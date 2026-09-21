@@ -1,0 +1,1597 @@
+#!/usr/bin/env python3
+"""Local agentmux dashboard with opt-in pane resizing, served on localhost:8787."""
+
+import base64
+import ccstore
+import datetime as dt
+import json
+import mqtt
+import os
+from pathlib import Path
+import re
+import stat
+import struct
+import subprocess
+import threading
+import time
+import unicodedata
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import parse_qs, unquote, urlsplit
+
+
+ROOT = Path(__file__).resolve().parent
+RUN_DIR = Path.home() / ".agentmux" / "run"
+LOG_DIR = Path.home() / ".agentmux" / "logs"
+STREAM_SLOTS = threading.BoundedSemaphore(16)
+
+# ONE STREAM PER AGENT.
+#
+# The global slot pool alone is not enough. A browser reload opens a fresh EventSource
+# per pane while the previous ones are still established — the server cannot tell a
+# client has gone until it next tries to write, and with a quiet agent that is up to a
+# heartbeat away. Seven panes over a couple of reloads exhausted all sixteen slots, and
+# three panes then sat at HTTP 503 showing nothing at all.
+#
+# So each agent gets a generation number. Opening a stream bumps it; any older thread for
+# that agent sees it has been superseded and exits, releasing its slot. Slots held is then
+# bounded by the number of AGENTS, not by how many times the page has been loaded.
+_stream_gen = {}
+_stream_gen_lock = threading.Lock()
+
+
+def claim_stream(name):
+    """Register as the current stream for `name` and return this claim's generation."""
+    with _stream_gen_lock:
+        generation = _stream_gen.get(name, 0) + 1
+        _stream_gen[name] = generation
+        return generation
+
+
+def stream_superseded(name, generation):
+    with _stream_gen_lock:
+        return _stream_gen.get(name, 0) != generation
+
+# An MQTT exchange blocks its handler thread for up to CONNECT_TIMEOUT +
+# SUBSCRIBE_WINDOW. Without a cap, parallel requests against a black-holed broker
+# accumulate threads and starve /api/agents and the SSE streams. Same pattern as
+# STREAM_SLOTS, deliberately small: this is an operator poking one broker.
+MQTT_SLOTS = threading.BoundedSemaphore(4)
+
+# ccstore's validators allow 8192-byte notes, journal bodies and device meta, so the
+# request cap has to leave room for that plus JSON overhead. It must stay <= 9999
+# because read_cc_body bounds Content-Length to four digits.
+CC_BODY_MAX = 9600
+HEARTBEAT_SECONDS = 15
+NAME_PATTERN = re.compile(r"[A-Za-z0-9_.-]{1,64}")
+# Every entry here is read through read_field(), which is the hardened reader
+# (regular files only, st_nlink > 1 rejected, O_NOFOLLOW, 512-byte cap, control
+# characters rejected). Adding a field inherits all of that; "auth" holds a method
+# id from auth.json and never a credential.
+FIELDS = ("cli", "perms", "cwd", "launch", "started", "task", "auth")
+EXTENSIONS = set(FIELDS) | {"pane"}
+
+# --- Jira reaper -------------------------------------------------------------
+#
+# agentmux is a pure CLI with no daemon, so nothing runs when a pane exits on its
+# own - `agentmux kill` closes its own issues, but a crash or a stray
+# `tmux kill-session` leaves the ticket open forever. This server is the only
+# long-running piece, and it already computes state == "stale", so the reaper
+# belongs here.
+#
+# Semantics are AT MOST ONCE: the marker is written before the call. A missed
+# transition is a nuisance; a Jira comment posted twice on every restart is worse.
+TASK_CLI = ROOT.parent / "taskmgmt" / "task.py"
+ATLASSIAN_CFG = Path.home() / ".agentmux" / "atlassian.json"
+_reaping = set()
+_reap_lock = threading.Lock()
+
+
+def task_management_ready():
+    return TASK_CLI.is_file() and ATLASSIAN_CFG.is_file()
+
+
+def _reap_worker(name, key):
+    """Close out one dead agent's issue. Runs off the request thread."""
+    try:
+        for args in (["done", key, "--from-log", name],
+                     ["report", name, "--title", f"agentmux run - {name} - {key}"]):
+            subprocess.run(["python3", str(TASK_CLI), *args],
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                           timeout=90, check=False)
+    except Exception:
+        pass            # best effort: never let this surface into an HTTP response
+    finally:
+        with _reap_lock:
+            _reaping.discard(name)
+
+
+def maybe_reap(name, key):
+    """Fire the reaper once for an agent seen stale with a bound issue."""
+    if not key or not NAME_PATTERN.fullmatch(name or "") or not task_management_ready():
+        return
+    marker = RUN_DIR / f"{name}.reported"
+    with _reap_lock:
+        if name in _reaping or marker.exists():
+            return
+        _reaping.add(name)
+    try:
+        # Written first, so a crash mid-call cannot cause a duplicate on restart.
+        marker.write_text("reaped-by-dashboard\n", encoding="utf-8")
+    except OSError:
+        with _reap_lock:
+            _reaping.discard(name)
+        return
+    threading.Thread(target=_reap_worker, args=(name, key), daemon=True).start()
+
+
+# --- resource manifest -------------------------------------------------------
+#
+# The Resources tab is manifest-driven: resources.json declares what to probe and
+# what commands to SHOW the operator. The security model is simply that argv comes
+# from that file and never from a request. A client may name a resource id; it can
+# never supply a command. Actions are shown, never executed.
+#
+# Results are cached because a full sweep spawns a dozen subprocesses and the tab
+# polls. Checks run in a bounded pool so a slow CLI cannot stall the server.
+MANIFEST = ROOT / "resources.json"
+_res_cache = {"at": 0.0, "data": None}
+_res_lock = threading.Lock()
+RESOURCE_TTL = 12
+RESOURCE_WORKERS = 4
+CTRL = re.compile("[" + "".join(chr(c) for c in list(range(0, 9)) + list(range(11, 32)) + [127]) + "]")
+
+
+def framed_snapshot(text):
+    """Turn `capture-pane -p -e` output into bytes a terminal renders correctly.
+
+    THE BUG THIS FIXES. capture-pane separates pane rows with a bare LF. A terminal
+    treats LF as "down one row", NOT "down one row and back to column 1" — that second
+    part is what CR does. The dashboard's terminals are built with convertEol: false,
+    deliberately, because the live log stream carries real CRLF from the agent and
+    converting it would corrupt that. So each snapshot row was starting at whatever
+    column the previous row ended on, producing a staircase of fragments: a line would
+    run off the right edge, wrap, and leave orphaned tails like "ng to read" and
+    "ine 08" down the left. That is the "lines are gapped, not streaming properly"
+    symptom, and it was in the snapshot only — appended log bytes always rendered fine.
+
+    Normalise to CRLF so every row starts at column 1. Existing CRLF is collapsed first
+    so nothing is doubled.
+
+    Autowrap is also disabled around the payload: capture-pane emits exactly one line
+    per pane row, and if any row reaches the last column the terminal would wrap it and
+    push every subsequent row down by one, so the last rows would fall off the bottom.
+    With DECAWM off, a full-width row stays on its own row. It is restored afterwards
+    because the live agent output that follows genuinely needs wrapping.
+    """
+    body = text.replace("\r\n", "\n").replace("\r", "").replace("\n", "\r\n")
+    return b"\x1b[?7l" + body.encode("utf-8") + b"\x1b[?7h"
+
+
+def load_manifest():
+    try:
+        with open(MANIFEST, encoding="utf-8") as fh:
+            data = json.load(fh)
+        if not isinstance(data, dict) or not isinstance(data.get("resources"), list):
+            return None
+        return data
+    except (OSError, ValueError):
+        return None
+
+
+def _clean(text, limit=160):
+    """One safe line: no control bytes, length-capped."""
+    line = CTRL.sub("", (text or "").strip().splitlines()[0] if (text or "").strip() else "")
+    return line[:limit]
+
+
+def _run_check(check):
+    """Execute one manifest check. Returns a dict with no secret content."""
+    out = {"id": check.get("id"), "label": check.get("label"),
+           "optional": bool(check.get("optional")), "ok": False, "detail": ""}
+    kind = check.get("type")
+
+    if kind == "file":
+        raw = check.get("path") or ""
+        if not isinstance(raw, str) or "\x00" in raw:
+            out["detail"] = "bad path in manifest"
+            return out
+        path = Path(os.path.expanduser(raw))
+        try:
+            info = path.lstat()
+        except OSError:
+            out["detail"] = "absent"
+            return out
+        out["ok"] = True
+        # POSIX mode is meaningless on drvfs (/mnt/...), where everything reports
+        # 777. Reporting that as a permission problem would be actively wrong.
+        on_drvfs = str(path.resolve()).startswith("/mnt/")
+        if on_drvfs:
+            out["detail"] = "present (on /mnt — NTFS ACL governs, POSIX mode not meaningful)"
+        else:
+            mode = stat.S_IMODE(info.st_mode)
+            out["detail"] = f"present, mode {mode:o}"
+            want = check.get("want_mode")
+            if want and f"{mode:o}" != str(want):
+                out["ok"] = False
+                out["detail"] += f" (expected {want})"
+        return out
+
+    if kind == "command":
+        argv = check.get("argv")
+        # Manifest-supplied only, and must be a list of plain strings.
+        if (not isinstance(argv, list) or not argv
+                or not all(isinstance(a, str) and "\x00" not in a for a in argv)):
+            out["detail"] = "bad argv in manifest"
+            return out
+        try:
+            proc = subprocess.run(argv, capture_output=True, text=True,
+                                  timeout=float(check.get("timeout", 12)),
+                                  check=False, stdin=subprocess.DEVNULL)
+            combined = (proc.stdout or "") + (proc.stderr or "")
+        except FileNotFoundError:
+            out["detail"] = "not installed"
+            return out
+        except (OSError, subprocess.SubprocessError, UnicodeError) as exc:
+            out["detail"] = f"probe failed: {type(exc).__name__}"
+            return out
+        expect = check.get("expect")
+        if expect:
+            try:
+                out["ok"] = re.search(expect, combined, re.I | re.M) is not None
+            except re.error:
+                out["detail"] = "bad expect regex in manifest"
+                return out
+        else:
+            out["ok"] = proc.returncode == 0
+        if not check.get("secret_output"):
+            out["detail"] = _clean(combined)
+        return out
+
+    out["detail"] = f"unknown check type {kind!r}"
+    return out
+
+
+# --- Jira tickets -------------------------------------------------------------
+#
+# The Ticket Reviewer reads real issues and can comment on or transition them.
+#
+# TWO DELIBERATE CHOICES:
+#
+# 1. No dry-run flag on these endpoints. Every other write here either happened or
+#    returned an error, and a client-supplied "pretend" mode reintroduces exactly
+#    the "did it actually happen?" ambiguity that has already bitten this codebase
+#    three times. atlassian.py's dry_run is exercised by tests directly instead.
+# 2. Searches are cached with a TTL. Jira is a network call on a site with an
+#    hourly rate limit (500/hour on Free), and this view polls.
+#
+# These are the only endpoints that write to a system outside this machine, so the
+# UI confirms before calling them.
+ISSUE_KEY = re.compile(r"[A-Z][A-Z0-9_]{1,19}-[0-9]{1,10}")
+TICKET_TTL = 30
+_atlassian = None
+_atlassian_error = None
+_ticket_cache = {"at": 0.0, "data": None}
+_ticket_lock = threading.Lock()
+
+
+def atlassian_module():
+    """Import taskmgmt/atlassian.py by path - taskmgmt/ is not a package."""
+    global _atlassian, _atlassian_error
+    if _atlassian is not None or _atlassian_error is not None:
+        return _atlassian
+    import importlib.util
+    path = ROOT.parent / "taskmgmt" / "atlassian.py"
+    try:
+        spec = importlib.util.spec_from_file_location("agentmux_atlassian", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _atlassian = module
+    except (OSError, ImportError, SyntaxError, ValueError) as err:
+        _atlassian_error = f"{type(err).__name__}"
+    return _atlassian
+
+
+def atlassian_config():
+    """Return (cfg, None) or (None, reason). The reason is safe to display."""
+    module = atlassian_module()
+    if module is None:
+        return None, f"taskmgmt/atlassian.py could not be loaded ({_atlassian_error})"
+    try:
+        return module.load_config(), None
+    except Exception as err:
+        # load_config's messages name the file and what is missing, never the token.
+        return None, str(err).splitlines()[0]
+
+
+def ticket_setup_hint():
+    return [
+        {"label": "Create the REST config",
+         "command": "python3 taskmgmt/setup_atlassian.py", "secret": True},
+        {"label": "Verify it", "command": "python3 taskmgmt/task.py whoami"},
+    ]
+
+
+def tickets_snapshot(force=False):
+    now = time.monotonic()
+    with _ticket_lock:
+        if not force and _ticket_cache["data"] and now - _ticket_cache["at"] < TICKET_TTL:
+            return _ticket_cache["data"]
+
+    cfg, reason = atlassian_config()
+    if cfg is None:
+        # Not an error state: Atlassian is optional. Say what is missing and how to
+        # fix it rather than returning an empty list that looks like "no tickets".
+        data = {"configured": False, "reason": reason, "setup": ticket_setup_hint(),
+                "issues": []}
+        with _ticket_lock:
+            _ticket_cache.update(at=now, data=data)
+        return data
+
+    module = atlassian_module()
+    project = str(cfg.get("jira_project") or "").strip()
+    jql = (f"project = {project} ORDER BY updated DESC" if ISSUE_KEY.match(project + "-1")
+           else "ORDER BY updated DESC")
+    try:
+        raw = module.jira_search(cfg, jql, limit=40)
+    except Exception as err:
+        data = {"configured": True, "error": f"Jira search failed: {type(err).__name__}",
+                "detail": _clean(str(err), 300), "issues": []}
+        with _ticket_lock:
+            _ticket_cache.update(at=now, data=data)
+        return data
+
+    issues = []
+    for item in (raw.get("issues") or [])[:40]:
+        fields = item.get("fields") or {}
+        status = ((fields.get("status") or {}).get("name")) or ""
+        assignee = ((fields.get("assignee") or {}).get("displayName")) or ""
+        issues.append({
+            "key": _clean(str(item.get("key", "")), 40),
+            "summary": _clean(str(fields.get("summary") or ""), 300),
+            "status": _clean(status, 60),
+            "assignee": _clean(assignee, 80),
+            "labels": [_clean(str(l), 40) for l in (fields.get("labels") or [])[:8]],
+        })
+    data = {"configured": True, "project": _clean(project, 40),
+            "base_url": _clean(str(cfg.get("base_url", "")), 200), "issues": issues}
+    with _ticket_lock:
+        _ticket_cache.update(at=now, data=data)
+    return data
+
+
+# --- auth methods -------------------------------------------------------------
+#
+# auth.json declares how each CLI can authenticate; ~/.agentmux/auth.json records
+# the non-secret settings and which method is active. Both are safe to display.
+#
+# ~/.agentmux/env holds the SECRETS and is never read for its values. To answer "is
+# the key set?", only variable NAMES are parsed out, and only names are returned.
+# That discipline is the whole reason the two files are separate: this function may
+# read one and must never surface the other.
+AUTH_MANIFEST = ROOT / "auth.json"
+AUTH_SETTINGS = Path.home() / ".agentmux" / "auth.json"
+AUTH_ENV = Path.home() / ".agentmux" / "env"
+ENV_EXPORT = re.compile(r"^\s*export\s+([A-Z][A-Z0-9_]{0,63})=", re.M)
+
+
+def env_var_names():
+    """Names only. Values are never read into a variable, logged or returned."""
+    try:
+        if AUTH_ENV.is_symlink() or not AUTH_ENV.is_file():
+            return set(), None
+        info = AUTH_ENV.lstat()
+        if info.st_size > 65536:
+            return set(), None
+        mode = f"{stat.S_IMODE(info.st_mode):o}"
+        text = AUTH_ENV.read_text(encoding="utf-8", errors="replace")
+        names = set(ENV_EXPORT.findall(text))
+        del text                      # keep the secret-bearing text out of scope
+        return names, mode
+    except OSError:
+        return set(), None
+
+
+def _setup_rows(source):
+    return [
+        {"id": str(a.get("id", "")), "label": _clean(str(a.get("label", "")), 90),
+         "command": _clean(str(a.get("command", "")), 300),
+         "secret": bool(a.get("secret")),
+         "note": _clean(str(a.get("note", "")), 400)}
+        for a in (source or []) if isinstance(a, dict)
+    ]
+
+
+def auth_validators():
+    """The validators from setup_auth.py, imported rather than copied.
+
+    auth.json names a validator per setting (`"validate": "model"`). Re-implementing
+    those patterns here would give two sources of truth that drift silently — the
+    browser accepting a value the CLI rejects, or the reverse.
+    """
+    global _auth_validators
+    if _auth_validators is not None:
+        return _auth_validators
+    import importlib.util
+    path = ROOT.parent / "taskmgmt" / "setup_auth.py"
+    try:
+        spec = importlib.util.spec_from_file_location("agentmux_setup_auth", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _auth_validators = module.VALIDATORS
+    except Exception:
+        _auth_validators = {}
+    return _auth_validators
+
+
+_auth_validators = None
+
+
+def auth_snapshot():
+    """Grouped by PROVIDER, because that is where shared attributes live.
+
+    A region or an API key belongs to the provider, not to each CLI using it, so the
+    payload reports it once with the methods nested underneath. That is also what
+    lets the UI render one collapsible section per provider instead of repeating the
+    same three fields under every CLI.
+    """
+    try:
+        with AUTH_MANIFEST.open(encoding="utf-8") as fh:
+            manifest = json.load(fh)
+        methods = manifest["methods"]
+        providers = manifest["providers"]
+        if not isinstance(methods, list) or not isinstance(providers, list):
+            raise ValueError("malformed")
+    except (OSError, ValueError, KeyError) as err:
+        return {"error": f"auth.json unreadable: {type(err).__name__}", "providers": []}
+
+    settings, settings_mode = {}, None
+    try:
+        if AUTH_SETTINGS.is_file() and not AUTH_SETTINGS.is_symlink():
+            settings_mode = f"{stat.S_IMODE(AUTH_SETTINGS.lstat().st_mode):o}"
+            with AUTH_SETTINGS.open(encoding="utf-8") as fh:
+                settings = json.load(fh)
+    except (OSError, ValueError):
+        settings = {}
+    active = settings.get("active") or {}
+    shared_all = settings.get("providers") or {}
+    method_all = settings.get("methods") or {}
+    present_names, env_mode = env_var_names()
+
+    def setting_rows(specs, values, scope):
+        """Non-secret settings: values ARE shown. A wrong region or gateway URL is
+        exactly what an operator opens this screen to find."""
+        rows = []
+        for spec in specs or []:
+            if not isinstance(spec, dict) or not spec.get("key"):
+                continue
+            key = str(spec["key"])
+            rows.append({
+                "key": key,
+                "scope": scope,
+                "label": _clean(str(spec.get("label", key)), 90),
+                "example": _clean(str(spec.get("example", "")), 120),
+                "value": _clean(str(values.get(key, "")), 200),
+                "set": key in values,
+            })
+        return rows
+
+    groups = []
+    by_provider = {}
+    for method in methods:
+        if isinstance(method, dict) and method.get("id") and method.get("provider"):
+            by_provider.setdefault(str(method["provider"]), []).append(method)
+
+    for provider in providers:
+        if not isinstance(provider, dict) or not provider.get("id"):
+            continue
+        pid = str(provider["id"])
+        shared = shared_all.get(pid, {})
+        provider_settings = setting_rows(provider.get("settings"), shared, "provider")
+        # Secrets report PRESENCE only - never a value, never a length, never a
+        # prefix, because a prefix is still a leak.
+        provider_secrets = [{"name": s, "set": s in present_names}
+                            for s in (provider.get("secrets") or [])
+                            if isinstance(s, str)]
+        provider_gaps = ([f"{pid}.{r['key']}" for r in provider_settings if not r["set"]]
+                         + [s["name"] for s in provider_secrets if not s["set"]])
+
+        rows = []
+        for method in sorted(by_provider.get(pid, []), key=lambda m: str(m["id"])):
+            mid = str(method["id"])
+            cli = str(method.get("cli", ""))
+            mine = method_all.get(mid, {})
+            method_settings = setting_rows(method.get("settings"), mine, "method")
+            method_gaps = [f"{mid}.{r['key']}" for r in method_settings if not r["set"]]
+            rows.append({
+                "id": mid,
+                "cli": cli,
+                # Settings the browser may change: non-secret, declared, and validated.
+                "editable": [row["key"] for row in method_settings],
+                "label": _clean(str(method.get("label", "")), 90),
+                "default": bool(method.get("default")),
+                "active": active.get(cli) == mid,
+                "settings": method_settings,
+                "missing": provider_gaps + method_gaps,
+                "configured": not (provider_gaps or method_gaps),
+                "notes": [_clean(str(n), 400) for n in (method.get("notes") or [])],
+                "setup": _setup_rows(method.get("setup")),
+            })
+
+        groups.append({
+            "id": pid,
+            "label": _clean(str(provider.get("label", pid)), 90),
+            "kind": _clean(str(provider.get("kind", "")), 40),
+            "summary": _clean(str(provider.get("summary", "")), 400),
+            "settings": provider_settings,
+            "secrets": provider_secrets,
+            "missing": provider_gaps,
+            "configured": not provider_gaps,
+            "notes": [_clean(str(n), 400) for n in (provider.get("notes") or [])],
+            "setup": _setup_rows(provider.get("setup")),
+            "methods": rows,
+            "clis": sorted({r["cli"] for r in rows if r["cli"]}),
+        })
+
+    return {
+        "providers": groups,
+        "active": {str(k): str(v) for k, v in active.items()},
+        "files": {
+            # Existence and mode only. This is the whole report on the secret file.
+            "settings": {"path": "~/.agentmux/auth.json", "mode": settings_mode},
+            "env": {"path": "~/.agentmux/env", "mode": env_mode,
+                    "count": len(present_names)},
+        },
+    }
+
+
+def resources_snapshot(force=False):
+    now = time.monotonic()
+    with _res_lock:
+        if not force and _res_cache["data"] and now - _res_cache["at"] < RESOURCE_TTL:
+            return _res_cache["data"]
+
+    manifest = load_manifest()
+    if manifest is None:
+        payload = {"error": "resources.json missing or invalid", "resources": []}
+    else:
+        jobs = []
+        for res in manifest["resources"]:
+            for check in res.get("checks") or []:
+                jobs.append((res.get("id"), check))
+
+        results = {}
+        # Bounded fan-out: a dozen CLI probes should not each get a thread.
+        import concurrent.futures as cf
+        with cf.ThreadPoolExecutor(max_workers=RESOURCE_WORKERS) as pool:
+            futures = {pool.submit(_run_check, chk): (rid, chk.get("id"))
+                       for rid, chk in jobs}
+            for fut in cf.as_completed(futures, timeout=90):
+                rid, cid = futures[fut]
+                try:
+                    results[(rid, cid)] = fut.result()
+                except Exception:
+                    results[(rid, cid)] = {"id": cid, "ok": False,
+                                           "detail": "probe crashed", "optional": False}
+
+        out = []
+        for res in manifest["resources"]:
+            checks = [results.get((res.get("id"), c.get("id")),
+                                  {"id": c.get("id"), "label": c.get("label"),
+                                   "ok": False, "detail": "not run",
+                                   "optional": bool(c.get("optional"))})
+                      for c in res.get("checks") or []]
+            required = [c for c in checks if not c.get("optional")]
+            state = ("ok" if required and all(c["ok"] for c in required)
+                     else "partial" if any(c["ok"] for c in checks)
+                     else "missing")
+            out.append({
+                "id": res.get("id"), "name": res.get("name"), "kind": res.get("kind"),
+                "summary": res.get("summary", ""), "docs": res.get("docs", ""),
+                "state": state, "checks": checks,
+                # Actions are DATA for the UI to display. The server never runs them.
+                "actions": [{"id": a.get("id"), "label": a.get("label"),
+                             "command": a.get("command", ""),
+                             "secret": bool(a.get("secret")), "note": a.get("note", "")}
+                            for a in res.get("actions") or []],
+                "notes": res.get("notes") or [],
+            })
+        payload = {"version": manifest.get("version", 1),
+                   "generated_at": dt.datetime.now().astimezone().isoformat(timespec="seconds"),
+                   "resources": out}
+
+    with _res_lock:
+        _res_cache["at"] = time.monotonic()
+        _res_cache["data"] = payload
+    return payload
+
+
+def open_log(name):
+    """Open only a regular, single-link log beneath the log directory."""
+    if not NAME_PATTERN.fullmatch(name):
+        raise ValueError("invalid name")
+    path = LOG_DIR / (name + ".log")
+    try:
+        path.resolve().relative_to(LOG_DIR.resolve())
+    except (ValueError, RuntimeError):
+        raise PermissionError("unsafe log path") from None
+    if LOG_DIR.is_symlink() or path.is_symlink():
+        raise PermissionError("unsafe log path")
+    info = path.lstat()
+    if not stat.S_ISREG(info.st_mode):
+        raise FileNotFoundError("not a regular log")
+    if info.st_nlink > 1:
+        raise PermissionError("hardlinked log")
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+    directory = os.open(LOG_DIR, flags | os.O_DIRECTORY)
+    try:
+        fd = os.open(name + ".log", flags | os.O_NONBLOCK, dir_fd=directory)
+    finally:
+        os.close(directory)
+    stream = os.fdopen(fd, "rb", buffering=0)
+    try:
+        opened = os.fstat(stream.fileno())
+        if not stat.S_ISREG(opened.st_mode):
+            raise FileNotFoundError("not a regular log")
+        if (opened.st_nlink > 1
+                or (opened.st_dev, opened.st_ino) != (info.st_dev, info.st_ino)):
+            raise PermissionError("unsafe log file")
+    except OSError:
+        stream.close()
+        raise
+    return stream
+
+
+def tmux(*args):
+    """Return successful tmux output, or None if unavailable."""
+    try:
+        result = subprocess.run(
+            ["tmux", "-L", "agentmux", *args],
+            capture_output=True, text=True, timeout=3, check=False,
+        )
+        return result.stdout if result.returncode == 0 else None
+    except (OSError, subprocess.SubprocessError, UnicodeError):
+        return None
+
+
+def read_field(path):
+    # Validate both the pathname and opened file; never follow metadata links.
+    try:
+        info = path.lstat()
+        if (not stat.S_ISREG(info.st_mode) or info.st_nlink > 1
+                or info.st_size > 512):
+            return None
+        fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+                     | getattr(os, "O_NONBLOCK", 0))
+        with os.fdopen(fd, "rb", buffering=0) as stream:
+            opened = os.fstat(stream.fileno())
+            if (not stat.S_ISREG(opened.st_mode) or opened.st_nlink > 1
+                    or opened.st_size > 512
+                    or (opened.st_dev, opened.st_ino) != (info.st_dev, info.st_ino)):
+                return None
+            raw = stream.read(512)
+            after = os.fstat(stream.fileno())
+            if after.st_nlink > 1 or after.st_size > 512:
+                return None
+        first_line = re.split(br"[\r\n]", raw, maxsplit=1)[0].decode("utf-8")
+        if any(unicodedata.category(char) in ("Cc", "Cf") for char in first_line):
+            return None
+        return first_line.strip()
+    except (OSError, ValueError, UnicodeError):
+        return None
+
+
+def agents_snapshot():
+    now = dt.datetime.now().astimezone()
+    sessions = tmux("list-sessions", "-F", "#{session_name}")
+    live = set(sessions.splitlines()) if sessions is not None else set()
+    metadata = {}
+    try:
+        # A redirected state directory must not expose unrelated files.
+        if not RUN_DIR.is_symlink():
+            for path in RUN_DIR.iterdir():
+                name, separator, extension = path.name.rpartition(".")
+                if name and separator and extension in EXTENSIONS:
+                    metadata.setdefault(name, {})[extension] = path
+    except OSError:
+        pass
+
+    agents = []
+    for name in sorted(live | metadata.keys()):
+        if not NAME_PATTERN.fullmatch(name):
+            continue
+        paths = metadata.get(name, {})
+        agent = {"name": name}
+        agent.update({field: read_field(paths[field]) if field in paths else None
+                      for field in FIELDS})
+        agent.update(cols=None, rows=None)
+        if name in live:
+            for field, pane_format in (("cols", "#{pane_width}"),
+                                       ("rows", "#{pane_height}")):
+                dimension = tmux("list-panes", "-t", "=" + name, "-F", pane_format)
+                try:
+                    agent[field] = int(dimension.strip()) if dimension else None
+                except ValueError:
+                    pass
+            clients = tmux("list-clients", "-t", "=" + name)
+            agent["state"] = "attached" if clients and clients.strip() else "detached"
+        else:
+            agent["state"] = "stale"
+            # Dead pane with a bound issue: close it out exactly once.
+            maybe_reap(agent.get("name"), agent.get("task"))
+        agent["uptime_seconds"] = None
+        if agent["started"]:
+            try:
+                started = dt.datetime.fromisoformat(
+                    agent["started"].replace("Z", "+00:00"))
+                if started.tzinfo is None:
+                    started = started.astimezone()
+                agent["uptime_seconds"] = int((now - started).total_seconds())
+            except (ValueError, OverflowError, OSError):
+                pass
+        agents.append(agent)
+    return {"generated_at": now.isoformat(timespec="seconds"),
+            "tmux_server": sessions is not None, "agents": agents}
+
+
+class Handler(BaseHTTPRequestHandler):
+    def send_body(self, status, body, content_type):
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.end_headers()
+        if self.command != "HEAD":
+            self.wfile.write(body)
+
+    def send_json(self, status, data):
+        self.send_body(status, json.dumps(data).encode("utf-8"), "application/json")
+
+    def do_GET(self):
+        try:
+            self.route()
+        except (BrokenPipeError, ConnectionResetError):
+            pass
+        except Exception:
+            self.send_json(500, {"error": "internal server error"})
+
+    do_HEAD = do_GET
+    do_POST = do_GET
+
+    def read_cc_body(self, max_bytes=1024):
+        """Apply the same JSON, origin, length and timeout guards as resize.
+
+        max_bytes is raised only for MQTT publish, whose payload cap (4096 bytes)
+        does not fit a 1024-byte body. The 4-digit Content-Length check below still
+        bounds it at 9999 regardless of what a caller asks for.
+        """
+        content_types = self.headers.get_all("Content-Type", [])
+        if (len(content_types) != 1
+                or content_types[0].split(";", 1)[0].strip().lower() != "application/json"):
+            self.send_json(415, {"error": "application/json required"})
+            return None
+        origins = self.headers.get_all("Origin", [])
+        if origins and (len(origins) != 1 or origins[0] not in (
+                "http://127.0.0.1:8787", "http://localhost:8787")):
+            self.send_json(403, {"error": "forbidden origin"})
+            return None
+        lengths = self.headers.get_all("Content-Length", [])
+        if (self.headers.get("Transfer-Encoding") is not None
+                or len(lengths) != 1 or not re.fullmatch(r"[0-9]+", lengths[0])):
+            self.send_json(400, {"error": "invalid content length"})
+            return None
+        if len(lengths[0]) > 4 or int(lengths[0]) > max_bytes:
+            self.send_json(413, {"error": "request body too large"})
+            return None
+        length = int(lengths[0])
+        previous_timeout = self.connection.gettimeout()
+        try:
+            self.connection.settimeout(5)
+            raw = self.rfile.read(length)
+        except OSError:
+            self.send_json(408, {"error": "request body timeout"})
+            return None
+        finally:
+            self.connection.settimeout(previous_timeout)
+        try:
+            if len(raw) != length:
+                raise ValueError
+            body = json.loads(raw)
+            if not isinstance(body, dict):
+                raise ValueError
+        except (ValueError, UnicodeError, RecursionError):
+            self.send_json(400, {"error": "invalid JSON object"})
+            return None
+        return body
+
+    def cc_endpoint(self, resource, query):
+        try:
+            if self.command == "POST":
+                if resource == "messages":
+                    self.send_json(405, {"error": "read-only endpoint"})
+                    return
+                body = self.read_cc_body(CC_BODY_MAX)
+                if body is None:
+                    return
+                values = ccstore.validate_write(resource, body)
+                with ccstore.connection() as db:
+                    result = ccstore.write(db, resource, values)
+                self.send_json(200, result)
+                return
+            if resource in ("tasks", "status", "delete"):
+                self.send_json(405, {"error": "POST required"})
+                return
+            params = parse_qs(query, keep_blank_values=True, max_num_fields=16)
+            allowed = {"limit", "since"} if resource == "messages" else (
+                {"limit"} if resource == "journal" else set())
+            if params.keys() - allowed or any(len(values) != 1 for values in params.values()):
+                raise ccstore.Invalid("invalid query parameters")
+            raw_limit = params.get("limit", ["100"])[0]
+            if not re.fullmatch(r"[0-9]{1,4}", raw_limit) or not 1 <= int(raw_limit) <= 1000:
+                raise ccstore.Invalid("limit must be between 1 and 1000")
+            since = ccstore.parse_timestamp(params["since"][0]) if "since" in params else None
+            with ccstore.connection() as db:
+                result = ccstore.read(db, resource, int(raw_limit), since)
+            self.send_json(200, {resource: result})
+        except ccstore.Invalid as err:
+            # Invalid subclasses ValueError, so it MUST be caught first or the
+            # generic handler below swallows the reason and every rejection reads
+            # "invalid fields" - which tells the operator nothing. These messages
+            # name a field or a bound and never echo submitted content, so they
+            # are safe to return.
+            self.send_json(400, {"error": str(err)})
+        except (ValueError, RecursionError):
+            self.send_json(400, {"error": "invalid fields or query parameters"})
+        except ccstore.NotFound:
+            self.send_json(404, {"error": "id not found"})
+        except ccstore.sqlite3.IntegrityError:
+            self.send_json(409, {"error": "record conflicts with existing data"})
+        except (ccstore.sqlite3.Error, OSError, RuntimeError):
+            self.send_json(503, {"error": "Control Center storage unavailable"})
+
+    def set_auth_setting(self):
+        """POST /api/auth/setting  {"method": "<id>", "key": "<key>", "value": "<value>"}
+
+        Changes ONE non-secret setting of one method — the model, a gateway URL. Safe from
+        the browser for the same reason /api/auth/select is: it carries no credential, and
+        entering one remains a terminal action.
+
+        The key must be DECLARED for that method in auth.json, and the value must pass the
+        same validator the CLI uses (imported, not re-implemented). So a request can name a
+        setting but never invent one, and never store a value `agentmux spawn` would then
+        choke on.
+        """
+        body = self.read_cc_body()
+        if body is None:
+            return
+        if not isinstance(body, dict) or body.keys() - {"method", "key", "value"}:
+            self.send_json(400, {"error": "unknown fields"})
+            return
+        method_id, key, value = body.get("method"), body.get("key"), body.get("value")
+        if not isinstance(method_id, str) or not re.fullmatch(r"[a-z][a-z0-9-]{1,63}", method_id):
+            self.send_json(400, {"error": "invalid method id"})
+            return
+        if not isinstance(key, str) or not re.fullmatch(r"[a-z][a-z0-9_]{1,40}", key):
+            self.send_json(400, {"error": "invalid setting key"})
+            return
+        if not isinstance(value, str) or not value.strip() or len(value) > 300:
+            self.send_json(400, {"error": "value must be a non-empty string under 300 chars"})
+            return
+        value = value.strip()
+
+        try:
+            with AUTH_MANIFEST.open(encoding="utf-8") as handle:
+                manifest = json.load(handle)
+        except (OSError, ValueError):
+            self.send_json(503, {"error": "auth.json unreadable"})
+            return
+        method = next((m for m in manifest.get("methods") or []
+                       if isinstance(m, dict) and m.get("id") == method_id), None)
+        if method is None:
+            self.send_json(404, {"error": "unknown method"})
+            return
+        spec = next((s for s in method.get("settings") or []
+                     if isinstance(s, dict) and s.get("key") == key), None)
+        if spec is None:
+            self.send_json(400, {"error": f"{method_id} declares no setting '{key}'"})
+            return
+
+        validators = auth_validators()
+        pattern_hint = validators.get(spec.get("validate", "text"))
+        if pattern_hint is not None:
+            pattern, hint = pattern_hint
+            if not pattern.match(value):
+                self.send_json(400, {"error": f"invalid {key}: {hint}"})
+                return
+
+        try:
+            settings = {"version": 2, "active": {}, "providers": {}, "methods": {}}
+            if AUTH_SETTINGS.is_file() and not AUTH_SETTINGS.is_symlink():
+                with AUTH_SETTINGS.open(encoding="utf-8") as handle:
+                    settings = json.load(handle)
+            for required in ("active", "providers", "methods"):
+                settings.setdefault(required, {})
+            settings["version"] = 2
+            settings.pop("settings", None)     # never leave the v1 key behind
+            settings["methods"].setdefault(method_id, {})[key] = value
+            previous_umask = os.umask(0o077)
+            try:
+                temporary = AUTH_SETTINGS.with_suffix(".tmp")
+                with open(temporary, "w", encoding="utf-8") as handle:
+                    json.dump(settings, handle, indent=2, sort_keys=True)
+                    handle.write("\n")
+                os.chmod(temporary, 0o600)
+                os.replace(temporary, AUTH_SETTINGS)
+            finally:
+                os.umask(previous_umask)
+        except (OSError, ValueError) as err:
+            self.send_json(503, {"error": f"could not write the auth settings: "
+                                          f"{type(err).__name__}"})
+            return
+        self.send_json(200, {"ok": True, "method": method_id, "key": key, "value": value,
+                             "note": "applies to agents spawned from now on"})
+
+    def select_auth(self):
+        """POST /api/auth/select  {"id": "<method-id>"} — set a CLI's active method.
+
+        The ONLY auth write the browser may make, and it carries no secret: it picks
+        which already-configured method new agents use. Entering a credential stays a
+        terminal action via taskmgmt/setup_auth.py, so a key never crosses HTTP.
+
+        A method that is not fully configured is refused rather than selected, so the
+        active method can never be one that would fail at spawn time.
+        """
+        body = self.read_cc_body()
+        if body is None:
+            return
+        if not isinstance(body, dict) or body.keys() - {"id"}:
+            self.send_json(400, {"error": "unknown fields"})
+            return
+        wanted = body.get("id")
+        if not isinstance(wanted, str) or not re.fullmatch(r"[a-z][a-z0-9-]{1,63}", wanted):
+            self.send_json(400, {"error": "invalid method id"})
+            return
+
+        snapshot = auth_snapshot()
+        chosen = next((m for group in snapshot.get("providers", []) for m in group["methods"]
+                       if m["id"] == wanted), None)
+        if chosen is None:
+            self.send_json(404, {"error": "unknown method id"})
+            return
+        if not chosen["configured"]:
+            self.send_json(409, {
+                "error": f"{wanted} is not configured (missing "
+                         f"{', '.join(chosen['missing'])}). Run: "
+                         f"python3 taskmgmt/setup_auth.py {wanted}"})
+            return
+        cli = chosen["cli"]
+
+        try:
+            settings = {"version": 1, "active": {}, "settings": {}}
+            if AUTH_SETTINGS.is_file() and not AUTH_SETTINGS.is_symlink():
+                with AUTH_SETTINGS.open(encoding="utf-8") as fh:
+                    settings = json.load(fh)
+            settings.setdefault("active", {})[cli] = wanted
+            # 0600 from creation, via a temp file in the same directory, so the file
+            # is never momentarily readable by anyone else.
+            previous_umask = os.umask(0o077)
+            try:
+                temporary = AUTH_SETTINGS.with_suffix(".tmp")
+                with open(temporary, "w", encoding="utf-8") as fh:
+                    json.dump(settings, fh, indent=2, sort_keys=True)
+                    fh.write("\n")
+                os.chmod(temporary, 0o600)
+                os.replace(temporary, AUTH_SETTINGS)
+            finally:
+                os.umask(previous_umask)
+        except (OSError, ValueError) as err:
+            self.send_json(503, {"error": f"could not write the auth settings: "
+                                          f"{type(err).__name__}"})
+            return
+        self.send_json(200, {"ok": True, "cli": cli, "active": wanted})
+
+    def ticket_action(self, action):
+        """POST /api/tickets/comment | /api/tickets/transition
+
+        These write to Jira, which is outside this machine and not undoable from
+        here, so the UI confirms first. There is no dry-run mode on purpose: a
+        success response means the call was made and Jira accepted it.
+        """
+        body = self.read_cc_body(CC_BODY_MAX)
+        if body is None:
+            return
+        allowed = {"key", "text"} if action == "comment" else {"key", "transition_id"}
+        if not isinstance(body, dict) or body.keys() - allowed:
+            self.send_json(400, {"error": "unknown fields"})
+            return
+        key = body.get("key")
+        if not isinstance(key, str) or not ISSUE_KEY.fullmatch(key):
+            self.send_json(400, {"error": "invalid issue key"})
+            return
+        if action == "comment":
+            text = body.get("text")
+            if not isinstance(text, str) or not text.strip():
+                self.send_json(400, {"error": "comment text is required"})
+                return
+            if len(text) > 8000:
+                self.send_json(400, {"error": "comment exceeds 8000 characters"})
+                return
+        else:
+            transition_id = body.get("transition_id")
+            if not isinstance(transition_id, str) or not re.fullmatch(r"[0-9]{1,10}", transition_id):
+                self.send_json(400, {"error": "invalid transition id"})
+                return
+
+        cfg, reason = atlassian_config()
+        if cfg is None:
+            self.send_json(409, {"error": reason, "setup": ticket_setup_hint()})
+            return
+        module = atlassian_module()
+        try:
+            if action == "comment":
+                module.jira_comment(cfg, key, body["text"])
+                detail = f"commented on {key}"
+            else:
+                module.jira_transition(cfg, key, body["transition_id"])
+                detail = f"transitioned {key}"
+        except Exception as err:
+            # atlassian.py raises with messages that never contain the token.
+            self.send_json(502, {"error": f"Jira refused: {_clean(str(err), 250)}"})
+            return
+        with _ticket_lock:
+            _ticket_cache.update(at=0.0, data=None)   # the list is now stale
+        self.send_json(200, {"ok": True, "detail": detail})
+
+    def mqtt_endpoint(self, action):
+        """POST /api/mqtt/publish | /api/mqtt/subscribe
+
+        The operator names the broker, so this makes an outbound connection to a
+        host from the request. That is the point of the tool, and it is acceptable
+        here because the server binds 127.0.0.1 only, every mutating request needs
+        a same-origin JSON preflight, and mqtt.py speaks only MQTT - it cannot be
+        steered into emitting an attacker-chosen protocol. It is still the one
+        endpoint that talks to the outside world, so host/port/topic are validated
+        before a socket is opened, never after.
+
+        No credentials are accepted. If a broker needs auth, CONNACK code 4 or 5
+        comes back and is reported as such.
+        """
+        body = self.read_cc_body(CC_BODY_MAX if action == "publish" else 1024)
+        if body is None:
+            return
+        allowed = {"host", "port", "topic", "payload"} if action == "publish" else {
+            "host", "port", "topic"}
+        try:
+            if not isinstance(body, dict) or body.keys() - allowed:
+                raise ValueError("unknown fields")
+            host = mqtt.check_host(body.get("host"))
+            port = mqtt.check_port(body.get("port"))
+            topic = mqtt.check_topic(body.get("topic"), allow_wildcards=action == "subscribe")
+            payload = mqtt.check_payload(body.get("payload")) if action == "publish" else None
+        except ValueError as err:
+            self.send_json(400, {"error": str(err)})
+            return
+
+        # grok finding 3: cap concurrent broker exchanges, so parallel requests against
+        # a black-holed broker cannot pile up handler threads. Refusing beats queueing -
+        # the caller finds out now rather than after a 5s connect timeout.
+        #
+        # Acquired AFTER validation and released in a finally that covers every exit
+        # from here on. Acquiring earlier leaked a slot on each 400, which exhausted
+        # the pool after four bad requests and 503'd everything afterwards.
+        if not MQTT_SLOTS.acquire(blocking=False):
+            self.send_json(503, {"error": "too many MQTT exchanges in flight"})
+            return
+        try:
+            # Do the broker exchange, close the socket, and only then answer. Replying
+            # from inside the `with` would tell the caller "ok" while DISCONNECT and the
+            # close were still pending, so a client that immediately inspected the
+            # broker could see a session we had already reported as finished.
+            with mqtt.Connection(host, port) as link:
+                if action == "publish":
+                    written = link.publish(topic, payload)
+                    result = {"ok": True,
+                              "detail": f"wrote {written} bytes to {topic} at QoS 0 "
+                                        f"(unacknowledged)"}
+                else:
+                    messages = link.subscribe(topic)
+                    for message in messages:
+                        message["payload"] = CTRL.sub("", message["payload"])
+                        message["topic"] = CTRL.sub("", message["topic"])
+                    result = {
+                        "ok": True,
+                        "detail": (f"{len(messages)} message(s) in "
+                                   f"{mqtt.SUBSCRIBE_WINDOW:g}s on {topic}"),
+                        "messages": messages,
+                    }
+            self.send_json(200, result)
+        except mqtt.MqttError as err:
+            # A broker-level failure is not our fault and not the client's: 502.
+            self.send_json(502, {"error": str(err)})
+        except (OSError, struct.error) as err:
+            self.send_json(502, {"error": f"broker exchange failed: {err}"})
+        finally:
+            MQTT_SLOTS.release()
+
+    def resize_agent(self, name):
+        if not NAME_PATTERN.fullmatch(name):
+            self.send_json(400, {"error": "invalid name"})
+            return
+        content_types = self.headers.get_all("Content-Type", [])
+        if (len(content_types) != 1
+                or content_types[0].split(";", 1)[0].strip().lower() != "application/json"):
+            self.send_json(415, {"error": "application/json required"})
+            return
+        origins = self.headers.get_all("Origin", [])
+        if origins and (len(origins) != 1 or origins[0] not in (
+                "http://127.0.0.1:8787", "http://localhost:8787")):
+            self.send_json(403, {"error": "forbidden origin"})
+            return
+        lengths = self.headers.get_all("Content-Length", [])
+        if (self.headers.get("Transfer-Encoding") is not None
+                or len(lengths) != 1 or not re.fullmatch(r"[0-9]+", lengths[0])):
+            self.send_json(400, {"error": "invalid content length"})
+            return
+        # Bound both the bytes read and the wait for an incomplete body.
+        if len(lengths[0]) > 4 or int(lengths[0]) > 1024:
+            self.send_json(413, {"error": "request body too large"})
+            return
+        length = int(lengths[0])
+        previous_timeout = self.connection.gettimeout()
+        try:
+            self.connection.settimeout(5)
+            raw = self.rfile.read(length)
+        except OSError:
+            self.send_json(408, {"error": "request body timeout"})
+            return
+        finally:
+            self.connection.settimeout(previous_timeout)
+        try:
+            if len(raw) != length:
+                raise ValueError
+            body = json.loads(raw)
+            if not isinstance(body, dict):
+                raise ValueError
+            cols, rows = body.get("cols"), body.get("rows")
+            # Reject rather than silently clamp values outside the permitted bounds.
+            if (type(cols) is not int or type(rows) is not int
+                    or not 20 <= cols <= 400 or not 5 <= rows <= 200):
+                raise ValueError
+        except (ValueError, UnicodeError, RecursionError):
+            self.send_json(400, {"error": "invalid dimensions or JSON"})
+            return
+        pane = (read_field(RUN_DIR / (name + ".pane"))
+                if not RUN_DIR.is_symlink() else None)
+        if not pane or not re.fullmatch(r"%[0-9]+", pane):
+            self.send_json(404, {"error": "pane not found"})
+            return
+        # Use an exact session target, not a pane target or a session prefix match.
+        target = "=" + name
+
+        def read_size():
+            output = tmux("list-panes", "-t", target, "-F",
+                          "#{pane_width}x#{pane_height}")
+            match = re.fullmatch(r"([0-9]+)x([0-9]+)", output.strip()) if output else None
+            return tuple(map(int, match.groups())) if match else None
+
+        current = read_size()
+        if current is None:
+            self.send_json(404, {"error": "pane not found"})
+            return
+        if current != (cols, rows):
+            window_id = tmux("list-panes", "-t", target, "-F", "#{window_id}")
+            window_id = window_id.strip() if window_id else None
+            if not window_id or not re.fullmatch(r"@[0-9]+", window_id):
+                self.send_json(500, {"error": "window id lookup failed"})
+                return
+            if tmux("set-option", "-t", window_id, "window-size", "manual") is None:
+                self.send_json(500, {"error": "setting manual window size failed"})
+                return
+            if tmux("resize-window", "-t", window_id, "-x", str(cols), "-y", str(rows)) is None:
+                self.send_json(500, {"error": "resize failed"})
+                return
+            current = read_size()
+            if current is None:
+                self.send_json(500, {"error": "size readback failed"})
+                return
+        actual_cols, actual_rows = current
+        # A status line can consume one row; report measured dimensions either way.
+        ok = abs(actual_cols - cols) <= 1 and abs(actual_rows - rows) <= 1
+        self.send_json(200 if ok else 409,
+                       {"ok": ok, "cols": actual_cols, "rows": actual_rows})
+
+    def stream_all(self, query):
+        """GET /api/stream-all — every agent's output over ONE SSE connection.
+
+        WHY THIS EXISTS. A browser allows only ~6 concurrent HTTP/1.1 connections per
+        host (6 in Firefox by default), and an SSE stream holds one open indefinitely. With
+        seven panes the seventh could never connect, so two panes traded places about once
+        a second, each showing "disconnected — retrying" half the time. Measured: the two
+        alternated perfectly complementarily, and closing one pane's stream simply moved
+        the problem to whichever pane reconnected last.
+
+        No amount of server-side tuning fixes that — the limit is in the browser. So all
+        agents share one connection and every frame names its agent:
+
+            event: snapshot   data: {"agent": "build", "b64": "..."}
+            event: chunk      data: {"agent": "build", "b64": "..."}
+            event: gone       data: {"agent": "build"}
+
+        The per-agent endpoint is kept: it is what the tests exercise, and it is still the
+        right thing for a single pane.
+        """
+        params = parse_qs(query or "")
+        try:
+            tail = min(262144, max(0, int((params.get("tail") or ["16384"])[0])))
+        except ValueError:
+            tail = 16384
+
+        if not STREAM_SLOTS.acquire(blocking=False):
+            self.send_json(503, {"error": "too many streams"})
+            return
+
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-cache")
+        self.send_header("X-Accel-Buffering", "no")
+        self.send_header("Connection", "close")
+        self.end_headers()
+        self.close_connection = True
+        self.connection.settimeout(5)
+
+        # name -> {"offset": int, "identity": (dev, ino)}
+        tracked = {}
+        heartbeat = time.monotonic() + HEARTBEAT_SECONDS
+        try:
+            while True:
+                live = {}
+                for agent in agents_snapshot().get("agents", []):
+                    name = agent.get("name")
+                    if NAME_PATTERN.fullmatch(name or "") and agent.get("state") != "stale":
+                        live[name] = agent
+
+                for name in [n for n in tracked if n not in live]:
+                    tracked.pop(name, None)
+                    self.send_event("gone", {"agent": name})
+
+                for name, agent in live.items():
+                    if name not in tracked:
+                        # New to this stream: send the pane's rendered screen first, for
+                        # the same reason the single-agent endpoint does — a byte tail
+                        # cannot reconstruct alternate-screen state.
+                        try:
+                            with open_log(name) as stream:
+                                info = os.fstat(stream.fileno())
+                                tracked[name] = {"offset": info.st_size,
+                                                 "identity": (info.st_dev, info.st_ino)}
+                        except OSError:
+                            continue
+                        pane = (read_field(RUN_DIR / (name + ".pane"))
+                                if not RUN_DIR.is_symlink() else None)
+                        snapshot = None
+                        if pane and re.fullmatch(r"%[0-9]+", pane):
+                            snapshot = tmux("capture-pane", "-p", "-e", "-t", pane)
+                        if snapshot is not None:
+                            self.send_event("snapshot", {
+                                "agent": name,
+                                "b64": base64.b64encode(
+                                    b"\x1b[2J\x1b[H" + framed_snapshot(snapshot)).decode()})
+                        continue
+
+                    state = tracked[name]
+                    try:
+                        with open_log(name) as stream:
+                            info = os.fstat(stream.fileno())
+                            identity = (info.st_dev, info.st_ino)
+                            if identity != state["identity"] or info.st_size < state["offset"]:
+                                state["offset"] = 0          # rotated or truncated
+                            state["identity"] = identity
+                            stream.seek(state["offset"])
+                            chunk = stream.read(65536)
+                            state["offset"] += len(chunk)
+                    except FileNotFoundError:
+                        continue                              # rotation gap
+                    except OSError:
+                        continue
+                    if chunk:
+                        self.send_event("chunk", {
+                            "agent": name, "b64": base64.b64encode(chunk).decode()})
+
+                now = time.monotonic()
+                if now >= heartbeat:
+                    self.wfile.write(b": ping\n\n")
+                    self.wfile.flush()
+                    heartbeat = now + HEARTBEAT_SECONDS
+                time.sleep(0.15)
+        except OSError:
+            return          # client gone; headers are already out, so never send an error
+        finally:
+            STREAM_SLOTS.release()
+
+    def send_event(self, event, payload):
+        body = json.dumps(payload).encode("utf-8")
+        self.wfile.write(b"event: " + event.encode() + b"\ndata: " + body + b"\n\n")
+        self.wfile.flush()
+
+    def stream_agent(self, name, query):
+        if not NAME_PATTERN.fullmatch(name):
+            self.send_json(400, {"error": "invalid name"})
+            return
+        try:
+            tail = int(parse_qs(query).get("tail", ["16384"])[0])
+            if tail < 0:
+                raise ValueError
+            tail = min(tail, 262144)
+        except ValueError:
+            self.send_json(400, {"error": "invalid tail"})
+            return
+        sessions = tmux("list-sessions", "-F", "#{session_name}")
+        if sessions is None or name not in sessions.splitlines():
+            self.send_json(404, {"error": "not found"})
+            return
+        try:
+            stream = open_log(name)
+        except PermissionError:
+            self.send_json(403, {"error": "forbidden"})
+            return
+        except OSError:
+            self.send_json(404, {"error": "not found"})
+            return
+        # Claim this agent BEFORE taking a slot, so the previous holder starts exiting
+        # and its slot comes back even if this request has to be refused.
+        generation = claim_stream(name)
+        if not STREAM_SLOTS.acquire(blocking=False):
+            stream.close()
+            self.send_json(503, {"error": "too many streams"})
+            return
+        try:
+            with stream:
+                info = os.fstat(stream.fileno())
+                identity = (info.st_dev, info.st_ino)
+                # Save EOF before capture so appends during capture are not lost.
+                offset = info.st_size
+                pane = (read_field(RUN_DIR / (name + ".pane"))
+                        if not RUN_DIR.is_symlink() else None)
+                snapshot = None
+                if pane and re.fullmatch(r"%[0-9]+", pane):
+                    snapshot = tmux("capture-pane", "-p", "-e", "-t", pane)
+                initial = b""
+                # Accept tail for compatibility, but ignore it when capture succeeds.
+                # A failed capture retains the historical tail fallback.
+                if snapshot is None:
+                    offset = max(0, info.st_size - tail)
+                    stream.seek(offset)
+                    if offset > 0:
+                        # Resynchronize a clipped tail with a bounded scan.
+                        probe = stream.read(min(4096, info.st_size - offset))
+                        boundary = re.search(br"[\x1b\n]", probe)
+                        if boundary is not None:
+                            offset += boundary.start()
+                        stream.seek(offset)
+                    initial = stream.read(info.st_size - offset)
+                    offset += len(initial)
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream")
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("X-Accel-Buffering", "no")
+            self.send_header("Connection", "close")
+            self.end_headers()
+            self.close_connection = True
+            if self.command == "HEAD":
+                return
+            # Bound blocked writes so disconnected or slow clients free their slot.
+            self.connection.settimeout(5)
+            try:
+                if snapshot is not None:
+                    self.wfile.write(b"event: snapshot\n")
+                    self.write_chunk(b"\x1b[2J\x1b[H" + framed_snapshot(snapshot))
+                if initial:
+                    self.write_chunk(initial)
+                heartbeat = time.monotonic() + HEARTBEAT_SECONDS
+                session_check = time.monotonic() + 1
+                while True:
+                    try:
+                        with open_log(name) as stream:
+                            info = os.fstat(stream.fileno())
+                            current_identity = (info.st_dev, info.st_ino)
+                            if current_identity != identity or info.st_size < offset:
+                                offset = 0
+                            identity = current_identity
+                            stream.seek(offset)
+                            chunk = stream.read(65536)
+                            offset += len(chunk)
+                        if chunk:
+                            self.write_chunk(chunk)
+                    except FileNotFoundError:
+                        # Rotation may briefly leave the pathname absent.
+                        pass
+                    now = time.monotonic()
+                    if now >= heartbeat:
+                        self.wfile.write(b": ping\n\n")
+                        self.wfile.flush()
+                        heartbeat = now + HEARTBEAT_SECONDS
+                    # A newer stream for this agent has taken over: stand down and give
+                    # the slot back rather than both of us tailing the same log.
+                    if stream_superseded(name, generation):
+                        return
+                    if now >= session_check:
+                        sessions = tmux("list-sessions", "-F", "#{session_name}")
+                        if sessions is not None and name not in sessions.splitlines():
+                            self.wfile.write(b"event: eof\ndata: \n\n")
+                            self.wfile.flush()
+                            return
+                        session_check = time.monotonic() + 1
+                    time.sleep(0.1)
+            except OSError:
+                # Headers already went out; never inject an HTTP error into SSE.
+                return
+        finally:
+            STREAM_SLOTS.release()
+
+    def write_chunk(self, chunk):
+        self.wfile.write(b"data: " + base64.b64encode(chunk) + b"\n\n")
+        self.wfile.flush()
+
+    def route(self):
+        # requestline preserves leading // that BaseHTTPRequestHandler normalizes.
+        target = self.requestline.split()[1]
+        if not target.startswith("/") or target.startswith("//"):
+            self.send_json(403, {"error": "forbidden"})
+            return
+        try:
+            parsed = urlsplit(target)
+            path = unquote(parsed.path, errors="strict")
+            parts = path.split("/")
+            if (".." in parts or "\\" in path or "\x00" in path
+                    or path.startswith("//")):
+                raise ValueError("unsafe path")
+            if path in ("/api/epics", "/api/tasks", "/api/journal", "/api/messages",
+                        "/api/devices", "/api/status", "/api/delete"):
+                self.cc_endpoint(path.rsplit("/", 1)[1], parsed.query)
+                return
+            if path == "/api/auth/setting":
+                if self.command != "POST":
+                    self.send_json(405, {"error": "POST required"})
+                else:
+                    self.set_auth_setting()
+                return
+            if path == "/api/auth/select":
+                if self.command != "POST":
+                    self.send_json(405, {"error": "POST required"})
+                else:
+                    self.select_auth()
+                return
+            if path in ("/api/tickets/comment", "/api/tickets/transition"):
+                if self.command != "POST":
+                    self.send_json(405, {"error": "POST required"})
+                else:
+                    self.ticket_action(path.rsplit("/", 1)[1])
+                return
+            if path in ("/api/mqtt/publish", "/api/mqtt/subscribe"):
+                if self.command != "POST":
+                    self.send_json(405, {"error": "POST required"})
+                else:
+                    self.mqtt_endpoint(path.rsplit("/", 1)[1])
+                return
+            if path.startswith("/api/resize/"):
+                if self.command != "POST":
+                    self.send_json(405, {"error": "POST required"})
+                else:
+                    self.resize_agent(path[len("/api/resize/"):])
+                return
+            if self.command == "POST":
+                self.send_json(404, {"error": "not found"})
+                return
+            if path == "/api/stream-all":
+                self.stream_all(parsed.query)
+                return
+            if path.startswith("/api/stream/"):
+                self.stream_agent(path[len("/api/stream/"):], parsed.query)
+                return
+            if any(":" in part for part in parts):
+                raise ValueError("unsafe path")
+            file_path = (ROOT / path.lstrip("/")).resolve()
+            file_path.relative_to(ROOT)
+        except (ValueError, OSError, RuntimeError, UnicodeError):
+            self.send_json(403, {"error": "forbidden"})
+            return
+
+        if path == "/api/tickets":
+            force = parse_qs(parsed.query).get("refresh", ["0"])[0] == "1"
+            self.send_json(200, tickets_snapshot(force=force))
+            return
+        if path == "/api/tickets/transitions":
+            params = parse_qs(parsed.query)
+            key = (params.get("key") or [""])[0]
+            if not ISSUE_KEY.fullmatch(key):
+                self.send_json(400, {"error": "invalid issue key"})
+                return
+            cfg, reason = atlassian_config()
+            if cfg is None:
+                self.send_json(409, {"error": reason})
+                return
+            try:
+                raw = atlassian_module().jira_transitions(cfg, key)
+            except Exception as err:
+                self.send_json(502, {"error": f"Jira refused: {_clean(str(err), 200)}"})
+                return
+            self.send_json(200, {"key": key, "transitions": [
+                {"id": _clean(str(t.get("id", "")), 20),
+                 "name": _clean(str(t.get("name", "")), 60)}
+                for t in (raw.get("transitions") or [])[:30]
+            ]})
+            return
+        if path == "/api/auth":
+            # Read-only. Reports declared methods, their non-secret settings, and
+            # whether each required secret is PRESENT - never a secret's value.
+            self.send_json(200, auth_snapshot())
+            return
+        if path == "/api/resources":
+            # Read-only. Runs only the probes declared in resources.json; a request
+            # can never supply a command. `?refresh=1` bypasses the cache.
+            force = parse_qs(parsed.query).get("refresh", ["0"])[0] == "1"
+            self.send_json(200, resources_snapshot(force=force))
+            return
+        if path == "/api/agents":
+            self.send_json(200, agents_snapshot())
+            return
+        if path == "/":
+            file_path = (ROOT / "index.html").resolve()
+            content_type = "text/html; charset=utf-8"
+        elif path in ("/app.js", "/fitmatrix.js"):
+            # fitmatrix.js is the readability test harness. index.html loads it only
+            # when the URL carries ?fit=1, so it is inert on the normal page but can
+            # be run against the REAL page rather than a mock.
+            content_type = "text/javascript; charset=utf-8"
+        elif path == "/style.css":
+            content_type = "text/css; charset=utf-8"
+        elif path == "/themes.json":
+            content_type = "application/json"
+        elif path in ("/vendor/xterm.js", "/vendor/addon-fit.js", "/vendor/xterm.css"):
+            content_type = ("text/css; charset=utf-8" if path.endswith(".css")
+                            else "text/javascript; charset=utf-8")
+        elif (len(parts) == 3 and parts[1] == "assets"
+              and parts[2].endswith(".svg")):
+            content_type = "image/svg+xml"
+        else:
+            self.send_json(404, {"error": "not found"})
+            return
+        try:
+            file_path.relative_to(ROOT)
+        except ValueError:
+            self.send_json(403, {"error": "forbidden"})
+            return
+        requested_extension = ".html" if path == "/" else Path(path).suffix
+        if file_path.suffix != requested_extension:
+            self.send_json(403, {"error": "forbidden"})
+            return
+        try:
+            if not file_path.is_file():
+                raise FileNotFoundError
+            body = file_path.read_bytes()
+        except OSError:
+            self.send_json(404, {"error": "not found"})
+            return
+        self.send_body(200, body, content_type)
+
+    def send_error(self, code, message=None, explain=None):
+        self.send_json(code, {"error": "not found" if code == 404 else "request rejected"})
+
+    def log_message(self, format, *args):
+        # Avoid logging request paths or other potentially sensitive input.
+        pass
+
+
+def main():
+    try:
+        with ThreadingHTTPServer(("127.0.0.1", 8787), Handler) as server:
+            print("agentmux dashboard: http://127.0.0.1:8787", flush=True)
+            server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    except OSError:
+        raise SystemExit("Unable to start dashboard on 127.0.0.1:8787")
+
+
+if __name__ == "__main__":
+    main()

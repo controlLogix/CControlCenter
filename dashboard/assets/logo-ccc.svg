@@ -1,0 +1,17 @@
+<!-- Standalone/favicon copy. The `color` below is the fallback currentColor
+     resolves against when this file is loaded outside a document (favicon,
+     <img src>). The titlebar uses an INLINED copy instead, so it inherits
+     the active theme. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" style="color:#d8dee6"
+     fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <title>Controls Control Center PLC</title>
+  <rect x="4.5" y="3.5" width="23" height="23" rx="1.5"/>
+  <path d="M7.5 6.5h3v3h-3zM12.5 6.5h3v3h-3zM17.5 6.5h3v3h-3zM22.5 6.5h2v3h-2z"/>
+  <path d="M4.5 12h23M7.5 19h17v4.5h-17zM19 19v4.5M10.5 21.25h5"/>
+  <g stroke="#ff9b4c">
+    <circle cx="10" cy="15.5" r="1"/>
+    <circle cx="16" cy="15.5" r="1"/>
+    <circle cx="22" cy="15.5" r="1"/>
+  </g>
+  <path d="M9 26.5v3M23 26.5v3M2 29.5h28"/>
+</svg>

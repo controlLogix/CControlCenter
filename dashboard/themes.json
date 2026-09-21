@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "default": "cc-dark",
+  "_comment": [
+    "Themes are DATA. Adding one is an edit to this file - no CSS and no JS change.",
+    "A theme's tokens are written onto document.documentElement.style at runtime, so",
+    "there is no stylesheet swap and no flash of unstyled content.",
+    "",
+    "Every theme MUST define the full token set below; the frontend does not merge",
+    "against a base, because a half-defined theme that silently inherits is worse to",
+    "debug than one that fails visibly.",
+    "",
+    "Brand note: orange is an ACCENT, never a fill. It marks the active nav item, the",
+    "focus ring, key values and 1px rules. Filling panels with it would read as a",
+    "warning state, which is exactly what --warn is for."
+  ],
+  "tokens": [
+    "--bg", "--panel", "--panel-2", "--line", "--text", "--muted",
+    "--accent", "--accent-dim", "--safe", "--warn", "--danger"
+  ],
+  "themes": [
+    {
+      "id": "cc-dark",
+      "name": "CC Dark (Orange Box)",
+      "dark": true,
+      "note": "Valve-era Steam: flat dark slate, tight 1px borders, dense. Thin HL2 orange accent.",
+      "tokens": {
+        "--bg": "#1b2027",
+        "--panel": "#22272e",
+        "--panel-2": "#171b21",
+        "--line": "#2f363f",
+        "--text": "#d8dee6",
+        "--muted": "#8b949e",
+        "--accent": "#ff9b4c",
+        "--accent-dim": "#c2762f",
+        "--safe": "#7fb069",
+        "--warn": "#e0af68",
+        "--danger": "#e06c75"
+      }
+    },
+    {
+      "id": "cc-light",
+      "name": "CC Light",
+      "dark": false,
+      "note": "Same structure on a warm paper ground. Orange darkened for contrast on white.",
+      "tokens": {
+        "--bg": "#f2f1ee",
+        "--panel": "#ffffff",
+        "--panel-2": "#f7f6f3",
+        "--line": "#d9d7d2",
+        "--text": "#1e232a",
+        "--muted": "#63696f",
+        "--accent": "#c2620a",
+        "--accent-dim": "#8f4805",
+        "--safe": "#3f7d3f",
+        "--warn": "#8a6400",
+        "--danger": "#b3261e"
+      }
+    },
+    {
+      "id": "classic-dark",
+      "name": "Classic Dark (pre-rebrand)",
+      "dark": true,
+      "note": "The palette the dashboard shipped with, kept so the rebrand loses nothing.",
+      "tokens": {
+        "--bg": "#0e1016",
+        "--panel": "#161922",
+        "--panel-2": "#0b0d12",
+        "--line": "#262b38",
+        "--text": "#e6e8ee",
+        "--muted": "#8b93a7",
+        "--accent": "#7aa2f7",
+        "--accent-dim": "#4c6fbf",
+        "--safe": "#79c0a0",
+        "--warn": "#e0af68",
+        "--danger": "#f7768e"
+      }
+    },
+    {
+      "id": "high-contrast",
+      "name": "High Contrast",
+      "dark": true,
+      "note": "For a bright plant floor or a projector. Maximum separation, orange kept as the only hue.",
+      "tokens": {
+        "--bg": "#000000",
+        "--panel": "#0d0d0d",
+        "--panel-2": "#000000",
+        "--line": "#5a5a5a",
+        "--text": "#ffffff",
+        "--muted": "#b8b8b8",
+        "--accent": "#ffab5e",
+        "--accent-dim": "#d07a22",
+        "--safe": "#5ddc7a",
+        "--warn": "#ffd24a",
+        "--danger": "#ff6b6b"
+      }
+    }
+  ]
+}

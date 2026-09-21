@@ -1,0 +1,781 @@
+/* ════════════════════════════════════════════════════════════════════════
+   Controls Control Center (CCC)
+
+   Valve-era Steam in spirit: flat dark slate, tight 1px borders, dense
+   information, no gradients or bevels. Modernised, with a thin light-orange
+   (HL2 Orange Box) accent used sparingly — active nav, focus ring, key values,
+   1px rules. Orange is an ACCENT, never a fill; filling with it would read as a
+   warning, which is what --warn is for.
+
+   Tokens below are the cc-dark fallback. app.js writes the selected theme's
+   tokens onto documentElement at runtime from themes.json, so there is no
+   stylesheet swap and no flash.
+   ════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --bg: #1b2027;
+  --panel: #22272e;
+  --panel-2: #171b21;
+  --line: #2f363f;
+  --text: #d8dee6;
+  --muted: #8b949e;
+  --accent: #ff9b4c;
+  --accent-dim: #c2762f;
+  --safe: #7fb069;
+  --warn: #e0af68;
+  --danger: #e06c75;
+
+  --title-h: 38px;
+  --nav-w: 46px;
+
+  /* Interface scale. Applied with `zoom` to the CHROME only — bars, headers, panels.
+     NOT to .term.
+     A page-wide zoom would cancel itself out here: zoom shrinks the CSS-pixel width a
+     cell reports (709 -> 459 at 1.5), so auto-fit picks a proportionally smaller font
+     and zoom scales it back to the same visual size, costing columns for nothing.
+     Scaling only the chrome leaves the terminal its real pixels and one clear owner of
+     text size: the ribbon's text controls. */
+  --ui-scale: 1;
+}
+
+/* zoom (not transform) because it participates in layout, so the grid reflows and the
+   terminal host receives a real, correct pixel size afterwards. */
+.titlebar, .activity, .ribbon, footer,
+.cell-head, .cell-status, .view.pad { zoom: var(--ui-scale); }
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+.spacer { flex: 1; }
+.stamp { color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.note  { color: var(--muted); font-size: 11px; }
+.note.warn { color: var(--warn); }
+.hint  { color: var(--muted); font-size: 11.5px; margin: 10px 0 0; }
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 11.5px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  padding: 1px 5px; border-radius: 3px;
+}
+
+/* ───────────────────────────── title bar ───────────────────────────── */
+
+.titlebar {
+  flex: 0 0 auto; height: var(--title-h);
+  display: flex; align-items: center; gap: 10px; padding: 0 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  /* the single thin orange rule that sets the brand */
+  box-shadow: inset 0 -1px 0 0 color-mix(in srgb, var(--accent) 38%, transparent);
+}
+
+.brand-mark { width: 20px; height: 20px; flex: 0 0 auto; display: block; }
+
+.brand {
+  font-size: 13px; letter-spacing: .01em; white-space: nowrap;
+  display: flex; align-items: baseline; gap: 7px;
+}
+.brand b { font-weight: 650; }
+.brand-abbr {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .12em;
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 3px; padding: 1px 4px;
+}
+
+.count { color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+
+.toggle {
+  display: inline-flex; align-items: center; gap: 5px;
+  color: var(--muted); font-size: 11.5px; user-select: none; cursor: pointer;
+}
+
+.pill {
+  font-size: 10.5px; padding: 2px 8px; border-radius: 999px;
+  border: 1px solid var(--line); color: var(--muted); white-space: nowrap;
+}
+.pill.up { color: var(--safe); border-color: color-mix(in srgb, var(--safe) 45%, transparent); }
+
+/* ───────────────────────── shell + activity bar ───────────────────────── */
+
+.shell { flex: 1 1 auto; display: flex; min-height: 0; }
+
+.activity {
+  flex: 0 0 var(--nav-w); width: var(--nav-w);
+  display: flex; flex-direction: column; align-items: stretch;
+  background: var(--panel-2);
+  border-right: 1px solid var(--line);
+  padding: 4px 0;
+}
+.nav-gap { flex: 1; }
+
+/* Compact: icon + 8px label, so it stays scannable without VS Code's width. */
+.nav-item {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 7px 0 5px;
+  background: none; border: 0; color: var(--muted);
+  cursor: pointer; font: inherit;
+}
+.nav-item svg {
+  width: 19px; height: 19px;
+  fill: none; stroke: currentColor; stroke-width: 1.5;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.nav-label { font-size: 8px; letter-spacing: .04em; text-transform: uppercase; }
+.nav-item:hover { color: var(--text); background: color-mix(in srgb, var(--text) 5%, transparent); }
+.nav-item:focus-visible { outline: 1px solid var(--accent); outline-offset: -2px; }
+
+.nav-item.active { color: var(--accent); }
+/* the 2px orange edge marker — the strongest single brand cue */
+.nav-item.active::before {
+  content: ""; position: absolute; left: 0; top: 4px; bottom: 4px;
+  width: 2px; background: var(--accent);
+}
+
+.nav-badge {
+  position: absolute; top: 4px; right: 7px;
+  min-width: 14px; padding: 0 3px;
+  background: var(--accent); color: var(--panel-2);
+  border-radius: 7px; font-size: 9px; font-weight: 700;
+  text-align: center; line-height: 14px;
+}
+
+/* ───────────────────────────── views ───────────────────────────── */
+
+.views { flex: 1 1 auto; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+
+.view { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.view[hidden] { display: none; }
+.view.pad { overflow: auto; padding: 12px 14px 18px; }
+
+.vhead { display: flex; align-items: center; gap: 9px; margin-bottom: 11px; flex-wrap: wrap; }
+.vhead h2 {
+  margin: 0; font-size: 14px; font-weight: 600; letter-spacing: .01em;
+  padding-left: 8px; border-left: 2px solid var(--accent);
+}
+
+.banner {
+  flex: 0 0 auto; margin: 9px 14px 0; padding: 8px 11px; border-radius: 5px;
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  font-size: 12px;
+}
+
+/* ───────────────────────── controls (shared) ───────────────────────── */
+
+select, .rin, .btn, .ta {
+  background: var(--panel-2); color: var(--text);
+  border: 1px solid var(--line); border-radius: 3px;
+  padding: 3px 7px; font: inherit; font-size: 11.5px;
+}
+select:focus-visible, .rin:focus-visible, .btn:focus-visible, .ta:focus-visible {
+  outline: 1px solid var(--accent); outline-offset: 1px;
+}
+.rin::placeholder { color: color-mix(in srgb, var(--muted) 75%, transparent); }
+.rin:invalid { border-color: var(--danger); }
+.btn { cursor: pointer; white-space: nowrap; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn:disabled:hover { border-color: var(--line); color: var(--text); }
+.ta { width: 100%; resize: vertical; font-family: inherit; margin-bottom: 10px; }
+
+.row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+
+.rlabel {
+  color: var(--muted); font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .07em; white-space: nowrap;
+}
+
+.card {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 5px; padding: 11px 12px; min-width: 0;
+  margin-bottom: 10px;
+}
+.card h3 {
+  margin: 0 0 9px; font-size: 12px; font-weight: 600;
+  color: var(--text); letter-spacing: .02em;
+}
+
+.notice {
+  border: 1px solid var(--line); border-left: 2px solid var(--warn);
+  background: var(--panel-2); border-radius: 3px;
+  padding: 8px 10px; font-size: 11.5px; color: var(--muted);
+}
+.notice strong { color: var(--text); }
+.notice code { font-size: 11px; }
+
+.empty {
+  margin: 18px 14px; padding: 22px; text-align: center; color: var(--muted);
+  border: 1px dashed var(--line); border-radius: 5px;
+}
+
+/* ───────────────────────── terminals: ribbon ───────────────────────── */
+
+.ribbon {
+  flex: 0 0 auto;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 13px;
+  padding: 6px 12px;
+  background: color-mix(in srgb, var(--panel) 75%, var(--bg));
+  border-bottom: 1px solid var(--line);
+}
+.ribbon[hidden] { display: none; }
+.rgroup { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.rgroup.grow { flex: 1 1 240px; min-width: 0; }
+
+.cmd {
+  flex: 1 1 auto; min-width: 0; padding: 3px 7px;
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 3px;
+  color: var(--accent);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 11px;
+  white-space: nowrap; overflow-x: auto;
+}
+
+/* ───────────────────────── terminals: grid ───────────────────────── */
+
+.grid {
+  flex: 1 1 auto; display: grid; gap: 9px; padding: 9px 12px 12px;
+  overflow: auto; min-height: 0;
+  grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr));
+  grid-auto-rows: var(--rowh, minmax(0, 1fr));
+}
+/* FREE MODE — panes are placed by the operator and stay put.
+   The grid becomes a positioned canvas and each cell is absolutely placed from a stored
+   left/top/width/height. A window resize deliberately does NOT move anything: only the
+   `sort` button rearranges. The canvas keeps `overflow: auto`, so a pane left outside a
+   now-smaller window is still reachable by scrolling rather than being yanked back. */
+.grid.free {
+  display: block; position: relative;
+  /* Grown by JS to enclose the furthest pane, so scrolling can always reach it. */
+  min-height: 100%;
+}
+.grid.free .cell {
+  position: absolute;
+  margin: 0;
+  min-height: 0;          /* the stored height is authoritative in free mode */
+}
+.grid.free .cell-head { cursor: grab; }
+.grid.free .cell-head:active { cursor: grabbing; }
+/* Buttons inside the header must stay clickable, not start a drag. */
+.grid.free .cell-head .cbtn, .grid.free .cell-head a { cursor: pointer; }
+.cell.dragging {
+  z-index: 40; opacity: .92;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .45);
+  border-color: var(--accent);
+}
+/* Bottom-right grip. Sizing a pane is how you make its text readable, so free mode
+   would be half a feature without it. */
+.cell-grip {
+  position: absolute; right: 0; bottom: 0; width: 16px; height: 16px;
+  cursor: nwse-resize; display: none; z-index: 5;
+}
+.grid.free .cell-grip { display: block; }
+.cell-grip::after {
+  content: ""; position: absolute; right: 3px; bottom: 3px; width: 7px; height: 7px;
+  border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent);
+  opacity: .55;
+}
+.cell-grip:hover::after { opacity: 1; }
+
+.grid.compact { grid-auto-rows: min-content; align-content: start; }
+.grid.compact .cell { min-height: 0; }
+/* In 'fit content' the cell height is derived from the content, so nothing should
+   overflow vertically. Must NOT clip a cell that applyFit marked scrollable, though:
+   this selector outranks `.term.scrolls`, and while it said plain `overflow: hidden`
+   it silently swallowed horizontal overflow — the pane was clipped with no way to
+   scroll to the rest, which is the exact failure the fit rework exists to prevent. */
+.grid.compact .cell .term:not(.scrolls) { overflow: hidden; }
+.grid.focusing .cell { display: none; }
+.grid.focusing .cell.focused { display: flex; }
+
+.cell {
+  display: flex; flex-direction: column; min-width: 0;
+  min-height: var(--cellmin, 180px);
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 4px; overflow: hidden;
+}
+.cell.stale { opacity: .55; }
+.cell.unrestricted { border-color: color-mix(in srgb, var(--danger) 38%, var(--line)); }
+.cell.focused { min-height: 0; }
+.cell.min { min-height: 0; align-self: start; }
+.cell.min .term, .cell.min .cell-status { display: none; }
+
+.cell-head {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 7px;
+  padding: 5px 8px; background: var(--panel);
+  border-bottom: 1px solid var(--line); font-size: 11.5px;
+}
+.cell-name { font-weight: 600; }
+.cell-cli {
+  color: var(--muted); font-family: ui-monospace, Consolas, monospace;
+  font-size: 10.5px; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; max-width: 16ch;
+}
+.cell-head .spacer { flex: 1; }
+.cell-up { color: var(--muted); font-size: 10.5px; font-variant-numeric: tabular-nums; }
+
+/* Effective text size, and what fraction of the pane is on screen when the
+   legibility floor binds. Amber when clipped: it means "scroll to see the rest",
+   not "the agent is idle". */
+.cell-fit {
+  color: var(--muted); font-size: 10px; font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, Consolas, monospace; white-space: nowrap;
+}
+.cell-fit.clipped {
+  color: var(--warn);
+  border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent);
+  border-radius: 3px; padding: 0 4px;
+}
+
+.cbtn {
+  background: transparent; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 3px;
+  padding: 0 5px; font-size: 11px; line-height: 1.5; cursor: pointer;
+}
+.cbtn:hover { color: var(--accent); border-color: var(--accent); }
+
+.dot {
+  width: 10px; height: 10px; display: inline-block; flex: 0 0 auto;
+  background-color: currentColor;
+}
+.dot.attached { -webkit-mask: url(assets/state-attached.svg) no-repeat center / contain; mask: url(assets/state-attached.svg) no-repeat center / contain; }
+.dot.detached { -webkit-mask: url(assets/state-detached.svg) no-repeat center / contain; mask: url(assets/state-detached.svg) no-repeat center / contain; }
+.dot.stale    { -webkit-mask: url(assets/state-stale.svg)    no-repeat center / contain; mask: url(assets/state-stale.svg)    no-repeat center / contain; }
+.st.attached { color: var(--safe); }
+.st.detached { color: var(--accent); }
+.st.stale    { color: var(--warn); }
+
+.perm {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .05em;
+  padding: 2px 5px; border-radius: 3px; white-space: nowrap;
+}
+.perm.unrestricted {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 42%, transparent);
+}
+.perm.sandboxed {
+  color: var(--safe);
+  background: color-mix(in srgb, var(--safe) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--safe) 38%, transparent);
+}
+.perm.unknown { color: var(--muted); border: 1px solid var(--line); }
+
+.task-badge {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .04em;
+  padding: 2px 5px; border-radius: 3px; white-space: nowrap;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  text-decoration: none;
+}
+a.task-badge:hover { text-decoration: underline; }
+
+.term { flex: 1 1 auto; min-height: 0; min-width: 0; overflow: hidden; padding: 3px 0 0 4px; }
+/* Scrollable ONLY when something is genuinely out of view. A permanently scrollable
+   host shows a scrollbar that steals width and then causes the overflow it was
+   meant to reveal. */
+.term.scrolls { overflow: auto; }
+.term.scrolls::-webkit-scrollbar { width: 7px; height: 7px; }
+.term.scrolls::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--accent) 45%, transparent); border-radius: 4px;
+}
+/* No transform. Scaling a rendered terminal resamples its glyph bitmaps and the text
+   becomes blurry mush at small sizes; applyFit sizes the FONT instead, so xterm
+   re-renders crisply. Kept as a plain block purely as the element xterm opens into. */
+.term-scale { transform: none; }
+
+/* xterm parks a ~7px hidden textarea at the cursor for IME composition. These
+   terminals are read-only (disableStdin), so it has no job here — but it still
+   follows the cursor, and with the cursor near the end of a long line it sat past the
+   cell's right edge and inflated the host's scrollWidth by ~40px. That produced a
+   scrollbar for content that was entirely inside the cell, and made "is text
+   clipped?" impossible to answer from scrollWidth. Pinned to the origin so it cannot
+   influence layout. !important is needed because xterm sets left/top inline. */
+.term .xterm-helper-textarea {
+  left: 0 !important; top: 0 !important; width: 1px !important; height: 1px !important;
+}
+
+.cell-status {
+  flex: 0 0 auto; padding: 3px 8px; font-size: 10.5px; color: var(--muted);
+  border-top: 1px solid var(--line); background: var(--panel);
+}
+.cell-status.err { color: var(--danger); }
+.cell-status.eof { color: var(--warn); }
+
+/* ───────────────────────── message queue ───────────────────────── */
+
+/* Actually pinned: sticky to the top of the scrolling view, so the orchestrator's
+   plan stays on screen while you read the traffic under it. Capped and internally
+   scrollable, because a long plan would otherwise own the whole viewport. An
+   opaque background is required - a translucent one lets messages show through. */
+.plan-pin {
+  position: sticky; top: -12px; z-index: 2;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  border-left: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, var(--panel));
+  border-radius: 4px; padding: 9px 11px; margin-bottom: 11px;
+  max-height: 32vh; overflow: auto;
+}
+.plan-pin h4 {
+  margin: 0 0 5px; font-size: 10px; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--accent);
+}
+.plan-pin pre {
+  margin: 0; white-space: pre-wrap; word-break: break-word;
+  font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; color: var(--text);
+}
+
+.msg-list { display: flex; flex-direction: column; gap: 4px; }
+
+.msg {
+  display: grid; grid-template-columns: 74px 128px 62px 1fr; gap: 9px;
+  align-items: baseline; padding: 5px 9px;
+  background: var(--panel); border: 1px solid var(--line);
+  border-left: 2px solid var(--line); border-radius: 3px;
+  font-size: 11.5px; min-width: 0;
+}
+.msg.plan    { border-left-color: var(--accent); }
+.msg.finding { border-left-color: var(--warn); }
+.msg.error   { border-left-color: var(--danger); }
+.msg.reply   { border-left-color: var(--safe); }
+
+.msg-at { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 10.5px; }
+.msg-who { font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; overflow: hidden; text-overflow: ellipsis; }
+.msg-who .to { color: var(--muted); }
+.msg-kind {
+  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--muted); border: 1px solid var(--line); border-radius: 3px;
+  padding: 1px 4px; text-align: center;
+}
+.msg.plan .msg-kind    { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 42%, transparent); }
+.msg.error .msg-kind   { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 42%, transparent); }
+.msg.finding .msg-kind { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 42%, transparent); }
+.msg-body { white-space: pre-wrap; word-break: break-word; min-width: 0; }
+
+/* ───────────────────────── task board ───────────────────────── */
+
+.board {
+  display: grid; gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  align-content: start;
+}
+
+.epic {
+  background: var(--panel); border: 1px solid var(--line);
+  border-top: 2px solid var(--accent); border-radius: 4px;
+  padding: 10px 11px; min-width: 0;
+}
+.epic-head { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+.epic-title { font-size: 12.5px; font-weight: 600; }
+.epic-meta { color: var(--muted); font-size: 10.5px; }
+
+.status-chip {
+  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  padding: 1px 5px; border-radius: 3px; border: 1px solid var(--line); color: var(--muted);
+}
+/* Vocabulary comes from EPIC_STATUSES / TASK_STATUSES in ccstore.py. */
+.status-chip.in_progress {
+  color: var(--accent); border-color: color-mix(in srgb, var(--accent) 42%, transparent);
+}
+.status-chip.done { color: var(--safe); border-color: color-mix(in srgb, var(--safe) 40%, transparent); }
+.status-chip.blocked { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 42%, transparent); }
+.status-chip.archived, .status-chip.cancelled { color: var(--muted); opacity: .75; }
+
+/* A <select> dressed as a chip, so every status is reachable - including blocked,
+   which a forward-only cycle could never enter. Native appearance is dropped but
+   the element stays a real select, so keyboard and screen readers are unaffected. */
+select.status-chip {
+  appearance: none; -webkit-appearance: none;
+  background: transparent; font: inherit; font-size: 9px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  /* Wide enough for the longest label ("in progress" at 9px uppercase) plus the
+     padding, or the text clips - a select does not shrink its text to fit. */
+  padding: 1px 5px; cursor: pointer; min-width: 12ch; text-align: center;
+}
+select.status-chip:hover { border-color: var(--accent); }
+select.status-chip:disabled { cursor: default; opacity: .5; }
+/* The popup list is rendered by the OS, so it needs readable colours of its own. */
+select.status-chip option {
+  background: var(--panel); color: var(--text);
+  font-size: 11px; text-transform: none; letter-spacing: 0;
+}
+
+.cbtn.del { color: var(--muted); font-size: 13px; line-height: 1.1; padding: 0 4px; }
+.cbtn.del:hover { color: var(--danger); border-color: var(--danger); }
+
+.task-rows { display: flex; flex-direction: column; gap: 3px; margin: 9px 0 8px; }
+.task-row {
+  display: flex; align-items: center; gap: 7px;
+  padding: 3px 6px; background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 3px; font-size: 11.5px; min-width: 0;
+}
+.task-row .t-title { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.task-row .t-agent { color: var(--muted); font-family: ui-monospace, Consolas, monospace; font-size: 10px; }
+
+/* ───────────────────────── journal ───────────────────────── */
+
+.journal { display: flex; flex-direction: column; gap: 5px; }
+.jentry {
+  background: var(--panel); border: 1px solid var(--line);
+  border-left: 2px solid var(--line); border-radius: 3px; padding: 7px 10px;
+}
+.jentry.decision { border-left-color: var(--accent); }
+.jentry.incident { border-left-color: var(--danger); }
+.jentry.change   { border-left-color: var(--warn); }
+.jentry-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.jentry-subject { font-weight: 600; font-size: 12px; }
+.jentry-body {
+  margin: 5px 0 0; white-space: pre-wrap; word-break: break-word;
+  font-size: 11.5px; color: var(--muted);
+}
+
+/* ───────────────────────── tickets ───────────────────────── */
+
+.tickets { display: flex; flex-direction: column; gap: 5px; }
+.ticket {
+  display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 3px; padding: 7px 10px; min-width: 0;
+}
+/* Pushed right and allowed to wrap onto its own line on a narrow window, so the
+   summary is never squeezed to nothing by the controls. */
+.ticket-actions {
+  display: flex; align-items: center; gap: 5px; margin-left: auto; flex: 0 0 auto;
+}
+.tickets .res-actions { margin-top: 8px; }
+.ticket .t-key { color: var(--accent); font-family: ui-monospace, Consolas, monospace; font-size: 11px; }
+.ticket .t-sum { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ───────────────────────── IIOT ───────────────────────── */
+
+.iiot-grid {
+  display: grid; gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+  align-content: start;
+}
+.iiot-grid .card { margin-bottom: 0; }
+.dev-list { display: flex; flex-direction: column; gap: 3px; }
+.dev {
+  display: grid; grid-template-columns: 1fr 70px 110px 92px auto; gap: 8px;
+  align-items: center; padding: 4px 8px;
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 3px; font-size: 11.5px; min-width: 0;
+}
+.dev-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dev-kind {
+  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
+  border-radius: 3px; padding: 1px 4px; text-align: center;
+}
+.dev-addr, .dev-proto { color: var(--muted); font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; }
+
+.mq-log {
+  max-height: 190px; overflow: auto; margin-top: 7px;
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 3px;
+  padding: 6px 8px; font-family: ui-monospace, Consolas, monospace; font-size: 10.5px;
+  color: var(--muted); white-space: pre-wrap; word-break: break-word;
+}
+
+/* ───────────────────────── settings ───────────────────────── */
+
+.swatches { display: flex; gap: 14px; margin-top: 9px; flex-wrap: wrap; }
+/* a <button> so the swatch is keyboard-reachable, reset to look like nothing */
+.swatch-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer;
+}
+.swatch-wrap:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+.swatch { display: flex; border-radius: 3px; overflow: hidden; border: 1px solid var(--line); }
+.swatch i { width: 15px; height: 18px; display: block; }
+.swatch-name { font-size: 8.5px; color: var(--muted); letter-spacing: .03em; }
+
+/* ───────────────────────── authentication ───────────────────────── */
+
+/* Collapsible, grouped by PROVIDER. Shared attributes sit on the provider; each
+   (cli, provider) method nests inside with only what is specific to it. Built on
+   <details>/<summary> so keyboard and a11y semantics come for free. */
+
+.auth-list { display: flex; flex-direction: column; gap: 7px; }
+
+.auth-provider {
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-left: 2px solid var(--line); border-radius: 4px; min-width: 0;
+}
+.auth-provider[open] { border-left-color: var(--accent); }
+.auth-provider.unconfigured { border-left-color: var(--warn); }
+
+.auth-summary {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 7px 10px; cursor: pointer; min-width: 0; list-style: none;
+}
+.auth-summary::-webkit-details-marker { display: none; }
+/* Own disclosure triangle: the native marker sits inconsistently across engines. */
+.auth-summary::before {
+  content: "▸"; color: var(--muted); font-size: 9px; flex: 0 0 auto;
+  transition: transform .12s ease;
+}
+details[open] > .auth-summary::before { transform: rotate(90deg); }
+.auth-summary:hover { background: color-mix(in srgb, var(--text) 4%, transparent); }
+.auth-summary:focus-visible { outline: 1px solid var(--accent); outline-offset: -2px; }
+
+.auth-body { padding: 0 11px 10px 22px; min-width: 0; }
+.auth-body > .res-summary { margin: 0 0 8px; }
+
+.auth-sub {
+  margin: 8px 0 4px; font-size: 9.5px; font-weight: 700;
+  letter-spacing: .07em; text-transform: uppercase; color: var(--muted);
+}
+
+.auth-id {
+  font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; color: var(--accent);
+}
+.auth-label { font-size: 12px; font-weight: 600; }
+.auth-clis { font-size: 10px; color: var(--muted); letter-spacing: .04em; }
+.auth-inuse {
+  font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 3px; padding: 1px 4px;
+}
+.auth-cli-tag {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--text); background: color-mix(in srgb, var(--text) 9%, transparent);
+  border-radius: 3px; padding: 1px 5px; min-width: 46px; text-align: center;
+}
+
+.auth-method {
+  background: var(--panel); border: 1px solid var(--line);
+  border-left: 2px solid var(--line); border-radius: 3px;
+  margin-top: 5px; min-width: 0;
+}
+.auth-method.active { border-left-color: var(--accent); }
+.auth-method.unconfigured { opacity: .85; }
+.auth-method > .auth-summary { padding: 5px 9px; }
+.auth-method .auth-body { padding: 0 9px 8px 20px; }
+.auth-method .res-checks { margin-bottom: 7px; }
+
+/* ───────────────────────── resources ───────────────────────── */
+
+.res-head { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; flex-wrap: wrap; }
+
+.res-list {
+  display: grid; gap: 9px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+  align-content: start;
+}
+.res {
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 4px; padding: 10px 12px; min-width: 0;
+}
+.res.ok      { border-left: 2px solid var(--safe); }
+.res.partial { border-left: 2px solid var(--warn); }
+.res.missing { border-left: 2px solid var(--danger); }
+
+.res-title { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+.res-title h3 { margin: 0; font-size: 12.5px; font-weight: 600; }
+.res-kind {
+  font-size: 9px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 1px 4px;
+}
+.res-state {
+  font-size: 9px; font-weight: 700; letter-spacing: .05em;
+  text-transform: uppercase; padding: 1px 5px; border-radius: 3px;
+}
+.res-state.ok      { color: var(--safe);   background: color-mix(in srgb, var(--safe) 14%, transparent); }
+.res-state.partial { color: var(--warn);   background: color-mix(in srgb, var(--warn) 14%, transparent); }
+.res-state.missing { color: var(--danger); background: color-mix(in srgb, var(--danger) 14%, transparent); }
+
+.res-summary { color: var(--muted); font-size: 11.5px; margin: 5px 0 8px; }
+.res-checks { list-style: none; margin: 0 0 8px; padding: 0; }
+.res-checks li { display: flex; gap: 6px; align-items: baseline; font-size: 11.5px; padding: 1px 0; min-width: 0; }
+.chk { flex: 0 0 auto; font-weight: 700; font-size: 10.5px; width: 1.3em; text-align: center; }
+.chk.ok { color: var(--safe); } .chk.bad { color: var(--danger); } .chk.opt { color: var(--muted); }
+.chk-label { flex: 0 0 auto; }
+.chk-detail {
+  color: var(--muted); font-family: ui-monospace, Consolas, monospace; font-size: 10.5px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+}
+
+.res-actions { display: flex; flex-direction: column; gap: 4px; margin-bottom: 7px; }
+.act { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.act-label { font-size: 11px; flex: 0 0 auto; }
+.act-cmd {
+  flex: 1 1 auto; min-width: 0; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 3px; padding: 2px 6px;
+  color: var(--accent); font-family: ui-monospace, Consolas, monospace; font-size: 10.5px;
+  white-space: nowrap; overflow-x: auto;
+}
+.act.secret .act-cmd { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 42%, transparent); }
+.act-secret-tag {
+  flex: 0 0 auto; font-size: 9px; font-weight: 700; letter-spacing: .05em;
+  color: var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 42%, transparent);
+  border-radius: 3px; padding: 1px 4px; text-transform: uppercase;
+}
+.res-notes { list-style: disc; margin: 5px 0 0; padding-left: 17px; color: var(--muted); font-size: 11px; }
+.res-notes li { margin: 2px 0; }
+.res-docs { font-size: 11px; margin: 7px 0 0; }
+.res-docs a { color: var(--accent); }
+.res-docs a:hover { text-decoration: underline; }
+
+/* ───────────────────────── footer ───────────────────────── */
+
+footer {
+  flex: 0 0 auto; padding: 5px 12px 7px;
+  color: var(--muted); font-size: 10.5px;
+  border-top: 1px solid var(--line); background: var(--panel);
+}
+
+/* ───────────────────────── responsive ───────────────────────── */
+/*
+   The chrome is fixed-height by design (the grid owns the remaining space and scrolls
+   itself), but on a small window the fixed parts ate everything and the grid was
+   squeezed to nothing with no way to reach it — which reads as "the page is stuck".
+   These rules give back the space instead of clipping it.
+*/
+
+/* Narrow: drop the activity-bar labels to icons, and let the ribbon breathe. */
+@media (max-width: 900px) {
+  :root { --nav-w: 34px; }
+  .nav-label { display: none; }
+  .nav-item svg { width: 17px; height: 17px; }
+  .ribbon { gap: 8px; padding: 5px 8px; }
+  .rlabel { display: none; }          /* the controls are self-describing via title */
+  .brand { font-size: 12px; }
+}
+
+/* Very narrow: the brand words go, the badge stays. */
+@media (max-width: 680px) {
+  .brand b + * , .brand { gap: 4px; }
+  .brand > :not(.brand-abbr) { display: none; }
+  .titlebar { gap: 6px; padding: 0 7px; }
+  footer { display: none; }            /* a static hint is the first thing to sacrifice */
+}
+
+/* Short: the ribbon is the tallest optional element, so cap it and let it scroll. */
+@media (max-height: 560px) {
+  .ribbon { max-height: 84px; overflow-y: auto; }
+  :root { --title-h: 32px; }
+}
+
+/* A window too small for a usable grid: let the whole shell scroll rather than
+   compress cells into unreadable slivers. A floor of 260px per cell is about the least
+   that can show anything meaningful. */
+@media (max-height: 420px) {
+  body { overflow: auto; }
+  .shell { min-height: 420px; }
+}
+
+/* Marks the far corner of the placed panes so the free canvas can scroll to reach one
+   parked outside a smaller window. Inert and invisible: a min-width on .grid itself
+   would make its box that wide and defeat its own overflow: auto. */
+.free-spacer { position: absolute; width: 1px; height: 1px; pointer-events: none; }

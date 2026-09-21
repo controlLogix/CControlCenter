@@ -1,0 +1,2712 @@
+'use strict';
+
+// agentmux dashboard — live terminal grid + configuration ribbon.
+//
+// Invariants:
+//  1. Nothing from the backend is interpolated as HTML. Agent names, cli strings
+//     and perms come from arbitrary text files; only textContent/classList used.
+//  2. Terminals are REUSED across polls. Recreating them would discard scrollback
+//     and restart every SSE stream.
+//  3. This page is READ-ONLY. It never spawns, signals or writes to an agent. The
+//     ribbon composes a command for the operator to run; it does not execute it.
+//
+// Review fixes applied (grok, 2026-09-18):
+//  #1 BLOCKER  eof no longer latches a pane dead — a live agent gets reconnected.
+//  #3          no SSE is opened for a stale agent; opened when it goes live.
+//  #6          a malformed /api/agents payload no longer destroys every terminal.
+
+const POLL_MS = 3000;
+const TAIL_BYTES = 16384;
+const MAX_RECONNECT_MS = 30000;
+const PREF_KEY = 'agentmux.dashboard.prefs';
+
+// The least a terminal cell may be before the grid scrolls instead of shrinking it.
+// Roughly eight rows of text at the legibility floor (8 x ~8.4px) plus the cell's own
+// header and status bar. A cell smaller than this shows one or two rows, which reads as
+// an idle agent rather than a cramped one.
+const MIN_USEFUL_CELL = 130;
+
+const els = {
+  grid:    document.getElementById('grid'),
+  empty:   document.getElementById('empty'),
+  stamp:   document.getElementById('stamp'),
+  tmux:    document.getElementById('tmux'),
+  banner:  document.getElementById('banner'),
+  count:   document.getElementById('count'),
+  follow:  document.getElementById('followToggle'),
+  ribbon:  document.getElementById('ribbon'),
+  rToggle: document.getElementById('ribbonToggle'),
+  layout:  document.getElementById('layoutMode'),
+  rowH:    document.getElementById('rowHeight'),
+  fontSz:  document.getElementById('fontSize'),
+  minFont: document.getElementById('minFont'),
+  uiScale: document.getElementById('uiScale'),
+  syncSz:  document.getElementById('syncSize'),
+  jiraBase: document.getElementById('jiraBase'),
+  // Views, keyed by the data-view attribute on each nav button. Adding a view is
+  // one entry here plus one button in index.html - no new branch anywhere.
+  views: {
+    terminals: document.getElementById('viewTerminals'),
+    queue:     document.getElementById('viewQueue'),
+    board:     document.getElementById('viewBoard'),
+    journal:   document.getElementById('viewJournal'),
+    tickets:   document.getElementById('viewTickets'),
+    iiot:      document.getElementById('viewIiot'),
+    settings:  document.getElementById('viewSettings'),
+  },
+  navItems: Array.from(document.querySelectorAll('.nav-item')),
+  badgeQueue: document.getElementById('badgeQueue'),
+
+  themeSelect: document.getElementById('themeSelect'),
+  themeNote:   document.getElementById('themeNote'),
+  swatches:    document.getElementById('swatches'),
+
+  queueList:    document.getElementById('queueList'),
+  queueStamp:   document.getElementById('queueStamp'),
+  queueKind:    document.getElementById('queueKind'),
+  queueFollow:  document.getElementById('queueFollow'),
+  queueRefresh: document.getElementById('queueRefresh'),
+  planPin:      document.getElementById('planPin'),
+
+  boardList:  document.getElementById('boardList'),
+  boardStamp: document.getElementById('boardStamp'),
+  epicTitle:  document.getElementById('epicTitle'),
+  epicJira:   document.getElementById('epicJira'),
+  epicAdd:    document.getElementById('epicAdd'),
+
+  journalList:    document.getElementById('journalList'),
+  journalStamp:   document.getElementById('journalStamp'),
+  journalKind:    document.getElementById('journalKind'),
+  journalSubject: document.getElementById('journalSubject'),
+  journalBody:    document.getElementById('journalBody'),
+  journalAdd:     document.getElementById('journalAdd'),
+
+  ticketList:    document.getElementById('ticketList'),
+  ticketStamp:   document.getElementById('ticketStamp'),
+  ticketRefresh: document.getElementById('ticketRefresh'),
+
+  authList:    document.getElementById('authList'),
+  authStamp:   document.getElementById('authStamp'),
+  authRefresh: document.getElementById('authRefresh'),
+
+  iiotStamp:   document.getElementById('iiotStamp'),
+  iiotRefresh: document.getElementById('iiotRefresh'),
+  devList:     document.getElementById('devList'),
+  devName:     document.getElementById('devName'),
+  devKind:     document.getElementById('devKind'),
+  devAddr:     document.getElementById('devAddr'),
+  devPort:     document.getElementById('devPort'),
+  devProto:    document.getElementById('devProto'),
+  devAdd:      document.getElementById('devAdd'),
+  mqHost:      document.getElementById('mqHost'),
+  mqPort:      document.getElementById('mqPort'),
+  mqTopic:     document.getElementById('mqTopic'),
+  mqSub:       document.getElementById('mqSub'),
+  mqPubTopic:  document.getElementById('mqPubTopic'),
+  mqPayload:   document.getElementById('mqPayload'),
+  mqPub:       document.getElementById('mqPub'),
+  mqLog:       document.getElementById('mqLog'),
+  bootpNotice: document.getElementById('bootpNotice'),
+  modbusHint:  document.getElementById('modbusHint'),
+  resList:  document.getElementById('resList'),
+  resStamp: document.getElementById('resStamp'),
+  resRefresh: document.getElementById('resRefresh'),
+  spName:  document.getElementById('spawnName'),
+  spCli:   document.getElementById('spawnCli'),
+  spModel: document.getElementById('spawnModel'),
+  spPerm:  document.getElementById('spawnPerm'),
+  spCmd:   document.getElementById('spawnCmd'),
+  copyBtn: document.getElementById('copyCmd'),
+  copyNote:document.getElementById('copyNote'),
+  sortBtn: document.getElementById('sortPanes'),
+};
+
+// xterm needs a literal colour table, but the app's colours are theme tokens, so
+// derive one from the live CSS custom properties instead of hardcoding a palette.
+// The old fixed palette survives as the `classic-dark` theme in themes.json.
+function xtermTheme() {
+  const cs = getComputedStyle(document.documentElement);
+  const v = (t) => cs.getPropertyValue(t).trim() || undefined;
+  const text = v('--text'), muted = v('--muted'), accent = v('--accent');
+  return {
+    background: v('--panel-2'), foreground: text, cursor: accent,
+    black: v('--panel'), red: v('--danger'), green: v('--safe'), yellow: v('--warn'),
+    blue: accent, magenta: v('--accent-dim'), cyan: muted, white: text,
+    brightBlack: muted, brightRed: v('--danger'), brightGreen: v('--safe'),
+    brightYellow: v('--warn'), brightBlue: accent, brightMagenta: v('--accent-dim'),
+    brightCyan: muted, brightWhite: text,
+  };
+}
+
+const panes = new Map();
+let consecutiveFailures = 0;
+
+// ---------------------------------------------------------------- helpers ---
+
+// SSE payloads are base64: agent output contains CR/LF and control bytes that
+// would corrupt SSE's line framing. Decode to bytes (not a string) so multi-byte
+// UTF-8 survives — xterm accepts Uint8Array and buffers split sequences.
+function b64ToBytes(b64) {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+function fmtUptime(s) {
+  if (s === null || s === undefined || !Number.isFinite(s)) return '';
+  s = Math.max(0, Math.floor(s));
+  const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60), sec = s % 60;
+  if (d) return `${d}d${h}h`;
+  if (h) return `${h}h${String(m).padStart(2, '0')}m`;
+  if (m) return `${m}m${String(sec).padStart(2, '0')}s`;
+  return `${sec}s`;
+}
+
+const stateClass = (s) => ['attached', 'detached', 'stale'].includes(s) ? s : 'stale';
+const permClass  = (p) => { const v = String(p || '').toLowerCase();
+  return (v === 'unrestricted' || v === 'sandboxed') ? v : 'unknown'; };
+const orDash = (v) => (v === null || v === undefined || v === '') ? '—' : String(v);
+
+// ------------------------------------------------------------------ prefs ---
+
+function loadPrefs() {
+  let p = {};
+  try { p = JSON.parse(localStorage.getItem(PREF_KEY) || '{}') || {}; } catch (_) {}
+  if (p.layout) els.layout.value = p.layout;
+  if (p.rowH)   els.rowH.value   = p.rowH;
+  if (p.fontSz) els.fontSz.value = p.fontSz;
+  if (p.minFont) els.minFont.value = p.minFont;
+  if (p.uiScale) els.uiScale.value = p.uiScale;
+  if (p.syncSz) els.syncSz.checked = true;
+  if (typeof p.jiraBase === 'string') els.jiraBase.value = p.jiraBase;
+  if (p.cli)    els.spCli.value  = p.cli;
+  if (p.perm)   els.spPerm.value = p.perm;
+  if (typeof p.model === 'string') els.spModel.value = p.model;
+  if (p.ribbonHidden) setRibbon(false);
+}
+function savePrefs() {
+  try {
+    localStorage.setItem(PREF_KEY, JSON.stringify({
+      layout: els.layout.value, rowH: els.rowH.value, fontSz: els.fontSz.value,
+      minFont: els.minFont.value, uiScale: els.uiScale.value,
+      syncSz: els.syncSz.checked, jiraBase: els.jiraBase.value,
+      cli: els.spCli.value, perm: els.spPerm.value, model: els.spModel.value,
+      ribbonHidden: els.ribbon.hidden,
+    }));
+  } catch (_) { /* private mode */ }
+}
+
+// ------------------------------------------------------------------ ribbon ---
+
+function setRibbon(show) {
+  els.ribbon.hidden = !show;
+  els.rToggle.setAttribute('aria-expanded', String(show));
+  requestAnimationFrame(() => panes.forEach((rec) => applyFit(rec)));
+}
+
+// Compose the agentmux command. Sanitised to a conservative charset so the
+// string we hand the operator cannot carry shell metacharacters.
+function composeSpawnCmd() {
+  const safe = (v, re) => (re.test(v) ? v : '');
+  const name  = safe(els.spName.value.trim(), /^[A-Za-z0-9_.-]{1,64}$/) || '<name>';
+  const cli   = safe(els.spCli.value, /^[a-z]{1,10}$/) || 'codex';
+  const model = safe(els.spModel.value.trim(), /^[A-Za-z0-9_.:-]{0,40}$/);
+  const sandboxed = els.spPerm.value === 'sandboxed';
+
+  let cmd = '';
+  if (sandboxed) cmd += 'AGENTMUX_NO_BYPASS=1 ';
+  cmd += `agentmux spawn ${name} --cli ${cli}`;
+  if (model) cmd += ` --model ${model}`;
+  cmd += ' --cwd .';
+  els.spCmd.textContent = cmd;     // textContent, never innerHTML
+  return cmd;
+}
+
+// Scale the chrome with the window.
+//
+// The reference is a 1500x940 window, which is where the fixed sizes in style.css were
+// designed. Width and height are both considered and the smaller wins, because chrome
+// that fits the width but not the height just pushes the grid off the bottom.
+//
+// Quantised to 5% steps. A continuous value would re-zoom on every pixel of a window
+// drag, and each change re-lays-out the grid and re-fits every terminal — visible
+// thrash for a difference nobody can see.
+const UI_REFERENCE_W = 1500;
+const UI_REFERENCE_H = 940;
+const UI_SCALE_MIN = 0.8;
+const UI_SCALE_MAX = 1.35;
+
+function autoUiScale() {
+  const byWidth = window.innerWidth / UI_REFERENCE_W;
+  const byHeight = window.innerHeight / UI_REFERENCE_H;
+  const raw = Math.min(byWidth, byHeight);
+  const stepped = Math.round(raw * 20) / 20;      // 5% steps
+  return Math.min(UI_SCALE_MAX, Math.max(UI_SCALE_MIN, stepped));
+}
+
+// Terminals are deliberately excluded from the zoom (see --ui-scale in style.css), so
+// the space left for them changes and every pane must re-fit afterwards.
+function applyUiScale() {
+  const chosen = els.uiScale.value;
+  const scale = chosen === 'auto' ? autoUiScale()
+                                  : Math.min(2, Math.max(0.6, parseFloat(chosen) || 1));
+  const current = getComputedStyle(document.documentElement)
+    .getPropertyValue('--ui-scale').trim();
+  if (parseFloat(current) === scale) return;      // nothing to do; avoids needless reflow
+  document.documentElement.style.setProperty('--ui-scale', String(scale));
+  els.uiScale.title = chosen === 'auto'
+    ? `Following the window: ${Math.round(scale * 100)}%. Pick a percentage to pin it.`
+    : 'Fixed interface scale. Choose auto to follow the window size.';
+  // Two frames: one for the zoom to take effect, one to measure the result.
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    relayout();
+    panes.forEach((rec) => applyFit(rec));
+  }));
+}
+
+function applyLayoutPrefs() {
+  // The minimum only applies while Text is 'auto'. Disabling it otherwise is the whole
+  // lesson from the control that silently did nothing: never present a knob that
+  // cannot move anything.
+  const autoText = els.fontSz.value === 'auto';
+  els.minFont.disabled = !autoText;
+  els.minFont.title = autoText
+    ? "The smallest size 'auto' may shrink to. Below this the cell scrolls instead."
+    : 'Only applies when Text is set to auto.';
+
+  // rows
+  const rh = els.rowH.value;
+  els.grid.classList.toggle('compact', rh === 'fitcontent');
+  if (rh === 'fitcontent') {
+    els.grid.style.removeProperty('--rowh');
+    els.grid.style.setProperty('--cellmin', '0px');
+    requestAnimationFrame(() => panes.forEach((rec) => applyContentHeight(rec)));
+  } else if (rh === 'fill') {
+    // 'fill' shares the viewport between cells, but it must not divide it into
+    // slivers: five agents in a short window gave each ~17px of terminal — one row of
+    // text, which is worse than useless because it looks like an idle agent. Below the
+    // floor the grid scrolls instead, so every visible cell is worth reading.
+    els.grid.style.setProperty('--rowh', `minmax(${MIN_USEFUL_CELL}px, 1fr)`);
+    els.grid.style.setProperty('--cellmin', `${MIN_USEFUL_CELL}px`);
+  } else {
+    els.grid.style.setProperty('--rowh', `minmax(${rh}px, 1fr)`);
+    els.grid.style.setProperty('--cellmin', `${rh}px`);
+  }
+  // Font size is NOT set here any more: applyFit derives it from the cell, the
+  // cap and the legibility floor. Setting it here too would fight that on every
+  // ribbon change.
+  // Not in free mode: there the height is part of the operator's placement, and
+  // clearing it would collapse every hand-sized pane on any ribbon change.
+  if (rh !== 'fitcontent' && !freeMode()) {
+    panes.forEach((rec) => { rec.cell.style.height = ''; });
+  }
+  // Row height is meaningless in free mode; say so rather than offer a dead knob.
+  els.rowH.disabled = freeMode();
+  els.rowH.title = freeMode()
+    ? 'Not used in free mode — drag a pane’s corner to size it.'
+    : 'Cell height';
+  relayout();
+  requestAnimationFrame(() => panes.forEach((rec) => applyFit(rec)));
+}
+
+function wireRibbon() {
+  els.rToggle.addEventListener('click', () => { setRibbon(els.ribbon.hidden); savePrefs(); });
+
+  [els.layout, els.rowH, els.fontSz, els.minFont, els.syncSz].forEach((el) =>
+    el.addEventListener('change', () => { applyLayoutPrefs(); savePrefs(); }));
+
+  els.uiScale.addEventListener('change', () => { applyUiScale(); savePrefs(); });
+  els.sortBtn.addEventListener('click', sortPanes);
+
+  els.jiraBase.addEventListener('input', () => { savePrefs(); panes.forEach(applyTaskBadge); });
+
+  [els.spName, els.spCli, els.spModel, els.spPerm].forEach((el) => {
+    el.addEventListener('input',  () => { composeSpawnCmd(); savePrefs(); });
+    el.addEventListener('change', () => { composeSpawnCmd(); savePrefs(); });
+  });
+
+  els.copyBtn.addEventListener('click', async () => {
+    const cmd = composeSpawnCmd();
+    try {
+      await navigator.clipboard.writeText(cmd);
+      els.copyNote.textContent = 'copied';
+    } catch (_) {
+      els.copyNote.textContent = 'select it manually';
+    }
+    setTimeout(() => { els.copyNote.textContent = ''; }, 1800);
+  });
+}
+
+// -------------------------------------------------------------- cell build ---
+
+function buildCell(agent) {
+  const cell = document.createElement('section');
+  cell.className = 'cell';
+
+  const head = document.createElement('div');
+  head.className = 'cell-head';
+  const st = document.createElement('span');
+  const name = document.createElement('span');
+  name.className = 'cell-name'; name.textContent = orDash(agent.name);
+  const cli = document.createElement('span'); cli.className = 'cell-cli';
+  const spacer = document.createElement('span'); spacer.className = 'spacer';
+  const up = document.createElement('span'); up.className = 'cell-up';
+  const perm = document.createElement('span');
+  const taskEl = document.createElement('span');   // filled by applyTaskBadge
+
+  // Re-request the snapshot: reopening the stream makes the backend send a fresh
+  // capture-pane of the CURRENT screen, which is also the repaint path if a TUI
+  // got out of sync.
+  const reBtn = document.createElement('button');
+  reBtn.className = 'cbtn'; reBtn.textContent = '⟳';
+  reBtn.title = 'Re-snapshot this pane';
+
+  // Focus: 200x49 is unreadable in a small cell, so let one agent take the whole
+  // grid. This is the practical answer to tiny text.
+  const zBtn = document.createElement('button');
+  zBtn.className = 'cbtn'; zBtn.textContent = '⤢';
+  zBtn.title = 'Focus this agent (Esc to exit)';
+
+  // Minimise: collapse to just this header. Keeps the stream running.
+  const mBtn = document.createElement('button');
+  mBtn.className = 'cbtn'; mBtn.textContent = '–';
+  mBtn.title = 'Minimise (stream keeps running)';
+
+  // Close the STREAM, not the agent. Frees one of the server's 16 stream slots
+  // and stops traffic for a pane you are not watching. The agent is untouched -
+  // this dashboard never signals or kills an agent.
+  const xBtn = document.createElement('button');
+  xBtn.className = 'cbtn'; xBtn.textContent = '×';
+  xBtn.title = 'Close this stream (does NOT kill the agent)';
+
+  // Effective text size and, when the legibility floor binds, how much of the pane
+  // is actually on screen. Without this the operator cannot tell "the agent printed
+  // nothing" from "the text is scrolled out of view".
+  const fit = document.createElement('span');
+  fit.className = 'cell-fit';
+
+  head.append(st, name, cli, taskEl, spacer, fit, up, perm, reBtn, mBtn, xBtn, zBtn);
+
+  const termHost = document.createElement('div'); termHost.className = 'term';
+  const scaleEl = document.createElement('div'); scaleEl.className = 'term-scale';
+  termHost.appendChild(scaleEl);
+  const status = document.createElement('div');
+  status.className = 'cell-status'; status.textContent = 'connecting…';
+
+  // Bottom-right size grip. Only visible in free mode (CSS), because in a grid mode the
+  // track sizes own the geometry and a grip there would fight them.
+  const grip = document.createElement('div');
+  grip.className = 'cell-grip';
+  grip.title = 'Drag to resize this pane';
+
+  cell.append(head, termHost, status, grip);
+
+  // GEOMETRY MUST MATCH THE AGENT PANE. Agent panes are 200x49 and TUI agents
+  // (codex, grok) emit absolute cursor addressing - grokrev's log has 12460
+  // ESC[row;colH moves. Building the terminal at any other size scrambles the
+  // screen. So we take cols/rows from the API and never fit-to-cell; the cell
+  // shows a CSS-scaled view instead.
+  const cols = Number.isFinite(agent.cols) && agent.cols > 0 ? agent.cols : 80;
+  const rows = Number.isFinite(agent.rows) && agent.rows > 0 ? agent.rows : 24;
+
+  const term = new window.Terminal({
+    cols, rows,
+    disableStdin: true,               // read-only by design
+    convertEol: false,
+    scrollback: 4000,
+    fontSize: parseInt(els.fontSz.value, 10) || 11,
+    fontFamily: 'ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace',
+    theme: xtermTheme(),
+    allowProposedApi: true,
+  });
+
+  // No FitAddon: fitting would resize the terminal away from the agent's real
+  // geometry, which is exactly what broke TUI rendering.
+  term.open(scaleEl);
+
+  const rec = {
+    cell, term, termHost, scaleEl, status, cols, rows, reBtn, zBtn, mBtn, xBtn,
+    minimized: false, userClosed: false, lastSync: 0, syncTimer: null,
+    headEl: head, grip, isTui: String(agent.cli || '').trim() !== 'shell',
+    headEls: { st, perm, up, cli, task: taskEl, fit },
+    source: null, retryMs: 500, retryTimer: null,
+    disposed: false,      // pane is being torn down — never reopen
+    streamEnded: false,   // server said eof — MAY reopen if the agent is live (#1)
+  };
+
+  const agentName = String(agent.name || '');
+  rec.name = agentName;
+  makeDraggable(rec, agentName);
+
+  // Measure the cell metrics ONCE, at a known font size, and store them as ratios
+  // per 1px of font. A monospace advance width and xterm's line height are both
+  // linear in fontSize, so a ratio is font-size independent — which is what makes
+  // it safe to PREDICT the size for a new font without measuring at that font.
+  //
+  // That distinction is the whole lesson from four failed attempts: measuring at
+  // the current size in order to choose the next size is a feedback loop, and every
+  // one of them ratcheted (188 cols in a 730px cell; 51x199; 182x40 -> 178x37).
+  rec.baseFont = parseFloat(els.fontSz.value) || 11;
+  requestAnimationFrame(() => {
+    measureMetrics(rec);
+    applyFit(rec);
+  });
+  reBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setStatus(rec, 're-snapshotting…', '');
+    openStream(rec, agentName);          // fresh stream => fresh snapshot
+  });
+  zBtn.addEventListener('click', (e) => { e.stopPropagation(); setFocus(agentName); });
+
+  mBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    rec.minimized = !rec.minimized;
+    rec.cell.classList.toggle('min', rec.minimized);
+    mBtn.textContent = rec.minimized ? '+' : '–';
+    mBtn.title = rec.minimized ? 'Restore' : 'Minimise (stream keeps running)';
+    relayout();
+    if (!rec.minimized) requestAnimationFrame(() => applyScale(rec));
+  });
+
+  xBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (rec.userClosed) {
+      rec.userClosed = false;
+      xBtn.textContent = '×';
+      xBtn.title = 'Close this stream (does NOT kill the agent)';
+      openStream(rec, agentName);
+    } else {
+      rec.userClosed = true;
+      closeStream(rec);
+      xBtn.textContent = '▷';
+      xBtn.title = 'Resume this stream';
+      setStatus(rec, 'stream closed by you - agent still running', 'eof');
+    }
+  });
+
+  if (window.ResizeObserver) {
+    rec.ro = new ResizeObserver(() => applyScale(rec));
+    rec.ro.observe(termHost);
+  }
+  return rec;
+}
+
+// Scale the (oversized) terminal down so a 200x49 pane is readable in a cell.
+// transform-origin is top-left so the scaled view stays anchored.
+// ══════════════════════════════════════════════════════════ text fitting ══════
+//
+// THE PROBLEM. A terminal is built at the AGENT's geometry (200x49 is typical) and
+// must never be resized away from it, because TUI agents emit absolute cursor
+// addressing — grokrev's log has 12,460 ESC[row;colH moves, and any other grid
+// scrambles the screen. So a 200-column pane has to be shown inside a cell that may
+// be 300px wide.
+//
+// WHY THE OLD APPROACH FAILED. It applied a CSS `scale()` transform. A transform
+// resamples the already-rendered glyph bitmaps, so at 3 columns text was not merely
+// small, it was blurry mush — unreadable at any size. It also made every
+// measurement suspect, because offsetWidth reflects an enclosing transform.
+//
+// THE FIX. Size the FONT instead of transforming pixels. xterm re-renders at
+// whatever font size it is given, so glyphs stay crisp at every step, and the
+// terminal keeps its 200x49 grid throughout.
+//
+// THE GUARANTEE. Text never shrinks below the legibility floor. If the whole pane
+// cannot fit at the floor, the cell scrolls and the header says how much is visible
+// — a readable window on the pane beats an unreadable whole.
+const FONT_STEP = 0.5;      // half-px steps: fine enough to fill, coarse enough not to jitter
+const HARD_MIN_FONT = 4;
+const HARD_MAX_FONT = 32;
+const GUTTER_W = 8;         // .term padding-left + a little slack for a scrollbar
+const GUTTER_H = 4;
+
+function clampNum(value, low, high) {
+  return Math.min(high, Math.max(low, value));
+}
+
+// Measure the TRUE grid size and store it as per-1px-of-font ratios. Safe to re-run:
+// it normalises by whatever font size is actually applied, so it is not a feedback
+// path.
+//
+// MEASURE `.xterm-screen`, NOT `.xterm`.
+//
+// `.xterm` is a block that fills its container, so its offsetWidth is the CELL
+// width. Dividing that by cols yields "the width a character would need in order to
+// fit", not the width one actually occupies — a circular measurement. The earlier
+// version did exactly that, so the ratio silently absorbed the cell width, every
+// pane reported a different ratio for the same font, and the fit converged on a
+// number that left a 182-column pane overflowing 1050px of content into a 709px cell
+// while believing it fit.
+//
+// xterm sizes `.xterm-screen` explicitly to cols x rows cells (inline
+// style.width/height), so it is the real grid box. Verified against xterm's own
+// internal dimensions: 1050px / 182 cols = 5.769px, matching its cell.width exactly.
+// `.xterm-screen` is a documented class, so no private API is needed.
+function measureMetrics(rec) {
+  const el = rec.term && rec.term.element;
+  const screen = el && el.querySelector('.xterm-screen');
+  if (!screen || !rec.cols || !rec.rows) return false;
+  const font = rec.appliedFont || rec.baseFont || 11;
+  const w = screen.offsetWidth, h = screen.offsetHeight;
+  // A zero here means xterm has not painted yet; keep any previous ratio rather than
+  // poisoning it with a measurement of nothing.
+  if (!w || !h || !font) return false;
+  rec.wRatio = (w / rec.cols) / font;
+  rec.hRatio = (h / rec.rows) / font;
+  // Absolute pixels at the current font, for the pane-size sync.
+  rec.charW = w / rec.cols;
+  rec.charH = h / rec.rows;
+  rec.natW = w;
+  rec.natH = h;
+  return true;
+}
+
+// ONE control decides the text size.
+//
+// It used to be three — a max, a min, and an auto/fixed mode — and in the default
+// configuration the one labelled "max" did nothing at all. With a 200-column pane in a
+// 709px cell the width-derived size is ~6.4px, so it always clamped UP to the minimum;
+// the cap was never the binding constraint. Changing "max font size" from 10 to 20
+// produced 7px either way, while the control labelled "min" was the only real lever.
+// A control that reads as the font size must change the font size.
+//
+// So: Text = 'auto' fits the pane and respects the minimum; Text = a number IS the size,
+// and the cell scrolls to reach whatever does not fit.
+function fontBounds() {
+  const raw = els.fontSz.value;
+  const floor = clampNum(parseFloat(els.minFont && els.minFont.value) || 7,
+                         HARD_MIN_FONT, HARD_MAX_FONT);
+  if (raw === 'auto') return { exact: null, cap: HARD_MAX_FONT, floor };
+  const size = clampNum(parseFloat(raw) || 11, HARD_MIN_FONT, HARD_MAX_FONT);
+  // An explicit size is both the floor and the cap: it is simply the size.
+  return { exact: size, cap: size, floor: size };
+}
+
+// The font size this cell should use. Pure: reads geometry, writes nothing.
+function targetFont(rec) {
+  if (!rec.wRatio || !rec.hRatio) return null;
+  const { exact, cap, floor } = fontBounds();
+  if (exact !== null) return exact;      // an explicit size: use it, scroll for the rest
+
+  const availW = rec.termHost.clientWidth - GUTTER_W;
+  if (availW <= 0) return null;
+  let fs = availW / (rec.cols * rec.wRatio);
+
+  // Constrain by height too, so the WHOLE pane is visible rather than just its top.
+  //
+  // Deliberately uses rec.rows, not usedRows(): deriving the font from how much the
+  // agent has printed makes the text jump on every frame, and in 'fit content' mode
+  // the cell height comes from the font size, which would close the loop.
+  //
+  // BUT only while height can shrink the text LEGIBLY. In a short cell, fitting all
+  // 49 rows can demand 4px text; clamping that to the floor yields marginal text that
+  // still does not show every row. When every row cannot be shown at a readable size,
+  // the honest trade is fewer rows at a readable size plus a scrollbar — so the height
+  // constraint is dropped rather than applied and then clamped.
+  if (els.rowH.value !== 'fitcontent') {
+    const availH = rec.termHost.clientHeight - GUTTER_H;
+    if (availH > 0) {
+      const fsHeight = availH / (rec.rows * rec.hRatio);
+      if (fsHeight >= floor) fs = Math.min(fs, fsHeight);
+    }
+  }
+
+  fs = Math.floor(fs / FONT_STEP) * FONT_STEP;
+  return clampNum(fs, floor, cap);
+}
+
+// A bounded refinement budget.
+//
+// xterm rounds each cell to whole device pixels, so a ratio measured at one font size
+// mispredicts slightly at another: a row 17px tall at 13px font is 1.3077 per px, but
+// 9px at 7px font is 1.2857. Over 49 rows that is ~40px of error — enough to land a
+// step or two away from the best size. So after applying a font we re-measure and
+// recompute; if the answer moved, we apply again.
+//
+// This is a CONVERGENT loop, not the feedback loop that broke four earlier attempts,
+// and the difference is deliberate: the budget is finite, and a size already tried in
+// this cycle is never revisited, so it cannot ratchet or oscillate.
+const FIT_MAX_PASSES = 4;
+
+function applyFit(rec, pass) {
+  if (!rec.term || rec.minimized || rec.disposed) return;
+  const host = rec.termHost;
+  if (!host || !host.clientWidth) return;
+
+  const refining = Number.isInteger(pass) && pass > 0;
+  if (!refining) {
+    if (els.syncSz.checked) maybeSyncPaneSize(rec);
+    rec.fitTried = null;          // fresh geometry, fresh budget
+  }
+
+  // Never transform: it is what made the text blurry. The wrapper stays a plain
+  // block so the terminal's own box is its real size and scrolling just works.
+  if (rec.scaleEl.style.transform) rec.scaleEl.style.transform = '';
+
+  if (!rec.wRatio && !measureMetrics(rec)) return;
+
+  const fs = targetFont(rec);
+  if (fs == null) return;
+
+  if (Math.abs((rec.appliedFont || 0) - fs) >= FONT_STEP / 2) {
+    const tried = rec.fitTried || (rec.fitTried = new Set());
+    tried.add(fs);
+    rec.appliedFont = fs;
+    try { rec.term.options.fontSize = fs; } catch (_) { return; }
+
+    // xterm re-renders ASYNCHRONOUSLY, so everything derived from the new size has to
+    // be redone on the next frame — including the scroll decision, which was
+    // previously made against pre-render geometry and never revisited.
+    requestAnimationFrame(() => {
+      if (rec.disposed || !measureMetrics(rec)) return;
+      const refined = targetFont(rec);
+      const nextPass = (pass || 0) + 1;
+      if (refined != null
+          && Math.abs(refined - fs) >= FONT_STEP / 2
+          && nextPass < FIT_MAX_PASSES
+          && !tried.has(refined)) {
+        applyFit(rec, nextPass);
+        return;
+      }
+      // Settled: either the target agrees, the budget is spent, or the next step
+      // would revisit a size already tried (an oscillation — keep what is applied,
+      // since the overflow state below makes either choice safe to display).
+      rec.fitTried = null;
+      applyContentHeight(rec);
+      updateOverflowState(rec, fs);
+      updateFitNote(rec);
+    });
+  }
+
+  applyContentHeight(rec);
+  updateOverflowState(rec, fs);
+  updateFitNote(rec);
+}
+
+// Decide whether this cell must scroll, from the geometry as it stands now.
+//
+// Scroll only when something is genuinely out of view: a permanently scrollable host
+// shows a scrollbar that steals width and then causes the very overflow it was meant
+// to reveal.
+function updateOverflowState(rec, fs) {
+  const host = rec.termHost;
+  if (!host) return;
+  const compact = els.rowH.value === 'fitcontent';
+  const natW = rec.cols * rec.wRatio * fs;
+  const natH = rec.rows * rec.hRatio * fs;
+
+  const overflowX = natW > host.clientWidth + 1;
+  // In 'fit content' the cell is sized to the rows that HAVE content, so the blank
+  // remainder of the grid hangs below it by design. Those rows are empty, so
+  // clipping them is correct and offering a scrollbar through blank space is not.
+  const overflowY = !compact && natH > host.clientHeight + 1;
+
+  host.classList.toggle('scrolls', overflowX || overflowY);
+  rec.fit = { fs, natW, natH, overflowX, overflowY, compact };
+}
+
+// Say what the operator is looking at. A cell showing 40% of a pane looks identical
+// to an idle agent otherwise.
+function updateFitNote(rec) {
+  const note = rec.headEls && rec.headEls.fit;
+  if (!note) return;
+  const fit = rec.fit;
+  if (!fit || rec.minimized) { note.textContent = ''; note.className = 'cell-fit'; return; }
+
+  const host = rec.termHost;
+  const bits = [`${fit.fs}px`];
+  let clipped = false;
+  if (fit.overflowX) {
+    const shown = Math.max(1, Math.floor((host.clientWidth - GUTTER_W)
+                                         / (rec.wRatio * fit.fs)));
+    bits.push(`${Math.min(shown, rec.cols)}/${rec.cols} cols`);
+    clipped = true;
+  }
+  if (fit.overflowY) {
+    const shown = Math.max(1, Math.floor((host.clientHeight - GUTTER_H)
+                                         / (rec.hRatio * fit.fs)));
+    bits.push(`${Math.min(shown, rec.rows)}/${rec.rows} rows`);
+    clipped = true;
+  }
+  note.textContent = bits.join(' · ');
+  note.className = clipped ? 'cell-fit clipped' : 'cell-fit';
+  note.title = clipped
+    ? `Text is at the ${fontBounds().floor}px legibility floor, so the pane does not `
+      + `fit — scroll the cell, or use fewer columns / focus (⤢) to see all of it.`
+    : `Auto-fitted to ${fit.fs}px; the whole ${rec.cols}x${rec.rows} pane is visible.`;
+}
+
+// Kept as the name the rest of the file calls; fitting replaced scaling.
+function applyScale(rec) {
+  applyFit(rec);
+}
+
+// Render the bound Jira issue. The key is re-validated here even though the
+// backend validated it on spawn: this builds an href, and a key from a text file
+// must never be trusted to be URL-safe. Label uses textContent, so a hostile key
+// cannot inject markup either.
+const ISSUE_KEY = /^[A-Z][A-Z0-9_]+-[0-9]+$/;
+
+function applyTaskBadge(rec) {
+  const el = rec.headEls.task;
+  const key = rec.taskKey;
+  if (!key || !ISSUE_KEY.test(key)) {
+    el.replaceChildren();
+    el.className = '';
+    return;
+  }
+  const base = (els.jiraBase.value || '').trim().replace(/\/+$/, '');
+  el.replaceChildren();
+  if (/^https:\/\/[^\s/]+$/.test(base)) {
+    const a = document.createElement('a');
+    a.className = 'task-badge';
+    a.href = `${base}/browse/${encodeURIComponent(key)}`;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.textContent = key;
+    a.title = `Open ${key} in Jira`;
+    el.appendChild(a);
+  } else {
+    const sp = document.createElement('span');
+    sp.className = 'task-badge';
+    sp.textContent = key;
+    sp.title = 'Set the Jira base URL in the ribbon to make this a link';
+    el.appendChild(sp);
+  }
+}
+
+function updateCellHead(rec, agent) {
+  rec.taskKey = (agent.task === null || agent.task === undefined) ? '' : String(agent.task).trim();
+  applyTaskBadge(rec);
+  const st = stateClass(agent.state);
+  const pc = permClass(agent.perms);
+  rec.headEls.st.className = `dot ${st}`;
+  rec.headEls.st.title = st === 'stale' ? 'In run/ but no live tmux session' : `session ${st}`;
+  rec.headEls.cli.textContent = orDash(agent.cli);
+  rec.isTui = String(agent.cli || '').trim() !== 'shell';
+  rec.headEls.up.textContent = fmtUptime(agent.uptime_seconds);
+  rec.headEls.perm.className = `perm ${pc}`;
+  rec.headEls.perm.textContent = pc === 'unknown' ? '—' : String(agent.perms);
+  if (pc === 'unrestricted') {
+    rec.headEls.perm.title = 'Runs with the provider permission bypass — full access';
+  }
+  rec.cell.classList.toggle('stale', st === 'stale');
+  rec.cell.classList.toggle('unrestricted', pc === 'unrestricted');
+}
+
+// ---------------------------------------------------------------- streaming ---
+
+// ════════════════════════════════════════════════════ one shared SSE stream ════
+//
+// WHY ONE CONNECTION FOR EVERY PANE.
+//
+// A browser allows only about six concurrent HTTP/1.1 connections per host — six in
+// Firefox by default — and an SSE stream holds one open for as long as it lives. With
+// seven panes the seventh could never connect, so two panes traded places roughly once a
+// second, each reading "disconnected — retrying" half the time. Measured: the two
+// alternated perfectly complementarily, and closing one pane's stream only moved the
+// problem to whichever pane reconnected last. No server tuning fixes it; the limit is in
+// the browser.
+//
+// So the backend multiplexes every agent over /api/stream-all and tags each frame with
+// its agent name. One connection, no ceiling on pane count, and the slot bookkeeping
+// becomes trivial.
+let sharedSource = null;
+let sharedRetryMs = 500;
+let sharedRetryTimer = null;
+
+function routeFrame(event, apply) {
+  let payload;
+  try { payload = JSON.parse(event.data); } catch (_) { return; }
+  const rec = panes.get(payload && payload.agent);
+  // userClosed means the operator pressed × on that pane: keep ignoring its frames
+  // rather than tearing down a connection every other pane is using.
+  if (!rec || rec.disposed || rec.userClosed || !payload.b64) return;
+  try { apply(rec, b64ToBytes(payload.b64)); } catch (_) {}
+}
+
+function closeSharedStream() {
+  if (sharedSource) { try { sharedSource.close(); } catch (_) {} sharedSource = null; }
+  if (sharedRetryTimer) { clearTimeout(sharedRetryTimer); sharedRetryTimer = null; }
+}
+
+// `force` reconnects even if a stream is already open — that is how a re-snapshot is
+// requested (the ⟳ button, or a geometry change), since the server only sends a snapshot
+// when it first sees an agent on a connection.
+function ensureSharedStream(force) {
+  if (!force && sharedSource && sharedSource.readyState !== 2) return;
+  closeSharedStream();
+  let src;
+  try {
+    src = new EventSource(`api/stream-all?tail=${TAIL_BYTES}`);
+  } catch (err) {
+    panes.forEach((rec) => setStatus(rec, `stream unavailable: ${err.message}`, 'err'));
+    return;
+  }
+  sharedSource = src;
+
+  src.onopen = () => {
+    sharedRetryMs = 500;
+    panes.forEach((rec) => {
+      rec.source = src;            // every pane is served by this one connection
+      rec.streamEnded = false;
+      if (!rec.userClosed) setStatus(rec, 'streaming', '');
+    });
+  };
+
+  src.addEventListener('snapshot', (event) => routeFrame(event, (rec, bytes) => {
+    rec.term.reset();
+    rec.term.write(bytes);
+    setStatus(rec, 'streaming', '');
+    requestAnimationFrame(() => { applyFit(rec); applyContentHeight(rec); });
+  }));
+
+  src.addEventListener('chunk', (event) => routeFrame(event, (rec, bytes) => {
+    rec.term.write(bytes);
+    if (els.follow.checked) rec.term.scrollToBottom();
+    if (els.rowH.value === 'fitcontent') {
+      if (rec.hTimer) clearTimeout(rec.hTimer);
+      rec.hTimer = setTimeout(() => applyContentHeight(rec), 250);
+    }
+  }));
+
+  src.addEventListener('gone', (event) => {
+    let payload;
+    try { payload = JSON.parse(event.data); } catch (_) { return; }
+    const rec = panes.get(payload && payload.agent);
+    if (rec) { rec.streamEnded = true; setStatus(rec, 'session ended', 'eof'); }
+  });
+
+  src.onerror = () => {
+    closeSharedStream();
+    sharedRetryMs = Math.min(sharedRetryMs * 2, MAX_RECONNECT_MS);
+    const seconds = Math.round(sharedRetryMs / 1000);
+    panes.forEach((rec) => {
+      rec.source = null;
+      if (!rec.userClosed) setStatus(rec, `disconnected — retrying in ${seconds}s`, 'err');
+    });
+    sharedRetryTimer = setTimeout(() => ensureSharedStream(true), sharedRetryMs);
+  };
+}
+
+// Kept as the name the rest of the file calls. A per-pane "open" is now a request for a
+// fresh snapshot of that pane, which means reconnecting the shared stream.
+function openStream(rec, name) {
+  if (rec.disposed) return;
+  rec.streamEnded = false;
+  rec.userClosed = false;
+  ensureSharedStream(true);
+}
+
+// The single-agent endpoint is still served and still tested; this is the old client path,
+// unused now but left intact so a single-pane consumer has something to follow.
+function openSingleStream(rec, name) {
+  if (rec.disposed) return;
+  closeStream(rec);
+  rec.streamEnded = false;
+
+  let src;
+  try {
+    src = new EventSource(`api/stream/${encodeURIComponent(name)}?tail=${TAIL_BYTES}`);
+  } catch (err) {
+    setStatus(rec, `stream unavailable: ${err.message}`, 'err');
+    return;
+  }
+  rec.source = src;
+
+  src.onopen = () => { rec.retryMs = 500; setStatus(rec, 'streaming', ''); };
+
+  // The backend sends the pane's CURRENT rendered screen as a framed snapshot
+  // before any log bytes. A mid-stream byte tail cannot reconstruct
+  // alternate-screen state, so this is what makes TUI agents render correctly.
+  src.addEventListener('snapshot', (ev) => {
+    if (!ev.data) return;
+    try {
+      rec.term.reset();
+      rec.term.write(b64ToBytes(ev.data));
+      setStatus(rec, 'streaming', '');
+      requestAnimationFrame(() => { applyScale(rec); applyContentHeight(rec); });
+    } catch (_) {}
+  });
+
+  src.onmessage = (ev) => {
+    if (!ev.data) return;
+    try { rec.term.write(b64ToBytes(ev.data)); } catch (_) {}
+    if (els.follow.checked) rec.term.scrollToBottom();
+    // Output changed, so the used-row count may have changed. Debounced because
+    // a busy agent can emit many frames a second.
+    if (els.rowH.value === 'fitcontent') {
+      if (rec.hTimer) clearTimeout(rec.hTimer);
+      rec.hTimer = setTimeout(() => applyContentHeight(rec), 250);
+    }
+  };
+
+  // #1 FIX: eof marks the stream ended but NOT the pane dead. If a later poll
+  // still shows this agent alive, syncAgents reopens. Previously this latched
+  // rec.closed = true and the cell never recovered — which combined with the
+  // backend's over-eager eof could kill a live pane permanently.
+  src.addEventListener('eof', () => {
+    setStatus(rec, 'stream ended — will reconnect if the agent is still live', 'eof');
+    rec.streamEnded = true;
+    closeStream(rec);
+  });
+
+  src.onerror = () => {
+    if (rec.disposed) return;
+    closeStream(rec);
+    rec.retryMs = Math.min(rec.retryMs * 2, MAX_RECONNECT_MS);
+    setStatus(rec, `disconnected — retrying in ${Math.round(rec.retryMs / 1000)}s`, 'err');
+    rec.retryTimer = setTimeout(() => openSingleStream(rec, name), rec.retryMs);
+  };
+}
+
+function closeStream(rec) {
+  // Only detach THIS pane. rec.source is the shared connection every other pane is also
+  // reading, so closing it here would blank the whole grid because one pane was dismissed.
+  rec.source = null;
+  if (rec.retryTimer) { clearTimeout(rec.retryTimer); rec.retryTimer = null; }
+}
+
+function setStatus(rec, text, kind) {
+  rec.status.textContent = text;
+  rec.status.className = `cell-status ${kind || ''}`.trim();
+}
+
+function destroyPane(name) {
+  const rec = panes.get(name);
+  if (!rec) return;
+  rec.disposed = true;
+  closeStream(rec);
+  // Every pending timer holds a closure over this record. Leaving them to fire after
+  // dispose() is how a torn-down pane resurrects a stream or writes to a dead terminal.
+  for (const key of ['reflowTimer', 'syncTimer', 'hTimer', 'retryTimer']) {
+    if (rec[key]) { clearTimeout(rec[key]); rec[key] = null; }
+  }
+  if (rec.ro) { try { rec.ro.disconnect(); } catch (_) {} }
+  try { rec.term.dispose(); } catch (_) {}
+  rec.cell.remove();
+  panes.delete(name);
+}
+
+// --------------------------------------------------------- content sizing ---
+
+// How many rows this terminal is REALLY using.
+//
+// For a line-oriented agent (a shell) that is cursor position + 1, so a pane
+// showing three lines reports 3 and its cell can shrink. For a TUI on the
+// alternate screen the whole grid is in use, so this returns the full height and
+// the cell stays full size - which is the correct answer for both without
+// special-casing either.
+function usedRows(rec) {
+  // A TUI paints its whole grid, so it always needs full height. The CLI name is
+  // the reliable signal - codex/claude/grok are full-screen TUIs, `shell` is not,
+  // and a buffer scan cannot distinguish them when the TUI is not on the
+  // alternate screen (codex is not).
+  if (rec.isTui) return rec.rows;
+  try {
+    const buf = rec.term.buffer.active;
+    // capture-pane paints the WHOLE pane grid, blank lines included, so the
+    // cursor is normally parked at the bottom of a full-height screen. Cursor
+    // position is therefore useless here - scan back for real content instead.
+    let last = 0;
+    for (let i = 0; i < rec.rows; i++) {
+      const line = buf.getLine(buf.baseY + i);
+      if (line && line.translateToString(true).trim() !== '') last = i + 1;
+    }
+    return Math.max(2, Math.min(rec.rows, last + 1));
+  } catch (_) {
+    return rec.rows;
+  }
+}
+
+// Height the cell needs for the rows in use, including its own chrome.
+//
+// Only 'fit content' mode sets a height. The row height is taken at the CURRENTLY
+// APPLIED font size, which is why there is no longer a scale factor in here: the
+// font is the single thing that determines size.
+function applyContentHeight(rec) {
+  // In free mode the height is the operator's, not the content's.
+  if (freeMode()) return;
+  if (els.rowH.value !== 'fitcontent' || rec.minimized) {
+    rec.cell.style.height = '';
+    return;
+  }
+  const rowH = liveCharH(rec);
+  if (!rowH) return;
+  const chrome = (rec.headEl ? rec.headEl.offsetHeight : 26)
+               + (rec.status ? rec.status.offsetHeight : 20) + 8;
+  const h = Math.round(usedRows(rec) * rowH) + chrome;
+  rec.cell.style.height = `${Math.max(56, h)}px`;
+}
+
+// Per-row pixel height at the font size in force. Derived from the stored ratio
+// rather than read from the DOM, because reading offsetHeight forces layout and this
+// runs on every stream frame.
+function liveCharH(rec) {
+  if (rec.hRatio && rec.appliedFont) return rec.hRatio * rec.appliedFont;
+  return rec.charH || 0;
+}
+
+// ------------------------------------------------- pane size <- cell size ---
+
+// Ask the backend to resize the AGENT's tmux pane to whatever fits this cell.
+// Opt-in: it writes to the agent, and it changes what agentmux read/capture-pane
+// returns for that pane (audit D26). Debounced, and never fired for a size we
+// already requested.
+function maybeSyncPaneSize(rec) {
+  if (!rec.name) return;
+
+  // Size the pane against a FIXED reference font — the cap — not against the font
+  // currently fitted.
+  //
+  // rec.charW moves with the fitted font, and the fitted font is chosen to make the
+  // pane's columns fit the cell. Feeding one into the other closes the loop: the font
+  // shrinks to fit the columns, so more columns are requested, so the font shrinks
+  // again. That is exactly what drove 182 -> 97 -> 64 columns in testing, the same
+  // ratchet as the original 182x40 -> 180x39 -> 178x37.
+  //
+  // Against the cap the loop has a fixed point: ask for the columns that fit at the
+  // most comfortable size, and the fit then chooses that size, and nothing moves.
+  if (!rec.wRatio || !rec.hRatio) return;          // metrics not measured yet
+  const charW = rec.wRatio * fontBounds().cap;
+  const charH = rec.hRatio * fontBounds().cap;
+  if (!charW || !charH) return;
+
+  // Key off the CELL width only. Anything derived from the pane's post-resize
+  // state is a feedback path, and every feedback path here ratcheted.
+  const cellW = rec.termHost.clientWidth;
+  if (!cellW) return;
+  if (rec.lastCellW && Math.abs(cellW - rec.lastCellW) < 8) return;  // cell did not really move
+  rec.lastCellW = cellW;
+
+  const wantCols = Math.max(20, Math.min(400, Math.floor((cellW - 8) / charW)));
+
+  // ROWS ARE DELIBERATELY NOT SYNCED.
+  //
+  // Driving rows from cell height is circular once 'fit content' is on: cell
+  // height comes from content, content height comes from pane rows, pane rows
+  // would come from cell height. That loop oscillated to 51x199 in testing.
+  // Width has no such dependency - a cell's width never depends on how many rows
+  // the agent wrote - so columns sync safely and rows stay put.
+  // tmux resize-window -y N yields a pane of N-1 rows when a status line is
+  // present, so asking for exactly rec.rows shrinks it by one every call. That
+  // was the 40 -> 39 -> 37 drift. Ask for one more to hold the current height.
+  const wantRows = Math.min(200, rec.rows + 1);
+
+  // Validate before sending. rec.rows can be stale or unset (a poll that reported
+  // null geometry, or a cell measured before its first /api/agents result), and
+  // NaN/undefined serialises to JSON null, which the backend correctly rejects
+  // with 400. Skipping quietly is right here - this is an optional convenience,
+  // not something worth showing the user an error for.
+  if (!Number.isInteger(wantCols) || wantCols < 20  || wantCols > 400) return;
+  if (!Number.isInteger(wantRows) || wantRows < 5   || wantRows > 200) return;
+
+  const key = `${wantCols}x${wantRows}`;
+  if (rec.lastSyncKey === key) return;
+  rec.lastSyncKey = key;
+
+  if (rec.syncTimer) clearTimeout(rec.syncTimer);
+  rec.syncTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(`api/resize/${encodeURIComponent(rec.name)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },   // forces a CORS preflight cross-origin
+        body: JSON.stringify({ cols: wantCols, rows: wantRows }),
+      });
+      if (!res.ok) {
+        setStatus(rec, `pane resize refused (HTTP ${res.status})`, 'err');
+        return;
+      }
+      // The next /api/agents poll reports the new geometry and syncAgents calls
+      // term.resize(), so we do not resize locally here.
+    } catch (err) {
+      setStatus(rec, `pane resize failed: ${err.message}`, 'err');
+    }
+  }, 450);
+}
+
+// ------------------------------------------------------------------- focus ---
+
+let focused = null;
+
+function setFocus(name) {
+  focused = (focused === name) ? null : name;
+  applyFocus();
+}
+
+function applyFocus() {
+  const on = focused !== null && panes.has(focused);
+  if (!on) focused = null;
+  els.grid.classList.toggle('focusing', on);
+  panes.forEach((rec, name) => {
+    rec.cell.classList.toggle('focused', on && name === focused);
+    rec.zBtn.textContent = (on && name === focused) ? '⤡' : '⤢';
+  });
+  relayout();
+  requestAnimationFrame(() => panes.forEach((rec) => applyFit(rec)));
+}
+
+// ------------------------------------------------------------------ layout ---
+
+// The widest column count at which a WHOLE pane still fits at or above the
+// legibility floor. The old rule was a hardcoded cap of 2, which was right for
+// 200-column panes on a 1500px screen and wrong everywhere else — a narrow pane or a
+// wide monitor can take more, and a very narrow window cannot even take two.
+const GRID_GAP = 9;        // keep in step with .grid { gap } in style.css
+const GRID_PAD = 24;       // .grid horizontal padding
+
+function autoCols(paneCount) {
+  if (paneCount <= 1) return 1;
+  const gridW = els.grid.clientWidth || 0;
+  // Widest pane wins: a layout that fits the average but clips the widest is not
+  // "fits". Fall back to the conventional 200 before any pane has been measured.
+  let paneCols = 0, wRatio = 0;
+  for (const rec of panes.values()) {
+    if (rec.cols > paneCols) paneCols = rec.cols;
+    if (rec.wRatio && rec.wRatio > wRatio) wRatio = rec.wRatio;
+  }
+  if (!gridW || !paneCols || !wRatio) return Math.min(2, paneCount);
+
+  const needed = paneCols * wRatio * fontBounds().floor;   // px for one whole pane
+  let best = 1;
+  for (let cols = 1; cols <= Math.min(paneCount, 12); cols++) {
+    const cellW = (gridW - GRID_PAD - GRID_GAP * (cols - 1)) / cols;
+    if (cellW - GUTTER_W >= needed) best = cols;
+    else break;
+  }
+  return best;
+}
+
+// ══════════════════════════════════════════════════════════ free placement ════
+//
+// In 'free' mode the operator owns the arrangement. Panes are absolutely positioned
+// from a stored rectangle, dragged by their header, sized by the bottom-right grip —
+// and a window resize does NOT move them. Only the `sort` button rearranges.
+//
+// That is the whole point: a resize still keeps the TEXT readable (applyFit re-runs off
+// each pane's own size), but it never reshuffles a layout you arranged by hand.
+const PLACE_KEY = 'ccc.panePlacement';
+const MIN_PANE_W = 240;
+const MIN_PANE_H = MIN_USEFUL_CELL;
+const CANVAS_PAD = 12;
+
+// One shared, inert element marking the far corner of the placed panes.
+const rec_spacer = (() => {
+  const node = document.createElement('div');
+  node.className = 'free-spacer';
+  node.setAttribute('aria-hidden', 'true');
+  return node;
+})();
+
+function freeMode() {
+  return els.layout.value === 'free' && focused === null;
+}
+
+function loadPlacements() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(PLACE_KEY) || '{}');
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch (_) { return {}; }
+}
+
+function savePlacements(map) {
+  try { localStorage.setItem(PLACE_KEY, JSON.stringify(map)); } catch (_) {}
+}
+
+function placementOf(name) {
+  const stored = loadPlacements()[name];
+  if (!stored) return null;
+  const { x, y, w, h } = stored;
+  if (![x, y, w, h].every((v) => Number.isFinite(v))) return null;
+  return { x: Math.max(0, x), y: Math.max(0, y),
+           w: Math.max(MIN_PANE_W, w), h: Math.max(MIN_PANE_H, h) };
+}
+
+function setPlacement(name, box) {
+  const map = loadPlacements();
+  map[name] = { x: Math.round(box.x), y: Math.round(box.y),
+                w: Math.round(box.w), h: Math.round(box.h) };
+  savePlacements(map);
+}
+
+// A rectangle for a pane that has never been placed. Tiles into the next free slot
+// rather than stacking everything at the origin.
+function defaultPlacement(index) {
+  const perRow = Math.max(1, Math.floor((els.grid.clientWidth - CANVAS_PAD)
+                                        / (MIN_PANE_W + 130 + CANVAS_PAD)) || 1);
+  const width = Math.max(MIN_PANE_W,
+                         Math.floor((els.grid.clientWidth - CANVAS_PAD * (perRow + 1)) / perRow));
+  const height = Math.max(MIN_PANE_H, Math.round(width * 0.52));
+  const column = index % perRow, row = Math.floor(index / perRow);
+  return { x: CANVAS_PAD + column * (width + CANVAS_PAD),
+           y: CANVAS_PAD + row * (height + CANVAS_PAD), w: width, h: height };
+}
+
+// Write the stored rectangles onto the cells. Never invents a new position for a pane
+// that already has one — that would be the auto-rearranging this mode exists to avoid.
+function applyFreeLayout() {
+  let index = 0, maxRight = 0, maxBottom = 0;
+  for (const [name, rec] of panes) {
+    let box = placementOf(name);
+    if (!box) {
+      box = defaultPlacement(index);
+      setPlacement(name, box);
+    }
+    index += 1;
+    rec.cell.style.left = `${box.x}px`;
+    rec.cell.style.top = `${box.y}px`;
+    rec.cell.style.width = `${box.w}px`;
+    rec.cell.style.height = rec.minimized ? '' : `${box.h}px`;
+    maxRight = Math.max(maxRight, box.x + box.w);
+    maxBottom = Math.max(maxBottom, box.y + box.h);
+  }
+  // Reachability is handled by a SPACER, not by min-width on the grid itself.
+  //
+  // Setting min-width on the scrolling element makes its own box that wide, which
+  // defeats its `overflow: auto` — the content then overflows an ancestor that clips,
+  // and a pane parked past the edge becomes unreachable. Measured: a 1452px canvas
+  // reported clientWidth 1452 inside a 900px window, so it was not scrolling at all.
+  //
+  // `.grid.free` is position: relative, so an absolutely positioned child does extend
+  // the scrollable area. A zero-height spacer at the far corner is enough, and it keeps
+  // the grid free to size itself to the viewport and scroll properly.
+  if (!rec_spacer.parentNode) els.grid.appendChild(rec_spacer);
+  rec_spacer.style.left = `${maxRight + CANVAS_PAD}px`;
+  rec_spacer.style.top = `${maxBottom + CANVAS_PAD}px`;
+}
+
+
+function clearFreeLayout() {
+  if (rec_spacer.parentNode) rec_spacer.remove();
+  panes.forEach((rec) => {
+    for (const property of ['left', 'top', 'width']) rec.cell.style.removeProperty(property);
+    if (els.rowH.value !== 'fitcontent') rec.cell.style.removeProperty('height');
+  });
+}
+
+// The ONLY automatic rearrangement in free mode, and it happens because the operator
+// asked for it. Tidies panes into a grid in the current display order.
+function sortPanes() {
+  if (!panes.size) return;
+  if (els.layout.value !== 'free') {
+    // In a grid mode the browser already arranges them; drop any stale free-mode
+    // rectangles so switching to free later starts from a tidy state.
+    savePlacements({});
+    relayout();
+    setStatusNote('sorted — grid modes arrange themselves');
+    return;
+  }
+  const names = [...panes.keys()];
+  const map = {};
+  names.forEach((name, index) => { map[name] = defaultPlacement(index); });
+  savePlacements(map);
+  applyFreeLayout();
+  requestAnimationFrame(() => panes.forEach((rec) => applyFit(rec)));
+  setStatusNote(`sorted ${names.length} pane${names.length === 1 ? '' : 's'}`);
+}
+
+function setStatusNote(text) {
+  els.copyNote.textContent = text;
+  setTimeout(() => {
+    if (els.copyNote.textContent === text) els.copyNote.textContent = '';
+  }, 2600);
+}
+
+// Drag to move (by the header) and the grip to size. Pointer events, so mouse, pen and
+// touch all work, and setPointerCapture keeps the gesture alive outside the element.
+function makeDraggable(rec, name) {
+  const start = { x: 0, y: 0, box: null, mode: null };
+
+  const begin = (event, mode) => {
+    if (!freeMode() || event.button !== 0) return;
+    // A click on a header button is not a drag.
+    if (mode === 'move' && event.target.closest('.cbtn, a')) return;
+    const box = placementOf(name) || {
+      x: rec.cell.offsetLeft, y: rec.cell.offsetTop,
+      w: rec.cell.offsetWidth, h: rec.cell.offsetHeight };
+    start.x = event.clientX; start.y = event.clientY;
+    start.box = box; start.mode = mode;
+    rec.cell.classList.add('dragging');
+    event.preventDefault();
+    event.target.setPointerCapture(event.pointerId);
+  };
+
+  const move = (event) => {
+    if (!start.mode) return;
+    const dx = event.clientX - start.x, dy = event.clientY - start.y;
+    const box = start.mode === 'move'
+      ? { x: Math.max(0, start.box.x + dx), y: Math.max(0, start.box.y + dy),
+          w: start.box.w, h: start.box.h }
+      : { x: start.box.x, y: start.box.y,
+          w: Math.max(MIN_PANE_W, start.box.w + dx),
+          h: Math.max(MIN_PANE_H, start.box.h + dy) };
+    rec.cell.style.left = `${box.x}px`;
+    rec.cell.style.top = `${box.y}px`;
+    rec.cell.style.width = `${box.w}px`;
+    rec.cell.style.height = `${box.h}px`;
+    start.live = box;
+  };
+
+  const end = () => {
+    if (!start.mode) return;
+    const box = start.live || start.box;
+    start.mode = null; start.live = null;
+    rec.cell.classList.remove('dragging');
+    setPlacement(name, box);
+    applyFreeLayout();                  // re-grow the canvas around the new position
+    requestAnimationFrame(() => applyFit(rec));   // a resized pane re-fits its text
+  };
+
+  rec.headEl.addEventListener('pointerdown', (e) => begin(e, 'move'));
+  rec.grip.addEventListener('pointerdown', (e) => begin(e, 'size'));
+  for (const target of [rec.headEl, rec.grip]) {
+    target.addEventListener('pointermove', move);
+    target.addEventListener('pointerup', end);
+    target.addEventListener('pointercancel', end);
+  }
+}
+
+function relayout() {
+  // In focus mode a single cell owns the grid.
+  if (focused !== null && panes.has(focused)) {
+    els.grid.classList.remove('free');
+    clearFreeLayout();
+    els.grid.style.setProperty('--cols', '1');
+    requestAnimationFrame(() => panes.forEach((rec) => applyFit(rec)));
+    return;
+  }
+
+  if (freeMode()) {
+    // Positions are the operator's. Apply what is stored and re-fit the text; do not
+    // compute a column count and do not move anything.
+    els.grid.classList.add('free');
+    applyFreeLayout();
+    requestAnimationFrame(() => panes.forEach((rec) => applyFit(rec)));
+    return;
+  }
+
+  els.grid.classList.remove('free');
+  clearFreeLayout();
+  const n = panes.size;
+  const mode = els.layout.value;
+  const cols = mode === 'auto' ? autoCols(n)
+                               : Math.max(1, Math.min(12, parseInt(mode, 10) || 1));
+  els.grid.style.setProperty('--cols', String(cols));
+  requestAnimationFrame(() => panes.forEach((rec) => applyFit(rec)));
+}
+
+function syncAgents(agents) {
+  const list = agents.slice();
+  const seen = new Set();
+
+  list.sort((a, b) => {
+    const as = a.state === 'stale' ? 1 : 0, bs = b.state === 'stale' ? 1 : 0;
+    if (as !== bs) return as - bs;
+    return String(a.name || '').localeCompare(String(b.name || ''));
+  });
+
+  let structureChanged = false;
+
+  for (const agent of list) {
+    const name = String(agent.name || '');
+    if (!name) continue;
+    seen.add(name);
+    const live = stateClass(agent.state) !== 'stale';
+
+    let rec = panes.get(name);
+    if (!rec) {
+      rec = buildCell(agent);
+      panes.set(name, rec);
+      els.grid.appendChild(rec.cell);
+      structureChanged = true;
+      // #3 FIX: only stream for a live agent. A stale one has no log to follow,
+      // so opening would 404 and retry forever.
+      if (live) openStream(rec, name);
+      else setStatus(rec, 'stale — no live session', 'eof');
+    } else if (live && !rec.source && !rec.retryTimer && !rec.userClosed) {
+      // #1 + #3 FIX: agent is live but we have no stream — either it just came
+      // back from stale, or the server sent a premature eof. Reconnect.
+      openStream(rec, name);
+    } else if (!live && rec.source) {
+      closeStream(rec);
+      setStatus(rec, 'stale — no live session', 'eof');
+    }
+    // The pane was resized — by `sync pane size`, or because someone attached with a
+    // different client. Follow it, and then RE-SNAPSHOT.
+    //
+    // Resizing alone is what produced the gapped, fragmented output: xterm reflows the
+    // buffer it already holds, so text that tmux had wrapped at 200 columns gets
+    // re-wrapped at 98, splitting lines and leaving orphaned tails ("ng to read",
+    // "ine 08"). Those bytes cannot be re-wrapped correctly by anyone — the original
+    // line breaks are gone.
+    //
+    // tmux's own screen is the authority, so throw the stale buffer away and ask the
+    // backend for a fresh capture-pane at the new size. Debounced, because a drag with
+    // sync enabled emits a burst of sizes and each re-snapshot is a stream restart.
+    if (Number.isFinite(agent.cols) && Number.isFinite(agent.rows) &&
+        agent.cols > 0 && agent.rows > 0 &&
+        (agent.cols !== rec.cols || agent.rows !== rec.rows)) {
+      try {
+        rec.term.resize(agent.cols, agent.rows);
+        rec.cols = agent.cols; rec.rows = agent.rows;
+        // Metrics are per-1px-of-font ratios and a resize does not change the font, so
+        // they stay valid. (Re-measuring here is what made the old estimate creep
+        // 182 -> 180 -> 178 every round.)
+        requestAnimationFrame(() => applyFit(rec));
+
+        if (rec.reflowTimer) clearTimeout(rec.reflowTimer);
+        rec.reflowTimer = setTimeout(() => {
+          rec.reflowTimer = null;
+          if (rec.disposed || rec.userClosed || !panes.has(name)) return;
+          setStatus(rec, 'geometry changed — re-snapshotting', '');
+          openStream(rec, name);      // reset() + a fresh capture-pane of the real screen
+        }, 450);
+      } catch (_) {}
+    }
+    updateCellHead(rec, agent);
+  }
+
+  for (const name of Array.from(panes.keys())) {
+    if (!seen.has(name)) { destroyPane(name); structureChanged = true; }
+  }
+
+  list.forEach((a) => {
+    const rec = panes.get(String(a.name || ''));
+    if (rec) els.grid.appendChild(rec.cell);
+  });
+
+  const none = panes.size === 0;
+  els.empty.hidden = !none;
+  els.grid.hidden = none;
+  els.count.textContent = none ? '' : `${panes.size} agent${panes.size === 1 ? '' : 's'}`;
+
+  if (focused !== null && !panes.has(focused)) focused = null;
+  if (structureChanged) { relayout(); applyFocus(); }
+}
+
+// -------------------------------------------------------------------- poll ---
+
+const showBanner = (m) => { els.banner.textContent = m; els.banner.hidden = false; };
+const clearBanner = () => { els.banner.hidden = true; els.banner.textContent = ''; };
+
+async function tick() {
+  try {
+    const res = await fetch('api/agents', { cache: 'no-store' });
+    if (!res.ok) throw new Error(`backend returned HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data || typeof data !== 'object') throw new Error('malformed response');
+
+    // #6 FIX: a 200 carrying a bad payload must NOT be read as "zero agents",
+    // which would destroy every terminal and its scrollback. Treat it as a
+    // failed poll and leave the existing panes alone.
+    if (!Array.isArray(data.agents)) throw new Error('response had no agents array');
+
+    syncAgents(data.agents);
+
+    const up = data.tmux_server === true;
+    els.tmux.textContent = up ? 'tmux up' : 'tmux down';
+    els.tmux.className = `pill ${up ? 'up' : ''}`.trim();
+
+    const when = data.generated_at ? new Date(data.generated_at) : null;
+    els.stamp.textContent = (when && !Number.isNaN(when.getTime()))
+      ? `updated ${when.toLocaleTimeString()}` : 'updated';
+    consecutiveFailures = 0;
+    clearBanner();
+  } catch (err) {
+    consecutiveFailures += 1;
+    els.stamp.textContent = `stale — ${consecutiveFailures} failed poll${consecutiveFailures === 1 ? '' : 's'}`;
+    if (consecutiveFailures >= 2) {
+      showBanner(`Cannot reach the backend (${err.message}). Is server.py still running on 127.0.0.1:8787?`);
+    }
+  }
+}
+
+// ---------------------------------------------------------------- resources ---
+//
+// Everything here is built with createElement/textContent. Resource names,
+// check details and command strings all originate from resources.json and from
+// CLI stdout, so none of it may be interpolated as HTML.
+//
+// Commands are DISPLAYED, never executed, and the backend never accepts a
+// secret. Anything credentialed is tagged so it is obvious it must be run in a
+// real terminal.
+
+let resourcesLoaded = false;
+let resourcesTimer = null;
+
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+
+function renderResources(data) {
+  els.resList.replaceChildren();
+  const list = Array.isArray(data && data.resources) ? data.resources : [];
+
+  if (data && data.error) {
+    els.resList.appendChild(el('p', 'empty', data.error));
+    return;
+  }
+  if (!list.length) {
+    els.resList.appendChild(el('p', 'empty', 'No resources declared in resources.json.'));
+    return;
+  }
+
+  for (const r of list) {
+    const state = ['ok', 'partial', 'missing'].includes(r.state) ? r.state : 'missing';
+    const card = el('article', `res ${state}`);
+
+    const title = el('div', 'res-title');
+    title.appendChild(el('h3', null, r.name || r.id || '?'));
+    if (r.kind) title.appendChild(el('span', 'res-kind', r.kind));
+    title.appendChild(el('span', `res-state ${state}`, state));
+    card.appendChild(title);
+
+    if (r.summary) card.appendChild(el('p', 'res-summary', r.summary));
+
+    if (Array.isArray(r.checks) && r.checks.length) {
+      const ul = el('ul', 'res-checks');
+      for (const c of r.checks) {
+        const li = el('li');
+        const mark = c.ok ? 'ok' : (c.optional ? 'opt' : 'bad');
+        li.appendChild(el('span', `chk ${mark}`, c.ok ? '✓' : (c.optional ? '–' : '✗')));
+        li.appendChild(el('span', 'chk-label', c.label || c.id || ''));
+        if (c.detail) {
+          const d = el('span', 'chk-detail', c.detail);
+          d.title = c.detail;              // title is text, not parsed
+          li.appendChild(d);
+        }
+        ul.appendChild(li);
+      }
+      card.appendChild(ul);
+    }
+
+    if (Array.isArray(r.actions) && r.actions.length) {
+      const wrap = el('div', 'res-actions');
+      for (const a of r.actions) {
+        if (!a.command) continue;
+        const row = el('div', `act${a.secret ? ' secret' : ''}`);
+        row.appendChild(el('span', 'act-label', a.label || a.id || ''));
+        const cmd = el('code', 'act-cmd', a.command);
+        cmd.title = a.note ? `${a.command}
+
+${a.note}` : a.command;
+        row.appendChild(cmd);
+        if (a.secret) {
+          const tag = el('span', 'act-secret-tag', 'your terminal');
+          tag.title = 'Handles a credential. Run it yourself - this page never accepts secrets.';
+          row.appendChild(tag);
+        }
+        const copy = el('button', 'btn', 'copy');
+        copy.title = 'Copy this command';
+        copy.addEventListener('click', async () => {
+          try { await navigator.clipboard.writeText(a.command); copy.textContent = 'copied'; }
+          catch (_) { copy.textContent = 'select it'; }
+          setTimeout(() => { copy.textContent = 'copy'; }, 1500);
+        });
+        row.appendChild(copy);
+        wrap.appendChild(row);
+      }
+      if (wrap.childElementCount) card.appendChild(wrap);
+    }
+
+    if (Array.isArray(r.notes) && r.notes.length) {
+      const ul = el('ul', 'res-notes');
+      for (const n of r.notes) ul.appendChild(el('li', null, n));
+      card.appendChild(ul);
+    }
+
+    if (r.docs && /^https:\/\//.test(r.docs)) {
+      const p = el('p', 'res-docs');
+      const a = el('a', null, 'documentation');
+      a.href = r.docs; a.target = '_blank'; a.rel = 'noopener noreferrer';
+      p.appendChild(a);
+      card.appendChild(p);
+    }
+
+    els.resList.appendChild(card);
+  }
+}
+
+async function loadResources(force) {
+  els.resStamp.textContent = force ? 're-running probes…' : 'loading resources…';
+  els.resRefresh.disabled = true;
+  try {
+    const res = await fetch(`api/resources${force ? '?refresh=1' : ''}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    renderResources(data);
+    const when = data.generated_at ? new Date(data.generated_at) : null;
+    els.resStamp.textContent = (when && !Number.isNaN(when.getTime()))
+      ? `probed ${when.toLocaleTimeString()}` : 'probed';
+    resourcesLoaded = true;
+  } catch (err) {
+    els.resStamp.textContent = `could not load resources: ${err.message}`;
+  } finally {
+    els.resRefresh.disabled = false;
+  }
+}
+
+const VIEW_KEY = 'ccc.view';
+
+// What each view needs loaded, and how often to refresh it while visible. A table
+// rather than a switch, so a new view is one entry.
+const VIEW_LOADERS = {
+  settings: () => { loadAuth(); if (!resourcesLoaded) loadResources(false); },
+  queue:    loadQueue,
+  board:    loadBoard,
+  journal:  loadJournal,
+  tickets:  loadTickets,
+  iiot:     loadIiot,
+};
+const VIEW_POLL_MS = { queue: 5000, settings: 20000 };
+
+let viewTimer = null;
+let currentView = 'terminals';
+
+function showView(which) {
+  if (!els.views[which]) which = 'terminals';
+  const wasTerm = currentView === 'terminals';
+  currentView = which;
+  const onTerm = which === 'terminals';
+
+  for (const [id, node] of Object.entries(els.views)) {
+    if (node) node.hidden = id !== which;
+  }
+  for (const btn of els.navItems) {
+    const on = btn.dataset.view === which;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-selected', String(on));
+  }
+
+  // The ribbon configures terminals (layout, font, spawn command); it is noise
+  // everywhere else. Remember the operator's own collapse choice so switching
+  // views does not silently un-collapse it.
+  if (onTerm) {
+    els.rToggle.disabled = false;
+    if (els.ribbonWasOpen !== false) setRibbon(true);
+  } else {
+    if (wasTerm) els.ribbonWasOpen = !els.ribbon.hidden;
+    els.ribbon.hidden = true;
+    els.rToggle.disabled = true;
+  }
+
+  // Probes and polls spawn work, so only run them for the visible view.
+  if (viewTimer) { clearInterval(viewTimer); viewTimer = null; }
+  if (resourcesTimer && which !== 'settings') { clearInterval(resourcesTimer); resourcesTimer = null; }
+
+  if (onTerm) {
+    // Terminals were hidden, so their geometry is stale.
+    requestAnimationFrame(() => { relayout(); panes.forEach((rec) => applyFit(rec)); });
+  } else {
+    const load = VIEW_LOADERS[which];
+    if (load) load();
+    const every = VIEW_POLL_MS[which];
+    if (every) {
+      if (which === 'settings') resourcesTimer = setInterval(() => loadResources(false), every);
+      else viewTimer = setInterval(load, every);
+    }
+  }
+
+  try { localStorage.setItem(VIEW_KEY, which); } catch (_) {}
+}
+
+for (const btn of els.navItems) {
+  btn.addEventListener('click', () => showView(btn.dataset.view));
+}
+
+// ═════════════════════════════════════════════════════════════════ themes ═════
+//
+// Themes are data (themes.json). Applying one writes its tokens onto
+// documentElement.style, so there is no stylesheet swap and no flash. A theme
+// must declare the full token set: a half-defined theme that silently inherits
+// is harder to debug than one that fails visibly, so missing tokens are named.
+
+const THEME_KEY = 'ccc.theme';
+
+// A token value must be a COLOUR, and only a colour.
+//
+// The first version of this allowed any of [#a-z0-9(), .%/-], reasoning that
+// excluding ':' excluded URLs. It does not: `url(//example.com/pixel.png)` is
+// protocol-relative, matches that class, and makes the browser fetch it the moment
+// the token lands on a `background` property. themes.json is local data rather than
+// request data, but the filter is the thing that is supposed to make it safe.
+//
+// So: an explicit shape per accepted colour form, and nothing else.
+const COLOUR = new RegExp([
+  '^#[0-9a-f]{3,8}$',                                      // #rgb .. #rrggbbaa
+  '^(rgb|hsl)a?\\(\\s*[0-9a-f%.,\\s/-]+\\)$',              // rgb()/rgba()/hsl()/hsla()
+  '^(color-mix|oklch|oklab|lab|lch)\\(\\s*[a-z0-9%.,\\s/()-]+\\)$',
+  '^[a-z]{3,20}$',                                         // named colours, transparent
+].join('|'), 'i');
+
+function safeColour(value) {
+  const text = String(value).trim();
+  // Belt and braces: even if a form above ever admitted it, no fetching functions.
+  if (/url\(|image\(|image-set\(|element\(|\/\/|@import|expression/i.test(text)) return null;
+  return COLOUR.test(text) ? text : null;
+}
+
+let themeData = null;
+
+function applyTheme(id) {
+  if (!themeData) return;
+  const theme = themeData.themes.find((t) => t.id === id) || themeData.themes[0];
+  if (!theme) return;
+
+  // A theme may only set tokens themes.json DECLARES. Otherwise a theme could set
+  // --title-h or --nav-w and resize the chrome, which is layout, not theming.
+  const declared = new Set(themeData.tokens || []);
+  const rejected = [];
+  for (const [token, value] of Object.entries(theme.tokens || {})) {
+    const colour = declared.has(token) ? safeColour(value) : null;
+    if (colour) {
+      document.documentElement.style.setProperty(token, colour);
+    } else {
+      rejected.push(token);
+    }
+  }
+  document.documentElement.style.colorScheme = theme.dark ? 'dark' : 'light';
+
+  const missing = (themeData.tokens || []).filter((t) => !(t in (theme.tokens || {})));
+  els.themeSelect.value = theme.id;
+  const problems = [
+    missing.length ? `missing ${missing.join(', ')}` : '',
+    rejected.length ? `rejected ${rejected.join(', ')}` : '',
+  ].filter(Boolean);
+  els.themeNote.textContent = problems.length
+    ? `incomplete theme - ${problems.join('; ')}`
+    : (theme.note || '');
+  els.themeNote.classList.toggle('warn', problems.length > 0);
+
+  renderSwatches(theme);
+  // Terminals carry their own colour table, so retheme the live ones too.
+  const t = xtermTheme();
+  panes.forEach((rec) => { try { rec.term.options.theme = t; } catch (_) {} });
+
+  try { localStorage.setItem(THEME_KEY, theme.id); } catch (_) {}
+}
+
+function renderSwatches(active) {
+  els.swatches.replaceChildren();
+  for (const t of themeData.themes) {
+    const wrap = el('button', 'swatch-wrap');
+    wrap.type = 'button';
+    wrap.title = `${t.name || t.id}${t.note ? ' - ' + t.note : ''}`;
+    const sw = el('div', 'swatch');
+    for (const token of ['--bg', '--panel', '--accent', '--safe', '--danger']) {
+      const chip = document.createElement('i');
+      // Same filter as applyTheme. A swatch assigns straight to a `background`
+      // property, so skipping validation here would reopen the hole regardless of
+      // how careful applyTheme is.
+      chip.style.background = safeColour((t.tokens || {})[token]) || 'transparent';
+      sw.appendChild(chip);
+    }
+    if (t.id === active.id) {
+      sw.style.outline = `1px solid ${safeColour((t.tokens || {})['--accent']) || '#fff'}`;
+    }
+    wrap.appendChild(sw);
+    wrap.appendChild(el('span', 'swatch-name', t.id));
+    wrap.addEventListener('click', () => applyTheme(t.id));
+    els.swatches.appendChild(wrap);
+  }
+}
+
+async function loadThemes() {
+  try {
+    themeData = await getJSON('themes.json');
+    if (!themeData || !Array.isArray(themeData.themes) || !themeData.themes.length) {
+      throw new Error('no themes declared');
+    }
+    els.themeSelect.replaceChildren();
+    for (const t of themeData.themes) {
+      const o = document.createElement('option');
+      o.value = t.id;
+      o.textContent = t.name || t.id;
+      els.themeSelect.appendChild(o);
+    }
+    let want = themeData.default;
+    try { want = localStorage.getItem(THEME_KEY) || want; } catch (_) {}
+    applyTheme(want);
+    els.themeSelect.addEventListener('change', () => applyTheme(els.themeSelect.value));
+  } catch (err) {
+    // The CSS :root block is the cc-dark fallback, so a failure here degrades to
+    // the right palette rather than to an unstyled page.
+    els.themeNote.textContent = `themes.json failed to load (${err.message}); using the built-in default`;
+    els.themeNote.classList.add('warn');
+  }
+}
+
+// ════════════════════════════════════════════════════════════ data helpers ════
+
+async function getJSON(path) {
+  const res = await fetch(path, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+// Every mutating call repeats the /api/resize contract: POST, an explicit JSON
+// content type (which forces a CORS preflight cross-origin), and nothing secret
+// in the body - secrets are still terminal-only.
+async function post(path, body) {
+  const res = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  let payload = {};
+  try { payload = await res.json(); } catch (_) {}
+  if (!res.ok) throw new Error(payload.error || `HTTP ${res.status}`);
+  return payload;
+}
+
+function clock(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? String(iso).slice(0, 19) : d.toLocaleTimeString();
+}
+
+function say(node, msg) { node.textContent = msg; }
+
+// ═══════════════════════════════════════════════════════════ message queue ════
+
+const MSG_KINDS = new Set(['plan', 'request', 'reply', 'status', 'finding', 'error']);
+
+async function loadQueue() {
+  try {
+    const data = await getJSON('api/messages?limit=300');
+    const all = Array.isArray(data.messages) ? data.messages : [];
+    const want = els.queueKind.value;
+    const rows = want ? all.filter((m) => m.kind === want) : all;
+
+    // Pin the orchestrator's latest plan: it is the thing you most often want on
+    // screen while reading the traffic underneath it.
+    const plan = [...all].reverse().find((m) => m.kind === 'plan');
+    els.planPin.replaceChildren();
+    els.planPin.hidden = !plan;
+    if (plan) {
+      els.planPin.appendChild(el('h4', null, `${plan.sender || 'orchestrator'} plan - ${clock(plan.at)}`));
+      els.planPin.appendChild(el('pre', null, String(plan.body || '')));
+    }
+
+    els.queueList.replaceChildren();
+    if (!rows.length) {
+      els.queueList.appendChild(el('p', 'empty',
+        'No messages. Agents append JSON lines to ~/.agentmux/queue/<agent>.jsonl'));
+    }
+    for (const m of rows) {
+      const kind = String(m.kind || 'status');
+      const row = el('div', MSG_KINDS.has(kind) ? `msg ${kind}` : 'msg');
+      row.appendChild(el('span', 'msg-at', clock(m.at)));
+      const who = el('span', 'msg-who', String(m.sender || '?'));
+      if (m.recipient) who.appendChild(el('span', 'to', ` \u2192 ${m.recipient}`));
+      row.appendChild(who);
+      row.appendChild(el('span', 'msg-kind', kind));
+      row.appendChild(el('span', 'msg-body', String(m.body || '')));
+      els.queueList.appendChild(row);
+    }
+
+    say(els.queueStamp, `${rows.length} message${rows.length === 1 ? '' : 's'}`);
+    if (els.queueFollow.checked && els.queueList.lastElementChild) {
+      els.queueList.lastElementChild.scrollIntoView({ block: 'nearest' });
+    }
+    // Reading the queue is what marks it read.
+    if (all.length) markQueueSeen(all[all.length - 1].at);
+  } catch (err) {
+    say(els.queueStamp, `queue unavailable: ${err.message}`);
+  }
+}
+
+// The badge exists to say "agents are talking" while you are looking at something
+// else, so it cannot be driven by loadQueue() - that only runs when the queue is
+// open. /api/messages?since= filters strictly after the timestamp, so the unseen
+// count is just the length of that response.
+const SEEN_KEY = 'ccc.queueSeenAt';
+let queueSeenAt = null;
+try { queueSeenAt = localStorage.getItem(SEEN_KEY); } catch (_) {}
+
+function markQueueSeen(newest) {
+  if (!newest || newest === queueSeenAt) return;
+  queueSeenAt = newest;
+  try { localStorage.setItem(SEEN_KEY, newest); } catch (_) {}
+  els.badgeQueue.hidden = true;
+  els.badgeQueue.textContent = '';
+}
+
+async function refreshQueueBadge() {
+  if (currentView === 'queue') return;   // loadQueue owns the badge while visible
+  try {
+    const since = queueSeenAt ? `since=${encodeURIComponent(queueSeenAt)}&` : '';
+    const data = await getJSON(`api/messages?${since}limit=1000`);
+    const n = Array.isArray(data.messages) ? data.messages.length : 0;
+    els.badgeQueue.hidden = n === 0;
+    els.badgeQueue.textContent = n > 99 ? '99+' : String(n);
+  } catch (_) {
+    // The queue is not load-bearing for the terminals; fail quiet rather than
+    // putting an error in the chrome of every other view.
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════ board ══════
+
+// These MUST match EPIC_STATUSES / TASK_STATUSES in ccstore.py - the backend
+// rejects anything else, and the vocabularies differ between the two tables (epics
+// archive, tasks cancel). smoke.sh asserts every value here is accepted, so drift
+// shows up as a test failure rather than a dead control.
+const EPIC_STATUSES = ['open', 'in_progress', 'blocked', 'done', 'archived'];
+const TASK_STATUSES = ['todo', 'in_progress', 'blocked', 'done', 'cancelled'];
+
+const STATUS_CLASS = /^[a-z_]+$/;   // in_progress has an underscore
+
+// A select, not a click-to-advance chip. The first version cycled forward, which
+// meant `blocked` and `cancelled` could be left but never entered - so the one
+// status you most need to set during a bad run was the one you could not reach.
+function statusSelect(kind, id, status, options, after, stamp) {
+  const st = String(status || '');
+  const select = document.createElement('select');
+  select.className = `status-chip ${STATUS_CLASS.test(st) ? st : ''}`;
+  select.title = `${kind} status`;
+  for (const value of options) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = value.replace('_', ' ');
+    option.selected = value === st;
+    select.appendChild(option);
+  }
+  select.addEventListener('change', async () => {
+    const wanted = select.value;
+    select.disabled = true;
+    try { await post('api/status', { kind, id, status: wanted }); await after(); }
+    catch (err) {
+      say(stamp, err.message);
+      select.value = st;          // put it back: the change did not happen
+      select.disabled = false;
+    }
+  });
+  return select;
+}
+
+// Deleting is irreversible and there is no undo, so it always confirms. The journal
+// has no delete at all - an append-only log you can quietly edit is not a log.
+function deleteButton(kind, id, label, after, stamp) {
+  const btn = el('button', 'cbtn del', '×');
+  btn.type = 'button';
+  btn.title = `delete ${kind} “${label}”`;
+  btn.setAttribute('aria-label', `delete ${kind} ${label}`);
+  btn.addEventListener('click', async () => {
+    const extra = kind === 'epic' ? '\n\nIts tasks are deleted with it.' : '';
+    if (!window.confirm(`Delete ${kind} “${label}”?${extra}\n\nThis cannot be undone.`)) return;
+    btn.disabled = true;
+    try { await post('api/delete', { kind, id }); await after(); }
+    catch (err) { say(stamp, err.message); btn.disabled = false; }
+  });
+  return btn;
+}
+
+async function loadBoard() {
+  try {
+    const data = await getJSON('api/epics');
+    const epics = Array.isArray(data.epics) ? data.epics : [];
+    els.boardList.replaceChildren();
+    if (!epics.length) els.boardList.appendChild(el('p', 'empty', 'No epics yet. Add one above.'));
+
+    for (const e of epics) {
+      const card = el('article', 'epic');
+      const head = el('div', 'epic-head');
+      head.appendChild(el('span', 'epic-title', String(e.title || '(untitled)')));
+      head.appendChild(statusSelect('epic', e.id, e.status, EPIC_STATUSES,
+                                    loadBoard, els.boardStamp));
+      if (e.jira_key) head.appendChild(el('span', 'epic-meta', String(e.jira_key)));
+      const tasks = Array.isArray(e.tasks) ? e.tasks : [];
+      const done = tasks.filter((t) => t.status === 'done').length;
+      if (tasks.length) head.appendChild(el('span', 'epic-meta', `${done}/${tasks.length}`));
+      head.appendChild(el('span', 'spacer'));
+      head.appendChild(deleteButton('epic', e.id, String(e.title || ''),
+                                    loadBoard, els.boardStamp));
+      card.appendChild(head);
+
+      const rows = el('div', 'task-rows');
+      for (const t of tasks) {
+        const r = el('div', 'task-row');
+        r.appendChild(statusSelect('task', t.id, t.status, TASK_STATUSES,
+                                   loadBoard, els.boardStamp));
+        r.appendChild(el('span', 't-title', String(t.title || '')));
+        if (t.agent) r.appendChild(el('span', 't-agent', String(t.agent)));
+        r.appendChild(deleteButton('task', t.id, String(t.title || ''),
+                                   loadBoard, els.boardStamp));
+        rows.appendChild(r);
+      }
+      card.appendChild(rows);
+
+      const add = el('div', 'row');
+      const title = el('input', 'rin');
+      title.placeholder = 'new task';
+      title.size = 16;
+      const agent = el('input', 'rin');
+      agent.placeholder = 'agent';
+      agent.size = 7;
+      const btn = el('button', 'btn', 'add task');
+      btn.type = 'button';
+      const submit = async () => {
+        if (!title.value.trim()) return;
+        btn.disabled = true;
+        try {
+          await post('api/tasks', {
+            epic_id: e.id, title: title.value.trim(), agent: agent.value.trim() || null,
+          });
+          await loadBoard();
+        } catch (err) { say(els.boardStamp, err.message); btn.disabled = false; }
+      };
+      btn.addEventListener('click', submit);
+      title.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') submit(); });
+      add.append(title, agent, btn);
+      card.appendChild(add);
+
+      els.boardList.appendChild(card);
+    }
+    say(els.boardStamp, `${epics.length} epic${epics.length === 1 ? '' : 's'}`);
+  } catch (err) {
+    say(els.boardStamp, `board unavailable: ${err.message}`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════ journal ══════
+
+const JOURNAL_KINDS = new Set(['note', 'decision', 'incident', 'change']);
+
+async function loadJournal() {
+  try {
+    const data = await getJSON('api/journal?limit=200');
+    const rows = Array.isArray(data.journal) ? data.journal : [];
+    els.journalList.replaceChildren();
+    if (!rows.length) els.journalList.appendChild(el('p', 'empty', 'Journal is empty.'));
+    for (const j of rows) {
+      const kind = String(j.kind || 'note');
+      const box = el('article', JOURNAL_KINDS.has(kind) ? `jentry ${kind}` : 'jentry');
+      const head = el('div', 'jentry-head');
+      head.appendChild(el('span', 'jentry-subject', String(j.subject || '(no subject)')));
+      head.appendChild(el('span', 'status-chip', kind));
+      head.appendChild(el('span', 'epic-meta', clock(j.at)));
+      if (j.agent) head.appendChild(el('span', 'epic-meta', String(j.agent)));
+      box.appendChild(head);
+      if (j.body) box.appendChild(el('p', 'jentry-body', String(j.body)));
+      els.journalList.appendChild(box);
+    }
+    say(els.journalStamp, `${rows.length} entr${rows.length === 1 ? 'y' : 'ies'}`);
+  } catch (err) {
+    say(els.journalStamp, `journal unavailable: ${err.message}`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════ tickets ══════
+
+const ISSUE_RE = /^[A-Z][A-Z0-9_]+-[0-9]+$/;
+const JIRA_BASE_RE = /^https:\/\/[A-Za-z0-9.-]+$/;
+
+// The issue key and base URL are both validated before either becomes part of an
+// href, so a crafted key cannot produce a javascript: URL.
+function issueLink(key, base) {
+  if (JIRA_BASE_RE.test(base) && ISSUE_RE.test(key)) {
+    const a = el('a', 't-key', key);
+    a.href = `${base}/browse/${encodeURIComponent(key)}`;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    return a;
+  }
+  return el('span', 't-key', key);
+}
+
+// Commenting and transitioning write to Jira, which is outside this machine and not
+// undoable from here, so both confirm first.
+function ticketActions(issue, base) {
+  const bar = el('div', 'ticket-actions');
+
+  const transitions = el('select', 'rin');
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = 'transition…';
+  transitions.appendChild(placeholder);
+  let loaded = false;
+  // Fetched on demand: one Jira call per issue up front would burn the hourly
+  // rate limit on a list nobody has clicked yet.
+  transitions.addEventListener('mousedown', async () => {
+    if (loaded) return;
+    loaded = true;
+    try {
+      const data = await getJSON(`api/tickets/transitions?key=${encodeURIComponent(issue.key)}`);
+      for (const t of (data.transitions || [])) {
+        const option = document.createElement('option');
+        option.value = t.id;
+        option.textContent = t.name;
+        transitions.appendChild(option);
+      }
+      if (!(data.transitions || []).length) placeholder.textContent = 'no transitions';
+    } catch (err) {
+      loaded = false;
+      placeholder.textContent = 'could not load';
+      say(els.ticketStamp, err.message);
+    }
+  });
+  transitions.addEventListener('change', async () => {
+    const id = transitions.value;
+    if (!id) return;
+    const name = transitions.options[transitions.selectedIndex].textContent;
+    if (!window.confirm(`Apply “${name}” to ${issue.key} in Jira?\n\nThis changes the real issue.`)) {
+      transitions.value = '';
+      return;
+    }
+    transitions.disabled = true;
+    try {
+      const out = await post('api/tickets/transition', { key: issue.key, transition_id: id });
+      say(els.ticketStamp, out.detail || 'done');
+      await loadTickets(true);
+    } catch (err) {
+      say(els.ticketStamp, err.message);
+      transitions.value = '';
+      transitions.disabled = false;
+    }
+  });
+  bar.appendChild(transitions);
+
+  const text = el('input', 'rin');
+  text.placeholder = 'comment…';
+  text.size = 30;
+  const send = el('button', 'btn', 'comment');
+  send.type = 'button';
+  const submit = async () => {
+    const value = text.value.trim();
+    if (!value) return;
+    if (!window.confirm(`Post this comment to ${issue.key} in Jira?\n\n${value}`)) return;
+    send.disabled = true;
+    try {
+      const out = await post('api/tickets/comment', { key: issue.key, text: value });
+      say(els.ticketStamp, out.detail || 'commented');
+      text.value = '';
+    } catch (err) { say(els.ticketStamp, err.message); }
+    send.disabled = false;
+  };
+  send.addEventListener('click', submit);
+  text.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') submit(); });
+  bar.append(text, send);
+  return bar;
+}
+
+async function loadTickets(force) {
+  els.ticketList.replaceChildren();
+  try {
+    const data = await getJSON(`api/tickets${force ? '?refresh=1' : ''}`);
+
+    // Atlassian is optional. When it is not set up, say what is missing and show
+    // the commands - an empty list would read as "no tickets", which is a lie.
+    if (!data.configured) {
+      const box = el('div', 'notice');
+      box.appendChild(el('p', null,
+        `Jira is not configured, so there are no tickets to review. ${data.reason || ''}`));
+      els.ticketList.appendChild(box);
+      const actions = el('div', 'res-actions');
+      for (const a of (data.setup || [])) {
+        const act = el('div', `act${a.secret ? ' secret' : ''}`);
+        act.appendChild(el('span', 'act-label', a.label));
+        act.appendChild(el('code', 'act-cmd', a.command));
+        if (a.secret) act.appendChild(el('span', 'act-secret-tag', 'your terminal'));
+        actions.appendChild(act);
+      }
+      els.ticketList.appendChild(actions);
+      say(els.ticketStamp, 'not configured');
+      return;
+    }
+    if (data.error) {
+      const box = el('div', 'notice');
+      box.appendChild(el('p', null, `${data.error}. ${data.detail || ''}`));
+      els.ticketList.appendChild(box);
+      say(els.ticketStamp, data.error);
+      return;
+    }
+
+    // Prefer the base URL Jira itself reported; fall back to the ribbon field.
+    const base = (data.base_url || els.jiraBase.value || '').trim().replace(/\/+$/, '');
+    const issues = data.issues || [];
+    if (!issues.length) {
+      els.ticketList.appendChild(el('p', 'empty',
+        `No issues returned${data.project ? ` for project ${data.project}` : ''}.`));
+    }
+    // Which local epics reference a Jira key, so the board and Jira can be seen
+    // together rather than in two places.
+    let linked = new Set();
+    try {
+      const epics = await getJSON('api/epics');
+      linked = new Set((epics.epics || []).map((e) => e.jira_key).filter(Boolean));
+    } catch (_) { /* the local board is not essential to reviewing tickets */ }
+
+    for (const issue of issues) {
+      const row = el('div', 'ticket');
+      row.appendChild(issueLink(issue.key, base));
+      row.appendChild(el('span', 't-sum', issue.summary || ''));
+      if (issue.status) row.appendChild(el('span', 'status-chip', issue.status));
+      if (issue.assignee) row.appendChild(el('span', 't-agent', issue.assignee));
+      if (linked.has(issue.key)) row.appendChild(el('span', 'res-kind', 'on board'));
+      row.appendChild(ticketActions(issue, base));
+      els.ticketList.appendChild(row);
+    }
+    say(els.ticketStamp,
+        `${issues.length} issue${issues.length === 1 ? '' : 's'}`
+        + (data.project ? ` in ${data.project}` : ''));
+  } catch (err) {
+    say(els.ticketStamp, `tickets unavailable: ${err.message}`);
+  }
+}
+
+// ════════════════════════════════════════════════════════════ authentication ══
+//
+// This view configures WHICH auth method each CLI uses. It never accepts a
+// credential: entering one is a terminal action (taskmgmt/setup_auth.py, getpass),
+// shown here as a command with a "your terminal" tag. The page only ever sends
+// {id} to /api/auth/select.
+
+// Collapsed/expanded state, per provider and per method, so a long list stays
+// navigable and reopening Settings does not undo how you left it. <details> gives
+// keyboard support and correct semantics for free - no ARIA to get wrong.
+const OPEN_KEY = 'ccc.authOpen';
+
+// A MAP of key -> boolean, not a set of open keys. With a set there is no way to
+// distinguish "collapsed by the operator" from "never seen", so a newly added
+// provider would default closed and go unnoticed.
+function openState() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(OPEN_KEY) || '{}');
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch (_) { return {}; }
+}
+
+function rememberOpen(key, isOpen) {
+  const state = openState();
+  state[key] = isOpen;
+  try { localStorage.setItem(OPEN_KEY, JSON.stringify(state)); } catch (_) {}
+}
+
+// One <details> block. `startOpen` applies until the operator has toggled this
+// particular key; after that their choice wins.
+function collapsible(key, cls, startOpen) {
+  const box = el('details', cls);
+  const remembered = openState()[key];
+  box.open = typeof remembered === 'boolean' ? remembered : startOpen;
+  box.addEventListener('toggle', () => rememberOpen(key, box.open));
+  return box;
+}
+
+function stateChip(configured, missing) {
+  const chip = el('span', `res-state ${configured ? 'ok' : 'missing'}`,
+    configured ? 'ready' : 'needs setup');
+  if (!configured && missing.length) chip.title = `Missing: ${missing.join(', ')}`;
+  return chip;
+}
+
+// An editable non-secret setting, rendered as a text field. Secrets never appear
+// here — entering one stays a terminal action.
+function settingEditor(methodId, row, after) {
+  const wrap = el('div', 'act');
+  wrap.appendChild(el('span', 'act-label', row.label || row.key));
+
+  const field = document.createElement('input');
+  field.className = 'rin';
+  field.type = 'text';
+  field.size = 26;
+  field.value = row.value || '';
+  field.placeholder = row.example || row.key;
+
+  const save = el('button', 'btn', 'set');
+  save.type = 'button';
+  const commit = async () => {
+    const value = field.value.trim();
+    if (!value || value === row.value) return;
+    save.disabled = true;
+    try {
+      const out = await post('api/auth/setting',
+                             { method: methodId, key: row.key, value });
+      say(els.authStamp, `${methodId}.${row.key} = ${out.value} — ${out.note || ''}`);
+      await after();
+    } catch (err) {
+      say(els.authStamp, err.message);
+      field.value = row.value || '';
+      save.disabled = false;
+    }
+  };
+  save.addEventListener('click', commit);
+  field.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') commit(); });
+
+  wrap.append(field, save);
+  return wrap;
+}
+
+// Non-secret settings show their VALUE; secrets show presence only. Never a value,
+// never a length, never a prefix - a prefix is still a leak.
+function settingList(rows, secrets) {
+  const list = el('ul', 'res-checks');
+  for (const r of rows || []) {
+    const li = el('li');
+    li.appendChild(el('span', `chk ${r.set ? 'ok' : 'bad'}`, r.set ? '✓' : '✗'));
+    li.appendChild(el('span', 'chk-label', r.label || r.key));
+    li.appendChild(el('span', 'chk-detail',
+      r.set ? r.value : (r.example ? `not set — e.g. ${r.example}` : 'not set')));
+    list.appendChild(li);
+  }
+  for (const s of secrets || []) {
+    const li = el('li');
+    li.appendChild(el('span', `chk ${s.set ? 'ok' : 'bad'}`, s.set ? '✓' : '✗'));
+    li.appendChild(el('span', 'chk-label', s.name));
+    li.appendChild(el('span', 'chk-detail',
+      s.set ? 'set (value never read or shown)' : 'not set'));
+    list.appendChild(li);
+  }
+  return list.childElementCount ? list : null;
+}
+
+function setupActions(rows) {
+  if (!(rows || []).length) return null;
+  const actions = el('div', 'res-actions');
+  for (const a of rows) {
+    const act = el('div', `act${a.secret ? ' secret' : ''}`);
+    act.appendChild(el('span', 'act-label', a.label));
+    act.appendChild(el('code', 'act-cmd', a.command));
+    if (a.secret) act.appendChild(el('span', 'act-secret-tag', 'your terminal'));
+    const copy = el('button', 'btn', 'copy');
+    copy.type = 'button';
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(a.command);
+        copy.textContent = 'copied';
+      } catch (_) { copy.textContent = 'select it'; }
+      setTimeout(() => { copy.textContent = 'copy'; }, 1600);
+    });
+    act.appendChild(copy);
+    actions.appendChild(act);
+    if (a.note) actions.appendChild(el('p', 'note', a.note));
+  }
+  return actions;
+}
+
+function noteList(notes) {
+  if (!(notes || []).length) return null;
+  const list = el('ul', 'res-notes');
+  for (const n of notes) list.appendChild(el('li', null, n));
+  return list;
+}
+
+async function loadAuth() {
+  try {
+    const data = await getJSON('api/auth');
+    if (data.error) throw new Error(data.error);
+    els.authList.replaceChildren();
+
+    for (const p of (data.providers || [])) {
+      // Default open only where there is something to do; a configured provider
+      // collapses out of the way.
+      const box = collapsible(`p:${p.id}`,
+        `auth-provider${p.configured ? '' : ' unconfigured'}`, !p.configured);
+
+      const head = el('summary', 'auth-summary');
+      head.appendChild(el('span', 'auth-id', p.id));
+      head.appendChild(el('span', 'auth-label', p.label));
+      if (p.kind) head.appendChild(el('span', 'res-kind', p.kind));
+      // Which CLIs this one provider serves - the point of grouping this way.
+      if ((p.clis || []).length) {
+        head.appendChild(el('span', 'auth-clis', p.clis.join(' · ')));
+      }
+      head.appendChild(el('span', 'spacer'));
+      const inUse = (p.methods || []).filter((m) => m.active).length;
+      if (inUse) head.appendChild(el('span', 'auth-inuse', 'in use'));
+      head.appendChild(stateChip(p.configured, p.missing || []));
+      box.appendChild(head);
+
+      const body = el('div', 'auth-body');
+      if (p.summary) body.appendChild(el('p', 'res-summary', p.summary));
+
+      // Shared attributes, shown ONCE for the provider rather than repeated under
+      // every CLI that uses it.
+      const shared = settingList(p.settings, p.secrets);
+      if (shared) {
+        body.appendChild(el('h5', 'auth-sub', `shared by ${(p.clis || []).join(', ') || 'this provider'}`));
+        body.appendChild(shared);
+      }
+      const pSetup = setupActions(p.setup);
+      if (pSetup) body.appendChild(pSetup);
+      const pNotes = noteList(p.notes);
+      if (pNotes) body.appendChild(pNotes);
+
+      for (const m of (p.methods || [])) {
+        const mBox = collapsible(`m:${m.id}`,
+          `auth-method${m.active ? ' active' : ''}${m.configured ? '' : ' unconfigured'}`,
+          false);
+        const mHead = el('summary', 'auth-summary');
+        mHead.appendChild(el('span', 'auth-cli-tag', m.cli));
+        mHead.appendChild(el('span', 'auth-id', m.id));
+        if (m.default) mHead.appendChild(el('span', 'res-kind', 'cli default'));
+        mHead.appendChild(el('span', 'spacer'));
+
+        const pick = el('button', 'btn', m.active ? 'in use' : 'use this');
+        pick.type = 'button';
+        pick.disabled = m.active || !m.configured;
+        pick.title = m.configured
+          ? `Make ${m.id} the default for new ${m.cli} agents`
+          : `Not configured: ${m.missing.join(', ')}`;
+        // Inside a <summary>, so stop the click from toggling the disclosure too.
+        pick.addEventListener('click', async (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          pick.disabled = true;
+          try { await post('api/auth/select', { id: m.id }); await loadAuth(); }
+          catch (err) { say(els.authStamp, err.message); pick.disabled = false; }
+        });
+        mHead.appendChild(pick);
+        mHead.appendChild(stateChip(m.configured, m.missing || []));
+        mBox.appendChild(mHead);
+
+        const mBody = el('div', 'auth-body');
+        if (m.label) mBody.appendChild(el('p', 'res-summary', m.label));
+        const own = settingList(m.settings, null);
+        if (own) {
+          mBody.appendChild(el('h5', 'auth-sub', `specific to ${m.id}`));
+          mBody.appendChild(own);
+        }
+        // Editable, for the settings the backend says are editable. A model change here
+        // applies to agents spawned from now on; a running agent keeps its own.
+        const editable = new Set(m.editable || []);
+        const editors = (m.settings || []).filter((row) => editable.has(row.key));
+        if (editors.length) {
+          mBody.appendChild(el('h5', 'auth-sub', 'change'));
+          const box = el('div', 'res-actions');
+          for (const row of editors) {
+            box.appendChild(settingEditor(m.id, row, loadAuth));
+          }
+          mBody.appendChild(box);
+          mBody.appendChild(el('p', 'note',
+            'Applies to agents spawned from now on — a running agent keeps the model it started with.'));
+        }
+        const mSetup = setupActions(m.setup);
+        if (mSetup) mBody.appendChild(mSetup);
+        const mNotes = noteList(m.notes);
+        if (mNotes) mBody.appendChild(mNotes);
+        mBox.appendChild(mBody);
+
+        body.appendChild(mBox);
+      }
+
+      box.appendChild(body);
+      els.authList.appendChild(box);
+    }
+
+    const files = data.files || {};
+    const bits = [];
+    for (const key of ['settings', 'env']) {
+      const f = files[key];
+      if (!f) continue;
+      const mode = f.mode ? `mode ${f.mode}` : 'absent';
+      const warn = f.mode && f.mode !== '600' ? ' — SHOULD BE 600' : '';
+      bits.push(`${f.path}: ${mode}${warn}`
+        + (key === 'env' && f.count ? ` (${f.count} variables)` : ''));
+    }
+    const chosen = Object.entries(data.active || {})
+      .map(([cli, id]) => `${cli}→${id}`).join('  ');
+    say(els.authStamp, (chosen ? chosen + '   ' : '') + bits.join('   '));
+    els.authStamp.classList.toggle('warn', bits.some((b) => b.includes('SHOULD BE')));
+  } catch (err) {
+    say(els.authStamp, `auth unavailable: ${err.message}`);
+  }
+}
+
+els.authRefresh.addEventListener('click', loadAuth);
+
+// ══════════════════════════════════════════════════════════════════ IIOT ══════
+
+function renderPrivilegeNotices() {
+  // BOOTP is stated honestly rather than faked: binding UDP 67/68 needs root and
+  // this server runs unprivileged, so there is nothing to show but the truth.
+  els.bootpNotice.replaceChildren();
+  els.bootpNotice.appendChild(el('p', null,
+    'Serving BOOTP/DHCP means binding UDP 67/68, which requires root. This server runs unprivileged, so it cannot - and will not pretend to.'));
+  const run = el('p', null, 'Run the privileged helper yourself: ');
+  run.appendChild(el('code', null, 'sudo python3 taskmgmt/bootp_probe.py --iface eth0'));
+  els.bootpNotice.appendChild(run);
+
+  els.modbusHint.replaceChildren();
+  els.modbusHint.appendChild(el('p', null,
+    'Modbus goes through the modbus MCP server via an agent rather than being reimplemented here - one tested protocol implementation instead of two.'));
+}
+
+function mqLog(line) {
+  const at = new Date().toLocaleTimeString();
+  els.mqLog.appendChild(el('div', null, `${at}  ${line}`));
+  while (els.mqLog.childElementCount > 200) els.mqLog.removeChild(els.mqLog.firstElementChild);
+  els.mqLog.scrollTop = els.mqLog.scrollHeight;
+}
+
+async function loadIiot() {
+  renderPrivilegeNotices();
+  try {
+    const data = await getJSON('api/devices');
+    const rows = Array.isArray(data.devices) ? data.devices : [];
+    els.devList.replaceChildren();
+    if (!rows.length) els.devList.appendChild(el('p', 'note', 'No devices registered.'));
+    for (const d of rows) {
+      const r = el('div', 'dev');
+      r.appendChild(el('span', 'dev-name', String(d.name || '')));
+      r.appendChild(el('span', 'dev-kind', String(d.kind || '')));
+      r.appendChild(el('span', 'dev-addr', String(d.address || '') + (d.port ? `:${d.port}` : '')));
+      r.appendChild(el('span', 'dev-proto', String(d.protocol || '')));
+      r.appendChild(deleteButton('device', d.id, String(d.name || ''),
+                                 loadIiot, els.iiotStamp));
+      els.devList.appendChild(r);
+    }
+    say(els.iiotStamp, `${rows.length} device${rows.length === 1 ? '' : 's'}`);
+  } catch (err) {
+    say(els.iiotStamp, `devices unavailable: ${err.message}`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════ wiring ═══════
+
+els.queueRefresh.addEventListener('click', loadQueue);
+els.queueKind.addEventListener('change', loadQueue);
+
+els.epicAdd.addEventListener('click', async () => {
+  const title = els.epicTitle.value.trim();
+  if (!title) return;
+  const key = els.epicJira.value.trim();
+  if (key && !ISSUE_RE.test(key)) { say(els.boardStamp, `not an issue key: ${key}`); return; }
+  els.epicAdd.disabled = true;
+  try {
+    await post('api/epics', { title, jira_key: key || null });
+    els.epicTitle.value = '';
+    els.epicJira.value = '';
+    await loadBoard();
+  } catch (err) { say(els.boardStamp, err.message); } finally { els.epicAdd.disabled = false; }
+});
+
+els.journalAdd.addEventListener('click', async () => {
+  const subject = els.journalSubject.value.trim();
+  if (!subject) return;
+  els.journalAdd.disabled = true;
+  try {
+    await post('api/journal', {
+      kind: els.journalKind.value,
+      subject,
+      body: els.journalBody.value.trim() || null,
+    });
+    els.journalSubject.value = '';
+    els.journalBody.value = '';
+    await loadJournal();
+  } catch (err) { say(els.journalStamp, err.message); } finally { els.journalAdd.disabled = false; }
+});
+
+els.ticketRefresh.addEventListener('click', () => loadTickets(true));
+els.iiotRefresh.addEventListener('click', loadIiot);
+
+els.devAdd.addEventListener('click', async () => {
+  const name = els.devName.value.trim();
+  if (!name) return;
+  els.devAdd.disabled = true;
+  try {
+    await post('api/devices', {
+      name,
+      kind: els.devKind.value,
+      address: els.devAddr.value.trim() || null,
+      port: els.devPort.value ? Number(els.devPort.value) : null,
+      protocol: els.devProto.value,
+    });
+    els.devName.value = '';
+    els.devAddr.value = '';
+    els.devPort.value = '';
+    await loadIiot();
+  } catch (err) { say(els.iiotStamp, err.message); } finally { els.devAdd.disabled = false; }
+});
+
+// MQTT: the backend owns the socket; the page only asks and reports. A failure is
+// always written to the log - a button that silently does nothing is worse than one
+// that says why it could not.
+async function mqttCall(path, body, describe) {
+  mqLog(describe);
+  try {
+    const out = await post(path, body);
+    mqLog(out.detail ? String(out.detail) : 'ok');
+    for (const m of (out.messages || [])) {
+      mqLog(`  ${m.topic}  ${m.payload}`);
+    }
+  } catch (err) {
+    mqLog(`failed: ${err.message}`);
+  }
+}
+
+els.mqSub.addEventListener('click', () => {
+  const host = els.mqHost.value.trim();
+  const topic = els.mqTopic.value.trim();
+  if (!host || !topic) { mqLog('need a broker host and a topic'); return; }
+  mqttCall('api/mqtt/subscribe',
+    { host, port: Number(els.mqPort.value) || 1883, topic },
+    `subscribe ${host}:${els.mqPort.value || 1883} ${topic}`);
+});
+
+els.mqPub.addEventListener('click', () => {
+  const host = els.mqHost.value.trim();
+  const topic = els.mqPubTopic.value.trim();
+  if (!host || !topic) { mqLog('need a broker host and a publish topic'); return; }
+  mqttCall('api/mqtt/publish',
+    { host, port: Number(els.mqPort.value) || 1883, topic, payload: els.mqPayload.value },
+    `publish ${topic}`);
+});
+
+els.resRefresh.addEventListener('click', () => loadResources(true));
+
+// Re-fit on window resize. relayout() recomputes the column count (auto mode depends on
+// the viewport width) and then fits every pane, so one path covers a ribbon change and a
+// window drag alike.
+//
+// Debounced, because a drag fires this continuously and each pass re-zooms the chrome,
+// re-lays-out the grid and re-fits every terminal. relayout() runs immediately so the
+// grid tracks the drag; the chrome scale settles once the drag stops.
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  relayout();
+  if (resizeTimer) clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    resizeTimer = null;
+    applyUiScale();          // no-op unless the stepped scale actually changed
+  }, 180);
+});
+
+// Close the streams when the page goes away. Without this the browser logs a
+// "connection interrupted while the page was loading" error for every open
+// EventSource on each reload — noise that buries genuine errors, and the console is
+// the only place a runtime fault in this page shows up.
+window.addEventListener('pagehide', () => {
+  panes.forEach((rec) => {
+    rec.disposed = true;
+    try { if (rec.source) rec.source.close(); } catch (_) {}
+  });
+});
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && focused !== null) { focused = null; applyFocus(); }
+});
+
+if (!window.Terminal) {
+  showBanner('xterm.js failed to load from vendor/ — terminals cannot render.');
+} else {
+  loadPrefs();
+  wireRibbon();
+  applyUiScale();
+  loadThemes();
+  let startView = 'terminals';
+  try { startView = localStorage.getItem(VIEW_KEY) || 'terminals'; } catch (_) {}
+  showView(startView);
+  ensureSharedStream(false);
+  refreshQueueBadge();
+  // Slower than POLL_MS: it merges files on every call, and unread traffic is not
+  // something you need sub-second.
+  setInterval(refreshQueueBadge, 10000);
+  composeSpawnCmd();
+  applyLayoutPrefs();
+  tick();
+  setInterval(tick, POLL_MS);
+}

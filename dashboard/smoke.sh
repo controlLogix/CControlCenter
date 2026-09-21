@@ -1,0 +1,218 @@
+#!/usr/bin/env bash
+# CCC dashboard smoke test. Run from the repo root inside WSL:
+#   bash <(tr -d '\r' < dashboard/smoke.sh)
+#
+# Read-only except the round-trip section, which creates a throwaway epic/task/
+# journal entry in ~/.agentmux/cc.db. Nothing is deleted.
+#
+# NOTE ON WRITES: every POST here checks its response body. An earlier version
+# sent writes to /dev/null and reported them as passing while the server was in
+# fact rejecting them - a test that cannot fail is worse than no test.
+set -u
+BASE="http://127.0.0.1:8787"
+pass=0; fail=0
+
+code() { curl -s -o /dev/null -w '%{http_code}' "$BASE/$1"; }
+jpost() { curl -s -X POST -H 'Content-Type: application/json' --data "$2" "$BASE/$1"; }
+
+check() { # check <label> <expected> <actual>
+  if [ "$2" = "$3" ]; then
+    printf '  ok    %-36s %s\n' "$1" "$3"; pass=$((pass + 1))
+  else
+    printf '  FAIL  %-36s got [%s] want [%s]\n' "$1" "$3" "$2"; fail=$((fail + 1))
+  fi
+}
+
+echo '--- static assets ---'
+# index.html is served at / only; it is deliberately not reachable as a path.
+# resources.json is a server-side manifest and is NOT served - the browser gets
+# its contents via /api/resources, which strips secret_output details.
+check '/ serves the page'   200 "$(code '')"
+check 'resources.json withheld' 404 "$(code 'resources.json')"
+for f in app.js style.css themes.json assets/logo-ccc.svg assets/logo-ccc-24.svg \
+         vendor/xterm.js vendor/addon-fit.js vendor/xterm.css; do
+  check "$f" 200 "$(code "$f")"
+done
+
+echo '--- readable endpoints ---'
+for e in api/agents api/resources api/epics api/journal api/messages api/devices; do
+  check "GET $e" 200 "$(code "$e")"
+done
+
+echo '--- write-only endpoints reject GET ---'
+for e in api/tasks api/status api/delete; do
+  check "GET $e" 405 "$(code "$e")"
+done
+check 'POST api/messages (read-only)' 405 \
+  "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' \
+      --data '{}' "$BASE/api/messages")"
+
+echo '--- mutating-endpoint guards ---'
+for e in api/epics api/tasks api/journal api/devices api/status api/delete; do
+  # No JSON content type -> 415. This is what forces a CORS preflight, which is
+  # the actual CSRF defence for a localhost server.
+  check "POST $e no-ctype" 415 "$(curl -s -o /dev/null -w '%{http_code}' \
+      -X POST --data '{}' "$BASE/$e")"
+  check "POST $e cross-origin" 403 "$(curl -s -o /dev/null -w '%{http_code}' \
+      -X POST -H 'Content-Type: application/json' -H 'Origin: https://evil.example' \
+      --data '{}' "$BASE/$e")"
+  check "POST $e unknown field" 400 "$(curl -s -o /dev/null -w '%{http_code}' \
+      -X POST -H 'Content-Type: application/json' --data '{"wat":1}' "$BASE/$e")"
+done
+
+echo '--- rejection reasons are specific (Invalid must not collapse to ValueError) ---'
+check 'bad status names the field' 'invalid status' \
+  "$(jpost api/status '{"kind":"epic","id":1,"status":"bogus"}' \
+     | python3 -c 'import json,sys; print(json.load(sys.stdin).get("error",""))')"
+check 'bad limit names the bound' 'limit must be between 1 and 1000' \
+  "$(curl -s "$BASE/api/journal?limit=0" \
+     | python3 -c 'import json,sys; print(json.load(sys.stdin).get("error",""))')"
+
+echo '--- multiplexed stream (one connection for every agent) ---'
+# A browser allows ~6 connections per host, and an SSE stream holds one open. With seven
+# panes the seventh could never connect and two panes traded places every second. All
+# agents now share /api/stream-all, so pane count is no longer capped by the browser.
+mux="$(timeout 6 curl -sN "$BASE/api/stream-all?tail=512" 2>/dev/null)"
+check 'stream-all returns frames' true "$([ -n "$mux" ] && echo true || echo false)"
+agent_count="$(curl -s "$BASE/api/agents"   | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["agents"]))')"
+named="$(printf '%s' "$mux" | python3 -c '
+import json, sys
+names = set()
+for line in sys.stdin.read().splitlines():
+    if line.startswith("data: "):
+        try:
+            names.add(json.loads(line[6:]).get("agent"))
+        except ValueError:
+            pass
+print(len(names - {None}))
+')"
+check 'every agent appears on the one connection' "$agent_count" "$named"
+check 'frames are tagged with an agent' true   "$(printf '%s' "$mux" | grep -q '"agent"' && echo true || echo false)"
+check 'snapshot frames are CRLF-framed' true   "$(printf '%s' "$mux" | grep -q 'event: snapshot' && echo true || echo false)"
+
+echo '--- path traversal ---'
+for p in '../server.py' '..%2fserver.py' 'assets/../../agentmux.sh' 'assets/../server.py'; do
+  got="$(code "$p")"
+  if [ "$got" = 200 ]; then
+    printf '  FAIL  %-36s SERVED\n' "$p"; fail=$((fail + 1))
+  else
+    printf '  ok    %-36s %s\n' "$p" "$got"; pass=$((pass + 1))
+  fi
+done
+
+echo '--- themes.json shape ---'
+if python3 - <<'PY'
+import json, sys, urllib.request
+d = json.load(urllib.request.urlopen('http://127.0.0.1:8787/themes.json'))
+tok = set(d['tokens'])
+bad = [t['id'] for t in d['themes'] if tok - set(t['tokens'])]
+print(f"        {len(d['themes'])} themes, default={d['default']}: "
+      + ', '.join(t['id'] for t in d['themes']))
+if bad:
+    print(f"        incomplete token sets: {bad}")
+    sys.exit(1)
+if d['default'] not in {t['id'] for t in d['themes']}:
+    print('        default names a theme that does not exist')
+    sys.exit(1)
+PY
+then
+  printf '  ok    %-36s\n' 'every theme declares all tokens'; pass=$((pass + 1))
+else
+  printf '  FAIL  %-36s\n' 'themes.json is inconsistent'; fail=$((fail + 1))
+fi
+
+echo '--- DB round-trip (statuses must match ccstore vocabularies) ---'
+eid="$(jpost api/epics '{"title":"smoke epic","jira_key":"SMOKE-1"}' \
+       | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')"
+if [ -z "$eid" ]; then
+  printf '  FAIL  epic create returned no id\n'; fail=$((fail + 1))
+else
+  printf '  ok    %-36s id=%s\n' 'epic created' "$eid"; pass=$((pass + 1))
+  check 'task created' 'smoke task' \
+    "$(jpost api/tasks "{\"epic_id\":$eid,\"title\":\"smoke task\",\"agent\":\"codex\"}" \
+       | python3 -c 'import json,sys; print(json.load(sys.stdin).get("title",""))')"
+  check 'epic -> in_progress' 'in_progress' \
+    "$(jpost api/status "{\"kind\":\"epic\",\"id\":$eid,\"status\":\"in_progress\"}" \
+       | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status",""))')"
+  check 'epic reads back with its task' 'in_progress 1' \
+    "$(curl -s "$BASE/api/epics" | python3 -c "
+import json, sys
+for e in json.load(sys.stdin)['epics']:
+    if e['id'] == $eid:
+        print(e['status'], len(e.get('tasks', []))); break
+")"
+  check 'unknown epic id -> 404' 404 \
+    "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' \
+        --data '{"kind":"epic","id":999999,"status":"done"}' "$BASE/api/status")"
+
+  # Every status the frontend offers must be accepted by the backend. app.js
+  # declares EPIC_STATUSES / TASK_STATUSES to build its dropdowns; if those drift
+  # from ccstore.py the control silently 400s, which is how `active`/`doing` shipped
+  # broken the first time. Assert the whole vocabulary, not one value.
+  for s in open in_progress blocked done archived; do
+    check "epic status $s accepted" "$s" \
+      "$(jpost api/status "{\"kind\":\"epic\",\"id\":$eid,\"status\":\"$s\"}" \
+         | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status",""))')"
+  done
+  check 'bogus epic status rejected' 'invalid status' \
+    "$(jpost api/status "{\"kind\":\"epic\",\"id\":$eid,\"status\":\"doing\"}" \
+       | python3 -c 'import json,sys; print(json.load(sys.stdin).get("error",""))')"
+
+  tid="$(jpost api/tasks "{\"epic_id\":$eid,\"title\":\"vocab task\"}" \
+         | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')"
+  for s in todo in_progress blocked done cancelled; do
+    check "task status $s accepted" "$s" \
+      "$(jpost api/status "{\"kind\":\"task\",\"id\":$tid,\"status\":\"$s\"}" \
+         | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status",""))')"
+  done
+
+  echo '--- delete, and the cascade ---'
+  check 'delete a task' 'True' \
+    "$(jpost api/delete "{\"kind\":\"task\",\"id\":$tid}" \
+       | python3 -c 'import json,sys; print(json.load(sys.stdin).get("ok",""))')"
+  check 'deleting it twice -> 404' 404 \
+    "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' \
+        --data "{\"kind\":\"task\",\"id\":$tid}" "$BASE/api/delete")"
+  check 'journal cannot be deleted' 400 \
+    "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' \
+        --data '{"kind":"journal","id":1}' "$BASE/api/delete")"
+  # The epic still has its original smoke task, so this proves the cascade runs.
+  check 'deleting the epic cascades its tasks' 1 \
+    "$(jpost api/delete "{\"kind\":\"epic\",\"id\":$eid}" \
+       | python3 -c 'import json,sys; print(json.load(sys.stdin).get("cascaded_tasks",""))')"
+  check 'the epic is gone' 0 \
+    "$(curl -s "$BASE/api/epics" | python3 -c "
+import json, sys
+print(sum(1 for e in json.load(sys.stdin)['epics'] if e['id'] == $eid))
+")"
+fi
+
+# grok finding 1: the store allows an 8192-byte journal body, so the request cap
+# must too. The old check used a 13-byte body and so never exercised this.
+long_body="$(python3 -c 'print("x" * 4000)')"
+check 'long journal body stores (not 413)' 'longbody'   "$(jpost api/journal "{\"kind\":\"note\",\"subject\":\"longbody\",\"body\":\"$long_body\"}"      | python3 -c 'import json,sys; print(json.load(sys.stdin).get("subject",""))')"
+check 'oversize journal body still 413' 413   "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json'       --data "{\"kind\":\"note\",\"subject\":\"toobig\",\"body\":\"$(python3 -c 'print("x" * 12000)')\"}"       "$BASE/api/journal")"
+
+# grok's note: smoke did not cover the MQTT endpoints, so a dropped guard there
+# would still have printed 48/48. test_mqtt.py covers them in depth; these two keep
+# the guard set honest even if that file is not run.
+for e in api/mqtt/publish api/mqtt/subscribe; do
+  check "GET $e" 405 "$(code "$e")"
+  check "POST $e no-ctype" 415 "$(curl -s -o /dev/null -w '%{http_code}'       -X POST --data '{}' "$BASE/$e")"
+done
+
+check 'journal round-trip' 'smoke' \
+  "$(jpost api/journal '{"kind":"note","subject":"smoke","body":"from smoke.sh"}' \
+     | python3 -c 'import json,sys; print(json.load(sys.stdin).get("subject",""))')"
+did="$(jpost api/devices '{"name":"smoke-plc","kind":"plc","address":"10.0.0.5","port":502,"protocol":"modbus-tcp"}' \
+       | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')"
+check 'device round-trip' true "$([ -n "$did" ] && echo true || echo false)"
+# Clean up after ourselves. Earlier runs had no delete, so each one left a row
+# behind and the IIOT view filled with duplicate smoke-plc entries.
+check 'device deleted' 'True' \
+  "$(jpost api/delete "{\"kind\":\"device\",\"id\":$did}" \
+     | python3 -c 'import json,sys; print(json.load(sys.stdin).get("ok",""))')"
+
+echo
+printf 'passed %d, failed %d\n' "$pass" "$fail"
+[ "$fail" -eq 0 ]

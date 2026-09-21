@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Controls Control Center</title>
+<link rel="icon" href="assets/logo-ccc.svg" type="image/svg+xml">
+<link rel="stylesheet" href="vendor/xterm.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ───────────────────────────── title bar ───────────────────────────── -->
+<header class="titlebar">
+  <!-- Inlined, not <img src>: currentColor does not inherit into an <img>, so a
+       referenced copy would render black on dark slate and ignore the theme.
+       assets/logo-ccc.svg stays on disk for the favicon, which needs a literal
+       colour of its own. -->
+  <svg id="brandMark" class="brand-mark" viewBox="0 0 32 32" role="img"
+       aria-label="Controls Control Center" fill="none" stroke="currentColor"
+       stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4.5" y="3.5" width="23" height="23" rx="1.5"/>
+    <path d="M7.5 6.5h3v3h-3zM12.5 6.5h3v3h-3zM17.5 6.5h3v3h-3zM22.5 6.5h2v3h-2z"/>
+    <path d="M4.5 12h23M7.5 19h17v4.5h-17zM19 19v4.5M10.5 21.25h5"/>
+    <g stroke="var(--accent)">
+      <circle cx="10" cy="15.5" r="1"/><circle cx="16" cy="15.5" r="1"/><circle cx="22" cy="15.5" r="1"/>
+    </g>
+    <path d="M9 26.5v3M23 26.5v3M2 29.5h28"/>
+  </svg>
+  <span class="brand"><b>Controls</b> Control Center<span class="brand-abbr">CCC</span></span>
+  <span class="count" id="count"></span>
+  <span class="spacer"></span>
+  <select id="uiScale" title="Scale the interface — bars, headers and panels. 'auto' follows the window size; a fixed percentage overrides it. Terminal text is governed by the ribbon's Text control, so this never fights the fit.">
+    <option value="auto" selected>UI auto</option>
+    <option value="0.85">UI 85%</option><option value="0.9">UI 90%</option>
+    <option value="1">UI 100%</option><option value="1.1">UI 110%</option>
+    <option value="1.25">UI 125%</option><option value="1.5">UI 150%</option>
+  </select>
+  <label class="toggle"><input type="checkbox" id="followToggle" checked> follow</label>
+  <button id="ribbonToggle" class="btn" aria-expanded="true" aria-controls="ribbon"
+          title="Show or hide the terminal configuration ribbon">ribbon</button>
+  <span id="tmux" class="pill">&nbsp;</span>
+  <span id="stamp" class="stamp" aria-live="polite">connecting…</span>
+</header>
+
+<div class="shell">
+
+  <!-- ─────────────────────── left activity bar ─────────────────────── -->
+  <nav class="activity" role="tablist" aria-label="Views" aria-orientation="vertical">
+    <button class="nav-item active" data-view="terminals" role="tab" aria-selected="true" title="Terminals — live agent panes">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 10l3 2.5-3 2.5M12.5 15H17"/></svg>
+      <span class="nav-label">Terminals</span>
+    </button>
+    <button class="nav-item" data-view="queue" role="tab" aria-selected="false" title="Message Queue — agent traffic and the orchestrator plan">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 11h11M4 16h7"/><circle cx="19" cy="16" r="2.5"/></svg>
+      <span class="nav-label">Queue</span>
+      <span class="nav-badge" id="badgeQueue" hidden></span>
+    </button>
+    <button class="nav-item" data-view="board" role="tab" aria-selected="false" title="Task Board — epics and tasks">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="7" rx="1"/></svg>
+      <span class="nav-label">Board</span>
+    </button>
+    <button class="nav-item" data-view="journal" role="tab" aria-selected="false" title="Journal — append-only operational log">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l4 4v12H5z"/><path d="M8 11h8M8 15h8M8 7h4"/></svg>
+      <span class="nav-label">Journal</span>
+    </button>
+    <button class="nav-item" data-view="tickets" role="tab" aria-selected="false" title="Ticket Reviewer — Jira issues">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V6h16v2a2 2 0 000 4v4H4v-4a2 2 0 000-4z"/><path d="M12 7v10" stroke-dasharray="2 2"/></svg>
+      <span class="nav-label">Tickets</span>
+    </button>
+    <button class="nav-item" data-view="iiot" role="tab" aria-selected="false" title="IIOT Field — devices, MQTT, BOOTP, Modbus">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="9" width="16" height="10" rx="1.5"/><path d="M7 9V6M12 9V5M17 9V6M7 19v2M12 19v2M17 19v2"/></svg>
+      <span class="nav-label">IIOT</span>
+    </button>
+    <span class="nav-gap"></span>
+    <button class="nav-item" data-view="settings" role="tab" aria-selected="false" title="Settings — theme, resources, configuration">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>
+      <span class="nav-label">Settings</span>
+    </button>
+  </nav>
+
+  <!-- ─────────────────────────── views ─────────────────────────── -->
+  <div class="views">
+
+    <div id="banner" class="banner" role="alert" hidden></div>
+
+    <!-- ═══ Terminals ═══ -->
+    <section id="viewTerminals" class="view" role="tabpanel" aria-label="Terminals">
+      <section id="ribbon" class="ribbon" aria-label="Terminal configuration">
+        <div class="rgroup">
+          <span class="rlabel">Layout</span>
+          <select id="layoutMode" title="Grid columns, or 'free' to place panes yourself. Auto picks the widest layout that still fits whole panes at a readable size.">
+            <option value="auto" selected>auto</option>
+            <option value="1">1 col</option><option value="2">2 cols</option>
+            <option value="3">3 cols</option><option value="4">4 cols</option>
+            <option value="5">5 cols</option><option value="6">6 cols</option>
+            <option value="8">8 cols</option>
+            <option value="free">free — drag to place</option>
+          </select>
+          <button id="sortPanes" class="btn" title="Tidy the panes back into a grid. In 'free' mode this is the ONLY thing that moves them — resizing the window never does.">sort</button>
+          <select id="rowHeight" title="Cell height">
+            <option value="180" selected>normal rows</option>
+            <option value="120">short rows</option>
+            <option value="280">tall rows</option>
+            <option value="fill">fill viewport</option>
+            <option value="fitcontent">fit content</option>
+          </select>
+          <span class="rlabel">Text</span>
+          <select id="fontSize" title="Terminal text size. 'auto' fits the whole pane into the cell, never going below the minimum. Any explicit size is used exactly, and the cell scrolls to reach the rest.">
+            <option value="auto" selected>auto</option>
+            <option value="6">6px</option><option value="7">7px</option>
+            <option value="8">8px</option><option value="9">9px</option>
+            <option value="10">10px</option><option value="11">11px</option>
+            <option value="12">12px</option><option value="13">13px</option>
+            <option value="14">14px</option><option value="16">16px</option>
+            <option value="18">18px</option><option value="20">20px</option>
+          </select>
+          <select id="minFont" title="The smallest size 'auto' may shrink to. Below this the cell scrolls instead, and the header says how much is visible. Only applies when Text is 'auto'.">
+            <option value="6">min 6px</option><option value="7" selected>min 7px</option>
+            <option value="8">min 8px</option><option value="9">min 9px</option>
+            <option value="10">min 10px</option><option value="12">min 12px</option>
+            <option value="14">min 14px</option>
+          </select>
+          <label class="toggle" title="Resize each agent's tmux pane to match its cell. Writes to the agent and changes what agentmux read sees (audit D26).">
+            <input type="checkbox" id="syncSize"> sync pane size
+          </label>
+        </div>
+        <div class="rgroup">
+          <span class="rlabel">New agent</span>
+          <input id="spawnName" class="rin" type="text" placeholder="name" size="9"
+                 pattern="[A-Za-z0-9\-._]{1,64}" title="Letters, digits, dot, dash, underscore">
+          <select id="spawnCli">
+            <option value="codex" selected>codex</option><option value="claude">claude</option>
+            <option value="grok">grok</option><option value="shell">shell</option>
+          </select>
+          <input id="spawnModel" class="rin" type="text" list="modelList" placeholder="model (optional)" size="13">
+          <datalist id="modelList">
+            <option value="grok-4.6"></option><option value="gpt-5.6-sol"></option>
+            <option value="gpt-5.6-luna"></option><option value="opus"></option><option value="sonnet"></option>
+          </datalist>
+          <select id="spawnPerm">
+            <option value="bypass" selected>unrestricted</option>
+            <option value="sandboxed">sandboxed</option>
+          </select>
+        </div>
+        <div class="rgroup">
+          <span class="rlabel">Jira</span>
+          <input id="jiraBase" class="rin" type="url" size="20" placeholder="https://you.atlassian.net"
+                 title="Used only to build issue links in the browser. Never sent to the backend.">
+        </div>
+        <div class="rgroup grow">
+          <code id="spawnCmd" class="cmd">agentmux spawn …</code>
+          <button id="copyCmd" class="btn">copy</button>
+          <span id="copyNote" class="note" aria-live="polite"></span>
+        </div>
+      </section>
+
+      <main id="grid" class="grid" aria-label="Agent terminals"></main>
+      <p id="empty" class="empty" hidden>
+        No agents running. Compose a spawn command above, or run
+        <code>agentmux spawn &lt;name&gt; --cli codex|claude|grok</code>
+      </p>
+    </section>
+
+    <!-- ═══ Message Queue ═══ -->
+    <section id="viewQueue" class="view pad" role="tabpanel" aria-label="Message Queue" hidden>
+      <div class="vhead">
+        <h2>Message Queue</h2>
+        <span id="queueStamp" class="stamp" aria-live="polite"></span>
+        <span class="spacer"></span>
+        <label class="toggle"><input type="checkbox" id="queueFollow" checked> follow</label>
+        <select id="queueKind" title="Filter by message kind">
+          <option value="">all kinds</option>
+          <option value="plan">plan</option><option value="request">request</option>
+          <option value="reply">reply</option><option value="status">status</option>
+          <option value="finding">finding</option><option value="error">error</option>
+        </select>
+        <button id="queueRefresh" class="btn">refresh</button>
+      </div>
+      <div id="planPin" class="plan-pin" hidden></div>
+      <div id="queueList" class="msg-list"></div>
+      <p class="hint">
+        Agents append newline-delimited JSON to <code>~/.agentmux/queue/&lt;agent&gt;.jsonl</code>.
+        The backend merges those files with the <code>messages</code> table by timestamp.
+      </p>
+    </section>
+
+    <!-- ═══ Task Board ═══ -->
+    <section id="viewBoard" class="view pad" role="tabpanel" aria-label="Task Board" hidden>
+      <div class="vhead">
+        <h2>Task Board</h2>
+        <span id="boardStamp" class="stamp" aria-live="polite"></span>
+        <span class="spacer"></span>
+        <input id="epicTitle" class="rin" type="text" size="24" placeholder="new epic title">
+        <input id="epicJira" class="rin" type="text" size="10" placeholder="JIRA-1 (opt)">
+        <button id="epicAdd" class="btn">add epic</button>
+      </div>
+      <div id="boardList" class="board"></div>
+      <p class="hint">
+        Persisted in <code>~/.agentmux/cc.db</code> (SQLite, WAL) for archival project
+        management — it outlives the session and stays queryable.
+      </p>
+    </section>
+
+    <!-- ═══ Journal ═══ -->
+    <section id="viewJournal" class="view pad" role="tabpanel" aria-label="Journal" hidden>
+      <div class="vhead">
+        <h2>Journal</h2>
+        <span id="journalStamp" class="stamp" aria-live="polite"></span>
+        <span class="spacer"></span>
+        <select id="journalKind">
+          <option value="note" selected>note</option><option value="decision">decision</option>
+          <option value="incident">incident</option><option value="change">change</option>
+        </select>
+        <input id="journalSubject" class="rin" type="text" size="28" placeholder="subject">
+        <button id="journalAdd" class="btn">append</button>
+      </div>
+      <textarea id="journalBody" class="ta" rows="2" placeholder="body (optional)"></textarea>
+      <div id="journalList" class="journal"></div>
+      <p class="hint">Append-only. Entries are never edited or deleted from this view.</p>
+    </section>
+
+    <!-- ═══ Ticket Reviewer ═══ -->
+    <section id="viewTickets" class="view pad" role="tabpanel" aria-label="Ticket Reviewer" hidden>
+      <div class="vhead">
+        <h2>Ticket Reviewer</h2>
+        <span id="ticketStamp" class="stamp" aria-live="polite"></span>
+        <span class="spacer"></span>
+        <button id="ticketRefresh" class="btn">refresh</button>
+      </div>
+      <div id="ticketList" class="tickets"></div>
+    </section>
+
+    <!-- ═══ IIOT Field ═══ -->
+    <section id="viewIiot" class="view pad" role="tabpanel" aria-label="IIOT Field" hidden>
+      <div class="vhead">
+        <h2>IIOT Field</h2>
+        <span id="iiotStamp" class="stamp" aria-live="polite"></span>
+        <span class="spacer"></span>
+        <button id="iiotRefresh" class="btn">refresh</button>
+      </div>
+
+      <div class="iiot-grid">
+        <section class="card">
+          <h3>Device registry</h3>
+          <div class="row">
+            <input id="devName" class="rin" type="text" size="11" placeholder="name">
+            <select id="devKind">
+              <option value="plc">PLC</option><option value="hmi">HMI</option>
+              <option value="io">Remote I/O</option><option value="drive">Drive</option>
+              <option value="sensor">Sensor</option><option value="gateway">Gateway</option>
+            </select>
+            <input id="devAddr" class="rin" type="text" size="12" placeholder="10.0.0.5">
+            <input id="devPort" class="rin" type="number" placeholder="502">
+            <select id="devProto">
+              <option value="modbus-tcp">Modbus TCP</option><option value="mqtt">MQTT</option>
+              <option value="ethernet-ip">EtherNet/IP</option><option value="opc-ua">OPC UA</option>
+            </select>
+            <button id="devAdd" class="btn">add</button>
+          </div>
+          <div id="devList" class="dev-list"></div>
+        </section>
+
+        <section class="card">
+          <h3>MQTT</h3>
+          <div class="row">
+            <input id="mqHost" class="rin" type="text" size="13" placeholder="broker host">
+            <input id="mqPort" class="rin" type="number" value="1883">
+            <input id="mqTopic" class="rin" type="text" size="14" placeholder="topic/#">
+            <button id="mqSub" class="btn">subscribe</button>
+          </div>
+          <div class="row">
+            <input id="mqPubTopic" class="rin" type="text" size="14" placeholder="publish topic">
+            <input id="mqPayload" class="rin" type="text" size="16" placeholder="payload">
+            <button id="mqPub" class="btn">publish</button>
+          </div>
+          <div id="mqLog" class="mq-log"></div>
+          <p class="hint">MQTT 3.1.1 over plain TCP. <strong>No TLS in this pass.</strong></p>
+        </section>
+
+        <section class="card">
+          <h3>BOOTP / DHCP</h3>
+          <div id="bootpNotice" class="notice"></div>
+        </section>
+
+        <section class="card">
+          <h3>Modbus</h3>
+          <div id="modbusHint" class="notice"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- ═══ Settings ═══ -->
+    <section id="viewSettings" class="view pad" role="tabpanel" aria-label="Settings" hidden>
+      <div class="vhead"><h2>Settings</h2><span class="spacer"></span></div>
+
+      <section class="card">
+        <h3>Appearance</h3>
+        <div class="row">
+          <span class="rlabel">Theme</span>
+          <select id="themeSelect" title="Themes are declared in themes.json"></select>
+          <span id="themeNote" class="note"></span>
+        </div>
+        <div id="swatches" class="swatches"></div>
+      </section>
+
+      <section class="card">
+        <h3>Authentication</h3>
+        <div class="res-head">
+          <span id="authStamp" class="stamp" aria-live="polite">not loaded</span>
+          <button id="authRefresh" class="btn">refresh</button>
+          <span class="note">
+            Selecting a method is safe from here. <strong>Entering a credential is not</strong> —
+            those commands are shown for you to run in a terminal.
+          </span>
+        </div>
+        <div id="authList" class="auth-list"></div>
+        <p class="hint">
+          Methods are declared in <code>dashboard/auth.json</code>; machine-specific
+          settings live in <code>~/.agentmux/auth.json</code> and secrets in
+          <code>~/.agentmux/env</code>, both 0600. agentmux <em>sources</em> the env
+          file into each pane rather than putting values on a command line, so a key
+          never reaches <code>ps</code> or your shell history.
+          Spawn with a specific method: <code>agentmux spawn &lt;name&gt; --cli codex --auth codex-chatgpt</code>
+        </p>
+      </section>
+
+      <section class="card">
+        <h3>Resources</h3>
+        <div class="res-head">
+          <span id="resStamp" class="stamp" aria-live="polite">not loaded</span>
+          <button id="resRefresh" class="btn" title="Re-run every probe (bypasses the 12s cache)">refresh</button>
+          <span class="note">Commands are shown, never run. Nothing here accepts a secret.</span>
+        </div>
+        <div id="resList" class="res-list"></div>
+      </section>
+    </section>
+
+  </div><!-- /views -->
+</div><!-- /shell -->
+
+<footer>
+  <span id="footNote">Read-only terminals. Streams <code>~/.agentmux/logs/&lt;name&gt;.log</code> over SSE; no keystrokes are sent to an agent.</span>
+</footer>
+
+<script src="vendor/xterm.js"></script>
+<script src="vendor/addon-fit.js"></script>
+<script src="app.js"></script>
+<script>
+  // Readability matrix, on demand only: open 127.0.0.1:8787/?fit=1 and run
+  // `await fitMatrix()` in the console. Kept out of the normal page so test code
+  // never ships as part of it, while still running against the real page.
+  if (new URLSearchParams(location.search).has('fit')) {
+    const probe = document.createElement('script');
+    probe.src = 'fitmatrix.js';
+    document.head.appendChild(probe);
+  }
+</script>
+</body>
+</html>

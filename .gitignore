@@ -1,0 +1,43 @@
+# ---------------------------------------------------------------------------
+# This repository is PUBLIC. Everything listed here stays on the workstation.
+#
+# The rule: this repo holds the harness and the dashboard as SOURCE. It does
+# not hold captured state - not another tool's credentials, not session
+# transcripts, not machine-specific handoff notes. Those are reproducible or
+# private; source is neither.
+# ---------------------------------------------------------------------------
+
+# Pre-change snapshots. The grok-*.tar.gz archives in here are copies of the
+# xAI CLI's entire state directory and each one contains .grok/auth.json, i.e.
+# live credentials, plus session transcripts. Never publish.
+.backup-2026-09-18/
+
+# Agent audit and hardening journals. Full of machine-local paths and
+# credential-shaped strings that cannot be classified automatically.
+audit_2026-09-17/
+wsl-agent-teams/
+
+# Internal handoff notes: machine layout, resume state, incident write-ups.
+# Valuable on this box, wrong thing to publish.
+ANALYSIS_2026-09-18.md
+PENDING_USER_ACTION.md
+RESUME.md
+STATUS_CCC_*.md
+TODO_next_demo.md
+dashboard/BRIEF_*.md
+dashboard/REVIEW_*.md
+
+# Superseded copies kept beside the originals while refactoring.
+*.bak
+*.pre-*
+*.baseline-run1
+
+# Interpreter and editor leftovers.
+__pycache__/
+*.py[cod]
+
+# Runtime state and logs belong in ~/.agentmux, never here.
+*.log
+*.db
+*.db-wal
+*.db-shm
