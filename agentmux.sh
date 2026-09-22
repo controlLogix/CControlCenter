@@ -224,6 +224,17 @@ agentmux - drive other agent CLIs in tmux panes
                                one with no pane, such as 'orchestrator' (this
                                session). Without this, replies addressed to the
                                orchestrator were retried and then discarded
+  claim  <resource> [--ttl S] [--note T] [--task ID] [--depends-on R]
+                               TAKE A WORK LOCK before editing anything another agent
+                               could touch. Atomic: exactly one agent wins. Refused
+                               with the holder's name if someone else has it. Leases
+                               expire (default 1800s) so a dead agent frees its work
+  release <resource>           give it back when you are done
+  claims [--json] [--all]      who is working on what, right now
+  journal <kind> <subject> [--body B]
+                               write to the SHARED journal every agent and the
+                               dashboard can read. kinds: claim release conflict note
+                               handoff blocked done plan
   list                         show agents, state and cwd
   kill   <name> | --all        stop agent(s)
   reap   [--dry-run]           remove run/ sidecars for agents with no live tmux
@@ -669,13 +680,24 @@ cmd_send() {
   # The newline test must use $'\n'. "$(printf '\n')" collapses to the empty
   # string (command substitution strips trailing newlines), so it matches every
   # prompt and would wrap single-line sends in paste markers as well.
+  # The gap between the text and the Enter.
+  #
+  # tmux itself orders these: both go to the same server queue. The wait is for the
+  # CLIENT - a TUI reading a bracketed paste needs to have consumed it before Enter
+  # arrives, or it submits a partial line. 0.4s was picked by eye and is pure latency
+  # on every single delivery; at a 100ms courier interval it became the largest
+  # remaining cost. Tunable, and lower for a single line, which no TUI needs time to
+  # reassemble.
+  local gap
   if [ "${text#*$'\n'}" != "$text" ]; then
     # multi-line: bracketed paste, else each newline submits the prompt early
     tm send-keys -t "$pane" -l -- "${ESC}[200~${text}${ESC}[201~"
+    gap="${AGENTMUX_SEND_DELAY_MULTILINE:-0.25}"
   else
     tm send-keys -t "$pane" -l -- "$text"
+    gap="${AGENTMUX_SEND_DELAY:-0.08}"
   fi
-  sleep 0.4
+  sleep "$gap"
   tm send-keys -t "$pane" Enter
 }
 
@@ -838,8 +860,8 @@ cmd_post() {
   local text="${words[*]}"
   [ -n "$text" ] || die "post needs a message body"
   case "$kind" in
-    plan|request|reply|status|finding|error) ;;
-    *) die "kind must be one of: plan request reply status finding error (got '$kind')" ;;
+    plan|request|reply|status|finding|error|claim|release) ;;
+    *) die "kind must be one of: plan request reply status finding error claim release (got '$kind')" ;;
   esac
 
   # Tell the caller NOW if this address cannot receive, rather than letting the
@@ -884,6 +906,45 @@ with path.open("a", encoding="utf-8") as handle:
 os.chmod(path, 0o600)
 print(f"posted {kind} to {recipient}")
 PY
+}
+
+# Work coordination: claims, dependencies and the shared journal.
+#
+# Conversation is not coordination. Three unrestricted agents on one repo will edit the
+# same file unless something stops them, and a message asking politely does not stop
+# anything - the other agent may not be reading. A claim is an atomically created FILE
+# (O_EXCL), so exactly one agent wins a race; the broadcast that follows is a courtesy,
+# not the mechanism.
+#
+# The holder defaults to $AGENTMUX_AGENT, so inside a pane an agent never has to know
+# or type its own name - and cannot claim on someone else's behalf by accident.
+coord_py() {
+  local repo="${AGENTMUX_REPO:-}"
+  [ -n "$repo" ] || die "AGENTMUX_REPO is unset; cannot find taskmgmt/coordination.py"
+  local script="$repo/taskmgmt/coordination.py"
+  [ -f "$script" ] || die "not found: $script"
+  printf '%s' "$script"
+}
+
+cmd_claim() {
+  local resource="${1:-}"; shift || true
+  [ -n "$resource" ] || die "claim needs a resource, e.g. agentmux claim taskmgmt/courier.py --note 'adding backoff'"
+  python3 "$(coord_py)" claim "$resource" --holder "${AGENTMUX_AGENT:-orchestrator}" "$@"
+}
+
+cmd_release() {
+  local resource="${1:-}"; shift || true
+  [ -n "$resource" ] || die "release needs a resource"
+  python3 "$(coord_py)" release "$resource" --holder "${AGENTMUX_AGENT:-orchestrator}" "$@"
+}
+
+cmd_claims() { python3 "$(coord_py)" claims "$@"; }
+
+cmd_journal() {
+  local kind="${1:-}" subject="${2:-}"; shift 2 2>/dev/null || true
+  [ -n "$kind" ] && [ -n "$subject" ] \
+    || die "journal needs a kind and a subject, e.g. agentmux journal note 'starting the mqtt refactor'"
+  python3 "$(coord_py)" journal "$kind" "$subject" --agent "${AGENTMUX_AGENT:-orchestrator}" "$@"
 }
 
 # The delivery half. Runs taskmgmt/courier.py, which tails every outbox and hands
@@ -1229,6 +1290,10 @@ case "${1:-}" in
   post)   shift; cmd_post   "$@" ;;
   courier) shift; cmd_courier "$@" ;;
   inbox)  shift; cmd_inbox  "$@" ;;
+  claim)  shift; cmd_claim  "$@" ;;
+  release) shift; cmd_release "$@" ;;
+  claims) shift; cmd_claims "$@" ;;
+  journal) shift; cmd_journal "$@" ;;
   list)   shift; cmd_list   "$@" ;;
   kill)   shift; cmd_kill   "$@" ;;
   reap)   shift; cmd_reap   "$@" ;;

@@ -181,6 +181,7 @@ empty list that reads as "no tickets".
 | `run_tests.sh` | Restarts the server and runs every suite; non-zero if any fails. Spawns two throwaway `shell` agents when none are running, because the stream checks need live panes, and kills them on exit. Pre-existing agents are left alone. |
 | `test_modal_guard.sh` | The `send` modal guard, against captured pane text. No tmux, no CLI, no network. |
 | `test_inbox_guard.sh` | `agentmux inbox` cannot be pointed outside `inbox/`. Runs against a throwaway `AGENTMUX_HOME`, so a regression cannot destroy real queue files while proving that it would. |
+| `test_coordination.sh` | Work claims, leases, dependency reporting and the journal fallback — including a 12-way concurrent race that must produce exactly one winner. |
 | `syntax_check.sh` | Parses every shell and Python file in the repo. |
 | `start_gateway.sh` / `setup_bedrock_codex.sh` | Bring up the Bedrock gateway; configure `codex-bedrock`. |
 | `check_key_exposure.sh` | Reports every location holding a Bedrock key, by fingerprint — never the value. |
@@ -374,6 +375,11 @@ agentmux ask    <name> <text...>      send -> wait for idle -> print pane
 agentmux post   <to> [--kind K] [--ref R] [--from N] [--strict] <text...>
                                       queue a message FOR ANOTHER AGENT
 agentmux inbox  [name] [--clear]      read mail for a virtual address (no pane)
+agentmux claim  <resource> [--ttl S] [--note T] [--task ID] [--depends-on R]
+                                      take a work lock; atomic, exactly one winner
+agentmux release <resource>           give it back
+agentmux claims [--json] [--all]      who is working on what, right now
+agentmux journal <kind> <subject>     write to the shared journal
 agentmux courier start|stop|status|once|watch|dead|requeue
                                       deliver queued messages to their recipients
 agentmux list
@@ -464,6 +470,68 @@ virtual, listing what *is* available, so an unreachable address is obvious immed
 rather than nine minutes later. `--strict` refuses outright.
 
 `agentmux courier status` prints what is running, what is pending and why.
+
+### Delivery latency
+
+Measured end to end — `post` returning to the text being visible in the recipient's
+pane, using `shell` agents so a model's thinking time does not swamp the harness's own
+cost:
+
+| | median | p95 | under 1s |
+| --- | --- | --- | --- |
+| 3s poll interval (until 2026-09-22) | 3031ms | 3210ms | 1/10 |
+| **now** | **111ms** | **267ms** | **12/12** |
+
+The old interval existed to avoid running `tmux list-sessions` ten times a second. The
+fix is not a faster loop but a **cheaper idle path**: `work_waiting()` answers "is there
+anything to do?" with a scandir and a stat per outbox — no subprocess, no tmux — and a
+full tick only happens when the answer is yes. Measured idle cost at a 100ms interval:
+**0.00% CPU, 14.5MB RSS** over 120 ticks. `AGENTMUX_COURIER_INTERVAL` tunes it;
+`AGENTMUX_SEND_DELAY` tunes the gap between the text and the Enter.
+
+### Coordination: claims, dependencies, the journal
+
+**Conversation is not coordination.** Three agents with unrestricted permissions on one
+repo will edit the same file given the chance, and a message asking them not to stops
+nothing — the other agent may not be reading.
+
+A **claim** is a file created with `O_CREAT | O_EXCL`, so exactly one agent wins a race.
+Verified with twelve concurrent claimants: one winner, one claim file, and the recorded
+holder is the process that was told it won.
+
+```
+agentmux claims                                      # who is on what, right now
+agentmux claim taskmgmt/courier.py --note "backoff" --task CCC-42
+agentmux release taskmgmt/courier.py
+```
+
+A refusal names the holder, their note, the expiry, and how to reach them. Claims carry
+a **lease** (default 1800s), so an agent that crashes or wanders off does not hold a
+file forever — an expired claim is takeable, and that is the only reason to ever
+`--force` a release.
+
+**Dependencies are declarations, not locks.** `--depends-on api/routes.py` records that
+your work assumes that file stays still, and `claims` surfaces it so whoever holds the
+other end can see who is relying on them. Enforcing them would mean writing a scheduler;
+surfacing them costs nothing and catches the common case, which is two agents
+unknowingly pulling in opposite directions.
+
+**The journal** is the shared record the dashboard renders:
+
+```
+agentmux journal note    "starting the mqtt refactor"
+agentmux journal blocked "waiting on api/routes.py, held by codex"
+agentmux journal handoff "courier.py is ready for review"
+```
+
+Kinds: `claim release conflict note handoff blocked done plan`. It falls back to
+`~/.agentmux/journal.jsonl` when the dashboard is down, because a coordination record
+that only exists while a web server happens to be running is not a record.
+
+`claim` and `release` are **message kinds in their own right**, not prose inside a
+`status`, so the dashboard can filter them and an agent can tell a work boundary from a
+remark. That vocabulary is defined in four places — `ccstore.py`, `courier.py`,
+`agentmux.sh` and `app.js` — and all four must agree.
 
 **The courier's lifetime matches the agents'.** A courier that is not running fails
 *silently* — `post` succeeds, the message sits in the queue, and the recipient simply

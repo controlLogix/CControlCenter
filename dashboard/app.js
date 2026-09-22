@@ -1873,7 +1873,8 @@ function say(node, msg) { node.textContent = msg; }
 
 // ═══════════════════════════════════════════════════════════ message queue ════
 
-const MSG_KINDS = new Set(['plan', 'request', 'reply', 'status', 'finding', 'error']);
+const MSG_KINDS = new Set(['plan', 'request', 'reply', 'status', 'finding',
+                           'error', 'claim', 'release']);
 
 async function loadQueue() {
   try {

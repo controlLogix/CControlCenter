@@ -75,7 +75,13 @@ VIRTUAL_AGENTS = frozenset(
 # Kept identical to dashboard/ccstore.py on purpose: a message the courier accepts
 # but the store rejects (or the reverse) would appear in one view and not the other.
 NAME_PATTERN = re.compile(r"[A-Za-z0-9_.-]{1,64}")
-MESSAGE_KINDS = frozenset(("plan", "request", "reply", "status", "finding", "error"))
+# "claim" and "release" are coordination, not conversation: an agent announcing that
+# it has taken or given up a resource. They are a distinct kind so the dashboard can
+# filter them and an agent can tell a work boundary from a remark. The vocabulary is
+# duplicated in courier.py, agentmux.sh and app.js - all four must agree or a message
+# accepted by one is invisible in another.
+MESSAGE_KINDS = frozenset(("plan", "request", "reply", "status", "finding", "error",
+                           "claim", "release"))
 
 READ_BYTES = 262144        # per outbox per tick
 BODY_MAX = 65536
@@ -187,6 +193,7 @@ def load_cursor(agent):
 
 
 def save_cursor(agent, info, offset):
+    _CURSOR_CACHE[agent] = offset
     write_private(cursor_path(agent), json.dumps(
         {"dev": info.st_dev, "ino": info.st_ino, "offset": offset}))
 
@@ -226,6 +233,15 @@ def parse_record(raw):
     recipient = value.get("recipient")
     sender = value.get("sender")
     if kind not in MESSAGE_KINDS:
+        # Say so. A silently skipped record is how an hour goes missing: when "claim"
+        # and "release" were added to the vocabulary, the RUNNING courier was still on
+        # the old set and dropped every one of them without a word, so coordination
+        # looked broken when it was merely stale. Logged once per kind, not per record.
+        if kind not in _UNKNOWN_KINDS_SEEN:
+            _UNKNOWN_KINDS_SEEN.add(kind)
+            log(f"SKIPPING records of unknown kind {kind!r} from {sender!r}. "
+                f"This courier knows {sorted(MESSAGE_KINDS)}. If the vocabulary was "
+                f"just extended, restart the courier: agentmux courier stop && start")
         return None
     if not isinstance(recipient, str) or not NAME_PATTERN.fullmatch(recipient):
         return None
@@ -442,6 +458,52 @@ def deliver(message, running):
     return False, detail[0] if detail else f"send exited {done.returncode}"
 
 
+def work_waiting():
+    """Is there anything to do? Cheap enough to ask ten times a second.
+
+    THE POINT OF THIS FUNCTION IS WHAT IT DOES NOT DO. A full tick shells out to
+    `tmux list-sessions` and reads every cursor; at a 100ms interval that is ten
+    subprocesses a second forever, which is why the interval used to be three seconds
+    and why delivery took three seconds. This answers the same question with a
+    scandir and a stat per outbox - no subprocess, no tmux - so the fast interval
+    costs nothing while idle and the courier can afford to look constantly.
+
+    Errs towards True: a missed wake-up delays a message, a spurious one costs a tick.
+    """
+    try:
+        if PENDING.exists() and PENDING.stat().st_size > 0:
+            return True
+    except OSError:
+        return True
+    try:
+        with os.scandir(QUEUE_DIR) as entries:
+            for entry in entries:
+                name = entry.name
+                if not name.endswith(".jsonl") or not NAME_PATTERN.fullmatch(name[:-6]):
+                    continue
+                if name[:-6] == COURIER:
+                    continue
+                try:
+                    size = entry.stat().st_size
+                except OSError:
+                    return True
+                seen = _CURSOR_CACHE.get(name[:-6])
+                if seen is None or size > seen:
+                    return True
+    except OSError:
+        return True
+    return False
+
+
+# Unknown message kinds already reported, so a stale courier complains once rather
+# than once per record.
+_UNKNOWN_KINDS_SEEN = set()
+
+# Offsets already consumed, kept in memory so an idle tick touches no cursor files.
+# Only ever a cache: every value is also written to disk by save_cursor.
+_CURSOR_CACHE = {}
+
+
 def tick(from_start=False, dry_run=False):
     """One pass: retry what is pending, then drain each outbox. Returns a summary."""
     QUEUE_DIR.mkdir(parents=True, exist_ok=True)
@@ -597,12 +659,18 @@ def watch(interval, from_start):
     log(f"courier watching {QUEUE_DIR} every {interval}s (pid {os.getpid()})")
     first = from_start
     try:
+        # One full pass up front to populate the cursor cache; work_waiting() reads
+        # that cache, so before the first tick it has nothing to compare against.
+        summary = tick(from_start=first)
+        first = False
         while True:
-            summary = tick(from_start=first)
-            first = False
-            if summary["delivered"] or summary["dropped"]:
-                log(f"tick    delivered {summary['delivered']}  "
-                    f"pending {summary['pending']}  dropped {summary['dropped']}")
+            # The fast path: no subprocess, no tmux, just a scandir. A full tick only
+            # happens when there is something to deliver or retry.
+            if work_waiting():
+                summary = tick()
+                if summary["delivered"] or summary["dropped"]:
+                    log(f"tick    delivered {summary['delivered']}  "
+                        f"pending {summary['pending']}  dropped {summary['dropped']}")
             time.sleep(interval)
     except KeyboardInterrupt:
         log("courier stopped")
@@ -626,7 +694,10 @@ def main(argv=None):
                       help="list messages kept in the dead-letter file")
     mode.add_argument("--requeue", action="store_true",
                       help="put every dead-letter message back in the delivery queue")
-    parser.add_argument("--interval", type=float, default=3.0, help="seconds between passes")
+    parser.add_argument("--interval", type=float,
+                        default=float(os.environ.get("AGENTMUX_COURIER_INTERVAL", 0.1)),
+                        help="seconds between passes (default 0.1; the idle path is "
+                             "a scandir, so a fast interval is cheap)")
     parser.add_argument("--from-start", action="store_true",
                         help="read outboxes from byte 0 - replays existing history")
     args = parser.parse_args(argv)
@@ -677,6 +748,21 @@ def main(argv=None):
         pid = running_pid()
         summary = tick(dry_run=True)
         print(f"courier:   {'running, pid ' + str(pid) if pid else 'not running'}")
+        # A courier started before the code it is running was edited will behave like
+        # the old code - most visibly by dropping message kinds it has never heard of.
+        # That cost real debugging time once; it should never be a mystery again.
+        if pid:
+            try:
+                started = os.path.getmtime(PIDFILE)
+                changed = os.path.getmtime(__file__)
+                if changed > started:
+                    age = int((changed - started) / 60)
+                    print(f"           STALE: courier.py was modified {age} minute(s) "
+                          f"AFTER this process started.")
+                    print(f"           Restart it or it keeps running the old code: "
+                          f"agentmux courier stop && agentmux courier start")
+            except OSError:
+                pass
         print(f"queue:     {QUEUE_DIR}")
         print(f"agents:    {', '.join(summary['running']) or 'none running'}")
         print(f"virtual:   {', '.join(sorted(VIRTUAL_AGENTS))} "
@@ -709,7 +795,7 @@ def main(argv=None):
         return 0
 
     if args.watch:
-        return watch(max(0.5, args.interval), args.from_start)
+        return watch(max(0.02, args.interval), args.from_start)
 
     summary = tick(from_start=args.from_start)
     print(f"delivered {summary['delivered']}  pending {summary['pending']}  "

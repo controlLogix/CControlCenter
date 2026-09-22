@@ -14,7 +14,13 @@ import threading
 DB_PATH = Path.home() / ".agentmux" / "cc.db"
 QUEUE_DIR = Path.home() / ".agentmux" / "queue"
 NAME_PATTERN = re.compile(r"[A-Za-z0-9_.-]{1,64}")
-MESSAGE_KINDS = frozenset(("plan", "request", "reply", "status", "finding", "error"))
+# "claim" and "release" are coordination, not conversation: an agent announcing that
+# it has taken or given up a resource. They are a distinct kind so the dashboard can
+# filter them and an agent can tell a work boundary from a remark. The vocabulary is
+# duplicated in courier.py, agentmux.sh and app.js - all four must agree or a message
+# accepted by one is invisible in another.
+MESSAGE_KINDS = frozenset(("plan", "request", "reply", "status", "finding", "error",
+                           "claim", "release"))
 EPIC_STATUSES = frozenset(("open", "in_progress", "blocked", "done", "archived"))
 TASK_STATUSES = frozenset(("todo", "in_progress", "blocked", "done", "cancelled"))
 QUEUE_FILE_BYTES = 262144
