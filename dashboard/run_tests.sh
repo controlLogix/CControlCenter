@@ -3,7 +3,9 @@
 #   bash <(tr -d '\r' < dashboard/run_tests.sh)
 #
 # Restarts the server first, because several suites assert on endpoints that only
-# exist after a reload. Exits non-zero if any suite fails.
+# exist after a reload, and spawns two throwaway agents if none are running, because
+# the stream checks need live panes. Both are cleaned up on exit. Exits non-zero if any
+# suite fails.
 #
 # test_auth.py needs an interactive-ish shell for nvm's node (codex is validated
 # through `codex exec --strict-config`), so run this under `bash -ic` if codex is
@@ -12,6 +14,55 @@ set -u
 [ -f dashboard/server.py ] || { echo 'run this from the agentmux repo root' >&2; exit 2; }
 
 bash <(tr -d '\r' < dashboard/restart.sh) >/dev/null || exit 1
+
+# Agents, if there are none.
+#
+# smoke.sh and test_snapshot.py assert against live panes: /api/stream-all has nothing
+# to carry without one, and the snapshot framing checks need a real pane to frame. Run
+# cold, that cost three checks in smoke.sh and six in test_snapshot.py - failures that
+# look exactly like a streaming regression and have cost real time being investigated as
+# one, twice.
+#
+# So the suite provides its own. Two `--cli shell` agents need no credentials and no
+# network. Pre-existing agents are left completely alone: if any session is already up,
+# nothing is spawned and nothing is killed, because the operator's agents are not the
+# test's to manage.
+#
+# AGENTMUX_NO_COURIER=1 because a test run should not leave a daemon behind; the
+# courier's own lifecycle is covered by test_courier.py against an isolated HOME.
+SPAWNED=""
+HARNESS=""
+
+cleanup() {
+  for agent in $SPAWNED; do
+    bash "$HARNESS" kill "$agent" >/dev/null 2>&1
+  done
+  [ -n "$HARNESS" ] && rm -f "$HARNESS"
+}
+trap cleanup EXIT INT TERM
+
+if command -v tmux >/dev/null 2>&1; then
+  live="$(tmux -L agentmux list-sessions -F '#{session_name}' 2>/dev/null | grep -c . || true)"
+  if [ "${live:-0}" -eq 0 ]; then
+    HARNESS="$(mktemp)"
+    tr -d '\r' < agentmux.sh > "$HARNESS"
+    export AGENTMUX_REPO="${AGENTMUX_REPO:-$PWD}"
+    export AGENTMUX_NO_COURIER=1
+    for agent in ccc-selftest-1 ccc-selftest-2; do
+      if bash "$HARNESS" spawn "$agent" --cli shell --cwd /tmp >/dev/null 2>&1; then
+        SPAWNED="$SPAWNED $agent"
+      fi
+    done
+    if [ -n "$SPAWNED" ]; then
+      echo "(spawned$SPAWNED for the stream checks; they are killed on exit)"
+      sleep 1
+    else
+      echo "WARNING: could not spawn test agents; stream checks will fail" >&2
+    fi
+  fi
+else
+  echo "WARNING: tmux not found; stream checks will fail without live agents" >&2
+fi
 
 total_fail=0
 

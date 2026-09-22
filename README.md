@@ -178,7 +178,7 @@ empty list that reads as "no tickets".
 | `restart.sh` | Restart the server; `--fresh-db` drops `cc.db` first. |
 | `seed_queue.py` | Writes sample agent traffic into `~/.agentmux/queue/` for exercising the Message Queue view. |
 | `show_auth.py` | Prints `/api/auth` as a tree. Debugging aid for the auth grouping. |
-| `run_tests.sh` | Restarts the server and runs every suite; non-zero if any fails. |
+| `run_tests.sh` | Restarts the server and runs every suite; non-zero if any fails. Spawns two throwaway `shell` agents when none are running, because the stream checks need live panes, and kills them on exit. Pre-existing agents are left alone. |
 | `syntax_check.sh` | Parses every shell and Python file in the repo. |
 | `start_gateway.sh` / `setup_bedrock_codex.sh` | Bring up the Bedrock gateway; configure `codex-bedrock`. |
 | `check_key_exposure.sh` | Reports every location holding a Bedrock key, by fingerprint — never the value. |
