@@ -58,7 +58,7 @@ Nothing is typed when the desktop, the taskbar or the overlay itself has focus; 
 | `--no-overlay` | | headless: stdout + API only |
 | `-v` | | also emit mic `level` events |
 
-Flags are saved to `%APPDATA%\voicecli\config.json`, so the next run starts the same way.
+Flags are saved to `%APPDATA%\voicecli\config.json`, so the next run starts the same way (`lock_hotkey` and `show_hotkey` can be changed there). When started from the shortcut, output goes to `%APPDATA%\voicecli\voicecli.log`.
 
 ## API (127.0.0.1:47821)
 
