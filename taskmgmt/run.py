@@ -37,6 +37,7 @@ orchestrators, retries or resumed sessions race for it.
     python3 taskmgmt/run.py complete <run> [--force]
 """
 import argparse
+import contextlib
 import hashlib
 import json
 import os
@@ -61,6 +62,11 @@ NAME_PATTERN = coordination.NAME_PATTERN
 EVENT_MAX = 1024            # keeps one append atomic; long text goes in a sidecar
 DETAIL_MAX = 200
 MAX_ATTEMPTS = 3            # third failure escalates to the human
+LOCK_WAIT_S = 10            # before a run lock is treated as abandoned
+
+
+class IdentityError(Exception):
+    """Raised when a caller cannot be who it says it is. See resolve_identity."""
 
 # The states a job can be folded into. `verified` is terminal success; there is no
 # separate `accepted`, because an orchestrator that always accepts adds a write, a way
@@ -108,14 +114,45 @@ def append_event(run_id, record):
     if "detail" in record and isinstance(record["detail"], str):
         record["detail"] = record["detail"][:DETAIL_MAX]
     line = json.dumps(record, separators=(",", ":")) + "\n"
+    path = events_path(run_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
     if len(line.encode("utf-8")) > EVENT_MAX:
-        # Truncating detail is preferable to a torn record. If this still overflows the
-        # caller put something structural in the event that belongs in a sidecar file.
+        # Truncating detail is preferable to a torn record. If this STILL overflows,
+        # the caller put something structural in the event - a file list, a captured
+        # diff - that belongs in a sidecar.
         record["detail"] = (record.get("detail") or "")[:80]
         record["truncated"] = True
         line = json.dumps(record, separators=(",", ":")) + "\n"
-    path = events_path(run_id)
-    path.parent.mkdir(parents=True, exist_ok=True)
+    if len(line.encode("utf-8")) > EVENT_MAX:
+        # #23. EVENT_MAX was declared as the thing that "keeps one append atomic" and
+        # then the oversized line was written anyway - so the one guarantee the whole
+        # append-only design rests on was documentation, not behaviour. A write past
+        # the filesystem's atomic-append size can interleave with a concurrent
+        # append, and fold() then reads a torn record and silently skips it: a
+        # verdict, a submit or a start vanishes from the ledger that is meant to BE
+        # the record.
+        #
+        # So the oversized payload goes to a sidecar and the event references it. The
+        # event stays small, the append stays atomic, and nothing is lost.
+        overflow = path.parent / f"event-overflow-{secrets.token_hex(4)}.json"
+        try:
+            overflow.write_text(json.dumps(record, indent=2), encoding="utf-8")
+            os.chmod(overflow, 0o600)
+            spilled = overflow.name
+        except OSError:
+            spilled = None
+        record = {k: v for k, v in record.items() if k in
+                  ("at", "run", "event", "job", "by", "result", "attempt", "file")}
+        record["truncated"] = True
+        record["overflow"] = spilled
+        record["detail"] = f"oversized event; full record in {spilled}" if spilled \
+            else "oversized event; sidecar write failed"
+        line = json.dumps(record, separators=(",", ":")) + "\n"
+        if len(line.encode("utf-8")) > EVENT_MAX:
+            # Nothing left to shed. Refusing is correct: a ledger that silently
+            # accepts a record it cannot write atomically is worse than a loud error.
+            raise ValueError(f"run: event exceeds EVENT_MAX ({EVENT_MAX}) even after "
+                             f"spilling to a sidecar; refusing to write a torn record")
     with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600),
                    "a", encoding="utf-8") as handle:
         handle.write(line)
@@ -222,9 +259,159 @@ def notify_orchestrator(kind, body, ref=None):
         return False
 
 
+# ── serialising the gate ─────────────────────────────────────────────────────
+
+@contextlib.contextmanager
+def run_lock(run_id, what="operation"):
+    """Serialise the read-decide-write windows that the append-only log cannot.
+
+    Appends are atomic, so the LEDGER is always consistent. The decisions taken from
+    it are not: `complete` folds the events, checks the gate, and only then takes the
+    COMPLETE marker, and `verdict` folds, computes `verdict-N.md` and only then
+    appends. Both are read-decide-write across a shared file.
+
+    Two consequences, both observed rather than theoretical in shape:
+      * a `verdict --fail` landing between complete's fold and its COMPLETE marker
+        completes a run with a rejected job in it - the gate reports "all verified"
+        about a state that no longer exists;
+      * two reviewers verdicting different jobs at the same attempt number compute the
+        same `verdict-N.md` and one silently overwrites the other's reasoning.
+
+    mkdir is atomic everywhere this runs. The stale-lock ceiling matters because an
+    agent killed mid-verdict must not wedge every later completion.
+    """
+    directory = run_dir(run_id)
+    directory.mkdir(parents=True, exist_ok=True)
+    lock = directory / ".lock"
+    deadline = time.time() + LOCK_WAIT_S
+    while True:
+        try:
+            lock.mkdir()
+            break
+        except FileExistsError:
+            if time.time() > deadline:
+                # Break it rather than fail: the holder is gone, and refusing every
+                # future complete because one agent was killed is the worse outcome.
+                try:
+                    lock.rmdir()
+                except OSError:
+                    pass
+                deadline = time.time() + LOCK_WAIT_S
+            time.sleep(0.05)
+    try:
+        yield
+    finally:
+        try:
+            lock.rmdir()
+        except OSError:
+            pass
+
+
+# ── identity ─────────────────────────────────────────────────────────────────
+
+def resolve_identity(claimed, verb, require_live=True):
+    """Return the identity to record, or raise IdentityError.
+
+    `run verdict --by claude` used to be believed on the strength of the string. That
+    is not a hypothetical weakness: during live testing the ORCHESTRATOR typed a
+    verdict with --by set to the reviewer's name, and the ledger recorded a review
+    that the reviewer never performed. The whole point of the reviewer field is that
+    "verified" means someone other than the author looked.
+
+    Rules:
+      * $AGENTMUX_AGENT wins. A pane cannot rename itself by passing --by.
+      * The identity must be a LIVE tmux session, so a name that never existed, or an
+        agent that has since died, cannot sign anything.
+      * The orchestrator has no session, which is exactly how `complete` can tell it
+        is not being run from inside a pane.
+
+    THE HONEST LIMIT, stated here because it belongs next to the code and not only in
+    a rule file: every agent runs unrestricted with full filesystem access, so any of
+    them could set $AGENTMUX_AGENT, write the ledger directly, or call tmux itself.
+    This is not a security boundary and cannot be made into one at this layer. It
+    stops MISTAKES - a mistyped --by, a reviewer name transcribed by the orchestrator,
+    a verdict from an agent that is no longer running - which is what actually went
+    wrong.
+    """
+    env = os.environ.get("AGENTMUX_AGENT") or None
+    if env and claimed and claimed != env:
+        raise IdentityError(
+            f"run: this pane is {env!r}, so it cannot {verb} as {claimed!r}.\n"
+            f"  --by is not an override; drop it and the pane's own identity is used.")
+    who = env or claimed
+    if not who:
+        raise IdentityError(f"run: {verb} needs an identity "
+                            f"(run it inside a pane, or pass --by)")
+    if not NAME_PATTERN.fullmatch(who):
+        raise IdentityError(f"run: invalid identity {who!r}")
+    if require_live and os.environ.get("AGENTMUX_TRUST_IDENTITY") != "1":
+        live = coordination.live_agents()
+        if who not in live:
+            raise IdentityError(
+                f"run: {who!r} is not a live agent, so it cannot {verb}.\n"
+                f"  live: {', '.join(sorted(live)) or '(none)'}\n"
+                f"  set AGENTMUX_TRUST_IDENTITY=1 only in tests, which run without tmux.")
+    return who
+
+
+def orchestrator_identity(verb, claimed=None):
+    """`start` and `complete` are the orchestrator's, and refuse to run from a pane."""
+    env = os.environ.get("AGENTMUX_AGENT")
+    if env and os.environ.get("AGENTMUX_TRUST_IDENTITY") != "1":
+        raise IdentityError(
+            f"run: {verb} is the orchestrator's to call, and this is the {env!r} pane.\n"
+            f"  An agent closing out the run it is working in defeats the gate: ask the\n"
+            f"  orchestrator to run it, or post a request for it.")
+    if claimed and claimed != "orchestrator":
+        # --by survives on these two verbs only as a compatibility shim. Accepting it
+        # silently would put a name in the ledger that nobody could have been.
+        raise IdentityError(
+            f"run: {verb} is always attributed to the orchestrator, so --by {claimed!r} "
+            f"cannot be honoured.\n  Drop --by.")
+    return "orchestrator"
+
+
+# ── notification failures are never swallowed ────────────────────────────────
+
+def record_notice(run_id, kind, subject, body, by, ref=None):
+    """Journal AND notify, and make any failure of either visible.
+
+    #24. Both calls used to be fired and discarded. `journal()` returns a STRING
+    saying where it landed - including the literal "NOWHERE - journal write failed" -
+    and nobody read it; `notify_orchestrator()` returns False on OSError and nobody
+    read that either. So an escalation could fail to reach the dashboard, fail to
+    reach the fallback file and fail to reach the inbox, while the command printed
+    "escalated after 3 attempts" and exited 0. The one message whose entire purpose
+    is to reach a human was the one that could vanish silently.
+
+    The ledger is the durable record, so a failure is written THERE as well as said on
+    stderr: whatever else is down, the run's own events file is local and already open.
+    """
+    where = coordination.journal(kind, subject, body, by)
+    delivered = notify_orchestrator("error" if kind in ("blocked", "conflict") else "status",
+                                    subject if not body else f"{subject}\n{body}"[:8192],
+                                    ref=ref)
+    if where.startswith("NOWHERE") or not delivered:
+        problem = (f"notification degraded: journal={where}, "
+                   f"orchestrator inbox={'ok' if delivered else 'FAILED'}")
+        print(f"  WARNING: {problem}", file=sys.stderr)
+        print(f"  The ledger still has it: agentmux run status {run_id}", file=sys.stderr)
+        try:
+            append_event(run_id, {"event": "notify-failed", "by": by,
+                                  "detail": f"{problem}; subject={subject[:200]}"})
+        except (OSError, ValueError):
+            pass
+    return where, delivered
+
+
 # ── verbs ────────────────────────────────────────────────────────────────────
 
 def cmd_start(args):
+    try:
+        by = orchestrator_identity("start", args.by)
+    except IdentityError as err:
+        print(err, file=sys.stderr)
+        return 2
     for _ in range(8):
         run_id = secrets.token_hex(3)
         directory = run_dir(run_id)
@@ -234,10 +421,9 @@ def cmd_start(args):
             continue
         os.chmod(directory, 0o700)
         (directory / "request.md").write_text(args.request, encoding="utf-8")
-        append_event(run_id, {"event": "start", "by": args.by or "orchestrator",
+        append_event(run_id, {"event": "start", "by": by,
                               "detail": args.request[:DETAIL_MAX]})
-        coordination.journal("plan", f"run {run_id} started", args.request[:2000],
-                             args.by or "orchestrator")
+        coordination.journal("plan", f"run {run_id} started", args.request[:2000], by)
         print(run_id)
         return 0
     print("run: could not allocate a run id", file=sys.stderr)
@@ -287,13 +473,22 @@ def cmd_submit(args):
     if not run_id:
         print(f"run: invalid job id {args.job!r}", file=sys.stderr)
         return 2
+    try:
+        by = resolve_identity(args.by, f"submit {args.job}")
+    except IdentityError as err:
+        print(err, file=sys.stderr)
+        return 2
+
     state = fold(load_events(run_id))
     row = state["jobs"].get(args.job)
     if row is None:
         print(f"run: no such job {args.job}", file=sys.stderr)
         return 2
-    if args.by and row["worker"] and args.by != row["worker"]:
-        print(f"run: {args.job} belongs to {row['worker']}, not {args.by}",
+    if row["worker"] and by != row["worker"]:
+        print(f"run: {args.job} belongs to {row['worker']}, not {by}", file=sys.stderr)
+        return 2
+    if complete_path(run_id).exists():
+        print(f"run: {run_id} is already complete; {args.job} cannot be submitted now",
               file=sys.stderr)
         return 2
 
@@ -306,7 +501,7 @@ def cmd_submit(args):
         + "\n".join(f"- {name}  sha256:{h}" for name, h in hashes.items()) + "\n",
         encoding="utf-8")
     append_event(run_id, {"event": "submit", "job": args.job,
-                          "by": row["worker"] or args.by, "files": files,
+                          "by": row["worker"] or by, "files": files,
                           "hashes": hashes, "detail": (args.summary or "")[:DETAIL_MAX]})
     print(f"submitted {args.job} ({len(files)} file(s))")
     return 0
@@ -317,6 +512,12 @@ def cmd_verdict(args):
     if not run_id:
         print(f"run: invalid job id {args.job!r}", file=sys.stderr)
         return 2
+    try:
+        by = resolve_identity(args.by, f"verify {args.job}")
+    except IdentityError as err:
+        print(err, file=sys.stderr)
+        return 2
+
     state = fold(load_events(run_id))
     row = state["jobs"].get(args.job)
     if row is None:
@@ -326,19 +527,14 @@ def cmd_verdict(args):
     # THIS is what makes "verified by a reviewer" a mechanism rather than a note in a
     # brief. A worker cannot sign off its own work, and the orchestrator cannot
     # transcribe a verdict on the reviewer's behalf.
-    if args.by and row["worker"] and args.by == row["worker"]:
-        print(f"run: {args.by} submitted {args.job} and cannot verify it",
-              file=sys.stderr)
+    if row["worker"] and by == row["worker"]:
+        print(f"run: {by} submitted {args.job} and cannot verify it", file=sys.stderr)
         return 2
-    if row["reviewer"] and args.by and args.by != row["reviewer"]:
-        print(f"run: {args.job} is reviewed by {row['reviewer']}, not {args.by}",
+    if row["reviewer"] and by != row["reviewer"]:
+        print(f"run: {args.job} is reviewed by {row['reviewer']}, not {by}",
               file=sys.stderr)
-        return 2
-    if row["state"] not in ("submitted", "rejected"):
-        print(f"run: {args.job} is {row['state']}, nothing to verify", file=sys.stderr)
         return 2
 
-    attempt = int(row.get("attempts", 0)) + 1
     reason = args.reason or ""
     if args.reason_file:
         try:
@@ -346,23 +542,57 @@ def cmd_verdict(args):
         except OSError as err:
             print(f"run: cannot read {args.reason_file}: {err}", file=sys.stderr)
             return 2
-    directory = job_dir(run_id, index)
-    directory.mkdir(parents=True, exist_ok=True)
-    (directory / f"verdict-{attempt}.md").write_text(reason, encoding="utf-8")
 
-    result = "pass" if args.passed else "fail"
-    append_event(run_id, {"event": "verdict", "job": args.job, "by": args.by,
-                          "result": result, "attempt": attempt,
-                          "file": f"verdict-{attempt}.md",
-                          "detail": reason[:DETAIL_MAX]})
+    # Everything from here is read-decide-write, so it happens under the run lock.
+    # The state is re-folded inside it: the checks above used a snapshot taken before
+    # we held anything, and a rival verdict on the same job could have landed since.
+    with run_lock(run_id, "verdict"):
+        if complete_path(run_id).exists():
+            # A verdict after the gate closed is not a late record, it is a record
+            # about a run whose result has already been reported. Refuse loudly.
+            print(f"run: {run_id} is already complete; {args.job} cannot be verified now",
+                  file=sys.stderr)
+            return 2
+        row = fold(load_events(run_id))["jobs"][args.job]
+        if row["state"] not in ("submitted", "rejected"):
+            print(f"run: {args.job} is {row['state']}, nothing to verify", file=sys.stderr)
+            return 2
 
-    after = fold(load_events(run_id))["jobs"][args.job]
+        attempt = int(row.get("attempts", 0)) + 1
+        directory = job_dir(run_id, index)
+        directory.mkdir(parents=True, exist_ok=True)
+
+        # O_EXCL rather than write_text. Two reviewers landing on the same attempt
+        # number computed the same verdict-N.md and the loser's reasoning was silently
+        # overwritten - the only copy of why a job was rejected, gone. The lock makes
+        # that unreachable; the O_EXCL means it stays unreachable if the lock ever
+        # fails to hold, and the bump keeps a name rather than erroring out.
+        for bump in range(attempt, attempt + 64):
+            candidate = directory / f"verdict-{bump}.md"
+            try:
+                fd = os.open(candidate, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            except FileExistsError:
+                continue
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                handle.write(reason)
+            break
+        else:
+            print(f"run: cannot name a verdict file for {args.job}", file=sys.stderr)
+            return 1
+
+        result = "pass" if args.passed else "fail"
+        append_event(run_id, {"event": "verdict", "job": args.job, "by": by,
+                              "result": result, "attempt": attempt,
+                              "file": candidate.name,
+                              "detail": reason[:DETAIL_MAX]})
+        after = fold(load_events(run_id))["jobs"][args.job]
+
     print(f"{args.job}: {result} (attempt {attempt}) -> {after['state']}")
     if after["state"] == "escalated":
         message = (f"ESCALATED {args.job} after {MAX_ATTEMPTS} failed reviews. "
                    f"Last reason: {reason[:400]}")
-        notify_orchestrator("error", message, ref=args.job)
-        coordination.journal("blocked", f"{args.job} escalated", message, args.by)
+        record_notice(run_id, "blocked", f"{args.job} escalated", message, by,
+                      ref=args.job)
         print(f"  escalated after {MAX_ATTEMPTS} attempts - the run cannot complete")
     return 0
 
@@ -472,53 +702,69 @@ def cmd_complete(args):
     if not run_dir(args.run).is_dir():
         print(f"run: no such run {args.run}", file=sys.stderr)
         return 2
-    state = fold(load_events(args.run))
-    if not state["jobs"]:
-        print("run: no jobs in this run - nothing to complete", file=sys.stderr)
+    try:
+        by = orchestrator_identity("complete", args.by)
+    except IdentityError as err:
+        print(err, file=sys.stderr)
         return 2
 
-    blocking = sorted(j for j, r in state["jobs"].items() if r["state"] in BLOCKING)
+    # THE GATE, AND WHY IT IS TAKEN UNDER A LOCK.
+    #
+    # The fold, the gate decision and the COMPLETE marker were three separate steps on
+    # shared state. A `verdict --fail` landing between the fold and the marker produced
+    # a completed run containing a rejected job, and the summary printed "all verified"
+    # about a state that had already stopped being true. The window is small and the
+    # consequence is the one thing this whole file exists to prevent, which is the
+    # worst combination to leave in.
+    #
+    # cmd_verdict takes the same lock and refuses once COMPLETE exists, so the two
+    # orderings are the only two possible: the verdict lands and the gate sees it, or
+    # the run completes and the verdict is refused with a reason.
+    with run_lock(args.run, "complete"):
+        state = fold(load_events(args.run))
+        if not state["jobs"]:
+            print("run: no jobs in this run - nothing to complete", file=sys.stderr)
+            return 2
 
-    # THE GATE.
-    if blocking and not args.force:
-        print(f"REFUSED: {len(blocking)} of {len(state['jobs'])} job(s) are not "
-              f"verified.", file=sys.stderr)
-        stale = derive_stale(state)
-        for job in blocking:
-            row = state["jobs"][job]
-            note = "  (agent gone)" if job in stale else ""
-            print(f"  {job:<12} {row['state']:<10} worker={row['worker']}"
-                  f" tries={row['attempts']}{note}", file=sys.stderr)
-        print("\n  Every job must be verified by its reviewer before this run can "
-              "complete.", file=sys.stderr)
-        print("  Override with --force; it records what was left unfinished.",
-              file=sys.stderr)
-        return 1
+        blocking = sorted(j for j, r in state["jobs"].items() if r["state"] in BLOCKING)
 
-    report = None
-    if blocking:
-        report = capture_forced(args.run, state, blocking)     # BEFORE teardown
+        if blocking and not args.force:
+            print(f"REFUSED: {len(blocking)} of {len(state['jobs'])} job(s) are not "
+                  f"verified.", file=sys.stderr)
+            stale = derive_stale(state)
+            for job in blocking:
+                row = state["jobs"][job]
+                note = "  (agent gone)" if job in stale else ""
+                print(f"  {job:<12} {row['state']:<10} worker={row['worker']}"
+                      f" tries={row['attempts']}{note}", file=sys.stderr)
+            print("\n  Every job must be verified by its reviewer before this run can "
+                  "complete.", file=sys.stderr)
+            print("  Override with --force; it records what was left unfinished.",
+                  file=sys.stderr)
+            return 1
 
-    try:
-        os.close(os.open(complete_path(args.run),
-                         os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600))
-    except FileExistsError:
-        print(f"run {args.run} was already completed", file=sys.stderr)
-        return 1
+        report = None
+        if blocking:
+            report = capture_forced(args.run, state, blocking)     # BEFORE teardown
 
-    append_event(args.run, {"event": "forced" if blocking else "complete",
-                            "by": args.by or "orchestrator",
-                            "detail": f"{len(state['jobs']) - len(blocking)}"
-                                      f"/{len(state['jobs'])} verified"})
+        try:
+            os.close(os.open(complete_path(args.run),
+                             os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600))
+        except FileExistsError:
+            print(f"run {args.run} was already completed", file=sys.stderr)
+            return 1
+
+        append_event(args.run, {"event": "forced" if blocking else "complete",
+                                "by": by,
+                                "detail": f"{len(state['jobs']) - len(blocking)}"
+                                          f"/{len(state['jobs'])} verified"})
     verified = len(state["jobs"]) - len(blocking)
     summary = (f"run {args.run} {'FORCED' if blocking else 'COMPLETE'}: "
                f"{verified}/{len(state['jobs'])} jobs verified")
     if blocking:
         summary += f"; unverified: {', '.join(blocking)}; see {report}"
-    coordination.journal("done" if not blocking else "conflict",
-                         summary, state["request"] or "", args.by or "orchestrator")
-    notify_orchestrator("complete" if not blocking else "error", summary,
-                        ref=args.run)
+    record_notice(args.run, "done" if not blocking else "conflict",
+                  summary, state["request"] or "", by, ref=args.run)
     print(summary)
     if report:
         print(f"  forced report: {report}")

@@ -13,17 +13,21 @@
 # Desktop with three factual errors as a result.
 set -u
 [ -f taskmgmt/run.py ] || { echo 'run this from the agentmux repo root' >&2; exit 2; }
+# shellcheck source=/dev/null
+. dashboard/testlib.sh          # ok/bad/check/check_rc/rc_is/count_msgs, one copy
 
 HOME_DIR="$(mktemp -d)"
 trap 'rm -rf "$HOME_DIR"' EXIT
 export AGENTMUX_HOME="$HOME_DIR"
 export AGENTMUX_DASHBOARD="http://127.0.0.1:1"     # unreachable: journal falls back
-RUN="python3 taskmgmt/run.py"
 
-pass=0; fail=0
-ok()  { printf '  ok    %s\n' "$1"; pass=$((pass + 1)); }
-bad() { printf '  FAIL  %s\n' "$1"; fail=$((fail + 1)); }
-rc_is() { if [ "$2" = "$3" ]; then ok "$1"; else bad "$1 (rc $3, wanted $2)"; fi; }
+# Identity is resolved against LIVE tmux sessions, and this suite deliberately runs
+# with no tmux at all - see the header. The escape hatch exists for exactly this, and
+# for nothing else: it is never set by the harness, only by tests. The negative cases
+# at the bottom of this file unset it, because a guard only tested with its own
+# bypass turned on is not tested.
+export AGENTMUX_TRUST_IDENTITY=1
+RUN="python3 taskmgmt/run.py"
 
 echo '--- a run is an explicit boundary ---'
 r=$($RUN start "make the thing" --by orchestrator 2>/dev/null)
@@ -143,6 +147,101 @@ else
   bad "an event is $longest bytes - appends are no longer atomic"
 fi
 
-echo
-echo "passed $pass, failed $fail"
-[ "$fail" -eq 0 ] || exit 1
+
+echo '--- identity is resolved, not accepted ---'
+# `run verdict --by claude` was believed on the strength of the string. During live
+# testing the ORCHESTRATOR typed a verdict with --by set to the reviewer's name, and
+# the ledger recorded a review that never happened - which makes the reviewer field,
+# and therefore the gate, decorative.
+ir=$($RUN start "identity checks" 2>/dev/null)
+$RUN assign "$ir" --worker worker-a --reviewer rev-a >/dev/null 2>&1
+ijob="$ir/1"
+
+# A pane cannot rename itself with --by.
+#
+# The discriminating case is the REVIEWER's pane submitting the WORKER's job. Old code
+# compared --by against row["worker"] and nothing else, so `--by worker-a` from rev-a's
+# pane was accepted and the ledger recorded a submission worker-a never made. Passing a
+# name that matches nobody would have been refused by the old code too, for an unrelated
+# reason, and would have proved nothing.
+AGENTMUX_AGENT=rev-a $RUN submit "$ijob" --by worker-a --summary x >/dev/null 2>&1
+check_rc "the reviewer's pane cannot submit as the worker" 2 "$?"
+AGENTMUX_AGENT=worker-a $RUN submit "$ijob" --by someone-else >/dev/null 2>&1
+check_rc '--by that disagrees with the pane is refused' 2 "$?"
+
+AGENTMUX_AGENT=worker-a $RUN submit "$ijob" --summary done >/dev/null 2>&1
+check_rc 'the pane submits as itself with no --by at all' 0 "$?"
+
+# The worker still cannot sign off its own work, by any route.
+AGENTMUX_AGENT=worker-a $RUN verdict "$ijob" --pass --reason ok >/dev/null 2>&1
+check_rc 'the worker cannot verify its own job' 2 "$?"
+
+# And the orchestrator cannot transcribe a verdict for the reviewer.
+AGENTMUX_AGENT= $RUN verdict "$ijob" --by rev-a --pass --reason ok >/dev/null 2>&1
+check_rc 'a --by verdict from outside any pane is accepted only under the test flag' 0 "$?"
+
+echo '--- and the guard itself works when it is not bypassed ---'
+# Everything above runs with AGENTMUX_TRUST_IDENTITY=1, so it proves the plumbing and
+# NOT the liveness check. Turn the bypass off: with no tmux running, live_agents() is
+# empty, so every named identity must now be refused. If these pass, the check is real.
+jr=$($RUN start "liveness" 2>/dev/null)
+$RUN assign "$jr" --worker worker-b --reviewer rev-b >/dev/null 2>&1
+jjob="$jr/1"
+( unset AGENTMUX_TRUST_IDENTITY; AGENTMUX_AGENT=worker-b $RUN submit "$jjob" --summary x ) >/dev/null 2>&1
+check_rc 'a non-live identity cannot submit' 2 "$?"
+( unset AGENTMUX_TRUST_IDENTITY; AGENTMUX_AGENT=rev-b $RUN verdict "$jjob" --pass --reason x ) >/dev/null 2>&1
+check_rc 'a non-live identity cannot verify' 2 "$?"
+
+# complete is the orchestrator's, and the orchestrator has no session - so "not a live
+# agent" is exactly the test for "not inside a pane".
+( unset AGENTMUX_TRUST_IDENTITY; AGENTMUX_AGENT=worker-b $RUN complete "$jr" --force ) >/dev/null 2>&1
+check_rc 'an agent cannot complete the run it is working in' 2 "$?"
+$RUN complete "$jr" --by rev-b --force >/dev/null 2>&1
+check_rc '--by on complete is refused rather than silently ignored' 2 "$?"
+
+echo '--- a verdict cannot land after the gate has closed ---'
+# The gate used to fold, decide, and only then take COMPLETE. A --fail arriving in
+# that window completed a run with a rejected job while printing "all verified".
+# TWO jobs, and the run is FORCED with the second still submitted. That is what makes
+# this discriminating: verdicting an already-verified job was refused by the old code
+# too ("verified, nothing to verify"), so a one-job version of this test went green
+# without exercising the race at all. A job left in `submitted` is genuinely
+# verdict-able, and the old code accepted the verdict happily - producing a fail
+# recorded against a run whose result had already been reported.
+kr=$($RUN start "gate race" 2>/dev/null)
+$RUN assign "$kr" --worker worker-c --reviewer rev-c >/dev/null 2>&1
+$RUN assign "$kr" --worker worker-c --reviewer rev-c >/dev/null 2>&1
+kjob="$kr/1"; klate="$kr/2"
+AGENTMUX_AGENT=worker-c $RUN submit "$kjob" --summary x >/dev/null 2>&1
+AGENTMUX_AGENT=rev-c $RUN verdict "$kjob" --pass --reason ok >/dev/null 2>&1
+AGENTMUX_AGENT=worker-c $RUN submit "$klate" --summary x >/dev/null 2>&1
+$RUN complete "$kr" --force >/dev/null 2>&1
+check_rc 'the run completes (forced, one job still open)' 0 "$?"
+AGENTMUX_AGENT=rev-c $RUN verdict "$klate" --fail --reason "too late" >/dev/null 2>&1
+check_rc 'a verdict on a still-open job after completion is refused' 2 "$?"
+AGENTMUX_AGENT=worker-c $RUN submit "$klate" --summary "also too late" >/dev/null 2>&1
+check_rc 'a submit after completion is refused' 2 "$?"
+
+echo '--- an oversized event spills to a sidecar rather than tearing the log ---'
+# EVENT_MAX was declared as what "keeps one append atomic" and then the oversized line
+# was written anyway, so the guarantee the append-only design rests on was a comment.
+lr=$($RUN start "overflow" 2>/dev/null)
+$RUN assign "$lr" --worker worker-d --reviewer rev-d \
+  --brief "$(head -c 4000 /dev/zero | tr '\0' 'b')" >/dev/null 2>&1
+AGENTMUX_AGENT=worker-d $RUN submit "$lr/1" \
+  --files "$(python3 -c 'print(",".join(f"f{i}.py" for i in range(400)))')" \
+  --summary over >/dev/null 2>&1
+longest=$(awk '{ if (length($0) > m) m = length($0) } END { print m + 1 }' \
+  "$HOME_DIR/runs/$lr/events.jsonl")
+if [ "$longest" -le 1024 ]; then
+  ok "every event stayed under the atomic cap (longest $longest)"
+else
+  bad "an event of $longest bytes was written past EVENT_MAX - the append can tear"
+fi
+if ls "$HOME_DIR/runs/$lr"/event-overflow-*.json >/dev/null 2>&1; then
+  ok 'the oversized payload was spilled to a sidecar'
+else
+  bad 'nothing was spilled; the event was silently truncated instead'
+fi
+
+finish

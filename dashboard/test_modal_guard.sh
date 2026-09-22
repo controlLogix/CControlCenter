@@ -27,7 +27,8 @@ tr -d '\r' < agentmux.sh > "$GUARD"
 # Pull in just the function; the script's dispatch runs on source otherwise.
 eval "$(sed -n '/^modal_text() {/,/^}/p' "$GUARD")"
 
-pass=0; fail=0
+# shellcheck source=/dev/null
+. dashboard/testlib.sh          # ok/bad/check/check_rc/rc_is/count_msgs, one copy
 
 modal() {   # modal <label> <text...>  - MUST be detected
   if modal_text "$2"; then
@@ -98,6 +99,5 @@ drwxr-xr-x 2 nick nick 4096 Sep 22 09:38 .'
 normal 'a diff'                 '+  if not logged in:
 -      continue'
 
-echo
-echo "passed $pass, failed $fail"
+finish
 [ "$fail" -eq 0 ] || exit 1

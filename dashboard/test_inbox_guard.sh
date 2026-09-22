@@ -25,9 +25,8 @@ printf '{"at":"t","sender":"dev","recipient":"orchestrator","kind":"reply","body
 printf '{"at":"t","sender":"dev","recipient":"rev","kind":"request","body":"UNDELIVERED","ref":null}\n' \
   > "$HOME_DIR/queue/dev.jsonl"
 
-pass=0; fail=0
-ok()   { printf '  ok    %s\n' "$1"; pass=$((pass + 1)); }
-bad()  { printf '  FAIL  %s\n' "$1"; fail=$((fail + 1)); }
+# shellcheck source=/dev/null
+. dashboard/testlib.sh          # ok/bad/check/check_rc/rc_is/count_msgs, one copy
 
 echo '--- a traversing name is refused ---'
 for name in '../queue/dev' '../../etc/passwd' 'a/b' '/etc/passwd' '..' '.'; do
@@ -141,6 +140,5 @@ else
   bad 'a record was torn'
 fi
 
-echo
-echo "passed $pass, failed $fail"
+finish
 [ "$fail" -eq 0 ] || exit 1

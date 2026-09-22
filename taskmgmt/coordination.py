@@ -265,10 +265,44 @@ def cmd_claim(args):
             if existing is None or expired(existing):
                 # Genuinely dead or corrupt - takeable. An empty file from a crashed
                 # claimant also lands here, which is correct: nobody holds it.
+                #
+                # BUT THE STEAL MUST BE SERIALISED ON THE INODE WE READ. Unconditional
+                # unlink is a TOCTOU: A and B both see the same expired claim, A
+                # unlinks and links its own (now valid, unexpired) claim, then B - who
+                # decided to steal several microseconds ago and never rechecked -
+                # unlinks A'S BRAND NEW CLAIM and links its own. Both print "claimed".
+                # Two winners, from a path whose whole job is to have one.
+                #
+                # Taking an exclusive token named for the inode we observed means only
+                # one stealer proceeds per generation of the file; anyone working from
+                # a stale read loses the token and retries against the new reality.
+                token = None
                 try:
-                    path.unlink()
+                    observed = os.stat(path).st_ino
+                    token = CLAIMS_DIR / f".steal.{flatten(args.resource)}.{observed}"
+                    os.link(staging, token)          # exclusive: one stealer per inode
+                except FileExistsError:
+                    # Someone else is stealing this same generation. Re-read and retry.
+                    if attempt == 1:
+                        continue
+                    staging.unlink(missing_ok=True)
+                    print("coordination: lost the race to take an expired claim",
+                          file=sys.stderr)
+                    return 1
                 except OSError:
                     pass
+                try:
+                    # Only remove the file if it is still the one we decided about.
+                    if token is None or os.stat(path).st_ino == observed:
+                        path.unlink()
+                except OSError:
+                    pass
+                finally:
+                    if token is not None:
+                        try:
+                            token.unlink()
+                        except OSError:
+                            pass
                 if attempt == 1:
                     continue
                 staging.unlink(missing_ok=True)
@@ -276,9 +310,19 @@ def cmd_claim(args):
                 return 1
             if existing.get("holder") == args.holder:
                 # Re-claiming your own is a renewal, not a conflict.
-                staging.unlink(missing_ok=True)
-                with path.open("w", encoding="utf-8") as handle:
-                    json.dump(record, handle)
+                #
+                # This used to be open(path, "w") - truncate the live claim, THEN
+                # write - which is the same empty-file window the staging dance above
+                # exists to close, sitting ten lines below it. Renewal is routine, so
+                # a rival racing one reads an empty file, concludes "malformed,
+                # therefore takeable", unlinks it and takes the claim, while the
+                # holder is told it renewed successfully. Two holders of a mutual
+                # exclusion primitive, silently.
+                #
+                # os.replace rather than os.link here: the holder check has already
+                # passed, so we are deliberately replacing our own claim, and replace
+                # is atomic - the file is never empty and never absent.
+                os.replace(staging, path)
                 print(f"renewed claim on {args.resource} "
                       f"({ttl}s, expires {time.strftime('%H:%M:%S', time.localtime(record['expires_at']))})")
                 return 0
@@ -321,16 +365,54 @@ def cmd_claim(args):
     return 0
 
 
+def release_still_ours(path, holder, observed_ino, force):
+    """Is the claim on disk still the one we decided to release?
+
+    Releasing is check-then-unlink, and the gap matters more than it looks. A claim
+    three seconds from expiry passes the holder check; it then expires, someone else
+    takes it legitimately with a fresh lease, and the original unlink deletes THEIR
+    live claim. `agentmux claims` then shows the resource free, a third agent takes it,
+    and two agents edit the same file - which is the one thing claims exist to stop.
+
+    So re-read immediately before the unlink and compare both the holder and the inode.
+    A different inode means the file has been replaced since we looked, whatever it
+    says inside.
+    """
+    try:
+        if os.stat(path).st_ino != observed_ino:
+            return False
+    except OSError:
+        return False
+    current = read_claim(path)
+    if current is None:
+        return False
+    if force:
+        return True
+    return current.get("holder") == holder and not expired(current)
+
+
 def cmd_release(args):
     path = CLAIMS_DIR / flatten(args.resource)
     existing = read_claim(path)
     if existing is None:
         print(f"no claim on {args.resource}")
         return 0
+    try:
+        observed_ino = os.stat(path).st_ino
+    except OSError:
+        print(f"no claim on {args.resource}")
+        return 0
     if existing.get("holder") != args.holder and not args.force:
         print(f"REFUSED: {args.resource} is held by {existing['holder']}, not "
               f"{args.holder}. Use --force only if you know they are gone.",
               file=sys.stderr)
+        return 1
+
+    # Re-check immediately before the destructive act. See release_still_ours.
+    if not release_still_ours(path, args.holder, observed_ino, args.force):
+        print(f"REFUSED: {args.resource} changed hands since it was read - not "
+              f"releasing someone else's claim.", file=sys.stderr)
+        print("  Run `agentmux claims` to see who holds it now.", file=sys.stderr)
         return 1
     try:
         path.unlink()

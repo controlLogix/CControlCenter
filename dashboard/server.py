@@ -20,8 +20,21 @@ from urllib.parse import parse_qs, unquote, urlsplit
 
 
 ROOT = Path(__file__).resolve().parent
-RUN_DIR = Path.home() / ".agentmux" / "run"
-LOG_DIR = Path.home() / ".agentmux" / "logs"
+# AGENTMUX_HOME, as everything else in this repo already honours it.
+#
+# #25, found while testing #21. agentmux.sh, courier.py, coordination.py and run.py all
+# resolve their root as os.environ.get("AGENTMUX_HOME", ~/.agentmux); these two files
+# hardcoded ~/.agentmux. So the moment AGENTMUX_HOME is set - which every test suite
+# does, and which is the only way to run a second isolated harness - the CLI and the
+# dashboard silently read DIFFERENT directories. The dashboard then shows an empty
+# queue, no agents and no runs while the CLI works perfectly, and nothing anywhere says
+# the two are looking at different state.
+#
+# Unset, this is byte-for-byte the previous expression, so nothing about the normal
+# deployment changes.
+HOME_DIR = Path(os.environ.get("AGENTMUX_HOME", str(Path.home() / ".agentmux")))
+RUN_DIR = HOME_DIR / "run"
+LOG_DIR = HOME_DIR / "logs"
 STREAM_SLOTS = threading.BoundedSemaphore(16)
 
 # ONE STREAM PER AGENT.
@@ -81,7 +94,7 @@ EXTENSIONS = set(FIELDS) | {"pane"}
 # Semantics are AT MOST ONCE: the marker is written before the call. A missed
 # transition is a nuisance; a Jira comment posted twice on every restart is worse.
 TASK_CLI = ROOT.parent / "taskmgmt" / "task.py"
-ATLASSIAN_CFG = Path.home() / ".agentmux" / "atlassian.json"
+ATLASSIAN_CFG = HOME_DIR / "atlassian.json"
 _reaping = set()
 _reap_lock = threading.Lock()
 
@@ -109,18 +122,42 @@ def maybe_reap(name, key):
     """Fire the reaper once for an agent seen stale with a bound issue."""
     if not key or not NAME_PATTERN.fullmatch(name or "") or not task_management_ready():
         return
-    marker = RUN_DIR / f"{name}.reported"
+    # #16. THE MARKER IS SHARED WITH THE CLI, SO IT MUST BE CLAIMED, NOT CHECKED.
+    #
+    # `_reap_lock` serialises this server's own threads, and only those. `agentmux kill`
+    # and `agentmux reap` close the same agent out from separate PROCESSES, where
+    # exists()-then-write() is plain check-then-write: both can see "absent" and both
+    # post, so a real Jira issue gets two close-out comments and two Confluence reports.
+    #
+    # It was worse than a narrow race. The marker used to live at run/<name>.reported,
+    # and both CLI paths run `rm -f run/<name>.*` immediately after the close-out - so
+    # the marker was deleted microseconds after it was written and this check was very
+    # nearly guaranteed to miss. run/reported/<name> is a sibling directory that the
+    # sidecar glob does not match, so it survives the sweep and is still here when we
+    # look. O_CREAT|O_EXCL makes the create itself the claim: one winner, cross-process.
+    legacy = RUN_DIR / f"{name}.reported"        # pre-2026-09-22 location
+    marker = RUN_DIR / "reported" / name
     with _reap_lock:
-        if name in _reaping or marker.exists():
+        if name in _reaping or marker.exists() or legacy.exists():
             return
         _reaping.add(name)
     try:
-        # Written first, so a crash mid-call cannot cause a duplicate on restart.
-        marker.write_text("reaped-by-dashboard\n", encoding="utf-8")
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        # Claimed first, so a crash mid-call cannot cause a duplicate on restart.
+        fd = os.open(marker, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+    except FileExistsError:
+        # The CLI got here first. Not an error - exactly one close-out is the point.
+        with _reap_lock:
+            _reaping.discard(name)
+        return
     except OSError:
         with _reap_lock:
             _reaping.discard(name)
         return
+    try:
+        os.write(fd, b"reaped-by-dashboard\n")
+    finally:
+        os.close(fd)
     threading.Thread(target=_reap_worker, args=(name, key), daemon=True).start()
 
 
@@ -369,8 +406,8 @@ def tickets_snapshot(force=False):
 # That discipline is the whole reason the two files are separate: this function may
 # read one and must never surface the other.
 AUTH_MANIFEST = ROOT / "auth.json"
-AUTH_SETTINGS = Path.home() / ".agentmux" / "auth.json"
-AUTH_ENV = Path.home() / ".agentmux" / "env"
+AUTH_SETTINGS = HOME_DIR / "auth.json"
+AUTH_ENV = HOME_DIR / "env"
 ENV_EXPORT = re.compile(r"^\s*export\s+([A-Z][A-Z0-9_]{0,63})=", re.M)
 
 

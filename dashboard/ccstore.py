@@ -8,11 +8,25 @@ from pathlib import Path
 import re
 import sqlite3
 import stat
+import sys
 import threading
 
 
-DB_PATH = Path.home() / ".agentmux" / "cc.db"
-QUEUE_DIR = Path.home() / ".agentmux" / "queue"
+# AGENTMUX_HOME, as everything else in this repo already honours it.
+#
+# #25, found while testing #21. agentmux.sh, courier.py, coordination.py and run.py all
+# resolve their root as os.environ.get("AGENTMUX_HOME", ~/.agentmux); these two files
+# hardcoded ~/.agentmux. So the moment AGENTMUX_HOME is set - which every test suite
+# does, and which is the only way to run a second isolated harness - the CLI and the
+# dashboard silently read DIFFERENT directories. The dashboard then shows an empty
+# queue, no agents and no runs while the CLI works perfectly, and nothing anywhere says
+# the two are looking at different state.
+#
+# Unset, this is byte-for-byte the previous expression, so nothing about the normal
+# deployment changes.
+HOME_DIR = Path(os.environ.get("AGENTMUX_HOME", str(Path.home() / ".agentmux")))
+DB_PATH = HOME_DIR / "cc.db"
+QUEUE_DIR = HOME_DIR / "queue"
 NAME_PATTERN = re.compile(r"[A-Za-z0-9_.-]{1,64}")
 # "claim" and "release" are coordination, not conversation: an agent announcing that
 # it has taken or given up a resource. They are a distinct kind so the dashboard can
@@ -248,6 +262,34 @@ def write(db, resource, values):
     return dict(row)
 
 
+# #21. THE UN-FIXED HALF OF THE COURIER'S OWN BUG.
+#
+# courier.py:254 logs once per unknown kind, because when "claim" and "release" were
+# added to the vocabulary the RUNNING courier was still on the old set and dropped
+# every one without a word - coordination looked broken when it was merely stale.
+#
+# This reader drops on exactly the same condition and said nothing at all, which is
+# the worse half of the same failure: the courier DELIVERS the message into the
+# recipient's pane, and the dashboard - the thing the operator is actually watching -
+# renders a conversation with that message missing from it. Two components disagreeing
+# about what was said, with no record anywhere of the disagreement.
+#
+# Once per cause, to stderr, where the server's own log already goes. Never per record:
+# a renamed kind would otherwise print for every line of every queue file on every poll.
+_DROPPED_SEEN = set()
+
+
+def _note_dropped(cause, filename):
+    """Say once that queue records are being discarded, and why."""
+    if cause in _DROPPED_SEEN:
+        return
+    _DROPPED_SEEN.add(cause)
+    print(f"ccstore: dropping queue records - {cause} - first seen in {filename}. "
+          f"Known kinds: {sorted(MESSAGE_KINDS)}. If the vocabulary was just extended, "
+          f"restart the dashboard and the courier so all readers agree.",
+          file=sys.stderr, flush=True)
+
+
 def queue_messages():
     """Read bounded tails through a pinned directory; never follow file links."""
     if QUEUE_DIR.is_symlink():
@@ -294,13 +336,15 @@ def queue_messages():
                             parse_timestamp(at)
                             kind = text_field(value, "kind", 64, True)
                             if kind not in MESSAGE_KINDS:
+                                _note_dropped(kind, filename)
                                 continue
                             result.append(dict(
                                 at=at, sender=text_field(value, "sender", 64, True, NAME_PATTERN),
                                 recipient=text_field(value, "recipient", 64, pattern=NAME_PATTERN),
                                 kind=kind, body=text_field(value, "body", 65536),
                                 ref=text_field(value, "ref", 256)))
-                        except (ValueError, UnicodeError, RecursionError):
+                        except (ValueError, UnicodeError, RecursionError) as err:
+                            _note_dropped(f"unparseable ({type(err).__name__})", filename)
                             continue
                 except OSError:
                     continue

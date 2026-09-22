@@ -229,12 +229,16 @@ agentmux - drive other agent CLIs in tmux panes
                                one with no pane, such as 'orchestrator' (this
                                session). Without this, replies addressed to the
                                orchestrator were retried and then discarded
-  run    start "<request>"      open a run; prints the run id
+  run    start "<request>"      open a run; prints the run id. Orchestrator only -
+                               refused from inside an agent pane, as is `complete`
   run    assign <run> --worker <a> --reviewer <b> [--brief T]
                                create a job. The reviewer must not be the worker
   run    submit [job]          worker: I am done (job defaults to $AGENTMUX_JOB)
   run    verdict <job> --pass|--fail [--reason-file F]
-                               REVIEWER ONLY - a worker cannot sign off its own work
+                               REVIEWER ONLY - a worker cannot sign off its own work.
+                               Identity comes from the pane, not from --by: omit it.
+                               A pane cannot verify as someone else, and a name that
+                               is not a live session is refused
   run    status <run> [--json] one line per job; safe to paste into a fresh session
   run    complete <run> [--force]
                                THE GATE. Refuses until every job is verified. --force
@@ -618,13 +622,26 @@ cmd_spawn() {
   # there is anything to message, without a boot-time service.
   #
   # AGENTMUX_NO_COURIER=1 opts out. Failure here is never fatal to a spawn.
+  #
+  # Takes the same lock as stop_courier_if_idle (#17). This agent's session is already
+  # up before we get here, so a concurrent `kill` either holds the lock and sees this
+  # session on its re-check, or waits and sees it. Either way it does not stop a
+  # courier this agent is about to depend on.
   if [ "${AGENTMUX_NO_COURIER:-0}" != "1" ] && [ -n "${AGENTMUX_REPO:-}" ] \
      && [ -f "$AGENTMUX_REPO/taskmgmt/courier.py" ]; then
+    local clock="$RUNDIR/.courier.lock" cwaited=0
+    mkdir -p "$RUNDIR" 2>/dev/null
+    until mkdir "$clock" 2>/dev/null; do
+      cwaited=$((cwaited + 1))
+      [ "$cwaited" -gt 50 ] && { rm -rf "$clock" 2>/dev/null; cwaited=0; }
+      sleep 0.1
+    done
     if ! python3 "$AGENTMUX_REPO/taskmgmt/courier.py" --status 2>/dev/null \
          | grep -q '^courier:   running'; then
       cmd_courier start >/dev/null 2>&1 \
         && printf "  courier: started (queued messages will be delivered)\n"
     fi
+    rm -rf "$clock" 2>/dev/null
   fi
   # Report the profile actually in force. An --auth method brings its own, replacing
   # yolo, so naming yolo unconditionally described a configuration that was not running.
@@ -774,7 +791,13 @@ cmd_read() {
   need "$name"
   local lines=""
   while [ $# -gt 0 ]; do
-    case "$1" in --lines|-n) lines="${2:-}"; shift 2 ;; *) shift ;; esac
+    case "$1" in
+      --lines|-n) lines="${2:?--lines needs a number}"; shift 2 ;;
+      # `*) shift` silently swallowed typos: `read rev --line 20` dropped both tokens
+      # and fell back to the default, which for read/tail is the entire pane - the
+      # multi-thousand-token dump --lines exists to avoid. Fail loudly instead.
+      *) die "read: unknown option '$1' (only --lines is accepted)" ;;
+    esac
   done
   local out
   out="$(tm capture-pane -p -J -t "$(pane_of "$name")" | strip_ansi | sed 's/[[:space:]]*$//' | trim_edges)"
@@ -790,7 +813,12 @@ cmd_tail() {
   [ -n "$name" ] || die "tail needs a name"
   local lines=200
   while [ $# -gt 0 ]; do
-    case "$1" in --lines|-n) lines="${2:-200}"; shift 2 ;; *) shift ;; esac
+    case "$1" in
+      --lines|-n) lines="${2:?--lines needs a number}"; shift 2 ;;
+      # A silently discarded typo here returns the default 200 lines of raw scrollback
+      # - up to ~10k tokens of redraw noise - when the caller asked for fewer.
+      *) die "tail: unknown option '$1' (only --lines is accepted)" ;;
+    esac
   done
   [ -f "$LOGDIR/$name.log" ] || die "no log for '$name'"
   strip_ansi < "$LOGDIR/$name.log" | tail -n "$lines"
@@ -803,9 +831,11 @@ cmd_wait() {
   local timeout="$TIMEOUT_S" quiet_ms="$QUIET_MS"
   while [ $# -gt 0 ]; do
     case "$1" in
-      --timeout|-t) timeout="${2:-$TIMEOUT_S}"; shift 2 ;;
-      --quiet|-q)   quiet_ms=$(( ${2:-5} * 1000 )); shift 2 ;;
-      *) shift ;;
+      --timeout|-t) timeout="${2:?--timeout needs seconds}"; shift 2 ;;
+      --quiet|-q)   quiet_ms=$(( ${2:?--quiet needs seconds} * 1000 )); shift 2 ;;
+      # `wait rev --timout 30` used to silently use the default timeout, so a caller
+      # who asked for 30s could block for 300 and never learn why.
+      *) die "wait: unknown option '$1' (wait takes --timeout and --quiet)" ;;
     esac
   done
   # A CLI that TELLS us it is working beats guessing from stillness.
@@ -942,6 +972,15 @@ cmd_post() {
       --ref)  ref="${2:-}";  shift 2 ;;
       --from) sender="${2:-}"; shift 2 ;;
       --strict) strict=1; shift ;;
+      --) shift; while [ $# -gt 0 ]; do words+=("$1"); shift; done ;;
+      # Worse here than in `ask`, because `post` is the AUTOMATED path:
+      # `post rev --knid request "check"` left kind as `status` and made the BODY
+      # "--knid request check", which the courier types into the agent's pane and
+      # Enters, persists to queue/*.jsonl, and the dashboard renders as that agent's
+      # own words. Refuse rather than smuggle it into the message.
+      -*) die "post: unknown option '$1'
+       (post takes --kind, --ref, --from, --strict; use -- before a body that
+        legitimately starts with a dash)" ;;
       *) words+=("$1"); shift ;;
     esac
   done
@@ -1017,12 +1056,21 @@ coord_py() {
 cmd_claim() {
   local resource="${1:-}"; shift || true
   [ -n "$resource" ] || die "claim needs a resource, e.g. agentmux claim taskmgmt/courier.py --note 'adding backoff'"
+  # --holder is NOT passed through from "$@": argparse takes the last occurrence, so
+  # appending user args after ours let `claim x --holder victim` claim in someone
+  # else's name. Identity comes from the environment here, full stop.
+  for arg in "$@"; do
+    case "$arg" in --holder) die "claim: --holder is set from \$AGENTMUX_AGENT and cannot be overridden" ;; esac
+  done
   python3 "$(coord_py)" claim "$resource" --holder "${AGENTMUX_AGENT:-orchestrator}" "$@"
 }
 
 cmd_release() {
   local resource="${1:-}"; shift || true
   [ -n "$resource" ] || die "release needs a resource"
+  for arg in "$@"; do
+    case "$arg" in --holder) die "release: --holder is set from \$AGENTMUX_AGENT and cannot be overridden" ;; esac
+  done
   python3 "$(coord_py)" release "$resource" --holder "${AGENTMUX_AGENT:-orchestrator}" "$@"
 }
 
@@ -1226,9 +1274,30 @@ report_stale() {
 # ~/.agentmux/inbox/<name>.jsonl and are read here. Before this existed every reply an
 # agent sent back to `orchestrator` was retried and then thrown away.
 cmd_inbox() {
-  local name="${1:-orchestrator}" clear=0
-  case "${2:-}" in --clear) clear=1 ;; esac
-  case "$name" in --clear) clear=1; name="orchestrator" ;; esac
+  # Positional-only parsing - `$1` is the name, `$2` must be the flag - read
+  # `inbox --clear claude` as name="--clear", which the second case rewrote to
+  # "orchestrator". So an operator who asked to clear claude's inbox cleared the
+  # ORCHESTRATOR's instead, destructively and silently, while claude's messages
+  # stayed unread. A typo in the flag (`--clera`) was ignored outright and the
+  # inbox was merely printed, so `--clear` looked like it had run.
+  local name="" clear=0
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --clear) clear=1; shift ;;
+      --)
+        shift
+        if [ $# -gt 0 ]; then name="$1"; shift; fi
+        ;;
+      -*) die "inbox: unknown option '$1'
+       (inbox takes one name and --clear; use -- before a name that
+        legitimately starts with a dash)" ;;
+      *)
+        [ -z "$name" ] || die "inbox takes one name (got '$name' and '$1')"
+        name="$1"; shift
+        ;;
+    esac
+  done
+  name="${name:-orchestrator}"
 
   # Validate exactly as cmd_post does. Without this the name was interpolated
   # straight into the path, so `inbox ../queue/claude --clear` resolved OUTSIDE
@@ -1245,7 +1314,7 @@ cmd_inbox() {
   local path="$ROOT/inbox/$name.jsonl"
   [ -f "$path" ] || { printf "inbox for '%s' is empty (%s)\n" "$name" "$path"; return 0; }
   python3 - "$path" "$clear" <<'PY'
-import json, os, pathlib, sys
+import json, os, pathlib, secrets, sys
 
 path, clear = pathlib.Path(sys.argv[1]), sys.argv[2] == "1"
 
@@ -1259,16 +1328,53 @@ path, clear = pathlib.Path(sys.argv[1]), sys.argv[2] == "1"
 #
 # os.replace is atomic within a filesystem. After it, the courier's next append
 # recreates the live file and nothing in flight is touched; we then read the renamed
-# snapshot, which no longer moves. The snapshot is kept rather than deleted so a
-# destructive read is still recoverable.
+# staging file, which no longer moves.
+#
+# #18. THE ARCHIVE IS APPENDED TO, NOT REPLACED.
+#
+# The snapshot used to be a fixed name - <inbox>.jsonl.read - reached by os.replace,
+# so the SECOND clear atomically destroyed what the first one had preserved. The
+# comment here promised a destructive read was recoverable; that promise held for
+# exactly one generation, and an operator who cleared twice while chasing something
+# lost the messages they were chasing. Clearing twice is the normal case.
+#
+# Staging name is unique (pid + random), so two concurrent clears of the same inbox
+# cannot publish each other's partial bytes - the same flaw already fixed in
+# courier.write_private. Appends are O_APPEND, so they interleave whole-record and
+# neither clear loses the other's. The archive is trimmed to the last ARCHIVE_MAX
+# bytes on a record boundary, so "keep it" cannot become "fill the disk".
+ARCHIVE_MAX = 4 * 1024 * 1024
+
 if clear:
-    snapshot = path.with_suffix(path.suffix + ".read")
+    staging = path.with_name(f".{path.name}.{os.getpid()}.{secrets.token_hex(4)}.taking")
     try:
-        os.replace(path, snapshot)
+        os.replace(path, staging)
     except OSError as err:
         print(f"could not take the inbox: {err}", file=sys.stderr)
         raise SystemExit(1)
-    source = snapshot
+
+    archive = path.with_suffix(path.suffix + ".read")
+    try:
+        taken = staging.read_bytes()
+        if taken and not taken.endswith(b"\n"):
+            taken += b"\n"
+        with open(archive, "ab") as out:      # O_APPEND: atomic against a rival clear
+            out.write(taken)
+        if archive.stat().st_size > ARCHIVE_MAX:
+            keep = archive.read_bytes()[-ARCHIVE_MAX:]
+            keep = keep.partition(b"\n")[2]  # never leave a half record at the front
+            trimmed = archive.with_name(archive.name + f".{os.getpid()}.trim")
+            trimmed.write_bytes(keep)
+            os.replace(trimmed, archive)
+    except OSError as err:
+        # The inbox is already claimed at this point. Say what happened and leave the
+        # staging file where it is rather than deleting the only copy of the messages.
+        print(f"cleared, but could not archive: {err}\n  the messages are in {staging}",
+              file=sys.stderr)
+        archived_ok = False
+    else:
+        archived_ok = True
+    source = staging
 else:
     source = path
 
@@ -1287,7 +1393,18 @@ for row in rows:
         print(f"      {line}")
     print()
 if clear:
-    print(f"inbox cleared; the messages above are kept in {source.name}")
+    archive = path.with_suffix(path.suffix + ".read")
+    if archived_ok:
+        # Safely in the archive, so the staging copy is redundant. Removed only on
+        # the path where the archive write actually succeeded - the error path
+        # deliberately keeps it, because there it is the only copy.
+        try:
+            source.unlink()
+        except OSError:
+            pass
+        print(f"inbox cleared; the messages above are appended to {archive.name}")
+    else:
+        print(f"inbox cleared; the messages above are kept in {source.name}")
 PY
 }
 
@@ -1342,6 +1459,36 @@ cmd_list() {
   report_stale
 }
 
+# Claim the one-time Jira close-out for an agent. Returns 0 to the SINGLE winner.
+#
+# #16. Three things can close the same agent out: `kill`, `reap`, and the dashboard's
+# own reaper (server.py:maybe_reap). Each checked for a marker and then wrote it -
+# check-then-write across three processes, so two could both see "absent". Worse, the
+# marker lived at run/<name>.reported and BOTH shell paths then ran
+# `rm -f "$RUNDIR/<name>".*`, which deleted the marker microseconds after writing it.
+# Its lifetime was effectively zero, so the dashboard reaper saw nothing and posted a
+# duplicate close-out comment and a duplicate Confluence report onto a real ticket.
+#
+# Fixed by moving the marker into run/reported/, which the sidecar glob does not match
+# so it OUTLIVES the sweep, and by taking it with noclobber - bash opens with O_EXCL,
+# so exactly one of the three wins the create and the other two get rc 1 and skip.
+claim_reported() {
+  local name="$1" who="${2:-cli}"
+  mkdir -p "$RUNDIR/reported" 2>/dev/null || return 1
+  # Honour the pre-2026-09-22 marker location so an in-flight upgrade cannot
+  # double-post for an agent already closed out by the old code.
+  [ -f "$RUNDIR/$name.reported" ] && return 1
+  ( set -o noclobber; printf '%s\n' "$who" > "$RUNDIR/reported/$name" ) 2>/dev/null
+}
+
+# Remove an agent's sidecars WITHOUT removing the close-out marker.
+#
+# run/reported/<name> is a sibling directory, so `run/<name>.*` never matched it; this
+# wrapper exists so the intent is stated once rather than inferred from a glob.
+sweep_sidecars() {
+  rm -f "$RUNDIR/$1".* 2>/dev/null
+}
+
 # Stop the courier once the last agent is gone.
 #
 # The mirror of the autostart in `spawn`. Without it the courier outlives every
@@ -1354,6 +1501,31 @@ stop_courier_if_idle() {
   [ -n "${AGENTMUX_REPO:-}" ] && [ -f "$AGENTMUX_REPO/taskmgmt/courier.py" ] || return 0
   # Any session still up means somebody may still be messaging.
   tm list-sessions >/dev/null 2>&1 && return 0
+
+  # #17. `kill last-agent` and `spawn new-agent` race here. The old order was:
+  # see no sessions -> --status -> --stop. A spawn landing anywhere in that window
+  # starts the courier (or finds it already running and starts nothing), then creates
+  # its session a beat later - and this stop tears down the courier the new agent was
+  # just told it had. The failure is SILENT in exactly the way the autostart exists to
+  # prevent: `post` succeeds, the message sits in the queue, nobody ever hears it.
+  #
+  # Serialise on a lock directory that `spawn` also takes, then re-check liveness
+  # while holding it. mkdir is atomic on every filesystem this runs on.
+  local lock="$RUNDIR/.courier.lock" waited=0
+  mkdir -p "$RUNDIR" 2>/dev/null
+  until mkdir "$lock" 2>/dev/null; do
+    waited=$((waited + 1))
+    # A crashed holder must not wedge every later kill. Reset after forcing, or a
+    # contended lock becomes a hot loop that stomps whoever wins next, forever.
+    [ "$waited" -gt 50 ] && { rm -rf "$lock" 2>/dev/null; waited=0; }
+    sleep 0.1
+  done
+  # shellcheck disable=SC2064
+  trap "rm -rf '$lock' 2>/dev/null" RETURN
+
+  # Re-check under the lock: a spawn that got in first has its session up by now.
+  tm list-sessions >/dev/null 2>&1 && return 0
+
   python3 "$AGENTMUX_REPO/taskmgmt/courier.py" --status 2>/dev/null \
     | grep -q '^courier:   running' || return 0
   python3 "$AGENTMUX_REPO/taskmgmt/courier.py" --stop >/dev/null 2>&1 \
@@ -1374,16 +1546,28 @@ cmd_kill() {
   # Confluence report are both built from this agent's pane log, and the log is
   # only meaningful while the sidecars still exist. Both calls are best-effort -
   # task_try swallows failures so a Jira outage cannot stop a kill.
+  # The marker is claimed BEFORE the two calls, not after, so a crash between them
+  # cannot produce a duplicate on the next reaper pass (#16).
   local bound; bound="$(cat "$RUNDIR/$target.task" 2>/dev/null || true)"
-  if [ -n "$bound" ] && task_cli >/dev/null; then
+  if [ -n "$bound" ] && task_cli >/dev/null && claim_reported "$target" killed-by-cli; then
     task_try done "$bound" --from-log "$target"
     task_try report "$target" --title "agentmux run - $target - $bound"
-    # Mark it handled so the dashboard reaper does not post a second time.
-    printf '%s\n' "killed-by-cli" > "$RUNDIR/$target.reported" 2>/dev/null || true
   fi
 
-  tm kill-session -t "=$target" && printf "killed '%s'\n" "$target"
-  rm -f "$RUNDIR/$target".* 2>/dev/null
+  # #20. The sweep used to run unconditionally. When kill-session FAILED - a tmux
+  # hiccup, a session renamed out from under us - the agent stayed alive with its
+  # sidecars deleted: no .cli, so `ask`/`read` could not tell which CLI it was driving;
+  # no .task, so its issue was orphaned; and the dashboard listed a live pane it could
+  # say nothing about. Deleting the record of a thing you failed to delete is the worst
+  # of both outcomes, so the sweep now follows the kill only when the kill worked.
+  if tm kill-session -t "=$target"; then
+    printf "killed '%s'\n" "$target"
+    sweep_sidecars "$target"
+  else
+    printf "could not kill '%s'; its sidecars are left in place\n" "$target" >&2
+    stop_courier_if_idle
+    return 1
+  fi
   stop_courier_if_idle
 }
 
@@ -1446,12 +1630,33 @@ cmd_reap() {
     # its Jira issue should not stay open because the tmux server went away rather
     # than the operator typing `kill`. Best-effort - task_try swallows failures.
     bound="$(cat "$RUNDIR/$name.task" 2>/dev/null || true)"
-    if [ -n "$bound" ] && [ ! -f "$RUNDIR/$name.reported" ] && task_cli >/dev/null; then
+    # The identity of the dead agent, captured BEFORE the slow part. See below.
+    local stamp; stamp="$(cat "$RUNDIR/$name.started" 2>/dev/null || true)"
+
+    if [ -n "$bound" ] && task_cli >/dev/null && claim_reported "$name" reaped-by-cli; then
       task_try done "$bound" --from-log "$name"
       task_try report "$name" --title "agentmux run - $name - $bound"
     fi
 
-    rm -f "$RUNDIR/$name".* 2>/dev/null
+    # #15. Those two calls are network round-trips to Jira and Confluence, each with a
+    # 90s ceiling - so up to three minutes can pass between `have "$name"` saying the
+    # session is dead and this delete. Agent names here are ROLES: claude, rev, codex
+    # get respawned under the same name constantly. Respawn inside that window and the
+    # sweep deletes a LIVE agent's sidecars, which is #20's damage arriving by a
+    # different road.
+    #
+    # So re-check on the way out, against both liveness and the spawn stamp - the
+    # stamp catches a respawn fast enough to have already died again.
+    if have "$name"; then
+      printf 'skipped %-14s (came back alive during close-out)\n' "$name" >&2
+      continue
+    fi
+    if [ "$(cat "$RUNDIR/$name.started" 2>/dev/null || true)" != "$stamp" ]; then
+      printf 'skipped %-14s (respawned during close-out)\n' "$name" >&2
+      continue
+    fi
+
+    sweep_sidecars "$name"
     reaped=$((reaped + 1))
     printf 'reaped %-14s (%s file(s))\n' "$name" "$files"
   done <<EOF
@@ -1482,6 +1687,11 @@ cmd_exec() {
     case "$1" in
       --cwd)      cwd="${2:-}";   shift 2 ;;
       --model|-m) model="${2:-}"; shift 2 ;;
+      --) shift; while [ $# -gt 0 ]; do words+=("$1"); shift; done ;;
+      # exec runs codex unrestricted, so a mistyped --cwd silently runs in $PWD with
+      # the flag pasted into the prompt.
+      -*) die "exec: unknown option '$1'
+       (exec takes --cwd, --model; use -- before a prompt starting with a dash)" ;;
       *) words+=("$1"); shift ;;
     esac
   done

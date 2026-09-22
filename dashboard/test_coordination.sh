@@ -19,12 +19,8 @@ export AGENTMUX_HOME="$HOME_DIR"
 export AGENTMUX_DASHBOARD="http://127.0.0.1:1"     # unreachable on purpose
 CO="python3 taskmgmt/coordination.py"
 
-pass=0; fail=0
-ok()  { printf '  ok    %s\n' "$1"; pass=$((pass + 1)); }
-bad() { printf '  FAIL  %s\n' "$1"; fail=$((fail + 1)); }
-check_rc() { # check_rc <label> <expected-rc> <actual-rc>
-  if [ "$2" = "$3" ]; then ok "$1"; else bad "$1 (rc $3, wanted $2)"; fi
-}
+# shellcheck source=/dev/null
+. dashboard/testlib.sh          # ok/bad/check/check_rc/rc_is/count_msgs, one copy
 
 echo '--- a claim is exclusive ---'
 $CO claim src/app.py --holder alice --note 'refactor' >/dev/null 2>&1
@@ -160,7 +156,6 @@ echo '--- broadcasts go to the interested, not to everyone ---'
 # finds out the moment it tries, and is told the holder, note and expiry then.
 rm -rf "$HOME_DIR/claims" "$HOME_DIR/queue"
 # An outbox is named for the SENDER; the recipient is a field in the record.
-count_msgs() { [ -f "$1" ] && grep -c . "$1" 2>/dev/null || printf '0'; }
 
 $CO claim lib/a.py --holder alice >/dev/null 2>&1
 before=$(count_msgs "$HOME_DIR/queue/alice.jsonl")
@@ -196,6 +191,57 @@ else
   bad "unrelated resource had $target interested agents"
 fi
 
+echo '--- renewal must never leave the claim file empty ---'
+# The renewal path used to be open(path,"w"): truncate the live claim, then write.
+# A rival racing that window reads an empty file, calls it malformed and steals the
+# claim while the holder is told it renewed. This renews in a loop while a reader
+# checks the file is ALWAYS a valid claim held by alice - never empty, never absent.
+rm -rf "$HOME_DIR/claims"
+$CO claim renew/target.py --holder alice --ttl 3600 >/dev/null 2>&1
+( for _ in $(seq 1 40); do $CO claim renew/target.py --holder alice --ttl 3600 >/dev/null 2>&1; done ) &
+renewer=$!
+bad_reads=0
+for _ in $(seq 1 120); do
+  holder=$(python3 -c "
+import json,sys
+try:
+    print(json.load(open('$HOME_DIR/claims/renew%2Ftarget.py.json')).get('holder',''))
+except Exception:
+    print('BROKEN')
+" 2>/dev/null)
+  [ "$holder" = "alice" ] || bad_reads=$((bad_reads + 1))
+  sleep 0.01
+done
+wait "$renewer"
+if [ "$bad_reads" -eq 0 ]; then
+  ok 'the claim was valid and held by alice on every read during renewal'
+else
+  bad "$bad_reads read(s) saw an empty or broken claim mid-renewal"
+fi
+
+echo '--- release must not delete a claim that changed hands ---'
+# A claim near expiry passes the holder check, expires, is legitimately retaken by
+# someone else, and the original unlink then deletes THEIR live claim. Simulated
+# deterministically by expiring alice's claim and letting bob take it before alice
+# releases.
+rm -rf "$HOME_DIR/claims"
+$CO claim handover/file.py --holder alice --ttl 60 >/dev/null 2>&1
+python3 - <<PY
+import json, pathlib, time
+p = pathlib.Path("$HOME_DIR/claims/handover%2Ffile.py.json")
+c = json.loads(p.read_text()); c["expires_at"] = time.time() - 1
+p.write_text(json.dumps(c))
+PY
+$CO claim handover/file.py --holder bob --ttl 3600 >/dev/null 2>&1
+$CO release handover/file.py --holder alice >/dev/null 2>&1
+check_rc 'alice cannot release the claim bob now holds' 1 $?
+holder=$($CO claims --json 2>/dev/null | python3 -c 'import json,sys; rows=json.load(sys.stdin); print(rows[0]["holder"] if rows else "GONE")')
+if [ "$holder" = "bob" ]; then
+  ok "bob's live claim survived alice's release (holder=$holder)"
+else
+  bad "bob's claim was destroyed (holder=$holder)"
+fi
+
 echo '--- THE RACE: many agents, one resource, simultaneously ---'
 # The sequential checks above prove the logic. This proves the mechanism: twelve
 # processes going for the same claim at once. Exactly one must win. If O_EXCL were
@@ -229,6 +275,5 @@ else
   bad 'the winner and the recorded holder disagree'
 fi
 
-echo
-echo "passed $pass, failed $fail"
+finish
 [ "$fail" -eq 0 ] || exit 1

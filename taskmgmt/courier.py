@@ -39,6 +39,7 @@ import argparse
 import json
 import os
 import re
+import secrets
 import shutil
 import signal
 import stat
@@ -167,13 +168,31 @@ def write_private(path, text):
     Atomically because a cursor half-written by a kill is worse than a stale one:
     the next tick would parse the fragment, fail, and reset to EOF, silently
     dropping whatever arrived in between.
+
+    THE STAGING NAME MUST BE UNIQUE PER WRITER. It used to be `<path>.tmp`, which is
+    only atomic for a single writer. `courier --requeue` runs in a different process
+    from `--watch`, so both would open the same `pending.jsonl.tmp`, truncate it and
+    interleave their writes - and then one os.replace would publish the OTHER's
+    partial bytes under the final name. load_pending() silently skips unparseable
+    lines, so the pending queue would just quietly empty.
+
+    os.replace guarantees the file is never TORN. It guarantees nothing at all about
+    two writers sharing a staging path.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    with tmp.open("w", encoding="utf-8") as handle:
-        handle.write(text)
-    os.chmod(tmp, 0o600)
-    os.replace(tmp, path)
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.{secrets.token_hex(4)}.tmp")
+    try:
+        with tmp.open("w", encoding="utf-8") as handle:
+            handle.write(text)
+        os.chmod(tmp, 0o600)
+        os.replace(tmp, path)
+    except BaseException:
+        # Never leave staging litter behind, including on KeyboardInterrupt.
+        try:
+            tmp.unlink()
+        except OSError:
+            pass
+        raise
 
 
 # ───────────────────────────────────────────────────────────────────── cursors ──
@@ -343,7 +362,22 @@ def load_pending():
 
 
 def save_pending(rows):
-    write_private(PENDING, "".join(json.dumps(row) + "\n" for row in rows[-PENDING_MAX:]))
+    """Persist the spill, dead-lettering anything over the cap rather than dropping it.
+
+    `rows[-PENDING_MAX:]` silently deleted the OLDEST undelivered messages - the exact
+    opposite of what the dead-letter file exists for, and with no log, no counter and
+    no way to find out. The cap still has to exist so a runaway sender cannot grow this
+    file without bound, but going over it is a reason to preserve a message, not to
+    destroy it.
+    """
+    if len(rows) > PENDING_MAX:
+        overflow = rows[:-PENDING_MAX]
+        rows = rows[-PENDING_MAX:]
+        for row in overflow:
+            dead_letter(row, f"pending queue over {PENDING_MAX}; kept here instead")
+        log(f"pending over {PENDING_MAX}: {len(overflow)} oldest message(s) moved to "
+            f"the dead-letter file - replay with `agentmux courier requeue`")
+    write_private(PENDING, "".join(json.dumps(row) + "\n" for row in rows))
 
 
 def backoff_for(attempts):
@@ -522,7 +556,7 @@ def tick(from_start=False, dry_run=False):
 
     # Retries first, so a message that has been waiting keeps its place ahead of
     # anything new for the same recipient.
-    blocked, keep = set(), []
+    blocked, keep, cursors = set(), [], []
     epoch = time.time()
     for row in pending:
         message = row["message"]
@@ -611,10 +645,25 @@ def tick(from_start=False, dry_run=False):
                              "next_at": epoch + backoff_for(1), "message": message})
                 log(f"defer   {message['sender']} -> {message['recipient']}: {reason}")
         if not dry_run:
-            save_cursor(agent, info, offset)
+            # NOT saved yet - see below. Held until the spill is on disk.
+            cursors.append((agent, info, offset))
 
     if not dry_run:
+        # ORDER IS LOAD-BEARING: the spill must be durable BEFORE the cursor advances.
+        #
+        # save_cursor used to run inside the loop above, so the cursor could reach disk
+        # while the messages it consumed existed only in the in-memory `keep` list. Kill
+        # the courier there - or let save_pending fail - and the cursor says those bytes
+        # were handled while the outbox still sits on disk containing them. The messages
+        # are gone, permanently, and nothing reports it.
+        #
+        # This ordering trades at-most-once for at-least-once: a crash between the two
+        # writes now re-delivers a message rather than losing it. For a coordination
+        # channel that is the right way round - a duplicate costs one inference turn, a
+        # loss can hang a run forever waiting for a verdict that was already sent.
         save_pending(keep)
+        for agent, info, offset in cursors:
+            save_cursor(agent, info, offset)
         # Only after a real pass: a --status run must not consume the one chance to
         # adopt history, or the next real pass would deliver all of it.
         if not baseline.exists():
@@ -655,7 +704,32 @@ def watch(interval, from_start):
         raise KeyboardInterrupt
 
     signal.signal(signal.SIGTERM, on_term)
-    write_private(PIDFILE, f"{os.getpid()}\n")
+
+    # TAKE THE PIDFILE EXCLUSIVELY. running_pid() above is a CHECK; this is the ACT,
+    # and another courier can start between them. Not hypothetical: `spawn` auto-starts
+    # a courier, so two parallel spawns both see "not running" and both launch one.
+    # Each courier keeps its own _CURSOR_CACHE, so both harvest the same outboxes and
+    # EVERY MESSAGE IS DELIVERED TWICE - into a live pane, with Enter, costing the
+    # recipient a duplicated inference turn each time.
+    #
+    # O_CREAT|O_EXCL makes the loser lose, the same mechanism as a claim.
+    try:
+        fd = os.open(PIDFILE, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+    except FileExistsError:
+        holder = running_pid()
+        if holder and holder != os.getpid():
+            log(f"another courier holds the pidfile (pid {holder}) - refusing to start")
+            return 1
+        # A stale pidfile from a courier killed without cleanup. Take it over, and if
+        # someone else takes it first, lose gracefully.
+        try:
+            PIDFILE.unlink()
+            fd = os.open(PIDFILE, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+        except (OSError, FileExistsError):
+            log("could not take a stale pidfile - another courier won the race")
+            return 1
+    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+        handle.write(f"{os.getpid()}\n")
     log(f"courier watching {QUEUE_DIR} every {interval}s (pid {os.getpid()})")
     first = from_start
     try:
@@ -716,6 +790,64 @@ def main(argv=None):
         return 0
 
     if args.dead or args.requeue:
+        if args.requeue:
+            # REQUEUE RACES THE WATCHER, TWICE. Both problems are the same shape as
+            # bugs already fixed elsewhere in this file, so both get the same fixes.
+            #
+            # 1. Read-then-unlink on the dead-letter file. A message the running
+            #    watcher dead-letters between the read and the unlink is destroyed -
+            #    never requeued, never printed, while the operator is told "requeued
+            #    N". Claim the file first with os.replace, then read what we claimed;
+            #    the watcher's next dead_letter() recreates a fresh one.
+            #
+            # 2. load_pending -> mutate -> save_pending across two processes is a
+            #    lost update: the watcher's concurrent save_pending is overwritten,
+            #    resurrecting messages it just delivered (duplicate delivery into a
+            #    live pane) and erasing rows it just deferred. There is no lock in
+            #    this codebase, so rather than invent one, refuse: the watcher owns
+            #    pending.jsonl while it is running.
+            holder = running_pid()
+            if holder and holder != os.getpid():
+                print(f"a courier is running (pid {holder}) and owns "
+                      f"{PENDING.name}.", file=sys.stderr)
+                print("  Stop it first, requeue, then start it again:", file=sys.stderr)
+                print("    agentmux courier stop && agentmux courier requeue "
+                      "&& agentmux courier start", file=sys.stderr)
+                return 1
+
+            claimed = DEAD_LETTER.with_name(
+                f"{DEAD_LETTER.name}.requeue.{os.getpid()}.{secrets.token_hex(4)}")
+            try:
+                os.replace(DEAD_LETTER, claimed)
+            except FileNotFoundError:
+                print("nothing in the dead-letter file")
+                return 0
+            except OSError as err:
+                print(f"could not take the dead-letter file: {err}", file=sys.stderr)
+                return 1
+
+            rows = []
+            for line in claimed.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                try:
+                    rows.append(json.loads(line))
+                except ValueError:
+                    continue
+            if not rows:
+                os.replace(claimed, DEAD_LETTER)      # put it back untouched
+                print("nothing in the dead-letter file")
+                return 0
+
+            pending = load_pending()
+            for row in rows:
+                pending.append({"attempts": 0, "reason": "requeued", "next_at": 0,
+                                "message": row["message"]})
+            save_pending(pending)
+            claimed.unlink(missing_ok=True)
+            print(f"requeued {len(rows)} message(s) for delivery")
+            return 0
+
         rows = []
         try:
             for line in DEAD_LETTER.read_text(encoding="utf-8").splitlines():
@@ -723,18 +855,6 @@ def main(argv=None):
                     rows.append(json.loads(line))
         except (OSError, ValueError):
             pass
-        if args.requeue:
-            if not rows:
-                print("nothing in the dead-letter file")
-                return 0
-            pending = load_pending()
-            for row in rows:
-                pending.append({"attempts": 0, "reason": "requeued", "next_at": 0,
-                                "message": row["message"]})
-            save_pending(pending)
-            DEAD_LETTER.unlink(missing_ok=True)
-            print(f"requeued {len(rows)} message(s) for delivery")
-            return 0
         print(f"dead-letter: {len(rows)} message(s)  {DEAD_LETTER}")
         for row in rows[:20]:
             message = row["message"]

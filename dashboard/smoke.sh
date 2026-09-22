@@ -10,18 +10,11 @@
 # fact rejecting them - a test that cannot fail is worse than no test.
 set -u
 BASE="http://127.0.0.1:8787"
-pass=0; fail=0
+# shellcheck source=/dev/null
+. dashboard/testlib.sh          # ok/bad/check/check_rc/rc_is/count_msgs, one copy
 
 code() { curl -s -o /dev/null -w '%{http_code}' "$BASE/$1"; }
 jpost() { curl -s -X POST -H 'Content-Type: application/json' --data "$2" "$BASE/$1"; }
-
-check() { # check <label> <expected> <actual>
-  if [ "$2" = "$3" ]; then
-    printf '  ok    %-36s %s\n' "$1" "$3"; pass=$((pass + 1))
-  else
-    printf '  FAIL  %-36s got [%s] want [%s]\n' "$1" "$3" "$2"; fail=$((fail + 1))
-  fi
-}
 
 echo '--- static assets ---'
 # index.html is served at / only; it is deliberately not reachable as a path.
@@ -245,6 +238,4 @@ check 'device deleted' 'True' \
   "$(jpost api/delete "{\"kind\":\"device\",\"id\":$did}" \
      | python3 -c 'import json,sys; print(json.load(sys.stdin).get("ok",""))')"
 
-echo
-printf 'passed %d, failed %d\n' "$pass" "$fail"
-[ "$fail" -eq 0 ]
+finish

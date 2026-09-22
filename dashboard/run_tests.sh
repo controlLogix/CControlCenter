@@ -80,10 +80,15 @@ run() {
   esac
 }
 
+# testlib first: it proves the shared assertions can FAIL on the bug shapes they exist
+# for. If they cannot, every suite below that uses them is decoration.
+run test_testlib.sh bash /dev/fd/8 8< <(tr -d '\r' < dashboard/test_testlib.sh)
+run test_argguard.sh bash /dev/fd/9 9< <(tr -d '\r' < dashboard/test_argguard.sh)
 run test_modal_guard.sh bash /dev/fd/4 4< <(tr -d '\r' < dashboard/test_modal_guard.sh)
 run test_inbox_guard.sh bash /dev/fd/5 5< <(tr -d '\r' < dashboard/test_inbox_guard.sh)
 run test_coordination.sh bash /dev/fd/6 6< <(tr -d '\r' < dashboard/test_coordination.sh)
 run test_run.sh   bash /dev/fd/7 7< <(tr -d '\r' < dashboard/test_run.sh)
+run test_lifecycle.sh bash /dev/fd/10 10< <(tr -d '\r' < dashboard/test_lifecycle.sh)
 run smoke.sh      bash /dev/fd/3 3< <(tr -d '\r' < dashboard/smoke.sh)
 run test_snapshot.py python3 dashboard/test_snapshot.py
 run test_mqtt.py  python3 dashboard/test_mqtt.py
