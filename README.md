@@ -432,12 +432,15 @@ Four behaviours are worth knowing, because each one is silent when it goes wrong
 
 `agentmux courier status` prints what is running, what is pending and why.
 
-**The courier starts with the first agent.** A courier that is not running fails
+**The courier's lifetime matches the agents'.** A courier that is not running fails
 *silently* — `post` succeeds, the message sits in the queue, and the recipient simply
 never hears anything. So `spawn` brings it up if it is not already running, which
 means messaging works whenever there is anything to message and there is no
-boot-time service to remember. `AGENTMUX_NO_COURIER=1` opts out; a failure to start
-it never fails a spawn.
+boot-time service to remember. `kill` stops it again once the **last** agent is gone,
+so it does not outlive them and sit polling an empty queue until the next reboot —
+that would be the same kind of orphan `reap` exists to clear up. Killing one agent
+while others remain leaves it running. `AGENTMUX_NO_COURIER=1` opts out of both ends;
+a failure to start it never fails a spawn.
 
 ### Sidecars outlive their sessions — `agentmux reap`
 

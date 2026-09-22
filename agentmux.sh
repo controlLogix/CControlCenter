@@ -912,11 +912,30 @@ cmd_list() {
   report_stale
 }
 
+# Stop the courier once the last agent is gone.
+#
+# The mirror of the autostart in `spawn`. Without it the courier outlives every
+# agent and polls an empty queue every few seconds until the next reboot - which is
+# how it behaved when first written, and it is exactly the kind of orphan this
+# session spent its time removing from run/. Started with the first agent, stopped
+# with the last.
+stop_courier_if_idle() {
+  [ "${AGENTMUX_NO_COURIER:-0}" = "1" ] && return 0
+  [ -n "${AGENTMUX_REPO:-}" ] && [ -f "$AGENTMUX_REPO/taskmgmt/courier.py" ] || return 0
+  # Any session still up means somebody may still be messaging.
+  tm list-sessions >/dev/null 2>&1 && return 0
+  python3 "$AGENTMUX_REPO/taskmgmt/courier.py" --status 2>/dev/null \
+    | grep -q '^courier:   running' || return 0
+  python3 "$AGENTMUX_REPO/taskmgmt/courier.py" --stop >/dev/null 2>&1 \
+    && printf 'courier stopped (no agents left)\n'
+}
+
 cmd_kill() {
   local target="${1:-}"
   [ -n "$target" ] || die "kill needs a name or --all"
   if [ "$target" = "--all" ]; then
     if tm kill-server 2>/dev/null; then echo "killed all agents"; else echo "no agents running"; fi
+    stop_courier_if_idle
     return 0
   fi
   need "$target"
@@ -935,6 +954,7 @@ cmd_kill() {
 
   tm kill-session -t "=$target" && printf "killed '%s'\n" "$target"
   rm -f "$RUNDIR/$target".* 2>/dev/null
+  stop_courier_if_idle
 }
 
 # All names that have sidecars under run/, live or not.
