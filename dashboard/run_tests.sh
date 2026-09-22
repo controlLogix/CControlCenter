@@ -37,10 +37,10 @@ run test_courier.py python3 dashboard/test_courier.py
 run test_gateway.py python3 dashboard/test_gateway.py
 run test_auth.py  timeout 400 python3 dashboard/test_auth.py
 
-# test_gateway.py runs against taskmgmt/bedrock_gateway.py IF IT EXISTS, and against
-# the surviving .pyc otherwise - the source is missing (see that file's docstring).
-# It needs no key and makes no network call, so it runs whether or not the Bedrock
-# path is parked.
+# test_gateway.py needs no key and makes no network call, so it runs whether or not the
+# Bedrock path is parked. Its last section compares the reconstructed
+# taskmgmt/bedrock_gateway.py against the preserved 2026-09-19 bytecode, running both on
+# identical inputs; that section skips itself once CPython can no longer load the .pyc.
 
 echo
 if [ "$total_fail" -eq 0 ]; then

@@ -2,8 +2,18 @@
 
 ## `bedrock_gateway.cpython-312.pyc.bin`
 
-This is the **only surviving copy of `taskmgmt/bedrock_gateway.py`**, which no longer
-exists. Neither the source nor its test suite is in the working tree or in git history,
+> **UPDATE 2026-09-22, later the same day: the source has been reconstructed.**
+> `taskmgmt/bedrock_gateway.py` exists again, rebuilt from this bytecode and verified
+> against it differentially - both implementations run on identical inputs and their
+> outputs compared, by `dashboard/test_gateway.py`. This file is therefore no longer the
+> last copy of anything, but **keep it**: it is the reference the reconstruction is
+> checked against, and that check is the only evidence the rewrite behaves like the
+> version that actually worked against live Bedrock. It also proved its worth
+> immediately - importing the new source overwrote the `__pycache__` entry, so without
+> this copy the act of writing the replacement would have destroyed the original.
+
+This was the **only surviving copy of `taskmgmt/bedrock_gateway.py`**, which no longer
+existed. Neither the source nor its test suite was in the working tree or in git history,
 so neither was ever committed. Both were most likely deleted alongside
 `dashboard/setup_bedrock_codex.sh` and `dashboard/probe_bedrock.sh` during the
 2026-09-20 credential purge — those two existed to copy an API key out of another tool's
@@ -21,17 +31,18 @@ version bump that rewrites the cache directory would have destroyed it silently.
 `.bin` suffix keeps it clear of those ignore rules and stops it being mistaken for a
 live cache entry that Python might load in place of a real module.
 
-### This is a deadline
+### The deadline that applied, and what was done about it
 
-A CPython 3.13 interpreter will refuse this file, and there is **no source to
-recompile**. One of three things needs to happen while it still loads:
+A CPython 3.13 interpreter will refuse this file, and there was **no source to
+recompile** - so the gateway was one routine Python upgrade away from being lost
+outright. Three options were on the table: decompile it, rewrite it, or let the Bedrock
+path go deliberately rather than by accident.
 
-1. decompile it back to source;
-2. rewrite the gateway from `dashboard/test_gateway.py`, which was rebuilt as an
-   executable specification of its behaviour (57 checks, including the three bugs fixed
-   on 2026-09-20 so a rewrite cannot quietly reintroduce them);
-3. decide the Bedrock path is staying parked and let it go deliberately rather than by
-   accident.
+Decompilation was not available: nothing suitable is installed, and the mature
+decompilers (uncompyle6, decompyle3) do not support CPython 3.12 at all. **Option 2 was
+taken** while the bytecode still loaded, which is what made the differential check
+possible. That window is now closed permanently - the source no longer depends on this
+file being loadable, only the verification does.
 
 ### What was extracted while it was still reachable
 

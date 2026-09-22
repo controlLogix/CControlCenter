@@ -10,31 +10,39 @@ parts that touch the network, and they are not exercised.
 
 WHY THIS FILE LOOKS UNUSUAL
 ---------------------------
-`taskmgmt/bedrock_gateway.py` **does not exist**. Neither did its test suite, which
-STATUS_CCC_2026-09-20.md lists as 31 checks. Both are absent from the working tree and
-from git history, so neither was ever committed; they were most likely deleted with
-the two Bedrock setup scripts during the 2026-09-20 credential purge, which is a
-different class of file - those existed to copy a key out of another tool's settings,
-these did not.
+Both this suite and `taskmgmt/bedrock_gateway.py` were **lost**. Neither was ever
+committed, and both were most likely deleted with the two Bedrock setup scripts during
+the 2026-09-20 credential purge - a different class of file, since those existed to copy
+a key out of another tool's settings and the gateway holds no credential.
 
-What survives is `taskmgmt/__pycache__/bedrock_gateway.cpython-312.pyc`, compiled from
-a 27,384-byte source on 2026-09-19. Its magic matches CPython 3.12, so the module still
-imports and runs. This suite loads the source if it is ever restored and falls back to
-that bytecode otherwise, and says which one it used.
+All that survived was the bytecode, compiled from a 27,384-byte source on 2026-09-19.
+Because its magic matched CPython 3.12 it still imported, which made two things possible
+on 2026-09-22: this suite was rebuilt against it, and then **the source itself was
+reconstructed** from its docstrings, constants and control flow.
 
-Two consequences worth stating plainly:
+So there are now two implementations, and the last section below runs them side by side
+on identical inputs. That is a far stronger check than assertions written from a reading
+of the docs: not "does the rewrite satisfy my idea of the spec" but "does it behave like
+the thing that actually worked against live Bedrock". It found four real divergences,
+three of which no reasonable hand-written test would have guessed.
 
-  - The gateway is one Python upgrade away from being lost outright. A 3.13
-    interpreter will refuse that .pyc and there is no source to recompile.
-  - These assertions are therefore also a specification. If the source is rewritten
-    or decompiled, this suite is the record of what the working version did -
-    including the three bugs fixed on 2026-09-20, each of which has a check below so
-    a rewrite cannot quietly reintroduce them.
+The comparison is perishable. When CPython can no longer load the 2026-09-19 bytecode
+that section skips itself, and the explicit assertions above remain as the specification -
+including a named check for each of the three bugs fixed on 2026-09-20, so a future
+change cannot quietly reintroduce them.
+
+The preserved bytecode lives in `taskmgmt/recovered/`, deliberately outside
+`__pycache__`: that directory is gitignored, and importing the reconstructed source
+overwrites the cache entry - which is exactly what happened the first time the rewrite
+was imported. Had it not been copied out first, writing the replacement would have
+destroyed the only thing available to verify it against.
 """
 
 import importlib.machinery
 import importlib.util
 import json
+import random
+import re
 import sys
 from pathlib import Path
 
@@ -262,6 +270,243 @@ check("url targets chat completions, not responses", True,
 gw.STATE["region"] = "eu-central-1"
 check("region is not hardcoded", True, "eu-central-1" in gw.bedrock_url())
 gw.STATE["region"] = "us-west-2"
+
+
+# ── differential against the original bytecode ───────────────────────────────
+#
+# The strongest check available, and a perishable one. While the 2026-09-19 bytecode
+# still loads, the reconstructed source can be run against it on identical inputs and
+# compared - not "does the rewrite satisfy my idea of the spec" but "does it behave
+# like the thing that actually worked against live Bedrock". Four real divergences
+# were found and fixed this way, three of which no reasonable test would have guessed:
+# empty string items must NOT be filtered out of `input`, an empty `message` must be
+# dropped, tool-call item events carry raw `arguments` rather than a "{}" default, and
+# each tool call emits output_item.added before .done.
+#
+# When CPython can no longer load the bytecode this section skips itself and the rest
+# of the suite carries on as an ordinary specification.
+
+print("--- differential against the original bytecode ---")
+
+original = None
+if SOURCE.is_file() and PRESERVED.is_file():
+    try:
+        loader = importlib.machinery.SourcelessFileLoader("gw_original", str(PRESERVED))
+        spec = importlib.util.spec_from_file_location("gw_original", str(PRESERVED),
+                                                      loader=loader)
+        original = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(original)
+    except Exception as err:                       # a newer CPython refuses the magic
+        print(f"        skipped: cannot load the 2026-09-19 bytecode ({err})")
+        print("        the checks above still stand as a specification.")
+else:
+    print("        skipped: nothing to compare against "
+          f"({'no source' if not SOURCE.is_file() else 'no preserved bytecode'})")
+
+
+def differ(label, call, cases):
+    """One check per family; the count of compared cases is the interesting part."""
+    if original is None:
+        return
+    bad = []
+    for case in cases:
+        try:
+            a = call(original, case)
+        except Exception as err:
+            a = f"<{type(err).__name__}>"
+        try:
+            b = call(gw, case)
+        except Exception as err:
+            b = f"<{type(err).__name__}>"
+        if a != b:
+            bad.append((case, a, b))
+    if bad:
+        print(f"        first divergence: {str(bad[0])[:200]}")
+    check(f"{label} ({len(cases)} cases)", 0, len(bad))
+
+
+FN_SPEC = {"type": "function", "name": "shell", "description": "run",
+           "parameters": {"type": "object"}}
+
+differ("text_from_content matches", lambda m, c: m.text_from_content(c), [
+    "plain", "", None, [], ["notadict"], [{"type": "input_text", "text": "a"}],
+    [{"refusal": "no"}], [{"text": None}], [{"text": "a", "refusal": "b"}]])
+
+differ("to_chat_messages matches", lambda m, b: m.to_chat_messages(b), [
+    {"input": "hi"}, {"input": ""}, {"input": "   "}, {"input": None},
+    {"input": 7}, {"input": {"weird": 1}}, {"input": ["a", "", "   "]},
+    {"instructions": "be terse", "input": "hi"}, {"instructions": "  ", "input": "hi"},
+    {"input": [{"type": "message", "role": "user",
+                "content": [{"type": "input_text", "text": "h"}]}]},
+    {"input": [{"type": "message", "role": "assistant", "content": []}]},
+    {"input": [{"type": "function_call", "name": "read", "arguments": '{"p":1}',
+                "call_id": "c1"}]},
+    {"input": [{"type": "function_call"}]},
+    {"input": [{"type": "function_call_output", "call_id": "c1", "output": "365"}]},
+    {"input": [{"type": "function_call_output"}]},
+    {"input": [{"type": "reasoning"}, {"type": "item_reference"}]},
+    {"input": [{"type": "mystery", "a": 1}]}, {"input": [{"no_type": 1}]},
+    {"input": [12345]}])
+
+differ("to_chat_tools matches", lambda m, b: m.to_chat_tools(b), [
+    {"tools": t} for t in [
+        [], None, [FN_SPEC], [FN_SPEC, FN_SPEC], [{"type": "function"}],
+        [{"type": "function", "name": ""}], [{"type": "web_search"}], ["notadict"],
+        [None], [{"type": "namespace", "name": "ns", "tools": [FN_SPEC]}],
+        [{"type": "namespace", "name": "ns"}],
+        [{"type": "namespace", "name": "a", "tools": [
+            {"type": "namespace", "name": "b", "tools": [
+                {"type": "namespace", "name": "c", "tools": [
+                    {"type": "namespace", "name": "d", "tools": [
+                        {"type": "function", "name": "deep", "parameters": {}}]}]}]}]}]]])
+
+differ("build_chat_request matches", lambda m, b: m.build_chat_request(b), [
+    {"input": "hi"}, {"model": "m", "input": "hi", "stream": True},
+    {"input": "hi", "max_output_tokens": 50, "temperature": 0.5, "top_p": 0.9},
+    {"input": "hi", "max_output_tokens": 0}, {"input": "hi", "tools": [FN_SPEC],
+                                              "tool_choice": "required"},
+    {"input": "hi", "tools": [FN_SPEC], "tool_choice": "bogus"},
+    {"input": "hi", "tool_choice": "auto"}])
+
+
+def response_without_clock(module, case):
+    obj = module.make_response_object(*case)
+    obj.pop("created_at", None)
+    return obj
+
+
+differ("make_response_object matches", response_without_clock, [
+    ("r", "m", text, calls, usage, status)
+    for text in ("", "hi")
+    for calls in (None, [], [{"id": "c1", "function": {"name": "f",
+                                                       "arguments": "{}"}}],
+                  [{"function": {"name": "f"}}], [{}])
+    for usage in (None, {}, {"prompt_tokens": 1, "completion_tokens": 2},
+                  {"completion_tokens": 7})
+    for status in ("completed", "failed")])
+
+# The reasoning filter was the one piece inferred rather than read directly, so it is
+# fuzzed: random chunk sequences, plus every possible split point of each corpus
+# string - which is exactly where a hold-back bug hides.
+CORPUS = ["MODEL OK", "y" * 60, "<reasoning>t</reasoning>answer",
+          "<reasoning>unclosed answer here", "a<reasoning>b</reasoning>c",
+          "</reasoning>orphan", "<reasoning></reasoning>", "partial <reason",
+          "<reasoning>nested <reasoning> in </reasoning> out"]
+SPLITS = [(text, cut) for text in CORPUS for cut in range(len(text) + 1)]
+
+
+def filter_split(module, case):
+    text, cut = case
+    handler = module.ReasoningFilter()
+    first = handler.feed(text[:cut])
+    second = handler.feed(text[cut:])
+    return first, second, handler.flush()
+
+
+differ("ReasoningFilter matches at every split", filter_split, SPLITS)
+
+random.seed(20260922)
+ALPHABET = ["a", " ", "<reasoning>", "</reasoning>", "<reas", "oning>", "<", ">",
+            "/reasoning", "x" * 20]
+FUZZ = [tuple(random.choice(ALPHABET) for _ in range(random.randint(1, 8)))
+        for _ in range(400)]
+
+
+def filter_fuzz(module, chunks):
+    handler = module.ReasoningFilter()
+    return [handler.feed(c) for c in chunks], handler.flush()
+
+
+differ("ReasoningFilter matches under fuzz", filter_fuzz, FUZZ)
+
+
+# The relay paths, driven through a fake socket. No network, no upstream.
+class _WFile:
+    def __init__(self):
+        self.chunks = []
+
+    def write(self, raw):
+        self.chunks.append(raw)
+
+    def flush(self):
+        pass
+
+
+class _Upstream:
+    def __init__(self, lines):
+        self._lines = lines
+
+    def __iter__(self):
+        return iter(self._lines)
+
+    def read(self):
+        return b"".join(self._lines)
+
+
+_VOLATILE = re.compile(r'(resp_gw_\d+|"created_at": \d+)')
+
+
+def _drive(module, case):
+    mode, payload = case
+    handler = module.Gateway.__new__(module.Gateway)
+    handler.wfile = _WFile()
+    handler.sent = []
+    handler.close_connection = False
+    handler.send_response = lambda *a: None
+    handler.send_header = lambda *a: None
+    handler.end_headers = lambda: None
+    handler.send_json = lambda code, obj: handler.sent.append((code, obj))
+    if mode == "once":
+        handler.relay_once(_Upstream([json.dumps(payload).encode()]), "model-x")
+    else:
+        lines = [b"data: " + json.dumps(c).encode() + b"\n" for c in payload]
+        lines.append(b"data: [DONE]\n")
+        handler.relay_stream(_Upstream(lines), "model-x")
+    for entry in handler.sent:
+        entry[1].pop("created_at", None) if isinstance(entry[1], dict) else None
+    body = b"".join(handler.wfile.chunks).decode("utf-8", "replace")
+    return _VOLATILE.sub("X", json.dumps(handler.sent, default=str) + body)
+
+
+def _delta(content=None, tool_calls=None, usage=None):
+    chunk = {"choices": [{"delta": {}}]}
+    if content is not None:
+        chunk["choices"][0]["delta"]["content"] = content
+    if tool_calls is not None:
+        chunk["choices"][0]["delta"]["tool_calls"] = tool_calls
+    if usage is not None:
+        chunk["usage"] = usage
+    return chunk
+
+
+differ("relay_once matches", _drive, [
+    ("once", p) for p in [
+        {"id": "x1", "choices": [{"message": {"content": "hello"}}],
+         "usage": {"prompt_tokens": 3, "completion_tokens": 4}},
+        {"choices": [{"message": {"content": ""}}]},
+        {"choices": [{"message": {"content": "<reasoning>t</reasoning>a"}}]},
+        {"choices": [{"message": {"content": "<reasoning>unclosed"}}]},
+        {"choices": [{"message": {"content": None, "tool_calls": [
+            {"id": "c1", "function": {"name": "f", "arguments": "{}"}}]}}]},
+        {"choices": []}, {"choices": [{}]}, {}]])
+
+differ("relay_stream matches", _drive, [
+    ("stream", s) for s in [
+        [_delta("hello "), _delta("world")], [_delta("MODEL OK")],
+        [_delta("<reasoning>"), _delta("think"), _delta("</reasoning>"), _delta("a")],
+        [_delta("<reasoning>never closed")], [_delta("a" * 300), _delta("b" * 300)],
+        [_delta(""), _delta(None)], [],
+        [_delta(usage={"prompt_tokens": 1, "completion_tokens": 2})],
+        [_delta(tool_calls=[{"index": 0, "id": "c1",
+                             "function": {"name": "shell", "arguments": '{"a'}}]),
+         _delta(tool_calls=[{"index": 0, "function": {"arguments": '":1}'}}])],
+        [_delta(tool_calls=[{"index": 0, "id": "c1", "function": {"name": "a"}}]),
+         _delta(tool_calls=[{"index": 1, "id": "c2", "function": {"name": "b"}}])],
+        [_delta("text"), _delta(tool_calls=[{"index": 0, "id": "c1",
+                                             "function": {"name": "f",
+                                                          "arguments": "{}"}}])],
+        [_delta(tool_calls=[{"function": {"name": "noindex"}}])],
+        [{"choices": [{"delta": {}}]}], [{"choices": []}], [{"no_choices": True}]]])
 
 print()
 print(f"passed {passed}, failed {failed}")
