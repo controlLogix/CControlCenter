@@ -11,6 +11,8 @@ from voicecli.engine import Transcriber
 
 
 class FakeMic:
+    ptt = None  # Transcriber to press/release around each clip (push-to-talk test)
+
     def __init__(self, clips):
         self.device = InputDevice(-1, "fake", "file", TARGET_RATE, 1)
         self.blocks = queue.Queue()
@@ -21,9 +23,14 @@ class FakeMic:
             block = int(TARGET_RATE * 0.03)
             silence = np.random.normal(0, 0.001, TARGET_RATE * 2).astype(np.float32)
             for clip in [silence] + [c for x in self.clips for c in (x, silence)]:
+                speech = clip is not silence
+                if speech and self.ptt:
+                    self.ptt.set_held(True)
                 for i in range(0, len(clip), block):
                     self.blocks.put(clip[i:i + block])
                     time.sleep(0.03)
+                if speech and self.ptt:
+                    self.ptt.set_held(False)
         threading.Thread(target=feed, daemon=True).start()
 
     def stop(self):
@@ -39,6 +46,7 @@ def load(path):
 ap = argparse.ArgumentParser()
 ap.add_argument("wavs", nargs="+")
 ap.add_argument("--model", default="small.en")
+ap.add_argument("--ptt", action="store_true", help="simulate holding push-to-talk during each clip")
 a = ap.parse_args()
 clips = [load(p) for p in a.wavs]
 events = []
@@ -48,8 +56,10 @@ def emit(ev):
     if ev["type"] != "level":
         print(json.dumps(ev), flush=True)
     events.append(ev)
-tr = Transcriber(emit, model=a.model)
-tr.set_mic(FakeMic(clips))
+tr = Transcriber(emit, model=a.model, mode="ptt" if a.ptt else "open")
+mic = FakeMic(clips)
+mic.ptt = tr if a.ptt else None
+tr.set_mic(mic)
 tr.start()
 total = 2 + sum(len(c) / TARGET_RATE + 2 for c in clips)
 time.sleep(total + 4)

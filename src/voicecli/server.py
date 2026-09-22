@@ -1,10 +1,15 @@
 """Local HTTP API on 127.0.0.1, the seam a future ByteDesk plugin will talk to.
 
-GET  /health          {"ok": true, "state": ..., "device": ...}
+GET  /health          state, mode, device, target window, options
 GET  /devices         input devices
+GET  /windows         windows that text can be sent to
 GET  /events          Server-Sent Events stream of every engine event
-POST /listening       body {"on": true|false}
-POST /device          body {"device": "<index or name substring>"}
+POST /listening       {"on": true|false}             open mic: pause/resume
+POST /mode            {"mode": "ptt"|"open"}
+POST /device          {"device": "<index or name substring>"}
+POST /target          {"hwnd": 1234} | {"title": "substring"} | {} to follow focus
+POST /show            bring the overlay forward (used by a second launch)
+POST /quit            exit voicecli
 """
 
 from __future__ import annotations
@@ -13,17 +18,16 @@ import json
 import queue
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from typing import Callable
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .app import App
 
 
 class Api:
-    def __init__(self, port: int, status: Callable[[], dict], devices: Callable[[], list],
-                 set_listening: Callable[[bool], None], set_device: Callable[[str], None]):
+    def __init__(self, port: int, app: "App"):
         self.port = port
-        self.status = status
-        self.devices = devices
-        self.set_listening = set_listening
-        self.set_device = set_device
+        self.app = app
         self._subs: list[queue.Queue] = []
         self._lock = threading.Lock()
         self._httpd: ThreadingHTTPServer | None = None
@@ -35,8 +39,21 @@ class Api:
             for q in self._subs:
                 q.put(event)
 
+    def _set_target(self, body: dict) -> None:
+        app = self.app
+        if body.get("hwnd"):
+            app.set_target(int(body["hwnd"]))
+        elif body.get("title"):
+            needle = str(body["title"]).lower()
+            match = next((w for w in app.windows() if needle in w["title"].lower()), None)
+            if match is None:
+                raise ValueError(f"no window titled like {body['title']!r}")
+            app.set_target(match["hwnd"])
+        else:
+            app.set_target(None)
+
     def start(self) -> None:
-        api = self
+        api, app = self, self.app
 
         class Handler(BaseHTTPRequestHandler):
             def log_message(self, *args):  # keep stdout clean for JSONL
@@ -56,9 +73,11 @@ class Api:
 
             def do_GET(self):
                 if self.path == "/health":
-                    self._json(200, {"ok": True, **api.status()})
+                    self._json(200, {"ok": True, **app.status()})
                 elif self.path == "/devices":
-                    self._json(200, api.devices())
+                    self._json(200, app.devices())
+                elif self.path == "/windows":
+                    self._json(200, app.windows())
                 elif self.path == "/events":
                     self._events()
                 else:
@@ -68,12 +87,21 @@ class Api:
                 try:
                     body = self._body()
                     if self.path == "/listening":
-                        api.set_listening(bool(body.get("on", True)))
+                        app.set_listening(bool(body.get("on", True)))
+                    elif self.path == "/mode":
+                        app.set_mode(str(body["mode"]))
                     elif self.path == "/device":
-                        api.set_device(str(body["device"]))
+                        app.set_device(str(body["device"]))
+                    elif self.path == "/target":
+                        api._set_target(body)
+                    elif self.path == "/show":
+                        app.show()
+                    elif self.path == "/quit":
+                        self._json(200, {"ok": True})
+                        return app.quit()
                     else:
                         return self._json(404, {"error": "not found"})
-                    self._json(200, {"ok": True, **api.status()})
+                    self._json(200, {"ok": True, **app.status()})
                 except (KeyError, ValueError) as e:
                     self._json(400, {"error": str(e)})
                 except Exception as e:  # e.g. the device would not open
@@ -88,7 +116,7 @@ class Api:
                 self.send_header("Cache-Control", "no-cache")
                 self.end_headers()
                 try:
-                    self.wfile.write(f"data: {json.dumps({'type': 'hello', **api.status()})}\n\n".encode())
+                    self.wfile.write(f"data: {json.dumps({'type': 'hello', **app.status()})}\n\n".encode())
                     self.wfile.flush()
                     while True:
                         try:
