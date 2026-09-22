@@ -608,11 +608,37 @@ cmd_spawn() {
 #
 # Matching the LAST few lines only, because these prompts live at the bottom of the pane
 # and the same words appear harmlessly in scrollback.
+# The patterns below are in three groups, and the second and third exist because the
+# first was not enough. Measured 2026-09-22 on a fresh `claude` pane: it shows THREE
+# modals in a row - folder trust, bypass-permissions consent, then an Opus effort
+# recommendation - and none of them matched. `send` typed into the second one, Enter
+# selected its default of "No, exit", and the agent died. That is bug 30 all over
+# again on a different CLI, so the guard now covers the shapes rather than one CLI's
+# wording:
+#
+#   1. explicit question forms  - the original set
+#   2. confirm/cancel footers   - "Enter to confirm", "Esc to cancel"
+#   3. a SELECTED option line   - a caret or arrow followed by an answer word, or by
+#                                 a numbered choice
+#
+# Group 3 needs care: `❯` and `›` are also the IDLE input prompts of claude and codex.
+# It only fires when the marker is followed by an answer-shaped word or "N.", which an
+# empty prompt never is.
+#
+# Matching the LAST few lines only, because these prompts live at the bottom of the pane
+# and the same words appear harmlessly in scrollback.
+# Split in two so the PATTERN can be tested without a tmux server or a real CLI:
+# modal_text takes the text, modal_prompt supplies it from a pane.
+# dashboard/test_modal_guard.sh exercises modal_text against captured samples.
+modal_text() {
+  printf '%s' "$1" | grep -Eqi \
+    'press enter to continue|update now \(runs|\[y/n\]|\(y/n\)|do you (want|trust)|allow this|press any key|select an option|continue\? *$|enter to confirm|esc to cancel|no, (exit|quit)|yes, i (accept|trust)|trust this folder|[❯›▶>][[:space:]]+([0-9]+\.|yes\b|no\b|switch\b|keep\b|continue\b|sign in\b|log ?in\b)'
+}
+
 modal_prompt() {
   local pane="$1" tail_text
-  tail_text="$(tm capture-pane -p -t "$pane" 2>/dev/null | grep -v '^[[:space:]]*$' | tail -6)"
-  printf '%s' "$tail_text" | grep -Eqi \
-    'press enter to continue|update now \(runs|\[y/n\]|\(y/n\)|do you (want|trust)|allow this|press any key|select an option|continue\? *$'
+  tail_text="$(tm capture-pane -p -t "$pane" 2>/dev/null | grep -v '^[[:space:]]*$' | tail -8)"
+  modal_text "$tail_text"
 }
 
 cmd_send() {
@@ -878,6 +904,31 @@ cmd_courier() {
   esac
 }
 
+# The permission mode the PANE is actually in, or empty if it cannot be told.
+#
+# WHY THIS EXISTS: run/<name>.perms records what spawn CONFIGURED, which is not the
+# same thing as what the agent ended up in. Measured 2026-09-22: a claude agent
+# spawned with bypassPermissions answered its startup dialogs and settled in `auto
+# mode`, while `list` went on reporting UNRESTRICTED. Reporting an agent as less
+# restricted than it is would be the dangerous direction; reporting it as more
+# restricted is merely wrong, and either way a listing that cannot be trusted is worse
+# than one that admits it does not know.
+#
+# Every CLI prints its mode in the pane footer, so read it from there.
+observed_perms() {
+  local name="$1" footer
+  footer="$(tm capture-pane -p -t "$name" 2>/dev/null | strip_ansi | grep -v '^[[:space:]]*$' | tail -6)"
+  case "$footer" in
+    *"bypass permissions on"*)  printf 'bypass' ;;
+    *"auto mode on"*)           printf 'auto' ;;
+    *"plan mode on"*)           printf 'plan' ;;
+    *"accept edits on"*)        printf 'acceptEdits' ;;
+    *"always-approve"*)         printf 'always-approve' ;;
+    *"YOLO"*|*"yolo"*)          printf 'yolo' ;;
+    *) printf '' ;;
+  esac
+}
+
 # Mention orphaned sidecars without acting on them. `list` is a read, so it says
 # what is there and names the verb; `reap` is what removes anything.
 report_stale() {
@@ -890,12 +941,29 @@ cmd_list() {
   if ! tm list-sessions >/dev/null 2>&1; then
     echo "no agents running"; report_stale; return 0
   fi
-  printf '%-14s %-12s %-9s %-12s %-10s %-18s %s\n' NAME CLI STATE PERMS TASK AUTH CWD
-  tm list-sessions -F '#{session_name}' 2>/dev/null | while read -r n; do
+  printf '%-14s %-12s %-9s %-14s %-10s %-18s %s\n' NAME CLI STATE PERMS TASK AUTH CWD
+  # Process substitution rather than a pipe: a piped `while read` runs in a subshell,
+  # so $mismatch would be discarded the moment the loop ended and the note below would
+  # never print.
+  local mismatch=""
+  while read -r n; do
     cli="$(cat "$RUNDIR/$n.cli" 2>/dev/null || echo '?')"
     cwd="$(cat "$RUNDIR/$n.cwd" 2>/dev/null || echo '?')"
     perms="$(cat "$RUNDIR/$n.perms" 2>/dev/null || echo '?')"
     task="$(cat "$RUNDIR/$n.task" 2>/dev/null || echo '-')"
+    # Prefer what the pane says over what spawn intended. A '*' marks a value that
+    # was configured but could not be confirmed from the pane, so the column never
+    # silently presents an assumption as an observation.
+    actual="$(observed_perms "$n")"
+    if [ -n "$actual" ]; then
+      case "$perms:$actual" in
+        UNRESTRICTED:bypass|UNRESTRICTED:yolo|UNRESTRICTED:always-approve) ;;
+        *) mismatch="$mismatch $n=$actual" ;;
+      esac
+      perms="$actual"
+    else
+      perms="$perms*"
+    fi
     # An auth method id, never a credential. '-' means the CLI's own built-in
     # default, i.e. an existing OAuth login that agentmux does not manage.
     auth="$(cat "$RUNDIR/$n.auth" 2>/dev/null || echo '-')"
@@ -907,8 +975,16 @@ cmd_list() {
     else
       st="detached"
     fi
-    printf '%-14s %-12s %-9s %-12s %-10s %-18s %s\n' "$n" "$cli" "$st" "$perms" "$task" "$auth" "$cwd"
-  done
+    printf '%-14s %-12s %-9s %-14s %-10s %-18s %s\n' "$n" "$cli" "$st" "$perms" "$task" "$auth" "$cwd"
+  done < <(tm list-sessions -F '#{session_name}' 2>/dev/null)
+
+  # Say it plainly when the pane disagrees with what spawn configured, rather than
+  # leaving the operator to notice a column they have read a hundred times.
+  if [ -n "$mismatch" ]; then
+    printf '\nPERMS differs from what spawn configured:%s\n' "$mismatch"
+    printf '  the pane is the authority here; a startup dialog can change the mode.\n'
+  fi
+  printf '%s' "" # keep the function's output tidy when nothing follows
   report_stale
 }
 

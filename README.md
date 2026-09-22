@@ -179,6 +179,7 @@ empty list that reads as "no tickets".
 | `seed_queue.py` | Writes sample agent traffic into `~/.agentmux/queue/` for exercising the Message Queue view. |
 | `show_auth.py` | Prints `/api/auth` as a tree. Debugging aid for the auth grouping. |
 | `run_tests.sh` | Restarts the server and runs every suite; non-zero if any fails. Spawns two throwaway `shell` agents when none are running, because the stream checks need live panes, and kills them on exit. Pre-existing agents are left alone. |
+| `test_modal_guard.sh` | The `send` modal guard, against captured pane text. No tmux, no CLI, no network. |
 | `syntax_check.sh` | Parses every shell and Python file in the repo. |
 | `start_gateway.sh` / `setup_bedrock_codex.sh` | Bring up the Bedrock gateway; configure `codex-bedrock`. |
 | `check_key_exposure.sh` | Reports every location holding a Bedrock key, by fingerprint — never the value. |
@@ -483,8 +484,17 @@ Two things this does **not** do:
 
 - It does not suppress first-run or account-level modals. Measured: codex still
   shows its directory-trust dialog, and a rate-limit "switch model?" prompt with
-  the *accept* option preselected. Use `key` for those — never `send`, which
-  appends Enter and actuates whatever has focus.
+  the *accept* option preselected. A freshly spawned **claude shows three in a
+  row** — folder trust, bypass-permissions consent, then an Opus effort
+  recommendation. Use `key` for those — never `send`, which appends Enter and
+  actuates whatever has focus.
+
+  `send` refuses while a modal is up, and that guard is load-bearing: a missed one
+  is destructive. It has cost an agent twice — a codex *"Update available / Press
+  enter to continue"* whose Enter ran npm install, and a claude *"No, exit / Yes, I
+  accept"* whose **default is No, exit**. `dashboard/test_modal_guard.sh` pins every
+  known dialog plus the idle prompts that must not trigger it, so the guard can be
+  widened without making `send` useless.
 - It does not reduce risk relative to passing the flags directly. Config is where
   the setting belongs, but the blast radius is the same — and if `~/.claude` and
   `~/.codex` are shared with a Windows install (see `link-windows-state.sh`), that
