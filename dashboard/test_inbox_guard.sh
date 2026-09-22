@@ -81,6 +81,66 @@ else
   bad 'rejected a legitimate name'
 fi
 
+echo '--- --clear keeps what it printed, rather than destroying it ---'
+printf '{"at":"t","sender":"dev","recipient":"orchestrator","kind":"reply","body":"keep me","ref":null}\n' \
+  > "$HOME_DIR/inbox/orchestrator.jsonl"
+bash "$AM" inbox orchestrator --clear >/dev/null 2>&1
+if [ -f "$HOME_DIR/inbox/orchestrator.jsonl.read" ] \
+   && grep -q 'keep me' "$HOME_DIR/inbox/orchestrator.jsonl.read"; then
+  ok 'cleared messages are retained in the .read snapshot'
+else
+  bad 'cleared messages were destroyed'
+fi
+
+echo '--- THE RACE: a message arriving during --clear must not vanish ---'
+# The old order was read -> print -> unlink, so anything the courier appended in
+# between was printed nowhere and then deleted. This appends continuously while the
+# clear runs and then checks the books balance: every message must be either in the
+# snapshot that was printed, or still in the live inbox. None may be missing.
+rm -f "$HOME_DIR/inbox/orchestrator.jsonl" "$HOME_DIR/inbox/orchestrator.jsonl.read"
+for i in $(seq 1 150); do
+  printf '{"at":"t","sender":"dev","recipient":"orchestrator","kind":"reply","body":"pre-%s","ref":null}\n' "$i" \
+    >> "$HOME_DIR/inbox/orchestrator.jsonl"
+done
+
+# Spread the writes so they are DEFINITELY still arriving when the clear lands.
+# Without the sleep the writer finishes first and the test passes vacuously.
+(
+  for i in $(seq 1 150); do
+    printf '{"at":"t","sender":"dev","recipient":"orchestrator","kind":"reply","body":"during-%s","ref":null}\n' "$i" \
+      >> "$HOME_DIR/inbox/orchestrator.jsonl"
+    sleep 0.01
+  done
+) &
+writer=$!
+sleep 0.3
+bash "$AM" inbox orchestrator --clear >/dev/null 2>&1
+wait "$writer"
+
+snap=$(grep -c . "$HOME_DIR/inbox/orchestrator.jsonl.read" 2>/dev/null || echo 0)
+live=$(grep -c . "$HOME_DIR/inbox/orchestrator.jsonl" 2>/dev/null || echo 0)
+total=$((snap + live))
+if [ "$total" -eq 300 ]; then
+  ok "no message lost across the clear ($snap archived + $live still live = 300)"
+else
+  bad "$((300 - total)) message(s) vanished ($snap archived + $live live)"
+fi
+# Prove the race was actually exercised. If every message ended up archived, the
+# writer finished before the clear and the check above proved nothing.
+if [ "$live" -gt 0 ] && [ "$snap" -gt 0 ]; then
+  ok "the clear genuinely interleaved with the writer ($live arrived after it)"
+else
+  bad "no interleave (snap=$snap live=$live) - the race was not exercised"
+fi
+# Every surviving record must still be parseable - a torn append would prove the
+# atomicity assumption wrong.
+if cat "$HOME_DIR/inbox/orchestrator.jsonl.read" "$HOME_DIR/inbox/orchestrator.jsonl" 2>/dev/null \
+   | python3 -c 'import json,sys; [json.loads(l) for l in sys.stdin if l.strip()]' 2>/dev/null; then
+  ok 'every surviving record is intact JSON - no torn appends'
+else
+  bad 'a record was torn'
+fi
+
 echo
 echo "passed $pass, failed $fail"
 [ "$fail" -eq 0 ] || exit 1

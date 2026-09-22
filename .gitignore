@@ -34,6 +34,10 @@ dashboard/REVIEW_*.md
 ORCHESTRATION_BRIEF.md
 ORCHESTRATION_RESULT.md
 
+# Scratch working area for a single run's artifacts (briefs, generated output).
+# Same rule as the orchestration files above: run output, not source.
+.penguin/
+
 # Superseded copies kept beside the originals while refactoring.
 *.bak
 *.pre-*

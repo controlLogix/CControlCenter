@@ -152,6 +152,50 @@ check_rc 'a status change fails cleanly too' 1 $?
 $CO task-status 1 bogus >/dev/null 2>&1
 check_rc 'an invalid status is rejected before any request' 2 $?
 
+echo '--- broadcasts go to the interested, not to everyone ---'
+# Every delivered message starts a full inference turn in the recipient, so telling
+# an uninvolved agent about a claim costs that agent's entire context to convey
+# nothing. Measured on this machine, claim/release was 29.8% of all deliveries.
+# Safe to omit because exclusion comes from the claim FILE: an agent that never heard
+# finds out the moment it tries, and is told the holder, note and expiry then.
+rm -rf "$HOME_DIR/claims" "$HOME_DIR/queue"
+# An outbox is named for the SENDER; the recipient is a field in the record.
+count_msgs() { [ -f "$1" ] && grep -c . "$1" 2>/dev/null || printf '0'; }
+
+$CO claim lib/a.py --holder alice >/dev/null 2>&1
+before=$(count_msgs "$HOME_DIR/queue/alice.jsonl")
+if [ "$before" -eq 0 ]; then
+  ok 'a claim nobody depends on notifies nobody'
+else
+  bad "$before message(s) queued for an uninterested audience"
+fi
+
+$CO claim lib/b.py --holder bob --depends-on lib/c.py >/dev/null 2>&1
+# Delivery itself needs a live tmux session (broadcast intersects the interested set
+# with live agents, so a claim is never queued for an agent that is not running and
+# would only dead-letter). With no tmux here, assert the audience calculation - which
+# is the part that decides who pays an inference turn.
+target=$(python3 -c "
+import sys; sys.path.insert(0, 'taskmgmt')
+import coordination
+print(','.join(sorted(coordination.interested_in('lib/c.py', 'carol'))))
+" 2>/dev/null)
+if [ "$target" = "bob" ]; then
+  ok "the interested set is exactly the depender (got '$target')"
+else
+  bad "interested set wrong: '$target'"
+fi
+target=$(python3 -c "
+import sys; sys.path.insert(0, 'taskmgmt')
+import coordination
+print(len(coordination.interested_in('lib/unrelated.py', 'alice')))
+" 2>/dev/null)
+if [ "$target" = "0" ]; then
+  ok 'and it is empty for an unrelated resource'
+else
+  bad "unrelated resource had $target interested agents"
+fi
+
 echo '--- THE RACE: many agents, one resource, simultaneously ---'
 # The sequential checks above prove the logic. This proves the mechanism: twelve
 # processes going for the same claim at once. Exactly one must win. If O_EXCL were

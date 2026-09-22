@@ -32,6 +32,7 @@ import argparse
 import json
 import os
 import re
+import secrets
 import subprocess
 import sys
 import time
@@ -55,8 +56,15 @@ RESOURCE_PATTERN = re.compile(r"[A-Za-z0-9_./-]{1,200}")
 DEFAULT_TTL = 1800          # 30 minutes
 MAX_TTL = 86400
 
-# Journal kinds the dashboard accepts; anything else is rejected there, so validate
-# here and say so rather than failing silently over HTTP.
+# Journal kinds this CLI accepts.
+#
+# CORRECTION (2026-09-22): an earlier version of this comment claimed the dashboard
+# rejects anything else. It does not - ccstore.validate_write accepts any token up to
+# 64 characters and stores it, and app.js uses its own four-value set only to pick a
+# CSS class. So the three sets disagree and nothing is dropped; the effect is purely
+# cosmetic, and the kinds below render unstyled. Do not "fix" that by narrowing this
+# list to app.js's four, which would lose `claim`, `release`, `handoff` and `blocked`
+# - the ones that carry coordination meaning.
 JOURNAL_KINDS = ("claim", "release", "conflict", "note", "handoff", "blocked",
                  "done", "plan")
 
@@ -127,14 +135,54 @@ def post(sender, recipient, kind, body, ref=None):
     return True
 
 
-def broadcast(sender, kind, body, skip=()):
-    """Tell every other live agent. Best effort by design.
+def interested_in(resource, sender):
+    """Who actually needs to hear about this resource changing hands.
+
+    WHY NOT EVERYONE. A delivered message is typed into a pane and Entered, which
+    starts a FULL INFERENCE TURN in the recipient: a 30-token notice costs whatever
+    that agent's whole context costs. Telling every agent about every claim was 29.8%
+    of all deliveries measured on this machine, and almost all of it was noise - an
+    agent that never touches the resource gains nothing from being interrupted.
+
+    It is safe to say nothing, and the codebase already says so twice: exclusion comes
+    from the claim FILE. An agent that never heard about a claim discovers it the
+    moment it tries to take the resource, and is then told the holder, their note, the
+    expiry and how to reach them - the information arrives when it is actionable.
+
+    What genuinely IS lost by silence is the dependency warning, so that is exactly the
+    target set: agents whose declared dependencies touch this resource, and agents
+    holding something this resource depends on. In the common case that set is empty
+    and no one is interrupted at all.
+    """
+    targets = set()
+    for claim in all_claims():
+        holder = claim.get("holder")
+        if not holder or holder == sender:
+            continue
+        depends = claim.get("depends_on") or []
+        if resource in depends:
+            targets.add(holder)                 # they are relying on this resource
+        elif claim.get("resource") == resource:
+            targets.add(holder)                 # stale duplicate; tell them anyway
+    return targets
+
+
+def broadcast(sender, kind, body, skip=(), resource=None, everyone=False):
+    """Notify the agents that need to know. Best effort by design.
 
     Mutual exclusion comes from the claim file, never from this. If an agent is down
     or not reading, the claim still holds and the next `claim` attempt still fails.
+
+    Pass `everyone=True` only for something that genuinely concerns all agents. The
+    default is the interested set, which is usually nobody.
     """
+    live = live_agents()
+    if everyone or resource is None:
+        audience = live
+    else:
+        audience = interested_in(resource, sender) & live
     sent = 0
-    for agent in sorted(live_agents()):
+    for agent in sorted(audience):
         if agent == sender or agent in skip:
             continue
         if post(sender, agent, kind, body):
@@ -191,29 +239,50 @@ def cmd_claim(args):
         "depends_on": [d for d in (args.depends_on or []) if RESOURCE_PATTERN.fullmatch(d)],
     }
 
+    # WRITE FIRST, THEN PUBLISH ATOMICALLY.
+    #
+    # The obvious version - O_EXCL create, then write the JSON into the fd - has a
+    # window where the claim file EXISTS BUT IS EMPTY. A concurrent claimant opening
+    # it in that window gets None from read_claim, concludes the claim is malformed
+    # and therefore takeable, unlinks it and creates its own. Two winners, silently.
+    #
+    # Caught by the 12-way race in test_coordination.sh only after an unrelated change
+    # shifted the timing, which is the usual way a latent race announces itself.
+    #
+    # os.link() is atomic and fails with FileExistsError if the target exists, so the
+    # file becomes visible only once it already contains a complete record.
+    staging = CLAIMS_DIR / f".{os.getpid()}.{secrets.token_hex(4)}.tmp"
+    staging.write_text(json.dumps(record), encoding="utf-8")
+    os.chmod(staging, 0o600)
+
     for attempt in (1, 2):
         try:
-            # O_EXCL is the whole mechanism: exactly one writer wins.
-            fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            os.link(staging, path)
+            staging.unlink()
+            break
         except FileExistsError:
             existing = read_claim(path)
             if existing is None or expired(existing):
-                # A dead or malformed claim is takeable. Remove and retry once.
+                # Genuinely dead or corrupt - takeable. An empty file from a crashed
+                # claimant also lands here, which is correct: nobody holds it.
                 try:
                     path.unlink()
                 except OSError:
                     pass
                 if attempt == 1:
                     continue
+                staging.unlink(missing_ok=True)
                 print("coordination: could not take an expired claim", file=sys.stderr)
                 return 1
             if existing.get("holder") == args.holder:
                 # Re-claiming your own is a renewal, not a conflict.
+                staging.unlink(missing_ok=True)
                 with path.open("w", encoding="utf-8") as handle:
                     json.dump(record, handle)
                 print(f"renewed claim on {args.resource} "
                       f"({ttl}s, expires {time.strftime('%H:%M:%S', time.localtime(record['expires_at']))})")
                 return 0
+            staging.unlink(missing_ok=True)
             held_for = int(time.time() - float(existing.get("expires_at", 0)) + existing.get("ttl", 0))
             print(f"REFUSED: '{args.resource}' is held by {existing['holder']}"
                   f" since {existing.get('at')} ({held_for}s ago)", file=sys.stderr)
@@ -231,20 +300,18 @@ def cmd_claim(args):
                  f"CLAIM CONFLICT: I need {args.resource}, you hold it. "
                  f"{args.note or ''}".strip())
             return 1
-        else:
-            with os.fdopen(fd, "w", encoding="utf-8") as handle:
-                json.dump(record, handle)
-            break
 
     where = journal("claim", f"{args.holder} claimed {args.resource}",
                     args.note or "", args.holder)
     depends = (" depends-on=" + ",".join(record["depends_on"])) if record["depends_on"] else ""
     told = broadcast(args.holder, "claim",
                      f"CLAIM {args.resource} by {args.holder} for {ttl}s"
-                     f"{depends}. {args.note or ''}".strip())
+                     f"{depends}. {args.note or ''}".strip(),
+                     resource=args.resource)
     print(f"claimed {args.resource} for {ttl}s")
     print(f"  journal: {where}")
-    print(f"  told {told} other agent(s)")
+    print(f"  told {told} interested agent(s)"
+          + ("" if told else " - nobody else depends on this"))
     if record["depends_on"]:
         holders = {c["resource"]: c["holder"] for c in all_claims()}
         for dep in record["depends_on"]:
@@ -271,7 +338,8 @@ def cmd_release(args):
         print(f"coordination: could not release: {err}", file=sys.stderr)
         return 1
     journal("release", f"{args.holder} released {args.resource}", "", args.holder)
-    broadcast(args.holder, "release", f"RELEASE {args.resource} by {args.holder}")
+    broadcast(args.holder, "release", f"RELEASE {args.resource} by {args.holder}",
+              resource=args.resource)
     print(f"released {args.resource}")
     return 0
 

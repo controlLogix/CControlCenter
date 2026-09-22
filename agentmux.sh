@@ -229,6 +229,17 @@ agentmux - drive other agent CLIs in tmux panes
                                one with no pane, such as 'orchestrator' (this
                                session). Without this, replies addressed to the
                                orchestrator were retried and then discarded
+  run    start "<request>"      open a run; prints the run id
+  run    assign <run> --worker <a> --reviewer <b> [--brief T]
+                               create a job. The reviewer must not be the worker
+  run    submit [job]          worker: I am done (job defaults to $AGENTMUX_JOB)
+  run    verdict <job> --pass|--fail [--reason-file F]
+                               REVIEWER ONLY - a worker cannot sign off its own work
+  run    status <run> [--json] one line per job; safe to paste into a fresh session
+  run    complete <run> [--force]
+                               THE GATE. Refuses until every job is verified. --force
+                               records what was unfinished before anything is torn down
+  run    teardown <run>        close only THIS run's agents; courier stays up
   claim  <resource> [--ttl S] [--note T] [--task ID] [--depends-on R]
                                TAKE A WORK LOCK before editing anything another agent
                                could touch. Atomic: exactly one agent wins. Refused
@@ -863,12 +874,32 @@ cmd_ask() {
   local name="${1:-}"; shift || true
   [ -n "$name" ] || die "ask needs a name"
   need "$name"
+  # `--lines` exists here for two reasons, and the second one is a bug fix.
+  #
+  # Cost: `ask` used to return the ENTIRE pane - 200 cols x 50 rows, ~10k characters,
+  # ~2.5-3.5k tokens - into the CALLER's context, on every call, permanently. Most of
+  # that is banner, footer, spinner residue and the echo of the question. For an
+  # orchestrator whose context is re-sent every turn, ten asks is 30k tokens of pane
+  # furniture that never leaves. This is the single highest-leverage token change in
+  # the harness and it is a handful of lines.
+  #
+  # Correctness: the old arg loop put every unrecognised token into `words`, which
+  # becomes the prompt. So `agentmux ask rev --lines 20 "check this"` did not fail -
+  # it typed "--lines 20 check this" AT THE AGENT. Silent prompt corruption. Unknown
+  # flags are now refused rather than smuggled into the text.
   local timeout="$TIMEOUT_S" quiet_s=$(( QUIET_MS / 1000 ))
+  local lines="${AGENTMUX_ASK_LINES:-40}"
   local -a words=()
   while [ $# -gt 0 ]; do
     case "$1" in
       --timeout|-t) timeout="${2:-$TIMEOUT_S}"; shift 2 ;;
       --quiet|-q)   quiet_s="${2:-5}"; shift 2 ;;
+      --lines|-n)   lines="${2:-40}"; shift 2 ;;
+      --all)        lines=""; shift ;;
+      --) shift; while [ $# -gt 0 ]; do words+=("$1"); shift; done ;;
+      -*) die "ask: unknown option '$1'
+       (ask takes --timeout, --quiet, --lines, --all; use -- before a prompt
+        that legitimately starts with a dash)" ;;
       *) words+=("$1"); shift ;;
     esac
   done
@@ -879,7 +910,11 @@ cmd_ask() {
   cmd_wait "$name" --timeout "$timeout" --quiet "$quiet_s"
   local rc=$?
   printf -- '----- %s -----\n' "$name"
-  cmd_read "$name"
+  if [ -n "$lines" ]; then
+    cmd_read "$name" --lines "$lines"
+  else
+    cmd_read "$name"
+  fi
   return "$rc"
 }
 
@@ -999,6 +1034,97 @@ cmd_claims() { python3 "$(coord_py)" claims "$@"; }
 # at an HTTP endpoint. A rule that says "use the task board" and a board that takes a
 # curl invocation are not compatible - one of them loses, and it is never the
 # convenient one.
+# Runs: the completion protocol.
+#
+# `run complete` is the gate the operator asked for - it refuses until every job has
+# been verified by a reviewer who is not the worker. Teardown is separate and explicit,
+# because completion and killing agents are different decisions: a forced completion
+# still wants the panes alive long enough to have been captured.
+run_py() {
+  local repo="${AGENTMUX_REPO:-}"
+  [ -n "$repo" ] || die "AGENTMUX_REPO is unset; cannot find taskmgmt/run.py"
+  local script="$repo/taskmgmt/run.py"
+  [ -f "$script" ] || die "not found: $script"
+  printf '%s' "$script"
+}
+
+cmd_run() {
+  local action="${1:-status}"; shift || true
+  local me="${AGENTMUX_AGENT:-orchestrator}"
+  case "$action" in
+    start)    python3 "$(run_py)" start "${1:?a one-line description of the request}" --by "$me" ;;
+    assign)   python3 "$(run_py)" assign "$@" ;;
+    submit)   python3 "$(run_py)" submit "${1:-${AGENTMUX_JOB:-}}" --by "$me" "${@:2}" ;;
+    verdict)  python3 "$(run_py)" verdict "$@" --by "$me" ;;
+    status)   python3 "$(run_py)" status "$@" ;;
+    complete) python3 "$(run_py)" complete "$@" --by "$me" ;;
+    teardown) cmd_run_teardown "$@" ;;
+    *) die "run: start|assign|submit|verdict|status|complete|teardown" ;;
+  esac
+}
+
+# Close a run's agents - and ONLY that run's agents.
+#
+# Deliberately not `kill --all`, which kills every agent including other runs' and the
+# operator's own, and skips claim release and sidecar removal entirely. The names come
+# from the ledger, so an agent that was never part of this run is never touched.
+#
+# Also deliberately not `cmd_kill`: that ends with stop_courier_if_idle, which would
+# stop the courier the moment this run's agents were the last ones - and the operator's
+# decision is that the courier stays up. It also fires two serial 45s Jira calls per
+# bound agent, which can put six minutes inside a teardown.
+cmd_run_teardown() {
+  local run_id="${1:-}"
+  [ -n "$run_id" ] || die "teardown needs a run id"
+  local names
+  names="$(python3 "$(run_py)" status "$run_id" --json 2>/dev/null | python3 -c '
+import json, sys
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    raise SystemExit
+seen = []
+for job in data.get("jobs", []):
+    for who in (job.get("worker"), job.get("reviewer")):
+        if who and who not in seen:
+            seen.append(who)
+print("\n".join(seen))
+')"
+  [ -n "$names" ] || { echo "no agents recorded for run $run_id"; return 0; }
+
+  local name killed=0
+  while read -r name; do
+    [ -n "$name" ] || continue
+    # Release anything it still holds, so the next run is not blocked by a lease that
+    # outlives the agent by up to half an hour.
+    python3 "$(coord_py)" claims --json 2>/dev/null | python3 -c "
+import json, sys
+try:
+    rows = json.load(sys.stdin)
+except Exception:
+    raise SystemExit
+print('\n'.join(r['resource'] for r in rows if r.get('holder') == '$name'))
+" | while read -r resource; do
+      [ -n "$resource" ] || continue
+      python3 "$(coord_py)" release "$resource" --holder "$name" --force >/dev/null 2>&1 \
+        && printf '  released %s (held by %s)\n' "$resource" "$name"
+    done
+
+    if have "$name"; then
+      tm kill-session -t "=$name" 2>/dev/null && { printf '  killed %s\n' "$name"; killed=$((killed + 1)); }
+    fi
+    rm -f "$RUNDIR/$name".* 2>/dev/null
+  done <<EOF
+$names
+EOF
+
+  printf 'torn down run %s: %s agent(s) killed\n' "$run_id" "$killed"
+  # The courier is left running on purpose; see the comment above.
+  python3 "$(coord_py)" journal done "run $run_id torn down" \
+    --body "$killed agent(s) closed; courier and dashboard left running" \
+    --agent "${AGENTMUX_AGENT:-orchestrator}" >/dev/null 2>&1
+}
+
 cmd_tasks() { python3 "$(coord_py)" tasks "$@"; }
 
 cmd_task() {
@@ -1120,9 +1246,34 @@ cmd_inbox() {
   [ -f "$path" ] || { printf "inbox for '%s' is empty (%s)\n" "$name" "$path"; return 0; }
   python3 - "$path" "$clear" <<'PY'
 import json, os, pathlib, sys
+
 path, clear = pathlib.Path(sys.argv[1]), sys.argv[2] == "1"
+
+# CLAIM THE FILE FIRST WHEN CLEARING, THEN READ WHAT WE CLAIMED.
+#
+# The previous order was read -> print -> unlink, which loses every message the
+# courier appended in between: it was never printed and is then deleted. The courier
+# appends with open(path, "a") and has no idea a reader is here, so the window is
+# real and silent - and for a completion protocol fed from this inbox it is a route
+# to "signal fired without all verifications received".
+#
+# os.replace is atomic within a filesystem. After it, the courier's next append
+# recreates the live file and nothing in flight is touched; we then read the renamed
+# snapshot, which no longer moves. The snapshot is kept rather than deleted so a
+# destructive read is still recoverable.
+if clear:
+    snapshot = path.with_suffix(path.suffix + ".read")
+    try:
+        os.replace(path, snapshot)
+    except OSError as err:
+        print(f"could not take the inbox: {err}", file=sys.stderr)
+        raise SystemExit(1)
+    source = snapshot
+else:
+    source = path
+
 rows = []
-for line in path.read_text(encoding="utf-8").splitlines():
+for line in source.read_text(encoding="utf-8").splitlines():
     if line.strip():
         try:
             rows.append(json.loads(line))
@@ -1136,8 +1287,7 @@ for row in rows:
         print(f"      {line}")
     print()
 if clear:
-    path.unlink()
-    print("inbox cleared")
+    print(f"inbox cleared; the messages above are kept in {source.name}")
 PY
 }
 
@@ -1367,6 +1517,7 @@ case "${1:-}" in
   claim)  shift; cmd_claim  "$@" ;;
   release) shift; cmd_release "$@" ;;
   claims) shift; cmd_claims "$@" ;;
+  run)    shift; cmd_run    "$@" ;;
   tasks)  shift; cmd_tasks  "$@" ;;
   task)   shift; cmd_task   "$@" ;;
   journal) shift; cmd_journal "$@" ;;
