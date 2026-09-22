@@ -214,12 +214,16 @@ agentmux - drive other agent CLIs in tmux panes
                                is $AGENTMUX_AGENT inside a pane, else 'orchestrator'.
                                K is one of plan request reply status finding error.
                                Queueing is not delivery - the courier does that
-  courier start|stop|status|once|watch
+  courier start|stop|status|once|watch|dead|requeue
                                deliver queued messages to their recipients with
                                `send`. `start` detaches and writes a pidfile;
                                `once` makes a single pass, which is what a test or a
                                cron line wants. A recipient that is down, or showing
                                a prompt, is retried rather than forced
+  inbox  [name] [--clear]      read messages delivered to a VIRTUAL address -
+                               one with no pane, such as 'orchestrator' (this
+                               session). Without this, replies addressed to the
+                               orchestrator were retried and then discarded
   list                         show agents, state and cwd
   kill   <name> | --all        stop agent(s)
   reap   [--dry-run]           remove run/ sidecars for agents with no live tmux
@@ -820,13 +824,14 @@ cmd_ask() {
 cmd_post() {
   local recipient="${1:-}"; shift || true
   [ -n "$recipient" ] || die "post needs a recipient: agentmux post <name> [--kind K] <text...>"
-  local kind="status" ref="" sender="${AGENTMUX_AGENT:-orchestrator}"
+  local kind="status" ref="" sender="${AGENTMUX_AGENT:-orchestrator}" strict=0
   local -a words=()
   while [ $# -gt 0 ]; do
     case "$1" in
       --kind) kind="${2:-}"; shift 2 ;;
       --ref)  ref="${2:-}";  shift 2 ;;
       --from) sender="${2:-}"; shift 2 ;;
+      --strict) strict=1; shift ;;
       *) words+=("$1"); shift ;;
     esac
   done
@@ -836,6 +841,20 @@ cmd_post() {
     plan|request|reply|status|finding|error) ;;
     *) die "kind must be one of: plan request reply status finding error (got '$kind')" ;;
   esac
+
+  # Tell the caller NOW if this address cannot receive, rather than letting the
+  # courier discover it over several minutes of retries. A not-yet-spawned agent is
+  # legitimate, so this warns by default and only refuses under --strict.
+  local virtual="${AGENTMUX_VIRTUAL_AGENTS:-orchestrator}"
+  if ! have "$recipient" \
+     && ! printf '%s' ",$virtual," | grep -q ",$recipient,"; then
+    printf "agentmux: warning - '%s' is not a running agent and not a virtual address.\n" "$recipient" >&2
+    printf '%s\n' "  It will be retried while the courier waits for it to appear, then kept" >&2
+    printf '%s\n' "  in the dead-letter file rather than delivered." >&2
+    printf "  running now: %s\n" "$(tm list-sessions -F '#{session_name}' 2>/dev/null | tr '\n' ' ')" >&2
+    printf "  virtual:     %s\n" "$virtual" >&2
+    [ "${strict:-0}" = 1 ] && die "refusing to queue for an unreachable recipient (--strict)"
+  fi
 
   python3 - "$ROOT" "$sender" "$recipient" "$kind" "$ref" "$text" <<'PY' || return 1
 import json, os, pathlib, re, sys, time
@@ -900,7 +919,9 @@ cmd_courier() {
     status) python3 "$script" --status ;;
     once)   python3 "$script" --once "$@" ;;
     watch)  python3 "$script" --watch "$@" ;;
-    *) die "courier: unknown action '$action' (start|stop|status|once|watch)" ;;
+    dead)   python3 "$script" --dead ;;
+    requeue) python3 "$script" --requeue ;;
+    *) die "courier: unknown action '$action' (start|stop|status|once|watch|dead|requeue)" ;;
   esac
 }
 
@@ -935,6 +956,41 @@ report_stale() {
   local n; n="$(stale_count)"
   [ "$n" = 0 ] && return 0
   printf '\n%s stale sidecar set(s) for agents with no live session - `agentmux reap` removes them\n' "$n"
+}
+
+# Read the orchestrator's mail.
+#
+# The orchestrator is this session - a Claude Code conversation, not a tmux pane - so
+# it has no screen for the courier to type into. Messages addressed to it land in
+# ~/.agentmux/inbox/<name>.jsonl and are read here. Before this existed every reply an
+# agent sent back to `orchestrator` was retried and then thrown away.
+cmd_inbox() {
+  local name="${1:-orchestrator}" clear=0
+  case "${2:-}" in --clear) clear=1 ;; esac
+  case "$name" in --clear) clear=1; name="orchestrator" ;; esac
+  local path="$ROOT/inbox/$name.jsonl"
+  [ -f "$path" ] || { printf "inbox for '%s' is empty (%s)\n" "$name" "$path"; return 0; }
+  python3 - "$path" "$clear" <<'PY'
+import json, os, pathlib, sys
+path, clear = pathlib.Path(sys.argv[1]), sys.argv[2] == "1"
+rows = []
+for line in path.read_text(encoding="utf-8").splitlines():
+    if line.strip():
+        try:
+            rows.append(json.loads(line))
+        except ValueError:
+            continue
+print(f"{len(rows)} message(s) in {path}\n")
+for row in rows:
+    print(f"  {row.get('at','')}  from {row.get('sender','?')} "
+          f"({row.get('kind','?')})" + (f" ref {row['ref']}" if row.get("ref") else ""))
+    for line in (row.get("body") or "").splitlines():
+        print(f"      {line}")
+    print()
+if clear:
+    path.unlink()
+    print("inbox cleared")
+PY
 }
 
 cmd_list() {
@@ -1159,6 +1215,7 @@ case "${1:-}" in
   ask)    shift; cmd_ask    "$@" ;;
   post)   shift; cmd_post   "$@" ;;
   courier) shift; cmd_courier "$@" ;;
+  inbox)  shift; cmd_inbox  "$@" ;;
   list)   shift; cmd_list   "$@" ;;
   kill)   shift; cmd_kill   "$@" ;;
   reap)   shift; cmd_reap   "$@" ;;

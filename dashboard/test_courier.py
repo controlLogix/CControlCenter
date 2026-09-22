@@ -83,6 +83,10 @@ spec.loader.exec_module(courier)
 RUNNING = {"dev", "rev"}
 courier.live_agents = lambda: set(RUNNING)
 
+# Retry on every tick instead of sleeping through a real exponential backoff. The
+# backoff schedule itself is asserted separately, against backoff_for().
+courier.BACKOFF_BASE = 0
+
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -122,12 +126,32 @@ def fail_sends(on):
 
 
 def reset():
-    """Back to a clean queue and a clean cursor set."""
+    """Back to a clean queue, cursor set and inbox."""
     shutil.rmtree(QUEUE, ignore_errors=True)
     shutil.rmtree(STATE, ignore_errors=True)
+    shutil.rmtree(HOME / "inbox", ignore_errors=True)
     QUEUE.mkdir(parents=True)
     clear_sent()
     fail_sends(False)
+
+
+def inbox(name="orchestrator"):
+    """Messages delivered to a virtual recipient."""
+    path = HOME / "inbox" / f"{name}.jsonl"
+    try:
+        return [json.loads(line) for line in
+                path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    except OSError:
+        return []
+
+
+def dead_letters():
+    try:
+        return [json.loads(line) for line in
+                courier.DEAD_LETTER.read_text(encoding="utf-8").splitlines()
+                if line.strip()]
+    except OSError:
+        return []
 
 
 # ── record parsing ───────────────────────────────────────────────────────────
@@ -346,7 +370,76 @@ check("from the courier", "courier", notes[0]["sender"])
 check("addressed to nobody, so it cannot loop", None, notes[0]["recipient"])
 check("naming both ends", True,
       "dev" in notes[0]["body"] and "rev" in notes[0]["body"])
+
+print("--- and the body is KEPT, not thrown away ---")
+# The first version reported the loss and discarded the payload, which tells an
+# operator that something vanished without telling them what.
+kept = dead_letters()
+check("the message lands in the dead-letter file", 1, len(kept))
+check("with its body intact", "doomed", kept[0]["message"]["body"])
+check("and its attempt count", courier.MAX_ATTEMPTS, kept[0]["attempts"])
+check("and why it failed", True, "prompt" in (kept[0]["reason"] or ""))
+check("the note points at the dead-letter file", True,
+      "dead-letter" in notes[0]["body"])
+check("dead-letter is 0600", 0o600, stat.S_IMODE(courier.DEAD_LETTER.stat().st_mode))
 fail_sends(False)
+
+
+# ── virtual recipients: the bug that made the orchestrator unreachable ───────
+
+print("--- a virtual recipient has no pane, so its inbox IS the delivery ---")
+# `agentmux post` defaults its sender to 'orchestrator' outside a pane. That is this
+# session, which has no tmux pane, so every reply addressed back to it used to be
+# retried and then discarded - the harness's own default sender could never receive.
+reset()
+courier.tick()
+post("dev", "orchestrator", kind="reply", body="answering the orchestrator")
+summary = courier.tick()
+check("delivered even though no pane exists", 1, summary["delivered"])
+check("nothing is left pending", 0, summary["pending"])
+check("it went to the inbox, not a pane", 0, len(sent()))
+box = inbox()
+check("the inbox has it", 1, len(box))
+check("with the body intact", "answering the orchestrator", box[0]["body"])
+check("attributed to the sender", "dev", box[0]["sender"])
+check("inbox file is 0600", 0o600,
+      stat.S_IMODE((HOME / "inbox" / "orchestrator.jsonl").stat().st_mode))
+check("nothing reached the dead-letter file", 0, len(dead_letters()))
+
+print("--- a live agent still wins over the virtual name ---")
+reset()
+courier.tick()
+RUNNING.add("orchestrator")
+post("dev", "orchestrator", kind="reply", body="pane exists now")
+summary = courier.tick()
+check("delivered to the pane", 1, summary["delivered"])
+check("the launcher was used", "orchestrator", sent()[0][1])
+check("and the inbox was not written", 0, len(inbox()))
+RUNNING.discard("orchestrator")
+
+print("--- backoff: a transient outage is ridden out, not punished ---")
+courier.BACKOFF_BASE = 3.0
+check("first retry waits the base interval", 3.0, courier.backoff_for(1))
+check("it doubles", 6.0, courier.backoff_for(2))
+check("and again", 12.0, courier.backoff_for(3))
+check("but is capped", courier.BACKOFF_MAX, courier.backoff_for(20))
+courier.BACKOFF_BASE = 0
+check("zero base disables it, for tests", 0.0, courier.backoff_for(5))
+check("more attempts than the old five", True, courier.MAX_ATTEMPTS > 5)
+
+print("--- a message not yet due is held, not retried ---")
+reset()
+courier.tick()
+courier.BACKOFF_BASE = 3.0
+post("dev", "ghost", body="waiting on backoff")
+courier.tick()                       # first attempt fails, schedules a retry
+clear_sent()
+summary = courier.tick()             # immediately again: must NOT retry yet
+check("held until its next_at", 0, summary["delivered"])
+check("no send attempted", 0, len(sent()))
+check("still pending", 1, summary["pending"])
+check("attempts did not increment", 1, courier.load_pending()[0]["attempts"])
+courier.BACKOFF_BASE = 0
 
 print("--- one stuck recipient must not stall the others ---")
 reset()

@@ -50,9 +50,27 @@ from pathlib import Path
 ROOT = Path(os.environ.get("AGENTMUX_HOME", str(Path.home() / ".agentmux")))
 QUEUE_DIR = ROOT / "queue"
 STATE_DIR = ROOT / "courier"
+INBOX_DIR = ROOT / "inbox"
 PENDING = STATE_DIR / "pending.jsonl"
+DEAD_LETTER = STATE_DIR / "dead-letter.jsonl"
 LOG = STATE_DIR / "courier.log"
 PIDFILE = STATE_DIR / "courier.pid"
+
+# VIRTUAL RECIPIENTS - addresses that are real but have no tmux pane.
+#
+# This exists because of a fault found in live use on 2026-09-22. `agentmux post`
+# defaults its sender to `orchestrator` whenever it runs outside a pane, which is what
+# the Claude Code session driving the harness is. But `orchestrator` has no pane, so
+# every reply an agent addressed back to it was undeliverable BY CONSTRUCTION: retried
+# five times, given up on, and the body thrown away. The harness's own default sender
+# was an address that could never receive.
+#
+# A virtual recipient is delivered to ~/.agentmux/inbox/<name>.jsonl instead of a pane.
+# Nothing is dropped and nothing is retried, because a file is always available.
+VIRTUAL_AGENTS = frozenset(
+    name.strip() for name in
+    os.environ.get("AGENTMUX_VIRTUAL_AGENTS", "orchestrator").split(",")
+    if name.strip())
 
 # Kept identical to dashboard/ccstore.py on purpose: a message the courier accepts
 # but the store rejects (or the reverse) would appear in one view and not the other.
@@ -61,8 +79,23 @@ MESSAGE_KINDS = frozenset(("plan", "request", "reply", "status", "finding", "err
 
 READ_BYTES = 262144        # per outbox per tick
 BODY_MAX = 65536
-MAX_ATTEMPTS = 5           # then give up on that message and say so
 PENDING_MAX = 500          # a runaway sender must not grow this file without bound
+
+# RETRY POLICY.
+#
+# The first version tried five times on every tick, three seconds apart: a fifteen
+# second window. That is long enough for a modal to be answered and nothing else. An
+# agent being restarted, a machine under load, or an operator stepping away all blew
+# straight through it, and the message was discarded.
+#
+# Now: more attempts, spaced by exponential backoff, so a transient outage is ridden
+# out rather than punished. 12 attempts at 3s doubling to a 60s cap is roughly a nine
+# minute window, and a failing delivery costs one attempt a minute rather than a busy
+# loop. Set BACKOFF_BASE to 0 to retry on every tick - the tests do this so they do not
+# have to sleep through a real backoff.
+MAX_ATTEMPTS = 12
+BACKOFF_BASE = 3.0         # seconds before the second attempt
+BACKOFF_MAX = 60.0         # ceiling on the gap between attempts
 SOCKET = os.environ.get("AGENTMUX_SOCKET", "agentmux")
 
 # The courier's own reserved name. Nothing is delivered to it, so an agent cannot
@@ -297,6 +330,40 @@ def save_pending(rows):
     write_private(PENDING, "".join(json.dumps(row) + "\n" for row in rows[-PENDING_MAX:]))
 
 
+def backoff_for(attempts):
+    """Seconds to wait before attempt number `attempts` + 1."""
+    if BACKOFF_BASE <= 0:
+        return 0.0
+    return min(BACKOFF_BASE * (2 ** max(0, attempts - 1)), BACKOFF_MAX)
+
+
+def due(row, now_epoch):
+    """Is this pending row ready for another attempt?"""
+    try:
+        return float(row.get("next_at", 0)) <= now_epoch
+    except (TypeError, ValueError):
+        return True
+
+
+def dead_letter(row, reason):
+    """Keep the whole message when we stop trying.
+
+    The first version posted an error note naming the sender, recipient and kind, and
+    threw the body away. For an operator that is the least useful half: you learn that
+    something was lost without learning what. The full record is retained here so a
+    delivery can be replayed once the recipient is back.
+    """
+    try:
+        STATE_DIR.mkdir(parents=True, exist_ok=True)
+        with DEAD_LETTER.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps({
+                "at": now(), "reason": reason,
+                "attempts": row.get("attempts"), "message": row["message"]}) + "\n")
+        os.chmod(DEAD_LETTER, 0o600)
+    except OSError:
+        pass
+
+
 def report(text):
     """Post a courier-authored note into the queue with NO recipient.
 
@@ -329,6 +396,16 @@ def render(message):
     return f"{head}: {message['body']}"
 
 
+def deliver_to_inbox(message):
+    """Append to a virtual recipient's inbox. Always available, so never retried."""
+    path = INBOX_DIR / f"{message['recipient']}.jsonl"
+    INBOX_DIR.mkdir(parents=True, exist_ok=True)
+    os.chmod(INBOX_DIR, 0o700)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(message) + "\n")
+    os.chmod(path, 0o600)
+
+
 def deliver(message, running):
     """Attempt one delivery. Returns (ok, reason)."""
     recipient = message["recipient"]
@@ -336,6 +413,17 @@ def deliver(message, running):
         return False, "addressed to itself"
     if recipient == COURIER:
         return False, "addressed to the courier"
+
+    # A virtual recipient has no pane and never will; its inbox is the delivery.
+    # Checked BEFORE the running test, because `orchestrator` would otherwise fail
+    # that test forever - which is the whole bug this exists to fix.
+    if recipient in VIRTUAL_AGENTS and recipient not in running:
+        try:
+            deliver_to_inbox(message)
+        except OSError as err:
+            return False, f"inbox write failed: {err.__class__.__name__}"
+        return True, ""
+
     if recipient not in running:
         return False, f"'{recipient}' is not running"
     binary = agentmux_bin()
@@ -373,11 +461,19 @@ def tick(from_start=False, dry_run=False):
     # Retries first, so a message that has been waiting keeps its place ahead of
     # anything new for the same recipient.
     blocked, keep = set(), []
+    epoch = time.time()
     for row in pending:
         message = row["message"]
         if dry_run:
             keep.append(row)
             blocked.add(message["recipient"])
+            continue
+        # Not yet due under backoff: hold it, and keep its recipient blocked so a
+        # newer message cannot overtake it.
+        if not due(row, epoch):
+            failed += 1
+            blocked.add(message["recipient"])
+            keep.append(row)
             continue
         ok, reason = deliver(message, running)
         if ok:
@@ -390,10 +486,12 @@ def tick(from_start=False, dry_run=False):
         if row["attempts"] >= MAX_ATTEMPTS:
             dropped += 1
             log(f"gave up {message['sender']} -> {message['recipient']}: {reason}")
-            report(f"undelivered after {MAX_ATTEMPTS} attempts: "
+            dead_letter(row, reason)
+            report(f"undelivered after {MAX_ATTEMPTS} attempts, kept in dead-letter: "
                    f"{message['sender']} -> {message['recipient']} "
                    f"({message['kind']}) - {reason}")
             continue
+        row["next_at"] = epoch + backoff_for(row["attempts"])
         failed += 1
         blocked.add(message["recipient"])
         keep.append(row)
@@ -431,7 +529,8 @@ def tick(from_start=False, dry_run=False):
             else:
                 failed += 1
                 blocked.add(message["recipient"])
-                keep.append({"attempts": 1, "reason": reason, "message": message})
+                keep.append({"attempts": 1, "reason": reason,
+                             "next_at": epoch + backoff_for(1), "message": message})
                 log(f"defer   {message['sender']} -> {message['recipient']}: {reason}")
         if not dry_run:
             save_cursor(agent, info, offset)
@@ -507,6 +606,10 @@ def main(argv=None):
     mode.add_argument("--watch", action="store_true", help="loop until killed")
     mode.add_argument("--status", action="store_true", help="report state, deliver nothing")
     mode.add_argument("--stop", action="store_true", help="stop a running courier")
+    mode.add_argument("--dead", action="store_true",
+                      help="list messages kept in the dead-letter file")
+    mode.add_argument("--requeue", action="store_true",
+                      help="put every dead-letter message back in the delivery queue")
     parser.add_argument("--interval", type=float, default=3.0, help="seconds between passes")
     parser.add_argument("--from-start", action="store_true",
                         help="read outboxes from byte 0 - replays existing history")
@@ -525,18 +628,68 @@ def main(argv=None):
         print(f"stopped courier (pid {pid})")
         return 0
 
+    if args.dead or args.requeue:
+        rows = []
+        try:
+            for line in DEAD_LETTER.read_text(encoding="utf-8").splitlines():
+                if line.strip():
+                    rows.append(json.loads(line))
+        except (OSError, ValueError):
+            pass
+        if args.requeue:
+            if not rows:
+                print("nothing in the dead-letter file")
+                return 0
+            pending = load_pending()
+            for row in rows:
+                pending.append({"attempts": 0, "reason": "requeued", "next_at": 0,
+                                "message": row["message"]})
+            save_pending(pending)
+            DEAD_LETTER.unlink(missing_ok=True)
+            print(f"requeued {len(rows)} message(s) for delivery")
+            return 0
+        print(f"dead-letter: {len(rows)} message(s)  {DEAD_LETTER}")
+        for row in rows[:20]:
+            message = row["message"]
+            print(f"  {message['at']}  {message['sender']} -> {message['recipient']}"
+                  f" ({message['kind']}) after {row.get('attempts')} attempts:"
+                  f" {row.get('reason', '')}")
+            print(f"      {(message.get('body') or '')[:120]}")
+        return 0
+
     if args.status:
         pid = running_pid()
         summary = tick(dry_run=True)
         print(f"courier:   {'running, pid ' + str(pid) if pid else 'not running'}")
         print(f"queue:     {QUEUE_DIR}")
         print(f"agents:    {', '.join(summary['running']) or 'none running'}")
+        print(f"virtual:   {', '.join(sorted(VIRTUAL_AGENTS))} "
+              f"(delivered to {INBOX_DIR}, never retried)")
         print(f"pending:   {summary['pending']} message(s) awaiting delivery")
         for row in load_pending()[:10]:
             message = row["message"]
+            waiting = ""
+            try:
+                gap = float(row.get("next_at", 0)) - time.time()
+                if gap > 0:
+                    waiting = f", next try in {int(gap)}s"
+            except (TypeError, ValueError):
+                pass
             print(f"  {message['sender']} -> {message['recipient']} "
-                  f"({message['kind']}) attempts {row.get('attempts', 0)}: "
-                  f"{row.get('reason', '')}")
+                  f"({message['kind']}) attempts {row.get('attempts', 0)}/{MAX_ATTEMPTS}"
+                  f"{waiting}: {row.get('reason', '')}")
+        for path in sorted(INBOX_DIR.glob("*.jsonl")) if INBOX_DIR.is_dir() else []:
+            count = sum(1 for _ in path.open(encoding="utf-8"))
+            print(f"inbox:     {path.stem}: {count} message(s)  ({path})")
+        dead = 0
+        try:
+            dead = sum(1 for line in DEAD_LETTER.read_text(encoding="utf-8").splitlines()
+                       if line.strip())
+        except OSError:
+            pass
+        if dead:
+            print(f"DEAD-LETTER: {dead} message(s) kept - see `courier dead`, "
+                  f"replay with `courier requeue`")
         return 0
 
     if args.watch:

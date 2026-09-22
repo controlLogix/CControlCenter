@@ -370,9 +370,10 @@ agentmux read   <name> [--lines N]    current pane, ANSI stripped
 agentmux tail   <name> [--lines N]    full scrollback log
 agentmux wait   <name> [--timeout S] [--quiet S]
 agentmux ask    <name> <text...>      send -> wait for idle -> print pane
-agentmux post   <to> [--kind K] [--ref R] [--from N] <text...>
+agentmux post   <to> [--kind K] [--ref R] [--from N] [--strict] <text...>
                                       queue a message FOR ANOTHER AGENT
-agentmux courier start|stop|status|once|watch
+agentmux inbox  [name] [--clear]      read mail for a virtual address (no pane)
+agentmux courier start|stop|status|once|watch|dead|requeue
                                       deliver queued messages to their recipients
 agentmux list
 agentmux kill   <name> | --all
@@ -426,10 +427,38 @@ Four behaviours are worth knowing, because each one is silent when it goes wrong
   `~/.agentmux/courier/pending.jsonl` and are retried ahead of new traffic, so order
   per recipient holds without one dead agent blocking its sender's traffic to
   everybody else.
-- **Giving up is visible.** After five attempts the message is dropped and the
-  courier posts an `error` into the queue as sender `courier` with a **null
-  recipient** — so it shows up in the Message Queue view and can never itself be
-  delivered, which is what stops a failure loop.
+- **Giving up keeps the message.** After `MAX_ATTEMPTS` (12, spread over ~9 minutes by
+  exponential backoff) the delivery stops being retried, the **full record is written
+  to `~/.agentmux/courier/dead-letter.jsonl`**, and the courier posts an `error` into
+  the queue as sender `courier` with a **null recipient** — visible in the Message
+  Queue view, and undeliverable by construction, which is what stops a failure loop.
+  `agentmux courier dead` lists them; `agentmux courier requeue` replays them all.
+
+### Virtual recipients, and the address that could never receive
+
+`agentmux post` defaults its sender to `orchestrator` whenever it runs outside a pane —
+which is what the Claude Code session driving the harness is. But `orchestrator` has no
+tmux pane, so for a while **every reply an agent addressed back to it was undeliverable
+by construction**: retried, given up on, and the body discarded. The harness's own
+default sender was an address that could never receive. It showed up the first time real
+agents were asked to report back.
+
+A **virtual recipient** is an address with no pane. Messages for it are appended to
+`~/.agentmux/inbox/<name>.jsonl` instead of being typed into a screen, so delivery
+always succeeds and nothing is retried:
+
+```
+agentmux inbox                 # read the orchestrator's mail
+agentmux inbox codex --clear   # read and empty
+```
+
+`orchestrator` is virtual by default; `AGENTMUX_VIRTUAL_AGENTS` takes a comma-separated
+list. A **live agent of the same name always wins** — the pane is preferred, and the
+inbox is only the fallback when no session exists.
+
+`post` also checks the recipient up front and warns when it is neither running nor
+virtual, listing what *is* available, so an unreachable address is obvious immediately
+rather than nine minutes later. `--strict` refuses outright.
 
 `agentmux courier status` prints what is running, what is pending and why.
 
