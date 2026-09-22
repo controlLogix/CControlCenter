@@ -968,6 +968,19 @@ cmd_inbox() {
   local name="${1:-orchestrator}" clear=0
   case "${2:-}" in --clear) clear=1 ;; esac
   case "$name" in --clear) clear=1; name="orchestrator" ;; esac
+
+  # Validate exactly as cmd_post does. Without this the name was interpolated
+  # straight into the path, so `inbox ../queue/claude --clear` resolved OUTSIDE
+  # inbox/ onto a real agent outbox and unlinked it - destroying messages that had
+  # not been delivered yet. cmd_post rejected such a name and cmd_inbox accepted it,
+  # which is the kind of gap that only shows up when someone goes looking. Found by
+  # grok reviewing this file.
+  printf '%s' "$name" | grep -Eq '^[A-Za-z0-9_.-]{1,64}$' \
+    || die "inbox name must be 1-64 chars of letters, digits, '_', '.' or '-' (got '$name')"
+  case "$name" in
+    .|..) die "inbox name must not be '.' or '..'" ;;
+  esac
+
   local path="$ROOT/inbox/$name.jsonl"
   [ -f "$path" ] || { printf "inbox for '%s' is empty (%s)\n" "$name" "$path"; return 0; }
   python3 - "$path" "$clear" <<'PY'

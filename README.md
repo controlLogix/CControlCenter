@@ -180,6 +180,7 @@ empty list that reads as "no tickets".
 | `show_auth.py` | Prints `/api/auth` as a tree. Debugging aid for the auth grouping. |
 | `run_tests.sh` | Restarts the server and runs every suite; non-zero if any fails. Spawns two throwaway `shell` agents when none are running, because the stream checks need live panes, and kills them on exit. Pre-existing agents are left alone. |
 | `test_modal_guard.sh` | The `send` modal guard, against captured pane text. No tmux, no CLI, no network. |
+| `test_inbox_guard.sh` | `agentmux inbox` cannot be pointed outside `inbox/`. Runs against a throwaway `AGENTMUX_HOME`, so a regression cannot destroy real queue files while proving that it would. |
 | `syntax_check.sh` | Parses every shell and Python file in the repo. |
 | `start_gateway.sh` / `setup_bedrock_codex.sh` | Bring up the Bedrock gateway; configure `codex-bedrock`. |
 | `check_key_exposure.sh` | Reports every location holding a Bedrock key, by fingerprint — never the value. |
@@ -426,7 +427,9 @@ Four behaviours are worth knowing, because each one is silent when it goes wrong
 - **One stuck recipient does not stall the others.** Undeliverable messages spill to
   `~/.agentmux/courier/pending.jsonl` and are retried ahead of new traffic, so order
   per recipient holds without one dead agent blocking its sender's traffic to
-  everybody else.
+  everybody else. A message queued behind a waiting one is held **without consuming an
+  attempt** — otherwise it would burn through `MAX_ATTEMPTS` and dead-letter having
+  never been tried once.
 - **Giving up keeps the message.** After `MAX_ATTEMPTS` (12, spread over ~9 minutes by
   exponential backoff) the delivery stops being retried, the **full record is written
   to `~/.agentmux/courier/dead-letter.jsonl`**, and the courier posts an `error` into

@@ -441,6 +441,41 @@ check("still pending", 1, summary["pending"])
 check("attempts did not increment", 1, courier.load_pending()[0]["attempts"])
 courier.BACKOFF_BASE = 0
 
+print("--- a message must NOT overtake one that is serving backoff ---")
+# Found by codex reviewing courier.py on 2026-09-22, and reproduced before fixing:
+# FIRST held under backoff, SECOND queued behind it for the same recipient, and
+# SECOND went first because the retry loop never consulted `blocked`.
+reset()
+courier.tick()
+courier.STATE_DIR.mkdir(parents=True, exist_ok=True)
+(courier.STATE_DIR / "adopted").write_text("x", encoding="utf-8")
+future = time.time() + 300
+courier.save_pending([
+    {"attempts": 1, "reason": "deferred", "next_at": future,
+     "message": {"at": "t1", "sender": "dev", "recipient": "rev",
+                 "kind": "request", "body": "FIRST", "ref": None}},
+    {"attempts": 0, "reason": "queued behind an earlier message",
+     "message": {"at": "t2", "sender": "dev", "recipient": "rev",
+                 "kind": "request", "body": "SECOND", "ref": None}},
+])
+summary = courier.tick()
+check("nothing is delivered while the first waits", 0, summary["delivered"])
+check("SECOND did not overtake FIRST", 0,
+      len([r for r in sent() if "SECOND" in r[2]]))
+check("both are still pending", 2, summary["pending"])
+rows = courier.load_pending()
+check("the held message keeps its order", "FIRST", rows[0]["message"]["body"])
+check("and the blocked one did NOT consume an attempt", 0, rows[1]["attempts"])
+
+print("--- once the first is due, both go in order ---")
+rows[0]["next_at"] = 0
+courier.save_pending(rows)
+clear_sent()
+summary = courier.tick()
+check("both delivered", 2, summary["delivered"])
+check("FIRST first", ["FIRST", "SECOND"],
+      [r[2].rsplit(": ", 1)[1] for r in sent()])
+
 print("--- one stuck recipient must not stall the others ---")
 reset()
 courier.tick()

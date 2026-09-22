@@ -468,6 +468,22 @@ def tick(from_start=False, dry_run=False):
             keep.append(row)
             blocked.add(message["recipient"])
             continue
+
+        # An earlier message for this same recipient is still waiting, so this one
+        # must not go first. Held WITHOUT consuming an attempt: a message queued
+        # behind a slow recipient would otherwise burn through MAX_ATTEMPTS and reach
+        # the dead-letter file having never once been tried.
+        #
+        # This guard existed in the new-message loop below from the start, but not
+        # here. It did not matter until backoff arrived: before that, every pending
+        # row was attempted on every tick, so a blocked recipient failed them all in
+        # order. With backoff the earlier row is skipped while it waits, and the later
+        # one sailed past it. Found by codex reviewing this file.
+        if message["recipient"] in blocked:
+            failed += 1
+            keep.append(row)
+            continue
+
         # Not yet due under backoff: hold it, and keep its recipient blocked so a
         # newer message cannot overtake it.
         if not due(row, epoch):
