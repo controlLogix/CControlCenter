@@ -27,6 +27,13 @@ TODO_next_demo.md
 dashboard/BRIEF_*.md
 dashboard/REVIEW_*.md
 
+# Orchestration run artifacts. A brief is an instruction to a specific set of live
+# agents and a result is that run's output; both are scratch from one machine's
+# session, not source, and they land in the repo root only because that is the cwd
+# the agents are parked on.
+ORCHESTRATION_BRIEF.md
+ORCHESTRATION_RESULT.md
+
 # Superseded copies kept beside the originals while refactoring.
 *.bak
 *.pre-*
