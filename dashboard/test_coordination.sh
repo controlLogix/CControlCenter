@@ -133,6 +133,25 @@ else
   bad 'claim was not journalled'
 fi
 
+echo '--- the task board degrades honestly when the dashboard is down ---'
+# AGENTMUX_DASHBOARD points at a closed port for this whole suite, which is the
+# interesting case: an agent told to use the board must be told clearly when it
+# cannot, not fail with a stack trace or - worse - appear to succeed.
+out="$($CO tasks 2>&1)"; rc=$?
+check_rc 'tasks exits non-zero when the board is unreachable' 1 "$rc"
+case "$out" in
+  *unreachable*) ok 'and says the dashboard is unreachable' ;;
+  *) bad "unhelpful error: $out" ;;
+esac
+case "$out" in
+  *'dashboard/server.py'*) ok 'and says how to start it' ;;
+  *) bad 'no remedy offered' ;;
+esac
+$CO task-status 1 in_progress >/dev/null 2>&1
+check_rc 'a status change fails cleanly too' 1 $?
+$CO task-status 1 bogus >/dev/null 2>&1
+check_rc 'an invalid status is rejected before any request' 2 $?
+
 echo '--- THE RACE: many agents, one resource, simultaneously ---'
 # The sequential checks above prove the logic. This proves the mechanism: twelve
 # processes going for the same claim at once. Exactly one must win. If O_EXCL were

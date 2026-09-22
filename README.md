@@ -380,6 +380,9 @@ agentmux claim  <resource> [--ttl S] [--note T] [--task ID] [--depends-on R]
 agentmux release <resource>           give it back
 agentmux claims [--json] [--all]      who is working on what, right now
 agentmux journal <kind> <subject>     write to the shared journal
+agentmux tasks  [--mine] [--all]      the task board: open work, by epic
+agentmux task   start|done|block <id>
+agentmux task   add <epic-id> "<title>"
 agentmux courier start|stop|status|once|watch|dead|requeue
                                       deliver queued messages to their recipients
 agentmux list
@@ -527,6 +530,22 @@ agentmux journal handoff "courier.py is ready for review"
 Kinds: `claim release conflict note handoff blocked done plan`. It falls back to
 `~/.agentmux/journal.jsonl` when the dashboard is down, because a coordination record
 that only exists while a web server happens to be running is not a record.
+
+**The task board** is reachable from the command line for the same reason. It existed
+long before agents used it, because using it meant hand-writing JSON at an HTTP
+endpoint — and a rule that says "use the task board" is not compatible with a board that
+takes a curl invocation. One of them loses, and it is never the convenient one.
+
+```
+agentmux tasks --mine            # what am I meant to be doing
+agentmux task start 42
+agentmux task done 42
+agentmux task add 5 "Reap orphaned sidecars on boot"
+```
+
+A status change is journalled as well as recorded: the board holds the state, the
+journal holds the fact that somebody decided it. When the dashboard is down these fail
+*loudly* and name the command that starts it, rather than appearing to succeed.
 
 `claim` and `release` are **message kinds in their own right**, not prose inside a
 `status`, so the dashboard can filter them and an agent can tell a work boundary from a

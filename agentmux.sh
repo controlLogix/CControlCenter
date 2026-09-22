@@ -231,6 +231,13 @@ agentmux - drive other agent CLIs in tmux panes
                                expire (default 1800s) so a dead agent frees its work
   release <resource>           give it back when you are done
   claims [--json] [--all]      who is working on what, right now
+  tasks  [--mine] [--all] [--json]
+                               the TASK BOARD: open work, by epic
+  task   start|done|block|todo <id>
+  task   add <epic-id> "<title>"
+                               move or create board work. Status changes are
+                               journalled too: the board records state, the journal
+                               records that someone decided it
   journal <kind> <subject> [--body B]
                                write to the SHARED journal every agent and the
                                dashboard can read. kinds: claim release conflict note
@@ -940,6 +947,27 @@ cmd_release() {
 
 cmd_claims() { python3 "$(coord_py)" claims "$@"; }
 
+# The task board, from the command line.
+#
+# The board existed and agents did not use it, because using it meant hand-writing JSON
+# at an HTTP endpoint. A rule that says "use the task board" and a board that takes a
+# curl invocation are not compatible - one of them loses, and it is never the
+# convenient one.
+cmd_tasks() { python3 "$(coord_py)" tasks "$@"; }
+
+cmd_task() {
+  local action="${1:-}"; shift || true
+  local me="${AGENTMUX_AGENT:-orchestrator}"
+  case "$action" in
+    start) python3 "$(coord_py)" task-status "${1:?task id}" in_progress --agent "$me" ;;
+    done)  python3 "$(coord_py)" task-status "${1:?task id}" done        --agent "$me" ;;
+    block) python3 "$(coord_py)" task-status "${1:?task id}" blocked     --agent "$me" ;;
+    todo)  python3 "$(coord_py)" task-status "${1:?task id}" todo        --agent "$me" ;;
+    add)   python3 "$(coord_py)" task-add "${1:?epic id}" "${2:?title}" --agent "$me" ;;
+    *) die "task: start|done|block|todo <id>, or add <epic-id> \"<title>\"" ;;
+  esac
+}
+
 cmd_journal() {
   local kind="${1:-}" subject="${2:-}"; shift 2 2>/dev/null || true
   [ -n "$kind" ] && [ -n "$subject" ] \
@@ -1293,6 +1321,8 @@ case "${1:-}" in
   claim)  shift; cmd_claim  "$@" ;;
   release) shift; cmd_release "$@" ;;
   claims) shift; cmd_claims "$@" ;;
+  tasks)  shift; cmd_tasks  "$@" ;;
+  task)   shift; cmd_task   "$@" ;;
   journal) shift; cmd_journal "$@" ;;
   list)   shift; cmd_list   "$@" ;;
   kill)   shift; cmd_kill   "$@" ;;

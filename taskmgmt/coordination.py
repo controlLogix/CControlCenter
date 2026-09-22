@@ -309,9 +309,106 @@ def cmd_journal(args):
     return 0
 
 
+# ── the task board ───────────────────────────────────────────────────────────
+#
+# The board already existed and agents did not use it, because using it meant hand
+# writing JSON at an HTTP endpoint. A rule that says "use the task board" and a board
+# that takes a curl invocation are not compatible; one of them loses, and it is never
+# the convenient one. These verbs make the board the path of least resistance.
+
+TASK_STATUSES = ("todo", "in_progress", "blocked", "done", "cancelled")
+
+
+def api(method, path, body=None):
+    data = json.dumps(body).encode("utf-8") if body is not None else None
+    request = urllib.request.Request(
+        f"{DASHBOARD}/api/{path}", method=method, data=data,
+        headers={"Content-Type": "application/json"} if data else {})
+    with urllib.request.urlopen(request, timeout=10) as response:
+        return json.loads(response.read())
+
+
+def cmd_tasks(args):
+    try:
+        epics = api("GET", "epics").get("epics", [])
+    except (urllib.error.URLError, OSError, ValueError, TimeoutError) as err:
+        print(f"coordination: dashboard unreachable at {DASHBOARD} ({err})",
+              file=sys.stderr)
+        print("  start it with: python3 dashboard/server.py", file=sys.stderr)
+        return 1
+    if args.json:
+        print(json.dumps(epics, indent=2))
+        return 0
+    mine = args.mine
+    shown = 0
+    for epic in epics:
+        tasks = [t for t in epic.get("tasks", [])
+                 if (not mine or t.get("agent") == mine)
+                 and (args.all or t.get("status") not in ("done", "cancelled"))]
+        if not tasks:
+            continue
+        print(f"\nepic {epic['id']}  {epic.get('title', '')}  [{epic.get('status')}]")
+        for task in tasks:
+            shown += 1
+            print(f"  {task['id']:>4}  {task.get('status', '?'):<12} "
+                  f"{(task.get('agent') or '-'):<10} {task.get('title', '')[:70]}")
+    if not shown:
+        print("no open tasks" + (f" for {mine}" if mine else ""))
+    return 0
+
+
+def cmd_task_status(args):
+    if args.status not in TASK_STATUSES:
+        print(f"coordination: status must be one of {', '.join(TASK_STATUSES)}",
+              file=sys.stderr)
+        return 2
+    try:
+        row = api("POST", "status", {"kind": "task", "id": args.id,
+                                     "status": args.status})
+    except (urllib.error.URLError, OSError, ValueError, TimeoutError) as err:
+        print(f"coordination: could not update task {args.id}: {err}", file=sys.stderr)
+        return 1
+    print(f"task {row['id']} -> {row['status']}  {row.get('title', '')[:60]}")
+    # A status change is a coordination event, so it goes in the journal too - the
+    # board records state, the journal records that a human or agent decided it.
+    journal("done" if args.status == "done" else "note",
+            f"task {row['id']} -> {args.status}", row.get("title", ""), args.agent)
+    return 0
+
+
+def cmd_task_add(args):
+    try:
+        row = api("POST", "tasks", {"epic_id": args.epic, "title": args.title,
+                                    "agent": args.agent or None})
+    except (urllib.error.URLError, OSError, ValueError, TimeoutError) as err:
+        print(f"coordination: could not create the task: {err}", file=sys.stderr)
+        return 1
+    print(f"task {row['id']} created in epic {args.epic}: {row.get('title', '')[:60]}")
+    journal("plan", f"task {row['id']} created", row.get("title", ""), args.agent)
+    return 0
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="agent work coordination")
     sub = parser.add_subparsers(dest="command", required=True)
+
+    tasks = sub.add_parser("tasks")
+    tasks.add_argument("--mine", default=None, help="only this agent's tasks")
+    tasks.add_argument("--all", action="store_true", help="include done and cancelled")
+    tasks.add_argument("--json", action="store_true")
+    tasks.set_defaults(func=cmd_tasks)
+
+    status = sub.add_parser("task-status")
+    status.add_argument("id", type=int)
+    status.add_argument("status")
+    status.add_argument("--agent", default=None)
+    status.set_defaults(func=cmd_task_status)
+
+    add = sub.add_parser("task-add")
+    add.add_argument("epic", type=int)
+    add.add_argument("title")
+    add.add_argument("--agent", default=None)
+    add.set_defaults(func=cmd_task_add)
 
     claim = sub.add_parser("claim")
     claim.add_argument("resource")
