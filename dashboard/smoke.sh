@@ -74,7 +74,16 @@ echo '--- multiplexed stream (one connection for every agent) ---'
 # agents now share /api/stream-all, so pane count is no longer capped by the browser.
 mux="$(timeout 6 curl -sN "$BASE/api/stream-all?tail=512" 2>/dev/null)"
 check 'stream-all returns frames' true "$([ -n "$mux" ] && echo true || echo false)"
-agent_count="$(curl -s "$BASE/api/agents"   | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["agents"]))')"
+# LIVE agents only. A stale entry is an agent whose tmux session is gone; it has no
+# log to follow, so the client deliberately opens no stream for it, and comparing
+# against the TOTAL made this check fail for a reason with nothing to do with
+# multiplexing. That is what happened on 2026-09-22: seven sets of orphaned sidecars
+# from a rebooted-away tmux server sat in run/, /api/agents reported seven agents,
+# the stream carried none, and four checks here failed. `agentmux reap` removes such
+# orphans; this counts correctly whether or not anyone has run it.
+agent_count="$(curl -s "$BASE/api/agents" | python3 -c '
+import json, sys
+print(sum(1 for a in json.load(sys.stdin)["agents"] if a.get("state") != "stale"))')"
 named="$(printf '%s' "$mux" | python3 -c '
 import json, sys
 names = set()
@@ -89,6 +98,29 @@ print(len(names - {None}))
 check 'every agent appears on the one connection' "$agent_count" "$named"
 check 'frames are tagged with an agent' true   "$(printf '%s' "$mux" | grep -q '"agent"' && echo true || echo false)"
 check 'snapshot frames are CRLF-framed' true   "$(printf '%s' "$mux" | grep -q 'event: snapshot' && echo true || echo false)"
+
+echo '--- a sidecar with no tmux session is stale, and does not inflate the live count ---'
+# Sidecars outlive their sessions whenever the tmux server goes away without
+# `agentmux kill` - a reboot does exactly that. The server must call such an agent
+# stale rather than counting it as running. Uses a name no real agent would take, and
+# removes it again below.
+PHANTOM="$HOME/.agentmux/run/zz-smoke-phantom.cli"
+live_before="$(curl -s "$BASE/api/agents" | python3 -c '
+import json, sys
+print(sum(1 for a in json.load(sys.stdin)["agents"] if a.get("state") != "stale"))')"
+printf 'shell\n' > "$PHANTOM"
+phantom_json="$(curl -s "$BASE/api/agents" | python3 -c '
+import json, sys
+rows = {a["name"]: a for a in json.load(sys.stdin)["agents"]}
+row = rows.get("zz-smoke-phantom")
+print(json.dumps({"present": row is not None,
+                  "state": (row or {}).get("state"),
+                  "live": sum(1 for a in rows.values() if a.get("state") != "stale")}))')"
+rm -f "$PHANTOM"
+check 'phantom sidecar is listed'        true    "$(printf '%s' "$phantom_json" | python3 -c 'import json,sys; print(str(json.load(sys.stdin)["present"]).lower())')"
+check 'phantom sidecar reads as stale'   stale   "$(printf '%s' "$phantom_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["state"])')"
+check 'phantom does not raise live count' "$live_before" "$(printf '%s' "$phantom_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["live"])')"
+check 'phantom sidecar cleaned up'       false   "$([ -e "$PHANTOM" ] && echo true || echo false)"
 
 echo '--- path traversal ---'
 for p in '../server.py' '..%2fserver.py' 'assets/../../agentmux.sh' 'assets/../server.py'; do

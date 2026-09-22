@@ -369,13 +369,99 @@ agentmux read   <name> [--lines N]    current pane, ANSI stripped
 agentmux tail   <name> [--lines N]    full scrollback log
 agentmux wait   <name> [--timeout S] [--quiet S]
 agentmux ask    <name> <text...>      send -> wait for idle -> print pane
+agentmux post   <to> [--kind K] [--ref R] [--from N] <text...>
+                                      queue a message FOR ANOTHER AGENT
+agentmux courier start|stop|status|once|watch
+                                      deliver queued messages to their recipients
 agentmux list
 agentmux kill   <name> | --all
+agentmux reap   [--dry-run]           drop sidecars for agents with no tmux session
 agentmux attach <name>                prints the command to watch it live
 agentmux exec   <text...> [--cwd DIR] headless one-shot codex exec, no tmux
 ```
 
 `--cwd` accepts Windows paths (`C:\path\to\repo`) and translates them.
+
+### Agents talking to each other
+
+Until 2026-09-22 they could not. `~/.agentmux/queue/<agent>.jsonl` was written only
+by `dashboard/seed_queue.py`, the dashboard rendered it, and **nothing delivered
+anything** — every exchange was relayed by hand through the orchestrator session.
+
+Two verbs close that loop, and they are deliberately separate: `post` queues,
+`courier` delivers. Queueing is not delivery, and an agent that posts should not
+block on whether the recipient is up.
+
+```
+agentmux courier start                          # once, in the background
+agentmux post rev --kind request "review src/mqtt.py"
+```
+
+Inside a pane an agent knows its own name from `$AGENTMUX_AGENT`, so `post` fills in
+the sender by itself; outside one the sender is `orchestrator`, which is what this
+session is. The recipient sees the message typed into its pane, attributed:
+
+```
+[agentmux] from dev (request): review src/mqtt.py
+```
+
+`--kind` is one of `plan request reply status finding error` — the same vocabulary
+`ccstore.py` enforces, so anything the courier accepts also appears in the
+dashboard's Message Queue view.
+
+Four behaviours are worth knowing, because each one is silent when it goes wrong:
+
+- **History is never replayed.** On its first ever pass the courier adopts every
+  existing outbox at EOF and records that it has done so. Without that, its first
+  run would type the whole of the seeded 2026-09-19 traffic into whatever agents
+  happened to be up. An outbox created *after* that first pass is read from byte 0,
+  because it cannot contain anything older than the courier — that distinction is
+  what stops a newly spawned agent's opening message being swallowed.
+- **Nothing is forced.** A recipient that is down, or whose pane is showing a modal,
+  is a delivery that has not succeeded *yet*. It is retried, not pushed past with
+  `send --force` — that guard exists because Enter into a codex "Update available"
+  prompt once ran npm install and killed an agent mid-session.
+- **One stuck recipient does not stall the others.** Undeliverable messages spill to
+  `~/.agentmux/courier/pending.jsonl` and are retried ahead of new traffic, so order
+  per recipient holds without one dead agent blocking its sender's traffic to
+  everybody else.
+- **Giving up is visible.** After five attempts the message is dropped and the
+  courier posts an `error` into the queue as sender `courier` with a **null
+  recipient** — so it shows up in the Message Queue view and can never itself be
+  delivered, which is what stops a failure loop.
+
+`agentmux courier status` prints what is running, what is pending and why.
+
+**The courier starts with the first agent.** A courier that is not running fails
+*silently* — `post` succeeds, the message sits in the queue, and the recipient simply
+never hears anything. So `spawn` brings it up if it is not already running, which
+means messaging works whenever there is anything to message and there is no
+boot-time service to remember. `AGENTMUX_NO_COURIER=1` opts out; a failure to start
+it never fails a spawn.
+
+### Sidecars outlive their sessions — `agentmux reap`
+
+Each agent has a set of small files under `~/.agentmux/run/` (`.cli`, `.cwd`,
+`.pane`, `.started`, …) that the dashboard reads to describe it. `kill` removes
+them, but **a reboot takes the whole tmux server without going through `kill`**, and
+nothing else cleans up. Measured 2026-09-22: 45 files for seven agents from a session
+days earlier.
+
+The dashboard is honest about these — each shows as `stale`, the pane is dimmed, no
+stream is opened — but they never go away, and `/api/agents` keeps counting them.
+
+```
+agentmux reap --dry-run     # what would go
+agentmux reap               # remove them; logs are left alone
+```
+
+`list` mentions the count without acting on it. Removal is an explicit verb rather
+than a side effect of listing or of a GET: a read that quietly deletes state is how
+you lose the one sidecar that would have explained an incident. If a bound Jira issue
+was never closed out, `reap` does that first, exactly as `kill` would.
+
+If `tmux` itself is missing, `reap` refuses — a failed `has-session` is then
+indistinguishable from a dead session, and guessing in that direction deletes state.
 
 ### Permissions: unrestricted by default
 

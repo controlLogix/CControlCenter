@@ -33,7 +33,15 @@ run smoke.sh      bash /dev/fd/3 3< <(tr -d '\r' < dashboard/smoke.sh)
 run test_snapshot.py python3 dashboard/test_snapshot.py
 run test_mqtt.py  python3 dashboard/test_mqtt.py
 run test_tickets.py python3 dashboard/test_tickets.py
+run test_courier.py python3 dashboard/test_courier.py
 run test_auth.py  timeout 400 python3 dashboard/test_auth.py
+
+# NOT RUN, because it does not exist: STATUS_CCC_2026-09-20.md lists a sixth suite,
+# test_gateway.py (31 checks, Bedrock translation). It is absent from the tree and
+# from git history - the 09-20 credential purge deleted the two Bedrock setup
+# scripts and this appears to have gone with them. taskmgmt/bedrock_gateway.py is
+# therefore untested. Reinstating it is worth doing if the Bedrock path is ever
+# unparked.
 
 echo
 if [ "$total_fail" -eq 0 ]; then

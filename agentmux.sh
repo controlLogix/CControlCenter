@@ -208,8 +208,25 @@ agentmux - drive other agent CLIs in tmux panes
   wait   <name> [--timeout S] [--quiet S]
                                block until the pane stops changing
   ask    <name> <text...>      send, wait for idle, then print the pane
+  post   <to> [--kind K] [--ref R] [--from NAME] <text...>
+                               queue a message FOR ANOTHER AGENT in this agent's
+                               outbox, ~/.agentmux/queue/<sender>.jsonl. The sender
+                               is $AGENTMUX_AGENT inside a pane, else 'orchestrator'.
+                               K is one of plan request reply status finding error.
+                               Queueing is not delivery - the courier does that
+  courier start|stop|status|once|watch
+                               deliver queued messages to their recipients with
+                               `send`. `start` detaches and writes a pidfile;
+                               `once` makes a single pass, which is what a test or a
+                               cron line wants. A recipient that is down, or showing
+                               a prompt, is retried rather than forced
   list                         show agents, state and cwd
   kill   <name> | --all        stop agent(s)
+  reap   [--dry-run]           remove run/ sidecars for agents with no live tmux
+                               session. A reboot takes the tmux server without
+                               going through `kill`, so orphans accumulate; the
+                               dashboard shows each as `stale` but never removes it.
+                               Logs are left alone
   attach <name>                print the command to watch the agent live
   exec   <text...> [--cwd DIR] [--model M]
                                headless one-shot "codex exec", no tmux
@@ -368,6 +385,15 @@ cmd_spawn() {
   done
   have "$name" && die "agent '$name' already exists (kill it first)"
 
+  # A name reaches three places that make an unchecked one dangerous rather than
+  # merely untidy: the pane environment (as $AGENTMUX_AGENT, inside single quotes,
+  # so a quote character escapes into the launch command), a sidecar path under
+  # run/, and a queue filename the courier and the dashboard both read back. The
+  # accepted set is a subset of ccstore.py's NAME_PATTERN - '.' is excluded because
+  # tmux gives it meaning in a target specifier.
+  printf '%s' "$name" | grep -Eq '^[A-Za-z0-9_-]{1,64}$' \
+    || die "agent name must be 1-64 chars of letters, digits, '_' or '-' (got '$name')"
+
   # Jira binding. Two accepted forms:
   #   --task ABC-123        bind an existing issue
   #   --task new:"Summary"  create the issue first, then bind the returned key
@@ -415,6 +441,10 @@ cmd_spawn() {
   # $ROOT/env below, which is SOURCED precisely so credentials never reach the
   # tmux command line or `ps`. The key is validated in the arg loop above.
   [ -n "$task" ] && env_prefix="$env_prefix export AGENTMUX_TASK='${task}';"
+  # The agent's own name. Without it an agent has no way to know what it is called,
+  # so it cannot fill in the sender field and `agentmux post` has nothing to
+  # attribute. Validated against the pattern above, so the quoting holds.
+  env_prefix="$env_prefix export AGENTMUX_AGENT='${name}';"
 
   # Private env for spawned panes - API keys for custom providers (e.g.
   # XAI_API_KEY for the codex "grok" profile) go in $ROOT/env, mode 0600, on the
@@ -536,6 +566,24 @@ cmd_spawn() {
 
   printf "spawned '%s' [%s] in %s\n" "$name" "$cli" "$cwd"
   [ -n "$auth" ] && printf "  auth: %s\n" "$auth"
+
+  # Bring the message courier up with the first agent.
+  #
+  # Nothing survives a reboot here - the tmux server, the Bedrock gateway and the
+  # courier all have to be started again, and a courier that is not running fails
+  # SILENTLY: `post` succeeds, the message sits in the queue, and the recipient
+  # simply never hears anything. Tying it to spawn means messaging works whenever
+  # there is anything to message, without a boot-time service.
+  #
+  # AGENTMUX_NO_COURIER=1 opts out. Failure here is never fatal to a spawn.
+  if [ "${AGENTMUX_NO_COURIER:-0}" != "1" ] && [ -n "${AGENTMUX_REPO:-}" ] \
+     && [ -f "$AGENTMUX_REPO/taskmgmt/courier.py" ]; then
+    if ! python3 "$AGENTMUX_REPO/taskmgmt/courier.py" --status 2>/dev/null \
+         | grep -q '^courier:   running'; then
+      cmd_courier start >/dev/null 2>&1 \
+        && printf "  courier: started (queued messages will be delivered)\n"
+    fi
+  fi
   # Report the profile actually in force. An --auth method brings its own, replacing
   # yolo, so naming yolo unconditionally described a configuration that was not running.
   [ "$bypass" = 1 ] && case "$cli" in
@@ -730,9 +778,117 @@ cmd_ask() {
   return "$rc"
 }
 
+# Append a message to THIS agent's outbox, ~/.agentmux/queue/<sender>.jsonl.
+#
+# The queue existed long before anything wrote to it from an agent: the dashboard
+# rendered it and dashboard/seed_queue.py was the only producer. This is the verb an
+# agent actually calls, and `agentmux courier` is what delivers the result.
+#
+# The sender is $AGENTMUX_AGENT, exported into every spawned pane. Outside a pane
+# there is no such variable, so it falls back to 'orchestrator' - which is exactly
+# what the Claude Code session driving all this is.
+#
+# Written through python3 rather than printf because a body is arbitrary agent text:
+# newlines, quotes and backslashes all have to survive into one JSON line intact,
+# and hand-rolling that escaping in shell is how a queue file gets corrupted.
+cmd_post() {
+  local recipient="${1:-}"; shift || true
+  [ -n "$recipient" ] || die "post needs a recipient: agentmux post <name> [--kind K] <text...>"
+  local kind="status" ref="" sender="${AGENTMUX_AGENT:-orchestrator}"
+  local -a words=()
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --kind) kind="${2:-}"; shift 2 ;;
+      --ref)  ref="${2:-}";  shift 2 ;;
+      --from) sender="${2:-}"; shift 2 ;;
+      *) words+=("$1"); shift ;;
+    esac
+  done
+  local text="${words[*]}"
+  [ -n "$text" ] || die "post needs a message body"
+  case "$kind" in
+    plan|request|reply|status|finding|error) ;;
+    *) die "kind must be one of: plan request reply status finding error (got '$kind')" ;;
+  esac
+
+  python3 - "$ROOT" "$sender" "$recipient" "$kind" "$ref" "$text" <<'PY' || return 1
+import json, os, pathlib, re, sys, time
+
+root, sender, recipient, kind, ref, body = sys.argv[1:7]
+name = re.compile(r"[A-Za-z0-9_.-]{1,64}")
+for label, value in (("sender", sender), ("recipient", recipient)):
+    if not name.fullmatch(value):
+        sys.exit(f"agentmux: {label} '{value}' is not a valid agent name")
+
+queue = pathlib.Path(root) / "queue"
+queue.mkdir(parents=True, exist_ok=True)
+path = queue / f"{sender}.jsonl"
+# Refuse a link rather than write through one: the outbox is read back by the
+# dashboard and the courier, so a symlinked or hardlinked queue file is a way to
+# get agent-authored text appended to something else entirely.
+if path.is_symlink() or (path.exists() and path.stat().st_nlink != 1):
+    sys.exit(f"agentmux: {path} is a link - refusing to write to it")
+
+record = {
+    "at": time.strftime("%Y-%m-%dT%H:%M:%S") + time.strftime("%z"),
+    "sender": sender, "recipient": recipient, "kind": kind,
+    "body": body[:65536], "ref": ref[:256] or None,
+}
+with path.open("a", encoding="utf-8") as handle:
+    handle.write(json.dumps(record) + "\n")
+os.chmod(path, 0o600)
+print(f"posted {kind} to {recipient}")
+PY
+}
+
+# The delivery half. Runs taskmgmt/courier.py, which tails every outbox and hands
+# each addressed message to its recipient with `agentmux send`.
+#
+# `start` detaches deliberately. The Bedrock gateway is a foreground process that
+# nothing supervises and that does not survive a reboot, which has cost a session's
+# first ten minutes more than once; a background courier with a pidfile at least
+# survives the shell that launched it.
+cmd_courier() {
+  local repo="${AGENTMUX_REPO:-}"
+  [ -n "$repo" ] || die "AGENTMUX_REPO is unset; cannot find taskmgmt/courier.py"
+  local script="$repo/taskmgmt/courier.py"
+  [ -f "$script" ] || die "not found: $script"
+  local action="${1:-status}"; shift || true
+  case "$action" in
+    start)
+      mkdir -p "$ROOT/courier"
+      if python3 "$script" --status 2>/dev/null | grep -q '^courier:   running'; then
+        printf 'courier is already running\n'; return 0
+      fi
+      # Created and locked down BEFORE nohup writes to it: the courier's output
+      # carries message bodies, and a shell redirect would otherwise make the file
+      # 0644 while every other piece of courier state is 0600.
+      : >> "$ROOT/courier/courier.out"
+      chmod 600 "$ROOT/courier/courier.out"
+      nohup python3 "$script" --watch "$@" >> "$ROOT/courier/courier.out" 2>&1 &
+      disown 2>/dev/null || true
+      sleep 1
+      python3 "$script" --status | head -1
+      ;;
+    stop)   python3 "$script" --stop ;;
+    status) python3 "$script" --status ;;
+    once)   python3 "$script" --once "$@" ;;
+    watch)  python3 "$script" --watch "$@" ;;
+    *) die "courier: unknown action '$action' (start|stop|status|once|watch)" ;;
+  esac
+}
+
+# Mention orphaned sidecars without acting on them. `list` is a read, so it says
+# what is there and names the verb; `reap` is what removes anything.
+report_stale() {
+  local n; n="$(stale_count)"
+  [ "$n" = 0 ] && return 0
+  printf '\n%s stale sidecar set(s) for agents with no live session - `agentmux reap` removes them\n' "$n"
+}
+
 cmd_list() {
   if ! tm list-sessions >/dev/null 2>&1; then
-    echo "no agents running"; return 0
+    echo "no agents running"; report_stale; return 0
   fi
   printf '%-14s %-12s %-9s %-12s %-10s %-18s %s\n' NAME CLI STATE PERMS TASK AUTH CWD
   tm list-sessions -F '#{session_name}' 2>/dev/null | while read -r n; do
@@ -753,6 +909,7 @@ cmd_list() {
     fi
     printf '%-14s %-12s %-9s %-12s %-10s %-18s %s\n' "$n" "$cli" "$st" "$perms" "$task" "$auth" "$cwd"
   done
+  report_stale
 }
 
 cmd_kill() {
@@ -778,6 +935,86 @@ cmd_kill() {
 
   tm kill-session -t "=$target" && printf "killed '%s'\n" "$target"
   rm -f "$RUNDIR/$target".* 2>/dev/null
+}
+
+# All names that have sidecars under run/, live or not.
+sidecar_names() {
+  ls "$RUNDIR" 2>/dev/null \
+    | sed -n 's/\.\(cli\|cwd\|perms\|task\|auth\|pane\|launch\|started\|reported\)$//p' \
+    | sort -u
+}
+
+# How many of those have no live tmux session. Used by `list` to nudge.
+stale_count() {
+  local name n=0
+  while read -r name; do
+    [ -n "$name" ] || continue
+    have "$name" || n=$((n + 1))
+  done <<EOF
+$(sidecar_names)
+EOF
+  printf '%s' "$n"
+}
+
+# Remove run/ sidecars whose tmux session no longer exists.
+#
+# WHY THIS EXISTS: `kill` removes an agent's sidecars, but a reboot takes the whole
+# tmux server without going through `kill`, and nothing else ever cleans up.
+# Measured 2026-09-22: 45 files for seven agents from a session days earlier. The
+# dashboard is honest about them - it labels each `stale`, dims the pane and opens no
+# stream - but they never go away, and /api/agents keeps counting them, which is what
+# made four smoke.sh stream checks fail against an empty /api/stream-all.
+#
+# Deletion is deliberately an explicit verb rather than a side effect of listing or
+# of a GET. A read that quietly removes state is how you lose the one sidecar that
+# would have explained an incident.
+cmd_reap() {
+  local dry=0
+  case "${1:-}" in
+    --dry-run|-n) dry=1 ;;
+    "") ;;
+    *) die "reap takes --dry-run or nothing (got '$1')" ;;
+  esac
+
+  # If tmux itself is missing, a failed has-session is indistinguishable from a dead
+  # session, and guessing in that direction deletes state. Refuse instead.
+  command -v tmux >/dev/null 2>&1 \
+    || die "tmux not found - cannot tell a dead session from a broken query; refusing to reap"
+
+  local name bound found=0 reaped=0
+  while read -r name; do
+    [ -n "$name" ] || continue
+    if have "$name"; then continue; fi
+    found=$((found + 1))
+    local files; files="$(ls "$RUNDIR/$name".* 2>/dev/null | wc -l)"
+    if [ "$dry" = 1 ]; then
+      printf 'would reap %-14s (%s file(s))\n' "$name" "$files"
+      continue
+    fi
+
+    # Same close-out as `kill`, for the same reason: an orphan is a dead agent, and
+    # its Jira issue should not stay open because the tmux server went away rather
+    # than the operator typing `kill`. Best-effort - task_try swallows failures.
+    bound="$(cat "$RUNDIR/$name.task" 2>/dev/null || true)"
+    if [ -n "$bound" ] && [ ! -f "$RUNDIR/$name.reported" ] && task_cli >/dev/null; then
+      task_try done "$bound" --from-log "$name"
+      task_try report "$name" --title "agentmux run - $name - $bound"
+    fi
+
+    rm -f "$RUNDIR/$name".* 2>/dev/null
+    reaped=$((reaped + 1))
+    printf 'reaped %-14s (%s file(s))\n' "$name" "$files"
+  done <<EOF
+$(sidecar_names)
+EOF
+
+  if [ "$found" = 0 ]; then
+    echo "no stale sidecars"
+  elif [ "$dry" = 1 ]; then
+    printf '%s stale agent(s); run `agentmux reap` to remove them\n' "$found"
+  else
+    printf '%s stale agent(s) reaped. Logs under %s are untouched.\n' "$reaped" "$LOGDIR"
+  fi
 }
 
 cmd_attach() {
@@ -824,8 +1061,11 @@ case "${1:-}" in
   tail)   shift; cmd_tail   "$@" ;;
   wait)   shift; cmd_wait   "$@" ;;
   ask)    shift; cmd_ask    "$@" ;;
+  post)   shift; cmd_post   "$@" ;;
+  courier) shift; cmd_courier "$@" ;;
   list)   shift; cmd_list   "$@" ;;
   kill)   shift; cmd_kill   "$@" ;;
+  reap)   shift; cmd_reap   "$@" ;;
   attach) shift; cmd_attach "$@" ;;
   exec)   shift; cmd_exec   "$@" ;;
   ""|-h|--help|help) usage ;;
