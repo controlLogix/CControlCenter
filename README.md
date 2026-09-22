@@ -492,6 +492,41 @@ full tick only happens when the answer is yes. Measured idle cost at a 100ms int
 **0.00% CPU, 14.5MB RSS** over 120 ticks. `AGENTMUX_COURIER_INTERVAL` tunes it;
 `AGENTMUX_SEND_DELAY` tunes the gap between the text and the Enter.
 
+### Idle detection: knowing when an agent has finished
+
+Transport is only half of what an operator experiences. The other half is `ask`, which
+sends and then waits for the agent to be done — and "done" used to mean *the pane has
+not changed for five seconds*, sampled every 1.5s. Measured on a real codex turn:
+
+```
+transport      200 ms   the courier
+inference     4273 ms   the model actually thinking
+idle tax      6000 ms   the harness waiting to be sure it stopped
+```
+
+**The harness spent longer confirming the model had finished than the model spent
+working.** With a three-agent chain that is eighteen seconds of nothing happening.
+
+So `wait` now reads the signal the CLIs already emit rather than inferring it from
+stillness. Captured from live panes, not guessed:
+
+| CLI | footer while working | when idle |
+| --- | --- | --- |
+| claude | `esc to interrupt` | absent |
+| grok | `Ctrl+c:cancel` | absent |
+| codex | — | `Ask Codex to do anything` |
+
+Absence of a busy marker plus a 600ms settle means done. **Absence is the safe
+direction to test**: a marker that fails to appear costs a few seconds of extra waiting,
+whereas inventing an "I am finished" pattern that can appear mid-turn would truncate the
+agent's answer — a correctness bug, not a speed one.
+
+Only the three CLIs whose footers were actually captured use the fast path. `shell`, a
+passthrough command, or a CLI that changes its footer in a future release falls back to
+the quiet timer, now 2000ms/250ms. `AGENTMUX_WAIT_NO_MARKER=1` forces the old behaviour
+outright — if a CLI's footer ever changes, the symptom is `ask` returning early, and
+that switch proves it without editing the harness.
+
 ### Coordination: claims, dependencies, the journal
 
 **Conversation is not coordination.** Three agents with unrestricted permissions on one

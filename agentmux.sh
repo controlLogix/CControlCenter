@@ -14,8 +14,13 @@ LOGDIR="$ROOT/logs"
 RUNDIR="$ROOT/run"
 mkdir -p "$LOGDIR" "$RUNDIR"
 
-POLL_MS="${AGENTMUX_POLL_MS:-1500}"     # how often to sample the pane
-QUIET_MS="${AGENTMUX_QUIET_MS:-5000}"   # pane unchanged this long => idle
+# Sampling and idle detection. Both were set when stillness was the ONLY completion
+# signal, and both were the dominant cost of an orchestrated turn: a 1500ms sample
+# with a 5000ms quiet window adds six seconds after a model has already finished -
+# measured longer than the model's own thinking time. cmd_wait now prefers a CLI's
+# busy marker where one is known, and these govern the fallback.
+POLL_MS="${AGENTMUX_POLL_MS:-250}"      # how often to sample the pane
+QUIET_MS="${AGENTMUX_QUIET_MS:-2000}"   # pane unchanged this long => idle (fallback)
 TIMEOUT_S="${AGENTMUX_TIMEOUT_S:-300}"  # hard ceiling for wait/ask
 COLS="${AGENTMUX_COLS:-200}"
 ROWS="${AGENTMUX_ROWS:-50}"
@@ -257,7 +262,11 @@ Spawned codex/claude agents run with the provider's master permission bypass by
 default (unrestricted). Set AGENTMUX_NO_BYPASS=1 to spawn sandboxed instead.
 
 Env: AGENTMUX_QUIET_MS, AGENTMUX_TIMEOUT_S, AGENTMUX_POLL_MS, AGENTMUX_COLS/ROWS
-     AGENTMUX_NO_BYPASS
+     AGENTMUX_NO_BYPASS, AGENTMUX_NO_COURIER, AGENTMUX_SETTLE_MS
+     AGENTMUX_WAIT_NO_MARKER=1   wait on stillness only, not the CLI's busy
+                                 marker. Use if a CLI changes its footer and
+                                 `ask` starts returning early
+     AGENTMUX_COURIER_INTERVAL, AGENTMUX_SEND_DELAY[_MULTILINE]
 USAGE
 }
 
@@ -788,6 +797,37 @@ cmd_wait() {
       *) shift ;;
     esac
   done
+  # A CLI that TELLS us it is working beats guessing from stillness.
+  #
+  # Measured 2026-09-22 on a real codex turn: transport 200ms, inference 4273ms, and
+  # then SIX SECONDS of the harness waiting to be sure the model had stopped. The
+  # wait was longer than the thinking. That is what an operator experiences as lag,
+  # and no amount of courier tuning touches it.
+  #
+  # These CLIs put an interrupt hint in the footer while and only while they are
+  # working, so its ABSENCE plus a short settle is a completion signal rather than a
+  # timeout. Absence is the safe direction to test: a marker that fails to appear
+  # costs a few seconds of extra waiting, whereas inventing an "I am done" pattern
+  # that shows up mid-turn would truncate the agent's answer.
+  #
+  # Only for CLIs whose footers were actually captured. Anything else - `shell`, a
+  # passthrough command, a CLI that changes its footer in a future release - falls
+  # back to the quiet timer, which always worked and still does.
+  # AGENTMUX_WAIT_NO_MARKER=1 forces the old stillness-only behaviour. Needed if a CLI
+  # changes its footer in a release and the marker stops matching: the symptom would be
+  # `ask` returning early, and this is the switch that proves or disproves it without
+  # editing the harness. It is also how the before/after timings were measured.
+  local cli settle_ms="${AGENTMUX_SETTLE_MS:-600}" use_marker=0
+  cli="$(cat "$RUNDIR/$name.cli" 2>/dev/null || echo '')"
+  if [ "${AGENTMUX_WAIT_NO_MARKER:-0}" != "1" ]; then
+    case "$cli" in codex|claude|grok) use_marker=1 ;; esac
+  fi
+
+  busy_marker() {
+    tm capture-pane -p -J -t "$(pane_of "$1")" 2>/dev/null | strip_ansi \
+      | tail -6 | grep -Eqi 'esc to interrupt|ctrl\+c:cancel|ctrl-c to stop|to interrupt'
+  }
+
   local last="" stable=0 elapsed=0 cur
   local deadline_ms=$(( timeout * 1000 ))
   local sleep_s
@@ -799,6 +839,12 @@ cmd_wait() {
       stable=$(( stable + POLL_MS ))
     else
       stable=0; last="$cur"
+    fi
+    # Fast path: the CLI is not advertising work and the screen has settled.
+    if [ "$use_marker" = 1 ] && [ "$stable" -ge "$settle_ms" ] \
+       && ! busy_marker "$name"; then
+      printf 'idle after %ss (no busy marker)\n' "$(( elapsed / 1000 ))" >&2
+      return 0
     fi
     if [ "$stable" -ge "$quiet_ms" ]; then
       printf 'idle after %ss\n' "$(( elapsed / 1000 ))" >&2
