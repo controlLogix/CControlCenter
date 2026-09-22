@@ -1,0 +1,7 @@
+# The preserved gateway bytecode is the ONLY surviving copy of a lost source file
+# (see taskmgmt/recovered/README.md). Git's auto-detection gets this right today,
+# but this checkout is on a Windows drive and a core.autocrlf setting on some other
+# machine would rewrite line endings inside the file and silently corrupt it - and a
+# corrupt .pyc cannot be recompiled, because there is no source. Pin it explicitly.
+taskmgmt/recovered/*.bin binary
+*.pyc                    binary
