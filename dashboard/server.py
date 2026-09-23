@@ -642,6 +642,129 @@ def resources_snapshot(force=False):
     return payload
 
 
+def feed_snapshot(limit=200):
+    """Everything the harness currently knows, as one chronological stream.
+
+    Merged HERE rather than in the browser for three reasons: the client would
+    otherwise poll five endpoints and re-derive severity from each, a new source would
+    have to be added twice, and the two heaviest sources are already cached
+    server-side - resources_snapshot() spawns a probe per resource and agents_snapshot()
+    shells out to tmux, so having the feed re-run them would have quietly tripled the
+    cost of every poll.
+
+    Never raises. A feed that goes blank because one source is unavailable is worse
+    than a feed missing one source, so each block degrades on its own.
+    """
+    entries = []
+
+    # 1 + 2. Journal and queue chatter, normalised in ccstore.
+    try:
+        with ccstore.connection() as db:
+            entries.extend(ccstore.feed_rows(db, limit))
+    except Exception as err:
+        entries.append(ccstore.feed_entry(now_iso(), "fault", "error", "dashboard",
+                                          f"feed could not read the database: {err}"))
+
+    # 3. Agents. State the CURRENT condition rather than a change log - there is no
+    #    history to diff against, and an operator asking "what is up right now" is
+    #    better served by a truthful snapshot than by an invented transition.
+    try:
+        agents = agents_snapshot()
+        if agents.get("tmux_server") is not True:
+            entries.append(ccstore.feed_entry(agents.get("generated_at"), "agent", "error",
+                                              "tmux", "tmux server is not running - no agent is reachable"))
+        for a in agents.get("agents", []):
+            name = a.get("name") or "?"
+            state = str(a.get("state") or "")
+            if state == "stale":
+                entries.append(ccstore.feed_entry(agents.get("generated_at"), "agent", "warn",
+                                                  name, "stale: sidecars in run/ but no live tmux session"))
+            else:
+                bits = [f"{state}", f"cli={a.get('cli') or '?'}", f"perms={a.get('perms') or '?'}"]
+                if a.get("task"):
+                    bits.append(f"task={a['task']}")
+                entries.append(ccstore.feed_entry(agents.get("generated_at"), "agent", "info",
+                                                  name, ", ".join(bits), a.get("task")))
+    except Exception as err:
+        entries.append(ccstore.feed_entry(now_iso(), "fault", "error", "dashboard",
+                                          f"feed could not read agents: {err}"))
+
+    # 4. Providers and systems, from the cached resource probes. force=False matters:
+    #    this must never be the thing that starts a probe sweep.
+    try:
+        res = resources_snapshot(force=False)
+        if res.get("error"):
+            entries.append(ccstore.feed_entry(now_iso(), "provider", "error", "resources",
+                                              str(res["error"])))
+        for r in res.get("resources", []):
+            state = str(r.get("state") or "missing")
+            severity = {"ok": "info", "partial": "warn"}.get(state, "error")
+            failed = [c.get("label") or c.get("id") or "?"
+                      for c in (r.get("checks") or [])
+                      if not c.get("ok") and not c.get("optional")]
+            text = f"{state}"
+            if r.get("summary"):
+                text += f" - {r['summary']}"
+            if failed:
+                text += f" (failing: {', '.join(failed[:4])})"
+            entries.append(ccstore.feed_entry(res.get("generated_at") or now_iso(),
+                                              "provider", severity,
+                                              r.get("name") or r.get("id") or "?", text,
+                                              r.get("id")))
+    except Exception as err:
+        entries.append(ccstore.feed_entry(now_iso(), "fault", "error", "dashboard",
+                                          f"feed could not read resources: {err}"))
+
+    # 5. Faults the other sources cannot express: messages the courier gave up on.
+    #    These are the ones that matter most and were previously visible only by
+    #    running `agentmux courier dead`.
+    try:
+        entries.extend(dead_letter_entries())
+    except Exception:
+        pass
+
+    entries.sort(key=lambda e: e.get("at") or "", reverse=True)
+    return {"generated_at": now_iso(), "entries": entries[:limit],
+            "sources": list(ccstore.FEED_SOURCES),
+            "severities": list(ccstore.FEED_SEVERITIES)}
+
+
+def dead_letter_entries(cap=40):
+    """Undeliverable messages, read straight from the courier's dead-letter file.
+
+    Read-only and bounded. The file is the courier's, so this never claims, truncates
+    or rewrites it - `agentmux courier requeue` owns that, and two writers on that file
+    is a bug this repo has already fixed once.
+    """
+    path = HOME_DIR / "courier" / "dead-letter.jsonl"   # courier.py:DEAD_LETTER
+    out = []
+    try:
+        raw = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return out
+    for line in raw.splitlines()[-cap:]:
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except ValueError:
+            continue
+        if not isinstance(row, dict):
+            continue
+        msg = row.get("message") if isinstance(row.get("message"), dict) else row
+        out.append(ccstore.feed_entry(
+            row.get("at") or msg.get("at"), "fault", "error",
+            msg.get("sender") or "courier",
+            f"undeliverable to {msg.get('recipient') or '?'}: "
+            f"{row.get('reason') or 'gave up'} - {msg.get('body') or ''}",
+            msg.get("ref")))
+    return out
+
+
+def now_iso():
+    return dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
+
+
 def open_log(name):
     """Open only a regular, single-link log beneath the log directory."""
     if not NAME_PATTERN.fullmatch(name):
@@ -1485,6 +1608,21 @@ class Handler(BaseHTTPRequestHandler):
             if path in ("/api/epics", "/api/tasks", "/api/journal", "/api/messages",
                         "/api/devices", "/api/status", "/api/delete"):
                 self.cc_endpoint(path.rsplit("/", 1)[1], parsed.query)
+                return
+            if path == "/api/feed":
+                # Read-only, and deliberately cheap: it reuses the same cached
+                # resource and agent snapshots the other views already poll rather
+                # than probing again. Routed HERE, in the shared block, so a POST
+                # gets 405 like every other read-only endpoint - from the GET-only
+                # section it fell through to 404, which tells the caller the endpoint
+                # does not exist when it plainly does.
+                if self.command != "GET":
+                    self.send_json(405, {"error": "read-only endpoint"})
+                    return
+                raw = parse_qs(parsed.query).get("limit", ["200"])[0]
+                limit = (int(raw) if re.fullmatch(r"[0-9]{1,4}", raw)
+                         and 1 <= int(raw) <= 2000 else 200)
+                self.send_json(200, feed_snapshot(limit))
                 return
             if path == "/api/auth/setting":
                 if self.command != "POST":

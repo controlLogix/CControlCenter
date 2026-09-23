@@ -48,6 +48,7 @@ const els = {
   views: {
     terminals: document.getElementById('viewTerminals'),
     queue:     document.getElementById('viewQueue'),
+    feed:      document.getElementById('viewFeed'),
     board:     document.getElementById('viewBoard'),
     journal:   document.getElementById('viewJournal'),
     tickets:   document.getElementById('viewTickets'),
@@ -67,6 +68,19 @@ const els = {
   queueFollow:  document.getElementById('queueFollow'),
   queueRefresh: document.getElementById('queueRefresh'),
   planPin:      document.getElementById('planPin'),
+
+  feedList:     document.getElementById('feedList'),
+  feedFilters:  document.getElementById('feedFilters'),
+  feedStamp:    document.getElementById('feedStamp'),
+  feedFollow:   document.getElementById('feedFollow'),
+  feedSearch:   document.getElementById('feedSearch'),
+  feedClear:    document.getElementById('feedClear'),
+  feedSources:  document.getElementById('feedSources'),
+  feedSeverity: document.getElementById('feedSeverity'),
+  feedMax:      document.getElementById('feedMax'),
+  feedPoll:     document.getElementById('feedPoll'),
+  feedBadge:    document.getElementById('feedBadge'),
+  badgeFeed:    document.getElementById('badgeFeed'),
 
   boardList:  document.getElementById('boardList'),
   boardStamp: document.getElementById('boardStamp'),
@@ -1781,14 +1795,188 @@ function keepScroll(load, forcePin) {
   };
 }
 
+// ── the activity feed ────────────────────────────────────────────────────────
+//
+// One stream over the five places state used to live: the journal, the message queue,
+// agent state, the resource probes and the courier's dead letters. A fault in any of
+// them was previously only visible if you happened to be looking at that one view.
+//
+// FILTERING IS CLIENT-SIDE ON PURPOSE. The server always merges everything and this
+// decides what to draw, so turning a source off is a display preference and not a
+// change to what is recorded - two people on the same dashboard can watch different
+// slices of the same truth, and nobody can hide a fault from anyone else by
+// unticking a box.
+const FEED_KEY = 'ccc.feed.v1';
+const FEED_SOURCE_LABELS = {
+  chatter:  'agent chatter',
+  journal:  'journal',
+  agent:    'agents',
+  provider: 'systems & providers',
+  fault:    'faults',
+  run:      'runs',
+};
+const SEVERITY_RANK = { info: 0, warn: 1, error: 2 };
+
+let feedPrefs = {
+  sources: Object.keys(FEED_SOURCE_LABELS),
+  severity: 'info',
+  max: 500,
+  poll: 5000,
+  badge: true,
+};
+let feedEntries = [];          // newest first, as the server returns them
+let feedSeen = 0;              // how many faults had been seen when the view was open
+let feedTimer = null;
+
+function loadFeedPrefs() {
+  try {
+    const raw = localStorage.getItem(FEED_KEY);
+    if (raw) feedPrefs = { ...feedPrefs, ...JSON.parse(raw) };
+  } catch (_) {}
+  if (!Array.isArray(feedPrefs.sources)) feedPrefs.sources = Object.keys(FEED_SOURCE_LABELS);
+  if (els.feedSeverity) els.feedSeverity.value = feedPrefs.severity;
+  if (els.feedMax) els.feedMax.value = String(feedPrefs.max);
+  if (els.feedPoll) els.feedPoll.value = String(feedPrefs.poll);
+  if (els.feedBadge) els.feedBadge.checked = feedPrefs.badge !== false;
+}
+
+function saveFeedPrefs() {
+  try { localStorage.setItem(FEED_KEY, JSON.stringify(feedPrefs)); } catch (_) {}
+}
+
+function feedPasses(entry) {
+  if (!feedPrefs.sources.includes(entry.source)) return false;
+  if ((SEVERITY_RANK[entry.severity] ?? 0) < (SEVERITY_RANK[feedPrefs.severity] ?? 0)) return false;
+  const q = (els.feedSearch && els.feedSearch.value || '').trim().toLowerCase();
+  if (!q) return true;
+  return `${entry.who} ${entry.text} ${entry.ref} ${entry.source}`.toLowerCase().includes(q);
+}
+
+// Chips are built from the SERVER's source list, not a hardcoded one, so a source
+// added server-side appears here without a second edit. smoke.sh:181 is the cautionary
+// tale: a comment claiming to check the frontend list against the backend's, which
+// then hardcoded it and compared the test to itself.
+function renderFeedFilters(sources) {
+  if (!els.feedFilters) return;
+  els.feedFilters.replaceChildren();
+  for (const src of sources) {
+    const on = feedPrefs.sources.includes(src);
+    const chip = el('button', `chip ${on ? 'on' : ''}`, FEED_SOURCE_LABELS[src] || src);
+    chip.type = 'button';
+    chip.setAttribute('aria-pressed', String(on));
+    chip.title = on ? `Hide ${src}` : `Show ${src}`;
+    chip.addEventListener('click', () => {
+      feedPrefs.sources = on
+        ? feedPrefs.sources.filter((x) => x !== src)
+        : [...feedPrefs.sources, src];
+      saveFeedPrefs();
+      renderFeedFilters(sources);
+      renderFeedSettings(sources);
+      drawFeed();
+    });
+    els.feedFilters.appendChild(chip);
+  }
+}
+
+function renderFeedSettings(sources) {
+  if (!els.feedSources) return;
+  els.feedSources.replaceChildren();
+  for (const src of sources) {
+    const label = el('label', 'toggle');
+    const box = document.createElement('input');
+    box.type = 'checkbox';
+    box.checked = feedPrefs.sources.includes(src);
+    box.addEventListener('change', () => {
+      feedPrefs.sources = box.checked
+        ? [...new Set([...feedPrefs.sources, src])]
+        : feedPrefs.sources.filter((x) => x !== src);
+      saveFeedPrefs();
+      renderFeedFilters(sources);
+      drawFeed();
+    });
+    label.appendChild(box);
+    label.appendChild(document.createTextNode(' ' + (FEED_SOURCE_LABELS[src] || src)));
+    els.feedSources.appendChild(label);
+  }
+}
+
+function drawFeed() {
+  if (!els.feedList) return;
+  const shown = feedEntries.filter(feedPasses).slice(0, feedPrefs.max);
+  // Oldest at the top, so the newest line is at the BOTTOM where a follow makes sense
+  // and where a terminal-shaped reader expects it.
+  shown.reverse();
+
+  const view = els.views && els.views.feed;
+  const pinned = !els.feedFollow || els.feedFollow.checked
+    || (view && view.scrollHeight - view.clientHeight - view.scrollTop <= 4);
+
+  els.feedList.replaceChildren();
+  if (!shown.length) {
+    els.feedList.appendChild(el('p', 'empty',
+      feedEntries.length ? 'Nothing matches the current filters.' : 'Nothing reported yet.'));
+  }
+  for (const e of shown) {
+    const row = el('div', `feed-row ${e.severity}`);
+    row.appendChild(el('span', 'f-at', (e.at || '').slice(11, 19)));
+    row.appendChild(el('span', `f-src ${e.source}`, e.source));
+    row.appendChild(el('span', 'f-who', e.who || '—'));
+    row.appendChild(el('span', 'f-text', e.text));
+    if (e.ref) {
+      const ref = el('span', 'f-ref', e.ref);
+      ref.title = `ref ${e.ref}`;
+      row.appendChild(ref);
+    }
+    row.title = `${e.at}  ${e.source}/${e.severity}`;
+    els.feedList.appendChild(row);
+  }
+  if (pinned && view) requestAnimationFrame(() => { view.scrollTop = view.scrollHeight; });
+  updateFeedBadge();
+}
+
+// The badge counts faults the operator has NOT had on screen. Counting everything
+// would make it a permanent red number that stops meaning anything.
+function updateFeedBadge() {
+  if (!els.badgeFeed) return;
+  const faults = feedEntries.filter((e) => e.severity === 'error').length;
+  const unseen = currentView === 'feed' ? 0 : Math.max(0, faults - feedSeen);
+  if (currentView === 'feed') feedSeen = faults;
+  const show = feedPrefs.badge !== false && unseen > 0;
+  els.badgeFeed.hidden = !show;
+  els.badgeFeed.textContent = show ? String(Math.min(unseen, 99)) : '';
+  els.badgeFeed.title = show ? `${unseen} unseen fault(s)` : '';
+}
+
+async function loadFeed() {
+  try {
+    const data = await getJSON(`api/feed?limit=${encodeURIComponent(feedPrefs.max)}`);
+    feedEntries = Array.isArray(data.entries) ? data.entries : [];
+    const sources = Array.isArray(data.sources) && data.sources.length
+      ? data.sources : Object.keys(FEED_SOURCE_LABELS);
+    renderFeedFilters(sources);
+    renderFeedSettings(sources);
+    drawFeed();
+    if (els.feedStamp) {
+      const counts = feedEntries.reduce((a, e) => (a[e.severity] = (a[e.severity] || 0) + 1, a), {});
+      els.feedStamp.textContent =
+        `${feedEntries.length} line(s) — ${counts.error || 0} error, ${counts.warn || 0} warn`;
+    }
+  } catch (err) {
+    if (els.feedStamp) els.feedStamp.textContent = `feed unavailable — ${err.message}`;
+  }
+}
+
 const VIEW_LOADERS = {
   settings: keepScroll(() => { loadAuth(); if (!resourcesLoaded) loadResources(false); }),
   queue:    keepScroll(loadQueue, () => els.queueFollow && els.queueFollow.checked),
+  feed:     keepScroll(loadFeed, () => els.feedFollow && els.feedFollow.checked),
   board:    keepScroll(loadBoard),
   journal:  keepScroll(loadJournal),
   tickets:  keepScroll(loadTickets),
   iiot:     keepScroll(loadIiot),
 };
+// The feed's interval is the operator's to set, so it is read from prefs at the
+// moment the view opens rather than frozen in this table.
 const VIEW_POLL_MS = { queue: 5000, settings: 20000 };
 
 let viewTimer = null;
@@ -1859,7 +2047,7 @@ function showView(which) {
   } else {
     const load = VIEW_LOADERS[which];
     if (load) load();
-    const every = VIEW_POLL_MS[which];
+    const every = which === 'feed' ? feedPrefs.poll : VIEW_POLL_MS[which];
     if (every) {
       if (which === 'settings') resourcesTimer = setInterval(keepScroll(() => loadResources(false)), every);
       else viewTimer = setInterval(load, every);
@@ -2870,6 +3058,40 @@ if (!window.Terminal) {
       }
     });
   }
+
+  // ── feed controls ──────────────────────────────────────────────────────────
+  loadFeedPrefs();
+  if (els.feedFollow) els.feedFollow.addEventListener('change', () => drawFeed());
+  if (els.feedSearch) els.feedSearch.addEventListener('input', () => drawFeed());
+  if (els.feedClear) els.feedClear.addEventListener('click', () => {
+    // Clears the SCREEN only. The journal is append-only, the queue files are the
+    // courier's and the dead letters are evidence - none of them are this button's
+    // to delete, and a "clear" that quietly destroyed them would be a trap.
+    feedEntries = [];
+    drawFeed();
+    if (els.feedStamp) els.feedStamp.textContent = 'cleared on screen — sources untouched';
+  });
+  if (els.feedSeverity) els.feedSeverity.addEventListener('change', () => {
+    feedPrefs.severity = els.feedSeverity.value; saveFeedPrefs(); drawFeed();
+  });
+  if (els.feedMax) els.feedMax.addEventListener('change', () => {
+    feedPrefs.max = parseInt(els.feedMax.value, 10) || 500; saveFeedPrefs(); loadFeed();
+  });
+  if (els.feedBadge) els.feedBadge.addEventListener('change', () => {
+    feedPrefs.badge = els.feedBadge.checked; saveFeedPrefs(); updateFeedBadge();
+  });
+  if (els.feedPoll) els.feedPoll.addEventListener('change', () => {
+    feedPrefs.poll = parseInt(els.feedPoll.value, 10) || 0;
+    saveFeedPrefs();
+    if (currentView === 'feed') showView('feed');      // restart on the new interval
+  });
+
+  // The feed is polled in the background at a slow floor even when it is not the
+  // visible view, because the whole point of the badge is to tell you a fault landed
+  // while you were looking somewhere else. Faults-only would be cheaper, but the
+  // endpoint is one cached call and the badge needs the same data the view draws.
+  setInterval(() => { if (currentView !== 'feed') loadFeed(); }, 30000);
+  loadFeed();
 
   setInterval(refreshQueueBadge, 10000);
   composeSpawnCmd();

@@ -798,3 +798,61 @@ footer {
    parked outside a smaller window. Inert and invisible: a min-width on .grid itself
    would make its box that wide and defeat its own overflow: auto. */
 .free-spacer { position: absolute; width: 1px; height: 1px; pointer-events: none; }
+
+/* ── activity feed ──────────────────────────────────────────────────────────
+   Monospace and dense on purpose: this is read the way a log is read, by
+   scanning a column, not by reading sentences. The severity colour is on a left
+   border rather than the text, so a wall of errors stays legible. */
+/* Sticky, because the filters scrolled away with the content: a feed is read at the
+   bottom, which is exactly where the controls for it were not. */
+.feed-filters {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  position: sticky; top: 0; z-index: 2;
+  padding: 2px 0 9px; margin-bottom: 0;
+  background: var(--bg);
+}
+.chip {
+  font: inherit; font-size: 10.5px; line-height: 1;
+  padding: 5px 9px; border-radius: 999px; cursor: pointer;
+  background: var(--panel-2); color: var(--muted);
+  border: 1px solid var(--line);
+}
+.chip:hover { border-color: var(--accent); }
+.chip.on { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+
+.feed {
+  display: flex; flex-direction: column; gap: 1px;
+  font-family: ui-monospace, Consolas, monospace; font-size: 11px;
+}
+.feed-row {
+  display: grid;
+  grid-template-columns: 58px 84px 108px 1fr auto;
+  gap: 8px; align-items: baseline;
+  padding: 3px 7px; border-left: 2px solid transparent;
+  background: var(--panel);
+}
+.feed-row:nth-child(odd) { background: var(--panel-2); }
+.feed-row.warn  { border-left-color: var(--warn, #d29922); }
+.feed-row.error { border-left-color: var(--bad, #f85149); }
+
+.f-at  { color: var(--muted); }
+.f-src { color: var(--muted); text-transform: uppercase; font-size: 9.5px; letter-spacing: .04em; }
+.f-src.fault, .f-src.provider { color: var(--fg); }
+.f-who { color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.f-text { white-space: pre-wrap; word-break: break-word; min-width: 0; }
+.f-ref { color: var(--muted); font-size: 9.5px; white-space: nowrap; }
+
+.feed-row.error .f-text { color: var(--bad, #f85149); }
+.feed-row.warn  .f-text { color: var(--warn, #d29922); }
+
+/* The feed tab's badge is a fault count, so it must not look like the queue's
+   neutral unread count. */
+.nav-badge.alert { background: var(--bad, #f85149); color: #fff; }
+
+/* Narrow windows: drop the columns rather than squeezing the message to nothing. */
+@media (max-width: 860px) {
+  .feed-row { grid-template-columns: 52px 1fr; }
+  .feed-row .f-src, .feed-row .f-ref { display: none; }
+  .feed-row .f-who { grid-column: 2; }
+  .feed-row .f-text { grid-column: 2; }
+}

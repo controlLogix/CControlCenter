@@ -238,4 +238,36 @@ check 'device deleted' 'True' \
   "$(jpost api/delete "{\"kind\":\"device\",\"id\":$did}" \
      | python3 -c 'import json,sys; print(json.load(sys.stdin).get("ok",""))')"
 
+
+echo '--- activity feed ---'
+# The feed merges five sources server-side. The thing most worth guarding is the
+# TIMESTAMP NORMALISATION: the sources emit three different formats
+# (2026-09-23T02:11:57+00:00, 2026-09-22T21:59:46-05:00, 2026-09-22T21:13:08-0500),
+# the first two of which are the same instant as the third. A string sort over the raw
+# values interleaves them wrongly and the newest line is not at the bottom.
+feed="$(curl -s "$BASE/api/feed?limit=50")"
+check 'GET api/feed' 200 "$(code 'api/feed')"
+check 'feed declares its sources' 'True'   "$(printf '%s' "$feed" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(len(d.get("sources",[])) >= 5)')"
+check 'entries are newest-first and comparable' 'True'   "$(printf '%s' "$feed" | python3 -c '
+import json,sys
+e=[x["at"] for x in json.load(sys.stdin)["entries"] if x["at"]]
+print(all(e[i] >= e[i+1] for i in range(len(e)-1)))')"
+check 'every timestamp is normalised to UTC' 'True'   "$(printf '%s' "$feed" | python3 -c '
+import json,sys
+e=json.load(sys.stdin)["entries"]
+print(all(x["at"].endswith("+00:00") for x in e if x["at"]))')"
+check 'every entry carries the full shape' 'True'   "$(printf '%s' "$feed" | python3 -c '
+import json,sys
+need={"at","source","severity","who","text","ref"}
+print(all(need <= set(x) for x in json.load(sys.stdin)["entries"]))')"
+check 'severity is drawn from a closed set' 'True'   "$(printf '%s' "$feed" | python3 -c '
+import json,sys
+d=json.load(sys.stdin)
+ok=set(d["severities"])
+print(all(x["severity"] in ok for x in d["entries"]))')"
+check 'limit is honoured' 'True'   "$(curl -s "$BASE/api/feed?limit=3" | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["entries"]) <= 3)')"
+# A silly limit must fall back, not 500 and not allocate.
+check 'a bad limit falls back rather than failing' 200 "$(code 'api/feed?limit=999999')"
+check 'api/feed rejects POST' 405   "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json'       --data '{}' "$BASE/api/feed")"
+
 finish

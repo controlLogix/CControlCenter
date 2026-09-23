@@ -353,6 +353,104 @@ def queue_messages():
     return result
 
 
+# ── the activity feed ────────────────────────────────────────────────────────
+#
+# One chronological stream over everything the harness knows, because the state was
+# spread across five places that each had to be visited separately: agent panes, the
+# queue, the journal, the resource probes and the courier's dead letters. A fault in
+# any of them was only visible if you happened to be looking at that one.
+#
+# Entries are NORMALISED here rather than in the frontend, so a new source is a server
+# change and every client agrees on the shape:
+#
+#   at        ISO timestamp, the sort key
+#   source    which subsystem reported it
+#   severity  info | warn | error
+#   who       the agent or component, or "" when it is not about one
+#   text      one line, already truncated
+#   ref       optional correlation id (job, ticket, resource)
+#
+# The severity of a chatter message is derived from its kind, not guessed from its
+# text: `error` is an error, `finding` and `blocked` are warnings, everything else is
+# information. Guessing from wording is how a message saying "no errors found" ends up
+# coloured red.
+FEED_SOURCES = ("chatter", "journal", "agent", "provider", "fault", "run")
+FEED_SEVERITIES = ("info", "warn", "error")
+
+# kind -> severity, for queue messages and journal entries alike.
+_KIND_SEVERITY = {
+    "error": "error", "blocked": "error", "conflict": "error",
+    "finding": "warn", "claim": "info", "release": "info",
+    "plan": "info", "request": "info", "reply": "info", "status": "info",
+    "note": "info", "handoff": "info", "done": "info",
+}
+
+
+def feed_at(value):
+    """Normalise a timestamp to UTC ISO, or "" if it cannot be read.
+
+    THE SOURCES DO NOT AGREE ON A FORMAT, and the feed sorts on this field:
+
+        journal   2026-09-23T02:11:57+00:00    UTC, colon in the offset
+        agents    2026-09-22T21:59:46-05:00    local, colon in the offset
+        chatter   2026-09-22T21:13:08-0500     local, NO colon
+
+    The first two are the same instant as the third, but a string sort puts the UTC
+    one an hour and a half earlier - so a merged feed interleaves wrongly and the
+    newest line is not at the bottom. Python's fromisoformat handles the bare -0500
+    form from 3.11, but this also accepts Z and falls back rather than raising,
+    because one unparseable row must not cost the whole feed.
+    """
+    if not isinstance(value, str) or not value:
+        return ""
+    try:
+        return parse_timestamp(value).isoformat(timespec="seconds")
+    except Invalid:
+        pass
+    try:
+        parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except (ValueError, OverflowError):
+        return ""
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=dt.timezone.utc)
+    return parsed.astimezone(dt.timezone.utc).isoformat(timespec="seconds")
+
+
+def feed_entry(at, source, severity, who, text, ref=None):
+    """One normalised line. Never raises on bad input; the feed must not be a way to
+    take the dashboard down."""
+    return {
+        "at": feed_at(at),
+        "source": source if source in FEED_SOURCES else "journal",
+        "severity": severity if severity in FEED_SEVERITIES else "info",
+        "who": str(who or "")[:64],
+        "text": " ".join(str(text or "").split())[:600],
+        "ref": str(ref)[:120] if ref else "",
+    }
+
+
+def feed_rows(db, limit=200):
+    """The database-backed half of the feed: journal entries and queue chatter."""
+    out = []
+    for row in db.execute("SELECT * FROM journal ORDER BY at DESC, id DESC LIMIT ?", (limit,)):
+        kind = str(row["kind"] or "")
+        subject = row["subject"] or ""
+        body = row["body"] or ""
+        text = f"{subject} - {body}" if body else subject
+        out.append(feed_entry(row["at"], "journal", _KIND_SEVERITY.get(kind, "info"),
+                              row["agent"], text, kind))
+    for msg in queue_messages():
+        kind = str(msg.get("kind") or "")
+        who = msg.get("sender") or ""
+        to = msg.get("recipient") or ""
+        text = msg.get("body") or ""
+        if to:
+            text = f"-> {to}: {text}"
+        out.append(feed_entry(msg.get("at"), "chatter", _KIND_SEVERITY.get(kind, "info"),
+                              who, text, msg.get("ref") or kind))
+    return out
+
+
 def read(db, resource, limit=100, since=None):
     if resource == "epics":
         epics = [dict(row, tasks=[]) for row in db.execute("SELECT * FROM epics ORDER BY id")]

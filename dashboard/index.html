@@ -56,6 +56,11 @@
       <span class="nav-label">Queue</span>
       <span class="nav-badge" id="badgeQueue" hidden></span>
     </button>
+    <button class="nav-item" data-view="feed" role="tab" aria-selected="false" title="Feed — one stream: systems, providers, agents, chatter and faults">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h3l2-7 3 12 3-16 2 11h3"/></svg>
+      <span class="nav-label">Feed</span>
+      <span class="nav-badge alert" id="badgeFeed" hidden></span>
+    </button>
     <button class="nav-item" data-view="board" role="tab" aria-selected="false" title="Task Board — epics and tasks">
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="7" rx="1"/></svg>
       <span class="nav-label">Board</span>
@@ -220,6 +225,23 @@
       <p class="hint">Append-only. Entries are never edited or deleted from this view.</p>
     </section>
 
+    <!-- ═══ Feed ═══ -->
+    <section id="viewFeed" class="view pad" role="tabpanel" aria-label="Activity Feed" hidden>
+      <div class="vhead">
+        <h2>Feed</h2>
+        <span id="feedStamp" class="stamp" aria-live="polite"></span>
+        <span class="spacer"></span>
+        <label class="toggle"><input type="checkbox" id="feedFollow" checked> follow</label>
+        <input id="feedSearch" class="rin" type="search" size="18" placeholder="filter text…">
+        <button id="feedClear" class="btn" title="Clear the on-screen buffer. The sources are untouched.">clear</button>
+      </div>
+      <div id="feedFilters" class="feed-filters" role="group" aria-label="Feed filters"></div>
+      <div id="feedList" class="feed" role="log" aria-live="polite"></div>
+      <p class="hint">Merged server-side from the journal, the message queue, agent state,
+        the resource probes and the courier's dead letters. Which sources appear, and how
+        many lines are kept, are set in <strong>Settings → Feed</strong>.</p>
+    </section>
+
     <!-- ═══ Ticket Reviewer ═══ -->
     <section id="viewTickets" class="view pad" role="tabpanel" aria-label="Ticket Reviewer" hidden>
       <div class="vhead">
@@ -293,6 +315,46 @@
     <!-- ═══ Settings ═══ -->
     <section id="viewSettings" class="view pad" role="tabpanel" aria-label="Settings" hidden>
       <div class="vhead"><h2>Settings</h2><span class="spacer"></span></div>
+
+      <section class="card">
+        <h3>Feed</h3>
+        <p class="hint">Which sources reach the feed, how loud they have to be, and how
+          much is kept. Stored in this browser; the server always merges everything and
+          the filtering happens here, so turning a source off never hides it from
+          anyone else.</p>
+        <div id="feedSources" class="row wrap"></div>
+        <div class="row wrap">
+          <label class="toggle" title="Lines below this level are not shown">
+            severity floor
+            <select id="feedSeverity">
+              <option value="info" selected>info and above</option>
+              <option value="warn">warnings and errors</option>
+              <option value="error">errors only</option>
+            </select>
+          </label>
+          <label class="toggle" title="How many lines the feed keeps on screen">
+            keep
+            <select id="feedMax">
+              <option value="200">200 lines</option>
+              <option value="500" selected>500 lines</option>
+              <option value="1000">1000 lines</option>
+              <option value="2000">2000 lines</option>
+            </select>
+          </label>
+          <label class="toggle" title="How often the feed polls the server">
+            refresh
+            <select id="feedPoll">
+              <option value="2000">every 2s</option>
+              <option value="5000" selected>every 5s</option>
+              <option value="15000">every 15s</option>
+              <option value="0">manual only</option>
+            </select>
+          </label>
+          <label class="toggle" title="Show a count of unseen warnings and errors on the Feed tab">
+            <input type="checkbox" id="feedBadge" checked> badge unseen faults
+          </label>
+        </div>
+      </section>
 
       <section class="card">
         <h3>Appearance</h3>
