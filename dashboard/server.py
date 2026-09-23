@@ -1003,7 +1003,12 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(400, {"error": str(err)})
         except (ValueError, RecursionError):
             self.send_json(400, {"error": "invalid fields or query parameters"})
-        except ccstore.NotFound:
+        except (ccboard.NotFound, ccstore.NotFound):
+            # BOTH, as the board endpoint does at board_endpoint's ladder. These
+            # verbs now delegate into ccboard, so a refusal raised down there -
+            # deleting something already deleted, say - arrives as ccboard's
+            # NotFound. Catching only ccstore's turned that into a 500, which
+            # reads as "the server broke" rather than "that is already gone".
             self.send_json(404, {"error": "id not found"})
         except ccstore.sqlite3.IntegrityError:
             self.send_json(409, {"error": "record conflicts with existing data"})

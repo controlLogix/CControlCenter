@@ -222,8 +222,16 @@ def validate_write(resource, body):
     status_value = body.get("status")
     if not isinstance(kind, str) or kind not in ("epic", "task"):
         raise Invalid("invalid kind")
+    # The retired words are accepted here and translated, which is what the
+    # STATUS_MIGRATION note at the top of this module has always claimed. The map
+    # existed but was only ever applied to rows already in the database, so a
+    # caller still saying `todo` - the old board UI, agentmux.sh, smoke.sh - was
+    # refused at the door by a vocabulary it was never told had changed.
     allowed = EPIC_STATUSES if kind == "epic" else TASK_STATUSES
-    if not isinstance(status_value, str) or status_value not in allowed:
+    if not isinstance(status_value, str):
+        raise Invalid("invalid status")
+    status_value = ccboard.STATUS_MIGRATION.get(status_value, status_value)
+    if status_value not in allowed:
         raise Invalid("invalid status")
     return dict(kind=kind, status=status_value, **_addressed(body, kind))
 
@@ -256,6 +264,39 @@ def device_row(row):
     return result
 
 
+def _legacy_id(created):
+    """Give a board payload back the `id` the compatibility surface promises.
+
+    `ccboard.entity()` sets `id` to the KEY ("EP-014") because on the board the
+    key IS the identity. These two endpoints predate that and have always
+    answered with the integer row id, which is what `read()` above still returns
+    for the very same resource - so POST and GET disagreed about what `id` meant.
+
+    That is not cosmetic. smoke.sh interpolates the value straight into JSON
+    unquoted (`{"epic_id":$eid}`), so a key string produced a malformed body and
+    the server answered "invalid JSON object"; every assertion downstream of the
+    first create then failed. The old board UI and agentmux.sh read it the same
+    way. The key stays available as `key`, and the board's own /api/board/* keeps
+    id == key.
+    """
+    if isinstance(created, dict) and "row" in created:
+        return dict(created, id=created["row"])
+    return created
+
+
+def _epic_by_ref(db, ref):
+    """An epic by integer row id or by key, because callers now see both.
+
+    `id` and `key` are different columns with different types; comparing the
+    INTEGER column against "EP-014" simply never matches, which surfaced as
+    "epic not found" rather than as a type error.
+    """
+    row = db.execute("SELECT key FROM epics WHERE id=?", (ref,)).fetchone()
+    if row is None and isinstance(ref, str):
+        row = db.execute("SELECT key FROM epics WHERE key=?", (ref,)).fetchone()
+    return row
+
+
 def write(db, resource, values):
     """The compatibility surface.
 
@@ -270,22 +311,22 @@ def write(db, resource, values):
     """
     now = timestamp()
     if resource == "epics":
-        return ccboard.create(db, "epic", {
+        return _legacy_id(ccboard.create(db, "epic", {
             "title": values["title"], "body": values.get("body"),
-            "jira_key": values["jira_key"], "notes": values["notes"]}, mirror=True)
+            "jira_key": values["jira_key"], "notes": values["notes"]}, mirror=True))
     if resource == "tasks":
         epic_key = values.get("epic")
         if epic_key is None:
-            row = db.execute("SELECT key FROM epics WHERE id=?", (values["epic_id"],)).fetchone()
+            row = _epic_by_ref(db, values["epic_id"])
             if row is None:
                 raise NotFound("epic not found")
             epic_key = row["key"]
         elif db.execute("SELECT id FROM epics WHERE key=?", (epic_key,)).fetchone() is None:
             raise NotFound("epic not found")
-        return ccboard.create(db, "task", {
+        return _legacy_id(ccboard.create(db, "task", {
             "title": values["title"], "body": values.get("body"), "epic": epic_key,
             "assignee": values["agent"], "jira_key": values["jira_key"]},
-            actor=values["agent"], mirror=True)
+            actor=values["agent"], mirror=True))
     if resource == "journal":
         cursor = db.execute("INSERT INTO journal (at,kind,agent,subject,body) VALUES (?,?,?,?,?)",
                             (now, values["kind"], values["agent"], values["subject"], values["body"]))
@@ -337,6 +378,12 @@ def _resolve_key(db, kind, values):
         return values["key"]
     table = {"epic": "epics", "task": "tasks"}[kind]
     row = db.execute("SELECT key FROM " + table + " WHERE id=?", (values["id"],)).fetchone()
+    if row is None and isinstance(values["id"], str):
+        # A caller that read `id` off a board payload holds a key, not a row id.
+        # Accepting both here costs one query and removes a whole class of
+        # "id not found" that is really "you were handed the other address".
+        row = db.execute("SELECT key FROM " + table + " WHERE key=?",
+                         (values["id"],)).fetchone()
     if row is None:
         raise NotFound("id not found")
     return row["key"]

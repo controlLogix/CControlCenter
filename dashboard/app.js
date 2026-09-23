@@ -2256,11 +2256,17 @@ async function refreshQueueBadge() {
 // ═════════════════════════════════════════════════════════════════ board ══════
 
 // These MUST match EPIC_STATUSES / TASK_STATUSES in ccstore.py - the backend
-// rejects anything else, and the vocabularies differ between the two tables (epics
-// archive, tasks cancel). smoke.sh asserts every value here is accepted, so drift
-// shows up as a test failure rather than a dead control.
-const EPIC_STATUSES = ['open', 'in_progress', 'blocked', 'done', 'archived'];
-const TASK_STATUSES = ['todo', 'in_progress', 'blocked', 'done', 'cancelled'];
+// rejects anything else. smoke.sh reads these two lines and asserts the backend
+// accepts every value, so drift shows up as a test failure rather than a dead
+// control. It had drifted: the board store replaced the old per-table words with
+// one vocabulary, and these lists still offered `archived`, `todo` and
+// `cancelled` - three dropdown entries that 400d on click.
+//
+// `deleted` is deliberately absent. It is reachable, but through the delete
+// button, which confirms first; offering it in a status menu makes destroying a
+// card the same gesture as reclassifying one.
+const EPIC_STATUSES = ['backlog', 'open', 'in_progress', 'blocked', 'parked', 'done'];
+const TASK_STATUSES = ['backlog', 'open', 'in_progress', 'blocked', 'parked', 'done'];
 
 const STATUS_CLASS = /^[a-z_]+$/;   // in_progress has an underscore
 

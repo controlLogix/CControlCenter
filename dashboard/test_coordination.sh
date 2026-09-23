@@ -296,8 +296,13 @@ class Handler(BaseHTTPRequestHandler):
         body = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
         with (root / 'identity-requests').open('a') as output:
             output.write(json.dumps({'path': self.path, 'body': body}) + '\n')
-        data = json.dumps({'id': 41, 'title': 'identity-test',
-                           'status': body.get('status', 'todo')}).encode()
+        # `key` is not decoration: cmd_task_add and cmd_task_status both read
+        # row['key'] to report what they changed. Without it the LEGITIMATE half
+        # of each pairing below died on a KeyError, which this test scored as
+        # "failed for the wrong reason" - so a stale fixture read as a broken
+        # identity guard, and the guard was fine all along.
+        data = json.dumps({'id': 41, 'key': 'TM-041', 'title': 'identity-test',
+                           'status': body.get('status', 'open')}).encode()
         self.send_response(200)
         self.send_header('Content-Length', str(len(data)))
         self.end_headers()

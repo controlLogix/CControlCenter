@@ -1253,10 +1253,19 @@ def delete(db, key, actor=None, session=None):
     """Soft delete, upstream's way: the status becomes `deleted`, the row stays,
     and the key stays burned. A board whose numbers get reused is a board whose
     history stops meaning anything."""
-    kind, _ = row_for(db, key)
+    kind, existing = row_for(db, key)
+    # Deleting twice is not idempotent here, it is a mistake worth reporting. The
+    # row survives a soft delete, so without this the second call "succeeds",
+    # re-stamps closed_at, and tells the caller it removed something it did not.
+    if existing["status"] == "deleted":
+        raise NotFound(key + " is already deleted")
     if kind == "epic":
+        # Only LIVE children cascade. A task deleted on its own is already gone;
+        # counting it again would report a cascade larger than the work actually
+        # affected, which is the number a caller uses to decide whether to worry.
         orphans = [row["key"] for row in db.execute(
-            "SELECT t.key FROM tasks t JOIN epics e ON t.epic_id=e.id WHERE e.key=?", (key,))]
+            "SELECT t.key FROM tasks t JOIN epics e ON t.epic_id=e.id"
+            " WHERE e.key=? AND t.status<>'deleted'", (key,))]
         for child in orphans:
             db.execute("UPDATE tasks SET status='deleted',updated_at=?,closed_at=? WHERE key=?",
                        (now(), now(), child))

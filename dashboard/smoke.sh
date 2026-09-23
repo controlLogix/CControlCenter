@@ -174,7 +174,29 @@ for e in json.load(sys.stdin)['epics']:
   # declares EPIC_STATUSES / TASK_STATUSES to build its dropdowns; if those drift
   # from ccstore.py the control silently 400s, which is how `active`/`doing` shipped
   # broken the first time. Assert the whole vocabulary, not one value.
-  for s in open in_progress blocked done archived; do
+  #
+  # The lists are READ FROM THE SERVED app.js rather than repeated here. Copying
+  # them made this a test of a third list that could itself go stale - and it did:
+  # the board store replaced the old per-table words, app.js kept offering
+  # `archived`/`todo`/`cancelled`, and this loop went on asserting the dead
+  # vocabulary was fine. Reading what the browser is actually handed is the only
+  # version of this check that can detect the drift it was written for.
+  statuses_from_app() {
+    curl -s "$BASE/app.js" | python3 -c "
+import re, sys
+src = sys.stdin.read()
+m = re.search(r'const $1 = \[(.*?)\];', src, re.S)
+print(' '.join(re.findall(r\"'([a-z_]+)'\", m.group(1))) if m else '')
+"
+  }
+  epic_vocab="$(statuses_from_app EPIC_STATUSES)"
+  task_vocab="$(statuses_from_app TASK_STATUSES)"
+  check 'epic vocabulary is readable from app.js' 'yes' \
+    "$([ -n "$epic_vocab" ] && echo yes || echo no)"
+  check 'task vocabulary is readable from app.js' 'yes' \
+    "$([ -n "$task_vocab" ] && echo yes || echo no)"
+
+  for s in $epic_vocab; do
     check "epic status $s accepted" "$s" \
       "$(jpost api/status "{\"kind\":\"epic\",\"id\":$eid,\"status\":\"$s\"}" \
          | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status",""))')"
@@ -185,7 +207,7 @@ for e in json.load(sys.stdin)['epics']:
 
   tid="$(jpost api/tasks "{\"epic_id\":$eid,\"title\":\"vocab task\"}" \
          | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')"
-  for s in todo in_progress blocked done cancelled; do
+  for s in $task_vocab; do
     check "task status $s accepted" "$s" \
       "$(jpost api/status "{\"kind\":\"task\",\"id\":$tid,\"status\":\"$s\"}" \
          | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status",""))')"
