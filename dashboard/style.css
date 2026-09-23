@@ -478,6 +478,19 @@ a.task-badge:hover { text-decoration: underline; }
 
 /* ───────────────────────── task board ───────────────────────── */
 
+/* The dispatch strip sits above the epics and reports the pool. It is a row of
+   chips rather than a panel because it must never look like somewhere to click:
+   the page cannot dispatch, by design. */
+.dispatch-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: 0 0 8px;
+  min-height: 18px;
+}
+.dispatch-strip:empty { display: none; }
+
 .board {
   display: grid; gap: 10px;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));

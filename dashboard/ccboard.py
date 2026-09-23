@@ -100,9 +100,41 @@ DEFAULT_CONFIG = {
     "wipLimit": 3,
     "autoCloseEpic": True,
     "autoReady": "label",
+    # ── dispatch ─────────────────────────────────────────────────────────────
+    #
+    # The board decides what may be handed to an agent; agentmux decides how to
+    # run one. These settings are the seam. They live here rather than in a
+    # dispatcher-local file for the same reason the gates do: a policy the board
+    # cannot see is a policy the board cannot enforce, and `doctor` should be
+    # able to report on it.
+    #
+    # dispatchEnabled is OFF by default, deliberately. Spawning agent processes
+    # that write to a repository is not something a fresh checkout should start
+    # doing because a server came up.
+    "dispatchEnabled": False,
+    "dispatchWip": 3,
+    "dispatchPoll": 20,
+    "dispatchIdleExit": 30,
+    "dispatchMaxFailures": 3,
+    "dispatchCli": "codex",
+    "dispatchReviewCli": "claude",
 }
-CONFIG_BOOLS = {"requireAcceptance", "requireEpic", "autoCloseEpic"}
+CONFIG_BOOLS = {"requireAcceptance", "requireEpic", "autoCloseEpic", "dispatchEnabled"}
 CONFIG_LISTS = {"requireOnCreate", "requireOnStart", "requireOnDone"}
+# name -> (low, high). Whole numbers, bounded where an unbounded one would be a
+# denial of service against this machine rather than a configuration choice.
+CONFIG_NUMBERS = {"wipLimit": (0, 999), "dispatchWip": (0, 32),
+                  "dispatchPoll": (5, 3600), "dispatchIdleExit": (0, 1440),
+                  "dispatchMaxFailures": (1, 99)}
+CONFIG_CLIS = {"dispatchCli", "dispatchReviewCli"}
+# The dispatch half of the config, as one list, so a caller that only wants
+# the dispatcher's policy does not have to know which names those are.
+DISPATCH_KEYS = ("dispatchEnabled", "dispatchWip", "dispatchPoll",
+                 "dispatchIdleExit", "dispatchMaxFailures",
+                 "dispatchCli", "dispatchReviewCli")
+# The CLI name reaches `agentmux spawn --cli`, which puts it in a launch command.
+# A subset of what spawn accepts, chosen so nothing here can carry shell syntax.
+CLI_RE = re.compile(r"[A-Za-z0-9_-]{1,32}")
 
 
 class Invalid(ValueError):
@@ -445,8 +477,11 @@ def set_config(db, name, value):
         known = ("body", "acceptance", "evidence", "actor")
         if not isinstance(value, list) or any(item not in known for item in value):
             raise Invalid(name + " must be a list drawn from: " + ", ".join(known))
-    elif name == "wipLimit":
-        value = number(value, name, 0, 999, integer=True)
+    elif name in CONFIG_NUMBERS:
+        low, high = CONFIG_NUMBERS[name]
+        value = number(value, name, low, high, integer=True)
+    elif name in CONFIG_CLIS:
+        value = text(value, name, 32, required=True, pattern=CLI_RE)
     elif name == "autoReady":
         value = text(value, name, 16, required=True, choices=("label", "off"))
     db.execute("INSERT INTO board_config (name,value) VALUES (?,?)"
@@ -1574,6 +1609,86 @@ def next_tasks(db, limit=10):
                             (0, t["rank"]) if t["rank"] is not None else (1, 0),
                             t["id"]))
     return out[:limit]
+
+
+def in_flight(db):
+    """Tasks an agent is holding right now: in_progress with an assignee."""
+    return _rows(db, "SELECT key,agent,session FROM tasks"
+                     " WHERE status='in_progress' AND agent IS NOT NULL ORDER BY id")
+
+
+def dispatchable(db, limit=10, busy=()):
+    """The queue a dispatcher may actually hand out, most urgent first.
+
+    next_tasks answers "what should a human pick up next" - it stops at unblocked
+    and specified. Dispatch has two further conditions that next_tasks must NOT
+    fold in, because they are about handing work to a *machine*:
+
+      * agent_readiness - the labels that reserve a card for a person
+        (NOT_FOR_AGENTS) and the epic requirement. A task can be perfectly well
+        specified and still be one a person must answer.
+      * file disjointness - two agents editing the same path is the collision
+        RULE #-0.7's claims exist to make impossible. Claims make it *safe*: the
+        loser is refused. Choosing disjoint work up front makes it *rare*, which
+        is the difference between a pool that makes progress and one that spends
+        its slots losing races.
+
+    `busy` is the set of paths already being worked. Overlapping cards are not
+    dropped - they are ranked after the disjoint ones, so a board whose every
+    card touches the same file still drains, just one at a time.
+    """
+    limit = number(limit, "limit", 1, 200, integer=True)
+    cfg = config(db)
+    order = {name: index for index, name in enumerate(PRIORITIES)}
+    taken = {str(path) for path in busy}
+    # _payload_task leaves `epic` as None and carries the row id in `epicRow`;
+    # only board() resolves it. agent_readiness asks for `epic`, so without this
+    # map every card on a board with requireEpic set reads as epic-less and the
+    # queue is always empty - which is exactly how this read first behaved.
+    epic_key_by_row = {row["id"]: row["key"] for row in db.execute("SELECT id,key FROM epics")}
+    candidates = []
+    for row in db.execute("SELECT * FROM tasks WHERE status IN ('backlog','open') ORDER BY id"):
+        task = _payload_task(db, row)
+        task["epic"] = epic_key_by_row.get(row["epic_id"])
+        if any(_status_of(db, dep) not in RESOLVED for dep in task["blockedBy"]):
+            continue
+        verdict = agent_readiness(task, cfg)
+        if not verdict["ready"]:
+            continue
+        candidates.append(task)
+    candidates.sort(key=lambda t: (order.get(t["priority"], len(PRIORITIES)),
+                                   (0, t["rank"]) if t["rank"] is not None else (1, 0),
+                                   t["id"]))
+    # Greedy disjoint pass, then the rest in the same priority order. A card with
+    # no touches recorded cannot be proven disjoint, so it is treated as
+    # overlapping rather than assumed safe.
+    first, rest = [], []
+    for task in candidates:
+        touches = set(task.get("touches") or [])
+        if touches and not (touches & taken):
+            taken |= touches
+            first.append(task)
+        else:
+            rest.append(task)
+    return _strip_body(first + rest)[:limit]
+
+
+def busy_paths(db):
+    """Every path an in-flight task has recorded touching."""
+    out = set()
+    for row in in_flight(db):
+        out |= set(_simple_list(db, "board_touches", "path", row["key"]))
+    return sorted(out)
+
+
+def dispatch_view(db, limit=10):
+    """Everything a dispatcher needs in one read: the queue, what is already
+    running, and the policy. One call, so the queue and the in-flight set it was
+    computed against cannot be from two different moments."""
+    cfg = config(db)
+    return {"tasks": dispatchable(db, limit, busy_paths(db)),
+            "inFlight": in_flight(db),
+            "config": {name: cfg[name] for name in DISPATCH_KEYS}}
 
 
 def triage(db, sweep_all=False, dry_run=False, actor=None):

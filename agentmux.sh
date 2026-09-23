@@ -250,14 +250,38 @@ agentmux - drive other agent CLIs in tmux panes
                                with the holder's name if someone else has it. Leases
                                expire (default 1800s) so a dead agent frees its work
   release <resource>           give it back when you are done
+  claim/release --for <agent>  claim in a WORKER's name. Orchestrator only, and only
+                               for an agent that is live: it is how dispatch hands a
+                               worker the files it was started for, not a way for one
+                               agent to act as another
   claims [--json] [--all]      who is working on what, right now
   tasks  [--mine] [--all] [--json]
                                the TASK BOARD: open work, by epic
-  task   start|done|block|todo <id>
+  task   start|done|block|todo|park|backlog <id> [--reason R]
   task   add <epic-id> "<title>"
                                move or create board work. Status changes are
                                journalled too: the board records state, the journal
                                records that someone decided it
+  dispatch [<id>] [--cli C] [--dry-run]
+                               hand ONE ready card to a fresh agent: spawn, claim its
+                               files, move it in_progress through the board's own gate,
+                               then brief it. No id takes the top of the queue. An
+                               unready card is refused BY THE BOARD, not by dispatch
+  collect [<id>]               reconcile dispatched cards: release claims, reap the
+                               pane, park what died. NEVER closes a task - the done
+                               gate wants evidence and an actor, and that judgement
+                               is not the collector's to make
+  pool   once|start|stop|status|resume
+                               the pickup loop: collect, then fill free slots up to
+                               dispatchWip, preferring cards whose files do not
+                               overlap. Off unless dispatchEnabled is set; config is
+                               re-read every tick, so turning it off does not mean
+                               finding the process
+  epic   new "<title>" | status <id> <s> | use <id> | list
+                               every task belongs to an epic; `use` sets the active one
+  board  config [<name> [<value>]]
+                               the board's own settings - the gates, the WIP limit and
+                               the dispatch policy. No arguments prints all of them
   journal <kind> <subject> [--body B]
                                write to the SHARED journal every agent and the
                                dashboard can read. kinds: claim release conflict note
@@ -1053,6 +1077,33 @@ coord_py() {
   printf '%s' "$script"
 }
 
+dispatch_py() {
+  local repo="${AGENTMUX_REPO:-}"
+  [ -n "$repo" ] || die "AGENTMUX_REPO is unset; cannot find taskmgmt/dispatch.py"
+  local script="$repo/taskmgmt/dispatch.py"
+  [ -f "$script" ] || die "not found: $script"
+  printf '%s' "$script"
+}
+
+# The board-to-agent verbs. Each one refuses from inside a pane for the same
+# reason `run complete` does: an agent that can dispatch can dispatch itself, and
+# a worker deciding to spawn more workers is how a pool becomes a fork bomb with a
+# task board attached.
+cmd_dispatch() {
+  [ -z "${AGENTMUX_AGENT:-}" ]     || die "dispatch is the orchestrator's to call, and this is the '$AGENTMUX_AGENT' pane."
+  python3 "$(dispatch_py)" dispatch "$@"
+}
+
+cmd_collect() {
+  [ -z "${AGENTMUX_AGENT:-}" ]     || die "collect is the orchestrator's to call, and this is the '$AGENTMUX_AGENT' pane."
+  python3 "$(dispatch_py)" collect "$@"
+}
+
+cmd_pool() {
+  [ -z "${AGENTMUX_AGENT:-}" ]     || die "pool is the orchestrator's to call, and this is the '$AGENTMUX_AGENT' pane."
+  python3 "$(dispatch_py)" pool "$@"
+}
+
 cmd_claim() {
   local resource="${1:-}"; shift || true
   [ -n "$resource" ] || die "claim needs a resource, e.g. agentmux claim taskmgmt/courier.py --note 'adding backoff'"
@@ -1191,13 +1242,85 @@ cmd_tasks() { python3 "$(coord_py)" tasks "$@"; }
 cmd_task() {
   local action="${1:-}"; shift || true
   local me="${AGENTMUX_AGENT:-orchestrator}"
+
+  # --agent is NOT passed through from "$@", for exactly the reason claim refuses
+  # --holder: argparse takes the LAST occurrence, so appending user args after ours
+  # would let `task done TM-014 --agent someone-else` sign the board in another
+  # agent's name. Outside a pane that check is the only one there is, because
+  # resolve_identity will accept any live agent when $AGENTMUX_AGENT is unset.
+  for arg in "$@"; do
+    case "$arg" in --agent|--agent=*)
+      die "task: --agent is set from \$AGENTMUX_AGENT and cannot be overridden" ;;
+    esac
+  done
+
+  local id status
   case "$action" in
-    start) python3 "$(coord_py)" task-status "${1:?task id}" in_progress --agent "$me" ;;
-    done)  python3 "$(coord_py)" task-status "${1:?task id}" done        --agent "$me" ;;
-    block) python3 "$(coord_py)" task-status "${1:?task id}" blocked     --agent "$me" ;;
-    todo)  python3 "$(coord_py)" task-status "${1:?task id}" todo        --agent "$me" ;;
-    add)   python3 "$(coord_py)" task-add "${1:?epic id}" "${2:?title}" --agent "$me" ;;
-    *) die "task: start|done|block|todo <id>, or add <epic-id> \"<title>\"" ;;
+    # The status shorthands. Extra flags survive, so `task block TM-014 --reason
+    # "waiting on the gateway"` reaches the verb that wants a reason - the reason
+    # is required reading for blocked and parked, and silently dropping it was
+    # why cards came back with no explanation on them.
+    start|done|block|todo|park|backlog)
+      id="${1:?task id}"; shift || true
+      case "$action" in
+        start) status=in_progress ;;
+        done)  status=done ;;
+        block) status=blocked ;;
+        park)  status=parked ;;
+        backlog) status=backlog ;;
+        # `todo` is the word people type; the board's vocabulary calls it `open`.
+        # It used to be passed through verbatim and the board rejected every one
+        # of them - the verb has never worked, because nothing exercised it.
+        *)     status=open ;;
+      esac
+      python3 "$(coord_py)" task-status "$id" "$status" --agent "$me" "$@" ;;
+    add)
+      python3 "$(coord_py)" task-add "${1:?epic id}" "${2:?title}" --agent "$me" ;;
+    # The rest of the board's task verbs, passed straight through. These existed in
+    # coordination.py from the day the store landed and were reachable only by
+    # invoking python3 by hand - which is the same reason the board went unused
+    # before `agentmux tasks` existed. A dispatched worker is told to run
+    # `agentmux task evidence`, so it had better be a command.
+    new|edit|ac|label|dep|evidence|commit|touch|comment|link|assign|move)
+      python3 "$(coord_py)" "task-$action" "$@" --agent "$me" ;;
+    # Reads. These take no identity: nothing is being signed.
+    show|why|next)
+      python3 "$(coord_py)" "task-$action" "$@" ;;
+    *) die "task: start|done|block|todo <id> | add <epic-id> \"<title>\" | new|show|edit|ac|label|dep|evidence|commit|touch|comment|link|assign|move|why|next" ;;
+  esac
+}
+
+cmd_epic() {
+  local action="${1:-}"; shift || true
+  local me="${AGENTMUX_AGENT:-orchestrator}"
+  for arg in "$@"; do
+    case "$arg" in --agent|--agent=*)
+      die "epic: --agent is set from \$AGENTMUX_AGENT and cannot be overridden" ;;
+    esac
+  done
+  case "$action" in
+    new)    python3 "$(coord_py)" epic-new "$@" --agent "$me" ;;
+    status) python3 "$(coord_py)" epic-status "$@" --agent "$me" ;;
+    use)    python3 "$(coord_py)" board-active "$@" ;;
+    ""|list) python3 "$(coord_py)" tasks ;;
+    *) die "epic: new \"<title>\" | status <id> <status> | use <id> | list" ;;
+  esac
+}
+
+# Board-level settings, as opposed to one card's fields. Read-only with no
+# arguments, which is the form worth typing when you want to know why the pool is
+# not picking anything up.
+cmd_board() {
+  local action="${1:-}"; shift || true
+  case "$action" in
+    config) python3 "$(coord_py)" config "$@" ;;
+    doctor) python3 "$(coord_py)" doctor "$@" ;;
+    history) python3 "$(coord_py)" history "$@" ;;
+    find)   python3 "$(coord_py)" find "$@" ;;
+    triage) python3 "$(coord_py)" triage "$@" --agent "${AGENTMUX_AGENT:-orchestrator}" ;;
+    override) python3 "$(coord_py)" override "$@" --agent "${AGENTMUX_AGENT:-orchestrator}" ;;
+    ""|-h|--help) python3 "$(coord_py)" config ;;
+    *) die "board: config|doctor|history|find|triage|override" ;;
   esac
 }
 
@@ -1743,6 +1866,11 @@ case "${1:-}" in
   run)    shift; cmd_run    "$@" ;;
   tasks)  shift; cmd_tasks  "$@" ;;
   task)   shift; cmd_task   "$@" ;;
+  dispatch) shift; cmd_dispatch "$@" ;;
+  collect)  shift; cmd_collect  "$@" ;;
+  pool)     shift; cmd_pool     "$@" ;;
+  board)    shift; cmd_board    "$@" ;;
+  epic)     shift; cmd_epic     "$@" ;;
   journal) shift; cmd_journal "$@" ;;
   list)   shift; cmd_list   "$@" ;;
   kill)   shift; cmd_kill   "$@" ;;

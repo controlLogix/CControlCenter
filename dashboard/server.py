@@ -1023,7 +1023,7 @@ class Handler(BaseHTTPRequestHandler):
     # bounded body. The op is picked from a table in code, never interpolated.
 
     BOARD_READS = ("board", "meta", "entity", "history", "why", "graph", "doctor",
-                   "find", "next", "sprint")
+                   "find", "next", "sprint", "dispatchable")
     BOARD_WRITES = ("create", "update", "status", "move", "delete", "acceptance",
                     "label", "dep", "evidence", "commit", "touch", "comment",
                     "link", "triage", "state", "config", "override")
@@ -1096,6 +1096,12 @@ class Handler(BaseHTTPRequestHandler):
             return ccboard.doctor(db)
         if op == "next":
             return {"tasks": ccboard.next_tasks(db, bounded("limit", 10, 1, 200))}
+        if op == "dispatchable":
+            # Read-only, like every other op here. Deciding what MAY be dispatched
+            # is the board's job; actually spawning a process is agentmux's, and
+            # keeping that split is why this endpoint cannot start anything - the
+            # same rule that keeps the Terminals view unable to spawn a pane.
+            return ccboard.dispatch_view(db, bounded("limit", 10, 1, 200))
         if op == "sprint":
             return ccboard.sprint_report(
                 db, ccboard.key_field(one("id"), "id", "sprint", required=True))

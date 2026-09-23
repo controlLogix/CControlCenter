@@ -52,3 +52,7 @@ __pycache__/
 *.db
 *.db-wal
 *.db-shm
+
+# Scratch a dispatched worker was given to write in. The smoke card's evidence
+# points here, so the directory is kept and its contents are not.
+tmp/

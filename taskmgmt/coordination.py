@@ -831,8 +831,17 @@ def cmd_task_dep(args):
 
 
 def cmd_task_attach(args):
-    op = {"evidence": "evidence", "commit": "commit", "touch": "touch"}[args.command]
-    field = {"evidence": "ref", "commit": "ref", "touch": "path"}[args.command]
+    # board_verb sets command to the PARSER's name, which is "task-evidence", not
+    # "evidence". Keying on the bare word raised KeyError on every call. It went
+    # unnoticed because nothing reached these three verbs: agentmux.sh exposed
+    # start/done/block/todo/add and nothing else, so attaching evidence meant
+    # invoking coordination.py by hand, which nobody did. The first dispatched
+    # worker told to run `agentmux task evidence` found it immediately.
+    op = args.command.split("task-", 1)[-1]
+    if op not in ("evidence", "commit", "touch"):
+        print(f"coordination: not an attach verb: {args.command}", file=sys.stderr)
+        return 2
+    field = {"evidence": "ref", "commit": "ref", "touch": "path"}[op]
     row = board_call("POST", f"board/{op}",
                      {"id": need_key(args.id), field: args.value, "actor": args.agent})
     if row is None:
@@ -976,6 +985,54 @@ def cmd_triage(args):
         print(f"  {change['id']:<9} {change['label']:<16} {gaps}")
     print(f"{len(result.get('changed') or [])} task(s) "
           f"{'would change' if result.get('dryRun') else 'changed'}")
+    return 0
+
+
+def cmd_config(args):
+    """Read or change one board setting.
+
+    Values are typed the way the board types them, so `dispatchEnabled true` sets a
+    boolean and `dispatchWip 4` sets a number. A quoted value is always a string,
+    which is how a setting whose value happens to look like a number stays text.
+    """
+    if args.name is None:
+        meta = board_call("GET", "board/meta")
+        if meta is None:
+            return 1
+        config = meta.get("config") or {}
+        if args.json:
+            print(json.dumps(config, indent=2))
+            return 0
+        for name in sorted(config):
+            print(f"  {name:<22} {json.dumps(config[name])}")
+        return 0
+    if args.value is None:
+        meta = board_call("GET", "board/meta")
+        if meta is None:
+            return 1
+        config = meta.get("config") or {}
+        if args.name not in config:
+            print(f"coordination: unknown setting {args.name}", file=sys.stderr)
+            return 2
+        print(json.dumps(config[args.name]))
+        return 0
+    raw = args.value
+    if raw.lower() in ("true", "false"):
+        value = raw.lower() == "true"
+    elif re.fullmatch(r"-?[0-9]{1,9}", raw):
+        value = int(raw)
+    elif raw.startswith("[") or raw.startswith("{"):
+        try:
+            value = json.loads(raw)
+        except ValueError:
+            print("coordination: value is not valid JSON", file=sys.stderr)
+            return 2
+    else:
+        value = raw
+    result = board_call("POST", "board/config", {"name": args.name, "value": value})
+    if result is None:
+        return 1
+    print(json.dumps(result))
     return 0
 
 
@@ -1156,6 +1213,11 @@ def main(argv=None):
     report.add_argument("--strict", action="store_true",
                         help="exit non-zero when the board has errors")
 
+    setting = board_verb("config", cmd_config, agent=False)
+    setting.add_argument("name", nargs="?", default=None)
+    setting.add_argument("value", nargs="?", default=None)
+    setting.add_argument("--json", action="store_true")
+
     log = board_verb("history", cmd_history, agent=False)
     log.add_argument("id", nargs="?", default=None)
     log.add_argument("--limit", type=int, default=50)
@@ -1173,12 +1235,18 @@ def main(argv=None):
     claim.add_argument("--note", default="")
     claim.add_argument("--task", default="")
     claim.add_argument("--depends-on", action="append", default=[])
+    # Delegation. NOT a second spelling of --holder: see the binding below for the
+    # two conditions that make it safe, and why an agent can never use it.
+    claim.add_argument("--for", dest="on_behalf_of", default=None,
+                       help="claim for a live agent; orchestrator only")
     claim.set_defaults(func=cmd_claim)
 
     release = sub.add_parser("release")
     release.add_argument("resource")
     release.add_argument("--holder", required=True)
     release.add_argument("--force", action="store_true")
+    release.add_argument("--for", dest="on_behalf_of", default=None,
+                        help="release a live agent's claim; orchestrator only")
     release.set_defaults(func=cmd_release)
 
     listing = sub.add_parser("claims")
@@ -1209,6 +1277,49 @@ def main(argv=None):
             if not claimed and not os.environ.get("AGENTMUX_AGENT"):
                 claimed = orchestrator_identity(args.command)
             setattr(args, field, resolve_identity(claimed, args.command))
+            # ── delegation ───────────────────────────────────────────────────
+            #
+            # `--holder` is refused precisely so one agent cannot act in another's
+            # name. Dispatch still has to put a claim in a WORKER's name, because
+            # the worker is who must hold it - the orchestrator holding a file on
+            # a worker's behalf would make every claim look like the
+            # orchestrator's and the whole record useless.
+            #
+            # That is a different thing from impersonation, and it is safe under
+            # exactly two conditions, both enforced here:
+            #
+            #   1. the caller really is the orchestrator - resolve_identity has
+            #      already refused if $AGENTMUX_AGENT is set, so no pane can
+            #      reach this line at all; and
+            #   2. the delegate is a LIVE agent, so a claim cannot be parked in
+            #      the name of something that does not exist.
+            #
+            # An agent that wants a file still claims it itself. This only lets
+            # the thing that STARTED a worker hand it the files it was started for.
+            delegate = getattr(args, "on_behalf_of", None)
+            if delegate:
+                if getattr(args, field) != "orchestrator":
+                    raise IdentityError(
+                        f"identity: --for is the orchestrator's, and this is the "
+                        f"{getattr(args, field)!r} pane."
+                        f"  Claim it yourself: drop --for.")
+                if not NAME_PATTERN.fullmatch(delegate):
+                    raise IdentityError(f"identity: invalid delegate {delegate!r}")
+                # Liveness is required to TAKE a claim and must not be required to
+                # give one back. A dead worker's claim is the only kind that needs
+                # releasing on its behalf, so demanding the holder still be alive
+                # made collect unable to do the one thing it exists for: the card
+                # parked correctly and its file stayed locked to a process that no
+                # longer existed, until the lease expired half an hour later.
+                #
+                # Releasing in a name is not a power: cmd_release re-reads the claim
+                # and refuses unless it is genuinely that holder's.
+                if (args.command == "claim" and delegate not in live_agents()
+                        and os.environ.get("AGENTMUX_TRUST_IDENTITY") != "1"):
+                    raise IdentityError(
+                        f"identity: {delegate!r} is not a live agent, so a claim "
+                        f"cannot be held in its name.")
+                setattr(args, field, delegate)
         except IdentityError as err:
             print(str(err), file=sys.stderr)
             return 2

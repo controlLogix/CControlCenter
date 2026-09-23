@@ -31,6 +31,7 @@ the WSL launcher and the `agentmux` skill are both pointed at it.
 | `ANALYSIS_2026-09-18.md` | What this is, how to use it, and the reliability caveats. **Read before trusting a relayed answer.** |
 | `dashboard/` | **Controls Control Center (CCC)** — the operations console. `python3 dashboard/server.py`, then open 127.0.0.1:8787. See the table below. |
 | `taskmgmt/` | Jira + Confluence, auth setup, and field tools. `atlassian.py` (REST client), `task.py` (CLI used by the harness and the dashboard reaper), `setup_atlassian.py` and `setup_auth.py` (non-echoing credential setup), `bootp_probe.py` (privileged, read-only BOOTP listener). |
+| `taskmgmt/dispatch.py` | **The board-to-agent seam.** Turns a ready card into a running agent and back: spawn, claim, start through the board's gate, brief, then collect. Drives `agentmux dispatch` / `collect` / `pool`. Decides nothing about readiness - `/api/board/dispatchable` does - and closes nothing. |
 | `~/.local/bin/agentmux` (WSL) | Launcher. Strips CRs at run time, so editing the `.sh` from Windows cannot break it. |
 | `~/.agentmux/logs/<name>.log` (WSL) | Full scrollback per agent, via `pipe-pane`. |
 | `~/.agentmux/run/<name>.*` (WSL) | Per-agent pane id, cli, cwd, start time. |
@@ -176,6 +177,7 @@ empty list that reads as "no tickets".
 | `test_tickets.py` | 48 checks: Jira request shaping via `atlassian.py`'s dry-run (Cloud v3 vs Server v2, ADF bodies), the not-configured path, and the write-endpoint guards. **No live Jira call.** |
 | `test_auth.py` | 54 checks: provider/method configuration in an isolated HOME, codex accepting the generated profile, and that no secret reaches the API. |
 | `restart.sh` | Restart the server; `--fresh-db` drops `cc.db` first. |
+| `test_dispatch.py` | 39 checks: what `dispatchable` will and will not offer an agent - unready cards, cards reserved for a person, blocked dependencies, work already in flight - plus touches-disjoint ordering and the dispatch config bounds. No tmux, no network, no spawned process. |
 | `seed_queue.py` | Writes sample agent traffic into `~/.agentmux/queue/` for exercising the Message Queue view. |
 | `show_auth.py` | Prints `/api/auth` as a tree. Debugging aid for the auth grouping. |
 | `run_tests.sh` | Restarts the server and runs every suite; non-zero if any fails. Spawns two throwaway `shell` agents when none are running, because the stream checks need live panes, and kills them on exit. Pre-existing agents are left alone. |
@@ -657,6 +659,102 @@ Two things this does **not** do:
 The claude config dir deliberately drops `hooks` from the agent's copy: a shared
 `settings.json` may carry SessionEnd hooks, and a spawned agent must not fire the
 operator's cleanup on exit.
+
+## Dispatch: the board drives the agents
+
+The board and the agents used to be two systems that happened to share a machine.
+The board knew what was ready; agentmux knew how to run a worker; nothing joined
+them. "Use the task board" therefore meant a person reading the queue, picking a
+card, typing `spawn`, typing `claim`, pasting a brief and remembering to move the
+status — six steps, every one of them skipped under load. That is how a board full
+of startable work came to sit next to three idle agents.
+
+`agentmux dispatch` is that join.
+
+```
+agentmux dispatch [<id>] [--cli codex] [--dry-run]   one card -> one fresh agent
+agentmux collect  [<id>]                             reconcile; never closes a card
+agentmux pool     once|start|stop|status|resume      the pickup loop
+agentmux board    config [<name> [<value>]]          the dispatch policy lives here
+```
+
+**One store.** `~/.agentmux/cc.db` is canonical. The board, `agentmux tasks`, the
+Control Center's Task Board view and the dispatcher all read and write that one
+database through `/api/board`. The `.bytedesk/task-management/` directory is the
+upstream plugin whose identifier and record model this board mirrors — it is not a
+second place work is tracked, and its own dispatch loop stays off. A card lives in
+one place or it will eventually say two things.
+
+**The sequence, and why it is that order.**
+
+    spawn -> claim -> start -> brief
+
+Claiming before spawning is impossible: a claim must be held by a live agent, and a
+name nobody has spawned is not live. Briefing before claiming is too late, because
+the agent is already reading the card. So the worker is spawned, claims its files
+while still sitting at an empty prompt, and is briefed only once those files are
+its own. If a claim is refused the worker is killed and the card is left exactly as
+it was found.
+
+`start` goes through the board's own gate. Dispatch never writes a status it has
+decided is allowed — it asks, and a 409 is the answer. An unready card cannot be
+dispatched even by naming it, because the gate is not in the dispatcher.
+
+**A worker is named for its card.** `TM-037` is worked by `tm-037`. That is not
+cosmetic: `collect` has to tell a dispatched worker from one a person spawned by
+hand, and the alternative — a registry file — is a second source of truth that can
+disagree with tmux. The name is the registry.
+
+**Collect never closes a task.** A worker that finished is a worker that *claims*
+to have finished, and `requireOnDone` wants evidence and an actor. Collect
+reconciles the world — releases claims, reaps the pane, parks what died — and
+leaves the closing judgement to the gate. Its outcomes:
+
+| Outcome | What it means |
+| --- | --- |
+| `working` | the CLI is still advertising work; nothing touched |
+| `idle` | quiet with no evidence attached. **Not** killed — an agent between turns and an agent that is stuck look identical from here |
+| `submitted` | quiet with evidence attached. Claims released, pane reaped, card left `in_progress` for review |
+| `parked` | the worker exited without finishing. Card parked with the reason, claims released |
+| `blocked` / `done` | the worker said so itself; claims released and the pane reaped |
+
+**The brief is a file, not keystrokes.** `~/.agentmux/dispatch/<KEY>.md` is written
+and the agent is pointed at it. A brief pasted as keystrokes is at the mercy of
+bracketed paste, autocomplete and modals, and a truncated brief is worse than none
+because the agent acts on the half it got. If the pane is showing a prompt, `send`
+refuses — correctly, since Enter would actuate someone else's dialog — and the
+brief is handed to the **courier**, which retries and dead-letters after five
+attempts. Only a failure to even queue it withdraws the dispatch.
+
+**The pool.** `agentmux pool start` detaches a loop that collects finished workers,
+then fills free slots up to `dispatchWip`, preferring cards whose files do not
+overlap. Collect runs first every tick, always: dispatching before collecting
+counts a dead worker's slot as occupied, so a pool whose workers all died would sit
+at its limit forever reporting itself full. Config is re-read every tick, so
+turning dispatch off does not mean finding the process.
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `dispatchEnabled` | `false` | the pool does nothing until this is on. Off by default because a fresh checkout must not start agents because a server came up |
+| `dispatchWip` | 3 | how many workers the pool will run at once |
+| `dispatchPoll` | 20 | seconds between ticks |
+| `dispatchIdleExit` | 30 | minutes of nothing before the pool exits |
+| `dispatchMaxFailures` | 3 | consecutive board failures before the pool pauses; `pool resume` releases the brake |
+| `dispatchCli` | `codex` | which CLI a dispatched worker runs |
+
+**The Control Center reports dispatch and cannot perform it.** The Task Board view
+carries a strip showing whether dispatch is on, which cards are in flight and what
+is ready — and no button. The same rule that keeps the Terminals view unable to
+spawn or kill a pane applies here and more so: dispatching starts an unrestricted
+agent that writes to this repository, which is not something a web page may do from
+a click. The page reports; the CLI acts.
+
+**Claiming for a worker.** `claim`/`release` take `--for <agent>`. It is refused
+from inside a pane and, on `claim`, refused for an agent that is not live — it is
+how the thing that *started* a worker hands it the files it was started for, not a
+way for one agent to act as another. Releasing deliberately does not require
+liveness: a dead worker's claim is the only kind that ever needs releasing on its
+behalf.
 
 ## The two modes
 

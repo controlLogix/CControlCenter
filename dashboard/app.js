@@ -83,6 +83,7 @@ const els = {
   badgeFeed:    document.getElementById('badgeFeed'),
 
   boardList:  document.getElementById('boardList'),
+  dispatchStrip: document.getElementById('dispatchStrip'),
   boardStamp: document.getElementById('boardStamp'),
   epicTitle:  document.getElementById('epicTitle'),
   epicJira:   document.getElementById('epicJira'),
@@ -2308,7 +2309,51 @@ function deleteButton(kind, id, label, after, stamp) {
   return btn;
 }
 
+// The dispatch strip: what the pool would do, and what it is doing.
+//
+// READ-ONLY, AND THERE IS NO BUTTON HERE ON PURPOSE. The same rule that keeps the
+// Terminals view unable to spawn or kill a pane applies to dispatch, and more so:
+// dispatching starts an unrestricted agent process that writes to this repository.
+// A page cannot be allowed to do that from a click, so the page reports and the
+// CLI acts. `agentmux dispatch` / `agentmux pool start` are the verbs.
+async function loadDispatch() {
+  const strip = els.dispatchStrip;
+  if (!strip) return;
+  try {
+    const data = await getJSON('api/board/dispatchable?limit=20');
+    const cfg = data.config || {};
+    const flight = Array.isArray(data.inFlight) ? data.inFlight : [];
+    const ready = Array.isArray(data.tasks) ? data.tasks : [];
+    strip.replaceChildren();
+
+    const on = cfg.dispatchEnabled === true;
+    strip.appendChild(el('span', on ? 'status-chip done' : 'status-chip', on ? 'dispatch on' : 'dispatch off'));
+    strip.appendChild(el('span', 'epic-meta',
+      `${flight.length}/${cfg.dispatchWip ?? '?'} working`));
+
+    if (flight.length) {
+      for (const row of flight) {
+        strip.appendChild(el('span', 't-agent',
+          `${String(row.key)} → ${String(row.agent || '?')}`));
+      }
+    }
+    if (ready.length) {
+      strip.appendChild(el('span', 'epic-meta',
+        `ready: ${ready.map((t) => String(t.id)).join(', ')}`));
+    } else if (!flight.length) {
+      strip.appendChild(el('span', 'epic-meta', 'nothing ready for an agent'));
+    }
+    if (!on && ready.length) {
+      strip.appendChild(el('span', 'epic-meta',
+        'agentmux board config dispatchEnabled true'));
+    }
+  } catch (err) {
+    strip.replaceChildren(el('span', 'epic-meta', `dispatch unavailable: ${err.message}`));
+  }
+}
+
 async function loadBoard() {
+  loadDispatch();
   try {
     const data = await getJSON('api/epics');
     const epics = Array.isArray(data.epics) ? data.epics : [];

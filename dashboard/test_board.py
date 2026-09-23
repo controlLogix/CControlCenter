@@ -602,6 +602,10 @@ ok("an unknown kind is 400", status == 400, status)
 httpd.shutdown()
 
 print()
-print("passed " + str(passed) + ", failed " + str(failed))
+# The store path goes ABOVE the summary, not below it. run_tests.sh reads the last
+# line of a suite's output and requires it to end "failed 0"; a trailing store path
+# made this suite read as a failure the moment it was added to the runner, while it
+# was in fact passing 123 of 123.
 print("store: " + str(HOME))
+print("passed " + str(passed) + ", failed " + str(failed))
 sys.exit(1 if failed else 0)

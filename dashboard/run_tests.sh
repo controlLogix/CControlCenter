@@ -163,6 +163,12 @@ run test_residue.sh bash /dev/fd/12 12< <(tr -d '\r' < dashboard/test_residue.sh
 run test_lifecycle.sh bash /dev/fd/10 10< <(tr -d '\r' < dashboard/test_lifecycle.sh)
 run test_frontend.sh bash /dev/fd/12 12< <(tr -d '\r' < dashboard/test_frontend.sh)
 run smoke.sh      bash /dev/fd/3 3< <(tr -d '\r' < dashboard/smoke.sh)
+# The board model and the dispatch seam. test_board.py landed with the store and
+# was never listed here, so it had not run in the gate since the day it was
+# written - a suite nothing invokes is decoration, which is the same standard
+# test_testlib.sh is held to above.
+run test_board.py python3 dashboard/test_board.py
+run test_dispatch.py python3 dashboard/test_dispatch.py
 run test_snapshot.py python3 dashboard/test_snapshot.py
 run test_mqtt.py  python3 dashboard/test_mqtt.py
 run test_tickets.py python3 dashboard/test_tickets.py
