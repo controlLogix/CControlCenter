@@ -1,0 +1,241 @@
+#!/usr/bin/env python3
+"""Offline C1/C3 regressions; no live board writes or third-party imports."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import sqlite3
+import sys
+import tempfile
+import unittest
+from unittest.mock import patch
+import warnings
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "taskmgmt"))
+import agentdefs as ad
+
+
+class AgentDefinitions(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix="agentdefs-")
+        self.addCleanup(self.tmp.cleanup)
+        self.base = Path(self.tmp.name)
+        self.home = self.base / "home"
+        self.repo = self.base / "repo"
+        self.root = self.home / ".agentmux"
+        self.root.mkdir(parents=True)
+        self.repo.mkdir()
+        env = patch.dict(os.environ, {"HOME": str(self.home), "AGENTMUX_HOME": str(self.root)})
+        env.start()
+        self.addCleanup(env.stop)
+        self.dirs = [self.repo / ".agentmux/agents", self.root / "agents",
+                     self.repo / ".claude/agents", self.home / ".claude/agents"]
+
+    def write(self, name="worker", scope=0, extra="", body="Persona\nsecond line", raw=None):
+        directory = self.dirs[scope]
+        directory.mkdir(parents=True, exist_ok=True)
+        path = directory / (name + ".md")
+        path.write_bytes(raw if raw is not None else
+                         f"---\nname: {name}\ndescription: Useful agent\n{extra}---\n{body}".encode())
+        return path
+
+    def load(self):
+        return ad.load_all(self.repo)
+
+    def test_four_scopes_and_defaults(self):
+        for i in range(4):
+            self.write("agent" + str(i), i)
+        specs, problems = self.load()
+        self.assertEqual(problems, [])
+        self.assertEqual(len(specs), 4)
+        for i, scope in enumerate(("repo", "global", "claude", "claude")):
+            s = specs["agent" + str(i)]
+            self.assertEqual(s.scope, scope)
+            self.assertEqual((s.cli, s.role, s.posture, s.worktree, s.max_instances),
+                             ("codex", "worker", "workspace-write", "per-member", 1))
+            self.assertEqual((s.model, s.auth, s.tools, s.tools_deny, s.capabilities),
+                             (None, None, (), (), ()))
+            self.assertTrue(Path(s.path).is_absolute())
+
+    def test_duplicates_every_pair_of_scopes(self):
+        for i in range(4):
+            for j in range(i + 1, 4):
+                with self.subTest(pair=(i, j)):
+                    a, b = self.write(scope=i), self.write(scope=j)
+                    specs, problems = self.load()
+                    self.assertEqual(specs, {})
+                    self.assertEqual(len(problems), 1)
+                    self.assertIn(str(a), problems[0]["error"])
+                    self.assertIn(str(b), problems[0]["error"])
+                    a.unlink()
+                    b.unlink()
+
+    def test_three_duplicates_and_invalid_duplicate(self):
+        for i in range(3):
+            self.write(scope=i)
+        specs, problems = self.load()
+        self.assertEqual(specs, {})
+        self.assertEqual(len(problems), 1)
+        self.write(scope=1, extra="posture: unsafe\n")
+        specs, problems = self.load()
+        self.assertEqual(specs, {})
+        self.assertEqual(sum("duplicate name" in p["error"] for p in problems), 1)
+
+    def test_flat_quotes_csv_checksum_crlf(self):
+        raw = (b'---\r\nname: worker\r\ndescription: "Colon: # text"\r\n'
+               b"cli: claude\r\ntools: Read, Bash(git diff:*)\r\ntools-deny: Write, Edit\r\n"
+               b"capabilities: review, security\r\nrole: lead\r\nmax_instances: 8\r\n"
+               b"model: 'model''s name'\r\n---\r\n\r\nBody\r\nnext\r\n")
+        self.write(raw=raw)
+        specs, problems = self.load()
+        self.assertEqual(problems, [])
+        s = specs["worker"]
+        self.assertEqual(s.description, "Colon: # text")
+        self.assertEqual(s.tools, ("Read", "Bash(git diff:*)"))
+        self.assertEqual(s.tools_deny, ("Write", "Edit"))
+        self.assertEqual(s.capabilities, ("review", "security"))
+        self.assertEqual(s.worktree, "integration")
+        self.assertEqual(s.model, "model's name")
+        self.assertEqual(s.persona, "Body\nnext")
+        self.assertEqual(s.checksum, "sha256:" + hashlib.sha256(raw).hexdigest())
+
+    def test_unknown_keys_warn_and_still_load(self):
+        p = self.write(extra="tool: Read\ncolour: green\n")
+        specs, problems = self.load()
+        self.assertIn("worker", specs)
+        self.assertEqual(len(problems), 2)
+        self.assertTrue(all(x["path"] == str(p) for x in problems))
+        self.assertTrue(any("'tool'" in x["error"] for x in problems))
+        self.assertTrue(any("'colour'" in x["error"] for x in problems))
+
+    def test_validation_rejections_are_named(self):
+        base = "---\nname: worker\ndescription: Useful\n"
+        cases = [
+            ("missing", "missing opening"),
+            (base, "missing closing"),
+            ("---\nname: worker\n---\n", "description"),
+            (base.replace("worker", "Wrong") + "---", "name"),
+            (base.replace("worker", "other") + "---", "filename"),
+            (base + "name: worker\n---", "duplicate frontmatter"),
+            (base + "tools:\n  allow: Read\n---", "flat"),
+        ]
+        for field, value in [("cli", "bad;cli"), ("posture", "unsafe"), ("role", "boss"),
+                             ("worktree", "shared"), ("max_instances", "0"),
+                             ("max_instances", "9"), ("max_instances", "1.5"),
+                             ("capabilities", "Upper"), ("capabilities", ",review"),
+                             ("capabilities", ",".join(["tag"] * 17)),
+                             ("tools", "Read,,Write"), ("tools", "[Read, Write]"),
+                             ("model", '"bad\\nmodel"'), ("auth", "not-a-method")]:
+            cases.append((base + f"{field}: {value}\n---", field))
+        cases.extend([(base + "---\n" + "x" * 4097, "persona"),
+                      (base + "---\nBad\x00", "persona"),
+                      (base.replace("Useful", "x" * 2049) + "---", "description"),
+                      (base.replace("Useful", "bad\tvalue") + "---", "description")])
+        for text, reason in cases:
+            with self.subTest(reason=reason, text=text[:100]):
+                p = self.write(raw=text.encode())
+                specs, problems = self.load()
+                self.assertEqual(specs, {})
+                self.assertTrue(any(reason in x["error"] and x["path"] == str(p)
+                                    for x in problems), problems)
+
+    def test_size_encoding_backups_symlinks_and_directories(self):
+        good = self.write("good")
+        (good.parent / "backup.md.bak_123").write_bytes(b"invalid")
+        self.write("huge", raw=b"x" * (ad.MAX_BYTES + 1))
+        self.write("invalid", raw=b"\xff")
+        (good.parent / "link.md").symlink_to(good)
+        (good.parent / "directory.md").mkdir()
+        specs, problems = self.load()
+        self.assertEqual(set(specs), {"good"})
+        self.assertEqual(len(problems), 4)
+        self.assertTrue(any("64 KiB" in x["error"] for x in problems))
+        self.assertTrue(any("symlink" in x["error"] for x in problems))
+
+    def test_listing_cap(self):
+        for i in range(201):
+            self.write("a" + str(i))
+        specs, problems = self.load()
+        self.assertEqual(specs, {})
+        self.assertEqual(len(problems), 1)
+        self.assertIn("200", problems[0]["error"])
+
+    def test_board_auth_model_defaults_and_resolve(self):
+        with sqlite3.connect(self.root / "cc.db") as db:
+            db.execute("CREATE TABLE board_config (name TEXT, value TEXT)")
+            db.execute("INSERT INTO board_config VALUES ('dispatchCli', '\"claude\"')")
+        methods = json.loads(ad.MANIFEST.read_text())["methods"]
+        auth = next(m["id"] for m in methods if m["cli"] == "claude")
+        (self.root / "auth.json").write_text(json.dumps({"active": {"claude": auth},
+                                                       "methods": {auth: {"model": "chosen"}}}))
+        self.write()
+        specs, problems = self.load()
+        self.assertEqual(problems, [])
+        s = specs["worker"]
+        self.assertEqual((s.cli, s.auth, s.model), ("claude", auth, "chosen"))
+        self.assertEqual(ad.resolve("worker", self.repo), s)
+        self.assertIsNone(ad.resolve("missing", self.repo))
+        self.write(extra="cli: codex\nauth: " + auth + "\n")
+        self.assertEqual(self.load()[0], {})
+
+    def test_io_and_config_failures_do_not_raise(self):
+        self.write()
+        with patch.object(ad.os, "open", side_effect=PermissionError("denied")):
+            specs, problems = self.load()
+        self.assertEqual(specs, {})
+        self.assertIn("denied", problems[0]["error"])
+        (self.root / "auth.json").write_text("{")
+        specs, problems = self.load()
+        self.assertIn("worker", specs)
+        self.assertTrue(any("auth configuration" in p["error"] for p in problems))
+        specs, problems = ad.load_all(object())
+        self.assertEqual(specs, {})
+        self.assertTrue(problems)
+
+    def test_same_directory_not_a_collision(self):
+        self.write("homeagent", 3)
+        specs, problems = ad.load_all(self.home)
+        self.assertEqual(problems, [])
+        self.assertEqual(set(specs), {"homeagent"})
+
+    def test_roster_fallback_and_override(self):
+        for cfg, override, cli in [({}, None, "codex"), ({"dispatchCli": "claude"}, None, "claude"),
+                                   ({"dispatchCli": "claude"}, "grok", "grok"),
+                                   ({"dispatchCli": ""}, "", "codex")]:
+            roster = ad.choose_roster({}, {}, cfg, override)
+            self.assertEqual(len(roster), 1)
+            self.assertEqual((roster[0].cli, roster[0].role), (cli, "lead"))
+        self.write(extra="role: lead\ntools: Read\n")
+        specs, problems = self.load()
+        self.assertEqual(problems, [])
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            roster = ad.choose_roster({}, specs, {})
+        self.assertEqual(roster[0], specs["worker"])
+        self.assertIn("degrade", str(caught[0].message))
+
+    def test_existing_claude_definitions_unchanged(self):
+        # Portable CI uses representative names; on the dispatched machine, copy
+        # the actual five bytes-for-byte into the isolated fixture and test them.
+        source = Path("/home/nick/.claude/agents")
+        names = ("hr-recruiter", "plc-dev", "plc-test-engineer", "scheduler", "senior-reviewer")
+        for name in names:
+            p = source / (name + ".md")
+            if p.is_file():
+                self.write(name, 3, raw=p.read_bytes())
+            else:
+                self.write(name, 3)
+        specs, problems = self.load()
+        self.assertEqual(problems, [])
+        self.assertEqual(set(specs), set(names))
+        self.assertTrue(all(s.role == "worker" and s.posture == "workspace-write"
+                            and s.max_instances == 1 for s in specs.values()))
+
+
+if __name__ == "__main__":
+    result = unittest.TextTestRunner(stream=sys.stdout, verbosity=2).run(
+        unittest.defaultTestLoader.loadTestsFromTestCase(AgentDefinitions))
+    failures = len(result.failures) + len(result.errors)
+    print(f"passed {result.testsRun - failures}, failed {failures}")
+    sys.exit(bool(failures))

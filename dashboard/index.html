@@ -7,6 +7,8 @@
 <link rel="icon" href="assets/logo-ccc.svg" type="image/svg+xml">
 <link rel="stylesheet" href="vendor/xterm.css">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="agents.css">
+<link rel="stylesheet" href="teams.css">
 </head>
 <body>
 
@@ -64,6 +66,14 @@
     <button class="nav-item" data-view="board" role="tab" aria-selected="false" title="Task Board — epics and tasks">
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="7" rx="1"/></svg>
       <span class="nav-label">Board</span>
+    </button>
+    <button class="nav-item" data-view="agents" role="tab" aria-selected="false" title="Agents — agent definitions">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21v-3a7 7 0 0114 0v3"/></svg>
+      <span class="nav-label">Agents</span>
+    </button>
+    <button class="nav-item" data-view="teams" role="tab" aria-selected="false" title="Teams — task teams">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="7" r="3"/><circle cx="18" cy="8" r="2"/><path d="M2 21v-3a6 6 0 0112 0v3M16 13a5 5 0 016 5v3"/></svg>
+      <span class="nav-label">Teams</span>
     </button>
     <button class="nav-item" data-view="journal" role="tab" aria-selected="false" title="Journal — append-only operational log">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l4 4v12H5z"/><path d="M8 11h8M8 15h8M8 7h4"/></svg>
@@ -207,6 +217,10 @@
         management — it outlives the session and stays queryable.
       </p>
     </section>
+
+    <!-- ═══ Agent and team views (populated by their own scripts) ═══ -->
+    <section id="viewAgents" class="view pad" role="tabpanel" aria-label="Agents" hidden></section>
+    <section id="viewTeams" class="view pad" role="tabpanel" aria-label="Teams" hidden></section>
 
     <!-- ═══ Journal ═══ -->
     <section id="viewJournal" class="view pad" role="tabpanel" aria-label="Journal" hidden>
@@ -408,6 +422,8 @@
 
 <script src="vendor/xterm.js"></script>
 <script src="vendor/addon-fit.js"></script>
+<script src="agents.js"></script>
+<script src="teams.js"></script>
 <script src="app.js"></script>
 <script>
   // Readability matrix, on demand only: open 127.0.0.1:8787/?fit=1 and run

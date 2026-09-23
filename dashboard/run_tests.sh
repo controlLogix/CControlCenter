@@ -169,6 +169,19 @@ run smoke.sh      bash /dev/fd/3 3< <(tr -d '\r' < dashboard/smoke.sh)
 # test_testlib.sh is held to above.
 run test_board.py python3 dashboard/test_board.py
 run test_dispatch.py python3 dashboard/test_dispatch.py
+# EP-015 suites are registered at the scaffold seam before their owning tasks land.
+# Missing suites are explicit skips during the staged build; present suites use
+# the same failure accounting as every existing suite above.
+for suite in test_agentdefs.py test_boardagents.py test_boardteams.py \
+             test_launch.sh test_frontend_agents.sh test_frontend_teams.sh; do
+  if [ ! -f "dashboard/$suite" ]; then
+    echo "SKIP $suite (EP-015 suite has not landed yet)"
+  elif [[ "$suite" == *.py ]]; then
+    run "$suite" python3 "dashboard/$suite"
+  else
+    run "$suite" bash /dev/fd/13 13< <(tr -d '\r' < "dashboard/$suite")
+  fi
+done
 run test_snapshot.py python3 dashboard/test_snapshot.py
 run test_mqtt.py  python3 dashboard/test_mqtt.py
 run test_tickets.py python3 dashboard/test_tickets.py

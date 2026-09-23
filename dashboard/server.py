@@ -2,6 +2,8 @@
 """Local agentmux dashboard with opt-in pane resizing, served on localhost:8787."""
 
 import base64
+import boardagents
+import boardteams
 import ccboard
 import ccstore
 import datetime as dt
@@ -81,7 +83,8 @@ NAME_PATTERN = re.compile(r"[A-Za-z0-9_.-]{1,64}")
 # (regular files only, st_nlink > 1 rejected, O_NOFOLLOW, 512-byte cap, control
 # characters rejected). Adding a field inherits all of that; "auth" holds a method
 # id from auth.json and never a credential.
-FIELDS = ("cli", "perms", "cwd", "launch", "started", "task", "auth")
+FIELDS = ("cli", "perms", "cwd", "launch", "started", "task", "auth",
+          "agentdef", "posture", "team", "role")
 EXTENSIONS = set(FIELDS) | {"pane"}
 
 # --- Jira reaper -------------------------------------------------------------
@@ -1028,10 +1031,11 @@ class Handler(BaseHTTPRequestHandler):
     # bounded body. The op is picked from a table in code, never interpolated.
 
     BOARD_READS = ("board", "meta", "entity", "history", "why", "graph", "doctor",
-                   "find", "next", "sprint", "dispatchable")
+                   "find", "next", "sprint", "dispatchable", "agents", "roster")
     BOARD_WRITES = ("create", "update", "status", "move", "delete", "acceptance",
                     "label", "dep", "evidence", "commit", "touch", "comment",
-                    "link", "triage", "state", "config", "override")
+                    "link", "triage", "state", "config", "override",
+                    "agentdef", "agentdrop", "recruit", "approve", "hire")
 
     def board_endpoint(self, op, query):
         try:
@@ -1072,6 +1076,11 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(503, {"error": "Control Center storage unavailable"})
 
     def board_read(self, db, op, params):
+        if op == "agents":
+            return boardagents.agents(db, params)
+        if op == "roster":
+            return boardteams.roster(db, params)
+
         def one(name, default=None):
             return params.get(name, [default])[0]
 
@@ -1113,6 +1122,17 @@ class Handler(BaseHTTPRequestHandler):
         return {"hits": ccboard.find(db, one("q"), bounded("limit", 50, 1, 200))}
 
     def board_write(self, db, op, body):
+        if op == "agentdef":
+            return boardagents.agentdef(db, body)
+        if op == "agentdrop":
+            return boardagents.agentdrop(db, body)
+        if op == "recruit":
+            return boardteams.recruit(db, body)
+        if op == "approve":
+            return boardteams.approve(db, body)
+        if op == "hire":
+            return boardteams.hire(db, body)
+
         actor = ccboard.text(body.get("actor"), "actor", 64, pattern=ccboard.NAME_RE)
         session = ccboard.text(body.get("session"), "session", 128)
 
@@ -1895,12 +1915,12 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/":
             file_path = (ROOT / "index.html").resolve()
             content_type = "text/html; charset=utf-8"
-        elif path in ("/app.js", "/fitmatrix.js"):
+        elif path in ("/app.js", "/fitmatrix.js", "/agents.js", "/teams.js"):
             # fitmatrix.js is the readability test harness. index.html loads it only
             # when the URL carries ?fit=1, so it is inert on the normal page but can
             # be run against the REAL page rather than a mock.
             content_type = "text/javascript; charset=utf-8"
-        elif path == "/style.css":
+        elif path in ("/style.css", "/agents.css", "/teams.css"):
             content_type = "text/css; charset=utf-8"
         elif path == "/themes.json":
             content_type = "application/json"

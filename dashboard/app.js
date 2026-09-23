@@ -44,7 +44,7 @@ const els = {
   syncSz:  document.getElementById('syncSize'),
   jiraBase: document.getElementById('jiraBase'),
   // Views, keyed by the data-view attribute on each nav button. Adding a view is
-  // one entry here plus one button in index.html - no new branch anywhere.
+  // a section and button in index.html plus registerView() for external views.
   views: {
     terminals: document.getElementById('viewTerminals'),
     queue:     document.getElementById('viewQueue'),
@@ -1930,6 +1930,23 @@ const VIEW_LOADERS = {
 // moment the view opens rather than frozen in this table.
 const VIEW_POLL_MS = { queue: 5000, settings: 20000 };
 
+// External views use the same view<Name> section convention as the built-in views.
+// Validate before changing any registry so a bad registration cannot half-apply.
+function registerView(name, loader, pollMs = 0) {
+  if (typeof name !== 'string' || !/^[a-z][a-z0-9]*$/.test(name)) {
+    throw new TypeError('Invalid view name');
+  }
+  const node = document.getElementById('view' + name[0].toUpperCase() + name.slice(1));
+  if (!node) throw new Error('Missing section for view: ' + name);
+  if (typeof loader !== 'function') throw new TypeError('View loader must be a function');
+  if (!Number.isFinite(pollMs) || pollMs < 0) {
+    throw new TypeError('View poll interval must be a non-negative number');
+  }
+  els.views[name] = node;
+  VIEW_LOADERS[name] = loader;
+  VIEW_POLL_MS[name] = pollMs;
+}
+
 let viewTimer = null;
 let currentView = 'terminals';
 
@@ -3042,6 +3059,11 @@ window.addEventListener('pagehide', () => {
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && focused !== null) { focused = null; applyFocus(); }
 });
+
+// The view scripts load first and subscribe once to this synchronous event.
+// Register before restoring the saved view, including on a reload into Agents/Teams.
+window.CCC = { el, getJSON, post, say, deleteButton, collapsible, settingEditor, registerView };
+window.dispatchEvent(new Event('ccc:ready'));
 
 if (!window.Terminal) {
   showBanner('xterm.js failed to load from vendor/ — terminals cannot render.');
