@@ -1,0 +1,36 @@
+{
+  "avatars": [
+    {
+      "id": "conductor",
+      "file": "conductor.svg",
+      "agent": "conductor",
+      "model": "grok-4.7",
+      "intent": "A hub joined to three nodes, the mark of an orchestrator on Claude.",
+      "palette": ["#121820", "#E8A317", "#F7F4EC", "#A86E10"]
+    },
+    {
+      "id": "developer",
+      "file": "developer.svg",
+      "agent": "developer",
+      "model": "grok-4.7",
+      "intent": "Three staggered slabs, the mark of a full-stack developer on Claude.",
+      "palette": ["#121820", "#14988C", "#F7F4EC"]
+    },
+    {
+      "id": "imager",
+      "file": "imager.svg",
+      "agent": "imager",
+      "model": "grok-4.7",
+      "intent": "A picture frame holding a sun and peaks, the mark of an image generator on Grok.",
+      "palette": ["#121820", "#6E4AFF", "#F7F4EC"]
+    },
+    {
+      "id": "reviewer",
+      "file": "reviewer.svg",
+      "agent": "reviewer",
+      "model": "grok-4.7",
+      "intent": "A shield and check, the mark of the final reviewer on Grok.",
+      "palette": ["#121820", "#E3485A", "#F7F4EC"]
+    }
+  ]
+}
