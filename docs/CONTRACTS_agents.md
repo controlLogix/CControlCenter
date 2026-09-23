@@ -10,6 +10,14 @@ locally that a different shape is better.
 
 Architecture: https://claude.ai/artifact/TDiV2FDxYyzs9kdeTtdn4P
 
+## Amendments
+
+If you read this file before an entry below, re-read the section it names.
+
+| When | What changed | Why |
+| --- | --- | --- |
+| 2026-09-23 | **C5**: the pane-name suffix is the ROLE, not the agent name. **C1**: `name` allows hyphens (`^[a-z][a-z0-9-]{0,63}$`); `description` cap raised 280 → 2048. | The original banned hyphens in names so the suffix could carry one, but four of the five definitions that must load unchanged are hyphenated, and `hr-recruiter`'s description is 320 characters. The two acceptance criteria contradicted each other. Found by the TM-040 worker, which blocked the card rather than guessing. |
+
 ---
 
 ## C0 — The rule that is not about code
@@ -37,10 +45,10 @@ SCOPES = ("claude", "global", "repo")   # ascending precedence for DISCOVERY onl
 
 @dataclass(frozen=True)
 class AgentSpec:
-    name: str                       # ^[a-z][a-z0-9]{0,31}$   -- NO hyphens, see C5
+    name: str                       # ^[a-z][a-z0-9-]{0,63}$  -- hyphens ARE allowed, see C5
     scope: str                      # one of SCOPES
     path: str                       # absolute path of the .md it came from
-    description: str                # <= 280 chars, one line
+    description: str                # <= 2048 chars, single line (no newlines)
     cli: str                        # ccboard.CLI_RE: ^[A-Za-z0-9_-]{1,32}$
     model: str | None
     auth: str | None                # a method id from dashboard/auth.json, NEVER a credential
@@ -187,19 +195,32 @@ Handlers delegate from `server.py` into `dashboard/boardagents.py` and
 ## C5 — Worker naming
 
 ```python
+ROLES = ("lead", "worker", "reviewer", "researcher")   # closed vocabulary, no hyphens
 WORKER_RE = re.compile(r"(ep|tm|adr|sp|cap)-[0-9]{3,9}(?:-([a-z][a-z0-9]{0,15}))?")
 
-def worker_name(key) -> str                  # "tm-042"           -- the LEAD, unchanged
-def member_name(key, role=None) -> str       # "tm-042-reviewer"
+def worker_name(key) -> str                  # "tm-042"            -- the LEAD, unchanged
+def member_name(key, role, ordinal=1) -> str # "tm-042-reviewer", "tm-042-worker2"
 def key_of_worker(name) -> str | None        # "TM-042"
-def role_of_worker(name) -> str              # group(3) or "lead"
+def role_of_worker(name) -> str              # group(3) minus any ordinal, or "lead"
 ```
 
 **The suffix must start with a letter.** Without that, `tm-042-7` is ambiguous with card
 key `TM-0427`, and `key_of_worker` silently attributes a member to the wrong card.
 
-**Because the suffix alphabet is `[a-z0-9]`, `AgentSpec.name` forbids hyphens** — otherwise
-`role_of_worker` cannot tell where the card key ends and the agent name begins.
+**The suffix is the ROLE, never the agent name.** *(Amended — the original contract made it
+the agent name and therefore banned hyphens in `AgentSpec.name`. That was wrong: four of
+the five definitions this build must load unchanged are hyphenated — `hr-recruiter`,
+`plc-dev`, `plc-test-engineer`, `senior-reviewer` — and since the filename must equal the
+name, no normalisation could satisfy both. Caught by the TM-040 worker before anything was
+built on it.)*
+
+Roles are a closed vocabulary with no hyphens, so the grammar stays unambiguous while the
+name is free to look like a Claude Code agent name, which is the point of reading that
+roster at all. Two members sharing a role take an ordinal: `worker`, `worker2`, `worker3`.
+
+The cost is that a pane name no longer says *which definition* it is running, only what
+part it plays. That is recoverable two ways and neither is a guess: `board_roster` maps
+`member_name` to `agent_name`, and the pane writes its own `run/<name>.agentdef` sidecar.
 
 `.` is forbidden throughout: tmux reads it as a target separator (`agentmux.sh:464`).
 Longest name `tm-999999999-researcher` is 23 characters, inside the 64 limit.
