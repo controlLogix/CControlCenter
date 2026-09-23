@@ -742,6 +742,37 @@ function applyScale(rec) {
   applyFit(rec);
 }
 
+// FOLLOW HAS TO PIN WHATEVER IS ACTUALLY SCROLLING.
+//
+// There are two scroll contexts per pane and they are mutually exclusive:
+//
+//   * xterm's own viewport, when the pane fits and xterm is clipping scrollback;
+//   * the HOST element, when updateOverflowState has set `.scrolls` because the pane
+//     is too large to fit at the legibility floor. xterm's viewport is then full
+//     height, so term.scrollToBottom() has nothing to scroll and silently does
+//     nothing - which is precisely the case where a pane is big enough to need follow.
+//
+// The old code only ever did the first. Both are pinned here, because which one
+// applies changes as the window resizes under the reader.
+function followPane(rec) {
+  if (!rec || rec.disposed || rec.minimized) return;
+  try { rec.term.scrollToBottom(); } catch (_) {}
+  const host = rec.termHost;
+  if (host && host.scrollHeight > host.clientHeight) host.scrollTop = host.scrollHeight;
+}
+
+function followAll() {
+  if (!els.follow || !els.follow.checked) return;
+  panes.forEach(followPane);
+}
+
+// A re-fit changes the element's height, which moves the host's scroll offset - so a
+// followed pane has to be re-pinned AFTER the fit settles, not before it starts.
+function followAfterFit(rec) {
+  if (!els.follow || !els.follow.checked) return;
+  requestAnimationFrame(() => requestAnimationFrame(() => followPane(rec)));
+}
+
 // Render the bound Jira issue. The key is re-validated here even though the
 // backend validated it on spawn: this builds an href, and a key from a text file
 // must never be trusted to be URL-safe. Label uses textContent, so a hostile key
@@ -859,12 +890,13 @@ function ensureSharedStream(force) {
     rec.term.reset();
     rec.term.write(bytes);
     setStatus(rec, 'streaming', '');
-    requestAnimationFrame(() => { applyFit(rec); applyContentHeight(rec); });
+    // reset() + a re-fit both drop the host to the top, so re-pin after it settles.
+    requestAnimationFrame(() => { applyFit(rec); applyContentHeight(rec); followAfterFit(rec); });
   }));
 
   src.addEventListener('chunk', (event) => routeFrame(event, (rec, bytes) => {
     rec.term.write(bytes);
-    if (els.follow.checked) rec.term.scrollToBottom();
+    if (els.follow.checked) followPane(rec);
     if (els.rowH.value === 'fitcontent') {
       if (rec.hTimer) clearTimeout(rec.hTimer);
       rec.hTimer = setTimeout(() => applyContentHeight(rec), 250);
@@ -926,14 +958,14 @@ function openSingleStream(rec, name) {
       rec.term.reset();
       rec.term.write(b64ToBytes(ev.data));
       setStatus(rec, 'streaming', '');
-      requestAnimationFrame(() => { applyScale(rec); applyContentHeight(rec); });
+      requestAnimationFrame(() => { applyScale(rec); applyContentHeight(rec); followAfterFit(rec); });
     } catch (_) {}
   });
 
   src.onmessage = (ev) => {
     if (!ev.data) return;
     try { rec.term.write(b64ToBytes(ev.data)); } catch (_) {}
-    if (els.follow.checked) rec.term.scrollToBottom();
+    if (els.follow.checked) followPane(rec);
     // Output changed, so the used-row count may have changed. Debounced because
     // a busy agent can emit many frames a second.
     if (els.rowH.value === 'fitcontent') {
@@ -1471,10 +1503,31 @@ function syncAgents(agents) {
     if (!seen.has(name)) { destroyPane(name); structureChanged = true; }
   }
 
-  list.forEach((a) => {
-    const rec = panes.get(String(a.name || ''));
-    if (rec) els.grid.appendChild(rec.cell);
-  });
+  // REORDER ONLY WHEN THE ORDER ACTUALLY CHANGED.
+  //
+  // This used to re-append every cell on every tick. appendChild on a node that is
+  // ALREADY in the document does not copy it - it DETACHES and re-inserts it, and a
+  // detached element loses the scroll offset of everything inside it. tick() runs at
+  // POLL_MS, so that was every pane in the grid being torn out and put back three
+  // times a second-and-a-bit, taking the reader's scroll position with it.
+  //
+  // That is the "it scrolls back to the top after a bit" report, and it is also why
+  // follow looked unreliable: a pane pinned to the bottom was re-attached at zero a
+  // moment later, so the next frame of output had to scroll it down again from the top.
+  //
+  // The sort only moves a cell when an agent goes stale, appears or disappears - rare.
+  // So compare the desired order against what is in the DOM and touch nothing when
+  // they already agree.
+  const desired = list
+    .map((a) => panes.get(String(a.name || '')))
+    .filter(Boolean)
+    .map((rec) => rec.cell);
+  const current = Array.from(els.grid.children);
+  const orderMatches = desired.length === current.length
+    && desired.every((cell, i) => cell === current[i]);
+  if (!orderMatches) {
+    for (const cell of desired) els.grid.appendChild(cell);
+  }
 
   const none = panes.size === 0;
   els.empty.hidden = !none;
@@ -1654,27 +1707,129 @@ const VIEW_KEY = 'ccc.view';
 
 // What each view needs loaded, and how often to refresh it while visible. A table
 // rather than a switch, so a new view is one entry.
+// SCROLL POSITION SURVIVES A RE-RENDER.
+//
+// Every list view is rebuilt wholesale with replaceChildren() on a 3-5 second poll.
+// That empties the container, its scrollHeight collapses to the viewport height, and
+// the browser clamps scrollTop to 0 - so a reader scrolled halfway down the journal is
+// thrown back to the top every few seconds. It is not drift and not a focus bug: it is
+// the poll, and it hit every scrollable element on the page.
+//
+// Restoring an absolute offset is not enough on its own. A list that GREW while the
+// reader sat at the bottom should stay at the bottom, or every new message pushes the
+// view up by its own height. So the pinned-to-bottom case is detected and re-pinned
+// rather than restored to a now-wrong number.
+//
+// Restoration happens in requestAnimationFrame, after layout has settled: setting
+// scrollTop before the browser has measured the new content silently clamps again.
+const AT_BOTTOM_SLOP = 4;          // px; a fractional scrollHeight is normal
+
+function scrollableNodes() {
+  const out = [];
+  document.querySelectorAll('.view, .term, .msg-body, .res-list, .mq-log').forEach((el) => {
+    if (el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth) out.push(el);
+  });
+  return out;
+}
+
+function snapshotScroll() {
+  return scrollableNodes().map((el) => ({
+    el,
+    top: el.scrollTop,
+    left: el.scrollLeft,
+    pinned: el.scrollHeight - el.clientHeight - el.scrollTop <= AT_BOTTOM_SLOP,
+  }));
+}
+
+function restoreScroll(saved) {
+  requestAnimationFrame(() => {
+    for (const s of saved) {
+      if (!s.el.isConnected) continue;
+      s.el.scrollTop = s.pinned ? s.el.scrollHeight : s.top;
+      s.el.scrollLeft = s.left;
+    }
+  });
+}
+
+// Wrap a view loader so its DOM swap cannot move the reader. The loaders are async,
+// so the restore has to wait for the promise - doing it synchronously would run
+// before the fetch had even returned, let alone rendered.
+// `forcePin` exists because the queue view has its own follow checkbox. Without it
+// the two mechanisms race: loadQueue scrolls the last row into view, then this restores
+// the reader's previous offset a frame later and undoes it. With it, a checked follow
+// simply means "every scrollable in this view counts as pinned", and the two agree.
+function keepScroll(load, forcePin) {
+  return (...args) => {
+    const pin = typeof forcePin === 'function' && forcePin();
+    const saved = snapshotScroll();
+    if (pin) for (const s of saved) s.pinned = true;
+    let out;
+    try {
+      out = load(...args);
+    } catch (err) {
+      restoreScroll(saved);
+      throw err;
+    }
+    if (out && typeof out.then === 'function') {
+      return out.then(
+        (v) => { restoreScroll(saved); return v; },
+        (e) => { restoreScroll(saved); throw e; },
+      );
+    }
+    restoreScroll(saved);
+    return out;
+  };
+}
+
 const VIEW_LOADERS = {
-  settings: () => { loadAuth(); if (!resourcesLoaded) loadResources(false); },
-  queue:    loadQueue,
-  board:    loadBoard,
-  journal:  loadJournal,
-  tickets:  loadTickets,
-  iiot:     loadIiot,
+  settings: keepScroll(() => { loadAuth(); if (!resourcesLoaded) loadResources(false); }),
+  queue:    keepScroll(loadQueue, () => els.queueFollow && els.queueFollow.checked),
+  board:    keepScroll(loadBoard),
+  journal:  keepScroll(loadJournal),
+  tickets:  keepScroll(loadTickets),
+  iiot:     keepScroll(loadIiot),
 };
 const VIEW_POLL_MS = { queue: 5000, settings: 20000 };
 
 let viewTimer = null;
 let currentView = 'terminals';
 
+// WHERE EACH VIEW WAS LEFT.
+//
+// Setting `hidden` takes an element out of layout, and the browser drops its
+// scrollTop when that happens - so reading halfway down the journal, glancing at the
+// board and coming back put you at the top with no way to get your place back. The
+// views that do not poll (journal, board, tickets, iiot) have no other way to lose
+// their position, so this is the whole of their half of the bug.
+//
+// Keyed by view id and held in memory only: a remembered offset into a list that has
+// changed since is worse than none, and a reload legitimately starts at the top.
+const viewScroll = new Map();
+
 function showView(which) {
   if (!els.views[which]) which = 'terminals';
   const wasTerm = currentView === 'terminals';
+
+  // Record where the OUTGOING view was before `hidden` discards it.
+  const leaving = els.views[currentView];
+  if (leaving && !leaving.hidden) viewScroll.set(currentView, leaving.scrollTop);
+
   currentView = which;
   const onTerm = which === 'terminals';
 
   for (const [id, node] of Object.entries(els.views)) {
     if (node) node.hidden = id !== which;
+  }
+
+  // Restore after layout: the element was display:none a moment ago, so it has no
+  // scrollHeight yet and assigning scrollTop now would silently clamp to 0.
+  const entering = els.views[which];
+  if (entering && viewScroll.has(which)) {
+    const want = viewScroll.get(which);
+    requestAnimationFrame(() => {
+      if (entering.hidden) return;
+      entering.scrollTop = Math.min(want, entering.scrollHeight - entering.clientHeight);
+    });
   }
   for (const btn of els.navItems) {
     const on = btn.dataset.view === which;
@@ -1706,7 +1861,7 @@ function showView(which) {
     if (load) load();
     const every = VIEW_POLL_MS[which];
     if (every) {
-      if (which === 'settings') resourcesTimer = setInterval(() => loadResources(false), every);
+      if (which === 'settings') resourcesTimer = setInterval(keepScroll(() => loadResources(false)), every);
       else viewTimer = setInterval(load, every);
     }
   }
@@ -2705,6 +2860,17 @@ if (!window.Terminal) {
   refreshQueueBadge();
   // Slower than POLL_MS: it merges files on every call, and unread traffic is not
   // something you need sub-second.
+  // Ticking `follow` must act NOW. Waiting for the next frame of output means an
+  // idle agent shows no response at all, which reads as a dead checkbox.
+  if (els.follow) els.follow.addEventListener('change', followAll);
+  if (els.queueFollow) {
+    els.queueFollow.addEventListener('change', () => {
+      if (els.queueFollow.checked && els.queueList && els.queueList.lastElementChild) {
+        els.queueList.lastElementChild.scrollIntoView({ block: 'nearest' });
+      }
+    });
+  }
+
   setInterval(refreshQueueBadge, 10000);
   composeSpawnCmd();
   applyLayoutPrefs();
