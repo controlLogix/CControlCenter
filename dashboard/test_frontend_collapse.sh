@@ -101,5 +101,104 @@ test('empty keys are ignored without preventing later cards from initializing', 
   const nodes = [new Details(''), new Details('valid')]; page(nodes);
   assert.equal(nodes[0].events.length, 0); assert.equal(nodes[1].events.length, 1);
 });
-console.log(`passed ${passed}, failed 0`);
+
+test('bounded storage evicts least recently touched choices across page reloads', () => {
+  storage.value = '{}';
+  let ctx = page([]);
+  for (let i = 0; i < 512; i++) ctx.rememberOpen(`feed:${i}`, false);
+  ctx.rememberOpen('feed:0', true);
+  ctx = page([]); // Recency must survive a fresh page, not only a session cache.
+  ctx.rememberOpen('feed:512', true);
+  const state = JSON.parse(storage.value);
+  assert.equal(Object.keys(state).length, 512);
+  assert.equal(state['feed:0'], true);
+  assert.equal(state['feed:1'], undefined);
+  assert.equal(state['feed:512'], true);
+  assert.equal(ctx.collapsible('feed:1', '', false).open, false);
+});
+test('serialized size cap migrates large legacy maps and handles oversized keys', () => {
+  const legacy = {};
+  for (let i = 0; i < 100; i++) legacy[`queue:${i}:` + '"\\😀'.repeat(1000)] = false;
+  storage.value = JSON.stringify(legacy);
+  const ctx = page([]);
+  ctx.rememberOpen('journal:recent', true);
+  assert.ok(storage.value.length <= 64 * 1024);
+  assert.equal(JSON.parse(storage.value)['journal:recent'], true);
+  assert.ok(Object.keys(JSON.parse(storage.value)).length < 100);
+  ctx.rememberOpen('queue:' + 'x'.repeat(70000), true);
+  assert.ok(storage.value.length <= 64 * 1024);
+  ctx.rememberOpen('ticket:next', false);
+  assert.equal(JSON.parse(storage.value)['ticket:next'], false);
+});
+
+// Exercise the production list renderers, not copies of their key expressions.
+class Node {
+  constructor(tag, cls, text) { this.tag = tag; this.className = cls; this.textContent = text; this.children = []; this.events = {}; this.open = false; }
+  appendChild(n) { this.children.push(n); return n; }
+  append(...nodes) { nodes.forEach(n => this.appendChild(n)); }
+  replaceChildren() { this.children = []; }
+  addEventListener(type, fn) { this.events[type] = fn; }
+  toggle(open) { this.open = open; this.events.toggle(); }
+}
+function renderer(store, rows) {
+  const els = {};
+  for (const name of ['feedList', 'queueList', 'journalList', 'ticketList', 'planPin', 'queueKind', 'queueStamp', 'journalStamp', 'ticketStamp', 'queueFollow', 'jiraBase']) els[name] = new Node('div');
+  els.queueKind.value = ''; els.jiraBase.value = '';
+  const ctx = {els, el: (tag, cls, text) => new Node(tag, cls, text),
+    feedEntries: rows.feed, feedPrefs: {max: 500}, feedPasses: () => true,
+    updateFeedBadge() {}, markQueueSeen() {}, clock: x => x, say() {},
+    MSG_KINDS: new Set(['status']), JOURNAL_KINDS: new Set(['note']),
+    issueLink: key => new Node('a', 't-key', key), ticketActions: () => new Node('div', 'ticket-actions'),
+    async getJSON(url) {
+      if (url.startsWith('api/messages')) return {messages: rows.queue};
+      if (url.startsWith('api/journal')) return {journal: rows.journal};
+      if (url.startsWith('api/tickets')) return {configured: true, base_url: 'https://jira.example', issues: rows.ticket};
+      return {epics: []};
+    }};
+  Object.defineProperty(ctx, 'localStorage', {get() { if (store instanceof Error) throw store; return store; }});
+  vm.createContext(ctx); vm.runInContext(code, ctx);
+  for (const [start, end] of [['function drawFeed()', '// The badge counts'],
+    ['async function loadQueue()', '// The badge exists'], ['async function loadJournal()', '// ═'],
+    ['async function loadTickets(force)', '// ═']]) {
+    const offset = app.indexOf(start);
+    vm.runInContext(app.slice(offset, app.indexOf(end, offset)), ctx);
+  }
+  return ctx;
+}
+(async () => {
+  const rows = {
+    ticket: [{key: 'ABC-1', summary: 'one'}, {key: 'ABC-2', summary: 'two'}],
+    queue: [{id: 'message-one', at: 'same', body: 'one'}, {id: 'message-two', at: 'same', body: 'two'},
+      {at: 'legacy', sender: 'a', body: 'legacy one'}, {at: 'legacy', sender: 'b', body: 'legacy two'}],
+    journal: [{id: 1, at: 'same', subject: 'one', body: 'body'}, {id: 2, at: 'same', subject: 'two', body: 'body'}],
+    feed: [{at: 'same', source: 'journal', who: 'a', text: 'one'}, {at: 'same', source: 'chatter', who: 'b', text: 'two'}]
+  };
+  async function draw(ctx) { ctx.drawFeed(); await ctx.loadQueue(); await ctx.loadJournal(); await ctx.loadTickets(); }
+  const lists = ['ticketList', 'queueList', 'journalList', 'feedList'];
+  storage.value = null;
+  const ctx = renderer(storage, rows); await draw(ctx);
+  const remembered = {};
+  for (const name of lists) {
+    const nodes = ctx.els[name].children;
+    assert.ok(nodes.length >= 2);
+    nodes.forEach(n => { assert.equal(n.tag, 'details'); assert.equal(n.open, false); assert.equal(n.children[0].tag, 'summary'); });
+    nodes[0].toggle(true); assert.equal(nodes[1].open, false);
+    remembered[name] = nodes.map(n => n.open).reverse();
+  }
+  Object.values(rows).forEach(list => list.reverse());
+  const reload = renderer(storage, rows); await draw(reload);
+  for (const name of lists) assert.deepEqual(reload.els[name].children.map(n => n.open), remembered[name]);
+  passed++; console.log('PASS: all four list renderers toggle independently and preserve identity across reload/reorder');
+  for (const store of [new Error('blocked getter'), {getItem() {throw Error('read');}, setItem() {throw Error('write');}},
+    {getItem() {return 'bad json';}, setItem() {throw Error('quota');}}]) {
+    const blocked = renderer(store, rows); await draw(blocked);
+    for (const name of lists) {
+      assert.equal(blocked.els[name].children.length, rows[name.replace('List', '')].length);
+      for (const node of blocked.els[name].children) { node.toggle(true); assert.equal(node.open, true); node.toggle(false); assert.equal(node.open, false); }
+    }
+  }
+  passed++; console.log('PASS: all four list renderers survive blocked/malformed storage and failed writes');
+  console.log(`passed ${passed}, failed 0`);
+})().catch(err => { console.error(err); process.exitCode = 1; });
+
 JS

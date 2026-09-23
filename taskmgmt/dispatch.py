@@ -346,8 +346,15 @@ def claim_for(worker, key, paths, note, namespace=None):
 def release_all(worker, paths, namespace=None):
     resources = [claim_resource(namespace, path) if namespace is not None else path
                  for path in paths]
+    # Include claims acquired after dispatch, not only the original touches.
+    resources += [claim["resource"] for claim in coordination.all_claims(include_expired=True)
+                  if claim.get("holder") == worker]
+    failed = []
     for path in dict.fromkeys(resources):
-        agentmux("release", path, "--for", worker)
+        rc, _, _ = agentmux("release", path, "--for", worker)
+        if rc:
+            failed.append(path)
+    return not failed
 
 
 # Worktree helpers are called by the roster/hire path with its board transaction.
@@ -390,7 +397,85 @@ def remove_worktree(worktree):
     Git's normal dirty/untracked checks are intentional. Never force removal of
     a member's unfinished work, and never delete its branch during collection.
     """
-    _git("worktree", "remove", str(worktree))
+    path = Path(worktree).resolve()
+    registered = [Path(line[9:]).resolve()
+                  for line in _git("worktree", "list", "--porcelain").splitlines()
+                  if line.startswith("worktree ")]
+    if path not in registered and not path.exists():
+        return
+    _git("worktree", "remove", str(path))
+
+
+def integrate_members(key, task, members):
+    """Merge completed branches in the lead tree, leaving conflicts for review.
+
+    Returns submitted/parked/unresolved. Only branches proven integrated are
+    deleted; a conflict or dirty tree preserves all remaining work for recovery.
+    """
+    lead = worker_name(key)
+    lead_row = next((row for row in members if row.get("member_name") == lead), {})
+    tree = task.get("worktree") or lead_row.get("worktree") or str(REPO)
+    expected_branch = task.get("branch") or lead_row.get("branch")
+    def git(*args):
+        return _git("-C", str(tree), *args)
+
+    try:
+        branch = git("symbolic-ref", "--short", "HEAD")
+        if expected_branch and branch != expected_branch:
+            raise RuntimeError("lead worktree is not on its integration branch")
+        if git("status", "--porcelain"):
+            raise RuntimeError("lead integration worktree has uncommitted changes")
+        for member in members:
+            source = member.get("branch")
+            if not source or member.get("member_name") == lead:
+                continue
+            if not source.startswith("agentmux/"):
+                raise RuntimeError("refusing unmanaged member branch: " + source)
+            if not git("branch", "--list", source):
+                if member.get("worktree") and Path(member["worktree"]).exists():
+                    raise RuntimeError("member branch missing while its worktree exists")
+                continue  # Already integrated and torn down on an earlier collect.
+            if member.get("worktree") and Path(member["worktree"]).exists():
+                if _git("-C", member["worktree"], "status", "--porcelain"):
+                    raise RuntimeError("member has uncommitted work: " + source)
+            try:
+                git("merge", "--no-edit", "--", source)
+            except RuntimeError:
+                conflicts = git("diff", "--name-only", "--diff-filter=U")
+                if not conflicts:
+                    raise
+                # Aborting restores the integration branch; it resolves nothing.
+                # Keep both branches and the member tree for manual recovery.
+                reason = "merge conflict integrating %s into %s: %s" % (
+                    source, branch, ", ".join(conflicts.splitlines()))
+                reported = comment(key, reason, lead)
+                parked = set_status(key, "parked", lead, reason=reason)
+                git("merge", "--abort")
+                return "parked" if reported is not None and parked is not None else "unresolved"
+        # Defer all teardown until every merge succeeds.
+        for member in members:
+            if member.get("member_name") and member["member_name"] != lead:
+                teardown_member(member, tree)
+    except RuntimeError as err:
+        comment(key, "integration/teardown requires recovery: " + str(err), lead)
+        return "unresolved"
+    return "submitted"
+
+
+def teardown_member(member, integration_tree):
+    """Idempotent cleanup; never discard commits absent from integration HEAD."""
+    branch = member.get("branch")
+    if branch and _git("branch", "--list", branch):
+        if not branch.startswith("agentmux/"):
+            raise RuntimeError("refusing unmanaged member branch: " + branch)
+        _git("-C", str(integration_tree), "merge-base", "--is-ancestor", branch, "HEAD")
+    if member.get("worktree"):
+        remove_worktree(member["worktree"])
+    if branch and _git("branch", "--list", branch):
+        # Ancestry above is against the integration tree, which need not be REPO.
+        _git("branch", "-D", branch)
+    if not release_all(member["member_name"], []):
+        raise RuntimeError("member claims could not be released")
 
 
 def prepare_member_worktree(db, key, agent_name, worker, base="HEAD"):
@@ -596,8 +681,14 @@ def collect_one(key, task=None):
     lead = worker_name(key)
     touches = list(task.get("touches") or [])
     live = live_agents()
-    members = sorted(name for name in live
-                     if key_of_worker(name) == key and name != lead)
+    roster = board("GET", "board/roster?id=" + key)
+    if roster is None:
+        return {"id": key, "outcome": "unresolved"}
+    rows = roster.get("members") or []
+    members = sorted({name for name in live
+                      if key_of_worker(name) == key and name != lead}
+                     | {row["member_name"] for row in rows
+                        if row.get("member_name") and row["member_name"] != lead})
     alive = lead in live
     status = task.get("status")
     lead_state = None
@@ -607,14 +698,13 @@ def collect_one(key, task=None):
 
     def reap(name, pane_alive=True):
         # Do not release a live pane's claims if killing it failed, or reap the
-        # lead while a member could still be writing. Branches are retained for
-        # the lead to merge (or for recovery after an orphaned team is parked).
+        # lead while a member could still be writing. Preserve branches until
+        # integration succeeds, or for recovery after an orphaned team parks.
         if pane_alive:
             rc, _, _ = agentmux("kill", name)
             if rc and name in live_agents():
                 return False
-        release_all(name, touches, namespace=name if name != lead else None)
-        return True
+        return release_all(name, touches, namespace=name if name != lead else None)
 
     # Every role belongs to the card, including reviewers and researchers.
     # Members are always reaped before the lead. Card evidence alone cannot
@@ -623,12 +713,12 @@ def collect_one(key, task=None):
     cleanup_failed = False
     for member in members:
         member_state = None
-        if not lead_dead and status == "in_progress":
+        if member in live and not lead_dead and status == "in_progress":
             member_state, _, _ = agentmux("wait", member, "--timeout", "3", timeout=30)
             if member_state != 3 and not (member_state == 0 and task.get("evidence")):
                 remaining = True
                 continue
-        if not reap(member):
+        if not reap(member, pane_alive=member in live):
             cleanup_failed = True
     if cleanup_failed:
         return {"id": key, "outcome": "unresolved"}
@@ -641,6 +731,12 @@ def collect_one(key, task=None):
         if not task.get("evidence"):
             # Idle without evidence is not proof of completion.
             return {"id": key, "outcome": "idle"}
+        integration = integrate_members(key, task, rows) if any(
+            row.get("branch") for row in rows) else "submitted"
+        if integration != "submitted":
+            if integration == "parked" and not reap(lead):
+                integration = "unresolved"
+            return {"id": key, "outcome": integration}
         if not reap(lead):
             return {"id": key, "outcome": "unresolved"}
         comment(key, "worker %s finished and was reaped; evidence attached, "
@@ -651,6 +747,15 @@ def collect_one(key, task=None):
     if not reap(lead, pane_alive=alive):
         return {"id": key, "outcome": "unresolved"}
     if status in ("done", "deleted", "blocked"):
+        try:
+            lead_row = next((row for row in rows if row.get("member_name") == lead), {})
+            tree = task.get("worktree") or lead_row.get("worktree") or str(REPO)
+            for row in rows:
+                if row.get("member_name") and row["member_name"] != lead:
+                    teardown_member(row, tree)
+        except RuntimeError as err:
+            comment(key, "teardown requires recovery: " + str(err), "orchestrator")
+            return {"id": key, "outcome": "unresolved"}
         log("collect: %s %s; team reaped, claims released" % (key, status))
         return {"id": key, "outcome": status}
 

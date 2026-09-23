@@ -875,3 +875,21 @@ footer {
   .feed-row .f-who { grid-column: 2; }
   .feed-row .f-text { grid-column: 2; }
 }
+
+/* JS list topics: the summary stays visible; native details hides the body.
+   Override the former row grids so closed details cannot expose grid children. */
+details.ticket, details.msg, details.feed-row { display: block; }
+.item-summary {
+  display: flex; align-items: baseline; gap: 8px; min-width: 0;
+  cursor: pointer; list-style: none;
+}
+.item-summary::-webkit-details-marker { display: none; }
+.item-summary::before { content: '▸'; flex: 0 0 auto; color: var(--muted); }
+details[open] > .item-summary::before { content: '▾'; }
+.item-summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.item-summary > .item-preview {
+  flex: 1 1 auto; min-width: 0; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.item-body { margin: 6px 0 0; }
+details.ticket[open] > .ticket-actions { margin-top: 8px; flex-wrap: wrap; }

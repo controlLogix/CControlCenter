@@ -988,6 +988,71 @@ def cmd_triage(args):
     return 0
 
 
+def print_agent_definition(row):
+    print(f"{row['name']} [scope: {row['scope']}] — {row.get('description', '')}")
+    for key, value in row.items():
+        if key in ("name", "scope", "description", "persona"):
+            continue
+        if isinstance(value, list):
+            value = ", ".join(value) or "(none)"
+        print(f"  {key}: {value}")
+    if "persona" in row:
+        print("  persona:")
+        print(row["persona"])
+
+
+def cmd_agents(args):
+    path = "board/agents"
+    if args.name is not None:
+        path += "?" + urllib.parse.urlencode({"name": args.name})
+    result = board_call("GET", path)
+    if result is None:
+        return 1
+    if args.json:
+        print(json.dumps(result, indent=2))
+    elif args.name is not None:
+        print_agent_definition(result)
+    else:
+        rows = result.get("agents", [])
+        print(f"{len(rows)} agent definition(s)")
+        for row in rows:
+            description = row.get("description", "")
+            if len(description) > 80:
+                description = description[:79] + "…"
+            print(f"  {row['name']} [scope: {row['scope']}] — {description}")
+        for problem in result.get("problems", []):
+            print(f"  problem: {problem['path']}: {problem['error']}")
+    return 0
+
+
+def cmd_agentdef(args):
+    body = {key: value for key, value in vars(args).items()
+            if key not in ("command", "func", "json") and value is not None}
+    result = board_call("POST", "board/agentdef", body)
+    if result is None:
+        return 1
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        print("Saved agent definition:")
+        print_agent_definition(result)
+    return 0
+
+
+def cmd_agentdrop(args):
+    body = {"scope": args.scope, "name": args.name}
+    if args.checksum is not None:
+        body["checksum"] = args.checksum
+    result = board_call("POST", "board/agentdrop", body)
+    if result is None:
+        return 1
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        print(f"Dropped agent definition {result['name']} ({result['scope']})")
+    return 0
+
+
 def cmd_config(args):
     """Read or change one board setting.
 
@@ -1212,6 +1277,29 @@ def main(argv=None):
     report = board_verb("doctor", cmd_doctor, agent=False)
     report.add_argument("--strict", action="store_true",
                         help="exit non-zero when the board has errors")
+
+    definitions = board_verb("agents", cmd_agents, agent=False)
+    definitions.add_argument("name", nargs="?")
+    definitions.add_argument("--json", action="store_true")
+
+    definition = board_verb("agentdef", cmd_agentdef, agent=False,
+                            help="create or replace a full agent definition")
+    definition.add_argument("scope")
+    definition.add_argument("name")
+    for field in ("description", "cli", "model", "auth", "posture", "role",
+                  "worktree", "persona", "checksum"):
+        definition.add_argument("--" + field)
+    for field in ("tools", "tools-deny", "capabilities"):
+        definition.add_argument("--" + field, nargs="*",
+                                help="space-separated values; omit values for an empty list")
+    definition.add_argument("--max-instances", type=int)
+    definition.add_argument("--json", action="store_true")
+
+    drop = board_verb("agentdrop", cmd_agentdrop, agent=False)
+    drop.add_argument("scope")
+    drop.add_argument("name")
+    drop.add_argument("--checksum")
+    drop.add_argument("--json", action="store_true")
 
     setting = board_verb("config", cmd_config, agent=False)
     setting.add_argument("name", nargs="?", default=None)

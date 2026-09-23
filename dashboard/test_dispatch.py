@@ -500,7 +500,8 @@ with tempfile.TemporaryDirectory(prefix="dispatch-git-") as temp:
                 ok("configured worktree storage inside repo is refused", False)
 
 section("collect: fan-out, lead-last, and orphan cleanup")
-def collect_case(live, states=None, status="in_progress", evidence=None, kill_failure=None):
+def collect_case(live, states=None, status="in_progress", evidence=None, kill_failure=None,
+                 roster=None, integration="submitted"):
     calls = []
     states = states or {}
     task = {"id": "TM-900", "status": status, "touches": ["src/file.py"],
@@ -514,6 +515,9 @@ def collect_case(live, states=None, status="in_progress", evidence=None, kill_fa
     with patch.object(dispatch, "live_agents", return_value=dict.fromkeys(live, {})), \
          patch.object(dispatch, "agentmux", side_effect=mux), \
          patch.object(dispatch, "set_status", return_value={}) as status_call, \
+         patch.object(dispatch, "board", return_value={"members": roster or []}), \
+         patch.object(coord, "all_claims", return_value=[]), \
+         patch.object(dispatch, "integrate_members", return_value=integration), \
          patch.object(dispatch, "comment"), patch.object(dispatch, "log"):
         result = dispatch.collect_one("TM-900", task)
     kills = [call[1] for call in calls if call[0] == "kill"]
@@ -558,6 +562,114 @@ for state, evidence, expected in ((2, [], "working"), (0, [], "idle"),
                                   (0, ["result"], "submitted"), (3, [], "parked")):
     outcome, _, _, _, _ = collect_case([lead], {lead: state}, evidence=evidence)
     ok("single lead retains " + expected + " behavior", outcome == expected)
+
+roster = [{"member_name": worker, "branch": "agentmux/" + worker}]
+outcome, kills, _, _, _ = collect_case(team, dict.fromkeys(team, 0), evidence=["result"],
+                                     roster=roster, integration="parked")
+ok("collection propagates conflict parking and reaps the lead",
+   outcome == "parked" and kills[-1] == lead)
+outcome, kills, _, _, _ = collect_case([lead], {lead: 0}, evidence=["result"],
+                                     roster=roster, integration="unresolved")
+ok("failed integration is not reported as submission", outcome == "unresolved" and not kills)
+outcome, kills, releases, _, _ = collect_case([lead], {lead: 0}, evidence=["result"], roster=roster)
+ok("roster discovers absent member panes and releases their claims",
+   outcome == "submitted" and ("release", worker + "/src/file.py", "--for", worker) in releases)
+with patch.object(dispatch, "agentmux", return_value=(1, "", "release refused")), \
+     patch.object(coord, "all_claims", return_value=[]):
+    ok("failed claim release cannot report clean teardown", not dispatch.release_all(worker, ["x"]))
+
+
+section("lead integration: real merges, conflicts and retryable teardown")
+with tempfile.TemporaryDirectory(prefix="dispatch-merge-") as temp:
+    repo = Path(temp) / "repo"
+    repo.mkdir()
+    def git(*args, cwd=None):
+        return subprocess.run(["git", "-C", str(cwd or repo), *args], check=True,
+                              capture_output=True, text=True).stdout.strip()
+    git("init")
+    git("config", "user.name", "Suite")
+    git("config", "user.email", "suite@example.invalid")
+    (repo / "shared.txt").write_text("base\n")
+    git("add", ".")
+    git("commit", "-m", "base")
+    git("checkout", "-b", "integration")
+    with patch.object(dispatch, "REPO", repo), patch.object(dispatch, "ROOT", Path(temp) / "state"), \
+         patch.object(dispatch, "comment", return_value={}) as comments, \
+         patch.object(dispatch, "set_status", return_value={}) as statuses, \
+         patch.object(dispatch, "agentmux", return_value=(0, "", "")) as mux, \
+         patch.object(coord, "all_claims", return_value=[
+             {"holder": "tm-900-worker", "resource": "tm-900-worker/extra.txt"}]):
+        first = dispatch.create_worktree("tm-900-worker")
+        tree = Path(first["worktree"])
+        (tree / "result.txt").write_text("member result")
+        git("add", ".", cwd=tree)
+        git("commit", "-m", "member result", cwd=tree)
+        task = {"worktree": str(repo), "branch": "integration"}
+        ok("member commits merge into the lead integration branch",
+           dispatch.integrate_members("TM-900", task, [first, {"status": "approved"}]) == "submitted"
+           and (repo / "result.txt").read_text() == "member result")
+        ok("successful teardown removes member tree and branch",
+           not tree.exists() and not git("branch", "--list", first["branch"]))
+        ok("teardown releases claims beyond original touches",
+           ("release", "tm-900-worker/extra.txt", "--for", "tm-900-worker")
+           in [call.args for call in mux.call_args_list])
+        dispatch.teardown_member(first, repo)
+        ok("repeated integration and teardown succeed",
+           dispatch.integrate_members("TM-900", task, [first]) == "submitted")
+        second = dispatch.create_worktree("tm-900-worker2")
+        tree = Path(second["worktree"])
+        (tree / "shared.txt").write_text("member version\n")
+        git("add", ".", cwd=tree)
+        git("commit", "-m", "member conflict", cwd=tree)
+        (repo / "shared.txt").write_text("lead version\n")
+        git("add", ".")
+        git("commit", "-m", "lead conflict")
+        before = git("rev-parse", "HEAD")
+        ok("conflict parks the card",
+           dispatch.integrate_members("TM-900", task, [second]) == "parked"
+           and statuses.call_args.args[:2] == ("TM-900", "parked"))
+        ok("conflict comment identifies source, target and files",
+           all(value in comments.call_args.args[1]
+               for value in (second["branch"], "integration", "shared.txt")))
+        ok("conflict preserves commits and leaves no merge in progress",
+           git("rev-parse", "HEAD") == before and not git("status", "--porcelain")
+           and tree.exists() and git("branch", "--list", second["branch"]))
+        try:
+            dispatch.teardown_member(second, repo)
+        except RuntimeError:
+            ok("teardown refuses unmerged member commits", tree.exists())
+        else:
+            ok("teardown refuses unmerged member commits", False)
+        statuses.reset_mock()
+        with patch.object(dispatch, "comment", return_value=None):
+            ok("failed conflict reporting cannot claim successful parking",
+               dispatch.integrate_members("TM-900", task, [second]) == "unresolved")
+        ok("integration never closes the card",
+           all(call.args[1] != "done" for call in statuses.call_args_list))
+        with patch.object(dispatch, "agentmux", side_effect=real_claim), \
+             patch.object(coord, "all_claims", wraps=coord.all_claims) as claims_mock, \
+             patch.object(coord, "live_agents", return_value={"tm-900-worker"}), \
+             patch.object(coord, "journal", return_value="test"), \
+             patch.object(coord, "broadcast", return_value=0):
+            # The outer claim stub is replaced with the on-disk reader here.
+            claims_mock.side_effect = lambda **kw: [coord.read_claim(path)
+                for path in coord.CLAIMS_DIR.glob("*.json") if coord.read_claim(path)]
+            dispatch.claim_for("tm-900-worker", "TM-900", ["extra.py"], "test", "tm-900-worker")
+            dispatch.teardown_member(first, repo)
+            ok("successful teardown leaves no claims held by the member",
+               not any(c.get("holder") == "tm-900-worker" for c in coord.all_claims()))
+        third = dispatch.create_worktree("tm-900-reviewer")
+        dispatch.remove_worktree(third["worktree"])
+        dispatch.teardown_member(third, repo)
+        ok("already removed tree still has its branch cleaned up",
+           not git("branch", "--list", third["branch"]))
+        fourth = dispatch.create_worktree("tm-900-researcher")
+        import shutil
+        shutil.rmtree(fourth["worktree"])
+        dispatch.teardown_member(fourth, repo)
+        ok("missing directory with stale git registration is cleaned up",
+           fourth["worktree"] not in git("worktree", "list", "--porcelain"))
+
 
 section("pool: independent card and global pane limits")
 def pool_case(live, wip, max_agents=None, extra_after_spawn=(), meta=None):

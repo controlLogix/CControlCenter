@@ -1868,16 +1868,21 @@ function drawFeed() {
       feedEntries.length ? 'Nothing matches the current filters.' : 'Nothing reported yet.'));
   }
   for (const e of shown) {
-    const row = el('div', `feed-row ${e.severity}`);
-    row.appendChild(el('span', 'f-at', (e.at || '').slice(11, 19)));
-    row.appendChild(el('span', `f-src ${e.source}`, e.source));
-    row.appendChild(el('span', 'f-who', e.who || '—'));
-    row.appendChild(el('span', 'f-text', e.text));
+    // Feed can contain hundreds of events: default closed with a one-line preview.
+    // The feed API has no ID; its immutable event tuple distinguishes same-time sources.
+    const row = collapsible(`feed:${JSON.stringify([e.at, e.source, e.who, e.ref, e.text])}`,
+      `feed-row ${e.severity}`, false);
+    const head = el('summary', 'item-summary');
+    head.appendChild(el('span', 'f-at', (e.at || '').slice(11, 19)));
+    head.appendChild(el('span', `f-src ${e.source}`, e.source));
+    head.appendChild(el('span', 'f-who', e.who || '—'));
+    head.appendChild(el('span', 'f-text item-preview', e.text));
     if (e.ref) {
       const ref = el('span', 'f-ref', e.ref);
       ref.title = `ref ${e.ref}`;
-      row.appendChild(ref);
+      head.appendChild(ref);
     }
+    row.append(head, el('p', 'f-text item-body', e.text));
     row.title = `${e.at}  ${e.source}/${e.severity}`;
     els.feedList.appendChild(row);
   }
@@ -2219,13 +2224,18 @@ async function loadQueue() {
     }
     for (const m of rows) {
       const kind = String(m.kind || 'status');
-      const row = el('div', MSG_KINDS.has(kind) ? `msg ${kind}` : 'msg');
-      row.appendChild(el('span', 'msg-at', clock(m.at)));
+      // Queue traffic is unbounded; keep bodies closed while showing a preview.
+      // Older messages lack IDs, so use their immutable envelope and body instead.
+      const key = m.id ?? JSON.stringify([m.at, m.sender, m.recipient, m.kind, m.body]);
+      const row = collapsible(`queue:${key}`, MSG_KINDS.has(kind) ? `msg ${kind}` : 'msg', false);
+      const head = el('summary', 'item-summary');
+      head.appendChild(el('span', 'msg-at', clock(m.at)));
       const who = el('span', 'msg-who', String(m.sender || '?'));
       if (m.recipient) who.appendChild(el('span', 'to', ` \u2192 ${m.recipient}`));
-      row.appendChild(who);
-      row.appendChild(el('span', 'msg-kind', kind));
-      row.appendChild(el('span', 'msg-body', String(m.body || '')));
+      head.appendChild(who);
+      head.appendChild(el('span', 'msg-kind', kind));
+      head.appendChild(el('span', 'item-preview', String(m.body || '')));
+      row.append(head, el('div', 'msg-body item-body', String(m.body || '')));
       els.queueList.appendChild(row);
     }
 
@@ -2455,8 +2465,10 @@ async function loadJournal() {
     if (!rows.length) els.journalList.appendChild(el('p', 'empty', 'Journal is empty.'));
     for (const j of rows) {
       const kind = String(j.kind || 'note');
-      const box = el('article', JOURNAL_KINDS.has(kind) ? `jentry ${kind}` : 'jentry');
-      const head = el('div', 'jentry-head');
+      // Journal subjects form a useful index; default bodies closed for long histories.
+      const key = j.id ?? JSON.stringify([j.at, j.agent, j.kind, j.subject, j.body]);
+      const box = collapsible(`journal:${key}`, JOURNAL_KINDS.has(kind) ? `jentry ${kind}` : 'jentry', false);
+      const head = el('summary', 'jentry-head item-summary');
       head.appendChild(el('span', 'jentry-subject', String(j.subject || '(no subject)')));
       head.appendChild(el('span', 'status-chip', kind));
       head.appendChild(el('span', 'epic-meta', clock(j.at)));
@@ -2612,12 +2624,16 @@ async function loadTickets(force) {
     } catch (_) { /* the local board is not essential to reviewing tickets */ }
 
     for (const issue of issues) {
-      const row = el('div', 'ticket');
-      row.appendChild(issueLink(issue.key, base));
-      row.appendChild(el('span', 't-sum', issue.summary || ''));
-      if (issue.status) row.appendChild(el('span', 'status-chip', issue.status));
-      if (issue.assignee) row.appendChild(el('span', 't-agent', issue.assignee));
-      if (linked.has(issue.key)) row.appendChild(el('span', 'res-kind', 'on board'));
+      // Tickets default closed: scan titles/statuses, then expand the issue to act.
+      // Include the Jira site so identical issue keys on different sites stay independent.
+      const row = collapsible(`ticket:${JSON.stringify([base, issue.key])}`, 'ticket', false);
+      const head = el('summary', 'item-summary');
+      head.appendChild(issueLink(issue.key, base));
+      head.appendChild(el('span', 't-sum', issue.summary || ''));
+      if (issue.status) head.appendChild(el('span', 'status-chip', issue.status));
+      if (issue.assignee) head.appendChild(el('span', 't-agent', issue.assignee));
+      if (linked.has(issue.key)) head.appendChild(el('span', 'res-kind', 'on board'));
+      row.appendChild(head);
       row.appendChild(ticketActions(issue, base));
       els.ticketList.appendChild(row);
     }
@@ -2651,9 +2667,25 @@ function openState() {
   } catch (_) { return {}; }
 }
 
+// Cap both count and serialized size instead of hashing: digests alone still
+// accumulate forever. Keep at most 512 choices / 64K UTF-16 code units (~128 KiB),
+// leaving quota for other settings even when legacy keys contain full bodies.
+// Insertion order records last touch: move the toggled key to the end, then evict
+// oldest choices first. Existing maps migrate on their next write; evicted items
+// return to their view default. A single over-budget key is not retained.
+const OPEN_MAX_ENTRIES = 512;
+const OPEN_MAX_CHARS = 64 * 1024;
 function rememberOpen(key, isOpen) {
-  const state = openState();
-  state[key] = isOpen;
+  const entries = Object.entries(openState())
+    .filter(([k, value]) => k !== key && typeof value === 'boolean');
+  entries.push([key, isOpen]);
+  const sizes = entries.map(([k, value]) => JSON.stringify(k).length + (value ? 4 : 5) + 2);
+  let chars = 1 + sizes.reduce((sum, size) => sum + size, 0);
+  let first = 0;
+  while (entries.length - first > OPEN_MAX_ENTRIES || chars > OPEN_MAX_CHARS) {
+    chars -= sizes[first++];
+  }
+  const state = Object.fromEntries(entries.slice(first));
   try { localStorage.setItem(OPEN_KEY, JSON.stringify(state)); } catch (_) {}
 }
 

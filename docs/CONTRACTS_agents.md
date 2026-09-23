@@ -199,6 +199,30 @@ under `/api/board/<op>`.
 | `approve` | POST | `{id, actor, members: [...]}` |
 | `hire` | POST | `{id, name}` — **and nothing else**, see C8 |
 
+The definition CLI surface for skills is `python3 taskmgmt/coordination.py`:
+
+```text
+agents [NAME] [--json]
+agentdef SCOPE NAME [--description TEXT] [--cli CLI] [--model MODEL]
+         [--auth AUTH] [--posture POSTURE] [--role ROLE] [--worktree MODE]
+         [--tools [TOOL ...]] [--tools-deny [TOOL ...]]
+         [--capabilities [CAPABILITY ...]] [--max-instances N]
+         [--persona TEXT] [--checksum CHECKSUM] [--json]
+agentdrop SCOPE NAME [--checksum CHECKSUM] [--json]
+```
+
+These map directly to the three definition ops above; `agents NAME` URL-encodes
+`name` and returns the full definition including persona and checksum. `agentdef`
+creates or **replaces the full definition**, not a partial update: send all desired
+fields and the fetched checksum when editing. Omit checksum for creation. List flags
+accept separate arguments (not comma-separated strings); a flag with no values sends
+an empty list. `--tools-deny` and `--max-instances` map to `tools_deny` and
+`max_instances`. `agentdrop` optionally guards deletion with a checksum.
+All three default to human-readable output; `--json` emits the unmodified API payload
+on stdout. Refusals exit nonzero and print the board's message and fix hints on stderr
+through `board_call`. Validation stays on the server. These are coordination.py
+subcommands; they do not require an `agentmux agent` shell wrapper.
+
 Handlers delegate from `server.py` into `dashboard/boardagents.py` and
 `dashboard/boardteams.py`. `server.py` holds delegation lines only, no logic.
 
