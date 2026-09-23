@@ -117,21 +117,26 @@ DEFAULT_CONFIG = {
     "dispatchIdleExit": 30,
     "dispatchMaxFailures": 3,
     "dispatchCli": "codex",
-    "dispatchReviewCli": "claude",
+    "teamMaxAgents": 8,
+    "teamMaxWorkers": 2,
+    "teamRequireApproval": True,
+    "dashboardMayHire": False,
 }
-CONFIG_BOOLS = {"requireAcceptance", "requireEpic", "autoCloseEpic", "dispatchEnabled"}
+CONFIG_BOOLS = {"requireAcceptance", "requireEpic", "autoCloseEpic", "dispatchEnabled",
+                "teamRequireApproval", "dashboardMayHire"}
 CONFIG_LISTS = {"requireOnCreate", "requireOnStart", "requireOnDone"}
 # name -> (low, high). Whole numbers, bounded where an unbounded one would be a
 # denial of service against this machine rather than a configuration choice.
 CONFIG_NUMBERS = {"wipLimit": (0, 999), "dispatchWip": (0, 32),
                   "dispatchPoll": (5, 3600), "dispatchIdleExit": (0, 1440),
-                  "dispatchMaxFailures": (1, 99)}
-CONFIG_CLIS = {"dispatchCli", "dispatchReviewCli"}
+                  "dispatchMaxFailures": (1, 99),
+                  "teamMaxAgents": (1, 32), "teamMaxWorkers": (0, 8)}
+CONFIG_CLIS = {"dispatchCli"}
 # The dispatch half of the config, as one list, so a caller that only wants
 # the dispatcher's policy does not have to know which names those are.
 DISPATCH_KEYS = ("dispatchEnabled", "dispatchWip", "dispatchPoll",
                  "dispatchIdleExit", "dispatchMaxFailures",
-                 "dispatchCli", "dispatchReviewCli")
+                 "dispatchCli")
 # The CLI name reaches `agentmux spawn --cli`, which puts it in a launch command.
 # A subset of what spawn accepts, chosen so nothing here can carry shell syntax.
 CLI_RE = re.compile(r"[A-Za-z0-9_-]{1,32}")
@@ -205,6 +210,15 @@ NEW_TABLES = (
     """CREATE TABLE IF NOT EXISTS board_touches (
         entity_key TEXT NOT NULL, path TEXT NOT NULL, at TEXT,
         PRIMARY KEY (entity_key, path))""",
+    """CREATE TABLE IF NOT EXISTS board_roster (
+        id INTEGER PRIMARY KEY,
+        entity_key TEXT NOT NULL, agent_name TEXT NOT NULL,
+        role TEXT NOT NULL, position INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'proposed', member_name TEXT,
+        worktree TEXT, branch TEXT, proposed_by TEXT, approved_by TEXT,
+        approved_at TEXT, at TEXT NOT NULL, updated_at TEXT)""",
+    "CREATE UNIQUE INDEX IF NOT EXISTS board_roster_slot ON board_roster(entity_key, agent_name)",
+    "CREATE INDEX IF NOT EXISTS board_roster_entity ON board_roster(entity_key, position)",
     """CREATE TABLE IF NOT EXISTS board_comments (
         id INTEGER PRIMARY KEY, entity_key TEXT NOT NULL, author TEXT,
         at TEXT NOT NULL, text TEXT NOT NULL)""",

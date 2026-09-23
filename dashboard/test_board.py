@@ -32,6 +32,7 @@ Four properties are worth more than the rest, and each has a named check below:
 
 import json
 import os
+import sqlite3
 import sys
 import tempfile
 import threading
@@ -150,6 +151,57 @@ with ccstore.connection() as db:
     ok("archived becomes done", epics["Numbered already"]["status"] == "done")
     ok("the status mapping is recorded",
        any(e["event"] == "status-migrated" for e in ccboard.history(db)))
+
+section("roster migration and team configuration")
+TEAM_DEFAULTS = {"teamMaxAgents": 8, "teamMaxWorkers": 2,
+                 "teamRequireApproval": True, "dashboardMayHire": False}
+with ccstore.connection() as db:
+    ok("migration adds the complete roster schema", ccboard.columns(db, "board_roster") == {
+        "id", "entity_key", "agent_name", "role", "position", "status", "member_name",
+        "worktree", "branch", "proposed_by", "approved_by", "approved_at", "at", "updated_at"})
+    indexes = {row["name"]: row["unique"]
+               for row in db.execute("PRAGMA index_list(board_roster)")}
+    ok("roster indexes have the contracted uniqueness",
+       indexes == {"board_roster_slot": 1, "board_roster_entity": 0})
+    for index, columns in (("board_roster_slot", ["entity_key", "agent_name"]),
+                           ("board_roster_entity", ["entity_key", "position"])):
+        ok(index + " has the contracted column order",
+           [row["name"] for row in db.execute("PRAGMA index_info(" + index + ")")] == columns)
+    insert = ("INSERT INTO board_roster (entity_key,agent_name,role,position,at)"
+              " VALUES (?,?,?,?,?)")
+    db.execute(insert, ("TM-001", "lead", "lead", 0, "t"))
+    rejects("duplicate roster slots are rejected",
+            lambda: db.execute(insert, ("TM-001", "lead", "worker", 1, "t")),
+            kind=sqlite3.IntegrityError)
+    db.execute(insert, ("TM-002", "lead", "lead", 0, "t"))
+    roster = [dict(row) for row in db.execute("SELECT * FROM board_roster ORDER BY id")]
+    ok("roster status defaults to proposed", all(row["status"] == "proposed" for row in roster))
+    ccboard.migrate(db)
+    ccboard.migrate(db)
+    ok("repeated migration preserves existing roster rows",
+       [dict(row) for row in db.execute("SELECT * FROM board_roster ORDER BY id")] == roster)
+    ok("team defaults are seeded", all(ccboard.config(db)[key] == value
+                                       for key, value in TEAM_DEFAULTS.items()))
+    for key, low, high in (("teamMaxAgents", 1, 32), ("teamMaxWorkers", 0, 8)):
+        for value in (low, high):
+            ccboard.set_config(db, key, value)
+            ok(key + " accepts boundary " + str(value), ccboard.config(db)[key] == value)
+        for value in (low - 1, high + 1, 1.5, True, "2"):
+            rejects(key + " rejects " + repr(value),
+                    lambda key=key, value=value: ccboard.set_config(db, key, value))
+    for key in ("teamRequireApproval", "dashboardMayHire"):
+        for value in (True, False):
+            ccboard.set_config(db, key, value)
+            ok(key + " accepts " + str(value), ccboard.config(db)[key] is value)
+        for value in (0, 1, "true", None):
+            rejects(key + " rejects " + repr(value),
+                    lambda key=key, value=value: ccboard.set_config(db, key, value))
+    ccboard.migrate(db)
+    ok("migration preserves team overrides", ccboard.config(db)["teamMaxAgents"] == 32
+       and ccboard.config(db)["teamMaxWorkers"] == 8
+       and ccboard.config(db)["teamRequireApproval"] is False)
+    for key, value in TEAM_DEFAULTS.items():
+        ccboard.set_config(db, key, value)
 
 with ccstore.connection() as db:
     before = ccboard.meta(db)["counters"]
@@ -535,6 +587,9 @@ ok("the board payload strips bodies from the list",
 status, meta = call("/api/board/meta")
 ok("GET /api/board/meta answers with the vocabulary",
    status == 200 and meta["vocab"]["statuses"] == list(ccboard.STATUSES))
+ok("board/meta publishes all four team defaults",
+   status == 200 and all(meta["config"].get(key) == value
+                         for key, value in TEAM_DEFAULTS.items()))
 ok("meta publishes the key format so no client hardcodes it",
    meta["kinds"]["task"] == {"prefix": "TM", "pad": 3})
 

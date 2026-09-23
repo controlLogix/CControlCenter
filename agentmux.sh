@@ -86,64 +86,81 @@ effective_claude_dir() {
 #   statusLine - references host-specific paths.
 #
 # NOT symlinked into the mirror - mutable operator state. These entries may point
-# at the Windows profile, and a spawned agent runs unrestricted, so linking them
-# would let it overwrite or prune the operator's own history and backups.
+# at the Windows profile; linking them could let a spawned agent overwrite or
+# prune the operator's own history and backups.
+# Called while holding the spawn lock, including the interval before new-session.
+claude_config_gc() {
+  local d agent
+  for d in "$ROOT/claude-config"/*; do
+    [ -d "$d" ] && [ ! -L "$d" ] || continue
+    agent="${d##*/}"
+    [[ "$agent" =~ ^[A-Za-z0-9_-]{1,64}$ ]] || continue
+    have "$agent" || rm -rf -- "$d"
+  done
+}
+
 claude_config_dir() {
-  local d="$ROOT/claude-config" src entry base tmp
+  local name="$1" posture="$2" tools="$3" deny_tools="$4"
+  local d="$ROOT/claude-config/$name" src entry base tmp
   src="$(effective_claude_dir)"
-  mkdir -p "$d"
+  [ ! -L "$ROOT/claude-config" ] && [ ! -L "$d" ] || return 1
+  mkdir -p "$d" || return 1
+  chmod 700 "$d" || return 1
   if [ -d "$src" ]; then
     for entry in "$src"/* "$src"/.[!.]*; do
       [ -e "$entry" ] || continue
       base="${entry##*/}"
       case "$base" in
-        settings.json|settings.local.json) continue ;;   # ours, never shared
-        sessions|history.jsonl|backups|projects|todos|statsig|shell-snapshots|ide)
-          continue ;;                                     # mutable operator state
+        settings.json|settings.local.json|sessions|history.jsonl|backups|projects|todos|statsig|shell-snapshots|ide) continue ;;
       esac
       [ -e "$d/$base" ] || ln -s "$entry" "$d/$base" 2>/dev/null
     done
   fi
-
-  # Regenerated every spawn so it tracks edits to the operator's settings.
-  # Written to a temp file and renamed, so a concurrent spawn can never read a
-  # half-written settings.json, and a failed python run leaves the previous good
-  # file in place rather than a truncated one.
-  if command -v python3 >/dev/null 2>&1 && [ -f "$src/settings.json" ]; then
-    tmp="$d/.settings.json.$$"
-    if python3 - "$src/settings.json" "$tmp" <<'PY'
-import json, sys
-src, dst = sys.argv[1], sys.argv[2]
-try:
-    with open(src, encoding='utf-8') as fh:
-        cfg = json.load(fh)
-except Exception:
-    cfg = {}
-cfg.pop('hooks', None)
-cfg.pop('statusLine', None)
-cfg.setdefault('permissions', {})['defaultMode'] = 'bypassPermissions'
-with open(dst, 'w', encoding='utf-8') as fh:
-    json.dump(cfg, fh, indent=2)
-PY
-    then
-      mv -f "$tmp" "$d/settings.json"
-    else
-      rm -f "$tmp"
-    fi
-  fi
-
-  # Last resort, and still atomic.
-  if [ ! -f "$d/settings.json" ]; then
-    tmp="$d/.settings.json.$$"
-    printf '%s\n' '{ "permissions": { "defaultMode": "bypassPermissions" } }' > "$tmp" \
-      && mv -f "$tmp" "$d/settings.json"
-  fi
-
-  # Caller claims UNRESTRICTED on the strength of this file; prove it first.
-  if ! grep -q '"defaultMode": *"bypassPermissions"' "$d/settings.json" 2>/dev/null; then
-    printf 'agentmux: failed to establish bypassPermissions in %s\n' "$d/settings.json" >&2
+  tmp="$(mktemp "$d/.settings.XXXXXX")" || return 1
+  if ! python3 - "$src/settings.json" "$tmp" "$posture" "$tools" "$deny_tools" <<'PYCFG'
+import json, pathlib, sys
+src, dst, posture, tools, deny = sys.argv[1:]
+cfg = json.loads(pathlib.Path(src).read_text()) if pathlib.Path(src).is_file() else {}
+for key in ('hooks', 'statusLine', 'permissions', 'enabledPlugins', 'mcpServers'):
+    cfg.pop(key, None)
+# Replace inherited permissions: operator allow rules/additionalDirectories must
+# never reopen a bounded agent's filesystem or permission modes.
+mode = {'unrestricted': 'bypassPermissions', 'workspace-write': 'acceptEdits',
+        'read-only': 'default'}[posture]
+blocked = deny.split(',') if deny else []
+if posture != 'unrestricted':
+    blocked += ['Bash', 'PowerShell', 'Agent', 'Task', 'NotebookEdit', 'mcp__*']
+if posture == 'read-only':
+    blocked += ['Write', 'Edit']
+cfg['permissions'] = {'defaultMode': mode, 'allow': [], 'deny': sorted(set(blocked))}
+if posture != 'unrestricted':
+    cfg['permissions']['disableBypassPermissionsMode'] = 'disable'
+    cfg['disableAllHooks'] = True
+pathlib.Path(dst).write_text(json.dumps(cfg, indent=2) + '\n')
+PYCFG
+  then
+    rm -f "$tmp"
     return 1
   fi
+  mv -f "$tmp" "$d/settings.json" || return 1
+  # Read the published file independently. No fallback to stale/permissive settings.
+  python3 - "$d/settings.json" "$posture" "$deny_tools" <<'PYPROVE' || return 1
+import json, sys
+cfg = json.load(open(sys.argv[1]))
+p = cfg['permissions']
+posture = sys.argv[2]
+assert p['defaultMode'] == {'unrestricted': 'bypassPermissions',
+    'workspace-write': 'acceptEdits', 'read-only': 'default'}[posture]
+required = set(filter(None, sys.argv[3].split(',')))
+if posture != 'unrestricted':
+    required.update(['Bash', 'PowerShell', 'Agent', 'Task', 'NotebookEdit', 'mcp__*'])
+    assert p['disableBypassPermissionsMode'] == 'disable'
+    assert not p['allow'] and not p.get('additionalDirectories')
+    assert cfg['disableAllHooks'] is True
+if posture == 'read-only':
+    required.update(['Write', 'Edit'])
+assert required.issubset(p['deny'])
+PYPROVE
   printf '%s' "$d"
 }
 
@@ -190,6 +207,9 @@ agentmux - drive other agent CLIs in tmux panes
 
   spawn <name> [--cli codex|claude|grok|shell|<cmd>] [--cwd DIR] [--model M]
                [--task ABC-123] [--auth METHOD]
+               [--agentdef NAME] [--posture read-only|workspace-write|unrestricted]
+               [--persona-file PATH] [--tools CSV] [--deny-tools CSV]
+               [--team TM-042] [--role lead|worker|reviewer|researcher]
                                start an agent in a detached tmux session.
                                --task binds a Jira issue: recorded in run/, shown
                                by `list` and the dashboard, and exported to the
@@ -439,20 +459,40 @@ if path.exists():
 PY
 }
 
-cmd_spawn() {
+cmd_spawn() (
   local name="${1:-}"; shift || true
   [ -n "$name" ] || die "spawn needs a name"
   local cli="codex" cwd="$PWD" model="" task="" summary="" created="" auth=""
+  local agentdef="" posture="unrestricted" persona_file="" tools="" deny_tools="" team="" role=""
+  local posture_explicit=0
   while [ $# -gt 0 ]; do
     case "$1" in
-      --cli)      cli="${2:-}";   shift 2 ;;
-      --cwd)      cwd="${2:-}";   shift 2 ;;
-      --model|-m) model="${2:-}"; shift 2 ;;
-      --task)     task="${2:-}";  shift 2 ;;
-      --auth)     auth="${2:-}";  shift 2 ;;
+      --cli|--cwd|--model|-m|--task|--auth|--agentdef|--posture|--persona-file|--tools|--deny-tools|--team|--role)
+        [ $# -ge 2 ] && [ -n "$2" ] && [[ "$2" != --* ]] || die "spawn: $1 needs a value"
+        ;;
       *) die "spawn: unknown option '$1'" ;;
     esac
+    case "$1" in
+      --cli) cli="$2" ;; --cwd) cwd="$2" ;; --model|-m) model="$2" ;;
+      --task) task="$2" ;; --auth) auth="$2" ;; --agentdef) agentdef="$2" ;;
+      --posture) posture="$2"; posture_explicit=1 ;; --persona-file) persona_file="$2" ;;
+      --tools) tools="$2" ;; --deny-tools) deny_tools="$2" ;;
+      --team) team="$2" ;; --role) role="$2" ;;
+    esac
+    shift 2
   done
+  [ -z "$agentdef" ] || [[ "$agentdef" =~ ^[a-z][a-z0-9-]{0,63}$ ]] || die "invalid --agentdef"
+  [ -z "$team" ] || { [ "${#team}" -le 511 ] && [[ "$team" =~ ^TM-[0-9]+$ ]]; } || die "invalid --team (expected TM-042)"
+  case "$role" in ''|lead|worker|reviewer|researcher) ;; *) die "invalid --role" ;; esac
+  case "$posture" in read-only|workspace-write|unrestricted) ;; *) die "invalid --posture" ;; esac
+  local value
+  for value in "$tools" "$deny_tools"; do
+    [ -z "$value" ] || { [ "${#value}" -le 511 ] && [[ "$value" =~ ^[A-Za-z][A-Za-z0-9_]*(,[A-Za-z][A-Za-z0-9_]*)*$ ]]; } || die "invalid tool CSV (expected tool names)"
+  done
+  if [ -n "$persona_file" ]; then
+    persona_file="$(to_wsl_path "$persona_file")"
+    [ -f "$persona_file" ] && [ ! -L "$persona_file" ] && [ -r "$persona_file" ] || die "--persona-file must be a readable regular file, not a symlink"
+  fi
   have "$name" && die "agent '$name' already exists (kill it first)"
 
   # A name reaches three places that make an unchecked one dangerous rather than
@@ -492,15 +532,32 @@ cmd_spawn() {
   cwd="$(to_wsl_path "$cwd")"
   [ -d "$cwd" ] || die "not a directory: $cwd"
 
-  # Spawned agents get unrestricted access by DEFAULT. The permissive posture is
-  # carried in each provider's own config rather than as a CLI flag:
-  #   codex  - the "yolo" profile in $CODEX_HOME/yolo.config.toml
-  #   claude - permissions.defaultMode in a dedicated CLAUDE_CONFIG_DIR
-  # Set AGENTMUX_NO_BYPASS=1 to spawn a sandboxed pane instead.
-  # `shell` and the passthrough case are never rewritten - a bare command string
-  # is the caller's own.
-  local bypass=1
-  [ "${AGENTMUX_NO_BYPASS:-0}" = "1" ] && bypass=0
+  # The machine brake is a workspace-write ceiling; read-only stays read-only.
+  if [ "${AGENTMUX_NO_BYPASS:-0}" = 1 ] && [ "$posture" = unrestricted ]; then
+    printf 'agentmux: AGENTMUX_NO_BYPASS clamps unrestricted to workspace-write\n' >&2
+    posture=workspace-write
+  fi
+  local bypass=0
+  [ "$posture" = unrestricted ] && bypass=1
+  case "$cli" in
+    codex|claude) ;;
+    grok)
+      # Installed Grok exposes named sandbox profiles, but neither --help nor
+      # inspect establishes a filesystem policy for these two contract levels.
+      # Permission modes alone are not a filesystem boundary. Fail closed.
+      [ "$posture" = unrestricted ] || die "grok cannot enforce posture '$posture': no verified sandbox profile"
+      ;;
+    *)
+      [ "$posture_explicit" = 0 ] && [ -z "$agentdef$tools$deny_tools$persona_file$team$role" ] || die "cannot enforce agent definition flags for CLI '$cli'"
+      ;;
+  esac
+  # Protect config GC and same-name preparation until the pane exists. flock is
+  # released by this subshell even on validation/config/launch failure.
+  local spawn_lock
+  exec {spawn_lock}>"$ROOT/.spawn.lock" || die "cannot open spawn lock"
+  flock -x "$spawn_lock" || die "cannot lock spawn"
+  have "$name" && die "agent '$name' already exists (kill it first)"
+  claude_config_gc
 
   local nb launch env_prefix
   nb="$(node_bin)"
@@ -541,49 +598,74 @@ cmd_spawn() {
     [ -n "$auth_exports" ] && env_prefix="$env_prefix $auth_exports"
   fi
 
+  local quoted_model="" quoted_path="" ccd="" cli_help=""
+  [ -z "$model" ] || printf -v quoted_model '%q' "$model"
   case "$cli" in
     codex)
-      launch="codex${model:+ -m $model}"
-      [ "$bypass" = 1 ] && launch="codex --profile yolo${model:+ -m $model}"
-      # A custom-provider method brings its own profile, and codex accepts exactly
-      # one --profile. The method's profile replaces yolo, so carry the permission
-      # posture across with explicit flags instead of silently losing it.
-      #
-      # auth_flags may already carry the method's configured model as -m. An explicit
-      # `spawn --model` must still win, and codex takes the LAST -m, so appending the
-      # caller's value after the method's gives the right precedence:
-      #   spawn --model X  >  the model set in Settings  >  the profile's model
-      if [ -n "$auth_flags" ]; then
-        launch="codex ${auth_flags}${model:+ -m $model}"
-        [ "$bypass" = 1 ] && launch="$launch --dangerously-bypass-approvals-and-sandbox"
+      launch="codex${auth_flags:+ $auth_flags}${model:+ -m $quoted_model}"
+      if [ "$bypass" = 1 ]; then
+        launch="$launch --dangerously-bypass-approvals-and-sandbox"
+      else
+        launch="$launch --sandbox $posture --ask-for-approval never"
       fi
       ;;
     claude)
-      launch="claude${model:+ --model $model}"
-      if [ "$bypass" = 1 ]; then
-        local ccd
-        # Refuse to spawn rather than report UNRESTRICTED for an agent whose
-        # bypass config could not be written.
-        ccd="$(claude_config_dir)" || die "could not prepare the claude config dir"
-        env_prefix="$env_prefix export CLAUDE_CONFIG_DIR='${ccd}';"
+      ccd="$(claude_config_dir "$name" "$posture" "$tools" "$deny_tools")" || die "could not prove claude posture '$posture'"
+      printf -v quoted_path '%q' "$ccd"
+      env_prefix="$env_prefix export CLAUDE_CONFIG_DIR=$quoted_path;"
+      printf -v quoted_path '%q' "$ccd/settings.json"
+      launch="claude${model:+ --model $quoted_model} --settings $quoted_path --setting-sources ''"
+      if [ "$bypass" = 0 ]; then
+        cli_help="$(claude --help 2>/dev/null)" || die "cannot verify claude restricted mode"
+        [[ "$cli_help" == *--restricted* ]] || die "claude cannot enforce bounded posture: --restricted unavailable"
+        launch="$launch --restricted --strict-mcp-config --mcp-config '{\"mcpServers\":{}}'"
+        # Positive builtin set closes alternative writers/delegation paths. An
+        # explicit --tools must be a subset, never reopen a shell via --restricted.
+        local bounded_tools="Read,Grep,Glob" requested
+        [ "$posture" = read-only ] || bounded_tools="$bounded_tools,Write,Edit"
+        if [ -n "$tools" ]; then
+          local -a requested_tools
+          IFS=, read -r -a requested_tools <<< "$tools"
+          for requested in "${requested_tools[@]}"; do
+            [[ ",$bounded_tools," == *",$requested,"* ]] || die "tool '$requested' cannot be enabled under $posture"
+          done
+        else
+          tools="$bounded_tools"
+        fi
       fi
+      [ -z "$tools" ] || launch="$launch --tools '$tools'"
+      [ -z "$deny_tools" ] || launch="$launch --disallowedTools '$deny_tools'"
       ;;
-    grok)
-      # xAI's own CLI. Authenticates with a BROWSER/DEVICE login to the Grok
-      # account (~/.grok/auth.json via `grok login`); XAI_API_KEY is only the
-      # non-browser fallback. So this needs no key at all - unlike the codex
-      # xai provider, which needs one AND is broken anyway (xAI rejects codex's
-      # built-in `namespace` tool type).
-      launch="grok${model:+ -m $model}"
-      [ "$bypass" = 1 ] && launch="grok --permission-mode bypassPermissions${model:+ -m $model}"
-      ;;
-    shell)  launch="${SHELL:-/bin/bash}" ;;
-    *)      launch="$cli" ;;
+    grok) launch="grok --permission-mode bypassPermissions${model:+ -m $quoted_model}" ;;
+    shell) launch="${SHELL:-/bin/bash}" ;;
+    *) launch="$cli" ;;
   esac
+
+  # Copy before launch without following an old sidecar symlink. Persona content
+  # is never interpolated into a command; workers receive only its file path.
+  local persona_tmp=""
+  if [ -n "$persona_file" ] || { [ "$cli" != claude ] && [ -n "$tools$deny_tools" ]; }; then
+    persona_tmp="$(mktemp "$RUNDIR/.persona.XXXXXX")" || die "cannot create persona"
+    if [ -n "$persona_file" ]; then
+      cat -- "$persona_file" > "$persona_tmp" || { rm -f "$persona_tmp"; die "cannot copy persona"; }
+    fi
+    if [ "$cli" != claude ] && [ -n "$tools$deny_tools" ]; then
+      printf '\n[degraded: named tool restrictions are advisory on %s]\nUse only these tools when specified: %s\nDo not use these tools: %s\n' "$cli" "${tools:-unspecified}" "${deny_tools:-none}" >> "$persona_tmp"
+      printf 'agentmux: degraded: %s named tool restrictions recorded in persona\n' "$cli" >&2
+    fi
+    chmod 600 "$persona_tmp" && mv -f "$persona_tmp" "$RUNDIR/$name.persona" || die "cannot publish private persona"
+    [ "$(stat -c '%a' "$RUNDIR/$name.persona")" = 600 ] || die "persona must be mode 0600"
+    printf -v quoted_path '%q' "$RUNDIR/$name.persona"
+    env_prefix="$env_prefix export AGENTMUX_PERSONA_FILE=$quoted_path;"
+  else
+    rm -f "$RUNDIR/$name.persona"
+  fi
 
   tm new-session -d -s "$name" -c "$cwd" -x "$COLS" -y "$ROWS" \
      "${env_prefix} exec ${launch}" \
      || die "failed to start tmux session"
+  flock -u "$spawn_lock"
+  exec {spawn_lock}>&-
 
   local pane
   pane="$(tm list-panes -t "$name" -F '#{pane_id}' 2>/dev/null | head -1)"
@@ -599,6 +681,14 @@ cmd_spawn() {
   printf '%s\n' "$cwd" > "$RUNDIR/$name.cwd"
   printf '%s\n' "$launch" > "$RUNDIR/$name.launch"
   date -Is > "$RUNDIR/$name.started"
+  if ! { printf '%s\n' "$agentdef" > "$RUNDIR/$name.agentdef" &&
+         printf '%s\n' "$posture" > "$RUNDIR/$name.posture" &&
+         printf '%s\n' "$team" > "$RUNDIR/$name.team" &&
+         printf '%s\n' "$role" > "$RUNDIR/$name.role"; }; then
+    tm kill-session -t "=$name" 2>/dev/null
+    rm -f "$RUNDIR/$name".*
+    die "could not record spawn metadata"
+  fi
   # Read back by `list` and by the dashboard through its hardened read_field().
   [ -n "$task" ] && printf '%s\n' "$task" > "$RUNDIR/$name.task"
   # Which auth method this agent actually started with. An id from auth.json, never
@@ -667,19 +757,9 @@ cmd_spawn() {
     fi
     rm -rf "$clock" 2>/dev/null
   fi
-  # Report the profile actually in force. An --auth method brings its own, replacing
-  # yolo, so naming yolo unconditionally described a configuration that was not running.
-  [ "$bypass" = 1 ] && case "$cli" in
-    codex)  if [ -n "$auth_flags" ]; then
-              printf "  permissions: UNRESTRICTED (--dangerously-bypass-approvals-and-sandbox)\n"
-            else
-              printf "  permissions: UNRESTRICTED (codex profile 'yolo')\n"
-            fi ;;
-    claude) printf "  permissions: UNRESTRICTED (CLAUDE_CONFIG_DIR bypassPermissions)\n" ;;
-    grok)   printf "  permissions: UNRESTRICTED (--permission-mode bypassPermissions)\n" ;;
-  esac
+  case "$cli" in codex|claude|grok) printf '  posture: %s\n' "$posture" ;; esac
   printf "watch it:  wsl -d Ubuntu -- tmux -L %s attach -t %s\n" "$SOCKET" "$name"
-}
+)
 
 # Does the pane currently show a blocking prompt that is NOT the agent's normal input?
 #
@@ -1836,7 +1916,7 @@ cmd_exec() {
   cwd="$(to_wsl_path "$cwd")"
   [ -d "$cwd" ] || die "not a directory: $cwd"
   export PATH="$(node_bin):$PATH"
-  # Same unrestricted default as cmd_spawn, via the same config-carried profile.
+  # Same unrestricted default as cmd_spawn; exec retains its legacy yolo profile.
   local bypass=""
   [ "${AGENTMUX_NO_BYPASS:-0}" != "1" ] && bypass="--profile yolo"
   # stdin is redirected from /dev/null: codex exec inherits stdin otherwise, so
