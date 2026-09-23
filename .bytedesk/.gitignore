@@ -1,0 +1,3 @@
+# Written by `tm init`. Worktrees are local checkouts, not shared board state.
+# The store at task-management/ carries its own .gitignore for pid/port/cache/bin.
+worktrees

@@ -37,6 +37,7 @@ import subprocess
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -537,8 +538,26 @@ def cmd_journal(args):
 # writing JSON at an HTTP endpoint. A rule that says "use the task board" and a board
 # that takes a curl invocation are not compatible; one of them loses, and it is never
 # the convenient one. These verbs make the board the path of least resistance.
+#
+# Work is addressed by its MINTED KEY - TM-014, EP-001 - not by a row number. That
+# is the identifier that goes in a commit message, a branch name and a handoff, and
+# it is stable across a restore. The integer id every one of these verbs used to
+# take is still accepted wherever a key is, because agentmux.sh and two suites
+# already pass one; `--json` output and every printed line lead with the key.
 
-TASK_STATUSES = ("todo", "in_progress", "blocked", "done", "cancelled")
+TASK_STATUSES = ("backlog", "open", "in_progress", "blocked", "parked", "done", "deleted")
+ISSUE_TYPES = ("task", "bug", "story", "spike", "chore")
+PRIORITIES = ("highest", "high", "medium", "low", "lowest")
+LINK_TYPES = ("relates", "duplicates", "blocks", "causes", "implements")
+KEY_RE = re.compile(r"^(EP|TM|ADR|SP|CAP)-[0-9]{3,9}$")
+
+
+class BoardError(Exception):
+    """The board refused, and said why. Carries the remedy when there is one."""
+
+    def __init__(self, message, missing=None):
+        super().__init__(message)
+        self.missing = missing or []
 
 
 def api(method, path, body=None):
@@ -546,36 +565,166 @@ def api(method, path, body=None):
     request = urllib.request.Request(
         f"{DASHBOARD}/api/{path}", method=method, data=data,
         headers={"Content-Type": "application/json"} if data else {})
-    with urllib.request.urlopen(request, timeout=10) as response:
-        return json.loads(response.read())
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            return json.loads(response.read())
+    except urllib.error.HTTPError as err:
+        # The board's refusals are the useful half of this CLI. Passing back
+        # "HTTP Error 409" instead of "TM-014 cannot close: missing evidence"
+        # and the command that fixes it would waste the whole gate.
+        try:
+            payload = json.loads(err.read())
+        except (ValueError, OSError):
+            raise BoardError(f"the board returned HTTP {err.code}") from None
+        raise BoardError(payload.get("error") or f"HTTP {err.code}",
+                         payload.get("missing")) from None
+
+
+def board_call(method, path, body=None):
+    """One place where every board verb's failure is turned into a message."""
+    try:
+        return api(method, path, body)
+    except BoardError as err:
+        print(f"coordination: {err}", file=sys.stderr)
+        for item in err.missing:
+            print(f"  fix: {item.get('hint', '')}", file=sys.stderr)
+        return None
+    except (urllib.error.URLError, OSError, ValueError, TimeoutError) as err:
+        print(f"coordination: dashboard unreachable at {DASHBOARD} ({err})", file=sys.stderr)
+        print("  start it with: python3 dashboard/server.py", file=sys.stderr)
+        return None
+
+
+def need_key(value, kind=None):
+    """Accept a key, or the row id the older verbs took."""
+    text = str(value)
+    if KEY_RE.match(text):
+        if kind and not text.startswith(kind + "-"):
+            raise BoardError(f"{text} is not a {kind} key")
+        return text
+    if re.fullmatch(r"[0-9]{1,18}", text):
+        return int(text)
+    raise BoardError(f"not a board key: {text}")
+
+
+def address(value, kind):
+    """The {id: ...} or {key: ...} half of a legacy-endpoint request body."""
+    resolved = need_key(value, kind)
+    return {"key": resolved} if isinstance(resolved, str) else {"id": resolved}
+
+
+def card_line(task):
+    """One task, one line, key first."""
+    labels = ",".join(task.get("labels") or [])
+    flag = "!" if "needs-triage" in (task.get("labels") or []) else " "
+    return (f"  {task.get('id', '?'):<9}{flag} {task.get('status', '?'):<12} "
+            f"{(task.get('assignee') or task.get('agent') or '-'):<10} "
+            f"{str(task.get('title', ''))[:56]:<56} {labels[:28]}")
 
 
 def cmd_tasks(args):
-    try:
-        epics = api("GET", "epics").get("epics", [])
-    except (urllib.error.URLError, OSError, ValueError, TimeoutError) as err:
-        print(f"coordination: dashboard unreachable at {DASHBOARD} ({err})",
-              file=sys.stderr)
-        print("  start it with: python3 dashboard/server.py", file=sys.stderr)
+    board = board_call("GET", "board")
+    if board is None:
         return 1
     if args.json:
-        print(json.dumps(epics, indent=2))
+        print(json.dumps(board, indent=2))
         return 0
-    mine = args.mine
-    shown = 0
-    for epic in epics:
-        tasks = [t for t in epic.get("tasks", [])
-                 if (not mine or t.get("agent") == mine)
-                 and (args.all or t.get("status") not in ("done", "cancelled"))]
-        if not tasks:
+    epics = {epic["id"]: epic for epic in board.get("epics", [])}
+    by_epic = {}
+    for task in board.get("tasks", []):
+        if args.mine and (task.get("assignee") or task.get("actor")) != args.mine:
             continue
-        print(f"\nepic {epic['id']}  {epic.get('title', '')}  [{epic.get('status')}]")
-        for task in tasks:
+        if not args.all and task.get("status") in ("done", "deleted"):
+            continue
+        by_epic.setdefault(task.get("epic"), []).append(task)
+    shown = 0
+    for epic_key in sorted(by_epic, key=lambda k: (k is None, k or "")):
+        epic = epics.get(epic_key)
+        title = epic.get("title", "") if epic else "(no epic)"
+        status = epic.get("status", "") if epic else ""
+        print(f"\n{epic_key or '(unfiled)':<9} {title}  [{status}]")
+        for task in by_epic[epic_key]:
             shown += 1
-            print(f"  {task['id']:>4}  {task.get('status', '?'):<12} "
-                  f"{(task.get('agent') or '-'):<10} {task.get('title', '')[:70]}")
+            print(card_line(task))
     if not shown:
-        print("no open tasks" + (f" for {mine}" if mine else ""))
+        print("no open tasks" + (f" for {args.mine}" if args.mine else ""))
+        return 0
+    active = board.get("state", {}).get("activeEpic")
+    print(f"\n{shown} open  |  active epic: {active or 'none'}"
+          f"  |  keys minted: {board.get('counters', {})}")
+    return 0
+
+
+def cmd_task_show(args):
+    task = board_call("GET", f"board/entity?id={need_key(args.id)}")
+    if task is None:
+        return 1
+    if args.json:
+        print(json.dumps(task, indent=2))
+        return 0
+    print(f"{task['id']}  {task.get('title', '')}")
+    print(f"  status     {task.get('status')}   epic {task.get('epic') or '-'}"
+          f"   type {task.get('type')}   priority {task.get('priority') or '-'}")
+    print(f"  assignee   {task.get('assignee') or '-'}   actor {task.get('actor') or '-'}")
+    if task.get("labels"):
+        print(f"  labels     {', '.join(task['labels'])}")
+    if task.get("triageMissing"):
+        print(f"  missing    {', '.join(task['triageMissing'])}")
+    if task.get("blockedBy"):
+        print(f"  blocked by {', '.join(task['blockedBy'])}")
+    for index, item in enumerate(task.get("acceptance") or [], 1):
+        print(f"  [{'x' if item['done'] else ' '}] {index}. {item['text']}")
+    for ref in task.get("evidence") or []:
+        print(f"  evidence   {ref}")
+    for ref in task.get("commits") or []:
+        print(f"  commit     {ref}")
+    for comment in task.get("comments") or []:
+        print(f"  note       {comment.get('author') or '?'}: {comment.get('text', '')[:70]}")
+    if task.get("body"):
+        print()
+        for line in str(task["body"]).splitlines():
+            print("  " + line)
+    return 0
+
+
+def cmd_task_new(args):
+    fields = {"kind": "task", "title": args.title, "actor": args.agent}
+    if args.body:
+        fields["body"] = args.body
+    if args.ac:
+        fields["acceptance"] = args.ac
+    if args.epic:
+        fields["epic"] = args.epic
+    if args.assignee:
+        fields["assignee"] = args.assignee
+    if args.type:
+        fields["type"] = args.type
+    if args.priority:
+        fields["priority"] = args.priority
+    if args.estimate is not None:
+        fields["estimate"] = args.estimate
+    if args.label:
+        fields["labels"] = args.label
+    if args.human:
+        fields["human"] = True
+    row = board_call("POST", "board/create", fields)
+    if row is None:
+        return 1
+    print(f"{row['id']} created in {row.get('epic') or '(no epic)'}: "
+          f"{row.get('title', '')[:60]}")
+    journal("plan", f"{row['id']} created", row.get("title", ""), args.agent)
+    return 0
+
+
+def cmd_task_add(args):
+    """The original verb, kept. It creates as a mirror - a bare title is enough -
+    so every existing caller keeps working; `task-new` is the gated path."""
+    row = board_call("POST", "tasks", {"epic_id": args.epic, "title": args.title,
+                                       "agent": args.agent or None})
+    if row is None:
+        return 1
+    print(f"{row['key']} created in epic {args.epic}: {row.get('title', '')[:60]}")
+    journal("plan", f"{row['key']} created", row.get("title", ""), args.agent)
     return 0
 
 
@@ -585,28 +734,290 @@ def cmd_task_status(args):
               file=sys.stderr)
         return 2
     try:
-        row = api("POST", "status", {"kind": "task", "id": args.id,
-                                     "status": args.status})
-    except (urllib.error.URLError, OSError, ValueError, TimeoutError) as err:
-        print(f"coordination: could not update task {args.id}: {err}", file=sys.stderr)
-        return 1
-    print(f"task {row['id']} -> {row['status']}  {row.get('title', '')[:60]}")
+        target = need_key(args.id, "TM")
+    except BoardError as err:
+        print(f"coordination: {err}", file=sys.stderr)
+        return 2
+    if isinstance(target, int):
+        # The row-id form predates keys and has no gated endpoint; it stays on
+        # the compatibility surface so `agentmux task done 7` keeps working.
+        row = board_call("POST", "status", {"kind": "task", "id": target,
+                                            "status": args.status})
+        if row is None:
+            return 1
+        key, title = row["key"], row.get("title", "")
+    else:
+        result = board_call("POST", "board/status",
+                            {"id": target, "status": args.status, "actor": args.agent,
+                             "reason": args.reason or None})
+        if result is None:
+            return 1
+        key, title = result["id"], result["entity"].get("title", "")
+        for name in ("closed", "reopened"):
+            if result.get(name):
+                print(f"  epic {result[name]} {name}")
+    print(f"{key} -> {args.status}  {title[:60]}")
     # A status change is a coordination event, so it goes in the journal too - the
     # board records state, the journal records that a human or agent decided it.
     journal("done" if args.status == "done" else "note",
-            f"task {row['id']} -> {args.status}", row.get("title", ""), args.agent)
+            f"{key} -> {args.status}", title, args.agent)
     return 0
 
 
-def cmd_task_add(args):
-    try:
-        row = api("POST", "tasks", {"epic_id": args.epic, "title": args.title,
-                                    "agent": args.agent or None})
-    except (urllib.error.URLError, OSError, ValueError, TimeoutError) as err:
-        print(f"coordination: could not create the task: {err}", file=sys.stderr)
+def cmd_task_edit(args):
+    patch = {}
+    if args.title:
+        patch["title"] = args.title
+    if args.body is not None:
+        patch["body"] = args.body
+    if args.priority:
+        patch["priority"] = args.priority
+    if args.type:
+        patch["type"] = args.type
+    if args.estimate is not None:
+        patch["estimate"] = args.estimate
+    if not patch:
+        print("coordination: nothing to change", file=sys.stderr)
+        return 2
+    row = board_call("POST", "board/update",
+                     {"id": need_key(args.id), "patch": patch, "actor": args.agent})
+    if row is None:
         return 1
-    print(f"task {row['id']} created in epic {args.epic}: {row.get('title', '')[:60]}")
-    journal("plan", f"task {row['id']} created", row.get("title", ""), args.agent)
+    print(f"{row['id']} edited: {', '.join(sorted(patch))}")
+    return 0
+
+
+def cmd_task_ac(args):
+    body = {"id": need_key(args.id), "actor": args.agent}
+    if args.text:
+        body["text"] = args.text
+    elif args.remove is not None:
+        body.update({"index": args.remove, "remove": True})
+    elif args.untick is not None:
+        body.update({"index": args.untick, "done": False})
+    elif args.tick is not None:
+        body.update({"index": args.tick, "done": True})
+    else:
+        print("coordination: give a criterion, or --tick/--untick/--remove <n>",
+              file=sys.stderr)
+        return 2
+    row = board_call("POST", "board/acceptance", body)
+    if row is None:
+        return 1
+    for index, item in enumerate(row.get("acceptance") or [], 1):
+        print(f"  [{'x' if item['done'] else ' '}] {index}. {item['text']}")
+    return 0
+
+
+def cmd_task_label(args):
+    row = board_call("POST", "board/label",
+                     {"id": need_key(args.id), "label": args.label,
+                      "present": not args.remove, "actor": args.agent})
+    if row is None:
+        return 1
+    print(f"{row['id']} labels: {', '.join(row.get('labels') or []) or '(none)'}")
+    return 0
+
+
+def cmd_task_dep(args):
+    row = board_call("POST", "board/dep",
+                     {"id": need_key(args.id, "TM"), "blockedBy": args.on,
+                      "present": not args.clear, "actor": args.agent})
+    if row is None:
+        return 1
+    print(f"{row['id']} blocked by: "
+          f"{', '.join(row.get('blockedBy') or []) or '(nothing)'}")
+    return 0
+
+
+def cmd_task_attach(args):
+    op = {"evidence": "evidence", "commit": "commit", "touch": "touch"}[args.command]
+    field = {"evidence": "ref", "commit": "ref", "touch": "path"}[args.command]
+    row = board_call("POST", f"board/{op}",
+                     {"id": need_key(args.id), field: args.value, "actor": args.agent})
+    if row is None:
+        return 1
+    print(f"{row['id']} {op}: {args.value}")
+    return 0
+
+
+def cmd_task_comment(args):
+    row = board_call("POST", "board/comment",
+                     {"id": need_key(args.id), "text": args.text, "actor": args.agent})
+    if row is None:
+        return 1
+    print(f"{row['id']}: {len(row.get('comments') or [])} comment(s)")
+    return 0
+
+
+def cmd_task_link(args):
+    row = board_call("POST", "board/link",
+                     {"id": need_key(args.id), "type": args.type, "target": args.target,
+                      "present": not args.remove, "actor": args.agent})
+    if row is None:
+        return 1
+    pairs = [f"{item['type']} {item['id']}" for item in row.get("links") or []]
+    print(f"{row['id']} links: " + (", ".join(pairs) or "(none)"))
+    return 0
+
+
+def cmd_task_assign(args):
+    row = board_call("POST", "board/update",
+                     {"id": need_key(args.id), "patch": {"assignee": args.who},
+                      "actor": args.agent})
+    if row is None:
+        return 1
+    print(f"{row['id']} assigned to {args.who}")
+    return 0
+
+
+def cmd_task_move(args):
+    result = board_call("POST", "board/move",
+                        {"id": need_key(args.id, "TM"), "epic": args.epic,
+                         "actor": args.agent})
+    if result is None:
+        return 1
+    print(f"{result['id']}: {result.get('from') or '(none)'} -> "
+          f"{result.get('to') or '(none)'}")
+    for name in ("closed", "reopened"):
+        if result.get(name):
+            print(f"  epic {result[name]} {name}")
+    return 0
+
+
+def cmd_task_why(args):
+    answer = board_call("GET", f"board/why?id={need_key(args.id, 'TM')}")
+    if answer is None:
+        return 1
+    print(answer["text"])
+    for entry in answer.get("chain") or []:
+        print(f"  {'  ' * entry['depth']}{entry['id']}  {entry.get('status')}"
+              f"  {str(entry.get('title') or '')[:50]}")
+    return 0
+
+
+def cmd_task_next(args):
+    result = board_call("GET", f"board/next?limit={args.limit}")
+    if result is None:
+        return 1
+    tasks = result.get("tasks") or []
+    if not tasks:
+        print("nothing is startable: every open task is blocked or under-specified")
+        return 0
+    for task in tasks:
+        print(card_line(task))
+    return 0
+
+
+def cmd_epic_new(args):
+    row = board_call("POST", "board/create",
+                     {"kind": "epic", "title": args.title, "body": args.body or "",
+                      "actor": args.agent})
+    if row is None:
+        return 1
+    print(f"{row['id']} created: {row.get('title', '')[:60]}")
+    if args.active:
+        board_call("POST", "board/state", {"name": "activeEpic", "value": row["id"]})
+        print(f"  active epic is now {row['id']}")
+    journal("plan", f"{row['id']} created", row.get("title", ""), args.agent)
+    return 0
+
+
+def cmd_epic_status(args):
+    result = board_call("POST", "board/status",
+                        {"id": need_key(args.id, "EP"), "status": args.status,
+                         "actor": args.agent})
+    if result is None:
+        return 1
+    print(f"{result['id']} -> {result['to']}")
+    return 0
+
+
+def cmd_active(args):
+    result = board_call("POST", "board/state",
+                        {"name": "activeEpic", "value": args.epic})
+    if result is None:
+        return 1
+    print(f"active epic: {result.get('activeEpic') or 'none'}")
+    return 0
+
+
+def cmd_new_entity(args):
+    kind = {"adr-new": "adr", "sprint-new": "sprint", "cap-new": "capability"}[args.command]
+    row = board_call("POST", "board/create",
+                     {"kind": kind, "title": args.title, "body": args.body or "",
+                      "actor": args.agent})
+    if row is None:
+        return 1
+    print(f"{row['id']} created: {row.get('title', '')[:60]}")
+    return 0
+
+
+def cmd_sprint_commit(args):
+    failures = 0
+    for key in args.tasks:
+        row = board_call("POST", "board/update",
+                         {"id": need_key(key, "TM"), "actor": args.agent,
+                          "patch": {"sprint": args.sprint}})
+        if row is None:
+            failures += 1
+        else:
+            print(f"{row['id']} -> {args.sprint}")
+    return 1 if failures else 0
+
+
+def cmd_triage(args):
+    result = board_call("POST", "board/triage",
+                        {"all": args.all, "dryRun": args.dry_run, "actor": args.agent})
+    if result is None:
+        return 1
+    for change in result.get("changed") or []:
+        gaps = ", ".join(change.get("missing") or []) or "-"
+        print(f"  {change['id']:<9} {change['label']:<16} {gaps}")
+    print(f"{len(result.get('changed') or [])} task(s) "
+          f"{'would change' if result.get('dryRun') else 'changed'}")
+    return 0
+
+
+def cmd_doctor(args):
+    report = board_call("GET", "board/doctor")
+    if report is None:
+        return 1
+    print(report["text"])
+    print(f"\n{report['errors']} error(s), {report['warnings']} warning(s)")
+    return 1 if report["errors"] and args.strict else 0
+
+
+def cmd_history(args):
+    query = f"board/history?limit={args.limit}"
+    if args.id:
+        query += f"&id={need_key(args.id)}"
+    result = board_call("GET", query)
+    if result is None:
+        return 1
+    for event in result.get("events") or []:
+        print(f"  {event['ts'][:19]}  {(event.get('id') or '-'):<9} "
+              f"{event['event']:<16} {event.get('actor') or '-'}")
+    return 0
+
+
+def cmd_find(args):
+    result = board_call("GET", "board/find?q=" + urllib.parse.quote(args.query))
+    if result is None:
+        return 1
+    for hit in result.get("hits") or []:
+        print(f"  {hit['id']:<9} {hit['kind']:<11} {hit['status']:<12} "
+              f"{str(hit['title'])[:56]}")
+    return 0
+
+
+def cmd_override(args):
+    result = board_call("POST", "board/override",
+                        {"reason": args.reason, "actor": args.agent})
+    if result is None:
+        return 1
+    print(f"one gate will be bypassed: {result.get('reason')}")
+    journal("note", "gate override armed", args.reason, args.agent)
     return 0
 
 
@@ -614,23 +1025,146 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="agent work coordination")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    tasks = sub.add_parser("tasks")
+    # ── the board verbs ──────────────────────────────────────────────────────
+    #
+    # Every one of these takes --agent, and every one is bound by the identity
+    # resolver below. That is not decoration: the board records who moved a task,
+    # and a field the caller can set to any name it likes is not a record of who
+    # did anything. RULE #-0.7.
+
+    def board_verb(name, handler, *, agent=True, **kwargs):
+        parser_ = sub.add_parser(name, **kwargs)
+        if agent:
+            parser_.add_argument("--agent", default=None)
+        parser_.set_defaults(func=handler, command=name)
+        return parser_
+
+    tasks = board_verb("tasks", cmd_tasks, agent=False)
     tasks.add_argument("--mine", default=None, help="only this agent's tasks")
-    tasks.add_argument("--all", action="store_true", help="include done and cancelled")
+    tasks.add_argument("--all", action="store_true", help="include done and deleted")
     tasks.add_argument("--json", action="store_true")
-    tasks.set_defaults(func=cmd_tasks)
 
-    status = sub.add_parser("task-status")
-    status.add_argument("id", type=int)
-    status.add_argument("status")
-    status.add_argument("--agent", default=None)
-    status.set_defaults(func=cmd_task_status)
+    show = board_verb("task-show", cmd_task_show, agent=False)
+    show.add_argument("id", help="TM-014, or the row id")
+    show.add_argument("--json", action="store_true")
 
-    add = sub.add_parser("task-add")
+    new = board_verb("task-new", cmd_task_new)
+    new.add_argument("title")
+    new.add_argument("--epic", default=None, help="EP-001; defaults to the active epic")
+    new.add_argument("--body", default=None, help="what and why")
+    new.add_argument("--ac", action="append", default=[],
+                     help="an acceptance criterion; repeat for more")
+    new.add_argument("--assignee", default=None)
+    new.add_argument("--type", default=None, choices=ISSUE_TYPES)
+    new.add_argument("--priority", default=None, choices=PRIORITIES)
+    new.add_argument("--estimate", type=float, default=None)
+    new.add_argument("--label", action="append", default=[])
+    new.add_argument("--human", action="store_true",
+                     help="file it with the human veto already set")
+
+    add = board_verb("task-add", cmd_task_add)
     add.add_argument("epic", type=int)
     add.add_argument("title")
-    add.add_argument("--agent", default=None)
-    add.set_defaults(func=cmd_task_add)
+
+    status = board_verb("task-status", cmd_task_status)
+    status.add_argument("id")
+    status.add_argument("status")
+    status.add_argument("--reason", default=None, help="required reading for blocked/parked")
+
+    edit = board_verb("task-edit", cmd_task_edit)
+    edit.add_argument("id")
+    edit.add_argument("--title", default=None)
+    edit.add_argument("--body", default=None)
+    edit.add_argument("--priority", default=None, choices=PRIORITIES)
+    edit.add_argument("--type", default=None, choices=ISSUE_TYPES)
+    edit.add_argument("--estimate", type=float, default=None)
+
+    criterion = board_verb("task-ac", cmd_task_ac)
+    criterion.add_argument("id")
+    criterion.add_argument("text", nargs="?", default=None)
+    criterion.add_argument("--tick", type=int, default=None)
+    criterion.add_argument("--untick", type=int, default=None)
+    criterion.add_argument("--remove", type=int, default=None)
+
+    label = board_verb("task-label", cmd_task_label)
+    label.add_argument("id")
+    label.add_argument("label")
+    label.add_argument("--remove", action="store_true")
+
+    dep = board_verb("task-dep", cmd_task_dep)
+    dep.add_argument("id")
+    dep.add_argument("--on", required=True, help="the task this one waits for")
+    dep.add_argument("--clear", action="store_true")
+
+    for name, metavar in (("evidence", "PATH_OR_URL"), ("commit", "SHA_OR_URL"),
+                          ("touch", "PATH")):
+        attach = board_verb("task-" + name, cmd_task_attach)
+        attach.add_argument("id")
+        attach.add_argument("value", metavar=metavar)
+
+    comment = board_verb("task-comment", cmd_task_comment)
+    comment.add_argument("id")
+    comment.add_argument("text")
+
+    link = board_verb("task-link", cmd_task_link)
+    link.add_argument("id")
+    link.add_argument("type", choices=LINK_TYPES)
+    link.add_argument("target")
+    link.add_argument("--remove", action="store_true")
+
+    assign = board_verb("task-assign", cmd_task_assign)
+    assign.add_argument("id")
+    assign.add_argument("who")
+
+    move = board_verb("task-move", cmd_task_move)
+    move.add_argument("id")
+    move.add_argument("--epic", required=True, help="EP-002, or none")
+
+    why = board_verb("task-why", cmd_task_why, agent=False)
+    why.add_argument("id")
+
+    nxt = board_verb("task-next", cmd_task_next, agent=False)
+    nxt.add_argument("--limit", type=int, default=10)
+
+    epic_new = board_verb("epic-new", cmd_epic_new)
+    epic_new.add_argument("title")
+    epic_new.add_argument("--body", default=None)
+    epic_new.add_argument("--active", action="store_true",
+                          help="make it the epic new tasks file into")
+
+    epic_status = board_verb("epic-status", cmd_epic_status)
+    epic_status.add_argument("id")
+    epic_status.add_argument("status")
+
+    active = board_verb("board-active", cmd_active, agent=False)
+    active.add_argument("epic", help="EP-002, or none")
+
+    for name in ("adr-new", "sprint-new", "cap-new"):
+        entity_new = board_verb(name, cmd_new_entity)
+        entity_new.add_argument("title")
+        entity_new.add_argument("--body", default=None)
+
+    commit_to = board_verb("sprint-commit", cmd_sprint_commit)
+    commit_to.add_argument("sprint")
+    commit_to.add_argument("tasks", nargs="+")
+
+    sweep = board_verb("triage", cmd_triage)
+    sweep.add_argument("--all", action="store_true", help="include resolved tasks")
+    sweep.add_argument("--dry-run", action="store_true")
+
+    report = board_verb("doctor", cmd_doctor, agent=False)
+    report.add_argument("--strict", action="store_true",
+                        help="exit non-zero when the board has errors")
+
+    log = board_verb("history", cmd_history, agent=False)
+    log.add_argument("id", nargs="?", default=None)
+    log.add_argument("--limit", type=int, default=50)
+
+    search = board_verb("find", cmd_find, agent=False)
+    search.add_argument("query")
+
+    bypass = board_verb("override", cmd_override)
+    bypass.add_argument("reason")
 
     claim = sub.add_parser("claim")
     claim.add_argument("resource")
@@ -661,8 +1195,14 @@ def main(argv=None):
 
     args = parser.parse_args(argv)
     # Resolve before a claim, journal write, or dashboard request can occur.
+    writes = ("task-new", "task-add", "task-status", "task-edit", "task-ac",
+              "task-label", "task-dep", "task-evidence", "task-commit", "task-touch",
+              "task-comment", "task-link", "task-assign", "task-move", "epic-new",
+              "epic-status", "adr-new", "sprint-new", "cap-new", "sprint-commit",
+              "triage", "override")
     field = {"claim": "holder", "release": "holder", "journal": "agent",
-             "entry": "agent", "task-add": "agent", "task-status": "agent"}.get(args.command)
+             "entry": "agent"}.get(args.command,
+                                   "agent" if args.command in writes else None)
     if field:
         try:
             claimed = getattr(args, field)

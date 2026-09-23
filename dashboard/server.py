@@ -2,6 +2,7 @@
 """Local agentmux dashboard with opt-in pane resizing, served on localhost:8787."""
 
 import base64
+import ccboard
 import ccstore
 import datetime as dt
 import json
@@ -1009,6 +1010,169 @@ class Handler(BaseHTTPRequestHandler):
         except (ccstore.sqlite3.Error, OSError, RuntimeError):
             self.send_json(503, {"error": "Control Center storage unavailable"})
 
+    # ── the task-management surface ──────────────────────────────────────────
+    #
+    # /api/epics and /api/tasks stay exactly as they were - see ccstore.write for
+    # why they are treated as mirrors. Everything below is the explicit, gated
+    # board: it is addressed by minted key (TM-014), it refuses a task that is not
+    # specified well enough to start or close, and it is what the board UI and the
+    # CLI drive.
+    #
+    # Every mutation repeats the /api/resize guards, because read_cc_body applies
+    # them: POST only, application/json required, cross-origin Origin rejected,
+    # bounded body. The op is picked from a table in code, never interpolated.
+
+    BOARD_READS = ("board", "meta", "entity", "history", "why", "graph", "doctor",
+                   "find", "next", "sprint")
+    BOARD_WRITES = ("create", "update", "status", "move", "delete", "acceptance",
+                    "label", "dep", "evidence", "commit", "touch", "comment",
+                    "link", "triage", "state", "config", "override")
+
+    def board_endpoint(self, op, query):
+        try:
+            if self.command == "POST":
+                if op not in self.BOARD_WRITES:
+                    self.send_json(405, {"error": "read-only endpoint"})
+                    return
+                body = self.read_cc_body(CC_BODY_MAX)
+                if body is None:
+                    return
+                if not isinstance(body, dict):
+                    raise ccboard.Invalid("body must be a JSON object")
+                with ccstore.connection() as db:
+                    self.send_json(200, self.board_write(db, op, body))
+                return
+            if op not in self.BOARD_READS:
+                self.send_json(405, {"error": "POST required"})
+                return
+            params = parse_qs(query, keep_blank_values=True, max_num_fields=8)
+            if any(len(values) != 1 for values in params.values()):
+                raise ccboard.Invalid("invalid query parameters")
+            with ccstore.connection() as db:
+                self.send_json(200, self.board_read(db, op, params))
+        except ccboard.Refused as err:
+            # 409, not 400: the request was well formed and the board said no. The
+            # missing list names the verb that fills each gap, so a client can
+            # print a remedy rather than just a rejection.
+            self.send_json(409, {"error": str(err), "missing": err.missing})
+        except (ccboard.Invalid, ccstore.Invalid) as err:
+            self.send_json(400, {"error": str(err)})
+        except (ccboard.NotFound, ccstore.NotFound) as err:
+            self.send_json(404, {"error": str(err)})
+        except (ValueError, RecursionError):
+            self.send_json(400, {"error": "invalid fields or query parameters"})
+        except ccstore.sqlite3.IntegrityError:
+            self.send_json(409, {"error": "record conflicts with existing data"})
+        except (ccstore.sqlite3.Error, OSError, RuntimeError):
+            self.send_json(503, {"error": "Control Center storage unavailable"})
+
+    def board_read(self, db, op, params):
+        def one(name, default=None):
+            return params.get(name, [default])[0]
+
+        def bounded(name, default, low, high):
+            raw = one(name, str(default))
+            if not re.fullmatch(r"[0-9]{1,4}", raw or "") or not low <= int(raw) <= high:
+                raise ccboard.Invalid(name + " must be between " + str(low)
+                                      + " and " + str(high))
+            return int(raw)
+
+        if op == "board":
+            return ccboard.board(db, include_deleted=one("deleted") == "1")
+        if op == "meta":
+            return ccboard.meta(db)
+        if op == "entity":
+            return ccboard.entity(db, ccboard.key_field(one("id"), "id", required=True))
+        if op == "history":
+            key = one("id")
+            return {"events": ccboard.history(
+                db, ccboard.key_field(key, "id") if key else None,
+                bounded("limit", 200, 1, 1000))}
+        if op == "why":
+            return ccboard.why(db, ccboard.key_field(one("id"), "id", "task", required=True))
+        if op == "graph":
+            return ccboard.graph(db)
+        if op == "doctor":
+            return ccboard.doctor(db)
+        if op == "next":
+            return {"tasks": ccboard.next_tasks(db, bounded("limit", 10, 1, 200))}
+        if op == "sprint":
+            return ccboard.sprint_report(
+                db, ccboard.key_field(one("id"), "id", "sprint", required=True))
+        return {"hits": ccboard.find(db, one("q"), bounded("limit", 50, 1, 200))}
+
+    def board_write(self, db, op, body):
+        actor = ccboard.text(body.get("actor"), "actor", 64, pattern=ccboard.NAME_RE)
+        session = ccboard.text(body.get("session"), "session", 128)
+
+        def target(kind=None):
+            return ccboard.key_field(body.get("id"), "id", kind, required=True)
+
+        def flag(name, default=True):
+            value = body.get(name, default)
+            if not isinstance(value, bool):
+                raise ccboard.Invalid(name + " must be true or false")
+            return value
+
+        if op == "create":
+            kind = ccboard.text(body.get("kind"), "kind", 16, required=True,
+                                choices=tuple(ccboard.KINDS))
+            fields = {k: v for k, v in body.items()
+                      if k not in ("kind", "actor", "session", "mirror")}
+            return ccboard.create(db, kind, fields, actor, session,
+                                  mirror=bool(body.get("mirror")))
+        if op == "update":
+            patch = body.get("patch")
+            if not isinstance(patch, dict):
+                raise ccboard.Invalid("patch must be a JSON object")
+            return ccboard.update(db, target(), patch, actor, session)
+        if op == "status":
+            return ccboard.set_status(db, target(), body.get("status"), actor, session,
+                                      body.get("reason"), mirror=bool(body.get("mirror")))
+        if op == "move":
+            return ccboard.move_task(db, target("task"), body.get("epic"), actor, session)
+        if op == "delete":
+            return ccboard.delete(db, target(), actor, session)
+        if op == "acceptance":
+            key = target()
+            if body.get("text") is not None:
+                return ccboard.add_acceptance(db, key, body["text"], actor)
+            if flag("remove", False):
+                return ccboard.drop_acceptance(db, key, body.get("index"), actor)
+            return ccboard.tick_acceptance(db, key, body.get("index"), flag("done"), actor)
+        if op == "label":
+            return ccboard.set_label(db, target(), body.get("label"), flag("present"), actor)
+        if op == "dep":
+            return ccboard.set_dep(db, target("task"), body.get("blockedBy"),
+                                   flag("present"), actor)
+        if op == "evidence":
+            return ccboard.add_evidence(db, target(), body.get("ref"), actor)
+        if op == "commit":
+            return ccboard.add_commit(db, target(), body.get("ref"), actor)
+        if op == "touch":
+            return ccboard.add_touch(db, target(), body.get("path"), actor)
+        if op == "comment":
+            return ccboard.add_comment(db, target(), body.get("text"), actor)
+        if op == "link":
+            return ccboard.set_link(db, target(), body.get("type"), body.get("target"),
+                                    flag("present"), actor)
+        if op == "triage":
+            return ccboard.triage(db, flag("all", False), flag("dryRun", False), actor)
+        if op == "state":
+            name = ccboard.text(body.get("name"), "name", 32, required=True,
+                                choices=ccboard.STATE_NAMES)
+            value = body.get("value")
+            if name in ("activeEpic", "activeSprint"):
+                value = ccboard.key_field(
+                    value, name, "epic" if name == "activeEpic" else "sprint")
+            elif value is not None:
+                raise ccboard.Invalid("override is set through /api/board/override")
+            return ccboard.set_state(db, name, value)
+        if op == "config":
+            return ccboard.set_config(db, ccboard.text(body.get("name"), "name", 32,
+                                                       required=True), body.get("value"))
+        return {"override": ccboard.set_override(db, body.get("reason"), actor)}
+
     def set_auth_setting(self):
         """POST /api/auth/setting  {"method": "<id>", "key": "<key>", "value": "<value>"}
 
@@ -1623,6 +1787,13 @@ class Handler(BaseHTTPRequestHandler):
                 limit = (int(raw) if re.fullmatch(r"[0-9]{1,4}", raw)
                          and 1 <= int(raw) <= 2000 else 200)
                 self.send_json(200, feed_snapshot(limit))
+                return
+            if path == "/api/board" or path.startswith("/api/board/"):
+                op = path[len("/api/board/"):] if len(path) > len("/api/board") else "board"
+                if not re.fullmatch(r"[a-z]{1,16}", op):
+                    self.send_json(404, {"error": "not found"})
+                else:
+                    self.board_endpoint(op, parsed.query)
                 return
             if path == "/api/auth/setting":
                 if self.command != "POST":

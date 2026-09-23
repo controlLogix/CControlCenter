@@ -1,0 +1,57 @@
+# Written by `tm init`. The markdown, config.json and evidence/ are the
+# shared record and belong in git. Everything below is per-machine.
+
+# A derived cache — `tm reindex` rebuilds it from the files.
+index.json
+
+# Session claims, the active epic, one-shot overrides. Whose machine, not what work.
+state.json
+
+# The agent registry — which workers this machine has running. Per-machine like
+# state.json: whose workers, on whose laptop, is not the shared record.
+agents.json
+
+# The dispatcher pool's pid — a loop running on this machine, right now.
+pool.pid
+
+# The pool's brake: its failure count and a pause that must survive a restart. One
+# machine's loop, like pool.pid.
+pool.state.json
+
+# The detached pool's own stream, truncated at every start. One machine's log.
+pool.log
+
+# In-flight planning conversations, and the untrusted files attached to them. evidence/ is
+# the shared record and belongs in git; this is the opposite of that — one machine's unfinished
+# thinking, plus bytes that arrived from outside and were never reviewed by anyone.
+planner/
+
+# This host's audit log, and the rotated generation. Session ids and one machine's
+# write stream — not a board artifact another clone can use.
+events.json
+events.jsonl
+events.*.jsonl
+
+# Generated project-local launchers. tm init rewrites them per host; they are not
+# a shared board artifact.
+bin
+
+# A port and a pid for a dashboard running here, now. Named twice: the glob covers
+# dashboard.assigned-port (pre-0.5 leftover) and anything else this process writes
+# under that prefix; the two exact names are what people look for in git status.
+dashboard.*
+dashboard.pid
+dashboard.port
+
+# The standing port assignment. Per-machine like the above, but kept out of the dashboard.*
+# glob so tidying the pid file cannot move the board's URL.
+port.assigned
+
+# writeAtomic's staging files. Present only mid-write, or after a crash.
+.tm-tmp-*
+
+# The cross-process lock, and the lock that breaks a stale one. Present only while a write is in
+# flight — or after a process was killed holding it, which is exactly when someone runs `git add -A`
+# and commits a lock belonging to a pid that never existed on anybody else's machine.
+state.lock
+state.lock.break

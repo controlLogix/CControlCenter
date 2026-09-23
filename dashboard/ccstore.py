@@ -11,6 +11,8 @@ import stat
 import sys
 import threading
 
+import ccboard
+
 
 # AGENTMUX_HOME, as everything else in this repo already honours it.
 #
@@ -35,8 +37,13 @@ NAME_PATTERN = re.compile(r"[A-Za-z0-9_.-]{1,64}")
 # accepted by one is invisible in another.
 MESSAGE_KINDS = frozenset(("plan", "request", "reply", "status", "finding", "error",
                            "claim", "release"))
-EPIC_STATUSES = frozenset(("open", "in_progress", "blocked", "done", "archived"))
-TASK_STATUSES = frozenset(("todo", "in_progress", "blocked", "done", "cancelled"))
+# One status vocabulary for every kind, as the task-management model upstream
+# uses: backlog | open | in_progress | blocked | parked | done | deleted. The two
+# names are kept because four call sites already import them, but they are now the
+# same set - epics no longer "archive" and tasks no longer "cancel", they resolve.
+# ccboard.STATUS_MIGRATION maps the retired words on the way in.
+EPIC_STATUSES = frozenset(ccboard.STATUSES)
+TASK_STATUSES = frozenset(ccboard.STATUSES)
 QUEUE_FILE_BYTES = 262144
 QUEUE_TOTAL_BYTES = 4194304
 QUEUE_MAX_FILES = 128
@@ -111,13 +118,19 @@ def connection():
             db.execute("PRAGMA journal_mode=WAL")
             db.execute("PRAGMA foreign_keys=ON")
             version = db.execute("PRAGMA user_version").fetchone()[0]
-            if version not in (0, 1):
+            if version not in (0, 1, 2):
                 raise RuntimeError("unsupported database version")
             with db:
                 for statement in SCHEMA:
                     db.execute(statement)
-                if version == 0:
-                    db.execute("PRAGMA user_version=1")
+                # Version 2 is the task-management schema: minted keys, the full
+                # task record, the upstream status vocabulary. ccboard.migrate is
+                # idempotent and runs on every connection for the same reason the
+                # base SCHEMA does - a database restored from backup, or one a
+                # second checkout created, arrives correct rather than half-built.
+                ccboard.migrate(db)
+                if version != 2:
+                    db.execute("PRAGMA user_version=2")
         with db:
             yield db
     finally:
@@ -144,23 +157,36 @@ def positive_id(value):
 
 def validate_write(resource, body):
     fields = {
-        "epics": {"title", "key", "jira_key", "notes"},
-        "tasks": {"epic_id", "title", "agent", "jira_key"},
+        "epics": {"title", "key", "jira_key", "notes", "body"},
+        "tasks": {"epic_id", "epic", "title", "agent", "jira_key", "body"},
         "journal": {"kind", "subject", "body", "agent"},
         "devices": {"name", "kind", "address", "port", "protocol", "meta"},
-        "status": {"kind", "id", "status"},
-        "delete": {"kind", "id"},
+        "status": {"kind", "id", "key", "status"},
+        "delete": {"kind", "id", "key"},
     }
     if not isinstance(body, dict) or body.keys() - fields[resource]:
         raise Invalid("unknown fields or invalid JSON object")
     token = re.compile(r"[A-Za-z0-9_.-]{1,64}")
     if resource == "epics":
+        # A key is MINTED, never supplied. Accepting one from a request would put
+        # the one identifier the board is addressed by in the hands of whoever
+        # posts first, and two epics called EP-001 is the collision the counter
+        # exists to prevent. The field is still recognised so the refusal says so.
+        if body.get("key") is not None:
+            raise Invalid("key is minted by the board and cannot be supplied")
         return dict(title=text_field(body, "title", required=True),
-                    key=text_field(body, "key", 64, pattern=token),
+                    body=text_field(body, "body", ccboard.MAX_BODY),
                     jira_key=text_field(body, "jira_key", 64, pattern=token),
                     notes=text_field(body, "notes", 8192))
     if resource == "tasks":
-        return dict(epic_id=positive_id(body.get("epic_id")),
+        epic_key = body.get("epic")
+        if epic_key is not None and body.get("epic_id") is not None:
+            raise Invalid("give epic or epic_id, not both")
+        if epic_key is not None:
+            epic_key = ccboard.key_field(epic_key, "epic", "epic", required=True)
+        return dict(epic_id=None if epic_key else positive_id(body.get("epic_id")),
+                    epic=epic_key,
+                    body=text_field(body, "body", ccboard.MAX_BODY),
                     title=text_field(body, "title", required=True),
                     agent=text_field(body, "agent", 64, pattern=NAME_PATTERN),
                     jira_key=text_field(body, "jira_key", 64, pattern=token))
@@ -191,7 +217,7 @@ def validate_write(resource, body):
         kind = body.get("kind")
         if not isinstance(kind, str) or kind not in ("epic", "task", "device"):
             raise Invalid("invalid kind")
-        return dict(kind=kind, id=positive_id(body.get("id")))
+        return dict(kind=kind, **_addressed(body, kind))
     kind = body.get("kind")
     status_value = body.get("status")
     if not isinstance(kind, str) or kind not in ("epic", "task"):
@@ -199,7 +225,29 @@ def validate_write(resource, body):
     allowed = EPIC_STATUSES if kind == "epic" else TASK_STATUSES
     if not isinstance(status_value, str) or status_value not in allowed:
         raise Invalid("invalid status")
-    return dict(kind=kind, id=positive_id(body.get("id")), status=status_value)
+    return dict(kind=kind, status=status_value, **_addressed(body, kind))
+
+
+def _addressed(body, kind):
+    """Accept either address: the minted key, or the row id the old API used.
+
+    The board is addressed by key now - TM-014 is what a person says and what a
+    commit message carries. The integer id stays valid because agentmux.sh, the
+    old board UI and two suites already send it, and silently rejecting them would
+    have made this change look like an outage rather than an addition.
+    """
+    key = body.get("key")
+    if key is not None:
+        # Devices are not board entities and have no minted key; they keep the
+        # row id they always had.
+        if kind == "device":
+            raise Invalid("devices are addressed by id")
+        if not isinstance(key, str) or not ccboard.KEY_RE.match(key):
+            raise Invalid("invalid key")
+        if ccboard.kind_of(key) != kind:
+            raise Invalid("key is not a " + kind + " key")
+        return {"key": key, "id": None}
+    return {"key": None, "id": positive_id(body.get("id"))}
 
 
 def device_row(row):
@@ -209,19 +257,35 @@ def device_row(row):
 
 
 def write(db, resource, values):
+    """The compatibility surface.
+
+    These two endpoints predate the task-management model and are what
+    agentmux.sh, the old board UI and two suites already call. They now go
+    through ccboard so every row they create is MINTED A KEY - that is the whole
+    point - but they create as a MIRROR: exempt from the completeness gate, the
+    way upstream exempts a harness's own todo list, which cannot carry a body or
+    acceptance criteria. A card filed this way is reported by `doctor` as
+    incomplete rather than refused at the door. The explicit, gated create is
+    /api/board/create.
+    """
     now = timestamp()
     if resource == "epics":
-        cursor = db.execute(
-            "INSERT INTO epics (key,title,jira_key,notes,created_at,updated_at) VALUES (?,?,?,?,?,?)",
-            (values["key"], values["title"], values["jira_key"], values["notes"], now, now))
-        return dict(db.execute("SELECT * FROM epics WHERE id=?", (cursor.lastrowid,)).fetchone())
+        return ccboard.create(db, "epic", {
+            "title": values["title"], "body": values.get("body"),
+            "jira_key": values["jira_key"], "notes": values["notes"]}, mirror=True)
     if resource == "tasks":
-        if db.execute("SELECT id FROM epics WHERE id=?", (values["epic_id"],)).fetchone() is None:
+        epic_key = values.get("epic")
+        if epic_key is None:
+            row = db.execute("SELECT key FROM epics WHERE id=?", (values["epic_id"],)).fetchone()
+            if row is None:
+                raise NotFound("epic not found")
+            epic_key = row["key"]
+        elif db.execute("SELECT id FROM epics WHERE key=?", (epic_key,)).fetchone() is None:
             raise NotFound("epic not found")
-        cursor = db.execute(
-            "INSERT INTO tasks (epic_id,title,agent,jira_key,created_at,updated_at) VALUES (?,?,?,?,?,?)",
-            (values["epic_id"], values["title"], values["agent"], values["jira_key"], now, now))
-        return dict(db.execute("SELECT * FROM tasks WHERE id=?", (cursor.lastrowid,)).fetchone())
+        return ccboard.create(db, "task", {
+            "title": values["title"], "body": values.get("body"), "epic": epic_key,
+            "assignee": values["agent"], "jira_key": values["jira_key"]},
+            actor=values["agent"], mirror=True)
     if resource == "journal":
         cursor = db.execute("INSERT INTO journal (at,kind,agent,subject,body) VALUES (?,?,?,?,?)",
                             (now, values["kind"], values["agent"], values["subject"], values["body"]))
@@ -233,33 +297,55 @@ def write(db, resource, values):
              values["protocol"], values["meta"], now))
         return device_row(db.execute("SELECT * FROM devices WHERE id=?", (cursor.lastrowid,)).fetchone())
     if resource == "delete":
-        # Table name comes from a fixed map, never from the request - the only place
-        # an identifier is chosen dynamically, so it is chosen from code.
-        #
         # journal is deliberately absent: it is append-only, which is the whole
-        # point of an operational log. Deleting an epic cascades to its tasks via
-        # the schema's ON DELETE CASCADE.
-        table = {"epic": "epics", "task": "tasks", "device": "devices"}[values["kind"]]
-        removed = 0
-        if values["kind"] == "epic":
-            removed = db.execute("SELECT COUNT(*) FROM tasks WHERE epic_id=?",
-                                 (values["id"],)).fetchone()[0]
-        cursor = db.execute(f"DELETE FROM {table} WHERE id=?", (values["id"],))
-        if cursor.rowcount == 0:
+        # point of an operational log.
+        #
+        # A DEVICE is still removed outright - it is not a board entity and its id
+        # means nothing outside the row. An EPIC or TASK is SOFT-deleted: the
+        # status becomes `deleted`, the row stays, and the key stays burned. That
+        # is upstream's rule and it is not fussiness. A board that reuses TM-014
+        # after deleting the first one has two different pieces of work answering
+        # to the same name in commit messages, branches and other people's notes.
+        if values["kind"] == "device":
+            cursor = db.execute("DELETE FROM devices WHERE id=?", (values["id"],))
+            if cursor.rowcount == 0:
+                raise NotFound("id not found")
+            return {"ok": True, "kind": "device", "id": values["id"], "cascaded_tasks": 0}
+        key = _resolve_key(db, values["kind"], values)
+        result = ccboard.delete(db, key)
+        return {"ok": True, "kind": values["kind"], "key": key,
+                "id": _row_id(db, values["kind"], key),
+                "cascaded_tasks": len(result["cascaded"])}
+    # A status change on the compatibility surface runs as a mirror too, so the
+    # old board UI and `agentmux task done` keep working exactly as they did. The
+    # epic auto-close and the triage resync still happen - those are bookkeeping,
+    # not gates, and skipping them would leave the board inconsistent rather than
+    # merely permissive. The gated path is /api/board/status.
+    key = _resolve_key(db, values["kind"], values)
+    ccboard.set_status(db, key, values["status"], mirror=True)
+    table = "epics" if values["kind"] == "epic" else "tasks"
+    return dict(db.execute("SELECT * FROM " + table + " WHERE key=?", (key,)).fetchone())
+
+
+def _resolve_key(db, kind, values):
+    """The minted key for whichever address the request used."""
+    if values.get("key"):
+        table = {"epic": "epics", "task": "tasks"}[kind]
+        if db.execute("SELECT 1 FROM " + table + " WHERE key=?",
+                      (values["key"],)).fetchone() is None:
             raise NotFound("id not found")
-        return {"ok": True, "kind": values["kind"], "id": values["id"],
-                "cascaded_tasks": removed}
-    if values["kind"] == "epic":
-        cursor = db.execute("UPDATE epics SET status=?,updated_at=? WHERE id=?",
-                            (values["status"], now, values["id"]))
-        row = db.execute("SELECT * FROM epics WHERE id=?", (values["id"],)).fetchone()
-    else:
-        cursor = db.execute("UPDATE tasks SET status=?,updated_at=? WHERE id=?",
-                            (values["status"], now, values["id"]))
-        row = db.execute("SELECT * FROM tasks WHERE id=?", (values["id"],)).fetchone()
-    if cursor.rowcount == 0:
+        return values["key"]
+    table = {"epic": "epics", "task": "tasks"}[kind]
+    row = db.execute("SELECT key FROM " + table + " WHERE id=?", (values["id"],)).fetchone()
+    if row is None:
         raise NotFound("id not found")
-    return dict(row)
+    return row["key"]
+
+
+def _row_id(db, kind, key):
+    table = {"epic": "epics", "task": "tasks"}[kind]
+    row = db.execute("SELECT id FROM " + table + " WHERE key=?", (key,)).fetchone()
+    return row["id"] if row else None
 
 
 # #21. THE UN-FIXED HALF OF THE COURIER'S OWN BUG.
@@ -453,9 +539,13 @@ def feed_rows(db, limit=200):
 
 def read(db, resource, limit=100, since=None):
     if resource == "epics":
-        epics = [dict(row, tasks=[]) for row in db.execute("SELECT * FROM epics ORDER BY id")]
+        # Soft-deleted rows are excluded here rather than removed from the table:
+        # the key stays burned, but a deleted card is not on the board. Pass
+        # ?deleted=1 through /api/board if you need to see them.
+        epics = [dict(row, tasks=[]) for row in db.execute(
+            "SELECT * FROM epics WHERE status<>'deleted' ORDER BY id")]
         by_id = {row["id"]: row for row in epics}
-        for row in db.execute("SELECT * FROM tasks ORDER BY id"):
+        for row in db.execute("SELECT * FROM tasks WHERE status<>'deleted' ORDER BY id"):
             if row["epic_id"] in by_id:
                 by_id[row["epic_id"]]["tasks"].append(dict(row))
         return epics
