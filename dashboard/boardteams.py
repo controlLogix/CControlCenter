@@ -1,5 +1,6 @@
 """Roster proposals and approval; writes share the board transaction and audit log."""
 from pathlib import Path
+import json
 import os
 import sys
 import tempfile
@@ -34,9 +35,15 @@ def _rows(db, key):
         "SELECT * FROM board_roster WHERE entity_key=? ORDER BY position,id", (key,))]
 
 
+def _proposal_gaps(db, key):
+    row = db.execute("SELECT detail FROM board_history WHERE entity_key=? "
+                     "AND event='recruit' ORDER BY id DESC LIMIT 1", (key,)).fetchone()
+    return json.loads(row[0] or "{}").get("gaps", []) if row else []
+
+
 def _payload(db, key):
     rows = _rows(db, key)
-    return {"id": key, "members": rows, "count": len(rows)}
+    return {"id": key, "members": rows, "count": len(rows), "gaps": _proposal_gaps(db, key)}
 
 
 def _write_target(db, body):
@@ -60,7 +67,12 @@ def roster(db, params):
 def recruit(db, body):
     key, task, actor = _write_target(db, body)
     specs, _ = agentdefs.load_all()
-    selected = agentdefs.choose_roster(task, specs, ccboard.config(db))
+    dependencies = {}
+    for row in db.execute("SELECT entity_key,blocked_by FROM board_deps"):
+        dependencies.setdefault(row["entity_key"], []).append(row["blocked_by"])
+    selected = agentdefs.choose_roster(task, specs, ccboard.config(db),
+                                       dependencies=dependencies)
+    gaps = getattr(selected, "gaps", [])
     existing = _rows(db, key)
     hired = {row["agent_name"] for row in existing if row["status"] == "hired"}
     desired = [(spec.name, spec.role, position) for position, spec in enumerate(selected)
@@ -69,7 +81,7 @@ def recruit(db, body):
                if row["status"] != "hired"]
     # A retry preserves proposal IDs, timestamps and history. A fresh recruitment
     # after approval deliberately replaces every non-hired row with a proposal.
-    if current == desired and all(row["status"] in ("proposed", "hired") for row in existing):
+    if current == desired and gaps == _proposal_gaps(db, key) and all(row["status"] in ("proposed", "hired") for row in existing):
         return _payload(db, key)
     db.execute("DELETE FROM board_roster WHERE entity_key=? AND status!='hired'", (key,))
     stamp = ccboard.now()
@@ -77,7 +89,7 @@ def recruit(db, body):
         db.execute("INSERT INTO board_roster "
                    "(entity_key,agent_name,role,position,proposed_by,at,updated_at) "
                    "VALUES (?,?,?,?,?,?,?)", (key, name, role, position, actor, stamp, stamp))
-    ccboard._record(db, key, "recruit", actor, detail={"members": [r[0] for r in desired]})
+    ccboard._record(db, key, "recruit", actor, detail={"members": [r[0] for r in desired], "gaps": gaps})
     return _payload(db, key)
 
 

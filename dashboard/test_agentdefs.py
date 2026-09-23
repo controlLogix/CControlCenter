@@ -215,6 +215,54 @@ class AgentDefinitions(unittest.TestCase):
         self.assertEqual(roster[0], specs["worker"])
         self.assertIn("degrade", str(caught[0].message))
 
+    def roster_specs(self):
+        for name, extra in (
+            ("alpha", "capabilities: frontend\n"),
+            ("backend", "capabilities: backend\n"),
+            ("senior-dev", "capabilities: senior, backend\nmax_instances: 8\n"),
+            ("review", "role: reviewer\ncapabilities: security\n"),
+            ("research", "role: researcher\n"),
+        ):
+            self.write(name, extra=extra)
+        return self.load()[0]
+
+    def test_worker_sizing_caps_and_determinism(self):
+        specs = self.roster_specs()
+        task = {"touches": ["ui/a", "ui/b", "api/c"]}
+        roster = ad.choose_roster(task, specs, {"teamMaxWorkers": 8})
+        self.assertEqual(len(roster), 3)
+        self.assertEqual(roster, ad.choose_roster(task, dict(reversed(list(specs.items()))),
+                                                 {"teamMaxWorkers": 8}))
+        task["acceptance"] = [{"text": str(i)} for i in range(5)]
+        self.assertEqual(len(ad.choose_roster(task, specs, {"teamMaxWorkers": 8})), 4)
+        for cap in (0, 1, 2):
+            self.assertEqual(len(ad.choose_roster(task, specs, {"teamMaxWorkers": cap})), cap + 1)
+        roster = ad.choose_roster({"touches": [f"d{i}/a" for i in range(8)]},
+                                  {"senior-dev": specs["senior-dev"]}, {"teamMaxWorkers": 8})
+        self.assertEqual([s.name for s in roster], ["lead", "senior-dev"])
+        self.assertTrue(roster.gaps)
+
+    def test_labels_gaps_types_and_depth(self):
+        specs = self.roster_specs()
+        roster = ad.choose_roster({"labels": ["backend", "missing"]}, specs, {})
+        self.assertIn("backend", [s.name for s in roster])
+        self.assertIn("Capability missing: no definition provides it", roster.gaps)
+        bug = ad.choose_roster({"type": "bug"}, specs, {"teamMaxWorkers": 8})
+        self.assertEqual([s.role for s in bug], ["lead", "worker", "reviewer"])
+        for kind in ("story", "spike"):
+            self.assertEqual(len(ad.choose_roster({"type": kind}, specs, {})), 3)
+        dependencies = {"A": ["B"], "B": ["C"], "C": ["A"]}
+        task = {"type": "story", "blockedBy": ["A"], "labels": ["frontend"]}
+        deep = ad.choose_roster(task, specs, {"teamMaxWorkers": 8}, dependencies=dependencies)
+        self.assertEqual([s.name for s in deep], ["lead", "senior-dev"])
+        self.assertIn("Capability frontend: not covered by selected roster", deep.gaps)
+        self.assertFalse(ad._deep_chain({"blockedBy": ["A"]}, {"A": ["A"]}))
+        self.assertFalse(ad._deep_chain({"key": "ROOT", "blockedBy": ["A"]},
+                                        {"A": ["B"], "B": ["ROOT"]}))
+        fallback = ad.choose_roster(task, {}, {"dispatchCli": "claude"}, dependencies=dependencies)
+        self.assertEqual([(s.name, s.cli) for s in fallback], [("lead", "claude")])
+        self.assertTrue(fallback.gaps)
+
     def test_existing_claude_definitions_unchanged(self):
         # Portable CI uses representative names; on the dispatched machine, copy
         # the actual five bytes-for-byte into the isolated fixture and test them.

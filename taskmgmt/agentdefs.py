@@ -260,12 +260,32 @@ def resolve(name, repo_root=None):
     return load_all(repo_root)[0].get(name)
 
 
-def choose_roster(task, specs, cfg, cli_override=None):
-    """Stage 1 selects one lead, without recruiting arbitrary workers.
+class Roster(list):
+    """List-compatible selection with proposal diagnostics (never launch specs)."""
+    def __init__(self, members, gaps=()):
+        super().__init__(members)
+        self.gaps = list(gaps)
 
-    Prefer a declared lead deterministically. With none, preserve the existing
-    dispatch CLI and unrestricted posture; definition defaults remain tighter.
-    Task-based recruitment belongs to the subsequent team-selection stage.
+
+def _deep_chain(task, dependencies):
+    """Three dependency edges are deep; bounded traversal also tolerates cycles."""
+    frontier = [(task.get("blockedBy") or [], frozenset(filter(None, (task.get("key"), task.get("id")))), 0)]
+    while frontier:
+        keys, seen, depth = frontier.pop()
+        for key in keys:
+            if key in seen:
+                continue
+            if depth + 1 >= 3:
+                return True
+            frontier.append((dependencies.get(key, ()), seen | {key}, depth + 1))
+    return False
+
+
+def choose_roster(task, specs, cfg, cli_override=None, *, dependencies=None):
+    """Select a deterministic lead, then bounded workers from existing card signals.
+
+    dependencies maps board keys to blockedBy keys; callers resolve it, keeping
+    selection independent of storage. C3 documents sizing, ranking and gaps.
     """
     leads = sorted((s for s in specs.values() if s.role == "lead"), key=lambda s: s.name)
     if leads:
@@ -279,4 +299,54 @@ def choose_roster(task, specs, cfg, cli_override=None):
     if lead.cli != "claude" and (lead.tools or lead.tools_deny):
         warnings.warn(f"{lead.name}: tools/tools-deny degrade on {lead.cli}; "
                       "named tool restrictions are Claude-only", UserWarning, stacklevel=2)
-    return [lead]
+    labels = set(task.get("labels") or [])
+    deep = _deep_chain(task, dependencies or {})
+    directories = {parts[0] for path in task.get("touches") or []
+                   if len(parts := path.replace("\\", "/").removeprefix("./").split("/")) > 1}
+    kind = task.get("type")
+    workers = max(1, len(directories), 2 if kind in ("story", "spike") else 1)
+    if len(task.get("acceptance") or []) >= 5:
+        workers += 1
+    if kind == "bug" or deep:
+        workers = 1
+    limit = max(0, min(8, int(cfg.get("teamMaxWorkers", 2))))
+    if deep or kind == "bug":
+        limit = min(limit, 2 if kind == "bug" else 1)
+    selected = [lead]
+    candidates = [s for s in specs.values() if s.role != "lead" and
+                  s.name != lead.name and s.max_instances >= 1]
+    missing = labels - set(lead.capabilities)
+
+    def rank(spec):
+        senior = bool({"senior", "expert", "principal"} &
+                      (set(spec.capabilities) | set(spec.name.split("-"))))
+        return (-int(deep and senior), -len(missing & set(spec.capabilities)), spec.name)
+
+    # Reserve the second slot for a bug reviewer, if the configured cap allows it.
+    requests = ["worker"] + (["reviewer"] if kind == "bug" else []) + ["worker"] * (workers - 1)
+    shortages = []
+    for role in requests:
+        pool = [s for s in candidates if s.role == role or
+                (role == "worker" and kind == "spike" and s.role == "researcher")]
+        if len(selected) - 1 >= limit:
+            shortages.append(f"{role}: teamMaxWorkers limit ({limit})")
+        elif not pool:
+            shortages.append(f"{role}: no available definition (one instance per name)")
+        else:
+            member = min(pool, key=rank)
+            selected.append(member)
+            candidates.remove(member)
+            missing.difference_update(member.capabilities)
+    # Matched labels may recruit additional specialists within the same cap.
+    while missing and len(selected) - 1 < limit:
+        pool = [s for s in candidates if missing & set(s.capabilities)]
+        if not pool:
+            break
+        member = min(pool, key=rank)
+        selected.append(member)
+        candidates.remove(member)
+        missing.difference_update(member.capabilities)
+    supplied = set().union(*(set(s.capabilities) for s in specs.values()))
+    gaps = [f"Capability {label}: " + ("no definition provides it" if label not in supplied
+            else "not covered by selected roster") for label in sorted(missing)]
+    return Roster(selected, gaps + sorted(set(shortages)))

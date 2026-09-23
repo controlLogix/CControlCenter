@@ -69,7 +69,7 @@ context.window.CCC = {
     if (failRead) throw Error('offline');
     if (url === 'api/board/board') return board;
     assert.equal(url, 'api/board/roster?id=TM-051');
-    return {members};
+    return {members, gaps: ['Capability <img src=x onerror=alert(2)>: no definition provides it']};
   },
   registerView: (name, fn) => { assert.equal(name, 'teams'); loader = fn; }
 };
@@ -78,6 +78,8 @@ vm.runInContext(source, context);
   assert.equal(reads, 0);
   ready(); await loader();
   assert.ok(text(root).includes('<img src=x onerror=alert(1)>'));
+  assert.ok(text(root).includes('Roster gap: Capability <img src=x onerror=alert(2)>: no definition provides it'));
+  assert.equal(flatten(root).filter(n => n.tag === 'img').length, 0);
   assert.equal(button('Save roster decision').disabled, true);
   choice('Approve lead').events.click();
   assert.equal(button('Save roster decision').disabled, true);

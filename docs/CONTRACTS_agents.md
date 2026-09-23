@@ -181,6 +181,42 @@ critical-path file for stages 2, 5 and 6. `dispatch.py` imports it.
 spec whose `cli` resolves identically to today (`cli_override or cfg["dispatchCli"] or
 "codex"`). That is what makes the first wave shippable with zero behaviour change.
 
+**Stage-2 contract:** selection remains pure and deterministic, returns the lead
+first, and recruits available definitions using existing card fields. A `Roster`
+is list-compatible (dispatch can continue taking `[0]`) and carries a `gaps` list.
+No card or definition fields are added.
+
+- Distinct top-level directories in `touches` request one worker each (root files
+  do not create directory requests); the minimum is one worker. Five or more
+  `acceptance` entries add one. Stories and spikes request at least two workers;
+  spikes may use researcher definitions as workers.
+- Bugs request one worker and one reviewer, taking precedence over directory and
+  acceptance sizing. Reviewers count toward `teamMaxWorkers`, as do all non-leads.
+- Labels are exact capability requirements, including unknown labels: every label
+  must be covered or reported as a gap. Workers rank by uncovered label matches,
+  then name. Additional matching specialists can fill remaining configured slots.
+  This deliberately treats workflow labels as requirements too, rather than
+  silently guessing which unknown tags are irrelevant.
+- A `blockedBy` path of three or more edges is deep. The board passes an optional
+  dependency adjacency map to the selector; traversal is cycle-safe and stops at
+  this threshold. Deep chains request only one worker (plus a reviewer for bugs)
+  and never widen for labels. They prefer senior definitions before capability
+  count. With no seniority field, the explicit proxy is a `senior`, `expert`, or
+  `principal` capability tag or hyphen-delimited name component; name breaks ties.
+- The configured `teamMaxWorkers` (default two, range zero through eight) caps all
+  non-leads. Each definition is selected at most once, which is also within its
+  `max_instances`: board roster identity is unique by `(entity_key, agent_name)`.
+  Values above one do not permit duplicate roster rows or invented aliases.
+  Unfilled role requests and uncovered capabilities report gaps, including when
+  a cap prevents coverage. This is proposal sizing, not global running-instance
+  accounting. Empty definitions still return exactly the stage-1 fallback lead.
+
+`recruit` stores diagnostics in its existing history detail alongside member names;
+`roster`, `approve`, and `hire` responses return the saved proposal's `gaps`. Reads
+therefore do not drift with definitions or card edits. Re-recruitment refreshes
+both rows and diagnostics; identical retries preserve history and proposal IDs.
+The Teams view renders gaps as text beside the proposed members, before approval.
+
 ---
 
 ## C4 — Board ops

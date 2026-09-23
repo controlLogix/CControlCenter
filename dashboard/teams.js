@@ -38,6 +38,9 @@
     const { el, post, say } = window.CCC;
     const card = el('article', 'teams-card');
     card.appendChild(el('h3', '', `${task.key} · ${task.title}`));
+    for (const gap of roster.gaps || []) {
+      card.appendChild(el('p', 'teams-gap', `Roster gap: ${gap}`));
+    }
     const stamp = el('p', 'stamp');
     stamp.setAttribute('aria-live', 'polite');
     const closed = ['done', 'deleted'].includes(task.status);

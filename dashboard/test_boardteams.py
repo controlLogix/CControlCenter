@@ -79,7 +79,7 @@ class TeamsHTTP(unittest.TestCase):
         return payload["events"]
 
     def test_roundtrip_idempotence_and_all_transitions(self):
-        self.assertEqual(self.read(), (200, {"id": self.key, "members": [], "count": 0}))
+        self.assertEqual(self.read(), (200, {"id": self.key, "members": [], "count": 0, "gaps": []}))
         status, proposed = self.write("recruit")
         self.assertEqual(status, 200)
         self.assertEqual(proposed["count"], 2)
@@ -180,6 +180,53 @@ class TeamsHTTP(unittest.TestCase):
         # No approved roster is required to select the dispatcher fallback lead.
         selected = boardteams.agentdefs.choose_roster({}, {}, {"teamRequireApproval": True})
         self.assertEqual([(s.name, s.role) for s in selected], [("lead", "lead")])
+
+    def test_real_recruitment_worker_approval_and_persisted_gaps(self):
+        self.mock.stop()
+        directory = BASE / ".agentmux/agents"
+        directory.mkdir(parents=True, exist_ok=True)
+        for name, extra in (("frontend", "capabilities: ui\n"),
+                            ("senior-backend", "capabilities: backend\n"),
+                            ("reviewer", "role: reviewer\n")):
+            path = directory / (name + ".md")
+            path.write_text(f"---\nname: {name}\ndescription: Real worker\n{extra}---\n")
+            self.addCleanup(path.unlink)
+        with ccstore.connection() as db:
+            for path in ("dashboard/view.js", "taskmgmt/work.py"):
+                ccboard.add_touch(db, self.key, path, actor="suite")
+            ccboard.set_label(db, self.key, "missing-capability", True, actor="suite")
+        status, proposal = self.write("recruit")
+        self.assertEqual(status, 200, proposal)
+        self.assertEqual([r["role"] for r in proposal["members"]], ["lead", "worker", "worker"])
+        self.assertIn("Capability missing-capability: no definition provides it", proposal["gaps"])
+        self.assertEqual(self.read(), (200, proposal))
+        self.assertEqual(self.write("recruit"), (200, proposal))
+        # A changed diagnostic alone is a new proposal; unchanged retry stays quiet.
+        before = len([e for e in self.events() if e["event"] == "recruit"])
+        with ccstore.connection() as db:
+            ccboard.set_label(db, self.key, "another-missing", True, actor="suite")
+        status, proposal = self.write("recruit")
+        self.assertEqual(status, 200)
+        self.assertIn("Capability another-missing: no definition provides it", proposal["gaps"])
+        self.assertEqual(len([e for e in self.events() if e["event"] == "recruit"]), before + 1)
+        self.assertEqual(self.write("recruit"), (200, proposal))
+        status, approved = self.write("approve", members=[r["agent_name"] for r in proposal["members"]])
+        self.assertEqual(status, 200)
+        self.assertTrue(all(r["status"] == "approved" for r in approved["members"]))
+        self.assertEqual(approved["gaps"], proposal["gaps"])
+        with ccstore.connection() as db:
+            previous = self.key
+            for i in range(3):
+                key = ccboard.create(db, "task", {"title": f"Dependency {i}", "epic": self.epic},
+                                     mirror=True)["id"]
+                ccboard.set_dep(db, previous, key, True, actor="suite")
+                previous = key
+        status, deep = self.write("recruit")
+        self.assertEqual(status, 200, deep)
+        self.assertEqual([r["agent_name"] for r in deep["members"]], ["lead", "senior-backend"])
+        # Diagnostics describe the saved proposal, even if definitions change.
+        (directory / "senior-backend.md").write_text("invalid")
+        self.assertEqual(self.read(), (200, deep))
 
     def prepare_hire(self):
         self.write("recruit")
