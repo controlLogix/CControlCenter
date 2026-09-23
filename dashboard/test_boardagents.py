@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """C2 contract checks against isolated files and a real port-0 HTTP server."""
 import hashlib
+from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 from pathlib import Path
@@ -8,6 +9,7 @@ import sys
 import tempfile
 import threading
 import unittest
+from unittest import mock
 import urllib.error
 import urllib.request
 from http.server import ThreadingHTTPServer
@@ -56,16 +58,133 @@ class AgentsHTTP(unittest.TestCase):
                         f"{extra}---\n{body}", encoding="utf-8")
         return path
 
-    def call(self, query="", method="GET", path="/api/board/agents"):
+    def call(self, query="", method="GET", path="/api/board/agents", body=None):
         request = urllib.request.Request(
             f"http://127.0.0.1:{self.httpd.server_address[1]}{path}{query}",
-            method=method)
+            method=method, data=None if body is None else json.dumps(body).encode(),
+            headers={"Content-Type": "application/json"})
         try:
             response = urllib.request.urlopen(request, timeout=10)
         except urllib.error.HTTPError as error:
             response = error
         with response:
             return response.code, json.loads(response.read())
+
+    def save(self, body):
+        return self.call(method="POST", path="/api/board/agentdef", body=body)
+
+    def drop(self, body):
+        return self.call(method="POST", path="/api/board/agentdrop", body=body)
+
+    def definition(self, **changes):
+        return dict(dict(name="writer", scope="repo", description='Useful: "writer"',
+                         cli="codex", persona="Review the changes.\nBe precise.",
+                         tools=["Read", "Grep"], tools_deny=["Write"],
+                         capabilities=["review"], max_instances=2), **changes)
+
+    def test_create_update_roundtrip_and_permissions(self):
+        for scope, index in (("repo", 0), ("global", 1)):
+            body = self.definition(name="writer-" + scope, scope=scope)
+            status, saved = self.save(body)
+            self.assertEqual(status, 200, saved)
+            self.assertEqual(self.call("?name=" + body["name"]), (200, saved))
+            for key, value in body.items():
+                self.assertEqual(saved[key], value)
+            path = Path(saved["path"])
+            self.assertEqual(path.parent, self.dirs[index])
+            self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+            self.assertEqual(list(path.parent.glob("*.tmp")), [])
+            status, edited = self.save(dict(saved, persona="Revised persona"))
+            self.assertEqual(status, 200, edited)
+            self.assertNotEqual(saved["checksum"], edited["checksum"])
+            self.assertEqual(self.call("?name=" + body["name"]), (200, edited))
+        self.assertEqual(self.call()[1]["count"], 2)
+
+    def test_stale_missing_and_deleted_checksums(self):
+        _, saved = self.save(self.definition())
+        path = Path(saved["path"])
+        path.write_bytes(path.read_bytes() + b"\nExternal edit")
+        before = path.read_bytes()
+        self.assertEqual(self.save(saved)[0], 409)
+        self.assertEqual(self.save(self.definition())[0], 409)
+        self.assertEqual(self.drop(saved)[0], 409)
+        self.assertEqual(path.read_bytes(), before)
+        path.unlink()
+        self.assertEqual(self.save(saved)[0], 409)
+        self.assertFalse(path.exists())
+
+    def test_collisions_reserve_invalid_files_in_every_scope(self):
+        for index in range(4):
+            with self.subTest(scope=index):
+                path = self.write("writer", index, "posture: invalid\n")
+                status, payload = self.save(self.definition())
+                self.assertEqual(status, 409, payload)
+                self.assertIn(str(path), str(payload["missing"]))
+                self.assertIn("posture: invalid", path.read_text())
+                path.unlink()
+
+    def test_reject_paths_and_read_only_scopes(self):
+        for changes in ({"scope": "claude"}, {"scope": "unknown"},
+                        {"name": "../outside"}, {"path": str(BASE / "outside.md")},
+                        {"path": str(self.dirs[1] / "writer.md")}, {"path": None},
+                        {"path": "bad\x00path"}):
+            with self.subTest(changes=changes):
+                body = self.definition(**changes)
+                self.assertEqual(self.save(body)[0], 400)
+                self.assertEqual(self.drop(body)[0], 400)
+        target = self.write("writer", 2)
+        before = target.read_bytes()
+        link = self.dirs[0] / "writer.md"
+        link.symlink_to(target)
+        self.assertEqual(self.save(self.definition())[0], 400)
+        self.assertEqual(self.drop(self.definition())[0], 400)
+        self.assertEqual(target.read_bytes(), before)
+        link.unlink()
+        self.dirs[0].rmdir()
+        self.dirs[0].symlink_to(self.dirs[2], target_is_directory=True)
+        try:
+            self.assertEqual(self.save(self.definition())[0], 400)
+            self.assertEqual(self.drop(self.definition())[0], 400)
+        finally:
+            self.dirs[0].unlink()
+            self.dirs[0].mkdir()
+
+    def test_validation_does_not_mutate(self):
+        for changes in ({"description": ""}, {"description": "line\nbreak"},
+                        {"persona": "x" * 4097}, {"role": "boss"},
+                        {"max_instances": True}, {"max_instances": 9},
+                        {"tools": "Read"}, {"tools": ["Read,Write"]},
+                        {"capabilities": ["Bad"]}, {"posture": "invalid"}):
+            with self.subTest(changes=changes):
+                self.assertEqual(self.save(self.definition(**changes))[0], 400)
+                self.assertFalse((self.dirs[0] / "writer.md").exists())
+
+    def test_drop_and_unknown_name(self):
+        self.assertEqual(self.drop({"name": "unknown", "scope": "repo"})[0], 404)
+        for scope in ("repo", "global"):
+            _, saved = self.save(self.definition(scope=scope))
+            self.assertEqual(self.drop({"name": "writer", "scope": scope})[0], 200)
+            self.assertFalse(Path(saved["path"]).exists())
+            self.assertEqual(self.call("?name=writer")[0], 404)
+
+    def test_concurrent_edit_has_one_winner(self):
+        _, saved = self.save(self.definition())
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            results = list(pool.map(self.save, [dict(saved, persona="First"),
+                                               dict(saved, persona="Second")]))
+        self.assertEqual(sorted(status for status, _ in results), [200, 409])
+        winner = next(body for status, body in results if status == 200)
+        self.assertEqual(self.call("?name=writer"), (200, winner))
+
+    def test_atomic_replace_failure_preserves_original_and_cleans_temp(self):
+        _, saved = self.save(self.definition())
+        path = Path(saved["path"])
+        before = path.read_bytes()
+        with mock.patch.object(server.boardagents.os, "replace", side_effect=OSError("test")):
+            with self.assertRaises(OSError):
+                server.boardagents.agentdef(None, dict(saved, persona="Replacement"))
+        self.assertEqual(path.read_bytes(), before)
+        self.assertEqual(list(path.parent.iterdir()), [path])
 
     def test_empty_contract(self):
         self.assertEqual(self.call(), (200, {"agents": [], "scopes":

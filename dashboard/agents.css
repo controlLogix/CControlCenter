@@ -1,1 +1,36 @@
-/* Agents view styles belong here. The scaffold uses the shared .view.pad layout. */
+/* Scoped to the definition view; terminal agents have separate shared styles. */
+#viewAgents .agents-header,
+#viewAgents .agents-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+#viewAgents .agents-header h2,
+#viewAgents .agents-title h4 { margin: 0; }
+#viewAgents .agents-problems { margin-bottom: 24px; }
+#viewAgents .agents-definition,
+#viewAgents .agents-problem {
+  border: 1px solid var(--border, #555);
+  border-radius: 6px;
+  padding: 14px;
+  margin-bottom: 12px;
+  overflow-wrap: anywhere;
+}
+#viewAgents .agents-problem { border-left: 4px solid var(--warn, #d99b36); }
+#viewAgents .agents-scope {
+  display: inline-block;
+  font-size: 12px;
+  border: 1px solid currentColor;
+  border-radius: 12px;
+  padding: 2px 8px;
+  margin-left: 6px;
+}
+#viewAgents .agents-path { font-family: monospace; overflow-wrap: anywhere; }
+#viewAgents .agents-fields {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 6px 16px;
+}
+#viewAgents .agents-fields dd { margin: 0; }
+#viewAgents .agents-remedy { margin-bottom: 0; }

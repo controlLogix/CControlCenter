@@ -239,6 +239,40 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "taskmgmt"))
 import dispatch
 import agentdefs
 
+section("worker naming: card identity and team roles stay unambiguous")
+ok("role suffix resolves to its card", dispatch.key_of_worker("tm-042-dev") == "TM-042")
+ok("four-digit key keeps its final digit", dispatch.key_of_worker("tm-0427") == "TM-0427")
+for invalid in ("tm-042-7", "tm-042-2worker", "tm-042-worker.2", "tm-042-worker-dev",
+                "tm-42", "tm-1234567890", "tm-042-", "TM-042", "tm-042\n", "", None):
+    ok("invalid worker is rejected: %r" % invalid, dispatch.key_of_worker(invalid) is None)
+for prefix, width in ccboard.KINDS.values():
+    for digits in ("042".zfill(width), "999999999"):
+        key = prefix + "-" + digits
+        lead = dispatch.worker_name(key)
+        ok("lead round-trip: " + key, lead == key.lower() and dispatch.key_of_worker(lead) == key)
+        ok("unsuffixed role is lead: " + key, dispatch.role_of_worker(lead) == "lead")
+        for role in dispatch.ROLES:
+            for ordinal in (1, 2, 123):
+                member = dispatch.member_name(key, role, ordinal)
+                expected = lead + "-" + role + (str(ordinal) if ordinal > 1 else "")
+                ok("member round-trip: " + expected,
+                   member == expected and dispatch.key_of_worker(member) == key
+                   and dispatch.role_of_worker(member) == role
+                   and len(member) <= 64 and "." not in member)
+ok("member ordinal defaults to one",
+   dispatch.member_name("TM-042", "reviewer") == "tm-042-reviewer")
+for key, role, ordinal in (("TM-042", "dev", 1), ("TM-042", "worker", 0),
+                           ("TM-042", "worker", -1), ("TM-042", "worker", True),
+                           ("TM-042", "worker", 1.5), ("TM-042", "worker", "2"),
+                           ("TM-042", "researcher", 1000000),
+                           ("TM-042.worker", "worker", 1), ("TM-042-dev", "worker", 1)):
+    try:
+        dispatch.member_name(key, role, ordinal)
+    except ValueError:
+        ok("invalid member arguments refused: %r" % ((key, role, ordinal),), True)
+    else:
+        ok("invalid member arguments refused: %r" % ((key, role, ordinal),), False)
+
 section("briefs: persona uses only the space left by the complete task")
 card = {"id": "TM-900", "title": "dispatch seam", "body": "Complete task body.",
         "acceptance": [{"text": "Keep this criterion intact", "done": True}],

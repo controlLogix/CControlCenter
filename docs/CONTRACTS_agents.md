@@ -418,3 +418,19 @@ Non-negotiable, and each one has drawn blood before:
   query 400.
 - Assert the ambiguity regression explicitly: `key_of_worker("tm-042-dev") == "TM-042"`
   **and** `key_of_worker("tm-0427") == "TM-0427"`.
+
+### Two traps that have now caught two suites each
+
+**Never `cd "$(dirname "$0")/.."` in a `.sh` suite.** Every shell suite here is invoked as
+`bash <(tr -d '\r' < dashboard/<suite>.sh)` — the CR strip is the repo's invocation
+convention — so `$0` is `/dev/fd/63`, `dirname` is `/dev/fd`, and that `cd` lands the suite
+in `/dev`. It then fails with something misleading like `FileNotFoundError:
+/dev/agentmux.sh`. `run_tests.sh` already runs from the repo root: use repo-relative paths
+and do not `cd` at all.
+
+**`node` is not on the PATH in a non-login WSL shell.** A suite that shells out to node dies
+with `node: command not found` and takes the gate with it. Resolve it the way
+`agentmux.sh:57 node_bin()` does — `ls -d "$HOME"/.nvm/versions/node/*/bin | sort -V | tail -1`,
+prepended to `PATH` — and fall back to the guarded skip that `test_frontend.sh:129` uses
+(`if command -v node; then … else` report and skip) so a machine without node degrades
+instead of failing.

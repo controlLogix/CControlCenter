@@ -72,7 +72,8 @@ KEY_RE = coordination.KEY_RE
 # cosmetic: `collect` must be able to tell a worker this module started from one a
 # person spawned by hand, and the alternative - a registry file - is a second
 # source of truth that can disagree with tmux. The name IS the registry.
-WORKER_RE = re.compile(r"(ep|tm|adr|sp|cap)-[0-9]{3,9}")
+ROLES = ("lead", "worker", "reviewer", "researcher")
+WORKER_RE = re.compile(r"(ep|tm|adr|sp|cap)-([0-9]{3,9})(?:-([a-z][a-z0-9]{0,15}))?")
 BRIEF_MAX = 8192
 POOL_STALE_S = 120
 
@@ -85,12 +86,37 @@ def worker_name(key):
     return key.lower()
 
 
+def member_name(key, role, ordinal=1):
+    """Name a role on a card, with an ordinal for additional members."""
+    if role not in ROLES:
+        raise ValueError("unknown member role: %r" % (role,))
+    if isinstance(ordinal, bool) or not isinstance(ordinal, int) or ordinal < 1:
+        raise ValueError("member ordinal must be a positive integer")
+    lead = worker_name(key)
+    if not KEY_RE.fullmatch(lead.upper()):
+        raise ValueError("invalid card key: %r" % (key,))
+    suffix = role + (str(ordinal) if ordinal > 1 else "")
+    name = lead + "-" + suffix
+    if len(name) > 64 or not WORKER_RE.fullmatch(name):
+        raise ValueError("member name exceeds the worker naming limits")
+    return name
+
+
 def key_of_worker(name):
     """The card a worker name refers to, or None if it is not a dispatched worker."""
-    if not WORKER_RE.fullmatch(name or ""):
+    match = WORKER_RE.fullmatch(name or "")
+    if not match:
         return None
-    key = name.upper()
-    return key if KEY_RE.match(key) else None
+    key = (match.group(1) + "-" + match.group(2)).upper()
+    return key if KEY_RE.fullmatch(key) else None
+
+
+def role_of_worker(name):
+    """Return the role without its ordinal; unsuffixed names are leads."""
+    match = WORKER_RE.fullmatch(name or "")
+    if not match:
+        raise ValueError("invalid worker name: %r" % (name,))
+    return re.sub(r"[0-9]+$", "", match.group(3)) if match.group(3) else "lead"
 
 
 # True only inside the detached pool loop, where pool_start has already pointed
