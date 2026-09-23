@@ -5,11 +5,17 @@
 
 While a phrase is in progress it is re-transcribed about every `partial_every`
 seconds (by the smaller `partial_model`) and emitted as a `partial` event. The
-finished phrase is transcribed once more by the main model and emitted as `final`.
+finished phrase is transcribed once more by the main model, on a separate worker so
+capture never stalls, and emitted as `final`.
+
+Models come from the app's own `models` folder when it ships them; otherwise from the
+Hugging Face cache, and are downloaded only when `allow_download` is set.
 """
 
 from __future__ import annotations
 
+import logging
+import os
 import queue
 import re
 import threading
@@ -20,8 +26,10 @@ from typing import Callable
 import numpy as np
 
 from .audio import TARGET_RATE, MicStream
+from .config import models_dir
 
 Emit = Callable[[dict], None]
+log = logging.getLogger(__name__)
 
 # Whisper's typical output for near-silent or noisy clips.
 HALLUCINATIONS = {
@@ -38,6 +46,26 @@ def _is_noise(text: str) -> bool:
     return re.sub(r"[^a-z' ]", "", text.lower()).strip() in HALLUCINATIONS
 
 
+def model_source(name: str) -> str:
+    """The bundled model directory for `name` if the app ships it, else the name itself."""
+    bundled = models_dir() / name
+    return str(bundled) if (bundled / "model.bin").is_file() else name
+
+
+def load_model(name: str, cpu_threads: int, allow_download: bool):
+    from faster_whisper import WhisperModel  # heavy import, deferred
+
+    source = model_source(name)
+    try:
+        return WhisperModel(source, device="cpu", compute_type="int8", cpu_threads=cpu_threads,
+                            local_files_only=not allow_download)
+    except Exception as e:
+        if source == name and not allow_download:
+            raise RuntimeError(f"model {name!r} is not installed (downloads are off: set "
+                               f"allow_download in config.json to fetch it)") from e
+        raise
+
+
 class Transcriber:
     def __init__(
         self,
@@ -49,10 +77,9 @@ class Transcriber:
         silence_ms: int = 700,
         partial_every: float = 0.4,
         max_utterance_s: float = 60.0,
-        cpu_threads: int = 8,
+        cpu_threads: int = min(8, os.cpu_count() or 4),
+        allow_download: bool = False,
     ):
-        from faster_whisper import WhisperModel  # heavy import, deferred
-
         self.emit = emit
         self.language = language or ("en" if model.endswith(".en") else None)
         self.silence_ms = silence_ms
@@ -60,10 +87,10 @@ class Transcriber:
         self.max_samples = int(max_utterance_s * TARGET_RATE)
         emit({"type": "state", "state": "loading", "model": model})
         t0 = time.perf_counter()
-        self.model = WhisperModel(model, device="cpu", compute_type="int8", cpu_threads=cpu_threads)
+        self.model = load_model(model, cpu_threads, allow_download)
         # A smaller model keeps live partials snappy; the final pass uses the main model.
         if partial_model and partial_model != model:
-            self.partial_model = WhisperModel(partial_model, device="cpu", compute_type="int8", cpu_threads=cpu_threads)
+            self.partial_model = load_model(partial_model, cpu_threads, allow_download)
         else:
             self.partial_model = self.model
         emit({"type": "state", "state": "ready", "model": model, "load_s": round(time.perf_counter() - t0, 2)})
@@ -75,8 +102,15 @@ class Transcriber:
         self._mic_lock = threading.Lock()
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
+        # Finished phrases wait here for the main model. Bounded: if transcription falls this far
+        # behind, dropping a phrase beats typing it long after the user moved on.
+        self._finals: queue.Queue[tuple[np.ndarray, int]] = queue.Queue(maxsize=3)
 
     # -- control ---------------------------------------------------------
+
+    @property
+    def mic(self) -> MicStream | None:
+        return self._mic
 
     def set_mic(self, mic: MicStream) -> None:
         """Switch to `mic`. If it fails to open, the previous mic is restored and the error re-raised."""
@@ -87,11 +121,23 @@ class Transcriber:
             try:
                 mic.start()
             except OSError:
+                self._mic = None
                 if previous is not None:
-                    previous.start()
+                    try:
+                        previous.start()
+                        self._mic = previous
+                    except OSError:
+                        pass  # the old mic is gone too; the app's watchdog keeps looking
                 raise
             self._mic = mic
         self.emit({"type": "device", "device": mic.device.to_dict()})
+
+    def detach_mic(self) -> None:
+        """Close the mic (before re-scanning devices, which needs every stream closed)."""
+        with self._mic_lock:
+            if self._mic is not None:
+                self._mic.stop()
+                self._mic = None
 
     def idle_state(self) -> str:
         if self.mode == "ptt":
@@ -118,6 +164,7 @@ class Transcriber:
     def start(self) -> None:
         self._thread = threading.Thread(target=self._run, name="transcriber", daemon=True)
         self._thread.start()
+        threading.Thread(target=self._final_worker, name="finals", daemon=True).start()
 
     def stop(self) -> None:
         self._stop.set()
@@ -199,7 +246,10 @@ class Transcriber:
 
                 def end():
                     nonlocal in_speech, utter
-                    self._finish(np.concatenate(utter), speech_samples)
+                    try:
+                        self._finals.put_nowait((np.concatenate(utter), speech_samples))
+                    except queue.Full:
+                        self.emit({"type": "discard", "reason": "busy"})
                     utter, in_speech = [], False
                     preroll.clear()
                     self.emit({"type": "state", "state": self.idle_state()})
@@ -242,10 +292,26 @@ class Transcriber:
                         continue
 
                 if now - last_partial >= self.partial_every and mic.blocks.qsize() < 5 and speech_samples:
-                    text = self.transcribe(np.concatenate(utter), final=False)
+                    try:
+                        text = self.transcribe(np.concatenate(utter), final=False)
+                    except Exception:  # a failed preview must not stop capture
+                        log.exception("partial transcription failed")
+                        text = ""
                     last_partial = time.monotonic()
                     if text and not _is_noise(text):
                         self.emit({"type": "partial", "text": text})
+
+    def _final_worker(self) -> None:
+        while not self._stop.is_set():
+            try:
+                audio, speech_samples = self._finals.get(timeout=0.2)
+            except queue.Empty:
+                continue
+            try:
+                self._finish(audio, speech_samples)
+            except Exception as e:
+                log.exception("final transcription failed")
+                self.emit({"type": "error", "message": f"transcription failed: {e}"})
 
     def _finish(self, audio: np.ndarray, speech_samples: int) -> None:
         if speech_samples < int(0.2 * TARGET_RATE):

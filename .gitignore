@@ -2,3 +2,7 @@
 __pycache__/
 *.pyc
 *.wav
+build/
+dist/
+models/
+build-log.txt

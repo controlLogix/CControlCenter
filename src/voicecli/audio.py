@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import ctypes
 import queue
+import time
+from ctypes import wintypes
 from dataclasses import dataclass
 
 import numpy as np
@@ -53,9 +56,49 @@ def list_inputs(all_apis: bool = False) -> list[InputDevice]:
     return out
 
 
+def refresh() -> None:
+    """Re-scan audio devices. PortAudio lists them once when it starts, so a mic plugged in
+    (or a headset switched on) later stays invisible until it is re-initialised. Close every
+    open stream first."""
+    sd._terminate()
+    sd._initialize()
+
+
+class _WAVEINCAPSW(ctypes.Structure):
+    _fields_ = [("wMid", wintypes.WORD), ("wPid", wintypes.WORD), ("vDriverVersion", wintypes.UINT),
+                ("szPname", wintypes.WCHAR * 32), ("dwFormats", wintypes.DWORD),
+                ("wChannels", wintypes.WORD), ("wReserved1", wintypes.WORD)]
+
+
+def system_input_names() -> list[str]:
+    """Input names straight from Windows (MME, cut at 31 characters). Unlike PortAudio's list
+    this is always current, and reading it does not disturb an open stream."""
+    winmm = ctypes.WinDLL("winmm")
+    names = []
+    caps = _WAVEINCAPSW()
+    for i in range(winmm.waveInGetNumDevs()):
+        if winmm.waveInGetDevCapsW(i, ctypes.byref(caps), ctypes.sizeof(caps)) == 0:
+            names.append(caps.szPname)
+    return names
+
+
+def matches(name: str, spec: str) -> bool:
+    """Does device `name` fit the user's `spec` (a name substring, possibly MME-truncated)?"""
+    name, spec = name.lower().rstrip(), spec.lower()
+    if not name or not spec:
+        return False
+    return spec in name or spec.startswith(name[:28]) or name.startswith(spec[:28])
+
+
+def present(spec: str) -> bool:
+    return any(matches(n, spec) for n in system_input_names())
+
+
 def resolve_device(spec: str | int | None) -> InputDevice:
     """Match a device by index, or by case-insensitive name substring; None means the default."""
     devices = list_inputs()
+    if not devices:
+        raise ValueError("no microphone found")
     if spec is None or spec == "":
         return next((d for d in devices if d.is_default), devices[0])
     if isinstance(spec, int) or str(spec).isdigit():
@@ -104,10 +147,18 @@ class MicStream:
         self._block_ms = block_ms
         self._frames = int(device.rate * block_ms / 1000)
         self._stream: sd.InputStream | None = None
+        self.last_block = 0.0  # time.monotonic() of the latest audio callback
 
     def _callback(self, indata, frames, time_info, status) -> None:
+        self.last_block = time.monotonic()
         mono = indata.mean(axis=1) if indata.shape[1] > 1 else indata[:, 0]
         self.blocks.put(_resample(mono.astype(np.float32, copy=False), self.device.rate))
+
+    def stalled(self, seconds: float) -> bool:
+        """True if the open stream has delivered nothing for `seconds` (device gone)."""
+        if self._stream is None:
+            return False
+        return not self._stream.active or time.monotonic() - self.last_block > seconds
 
     def _open(self, dev: InputDevice) -> sd.InputStream:
         self._frames = int(dev.rate * self._block_ms / 1000)
@@ -127,6 +178,7 @@ class MicStream:
         errors = []
         for dev in [self.device] + _same_mic_other_apis(self.device):
             try:
+                self.last_block = time.monotonic()
                 self._stream = self._open(dev)
                 self.device = dev
                 return
@@ -136,6 +188,9 @@ class MicStream:
 
     def stop(self) -> None:
         if self._stream is not None:
-            self._stream.stop()
-            self._stream.close()
-            self._stream = None
+            stream, self._stream = self._stream, None
+            try:
+                stream.stop()
+                stream.close()
+            except sd.PortAudioError:
+                pass  # the device is already gone

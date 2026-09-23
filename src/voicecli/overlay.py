@@ -9,7 +9,7 @@ import tkinter as tk
 from tkinter import font as tkfont
 from typing import TYPE_CHECKING
 
-from . import inject
+from . import __version__, inject
 
 if TYPE_CHECKING:
     from .app import App
@@ -43,6 +43,7 @@ class Overlay:
         self._state = "loading"
         self._device_name = ""
         self._closing = False
+        self._hidden = False
 
         try:  # per-monitor DPI aware, so geometry and fonts use real pixels on scaled displays
             ctypes.windll.shcore.SetProcessDpiAwareness(2)
@@ -101,6 +102,8 @@ class Overlay:
             widget.bind("<ButtonRelease-1>", self._drag_end)
             widget.bind("<Button-3>", self._menu)
 
+        # Window close (Alt+F4, the installer's restart manager, sign-out) quits cleanly.
+        root.protocol("WM_DELETE_WINDOW", self._quit)
         root.after(50, self._no_activate)
         root.after(40, self._pump)
 
@@ -108,6 +111,10 @@ class Overlay:
 
     def request(self, cmd: str) -> None:
         self.events.put({"type": "_cmd", "cmd": cmd})
+
+    @property
+    def hidden(self) -> bool:
+        return self._hidden
 
     # -- window plumbing ------------------------------------------------------
 
@@ -129,17 +136,22 @@ class Overlay:
         self.app.save_position(self.root.winfo_x(), self.root.winfo_y())
 
     def _show(self) -> None:
+        self._hidden = False
         self.root.deiconify()
         self.root.attributes("-topmost", True)
         self.root.lift()
         self._no_activate()
         self.note.configure(text="")
 
+    def _hide(self) -> None:
+        self._hidden = True
+        self.root.withdraw()
+
     def _toggle(self) -> None:
         if self.root.state() == "withdrawn":
             self._show()
         else:
-            self.root.withdraw()
+            self._hide()
 
     def _quit(self) -> None:
         if not self._closing:
@@ -193,8 +205,15 @@ class Overlay:
         if cfg.mode == "open":
             m.add_command(label="Pause / resume listening", command=app.toggle_listening)
         m.add_separator()
-        m.add_command(label=f"Hide overlay   ({inject.key_label(cfg.show_hotkey)} shows it)", command=self.root.withdraw)
-        m.add_command(label="Quit voicecli", command=self._quit)
+        autostart = tk.BooleanVar(self.root, app.autostart_available() and app.autostart_enabled())
+        m.add_checkbutton(label="Start with Windows", variable=autostart,
+                          state="normal" if app.autostart_available() else "disabled",
+                          command=lambda: self._safe(app.set_autostart, autostart.get()))
+        m.add_command(label="Open log folder", command=lambda: self._safe(app.open_logs))
+        m.add_separator()
+        m.add_command(label=f"Hide overlay   ({inject.key_label(cfg.show_hotkey)} or the tray icon shows it)",
+                      command=self._hide)
+        m.add_command(label=f"Quit Voice CLI {__version__}", command=self._quit)
         try:
             m.tk_popup(e.x_root, e.y_root)
         except tk.TclError:
@@ -253,6 +272,7 @@ class Overlay:
         t = ev.get("type")
         if t == "_cmd":
             {"show": self._show, "toggle": self._toggle, "quit": self._quit}[ev["cmd"]]()
+            return
         elif t == "state":
             s = ev["state"]
             label = {"loading": f"loading {ev.get('model', '')}…", "ptt_idle": self._idle_text(),
