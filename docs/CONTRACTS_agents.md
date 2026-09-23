@@ -199,7 +199,7 @@ under `/api/board/<op>`.
 | `approve` | POST | `{id, actor, members: [...]}` |
 | `hire` | POST | `{id, name}` — **and nothing else**, see C8 |
 
-The definition CLI surface for skills is `python3 taskmgmt/coordination.py`:
+The definition and team CLI surface for skills is `python3 taskmgmt/coordination.py`:
 
 ```text
 agents [NAME] [--json]
@@ -209,9 +209,13 @@ agentdef SCOPE NAME [--description TEXT] [--cli CLI] [--model MODEL]
          [--capabilities [CAPABILITY ...]] [--max-instances N]
          [--persona TEXT] [--checksum CHECKSUM] [--json]
 agentdrop SCOPE NAME [--checksum CHECKSUM] [--json]
+roster KEY [--json]
+recruit KEY [--agent ACTOR] [--json]
+approve KEY --member NAME [--member NAME ...] [--agent ACTOR] [--json]
+hire KEY --name NAME [--json]
 ```
 
-These map directly to the three definition ops above; `agents NAME` URL-encodes
+The definition commands map directly to the three definition ops above; `agents NAME` URL-encodes
 `name` and returns the full definition including persona and checksum. `agentdef`
 creates or **replaces the full definition**, not a partial update: send all desired
 fields and the fetched checksum when editing. Omit checksum for creation. List flags
@@ -222,6 +226,14 @@ All three default to human-readable output; `--json` emits the unmodified API pa
 on stdout. Refusals exit nonzero and print the board's message and fix hints on stderr
 through `board_call`. Validation stays on the server. These are coordination.py
 subcommands; they do not require an `agentmux agent` shell wrapper.
+
+The team commands map directly to their four board ops. `roster` URL-encodes `id`;
+`recruit` and `approve` send the resolved pane/orchestrator identity as `actor`.
+Repeat `--member` for each approved definition name. `hire` sends only `id` and
+`name`: no cli, cwd, model, argv, or actor overrides are exposed. All four default
+to a readable roster; `--json` preserves the API payload. Every refusal goes
+through `board_call`, including the board's 403 hiring explanation and 409 fix
+hints, with nonzero exit and no retry or configuration workaround.
 
 Handlers delegate from `server.py` into `dashboard/boardagents.py` and
 `dashboard/boardteams.py`. `server.py` holds delegation lines only, no logic.

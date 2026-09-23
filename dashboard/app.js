@@ -2315,7 +2315,7 @@ function statusSelect(kind, id, status, options, after, stamp) {
   select.addEventListener('change', async () => {
     const wanted = select.value;
     select.disabled = true;
-    try { await post('api/status', { kind, id, status: wanted }); await after(); }
+    try { await post('api/board/status', { id, status: wanted, actor: 'dashboard' }); await after(); }
     catch (err) {
       say(stamp, err.message);
       select.value = st;          // put it back: the change did not happen
@@ -2388,35 +2388,41 @@ async function loadDispatch() {
 async function loadBoard() {
   loadDispatch();
   try {
-    const data = await getJSON('api/epics');
+    const data = await getJSON('api/board/board');
     const epics = Array.isArray(data.epics) ? data.epics : [];
+    const allTasks = Array.isArray(data.tasks) ? data.tasks : [];
+    const epicKeys = new Set(epics.map((e) => e.key));
+    const ungrouped = allTasks.filter((t) => !epicKeys.has(t.epic));
+    const groups = ungrouped.length ? [...epics, { title: 'Tasks without an epic' }] : epics;
     els.boardList.replaceChildren();
-    if (!epics.length) els.boardList.appendChild(el('p', 'empty', 'No epics yet. Add one above.'));
+    if (!groups.length) els.boardList.appendChild(el('p', 'empty', 'No epics yet. Add one above.'));
 
-    for (const e of epics) {
+    for (const e of groups) {
       const card = el('article', 'epic');
       const head = el('div', 'epic-head');
+      if (e.key) head.appendChild(el('span', 'board-key', e.key));
       head.appendChild(el('span', 'epic-title', String(e.title || '(untitled)')));
-      head.appendChild(statusSelect('epic', e.id, e.status, EPIC_STATUSES,
-                                    loadBoard, els.boardStamp));
+      if (e.key) head.appendChild(statusSelect('epic', e.key, e.status, EPIC_STATUSES,
+                                              loadBoard, els.boardStamp));
       if (e.jira_key) head.appendChild(el('span', 'epic-meta', String(e.jira_key)));
-      const tasks = Array.isArray(e.tasks) ? e.tasks : [];
+      const tasks = e.key ? allTasks.filter((t) => t.epic === e.key) : ungrouped;
       const done = tasks.filter((t) => t.status === 'done').length;
       if (tasks.length) head.appendChild(el('span', 'epic-meta', `${done}/${tasks.length}`));
       head.appendChild(el('span', 'spacer'));
-      head.appendChild(deleteButton('epic', e.id, String(e.title || ''),
-                                    loadBoard, els.boardStamp));
+      if (e.key) head.appendChild(deleteButton('epic', e.key, `${e.key} ${e.title || ''}`,
+        loadBoard, els.boardStamp, () => post('api/board/delete', { id: e.key, actor: 'dashboard' })));
       card.appendChild(head);
 
       const rows = el('div', 'task-rows');
       for (const t of tasks) {
         const r = el('div', 'task-row');
-        r.appendChild(statusSelect('task', t.id, t.status, TASK_STATUSES,
+        r.appendChild(el('span', 'board-key', t.key));
+        r.appendChild(statusSelect('task', t.key, t.status, TASK_STATUSES,
                                    loadBoard, els.boardStamp));
         r.appendChild(el('span', 't-title', String(t.title || '')));
-        if (t.agent) r.appendChild(el('span', 't-agent', String(t.agent)));
-        r.appendChild(deleteButton('task', t.id, String(t.title || ''),
-                                   loadBoard, els.boardStamp));
+        if (t.assignee) r.appendChild(el('span', 't-agent', String(t.assignee)));
+        r.appendChild(deleteButton('task', t.key, `${t.key} ${t.title || ''}`,
+          loadBoard, els.boardStamp, () => post('api/board/delete', { id: t.key, actor: 'dashboard' })));
         rows.appendChild(r);
       }
       card.appendChild(rows);
@@ -2435,7 +2441,7 @@ async function loadBoard() {
         btn.disabled = true;
         try {
           await post('api/tasks', {
-            epic_id: e.id, title: title.value.trim(), agent: agent.value.trim() || null,
+            epic_id: e.row, title: title.value.trim(), agent: agent.value.trim() || null,
           });
           await loadBoard();
         } catch (err) { say(els.boardStamp, err.message); btn.disabled = false; }
@@ -2443,7 +2449,8 @@ async function loadBoard() {
       btn.addEventListener('click', submit);
       title.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') submit(); });
       add.append(title, agent, btn);
-      card.appendChild(add);
+      // Creation still uses the compatibility form endpoint, which takes a row id.
+      if (e.key) card.appendChild(add);
 
       els.boardList.appendChild(card);
     }

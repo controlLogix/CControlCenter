@@ -162,6 +162,7 @@ run test_run.sh   bash /dev/fd/7 7< <(tr -d '\r' < dashboard/test_run.sh)
 run test_residue.sh bash /dev/fd/12 12< <(tr -d '\r' < dashboard/test_residue.sh)
 run test_lifecycle.sh bash /dev/fd/10 10< <(tr -d '\r' < dashboard/test_lifecycle.sh)
 run test_frontend.sh bash /dev/fd/12 12< <(tr -d '\r' < dashboard/test_frontend.sh)
+run test_frontend_board.sh bash /dev/fd/14 14< <(tr -d '\r' < dashboard/test_frontend_board.sh)
 run smoke.sh      bash /dev/fd/3 3< <(tr -d '\r' < dashboard/smoke.sh)
 # The board model and the dispatch seam. test_board.py landed with the store and
 # was never listed here, so it had not run in the gate since the day it was
@@ -172,7 +173,7 @@ run test_dispatch.py python3 dashboard/test_dispatch.py
 # EP-015 suites are registered at the scaffold seam before their owning tasks land.
 # Missing suites are explicit skips during the staged build; present suites use
 # the same failure accounting as every existing suite above.
-for suite in test_agentdefs.py test_agentcli.py test_boardagents.py test_boardteams.py \
+for suite in test_agentdefs.py test_agentcli.py test_teamcli.py test_boardagents.py test_boardteams.py \
              test_launch.sh test_frontend_agents.sh test_frontend_teams.sh test_frontend_collapse.sh; do
   if [ ! -f "dashboard/$suite" ]; then
     echo "SKIP $suite (EP-015 suite has not landed yet)"

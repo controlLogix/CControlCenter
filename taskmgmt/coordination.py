@@ -1053,6 +1053,31 @@ def cmd_agentdrop(args):
     return 0
 
 
+def cmd_team(args):
+    if args.command == "roster":
+        result = board_call("GET", "board/roster?" +
+                            urllib.parse.urlencode({"id": args.id}))
+    else:
+        body = {"id": args.id}
+        if args.command == "hire":
+            body["name"] = args.name
+        else:
+            body["actor"] = args.agent
+            if args.command == "approve":
+                body["members"] = args.member
+        result = board_call("POST", "board/" + args.command, body)
+    if result is None:
+        return 1
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        print(f"{result['id']}: {result['count']} roster member(s)")
+        for row in result.get("members", []):
+            pane = f" -> {row['member_name']}" if row.get("member_name") else ""
+            print(f"  {row['agent_name']} [{row['role']}] {row['status']}{pane}")
+    return 0
+
+
 def cmd_config(args):
     """Read or change one board setting.
 
@@ -1301,6 +1326,16 @@ def main(argv=None):
     drop.add_argument("--checksum")
     drop.add_argument("--json", action="store_true")
 
+    for name in ("roster", "recruit", "approve", "hire"):
+        team = board_verb(name, cmd_team, agent=name in ("recruit", "approve"))
+        team.add_argument("id", help="board key, e.g. TM-042")
+        team.add_argument("--json", action="store_true")
+        if name == "approve":
+            team.add_argument("--member", action="append", required=True,
+                              help="agent definition name; repeat for each member")
+        elif name == "hire":
+            team.add_argument("--name", required=True)
+
     setting = board_verb("config", cmd_config, agent=False)
     setting.add_argument("name", nargs="?", default=None)
     setting.add_argument("value", nargs="?", default=None)
@@ -1355,7 +1390,7 @@ def main(argv=None):
               "task-label", "task-dep", "task-evidence", "task-commit", "task-touch",
               "task-comment", "task-link", "task-assign", "task-move", "epic-new",
               "epic-status", "adr-new", "sprint-new", "cap-new", "sprint-commit",
-              "triage", "override")
+              "triage", "override", "recruit", "approve")
     field = {"claim": "holder", "release": "holder", "journal": "agent",
              "entry": "agent"}.get(args.command,
                                    "agent" if args.command in writes else None)

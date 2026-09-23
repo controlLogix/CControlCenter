@@ -893,3 +893,5 @@ details[open] > .item-summary::before { content: '▾'; }
 }
 .item-body { margin: 6px 0 0; }
 details.ticket[open] > .ticket-actions { margin-top: 8px; flex-wrap: wrap; }
+
+.board-key { color: var(--accent); font-family: ui-monospace, Consolas, monospace; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
