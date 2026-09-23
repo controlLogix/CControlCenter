@@ -48,6 +48,11 @@ __pycache__/
 *.py[cod]
 
 # Runtime state and logs belong in ~/.agentmux, never here.
+#
+# .agentmux/agents/ in THIS repo is the exception, and it is not runtime state:
+# those are agent definitions, versioned with the code they know how to work on,
+# the way .claude/agents/ is. Do not add it here - a repo-local roster that is
+# not committed is a roster only one machine has.
 *.log
 *.db
 *.db-wal
