@@ -80,6 +80,27 @@ else
   bad 'the restore does not wait for layout; assigning scrollTop now clamps to 0'
 fi
 
+echo '--- no async wrapper restores a stale scroll offset ---'
+# keepScroll() snapshotted scroll before a view loader and restored it after. The
+# loaders are async, so on a cold load the restore fired 3.3 SECONDS after the click,
+# by which time the operator had scrolled deliberately - and it threw that away.
+# Caught with a stack: restoreScroll <- keepScroll <- showView, from 149 to 0.
+# It was also built on a misdiagnosis: the pre-fix build held its scroll under three
+# observed re-renders, so it never fixed anything.
+# Comment lines are stripped first: the explanation of why keepScroll was removed
+# names it, and a guard that matches its own documentation is a guard that always
+# fires. Strip `//` lines and look at the code that is left.
+if sed 's|^[[:space:]]*//.*$||' "$APP" | grep -q 'keepScroll('; then
+  bad 'keepScroll is back: an async restore will overwrite deliberate scrolling'
+else
+  ok 'no async scroll-restore wrapper around the view loaders'
+fi
+if grep -q 'requestAnimationFrame(() => requestAnimationFrame(() => {' "$APP"; then
+  ok 'the view restore waits two frames for layout'
+else
+  bad 'the view restore runs before the grid has been measured'
+fi
+
 echo '--- the scroll container is not zoomed, and the board has no dead space ---'
 # zoom on an overflow:auto element keeps scrollTop in the element's own zoomed
 # coordinate space, so offsets come back fractional (measured 2029.4166259765625) and

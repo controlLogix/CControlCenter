@@ -1721,79 +1721,29 @@ const VIEW_KEY = 'ccc.view';
 
 // What each view needs loaded, and how often to refresh it while visible. A table
 // rather than a switch, so a new view is one entry.
-// SCROLL POSITION SURVIVES A RE-RENDER.
+// WHY THERE IS NO keepScroll() HERE ANY MORE.
 //
-// Every list view is rebuilt wholesale with replaceChildren() on a 3-5 second poll.
-// That empties the container, its scrollHeight collapses to the viewport height, and
-// the browser clamps scrollTop to 0 - so a reader scrolled halfway down the journal is
-// thrown back to the top every few seconds. It is not drift and not a focus bug: it is
-// the poll, and it hit every scrollable element on the page.
+// There used to be a wrapper that snapshotted every scrollable element before a view
+// loader ran and restored it afterwards, on the theory that the poll's
+// replaceChildren() was collapsing each container and clamping scrollTop to 0.
 //
-// Restoring an absolute offset is not enough on its own. A list that GREW while the
-// reader sat at the bottom should stay at the bottom, or every new message pushes the
-// view up by its own height. So the pinned-to-bottom case is detected and re-pinned
-// rather than restored to a now-wrong number.
+// That theory was WRONG, and it was tested: run against the pre-fix build under three
+// OBSERVED re-renders, the scroll held there too. The view is the scroll container and
+// only an inner list is replaced, so the browser anchors it. The real cause of the
+// reported reset was syncAgents() re-appending every pane cell on every tick - see the
+// comment there.
 //
-// Restoration happens in requestAnimationFrame, after layout has settled: setting
-// scrollTop before the browser has measured the new content silently clamps again.
-const AT_BOTTOM_SLOP = 4;          // px; a fractional scrollHeight is normal
-
-function scrollableNodes() {
-  const out = [];
-  document.querySelectorAll('.view, .term, .msg-body, .res-list, .mq-log').forEach((el) => {
-    if (el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth) out.push(el);
-  });
-  return out;
-}
-
-function snapshotScroll() {
-  return scrollableNodes().map((el) => ({
-    el,
-    top: el.scrollTop,
-    left: el.scrollLeft,
-    pinned: el.scrollHeight - el.clientHeight - el.scrollTop <= AT_BOTTOM_SLOP,
-  }));
-}
-
-function restoreScroll(saved) {
-  requestAnimationFrame(() => {
-    for (const s of saved) {
-      if (!s.el.isConnected) continue;
-      s.el.scrollTop = s.pinned ? s.el.scrollHeight : s.top;
-      s.el.scrollLeft = s.left;
-    }
-  });
-}
-
-// Wrap a view loader so its DOM swap cannot move the reader. The loaders are async,
-// so the restore has to wait for the promise - doing it synchronously would run
-// before the fetch had even returned, let alone rendered.
-// `forcePin` exists because the queue view has its own follow checkbox. Without it
-// the two mechanisms race: loadQueue scrolls the last row into view, then this restores
-// the reader's previous offset a frame later and undoes it. With it, a checked follow
-// simply means "every scrollable in this view counts as pinned", and the two agree.
-function keepScroll(load, forcePin) {
-  return (...args) => {
-    const pin = typeof forcePin === 'function' && forcePin();
-    const saved = snapshotScroll();
-    if (pin) for (const s of saved) s.pinned = true;
-    let out;
-    try {
-      out = load(...args);
-    } catch (err) {
-      restoreScroll(saved);
-      throw err;
-    }
-    if (out && typeof out.then === 'function') {
-      return out.then(
-        (v) => { restoreScroll(saved); return v; },
-        (e) => { restoreScroll(saved); throw e; },
-      );
-    }
-    restoreScroll(saved);
-    return out;
-  };
-}
+// Worse, the wrapper caused a bug of its own. The loaders are async, so the restore
+// fired whenever the fetch resolved - measured at 3.3 SECONDS after the click on a
+// cold load - and by then the operator had scrolled somewhere deliberately. It then
+// restored the offset from before the load and threw that away, with a stack reading
+//     restoreScroll <- keepScroll <- showView
+// A fix for a bug that did not exist, which created one that did. Removed rather than
+// patched: the thing it was protecting against does not happen here.
+//
+// Scroll position across a VIEW SWITCH is handled by viewScroll in showView, which is
+// the mechanism that actually helps and runs at a moment when nothing else is touching
+// the element.
 
 // ── the activity feed ────────────────────────────────────────────────────────
 //
@@ -1967,13 +1917,13 @@ async function loadFeed() {
 }
 
 const VIEW_LOADERS = {
-  settings: keepScroll(() => { loadAuth(); if (!resourcesLoaded) loadResources(false); }),
-  queue:    keepScroll(loadQueue, () => els.queueFollow && els.queueFollow.checked),
-  feed:     keepScroll(loadFeed, () => els.feedFollow && els.feedFollow.checked),
-  board:    keepScroll(loadBoard),
-  journal:  keepScroll(loadJournal),
-  tickets:  keepScroll(loadTickets),
-  iiot:     keepScroll(loadIiot),
+  settings: () => { loadAuth(); if (!resourcesLoaded) loadResources(false); },
+  queue:    loadQueue,
+  feed:     loadFeed,
+  board:    loadBoard,
+  journal:  loadJournal,
+  tickets:  loadTickets,
+  iiot:     loadIiot,
 };
 // The feed's interval is the operator's to set, so it is read from prefs at the
 // moment the view opens rather than frozen in this table.
@@ -2009,15 +1959,23 @@ function showView(which) {
     if (node) node.hidden = id !== which;
   }
 
-  // Restore after layout: the element was display:none a moment ago, so it has no
+  // Restore after layout. The element was display:none a moment ago, so it has no
   // scrollHeight yet and assigning scrollTop now would silently clamp to 0.
+  //
+  // TWO frames, and NO manual clamp. The first version did both wrong: one frame is
+  // not enough for a grid to lay out, and clamping with
+  //     Math.min(want, scrollHeight - clientHeight)
+  // computes that bound against a box that has not been measured yet, so the bound is
+  // 0 and the "restore" writes 0 - turning the fix into the bug it was meant to
+  // repair. The browser already clamps an over-large scrollTop correctly once the
+  // content is real, so let it.
   const entering = els.views[which];
   if (entering && viewScroll.has(which)) {
     const want = viewScroll.get(which);
-    requestAnimationFrame(() => {
-      if (entering.hidden) return;
-      entering.scrollTop = Math.min(want, entering.scrollHeight - entering.clientHeight);
-    });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (entering.hidden || !want) return;
+      entering.scrollTop = want;
+    }));
   }
   for (const btn of els.navItems) {
     const on = btn.dataset.view === which;
@@ -2049,7 +2007,7 @@ function showView(which) {
     if (load) load();
     const every = which === 'feed' ? feedPrefs.poll : VIEW_POLL_MS[which];
     if (every) {
-      if (which === 'settings') resourcesTimer = setInterval(keepScroll(() => loadResources(false)), every);
+      if (which === 'settings') resourcesTimer = setInterval(() => loadResources(false), every);
       else viewTimer = setInterval(load, every);
     }
   }
