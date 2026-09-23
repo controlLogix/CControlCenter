@@ -65,9 +65,6 @@ MAX_ATTEMPTS = 3            # third failure escalates to the human
 LOCK_WAIT_S = 10            # before a run lock is treated as abandoned
 
 
-class IdentityError(Exception):
-    """Raised when a caller cannot be who it says it is. See resolve_identity."""
-
 # The states a job can be folded into. `verified` is terminal success; there is no
 # separate `accepted`, because an orchestrator that always accepts adds a write, a way
 # to hang the gate, and a reason to re-read the artifact it is trying not to read.
@@ -307,70 +304,6 @@ def run_lock(run_id, what="operation"):
             pass
 
 
-# ── identity ─────────────────────────────────────────────────────────────────
-
-def resolve_identity(claimed, verb, require_live=True):
-    """Return the identity to record, or raise IdentityError.
-
-    `run verdict --by claude` used to be believed on the strength of the string. That
-    is not a hypothetical weakness: during live testing the ORCHESTRATOR typed a
-    verdict with --by set to the reviewer's name, and the ledger recorded a review
-    that the reviewer never performed. The whole point of the reviewer field is that
-    "verified" means someone other than the author looked.
-
-    Rules:
-      * $AGENTMUX_AGENT wins. A pane cannot rename itself by passing --by.
-      * The identity must be a LIVE tmux session, so a name that never existed, or an
-        agent that has since died, cannot sign anything.
-      * The orchestrator has no session, which is exactly how `complete` can tell it
-        is not being run from inside a pane.
-
-    THE HONEST LIMIT, stated here because it belongs next to the code and not only in
-    a rule file: every agent runs unrestricted with full filesystem access, so any of
-    them could set $AGENTMUX_AGENT, write the ledger directly, or call tmux itself.
-    This is not a security boundary and cannot be made into one at this layer. It
-    stops MISTAKES - a mistyped --by, a reviewer name transcribed by the orchestrator,
-    a verdict from an agent that is no longer running - which is what actually went
-    wrong.
-    """
-    env = os.environ.get("AGENTMUX_AGENT") or None
-    if env and claimed and claimed != env:
-        raise IdentityError(
-            f"run: this pane is {env!r}, so it cannot {verb} as {claimed!r}.\n"
-            f"  --by is not an override; drop it and the pane's own identity is used.")
-    who = env or claimed
-    if not who:
-        raise IdentityError(f"run: {verb} needs an identity "
-                            f"(run it inside a pane, or pass --by)")
-    if not NAME_PATTERN.fullmatch(who):
-        raise IdentityError(f"run: invalid identity {who!r}")
-    if require_live and os.environ.get("AGENTMUX_TRUST_IDENTITY") != "1":
-        live = coordination.live_agents()
-        if who not in live:
-            raise IdentityError(
-                f"run: {who!r} is not a live agent, so it cannot {verb}.\n"
-                f"  live: {', '.join(sorted(live)) or '(none)'}\n"
-                f"  set AGENTMUX_TRUST_IDENTITY=1 only in tests, which run without tmux.")
-    return who
-
-
-def orchestrator_identity(verb, claimed=None):
-    """`start` and `complete` are the orchestrator's, and refuse to run from a pane."""
-    env = os.environ.get("AGENTMUX_AGENT")
-    if env and os.environ.get("AGENTMUX_TRUST_IDENTITY") != "1":
-        raise IdentityError(
-            f"run: {verb} is the orchestrator's to call, and this is the {env!r} pane.\n"
-            f"  An agent closing out the run it is working in defeats the gate: ask the\n"
-            f"  orchestrator to run it, or post a request for it.")
-    if claimed and claimed != "orchestrator":
-        # --by survives on these two verbs only as a compatibility shim. Accepting it
-        # silently would put a name in the ledger that nobody could have been.
-        raise IdentityError(
-            f"run: {verb} is always attributed to the orchestrator, so --by {claimed!r} "
-            f"cannot be honoured.\n  Drop --by.")
-    return "orchestrator"
-
-
 # ── notification failures are never swallowed ────────────────────────────────
 
 def record_notice(run_id, kind, subject, body, by, ref=None):
@@ -408,8 +341,8 @@ def record_notice(run_id, kind, subject, body, by, ref=None):
 
 def cmd_start(args):
     try:
-        by = orchestrator_identity("start", args.by)
-    except IdentityError as err:
+        by = coordination.orchestrator_identity("start", args.by)
+    except coordination.IdentityError as err:
         print(err, file=sys.stderr)
         return 2
     for _ in range(8):
@@ -474,8 +407,8 @@ def cmd_submit(args):
         print(f"run: invalid job id {args.job!r}", file=sys.stderr)
         return 2
     try:
-        by = resolve_identity(args.by, f"submit {args.job}")
-    except IdentityError as err:
+        by = coordination.resolve_identity(args.by, f"submit {args.job}")
+    except coordination.IdentityError as err:
         print(err, file=sys.stderr)
         return 2
 
@@ -513,8 +446,8 @@ def cmd_verdict(args):
         print(f"run: invalid job id {args.job!r}", file=sys.stderr)
         return 2
     try:
-        by = resolve_identity(args.by, f"verify {args.job}")
-    except IdentityError as err:
+        by = coordination.resolve_identity(args.by, f"verify {args.job}")
+    except coordination.IdentityError as err:
         print(err, file=sys.stderr)
         return 2
 
@@ -703,8 +636,8 @@ def cmd_complete(args):
         print(f"run: no such run {args.run}", file=sys.stderr)
         return 2
     try:
-        by = orchestrator_identity("complete", args.by)
-    except IdentityError as err:
+        by = coordination.orchestrator_identity("complete", args.by)
+    except coordination.IdentityError as err:
         print(err, file=sys.stderr)
         return 2
 

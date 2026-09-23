@@ -5,6 +5,7 @@
 # A file rather than a one-liner because nesting $(pgrep ...) inside a
 # `wsl.exe bash -c "..."` call gets expanded by the *outer* Windows shell first.
 set -u
+ROOT="${AGENTMUX_HOME:-$HOME/.agentmux}"
 
 # Deliberately no `cd "$(dirname "$0")"`: run via process substitution, $0 is
 # /dev/fd/63, so that would land in /dev. Run this from the repo root.
@@ -20,7 +21,7 @@ done
 sleep 1
 
 if [ "${1:-}" = '--fresh-db' ]; then
-  rm -f "$HOME/.agentmux/cc.db" "$HOME/.agentmux/cc.db-wal" "$HOME/.agentmux/cc.db-shm"
+  rm -f "$ROOT/cc.db" "$ROOT/cc.db-wal" "$ROOT/cc.db-shm"
   echo 'cc.db removed'
 fi
 

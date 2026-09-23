@@ -157,4 +157,97 @@ case "$noise" in
   *) bad 'the report does not say which kind was dropped' ;;
 esac
 
+echo '--- every component uses the selected AGENTMUX_HOME ---'
+# Extract only the production helpers, with their actual ROOT expression; do not
+# source the harness dispatch, spawn anything, or override the operator's HOME.
+PATH_HELPERS="$AGENTMUX_HOME/path-helpers.sh"
+{
+  sed -n '/^ROOT=/p' "$HARNESS"
+  sed -n '/^auth_default_for() {/,/^}/p' "$HARNESS"
+  sed -n '/^auth_resolve() {/,/^}/p' "$HARNESS"
+  sed -n '/^task_cli() {/,/^}/p' "$HARNESS"
+} > "$PATH_HELPERS"
+PATH_HOME="$AGENTMUX_HOME/selected home"
+mkdir -p "$PATH_HOME"
+printf '{"active":{"codex":"isolated-%s"}}\n' "$TAG" > "$PATH_HOME/auth.json"
+default=$(AGENTMUX_HOME="$PATH_HOME" bash -c '. "$1"; auth_default_for codex' _ "$PATH_HELPERS")
+if [ "$default" = "isolated-$TAG" ]; then
+  ok 'home: auth_default_for reads the selected auth.json'
+else
+  bad 'home: auth_default_for read another home or lost the configured default'
+fi
+
+# A minimal manifest requires both settings and a secret NAME in the selected home.
+# None of the data is real credentials; the production helper only emits settings.
+mkdir -p "$PATH_HOME/repo/dashboard"
+cat > "$PATH_HOME/repo/dashboard/auth.json" <<'JSON'
+{"providers":[{"id":"home-test","settings":[{"key":"region"}],"secrets":["HOME_TEST_KEY"]}],"methods":[{"id":"home-test","cli":"codex","provider":"home-test","settings":[{"key":"model"}],"env_from_provider":{"HOME_TEST_REGION":"region"},"env_from_method":{"HOME_TEST_MODEL":"model"}}]}
+JSON
+printf '%s\n' '{"providers":{"home-test":{"region":"isolated-region"}},"methods":{"home-test":{"model":"isolated-model"}}}' > "$PATH_HOME/auth.json"
+printf '%s\n' 'export HOME_TEST_KEY=fixture-only' > "$PATH_HOME/env"
+resolved=$(AGENTMUX_HOME="$PATH_HOME" AGENTMUX_REPO="$PATH_HOME/repo" bash -c '. "$1"; auth_resolve home-test codex' _ "$PATH_HELPERS" 2>/dev/null); rc=$?
+if [ "$rc" = 0 ] && [[ "$resolved" == *'HOME_TEST_REGION=isolated-region;'*'HOME_TEST_MODEL=isolated-model;'* ]]; then
+  ok 'home: auth_resolve reads settings and secret names from the selected home'
+else
+  bad "home: auth_resolve ignored the selected configuration (rc=$rc)"
+fi
+
+# Exercise both directions, so this discriminates whether or not the operator has
+# a real atlassian.json. A config in another home must not enable the task hooks.
+printf '# fixture CLI\n' > "$PATH_HOME/task.py"
+printf '{}\n' > "$PATH_HOME/atlassian.json"
+selected_cli=$(AGENTMUX_HOME="$PATH_HOME" AGENTMUX_TASK_CLI="$PATH_HOME/task.py" bash -c '. "$1"; task_cli' _ "$PATH_HELPERS"); present_rc=$?
+rm "$PATH_HOME/atlassian.json"
+AGENTMUX_HOME="$PATH_HOME" AGENTMUX_TASK_CLI="$PATH_HOME/task.py" bash -c '. "$1"; task_cli' _ "$PATH_HELPERS" >/dev/null; absent_rc=$?
+if [ "$present_rc/$absent_rc" = 0/1 ] && [ "$selected_cli" = "$PATH_HOME/task.py" ]; then
+  ok 'home: task_cli requires atlassian.json in the selected home only'
+else
+  bad "home: task_cli used another home (present=$present_rc absent=$absent_rc)"
+fi
+
+# Execute just ROOT and the --fresh-db branch, never pgrep/kill/nohup/curl.
+# The rm shim maps any attempted deletion in the REAL default directory to a
+# disposable mirror. Even the broken base cannot delete the operator's files.
+# Its selected-home files remain, and its default-home mirror is destroyed, so
+# each assertion below fails on the original destructive path.
+RESTART_PATHS="$AGENTMUX_HOME/restart-paths.sh"
+tr -d '\r' < dashboard/restart.sh | sed -n '/^ROOT=/p; /^if .*--fresh-db/,/^fi$/p' > "$RESTART_PATHS"
+OPERATOR_MIRROR="$AGENTMUX_HOME/operator-mirror"
+mkdir -p "$OPERATOR_MIRROR"
+for file in cc.db cc.db-wal cc.db-shm; do
+  printf 'selected %s\n' "$file" > "$PATH_HOME/$file"
+  printf 'operator %s\n' "$file" > "$OPERATOR_MIRROR/$file"
+done
+export PATH_HOME OPERATOR_MIRROR
+# Also verify the actual operator database is unchanged; it is only ever read.
+real_db_before=$(sha256sum "$HOME/.agentmux/cc.db" 2>/dev/null || printf 'ABSENT')
+AGENTMUX_HOME="$PATH_HOME" bash -s -- "$RESTART_PATHS" <<'RESTART' >/dev/null
+set -eu
+rm() {
+  local arg
+  for arg in "$@"; do
+    case "$arg" in
+      -f) ;;
+      "$HOME/.agentmux/"*) command rm -f "$OPERATOR_MIRROR/${arg##*/}" ;;
+      "$PATH_HOME/"*) command rm -f "$arg" ;;
+      *) echo "unexpected deletion target: $arg" >&2; return 1 ;;
+    esac
+  done
+}
+script="$1"
+set -- --fresh-db
+. "$script"
+RESTART
+restart_rc=$?
+real_db_after=$(sha256sum "$HOME/.agentmux/cc.db" 2>/dev/null || printf 'ABSENT')
+for file in cc.db cc.db-wal cc.db-shm; do
+  if [ "$restart_rc" = 0 ] && [ "$real_db_before" = "$real_db_after" ] && \
+     [ ! -e "$PATH_HOME/$file" ] && \
+     cmp -s "$OPERATOR_MIRROR/$file" <(printf 'operator %s\n' "$file"); then
+    ok "home: fresh-db removes selected $file and preserves default-home bytes"
+  else
+    bad "home: fresh-db targeted the wrong $file (or the deletion block failed)"
+  fi
+done
+
 finish

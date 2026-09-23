@@ -90,6 +90,78 @@ def live_agents():
         return set()
 
 
+class IdentityError(Exception):
+    """Raised when a caller cannot be who it says it is. See resolve_identity."""
+
+
+def resolve_identity(claimed, verb, require_live=True):
+    """Return the identity to record, or raise IdentityError.
+
+    `run verdict --by claude` used to be believed on the strength of the string. That
+    is not a hypothetical weakness: during live testing the ORCHESTRATOR typed a
+    verdict with --by set to the reviewer's name, and the ledger recorded a review
+    that the reviewer never performed. The whole point of the reviewer field is that
+    "verified" means someone other than the author looked.
+
+    Rules:
+      * $AGENTMUX_AGENT wins over --by, --holder, and --agent.
+      * The identity must be a LIVE tmux session, so a name that never existed, or an
+        agent that has since died, cannot sign anything.
+      * The orchestrator has no session, which is exactly how `complete` can tell it
+        is not being run from inside a pane.
+
+    THE HONEST LIMIT, stated here because it belongs next to the code and not only in
+    a rule file: every agent runs unrestricted with full filesystem access, so any of
+    them could set $AGENTMUX_AGENT, write the ledger directly, or call tmux itself.
+    This is not a security boundary and cannot be made into one at this layer. It
+    stops MISTAKES - a mistyped --by, a reviewer name transcribed by the orchestrator,
+    a verdict from an agent that is no longer running - which is what actually went
+    wrong.
+    """
+    env = os.environ.get("AGENTMUX_AGENT") or None
+    if env and claimed and claimed != env:
+        raise IdentityError(
+            f"identity: this pane is {env!r}, so it cannot {verb} as {claimed!r}.\n"
+            f"  An explicit identity is not an override; drop it and the pane's own identity is used.")
+    who = env or claimed
+    if not who:
+        raise IdentityError(f"identity: {verb} needs an identity "
+                            f"(run it inside a pane, or pass an explicit identity)")
+    if not NAME_PATTERN.fullmatch(who):
+        raise IdentityError(f"identity: invalid identity {who!r}")
+    if who == "orchestrator":
+        return orchestrator_identity(verb, who, allow_test_identity=False)
+    if require_live and os.environ.get("AGENTMUX_TRUST_IDENTITY") != "1":
+        live = live_agents()
+        if who not in live:
+            raise IdentityError(
+                f"identity: {who!r} is not a live agent, so it cannot {verb}.\n"
+                f"  live: {', '.join(sorted(live)) or '(none)'}\n"
+                f"  set AGENTMUX_TRUST_IDENTITY=1 only in tests, which run without tmux.")
+    return who
+
+
+def orchestrator_identity(verb, claimed=None, allow_test_identity=True):
+    """Resolve the outside-pane identity, including run's legacy test bypass.
+
+    Coordination disables that bypass: its virtual orchestrator identity must only
+    be available outside panes, even when synthetic agent liveness is trusted.
+    """
+    env = os.environ.get("AGENTMUX_AGENT")
+    if env and (not allow_test_identity or os.environ.get("AGENTMUX_TRUST_IDENTITY") != "1"):
+        raise IdentityError(
+            f"identity: {verb} is the orchestrator's to call, and this is the {env!r} pane.\n"
+            f"  An agent closing out the run it is working in defeats the gate: ask the\n"
+            f"  orchestrator to run it, or post a request for it.")
+    if claimed and claimed != "orchestrator":
+        # --by survives on these two verbs only as a compatibility shim. Accepting it
+        # silently would put a name in the ledger that nobody could have been.
+        raise IdentityError(
+            f"identity: {verb} is always attributed to the orchestrator, so --by {claimed!r} "
+            f"cannot be honoured.\n  Drop --by.")
+    return "orchestrator"
+
+
 def read_claim(path):
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
@@ -580,7 +652,7 @@ def main(argv=None):
     listing.add_argument("--all", action="store_true", help="include expired")
     listing.set_defaults(func=cmd_claims)
 
-    entry = sub.add_parser("journal")
+    entry = sub.add_parser("journal", aliases=["entry"])
     entry.add_argument("kind")
     entry.add_argument("subject")
     entry.add_argument("--body", default="")
@@ -588,6 +660,18 @@ def main(argv=None):
     entry.set_defaults(func=cmd_journal)
 
     args = parser.parse_args(argv)
+    # Resolve before a claim, journal write, or dashboard request can occur.
+    field = {"claim": "holder", "release": "holder", "journal": "agent",
+             "entry": "agent", "task-add": "agent", "task-status": "agent"}.get(args.command)
+    if field:
+        try:
+            claimed = getattr(args, field)
+            if not claimed and not os.environ.get("AGENTMUX_AGENT"):
+                claimed = orchestrator_identity(args.command)
+            setattr(args, field, resolve_identity(claimed, args.command))
+        except IdentityError as err:
+            print(str(err), file=sys.stderr)
+            return 2
     return args.func(args)
 
 

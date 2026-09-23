@@ -156,7 +156,7 @@ task_cli() {
   local cli="${AGENTMUX_TASK_CLI:-${AGENTMUX_REPO:-}/taskmgmt/task.py}"
   [ -n "${AGENTMUX_REPO:-}${AGENTMUX_TASK_CLI:-}" ] || return 1
   [ -f "$cli" ] || return 1
-  [ -f "$HOME/.agentmux/atlassian.json" ] || return 1
+  [ -f "$ROOT/atlassian.json" ] || return 1
   command -v python3 >/dev/null 2>&1 || return 1
   printf '%s' "$cli"
 }
@@ -302,12 +302,12 @@ USAGE
 auth_resolve() {
   local method="$1" cli="$2" repo="${AGENTMUX_REPO:-}"
   [ -n "$repo" ] || { printf 'agentmux: AGENTMUX_REPO is unset; cannot read the auth manifest\n' >&2; return 1; }
-  python3 - "$repo" "$method" "$cli" <<'PY'
+  python3 - "$repo" "$method" "$cli" "$ROOT" <<'PY'
 import json, os, pathlib, re, sys, shlex
 
 repo, method_id, cli = sys.argv[1], sys.argv[2], sys.argv[3]
 manifest = pathlib.Path(repo) / "dashboard" / "auth.json"
-root = pathlib.Path(os.path.expanduser("~/.agentmux"))
+root = pathlib.Path(sys.argv[4])
 
 try:
     data = json.loads(manifest.read_text(encoding="utf-8"))
@@ -404,9 +404,9 @@ PY
 # The configured default method for a CLI, or empty if none is set.
 auth_default_for() {
   local cli="$1"
-  python3 - "$cli" <<'PY' 2>/dev/null
+  python3 - "$cli" "$ROOT" <<'PY' 2>/dev/null
 import json, os, pathlib, sys
-path = pathlib.Path(os.path.expanduser("~/.agentmux/auth.json"))
+path = pathlib.Path(sys.argv[2]) / "auth.json"
 if path.exists():
     try:
         print(json.loads(path.read_text(encoding="utf-8")).get("active", {}).get(sys.argv[1], ""))
@@ -1057,10 +1057,11 @@ cmd_claim() {
   local resource="${1:-}"; shift || true
   [ -n "$resource" ] || die "claim needs a resource, e.g. agentmux claim taskmgmt/courier.py --note 'adding backoff'"
   # --holder is NOT passed through from "$@": argparse takes the last occurrence, so
+  # Python enforces the same binding for direct CLI callers.
   # appending user args after ours let `claim x --holder victim` claim in someone
   # else's name. Identity comes from the environment here, full stop.
   for arg in "$@"; do
-    case "$arg" in --holder) die "claim: --holder is set from \$AGENTMUX_AGENT and cannot be overridden" ;; esac
+    case "$arg" in --holder|--holder=*) die "claim: --holder is set from \$AGENTMUX_AGENT and cannot be overridden" ;; esac
   done
   python3 "$(coord_py)" claim "$resource" --holder "${AGENTMUX_AGENT:-orchestrator}" "$@"
 }
@@ -1069,7 +1070,7 @@ cmd_release() {
   local resource="${1:-}"; shift || true
   [ -n "$resource" ] || die "release needs a resource"
   for arg in "$@"; do
-    case "$arg" in --holder) die "release: --holder is set from \$AGENTMUX_AGENT and cannot be overridden" ;; esac
+    case "$arg" in --holder|--holder=*) die "release: --holder is set from \$AGENTMUX_AGENT and cannot be overridden" ;; esac
   done
   python3 "$(coord_py)" release "$resource" --holder "${AGENTMUX_AGENT:-orchestrator}" "$@"
 }

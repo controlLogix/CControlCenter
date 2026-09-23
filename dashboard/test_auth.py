@@ -123,8 +123,8 @@ def split_resolution(stdout):
 
 
 def resolve(method_id, cli):
-    """Call the harness's own auth_resolve, extracted from agentmux.sh."""
-    script = ('eval "$(sed -n "/^auth_resolve()/,/^}/p" agentmux.sh | tr -d "\\r")"; '
+    """Call auth_resolve with its production ROOT initialization, without dispatch."""
+    script = ('eval "$(sed -n "/^ROOT=/p; /^auth_resolve()/,/^}/p" agentmux.sh | tr -d "\\r")"; '
               f'auth_resolve {method_id} {cli}')
     return subprocess.run(["bash", "-c", script], cwd=REPO, env=env,
                           capture_output=True, text=True, timeout=60)

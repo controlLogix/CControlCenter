@@ -17,6 +17,10 @@ HOME_DIR="$(mktemp -d)"
 trap 'rm -rf "$HOME_DIR"' EXIT
 export AGENTMUX_HOME="$HOME_DIR"
 export AGENTMUX_DASHBOARD="http://127.0.0.1:1"     # unreachable on purpose
+# No tmux is required: synthetic holders bypass liveness only. Identity mismatch
+# checks remain active; the negative liveness case below explicitly disables this.
+unset AGENTMUX_AGENT
+export AGENTMUX_TRUST_IDENTITY=1
 CO="python3 taskmgmt/coordination.py"
 
 # shellcheck source=/dev/null
@@ -273,6 +277,109 @@ if [ "$(cat "$winners")" = "$($CO claims --json 2>/dev/null | python3 -c 'import
   ok 'the recorded holder is the process that was told it won'
 else
   bad 'the winner and the recorded holder disagree'
+fi
+
+echo '--- Python CLI identity binding (including direct entry points) ---'
+# Each assertion is a paired contract: a forged call must fail for identity reasons,
+# and its legitimate counterpart must work. The positive halves protect compatibility
+# (which already worked at the base); the forged half makes every assertion red there.
+# Capture both status and diagnostic so a missing server/file cannot masquerade as
+# identity enforcement. No real dashboard or tmux is involved.
+# A real local HTTP fixture lets valid task operations succeed on BOTH revisions.
+# Thus the base failure proves an accepted forgery, not a dashboard outage.
+python3 - "$HOME_DIR" <<'PYHTTP' &
+import json, pathlib, sys
+from http.server import BaseHTTPRequestHandler, HTTPServer
+root = pathlib.Path(sys.argv[1])
+class Handler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        body = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
+        with (root / 'identity-requests').open('a') as output:
+            output.write(json.dumps({'path': self.path, 'body': body}) + '\n')
+        data = json.dumps({'id': 41, 'title': 'identity-test',
+                           'status': body.get('status', 'todo')}).encode()
+        self.send_response(200)
+        self.send_header('Content-Length', str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+    def log_message(self, *args):
+        pass
+server = HTTPServer(('127.0.0.1', 0), Handler)
+(root / 'identity-port').write_text(str(server.server_port))
+server.serve_forever()
+PYHTTP
+identity_server=$!
+trap 'kill "$identity_server" 2>/dev/null; wait "$identity_server" 2>/dev/null; rm -rf "$HOME_DIR"' EXIT
+for _ in $(seq 1 100); do
+  [ -s "$HOME_DIR/identity-port" ] && break
+  sleep 0.02
+done
+identity_api="http://127.0.0.1:$(cat "$HOME_DIR/identity-port")"
+for verb in claim release journal entry task-add task-status; do
+  case "$verb" in
+    claim)       args=(claim identity/claim --holder victim) ;;
+    release)
+      $CO claim identity/release --holder victim >/dev/null 2>&1
+      args=(release identity/release --holder victim) ;;
+    journal|entry) args=("$verb" note identity-test --agent victim) ;;
+    task-add)    args=(task-add 41 identity-test --agent victim) ;;
+    task-status) args=(task-status 41 done --agent victim) ;;
+  esac
+  out=$(AGENTMUX_DASHBOARD="$identity_api" AGENTMUX_AGENT=attacker $CO "${args[@]}" 2>&1); rc=$?
+  matching_rc=0
+  if [[ "$verb" == entry || "$verb" == task-* ]]; then
+    AGENTMUX_DASHBOARD="$identity_api" AGENTMUX_AGENT=victim $CO "${args[@]}" >/dev/null 2>&1
+    matching_rc=$?
+  fi
+  if [ "$rc/$matching_rc" = 2/0 ] && [[ "$out" == *"identity:"*"cannot"* ]]; then
+    ok "identity: $verb refuses a forged identity before side effects"
+  else
+    bad "identity: $verb accepted forgery or failed for the wrong reason (rc=$rc: $out)"
+  fi
+done
+
+# Matching --holder remains useful; test it alongside a mismatched call to the same
+# route, so this acceptance assertion cannot go green against an unguarded CLI.
+AGENTMUX_AGENT=attacker $CO claim identity/matching --holder victim >/dev/null 2>&1
+forged_rc=$?
+AGENTMUX_AGENT=attacker $CO claim identity/matching --holder attacker >/dev/null 2>&1
+matching_rc=$?
+check 'identity: matching holder accepted, mismatch refused' '2/0' "$forged_rc/$matching_rc"
+
+# The orchestrator is not a live session. Disable the test escape hatch here: the
+# explicit shell-provided identity must work outside panes and be refused inside.
+for verb in claim release journal; do
+  case "$verb" in
+    claim) args=(claim identity/orchestrator --holder orchestrator) ;;
+    release) args=(release identity/orchestrator --holder orchestrator) ;;
+    journal) args=(journal note identity-orchestrator --agent orchestrator) ;;
+  esac
+  out=$(env -u AGENTMUX_TRUST_IDENTITY AGENTMUX_AGENT=attacker $CO "${args[@]}" 2>&1); rc=$?
+  env -u AGENTMUX_TRUST_IDENTITY -u AGENTMUX_AGENT $CO "${args[@]}" >/dev/null 2>&1
+  outside_rc=$?
+  if [ "$rc/$outside_rc" = '2/0' ] && [[ "$out" == *"identity:"*"cannot"* ]]; then
+    ok "identity: orchestrator $verb accepted only outside a pane"
+  else
+    bad "identity: orchestrator $verb contract broken (inside=$rc outside=$outside_rc: $out)"
+  fi
+done
+
+# Even an environment naming itself orchestrator must not take the special path.
+out=$(AGENTMUX_AGENT=orchestrator $CO journal note impersonation --agent orchestrator 2>&1); rc=$?
+if [ "$rc" = 2 ] && [[ "$out" == *"orchestrator's to call"* ]]; then
+  ok 'identity: a pane named orchestrator cannot use the virtual identity'
+else
+  bad "identity: virtual identity available inside a pane (rc=$rc: $out)"
+fi
+
+# Use an isolated socket to make absence deterministic even on a developer's machine
+# with real sessions. This must fail specifically at liveness, without the bypass.
+out=$(env -u AGENTMUX_TRUST_IDENTITY AGENTMUX_SOCKET="identity-test-$$" AGENTMUX_AGENT=absent-agent \
+  $CO claim identity/absent --holder absent-agent 2>&1); rc=$?
+if [ "$rc" = 2 ] && [[ "$out" == *'not a live agent'* ]]; then
+  ok 'identity: non-live matching holder refused without the test bypass'
+else
+  bad "identity: liveness guard failed (rc=$rc: $out)"
 fi
 
 finish

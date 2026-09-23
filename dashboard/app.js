@@ -1896,7 +1896,7 @@ async function loadQueue() {
     els.queueList.replaceChildren();
     if (!rows.length) {
       els.queueList.appendChild(el('p', 'empty',
-        'No messages. Agents append JSON lines to ~/.agentmux/queue/<agent>.jsonl'));
+        'No messages. Agents append JSON lines to $AGENTMUX_HOME/queue/<agent>.jsonl (default: ~/.agentmux/queue/<agent>.jsonl)'));
     }
     for (const m of rows) {
       const kind = String(m.kind || 'status');
