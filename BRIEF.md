@@ -15,8 +15,9 @@ the coordination is what is being tested.
 - **Frontend** (`web/`): `index.html` + `app.js` + `style.css`, no build step and no external
   requests. It fetches `/api/agents` and renders one card per agent: avatar, name, role, provider.
   It works at 360px wide and has a dark mode (`prefers-color-scheme`).
-- **Avatars** (`web/avatars/`): one image per agent, named `<id>.svg` or `<id>.png`, square, and
-  readable at 96px:
+- **Avatars** (`web/avatars/`): one generated image per agent, named `<id>.png` (or `.jpg`), made with
+  the xAI Images API, with `web/avatars/manifest.json` recording provenance. The API may not return
+  squares, so the frontend shows each avatar in a square frame (`object-fit: cover`) that is readable at 96px:
   - `conductor`: orchestrator, Claude
   - `developer`: full-stack developer, Claude
   - `imager`: image generator, Grok
