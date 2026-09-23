@@ -1,0 +1,32 @@
+{
+  "avatars": [
+    {
+      "file": "conductor.svg",
+      "agent": "conductor",
+      "model": "grok-4.7",
+      "intent": "Gold hub linked to three nodes, the mark of the Claude orchestrator who directs the other agents.",
+      "palette": ["#12161C", "#243044", "#1C2430", "#F3EDE2", "#E2B657"]
+    },
+    {
+      "file": "developer.svg",
+      "agent": "developer",
+      "model": "grok-4.7",
+      "intent": "A window of stacked bars over a database cylinder, the mark of the Claude full-stack developer.",
+      "palette": ["#12161C", "#243044", "#1C2430", "#F3EDE2", "#6C9BFF", "#3E64B8", "#A9C4FF"]
+    },
+    {
+      "file": "imager.svg",
+      "agent": "imager",
+      "model": "grok-4.7",
+      "intent": "A framed landscape of sun and peaks plus a spark, the mark of the Grok image generator.",
+      "palette": ["#12161C", "#243044", "#1C2430", "#F3EDE2", "#F08A6A"]
+    },
+    {
+      "file": "reviewer.svg",
+      "agent": "reviewer",
+      "model": "grok-4.7",
+      "intent": "A clipboard with a heavy check, the mark of the Grok final reviewer.",
+      "palette": ["#12161C", "#243044", "#1C2430", "#F3EDE2", "#5ED6A8"]
+    }
+  ]
+}
