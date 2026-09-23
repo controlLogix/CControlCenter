@@ -44,6 +44,7 @@ class TeamsHTTP(unittest.TestCase):
     def setUp(self):
         with ccstore.connection() as db:
             epic = ccboard.create(db, "epic", {"title": "Test epic"}, mirror=True)["id"]
+            self.epic = epic
             self.key = ccboard.create(db, "task", {"title": "Roster test", "epic": epic},
                                      mirror=True)["id"]
         lead = boardteams.agentdefs.choose_roster({}, {}, {})[0]
@@ -179,6 +180,117 @@ class TeamsHTTP(unittest.TestCase):
         # No approved roster is required to select the dispatcher fallback lead.
         selected = boardteams.agentdefs.choose_roster({}, {}, {"teamRequireApproval": True})
         self.assertEqual([(s.name, s.role) for s in selected], [("lead", "lead")])
+
+    def prepare_hire(self):
+        self.write("recruit")
+        self.write("approve", members=["lead"])
+        with ccstore.connection() as db:
+            ccboard.set_config(db, "dashboardMayHire", True)
+            ccboard.set_config(db, "dispatchEnabled", True)
+        self.addCleanup(self.reset_hire_config)
+        directory = BASE / ".agentmux/agents"
+        directory.mkdir(parents=True, exist_ok=True)
+        definition = directory / "lead.md"
+        definition.write_text("---\nname: lead\ndescription: Hire test\ncli: codex\n"
+                              "role: lead\nposture: unrestricted\nmodel: disk-model\n"
+                              "---\nDisk persona\n")
+        self.addCleanup(definition.unlink)
+        repo = patch.object(boardteams.dispatch, "REPO", BASE)
+        repo.start()
+        self.addCleanup(repo.stop)
+        spawn = patch.object(boardteams.dispatch, "agentmux", return_value=(0, "", ""))
+        mocked = spawn.start()
+        self.addCleanup(spawn.stop)
+        return mocked
+
+    def reset_hire_config(self):
+        with ccstore.connection() as db:
+            ccboard.set_config(db, "dashboardMayHire", False)
+            ccboard.set_config(db, "dispatchEnabled", False)
+
+    def test_hire_ignores_injected_launch_fields_and_resolves_disk(self):
+        spawn = self.prepare_hire()
+        def spawned(*args):
+            self.assertEqual(Path(args[args.index("--persona-file") + 1]).read_text(),
+                             "Disk persona")
+            return 0, "", ""
+        spawn.side_effect = spawned
+        status, result = self.call("hire", {
+            "id": self.key, "name": "lead", "cli": "evil-cli", "cwd": "/evil",
+            "argv": ["--evil"], "model": "evil-model", "posture": "read-only",
+            "flags": ["--evil"], "actor": "evil-actor"})
+        self.assertEqual(status, 200, result)
+        args = spawn.call_args.args
+        self.assertEqual(args[args.index("--cli") + 1], "codex")
+        self.assertEqual(args[args.index("--cwd") + 1], str(BASE))
+        self.assertEqual(args[args.index("--model") + 1], "disk-model")
+        for injected in ("evil-cli", "/evil", "--evil", "evil-model", "evil-actor"):
+            self.assertNotIn(injected, args)
+        self.assertEqual(result["members"][0]["status"], "hired")
+        self.assertEqual([e["actor"] for e in self.events() if e["event"] == "hire"],
+                         ["dashboard"])
+        self.assertEqual(self.call("hire", {"id": self.key, "name": "lead"})[0], 409)
+        spawn.assert_called_once()
+
+    def test_hire_requires_approval_on_this_card(self):
+        spawn = self.prepare_hire()
+        for state in ("proposed", "rejected", "hired", "finished"):
+            with self.subTest(state=state):
+                with ccstore.connection() as db:
+                    db.execute("UPDATE board_roster SET status=? WHERE entity_key=?",
+                               (state, self.key))
+                self.assertEqual(self.call("hire", {"id": self.key, "name": "lead"})[0], 409)
+        self.assertEqual(self.call("hire", {"id": self.key, "name": "unknown"})[0], 409)
+        with ccstore.connection() as db:
+            other = ccboard.create(db, "task", {"title": "Other card", "epic": self.epic},
+                                   mirror=True)["id"]
+        self.assertEqual(self.call("hire", {"id": other, "name": "lead"})[0], 409)
+        spawn.assert_not_called()
+
+    def test_hire_config_and_listener_gates(self):
+        spawn = self.prepare_hire()
+        for flag in ("dashboardMayHire", "dispatchEnabled"):
+            with self.subTest(flag=flag):
+                with ccstore.connection() as db:
+                    ccboard.set_config(db, flag, False)
+                self.assertEqual(self.call("hire", {"id": self.key, "name": "lead"})[0], 403)
+                with ccstore.connection() as db:
+                    ccboard.set_config(db, flag, True)
+        with ccstore.connection() as db:
+            for host in (None, "0.0.0.0", "::1", "192.168.1.1"):
+                with self.assertRaises(boardteams.HireForbidden):
+                    boardteams.hire(db, {"id": self.key, "name": "lead"}, bind_host=host)
+        spawn.assert_not_called()
+
+    def test_hire_slots_and_spawn_failure_release(self):
+        spawn = self.prepare_hire()
+        slots = boardteams.HIRE_SLOTS
+        self.assertTrue(slots.acquire(blocking=False))
+        self.assertTrue(slots.acquire(blocking=False))
+        try:
+            self.assertEqual(self.call("hire", {"id": self.key, "name": "lead"})[0], 503)
+            spawn.assert_not_called()
+        finally:
+            slots.release()
+            slots.release()
+        spawn.return_value = (1, "", "failed")
+        self.assertEqual(self.call("hire", {"id": self.key, "name": "lead"})[0], 503)
+        self.assertEqual(self.read()[1]["members"][0]["status"], "approved")
+        spawn.return_value = (0, "", "")
+        self.assertEqual(self.call("hire", {"id": self.key, "name": "lead"})[0], 200)
+
+    def test_hire_posture_ceiling_and_missing_definition(self):
+        spawn = self.prepare_hire()
+        path = BASE / ".agentmux/agents/lead.md"
+        original = path.read_text()
+        path.write_text("invalid definition")
+        self.assertEqual(self.call("hire", {"id": self.key, "name": "lead"})[0], 409)
+        spawn.assert_not_called()
+        path.write_text(original)
+        with patch.dict(os.environ, {"AGENTMUX_NO_BYPASS": "1"}):
+            self.assertEqual(self.call("hire", {"id": self.key, "name": "lead"})[0], 200)
+        args = spawn.call_args.args
+        self.assertEqual(args[args.index("--posture") + 1], "workspace-write")
 
 
 if __name__ == "__main__":

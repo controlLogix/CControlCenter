@@ -46,6 +46,7 @@ judgement to the gate, the only thing entitled to make it.
 """
 import argparse
 import errno
+import hashlib
 import json
 import os
 import re
@@ -291,28 +292,140 @@ def write_brief(task, spec=None):
 
 # ── claims ───────────────────────────────────────────────────────────────────
 
-def claim_for(worker, key, paths, note):
-    """Claim every path for the worker. All or nothing.
+def claim_resource(worker, path):
+    """C6: a member's repository path, within the coordination resource bound.
 
-    Partial ownership is the worst outcome available: the agent edits what it got
-    and blocks on what it did not, holding the rest of the queue behind it. So a
-    refusal anywhere rolls the whole set back.
+    Shared state must be passed to claim_for without a namespace. Never infer
+    that a shared resource is private merely because a member requested it.
     """
+    if not isinstance(worker, str) or not WORKER_RE.fullmatch(worker):
+        raise ValueError("invalid worker namespace")
+    if (not isinstance(path, str) or path.startswith("/")
+            or any(part in ("", ".", "..") for part in path.split("/"))):
+        raise ValueError("member claims require a repository-relative path")
+    resource = worker + "/" + path
+    if not coordination.RESOURCE_PATTERN.fullmatch(resource) or ".." in resource:
+        raise ValueError("invalid member resource or combined length exceeds 200")
+    return resource
+
+
+def claim_for(worker, key, paths, note, namespace=None):
+    """Claim all paths or roll back; leads/shared state omit namespace.
+
+    Validate the entire set before acquiring anything, including the combined
+    namespace/path length. Return rollback failures to the caller for recovery.
+    """
+    try:
+        resources = list(dict.fromkeys(
+            claim_resource(namespace, path) if namespace is not None else path
+            for path in paths))
+        if any(not isinstance(path, str)
+               or not coordination.RESOURCE_PATTERN.fullmatch(path) or ".." in path
+               for path in resources):
+            raise ValueError("invalid claim resource")
+    except (ValueError, TypeError) as err:
+        return False, str(err)
     taken = []
-    for path in paths:
+    for path in resources:
         rc, out, err = agentmux("claim", path, "--for", worker,
                                 "--task", key, "--note", note[:200])
         if rc != 0:
-            for done in taken:
-                agentmux("release", done, "--for", worker)
-            return False, (err or out or "claim refused").strip().splitlines()[0]
+            failures = []
+            for done in reversed(taken):
+                released, _, _ = agentmux("release", done, "--for", worker)
+                if released:
+                    failures.append(done)
+            reason = (err or out or "claim refused").strip() or "claim refused"
+            if failures:
+                reason += "; rollback failed for " + ", ".join(failures)
+            return False, reason
         taken.append(path)
     return True, ""
 
 
-def release_all(worker, paths):
-    for path in paths:
+def release_all(worker, paths, namespace=None):
+    resources = [claim_resource(namespace, path) if namespace is not None else path
+                 for path in paths]
+    for path in dict.fromkeys(resources):
         agentmux("release", path, "--for", worker)
+
+
+# Worktree helpers are called by the roster/hire path with its board transaction.
+# Creating a tree precedes spawn; claiming follows spawn (only live panes claim).
+# The caller owns commit/rollback and must remove a newly created tree if a later
+# spawn or board transaction fails. Successful branches survive collection so
+# the lead can merge them. No agentmux worktree verb is needed.
+def _git(*args):
+    try:
+        done = subprocess.run(["git", "-C", str(REPO), *args],
+                              capture_output=True, text=True, timeout=180)
+    except (OSError, subprocess.TimeoutExpired) as err:
+        raise RuntimeError("worktree git failed: %s" % err) from err
+    if done.returncode:
+        raise RuntimeError((done.stderr or done.stdout or "git failed").strip())
+    return done.stdout.strip()
+
+
+def create_worktree(worker, base="HEAD"):
+    """Create an external tree and branch; refuse existing names, never reset."""
+    if not isinstance(worker, str) or not WORKER_RE.fullmatch(worker):
+        raise ValueError("invalid worktree member name")
+    repo = Path(_git("rev-parse", "--show-toplevel")).resolve()
+    common = Path(_git("rev-parse", "--path-format=absolute", "--git-common-dir")).resolve()
+    identity = hashlib.sha256(str(common).encode()).hexdigest()[:16]
+    root = (ROOT / "worktrees" / identity).resolve()
+    if root == repo or repo in root.parents:
+        raise ValueError("worktrees must live outside the repository")
+    root.mkdir(parents=True, exist_ok=True)
+    path = root / worker
+    branch = "agentmux/" + worker
+    # git refuses an existing branch or destination; neither is ours to erase.
+    _git("worktree", "add", "-b", branch, str(path), base)
+    return {"member_name": worker, "worktree": str(path), "branch": branch}
+
+
+def remove_worktree(worktree):
+    """Remove a clean tree, retaining its branch for integration/recovery.
+
+    Git's normal dirty/untracked checks are intentional. Never force removal of
+    a member's unfinished work, and never delete its branch during collection.
+    """
+    _git("worktree", "remove", str(worktree))
+
+
+def prepare_member_worktree(db, key, agent_name, worker, base="HEAD"):
+    """Create a member tree and record it on the existing approved roster row.
+
+    Used by hire inside its transaction; no status/approval decision is made
+    here. The returned metadata supplies spawn's cwd and subsequent cleanup.
+    """
+    if key_of_worker(worker) != key:
+        raise ValueError("member name does not belong to the card")
+    row = db.execute("SELECT id,status,member_name,worktree,branch FROM board_roster "
+                     "WHERE entity_key=? AND agent_name=?", (key, agent_name)).fetchone()
+    if row is None or row[1] != "approved":
+        raise ValueError("member must have an approved roster row")
+    if any(row[index] for index in (2, 3, 4)):
+        raise ValueError("member already has worktree metadata")
+    # The board module owns history formatting, just as for roster approval.
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "dashboard"))
+    import ccboard
+    metadata = None
+    db.execute("SAVEPOINT member_worktree")
+    try:
+        metadata = create_worktree(worker, base)
+        db.execute("UPDATE board_roster SET member_name=?,worktree=?,branch=?,updated_at=? "
+                   "WHERE id=?", (worker, metadata["worktree"], metadata["branch"], now(), row[0]))
+        ccboard._record(db, key, "worktree", worker, detail=metadata)
+        db.execute("RELEASE member_worktree")
+    except Exception:
+        db.execute("ROLLBACK TO member_worktree")
+        db.execute("RELEASE member_worktree")
+        if metadata is not None:
+            remove_worktree(metadata["worktree"])
+            _git("branch", "-d", metadata["branch"])
+        raise
+    return metadata
 
 
 # ── dispatch ─────────────────────────────────────────────────────────────────

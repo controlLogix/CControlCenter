@@ -1,1 +1,25 @@
-/* Teams view styles belong here. The scaffold uses the shared .view.pad layout. */
+.teams-header, .teams-member {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .6rem;
+}
+.teams-actor { display: block; margin: .8rem 0; }
+.teams-content, .teams-list {
+  display: grid;
+  align-items: start;
+  gap: 1rem;
+}
+.teams-card, .teams-settings {
+  border: 1px solid var(--line, #555);
+  border-radius: .5rem;
+  padding: 1rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.teams-member { margin: .7rem 0; }
+.teams-member .btn[aria-pressed="true"] {
+  outline: 2px solid currentColor;
+  font-weight: bold;
+}
+.teams-settings .act { flex-wrap: wrap; }

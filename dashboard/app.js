@@ -2676,7 +2676,7 @@ function stateChip(configured, missing) {
 
 // An editable non-secret setting, rendered as a text field. Secrets never appear
 // here — entering one stays a terminal action.
-function settingEditor(methodId, row, after) {
+function settingEditor(methodId, row, after, options = {}) {
   const wrap = el('div', 'act');
   wrap.appendChild(el('span', 'act-label', row.label || row.key));
 
@@ -2684,23 +2684,31 @@ function settingEditor(methodId, row, after) {
   field.className = 'rin';
   field.type = 'text';
   field.size = 26;
-  field.value = row.value || '';
+  field.value = String(row.value ?? '');
   field.placeholder = row.example || row.key;
 
   const save = el('button', 'btn', 'set');
   save.type = 'button';
+  const stamp = options.stamp || els.authStamp;
   const commit = async () => {
+    if (save.disabled) return;
     const value = field.value.trim();
-    if (!value || value === row.value) return;
+    if (!value || value === String(row.value ?? '')) return;
     save.disabled = true;
     try {
-      const out = await post('api/auth/setting',
-                             { method: methodId, key: row.key, value });
-      say(els.authStamp, `${methodId}.${row.key} = ${out.value} — ${out.note || ''}`);
+      if (options.save) {
+        await options.save(value);
+        say(stamp, `${row.label || row.key} saved`);
+      } else {
+        const out = await post('api/auth/setting',
+                               { method: methodId, key: row.key, value });
+        say(stamp, `${methodId}.${row.key} = ${out.value} — ${out.note || ''}`);
+      }
       await after();
     } catch (err) {
-      say(els.authStamp, err.message);
-      field.value = row.value || '';
+      say(stamp, err.message);
+      field.value = String(row.value ?? '');
+    } finally {
       save.disabled = false;
     }
   };

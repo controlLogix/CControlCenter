@@ -4,7 +4,8 @@
     python3 dashboard/test_dispatch.py   # no network, no tmux, no port 8787
 
 Runs against a throwaway AGENTMUX_HOME under the system temp directory, so it
-never touches the operator's cc.db, and never spawns a process.
+never touches the operator's cc.db or starts an agent. Git lifecycle checks use
+a temporary repository and real git subprocesses.
 
 WHAT THIS SUITE IS FOR
 ----------------------
@@ -358,6 +359,145 @@ result, calls = dispatch_case({spec.name: spec}, dry_run=True)
 ok("dry run does not spawn or claim", result == "tm-900" and not calls)
 result, calls = dispatch_case({spec.name: spec}, task=oversized)
 ok("oversized required brief is refused before spawning", result is None and not calls)
+
+section("C6: namespaced resources and transactional claim acquisition")
+resource = dispatch.claim_resource("tm-900-worker", "dashboard/app.js")
+ok("member resource satisfies the coordination pattern",
+   dispatch.coordination.RESOURCE_PATTERN.fullmatch(resource) is not None)
+ok("flattened claims distinguish lead and both members",
+   len({dispatch.coordination.flatten(value) for value in (
+       "dashboard/app.js", resource,
+       dispatch.claim_resource("tm-900-worker2", "dashboard/app.js"))}) == 3)
+namespace = "tm-900-worker"
+ok("combined resource accepts exactly 200 characters",
+   len(dispatch.claim_resource(namespace, "a" * (199 - len(namespace)))) == 200)
+for bad in ("a" * (200 - len(namespace)), "../secret", "/absolute", "a//b", "./a", "a:b"):
+    try:
+        dispatch.claim_resource(namespace, bad)
+    except ValueError:
+        ok("invalid member path refused: " + bad[:30], True)
+    else:
+        ok("invalid member path refused: " + bad[:30], False)
+
+# Run actual coordination claims with only notification/liveness dependencies
+# stubbed, proving that the namespace is an independent lock, not just a string.
+import argparse
+import contextlib
+import io
+coord = dispatch.coordination
+coord.CLAIMS_DIR.mkdir(parents=True, exist_ok=True)
+def real_claim(*args, **kwargs):
+    verb, path = args[:2]
+    holder = args[args.index("--for") + 1]
+    options = argparse.Namespace(resource=path, holder=holder, ttl=600,
+                                 task="TM-900", note="suite", depends_on=[], steal=False, force=False)
+    with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+        rc = coord.cmd_claim(options) if verb == "claim" else coord.cmd_release(options)
+    return rc or 0, "", "refused" if rc else ""
+with patch.object(dispatch, "agentmux", side_effect=real_claim), \
+     patch.object(coord, "live_agents", return_value={"tm-900", namespace, "tm-901"}), \
+     patch.object(coord, "journal", return_value="test"), \
+     patch.object(coord, "broadcast", return_value=0):
+    ok("lead claims the full unnamespaced touches set",
+       dispatch.claim_for("tm-900", "TM-900", ["dashboard/app.js"], "lead")[0])
+    ok("member can claim the same file within its tree",
+       dispatch.claim_for(namespace, "TM-900", ["dashboard/app.js"], "member", namespace)[0])
+    dispatch.release_all(namespace, ["dashboard/app.js"], namespace)
+    ok("member release preserves lead claim",
+       (coord.CLAIMS_DIR / coord.flatten("dashboard/app.js")).exists()
+       and not (coord.CLAIMS_DIR / coord.flatten(resource)).exists())
+    dispatch.claim_for("tm-901", "TM-901", [namespace + "/busy.py"], "other")
+    success, refusal = dispatch.claim_for(namespace, "TM-900",
+                                         ["free.py", "busy.py"], "member", namespace)
+    ok("partial acquisition releases its successful claim on conflict",
+       not success and not (coord.CLAIMS_DIR / coord.flatten(namespace + "/free.py")).exists())
+    ok("rollback preserves the conflicting owner's claim",
+       '"tm-901"' in (coord.CLAIMS_DIR / coord.flatten(namespace + "/busy.py")).read_text())
+with patch.object(dispatch, "agentmux") as mux:
+    success, _ = dispatch.claim_for(namespace, "TM-900", ["ok.py", "x" * 200], "test", namespace)
+    ok("invalid late resource is rejected before any acquisition", not success and not mux.called)
+with patch.object(dispatch, "agentmux", side_effect=[(0, "", ""), (1, "", "busy"),
+                                                      (1, "", "release failed")]):
+    success, refusal = dispatch.claim_for(namespace, "TM-900", ["a", "b"], "test", namespace)
+    ok("failed rollback is surfaced for recovery", not success and "rollback failed" in refusal)
+
+section("member worktrees: real git lifecycle and roster metadata")
+import subprocess
+with tempfile.TemporaryDirectory(prefix="dispatch-git-") as temp:
+    repo = Path(temp) / "repo"
+    repo.mkdir()
+    def git(*args):
+        return subprocess.run(["git", "-C", str(repo), *args], check=True,
+                              capture_output=True, text=True).stdout.strip()
+    git("init")
+    git("-c", "user.name=Suite", "-c", "user.email=suite@example.invalid",
+        "commit", "--allow-empty", "-m", "fixture")
+    with patch.object(dispatch, "REPO", repo), patch.object(dispatch, "ROOT", Path(temp) / "state"), \
+         ccstore.connection() as db:
+        key = ready_card(db, epic, "worktree member fixture")
+        stamp = ccboard.now()
+        for ordinal in (1, 2):
+            name = "member" + str(ordinal)
+            db.execute("INSERT INTO board_roster "
+                       "(entity_key,agent_name,role,position,status,at,updated_at) "
+                       "VALUES (?,?,?,?,?,?,?)", (key, name, "worker", ordinal, "approved", stamp, stamp))
+            worker = dispatch.member_name(key, "worker", ordinal)
+            metadata = dispatch.prepare_member_worktree(db, key, name, worker)
+            tree = Path(metadata["worktree"])
+            row = db.execute("SELECT member_name,worktree,branch FROM board_roster "
+                             "WHERE entity_key=? AND agent_name=?", (key, name)).fetchone()
+            ok("member %d records tree, branch and pane on its row" % ordinal,
+               tuple(row) == (worker, str(tree), metadata["branch"]) and tree.is_dir())
+            ok("member tree is outside the repository", repo not in tree.parents)
+            actual = subprocess.run(["git", "-C", str(tree), "branch", "--show-current"],
+                                    check=True, capture_output=True, text=True).stdout.strip()
+            ok("member checks out its own recorded branch", actual == metadata["branch"])
+            try:
+                dispatch.prepare_member_worktree(db, key, name, worker)
+            except ValueError:
+                ok("duplicate setup preserves the original member tree", tree.is_dir())
+            else:
+                ok("duplicate setup preserves the original member tree", False)
+            (tree / "unfinished.txt").write_text("member work")
+            try:
+                dispatch.remove_worktree(tree)
+            except RuntimeError:
+                ok("cleanup refuses to discard uncommitted member work", tree.exists())
+            else:
+                ok("cleanup refuses to discard uncommitted member work", False)
+            (tree / "unfinished.txt").unlink()
+            dispatch.remove_worktree(tree)
+            ok("clean removal retains the member branch for lead integration",
+               not tree.exists() and metadata["branch"] in git("branch", "--list"))
+        db.execute("INSERT INTO board_roster "
+                   "(entity_key,agent_name,role,position,status,at,updated_at) "
+                   "VALUES (?,?,?,?,?,?,?)", (key, "failure", "worker", 3, "approved", stamp, stamp))
+        worker = dispatch.member_name(key, "worker", 3)
+        with patch.object(ccboard, "_record", side_effect=RuntimeError("history write failed")):
+            try:
+                dispatch.prepare_member_worktree(db, key, "failure", worker)
+            except RuntimeError:
+                row = db.execute("SELECT member_name,worktree,branch FROM board_roster "
+                                 "WHERE entity_key=? AND agent_name='failure'", (key,)).fetchone()
+                ok("failed recording rolls back roster metadata", tuple(row) == (None, None, None))
+                ok("failed recording removes the new tree and unused branch",
+                   worker not in git("worktree", "list") and worker not in git("branch", "--list"))
+            else:
+                ok("failed recording rolls back roster metadata", False)
+        with patch.object(dispatch, "create_worktree") as create:
+            try:
+                dispatch.prepare_member_worktree(db, key, "not-approved", worker)
+            except ValueError:
+                ok("missing approved row is refused before creating a worktree", not create.called)
+            else:
+                ok("missing approved row is refused before creating a worktree", False)
+        with patch.object(dispatch, "ROOT", repo / ".state"):
+            try:
+                dispatch.create_worktree("tm-999-worker")
+            except ValueError:
+                ok("configured worktree storage inside repo is refused", True)
+            else:
+                ok("configured worktree storage inside repo is refused", False)
 
 print()
 print("passed %d, failed %d" % (passed, failed))

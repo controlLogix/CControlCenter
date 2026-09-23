@@ -1059,6 +1059,10 @@ class Handler(BaseHTTPRequestHandler):
                 raise ccboard.Invalid("invalid query parameters")
             with ccstore.connection() as db:
                 self.send_json(200, self.board_read(db, op, params))
+        except boardteams.HireForbidden as err:
+            self.send_json(403, {"error": str(err)})
+        except boardteams.HireUnavailable as err:
+            self.send_json(503, {"error": str(err)})
         except ccboard.Refused as err:
             # 409, not 400: the request was well formed and the board said no. The
             # missing list names the verb that fills each gap, so a client can
@@ -1111,10 +1115,10 @@ class Handler(BaseHTTPRequestHandler):
         if op == "next":
             return {"tasks": ccboard.next_tasks(db, bounded("limit", 10, 1, 200))}
         if op == "dispatchable":
-            # Read-only, like every other op here. Deciding what MAY be dispatched
-            # is the board's job; actually spawning a process is agentmux's, and
-            # keeping that split is why this endpoint cannot start anything - the
-            # same rule that keeps the Terminals view unable to spawn a pane.
+            # Dispatchability is read-only. POST hire deliberately starts a
+            # process under boardteams' five bounds: defence in depth, not
+            # authentication. Port 8787 is unauthenticated; Origin only stops
+            # cross-origin browsers, and non-browser clients can omit it.
             return ccboard.dispatch_view(db, bounded("limit", 10, 1, 200))
         if op == "sprint":
             return ccboard.sprint_report(
@@ -1131,7 +1135,7 @@ class Handler(BaseHTTPRequestHandler):
         if op == "approve":
             return boardteams.approve(db, body)
         if op == "hire":
-            return boardteams.hire(db, body)
+            return boardteams.hire(db, body, bind_host=self.server.server_address[0])
 
         actor = ccboard.text(body.get("actor"), "actor", 64, pattern=ccboard.NAME_RE)
         session = ccboard.text(body.get("session"), "session", 128)
