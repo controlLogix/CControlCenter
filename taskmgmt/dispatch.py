@@ -57,6 +57,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import coordination                                    # noqa: E402  reuse, do not restate
+import agentdefs                                       # noqa: E402
 
 ROOT = Path(os.environ.get("AGENTMUX_HOME", str(Path.home() / ".agentmux")))
 DISPATCH_DIR = ROOT / "dispatch"
@@ -186,7 +187,7 @@ def brief_path(key):
     return DISPATCH_DIR / ("%s.md" % key)
 
 
-def write_brief(task):
+def brief_text(task, spec=None):
     """The handoff, on disk.
 
     Deliberately a FILE the agent is pointed at rather than text typed into the
@@ -238,7 +239,25 @@ def write_brief(task):
         "    agentmux task block %s --reason \"...\"" % key,
         "",
     ]
-    text = "\n".join(lines)[:BRIEF_MAX]
+    text = "\n".join(lines)
+    remaining = BRIEF_MAX - len(text.encode("utf-8"))
+    if remaining < 0:
+        raise ValueError("task brief exceeds BRIEF_MAX; acceptance and claims cannot be truncated")
+    persona = spec.persona if spec is not None else ""
+    heading = "\n## Persona\n\n"
+    if persona and remaining > len(heading.encode("utf-8")):
+        # Spend only the space left by the complete task. Decode at a UTF-8
+        # boundary so a multibyte persona never breaks the file or the bound.
+        budget = remaining - len(heading.encode("utf-8")) - 1
+        excerpt = persona.encode("utf-8")[:budget].decode("utf-8", errors="ignore")
+        text += heading + excerpt + "\n"
+    return text
+
+
+def write_brief(task, spec=None):
+    """Write the bounded handoff without ever clipping acceptance or claims."""
+    text = brief_text(task, spec)
+    key = task["id"]
     DISPATCH_DIR.mkdir(parents=True, exist_ok=True)
     brief_path(key).write_text(text, encoding="utf-8")
     return brief_path(key)
@@ -306,7 +325,6 @@ def dispatch_one(key=None, cli=None, dry_run=False, limit=10, quiet=False):
 
     key = task["id"]
     worker = worker_name(key)
-    cli = cli or cfg.get("dispatchCli") or "codex"
 
     if worker in live_agents():
         log("dispatch: %s already has a worker (%s)" % (key, worker))
@@ -319,12 +337,29 @@ def dispatch_one(key=None, cli=None, dry_run=False, limit=10, quiet=False):
         return None
     task = full.get("task") or full.get("entity") or full
 
+    specs, problems = agentdefs.load_all(REPO)
+    for problem in problems:
+        log("dispatch: agent definition %s: %s" % (problem["path"], problem["error"]))
+    spec = agentdefs.choose_roster(task, specs, cfg, cli_override=cli)[0]
+    cli = spec.cli
+    try:
+        brief_text(task, spec)
+    except ValueError as err:
+        log("dispatch: %s cannot be briefed: %s" % (key, err))
+        return None
+
     if dry_run:
         log("dispatch: would spawn %s [%s] for %s - %s"
             % (worker, cli, key, task.get("title") or ""))
         return worker
 
-    rc, out, err = agentmux("spawn", worker, "--cli", cli, "--cwd", str(REPO))
+    spawn_args = ["spawn", worker, "--cli", cli, "--cwd", str(REPO),
+                  "--posture", spec.posture]
+    if spec.model:
+        spawn_args += ["--model", spec.model]
+    if spec.auth:
+        spawn_args += ["--auth", spec.auth]
+    rc, out, err = agentmux(*spawn_args)
     if rc != 0:
         log("dispatch: spawn failed for %s: %s" % (key, (err or out).strip()[:200]))
         return None
@@ -348,7 +383,7 @@ def dispatch_one(key=None, cli=None, dry_run=False, limit=10, quiet=False):
 
     board("POST", "board/update", {"id": key, "actor": worker,
                                    "patch": {"assignee": worker, "session": worker}})
-    path = write_brief(task)
+    path = write_brief(task, spec)
 
     # Let the CLI finish coming up before typing at it. A fresh pane is the most
     # likely moment for a modal - a directory-trust dialog, an update prompt, a

@@ -230,6 +230,101 @@ with ccstore.connection() as db:
     ok("a sweep cannot put a human-vetoed card back in the queue",
        vetoed not in ids(ccboard.dispatchable(db, 50)))
 
+
+# Exercise the real roster/brief seam; only external board/process calls are fake.
+from dataclasses import replace
+from unittest.mock import patch
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "taskmgmt"))
+import dispatch
+import agentdefs
+
+section("briefs: persona uses only the space left by the complete task")
+card = {"id": "TM-900", "title": "dispatch seam", "body": "Complete task body.",
+        "acceptance": [{"text": "Keep this criterion intact", "done": True}],
+        "touches": ["first.py", "last/claimed.py"]}
+spec = replace(agentdefs.choose_roster(card, {}, {})[0], name="specialist",
+               cli="claude", model="test-model", auth="test-auth",
+               posture="read-only", persona="Review the code carefully.")
+plain = dispatch.write_brief(card).read_text()
+brief = dispatch.write_brief(card, spec).read_text()
+ok("chosen persona appears under its heading",
+   "## Persona\n\nReview the code carefully." in brief)
+ok("task content is unchanged by adding a persona", brief.startswith(plain))
+long_spec = replace(spec, persona="界" * dispatch.BRIEF_MAX)
+bounded_path = dispatch.write_brief(card, long_spec)
+bounded = bounded_path.read_text()
+ok("oversized multibyte persona stays within BRIEF_MAX bytes",
+   bounded_path.stat().st_size <= dispatch.BRIEF_MAX)
+ok("persona truncation keeps all task content and final claim",
+   bounded.startswith(plain) and "- `last/claimed.py`" in bounded
+   and "0. [x] Keep this criterion intact" in bounded)
+ok("persona was truncated", long_spec.persona not in bounded)
+with patch.object(dispatch, "BRIEF_MAX", len(plain.encode("utf-8"))):
+    ok("zero persona budget preserves the complete task",
+       dispatch.write_brief(card, spec).read_text() == plain)
+oversized = dict(card, acceptance=["required " * dispatch.BRIEF_MAX])
+try:
+    dispatch.write_brief(oversized, spec)
+except ValueError:
+    ok("oversized required content is refused without overwriting the brief",
+       dispatch.brief_path(card["id"]).read_text() == plain)
+else:
+    ok("oversized required content is refused without overwriting the brief", False)
+
+section("dispatch: selected spec reaches spawn and brief")
+def dispatch_case(specs, cfg=None, override=None, task=None, dry_run=False):
+    task = task or card
+    calls = []
+    def fake_agentmux(*args, **kwargs):
+        calls.append(args)
+        return 0, "", ""
+    with patch.object(dispatch, "dispatch_view", return_value={
+            "tasks": [{"id": task["id"]}], "config": cfg or {}}), \
+         patch.object(dispatch, "entity", return_value={"task": task}), \
+         patch.object(dispatch, "live_agents", return_value={}), \
+         patch.object(agentdefs, "load_all", return_value=(specs, [])) as load, \
+         patch.object(agentdefs, "choose_roster", wraps=agentdefs.choose_roster) as choose, \
+         patch.object(dispatch, "agentmux", side_effect=fake_agentmux), \
+         patch.object(dispatch, "set_status", return_value={}), \
+         patch.object(dispatch, "board", return_value={}):
+        result = dispatch.dispatch_one(cli=override, dry_run=dry_run)
+        ok("definitions are loaded for the dispatch repository",
+           load.call_args.args == (dispatch.REPO,))
+        ok("roster selection receives the full task and CLI override",
+           choose.call_args.args == (task, specs, cfg or {})
+           and choose.call_args.kwargs == {"cli_override": override})
+    return result, calls
+
+result, calls = dispatch_case({spec.name: spec})
+spawn = calls[0]
+ok("chosen CLI, model, auth and posture reach spawn",
+   result == "tm-900" and spawn == (
+       "spawn", "tm-900", "--cli", "claude", "--cwd", str(dispatch.REPO),
+       "--posture", "read-only", "--model", "test-model", "--auth", "test-auth"))
+ok("spawn precedes claims and brief delivery",
+   [call[0] for call in calls] == ["spawn", "claim", "claim", "wait", "send"])
+ok("dispatch writes chosen persona and sends the brief path",
+   spec.persona in dispatch.brief_path(card["id"]).read_text()
+   and str(dispatch.brief_path(card["id"])) in calls[-1][2])
+for cfg, override, expected in (({}, None, "codex"),
+                                ({"dispatchCli": "claude"}, None, "claude"),
+                                ({"dispatchCli": "claude"}, "gemini", "gemini")):
+    result, calls = dispatch_case({}, cfg, override)
+    ok("no definition preserves legacy CLI resolution: " + expected,
+       result == "tm-900" and calls[0] == (
+           "spawn", "tm-900", "--cli", expected, "--cwd", str(dispatch.REPO),
+           "--posture", "unrestricted"))
+    ok("no definition preserves the original brief",
+       dispatch.brief_path(card["id"]).read_text() == plain)
+result, calls = dispatch_case({spec.name: spec}, override="codex")
+ok("CLI override drops incompatible model and auth",
+   calls[0][3] == "codex" and "--model" not in calls[0] and "--auth" not in calls[0])
+result, calls = dispatch_case({spec.name: spec}, dry_run=True)
+ok("dry run does not spawn or claim", result == "tm-900" and not calls)
+result, calls = dispatch_case({spec.name: spec}, task=oversized)
+ok("oversized required brief is refused before spawning", result is None and not calls)
+
 print()
 print("passed %d, failed %d" % (passed, failed))
 sys.exit(1 if failed else 0)
