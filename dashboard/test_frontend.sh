@@ -80,6 +80,30 @@ else
   bad 'the restore does not wait for layout; assigning scrollTop now clamps to 0'
 fi
 
+echo '--- the scroll container is not zoomed, and the board has no dead space ---'
+# zoom on an overflow:auto element keeps scrollTop in the element's own zoomed
+# coordinate space, so offsets come back fractional (measured 2029.4166259765625) and
+# scrollHeight, clientHeight and the thumb are each rounded from a different
+# intermediate. Zoom the CONTENT and leave the scrolling box at scale 1.
+if grep -qE '^\.view\.pad \{ zoom: 1; \}' dashboard/style.css; then
+  ok 'the scrolling box is explicitly unzoomed'
+else
+  bad 'zoom is still on .view.pad, the element that scrolls'
+fi
+if grep -qE '^\.view\.pad > \* \{ zoom: var\(--ui-scale\); \}' dashboard/style.css; then
+  ok 'and the scale is applied to its content instead'
+else
+  bad 'nothing applies --ui-scale to the view content'
+fi
+# align-content alone leaves align-items at stretch, so every card grows to the height
+# of the tallest in its row. Measured 150px of empty grid inside a 752px list - real
+# scroll extent with nothing in it, so the thumb stops matching what you can read.
+if awk '/^\.board \{/,/^\}/' dashboard/style.css | grep -q 'align-items: start'; then
+  ok 'board cards are their natural height, so the scroll extent is real content'
+else
+  bad 'board cards stretch to row height and pad the grid with dead scroll extent'
+fi
+
 echo '--- app.js still parses ---'
 if command -v node >/dev/null 2>&1; then
   if node --check "$APP" 2>/dev/null; then ok 'node --check passes'; else bad 'app.js is not valid JavaScript'; fi

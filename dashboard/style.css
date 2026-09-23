@@ -41,7 +41,20 @@
 /* zoom (not transform) because it participates in layout, so the grid reflows and the
    terminal host receives a real, correct pixel size afterwards. */
 .titlebar, .activity, .ribbon, footer,
-.cell-head, .cell-status, .view.pad { zoom: var(--ui-scale); }
+.cell-head, .cell-status { zoom: var(--ui-scale); }
+
+/* NEVER ZOOM A SCROLL CONTAINER.
+   `.view.pad` is both the scrolling box (overflow: auto) and, until now, the zoomed
+   one. Chrome keeps scrollTop in the element's own zoomed coordinate space, so every
+   offset comes back fractional - 2029.4166259765625 for what should be a whole number
+   of pixels - and scrollHeight, clientHeight and the scrollbar thumb are each rounded
+   from a different intermediate. The result is a thumb whose length does not match the
+   content, and a last pixel or two that rounding can put out of reach.
+   Zoom the CONTENT instead and leave the scrolling box at scale 1: the container then
+   measures real pixels, the scrollbar is computed from them, and the visual result is
+   identical because the children are still scaled. */
+.view.pad { zoom: 1; }
+.view.pad > * { zoom: var(--ui-scale); }
 
 * { box-sizing: border-box; }
 html, body { height: 100%; }
@@ -469,6 +482,12 @@ a.task-badge:hover { text-decoration: underline; }
   display: grid; gap: 10px;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
   align-content: start;
+  /* align-ITEMS, not just align-CONTENT. Without it each card stretches to the height
+     of the tallest card in its row, so a row holding one six-task epic pads every
+     other card in that row with dead space - measured at 150px of empty grid inside a
+     752px list. That space is real scroll extent, so the scrollbar reports more
+     content than exists and the thumb no longer corresponds to what you can read. */
+  align-items: start;
 }
 
 .epic {
