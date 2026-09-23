@@ -38,12 +38,18 @@ const text = node => flatten(node).map(n => n.textContent).join('\n');
 const button = label => flatten(root).find(n => n.tag === 'button' && n.textContent === label);
 const choice = label => flatten(root).find(n => n['aria-label'] === label);
 let ready, loader, failRead = false, failWrite = false, reads = 0, posts = [];
+let hireError = '', holdHire = null;
 let board = {tasks: [{key: 'TM-051', title: '<img src=x onerror=alert(1)>', status: 'in_progress'}],
   config: {teamMaxAgents: 8, teamMaxWorkers: 0, teamRequireApproval: true, dashboardMayHire: false}};
 let members = [{agent_name: 'lead', role: 'lead', status: 'proposed'}, {agent_name: 'review', role: 'reviewer', status: 'proposed'}];
 const post = async (url, body) => {
   posts.push({url, body: JSON.parse(JSON.stringify(body))});
   if (failWrite) throw Error('write refused');
+  if (url === 'api/board/hire') {
+    if (hireError) throw Error(hireError);
+    if (holdHire) await holdHire;
+    members = members.map(m => m.agent_name === body.name ? {...m, status: 'hired'} : m);
+  }
   if (url === 'api/board/approve') members = members.map(m => ({...m, status: body.members.includes(m.agent_name) ? 'approved' : 'rejected', approved_by: 'server-actor'}));
   if (url === 'api/board/recruit') members = members.map(m => ({...m, status: 'proposed', approved_by: null}));
   if (url === 'api/board/config') board.config[body.name] = body.value;
@@ -125,11 +131,70 @@ vm.runInContext(source, context);
   await button('Refresh').events.click(); assert.match(text(root), /out of date/);
   failRead = false;
   await button('Refresh').events.click(); assert.equal(choice('Approve lead'), undefined);
+  // Only approved members of open cards can be hired, and configuration gates
+  // the control. Hiring needs no decision actor and sends no launch parameters.
+  members = ['proposed', 'approved', 'rejected', 'hired', 'finished'].map(status => ({agent_name: status, role: 'worker', status}));
+  board.config.dashboardMayHire = false;
+  await loader(); assert.equal(button('Hire'), undefined);
+  delete board.config.dashboardMayHire;
+  await loader(); assert.equal(button('Hire'), undefined);
+  board.config.dashboardMayHire = true;
+  await loader();
+  assert.equal(flatten(root).filter(n => n.textContent === 'Hire').length, 1);
+  assert.ok(choice('Hire approved'));
+  board.tasks[0].status = 'done'; await loader(); assert.equal(button('Hire'), undefined);
+  board.tasks[0].status = 'in_progress'; await loader();
+  root.children[1].children[0].value = '';
+  // These are the server's actual refusal reasons, not fabricated status codes.
+  // Posture is clamped by the server, so it does not emit a posture refusal.
+  const backend = fs.readFileSync('dashboard/boardteams.py', 'utf8');
+  const reasons = [
+    'hire requires an approved roster row on an open card',
+    'dashboardMayHire and dispatchEnabled must both be enabled',
+    'dashboard hire slots exhausted',
+    'agent definition is unavailable',
+    'dashboard hiring requires a 127.0.0.1 listener',
+    'agent spawn failed'
+  ];
+  const rendered = new Set();
+  for (const reason of reasons) {
+    assert.ok(backend.includes(reason));
+    hireError = reason;
+    const count = posts.length;
+    await choice('Hire approved').events.click();
+    assert.equal(posts.length, count + 1);
+    assert.deepEqual(posts.at(-1), {url: 'api/board/hire', body: {id: 'TM-051', name: 'approved'}});
+    const message = flatten(root).find(n => n.textContent.startsWith('Hire failed:')).textContent;
+    assert.ok(message.includes(reason)); rendered.add(message);
+    assert.equal(choice('Hire approved').disabled, undefined);
+    assert.equal(members[1].status, 'approved');
+  }
+  assert.equal(rendered.size, reasons.length);
+  hireError = '';
+  let releaseHire;
+  holdHire = new Promise(resolve => { releaseHire = resolve; });
+  const hireButton = choice('Hire approved');
+  const count = posts.length, beforeHireReads = reads;
+  const pending = hireButton.events.click();
+  assert.equal(hireButton.disabled, true);
+  assert.equal(button('Refresh').disabled, true);
+  await hireButton.events.click(); assert.equal(posts.length, count + 1);
+  releaseHire(); await pending; holdHire = null;
+  assert.equal(reads, beforeHireReads + 2);
+  assert.equal(choice('Hire approved'), undefined);
+  assert.equal(members[1].status, 'hired');
+  assert.doesNotMatch(text(root), /WRONG POST DATA/);
+  members[1].status = 'approved'; await loader();
+  failRead = true;
+  await choice('Hire approved').events.click();
+  assert.match(text(root), /Hired, but refresh failed/);
+  assert.equal(choice('Hire approved').disabled, true);
+  failRead = false; await loader(); assert.equal(choice('Hire approved'), undefined);
   members = []; await loader(); assert.match(text(root), /No roster proposed/);
   assert.ok(button('Propose roster'));
   board.tasks[0].status = 'done'; await loader(); assert.equal(button('Propose roster'), undefined);
   board.tasks = []; await loader(); assert.match(text(root), /No task cards/);
-  console.log('PASS: Teams loader/registry, per-member decisions, server re-read, errors, empty/closed rosters, four typed settings, legacy auth editor');
+  console.log('PASS: Teams loader/registry, decisions, settings, legacy auth, id/name-only hire, permission/status gates, six distinct API refusals, duplicate guard, server re-read and refresh failure');
 })().catch(error => { console.error(error); process.exitCode = 1; });
 JS
 then

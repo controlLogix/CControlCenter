@@ -34,7 +34,7 @@
     return ui;
   }
 
-  function rosterCard(task, roster) {
+  function rosterCard(task, roster, config) {
     const { el, post, say } = window.CCC;
     const card = el('article', 'teams-card');
     card.appendChild(el('h3', '', `${task.key} · ${task.title}`));
@@ -53,6 +53,14 @@
       row.appendChild(el('strong', '', member.agent_name));
       row.appendChild(el('span', '', `${member.role} · ${member.status}`));
       if (member.approved_by) row.appendChild(el('span', '', `Approved by ${member.approved_by}`));
+      if (member.status === 'approved' && !closed && config.dashboardMayHire === true) {
+        const hire = el('button', 'btn teams-hire', 'Hire');
+        hire.type = 'button';
+        hire.setAttribute('aria-label', `Hire ${member.agent_name}`);
+        hire.addEventListener('click', () => submit('hire', { name: member.agent_name }));
+        controls.push(hire);
+        row.appendChild(hire);
+      }
       if (member.status === 'proposed' && !closed && !decided) {
         const choices = [];
         for (const [label, approved] of [['Approve', true], ['Reject', false]]) {
@@ -75,20 +83,32 @@
     if (!roster.members.length) card.appendChild(el('p', 'empty', 'No roster proposed yet.'));
     async function submit(op, extra) {
       const actor = ui.actor.value.trim();
-      if (!actor) { say(stamp, 'Enter a decision actor above first.'); return; }
+      const hiring = op === 'hire';
+      if (!hiring && !actor) { say(stamp, 'Enter a decision actor above first.'); return; }
       if (loading) return;
+      if (hiring && config.dashboardMayHire !== true) return;
       loading = true;
       ui.refresh.disabled = true;
+      const disabled = controls.map(control => control.disabled);
       controls.forEach(control => { control.disabled = true; });
+      if (hiring) say(stamp, `Hiring ${extra.name}…`);
       let written = false;
       try {
-        await post(`api/board/${op}`, { id: task.key, actor, ...extra });
+        // Hire accepts only identity: the server resolves definition and posture.
+        await post(`api/board/${op}`, hiring
+          ? { id: task.key, name: extra.name }
+          : { id: task.key, actor, ...extra });
         written = true;
         // Never render the POST response or treat a local choice as board status.
         await refreshTeams();
       } catch (err) {
-        say(stamp, `${written ? 'Saved, but refresh failed' : 'Not saved'}: ${err.message}. Refresh to retry.`);
-        if (!written) controls.forEach(control => { control.disabled = false; });
+        // Preserve the API's distinct bound reasons (including approval, config,
+        // slots, definition and listener); HTTP status alone loses that detail.
+        const outcome = written
+          ? (hiring ? 'Hired, but refresh failed' : 'Saved, but refresh failed')
+          : (hiring ? 'Hire failed' : 'Not saved');
+        say(stamp, `${outcome}: ${err.message}. Refresh to retry.`);
+        if (!written) controls.forEach((control, index) => { control.disabled = disabled[index]; });
       } finally {
         loading = false;
         ui.refresh.disabled = false;
@@ -144,7 +164,7 @@
     }
     const list = el('section', 'teams-list');
     if (!tasks.length) list.appendChild(el('p', 'empty', 'No task cards found.'));
-    tasks.forEach((task, index) => list.appendChild(rosterCard(task, rosters[index])));
+    tasks.forEach((task, index) => list.appendChild(rosterCard(task, rosters[index], data.config)));
     ui.content.replaceChildren(settings, list);
     say(ui.stamp, `${tasks.length} task rosters loaded`);
   }
