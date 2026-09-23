@@ -6,13 +6,9 @@
 Runs setup_auth.py against an ISOLATED HOME under /tmp with an obviously fake
 token, so the operator's real ~/.agentmux/env and ~/.codex are never touched.
 
-The /api/* section is different: it drives the RUNNING dashboard, which reads and
-writes the operator's real ~/.agentmux/auth.json. Isolation is impossible there
-without a second server, so that file is snapshotted before the mutating checks
-and restored at exit instead. It used to be left as the test found it only when a
-prior value happened to exist - so a run could silently ADD a method entry to
-the live config. No secret is involved (a model id is not one), but a test must
-not leave residue in a real config either way.
+The /api/* section uses the dashboard home selected by run_tests.sh. Its fixture
+is restored within that disposable home. Run through run_tests.sh to isolate HTTP
+writes from the operator's server as well as the setup_auth subprocesses.
 
 What this is actually proving:
   - a provider's SHARED attributes are stored ONCE on the provider, not copied
@@ -98,6 +94,7 @@ env = dict(os.environ)
 env["HOME"] = str(sandbox)
 env["CODEX_HOME"] = str(sandbox / ".codex")
 env["AGENTMUX_REPO"] = str(REPO)
+env["AGENTMUX_HOME"] = str(sandbox / ".agentmux")
 
 SETSID = shutil.which("setsid")
 
@@ -286,16 +283,15 @@ check("env file reported by mode only", {"path", "mode", "count"},
       set(data["files"]["env"]))
 
 print("--- /api/auth/select keeps the standard guards ---")
-# Everything past this line mutates the LIVE ~/.agentmux/auth.json through the running
-# server. Snapshot the bytes now and put them back at exit, whether the run passes, fails
-# or raises - otherwise the test is a config editor.
-LIVE_AUTH = Path.home() / ".agentmux" / "auth.json"
+# HTTP writes belong to the selected server home, not the setup_auth subprocess
+# sandbox. Restore that fixture only; never restore an unrelated default-home file.
+LIVE_AUTH = Path(os.environ.get("AGENTMUX_HOME", str(Path.home() / ".agentmux"))) / "auth.json"
 _live_before = LIVE_AUTH.read_bytes() if LIVE_AUTH.exists() else None
 
 def _restore_live_auth(announce=True):
     if _live_before is None:
         LIVE_AUTH.unlink(missing_ok=True)
-    elif LIVE_AUTH.read_bytes() != _live_before:
+    elif not LIVE_AUTH.exists() or LIVE_AUTH.read_bytes() != _live_before:
         previous = os.umask(0o077)
         try:
             handle, temporary = tempfile.mkstemp(dir=str(LIVE_AUTH.parent),
@@ -307,7 +303,7 @@ def _restore_live_auth(announce=True):
         finally:
             os.umask(previous)
         if announce:
-            print("        live auth.json restored to its pre-test bytes")
+            print("        selected auth.json restored to its pre-test bytes")
 
 # Called explicitly before the summary, because run_tests.sh parses the LAST line for
 # "passed N, failed M" - anything printed after it makes the suite read as a failure.

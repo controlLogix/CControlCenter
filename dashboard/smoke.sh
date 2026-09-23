@@ -3,7 +3,7 @@
 #   bash <(tr -d '\r' < dashboard/smoke.sh)
 #
 # Read-only except the round-trip section, which creates a throwaway epic/task/
-# journal entry in ~/.agentmux/cc.db. Nothing is deleted.
+# journal entry in the test dashboard database. Run through run_tests.sh for isolation.
 #
 # NOTE ON WRITES: every POST here checks its response body. An earlier version
 # sent writes to /dev/null and reported them as passing while the server was in
@@ -97,7 +97,7 @@ echo '--- a sidecar with no tmux session is stale, and does not inflate the live
 # `agentmux kill` - a reboot does exactly that. The server must call such an agent
 # stale rather than counting it as running. Uses a name no real agent would take, and
 # removes it again below.
-PHANTOM="$HOME/.agentmux/run/zz-smoke-phantom.cli"
+PHANTOM="${AGENTMUX_HOME:-$HOME/.agentmux}/run/zz-smoke-phantom.cli"
 live_before="$(curl -s "$BASE/api/agents" | python3 -c '
 import json, sys
 print(sum(1 for a in json.load(sys.stdin)["agents"] if a.get("state") != "stale"))')"

@@ -7,6 +7,8 @@
 #
 # LIMIT: the base MUST predate the fix. HEAD (including aliases resolving to HEAD)
 # cannot demonstrate regression detection. Neither can an unrelated/future commit.
+# For an uncommitted fix whose base is still HEAD, validate in a disposable
+# descendant checkout; do not bypass this rule or move the workspace HEAD.
 # Never advance a baseline merely to make this check green. Counts are a lower bound,
 # not proof that each failure has the right cause; review the differential logs too.
 # A suite crash is NOT evidence of discrimination: require its complete testlib summary
@@ -48,6 +50,8 @@ test_lifecycle.sh            753d791    15
 test_coordination.sh        a2258a8    12
 # Job 2: selected-home auth, Atlassian, and safe fresh-db paths.
 test_lifecycle.sh            a2258a8    6
+# Residue gate and temporary dashboard lifecycle, including signal restoration.
+test_residue.sh              b64cef1    26
 BASELINES
   SELF_TEST=1
 else

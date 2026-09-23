@@ -334,7 +334,7 @@ def atlassian_config():
     if module is None:
         return None, f"taskmgmt/atlassian.py could not be loaded ({_atlassian_error})"
     try:
-        return module.load_config(), None
+        return module.load_config(ATLASSIAN_CFG), None
     except Exception as err:
         # load_config's messages name the file and what is missing, never the token.
         return None, str(err).splitlines()[0]

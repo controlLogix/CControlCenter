@@ -25,7 +25,8 @@ if [ "${1:-}" = '--fresh-db' ]; then
   echo 'cc.db removed'
 fi
 
-nohup python3 dashboard/server.py > /tmp/ccc-server.log 2>&1 &
+# The restored dashboard must outlive the suite process group.
+nohup setsid python3 dashboard/server.py > /tmp/ccc-server.log 2>&1 &
 sleep 3
 if curl -s -o /dev/null "http://127.0.0.1:8787/"; then
   echo "up: http://127.0.0.1:8787  (pid $!)"
