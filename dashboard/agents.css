@@ -30,7 +30,22 @@
 #viewAgents .agents-fields {
   display: grid;
   grid-template-columns: max-content minmax(0, 1fr);
+  align-items: start;
   gap: 6px 16px;
 }
 #viewAgents .agents-fields dd { margin: 0; }
 #viewAgents .agents-remedy { margin-bottom: 0; }
+
+#viewAgents .agents-editor { margin: 12px 0; }
+#viewAgents .agents-editor summary { cursor: pointer; }
+#viewAgents .agents-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  align-items: start;
+  gap: 12px;
+  margin-top: 12px;
+}
+#viewAgents .agents-label { display: flex; flex-direction: column; gap: 4px; }
+#viewAgents .agents-label .rin { width: 100%; box-sizing: border-box; }
+#viewAgents .agents-label:has(textarea),
+#viewAgents .agents-form .stamp { grid-column: 1 / -1; }

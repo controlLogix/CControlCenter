@@ -2317,7 +2317,7 @@ function statusSelect(kind, id, status, options, after, stamp) {
 
 // Deleting is irreversible and there is no undo, so it always confirms. The journal
 // has no delete at all - an append-only log you can quietly edit is not a log.
-function deleteButton(kind, id, label, after, stamp) {
+function deleteButton(kind, id, label, after, stamp, remove = () => post('api/delete', { kind, id })) {
   const btn = el('button', 'cbtn del', '×');
   btn.type = 'button';
   btn.title = `delete ${kind} “${label}”`;
@@ -2326,7 +2326,7 @@ function deleteButton(kind, id, label, after, stamp) {
     const extra = kind === 'epic' ? '\n\nIts tasks are deleted with it.' : '';
     if (!window.confirm(`Delete ${kind} “${label}”?${extra}\n\nThis cannot be undone.`)) return;
     btn.disabled = true;
-    try { await post('api/delete', { kind, id }); await after(); }
+    try { await remove(); await after(); }
     catch (err) { say(stamp, err.message); btn.disabled = false; }
   });
   return btn;
@@ -2657,14 +2657,31 @@ function rememberOpen(key, isOpen) {
   try { localStorage.setItem(OPEN_KEY, JSON.stringify(state)); } catch (_) {}
 }
 
-// One <details> block. `startOpen` applies until the operator has toggled this
-// particular key; after that their choice wins.
-function collapsible(key, cls, startOpen) {
-  const box = el('details', cls);
+// Both markup and JS-created cards use the same keys and storage map. Keep
+// OPEN_KEY unchanged so existing provider/method preferences survive upgrades.
+const wiredCollapsibles = new WeakSet();
+function wireCollapsible(box, key, startOpen) {
+  if (wiredCollapsibles.has(box)) return box;
+  wiredCollapsibles.add(box);
   const remembered = openState()[key];
   box.open = typeof remembered === 'boolean' ? remembered : startOpen;
   box.addEventListener('toggle', () => rememberOpen(key, box.open));
   return box;
+}
+
+// Declarative contract: <details data-collapse-key="unique-key" open>
+// <summary>Title</summary>...</details>. Omit `open` to default closed.
+// No view-specific registration is needed; native controls retain their nodes.
+function initCollapsibles(root = document) {
+  root.querySelectorAll('details[data-collapse-key]').forEach(box => {
+    const key = box.dataset.collapseKey;
+    if (key) wireCollapsible(box, key, box.open);
+  });
+}
+
+// `startOpen` applies until the operator has toggled this particular key.
+function collapsible(key, cls, startOpen) {
+  return wireCollapsible(el('details', cls), key, startOpen);
 }
 
 function stateChip(configured, missing) {
@@ -3070,6 +3087,8 @@ window.addEventListener('keydown', (e) => {
 
 // The view scripts load first and subscribe once to this synchronous event.
 // Register before restoring the saved view, including on a reload into Agents/Teams.
+initCollapsibles();
+
 window.CCC = { el, getJSON, post, say, deleteButton, collapsible, settingEditor, registerView };
 window.dispatchEvent(new Event('ccc:ready'));
 

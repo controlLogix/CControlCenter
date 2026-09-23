@@ -40,9 +40,19 @@ const root = new Node('section');
 const flatten = node => [node, ...node.children.flatMap(flatten)];
 const text = node => flatten(node).map(n => n.textContent).join('\n');
 let ready, loader, calls = 0, failure;
+let confirmed = false, confirms = 0, mutationError, mutations = [];
+const el = (...args) => new Node(...args);
+const say = (node, value) => { node.textContent = value; };
+const helperContext = {
+  el, say, window: {confirm: message => { assert.match(message, /cannot be undone/); confirms++; return confirmed; }},
+  post: async () => { throw new Error('Agent delete must not use api/delete'); }
+};
+vm.createContext(helperContext);
+vm.runInContext(app.slice(app.indexOf('function deleteButton('), app.indexOf('// The dispatch strip:')), helperContext);
+const deleteButton = helperContext.deleteButton;
 let payload = {
   agents: ['repo', 'global', 'claude'].map(scope => ({name: scope + '-agent', scope,
-    description: '<img src=x onerror=alert(1)>', cli: 'codex', posture: 'read-only', role: 'reviewer', path: '/' + scope + '/agent.md'})),
+    description: '<img src=x onerror=alert(1)>', cli: 'codex', posture: 'read-only', role: 'reviewer', path: '/' + scope + '/agent.md', checksum: 'sha256:original'})),
   problems: [
     {path: '/repo/dup.md', scope: 'repo', error: "duplicate name 'dup'; all entries unusable: /repo/dup.md, /global/dup.md"},
     {path: '/repo/bad.md', scope: 'repo', error: "unknown key 'tool'"},
@@ -50,12 +60,29 @@ let payload = {
   ]
 };
 vm.runInNewContext(source, {
+  fetch: async (url, options) => {
+    assert.equal(options.method, 'POST');
+    assert.equal(options.headers['Content-Type'], 'application/json');
+    const body = JSON.parse(options.body);
+    mutations.push({url, body});
+    if (mutationError) return {ok: false, status: 409, json: async () => mutationError};
+    return {ok: true, json: async () => ({...body, checksum: 'sha256:saved'})};
+  },
   document: {getElementById: id => { assert.equal(id, 'viewAgents'); return root; }},
   window: {
     addEventListener: (event, fn, options) => { assert.equal(event, 'ccc:ready'); assert.equal(options.once, true); ready = fn; },
     CCC: {
-      el: (...args) => new Node(...args), say: (node, value) => { node.textContent = value; },
-      getJSON: async url => { assert.equal(url, 'api/board/agents'); calls++; if (failure) throw failure; return payload; },
+      el, say, deleteButton,
+      getJSON: async url => {
+        if (failure) throw failure;
+        if (url.startsWith('api/board/agents?name=')) {
+          const name = decodeURIComponent(url.split('=')[1]);
+          return {...payload.agents.find(agent => agent.name === name), persona: 'Full persona\nsecond line',
+            model: 'test-model', tools: ['Read', 'Bash'], tools_deny: ['Write'], capabilities: ['review'],
+            worktree: 'none', max_instances: 2};
+        }
+        assert.equal(url, 'api/board/agents'); calls++; return payload;
+      },
       registerView: (...args) => { assert.equal(args[0], 'agents'); assert.equal(args.length, 2); loader = args[1]; }
     }
   }
@@ -72,6 +99,64 @@ vm.runInNewContext(source, {
   for (const scope of ['repo', 'global', 'claude']) assert.ok(flatten(content).some(n => n.cls === 'agents-scope' && n.textContent === scope));
   for (const value of ['codex', 'read-only', 'reviewer', '<img src=x onerror=alert(1)>']) assert.ok(text(content).includes(value));
   const refresh = root.children[0].children[1];
+  const cards = () => flatten(content).filter(n => n.cls === 'agents-definition');
+  const open = async details => { details.open = true; await details.events.toggle(); return flatten(details).find(n => n.tag === 'form'); };
+  const input = (form, name) => flatten(form).find(n => n.name === name);
+  const submit = form => form.events.submit({preventDefault() {}});
+  assert.equal(flatten(cards()[2]).filter(n => n.tag === 'button' || n.tag === 'form' || n.tag === 'details').length, 0);
+  for (const scope of ['repo', 'global']) {
+    const card = cards().find(n => text(n).includes(scope + '-agent'));
+    const form = await open(flatten(card).find(n => n.tag === 'details'));
+    assert.equal(input(form, 'persona').value, 'Full persona\nsecond line');
+    assert.equal(input(form, 'name').disabled, true);
+    assert.equal(input(form, 'scope').disabled, true);
+    input(form, 'description').value = 'Updated ' + scope;
+    await submit(form);
+    const saved = mutations.at(-1);
+    assert.equal(saved.url, 'api/board/agentdef');
+    assert.equal(saved.body.scope, scope);
+    assert.equal(saved.body.checksum, 'sha256:original');
+    assert.equal(saved.body.persona, 'Full persona\nsecond line');
+    assert.deepEqual(saved.body.tools, ['Read', 'Bash']);
+    assert.deepEqual(saved.body.tools_deny, ['Write']);
+    assert.equal(saved.body.max_instances, 2);
+    const currentCard = cards().find(n => text(n).includes(scope + '-agent'));
+    const remove = flatten(currentCard).find(n => n.cls === 'cbtn del');
+    const before = mutations.length;
+    confirmed = false;
+    await remove.events.click();
+    assert.equal(mutations.length, before);
+    confirmed = true;
+    mutationError = {error: 'definition changed', missing: [{hint: '/' + scope + '/agent.md'}]};
+    await remove.events.click();
+    assert.equal(remove.disabled, false);
+    assert.match(text(currentCard), /definition changed/);
+    mutationError = null;
+    await remove.events.click();
+    assert.equal(remove.disabled, true);
+    assert.equal(mutations.at(-1).url, 'api/board/agentdrop');
+    assert.equal(mutations.at(-1).body.scope, scope);
+    assert.equal(mutations.at(-1).body.checksum, 'sha256:original');
+  }
+  assert.equal(confirms, 6);
+  const create = root.children[3];
+  for (const scope of ['repo', 'global']) {
+    const form = await open(create);
+    input(form, 'name').value = 'new-' + scope;
+    input(form, 'scope').value = scope;
+    input(form, 'description').value = 'New definition';
+    mutationError = {error: 'agent name already taken: new-' + scope,
+      missing: [{field: 'name', hint: '/other-scope/new-' + scope + '.md'}]};
+    await submit(form);
+    assert.ok(text(form).includes(mutationError.error));
+    assert.ok(text(form).includes(mutationError.missing[0].hint));
+    assert.equal(input(form, 'name').value, 'new-' + scope);
+    mutationError = null;
+    await submit(form);
+    assert.equal(mutations.at(-1).body.scope, scope);
+    assert.equal(mutations.at(-1).body.checksum, undefined);
+    assert.equal(create.open, false);
+  }
   const oldChildren = content.children;
   failure = new Error('offline');
   await refresh.events.click();
@@ -87,9 +172,9 @@ vm.runInNewContext(source, {
   await refresh.events.click();
   assert.equal(content.children.length, 1);
   assert.match(text(content), /No usable agent definitions/);
-  assert.equal(calls, 4);
+  assert.ok(calls >= 8);
   assert.equal(refresh.disabled, false);
-  console.log('PASS: Agents loader, registry, diagnostics, scopes, safe text, manual refresh, empty and failure states');
+  console.log('PASS: Agents repo/global create/edit/delete, real deleteButton cancel/confirm/error/custom callback, collision paths, Claude read-only, full fields/checksums, registry, diagnostics, safe text, refresh and failure states');
 })().catch(error => { console.error(error); process.exitCode = 1; });
 JS
 then

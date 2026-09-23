@@ -220,6 +220,11 @@ select:focus-visible, .rin:focus-visible, .btn:focus-visible, .ta:focus-visible 
   color: var(--text); letter-spacing: .02em;
 }
 
+.card > summary { cursor: pointer; }
+.card > summary h3 { display: inline; margin: 0; }
+.card[open] > summary { margin-bottom: 9px; }
+.card > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
 .notice {
   border: 1px solid var(--line); border-left: 2px solid var(--warn);
   background: var(--panel-2); border-radius: 3px;
@@ -593,6 +598,7 @@ select.status-chip option {
 
 .iiot-grid {
   display: grid; gap: 10px;
+  align-items: start;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
   align-content: start;
 }

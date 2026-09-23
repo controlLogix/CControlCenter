@@ -499,6 +499,108 @@ with tempfile.TemporaryDirectory(prefix="dispatch-git-") as temp:
             else:
                 ok("configured worktree storage inside repo is refused", False)
 
+section("collect: fan-out, lead-last, and orphan cleanup")
+def collect_case(live, states=None, status="in_progress", evidence=None, kill_failure=None):
+    calls = []
+    states = states or {}
+    task = {"id": "TM-900", "status": status, "touches": ["src/file.py"],
+            "evidence": evidence or []}
+    def mux(*args, **kwargs):
+        calls.append(args)
+        rc = states.get(args[1], 2) if args[0] == "wait" else 0
+        if args[0] == "kill" and args[1] == kill_failure:
+            rc = 1
+        return rc, "", ""
+    with patch.object(dispatch, "live_agents", return_value=dict.fromkeys(live, {})), \
+         patch.object(dispatch, "agentmux", side_effect=mux), \
+         patch.object(dispatch, "set_status", return_value={}) as status_call, \
+         patch.object(dispatch, "comment"), patch.object(dispatch, "log"):
+        result = dispatch.collect_one("TM-900", task)
+    kills = [call[1] for call in calls if call[0] == "kill"]
+    releases = [call for call in calls if call[0] == "release"]
+    return result["outcome"], kills, releases, calls, status_call
+
+lead = "tm-900"
+worker = "tm-900-worker"
+reviewer = "tm-900-reviewer"
+team = [lead, reviewer, worker]
+for status in ("done", "deleted", "blocked"):
+    outcome, kills, releases, calls, status_call = collect_case(team + ["tm-901-worker"], status=status)
+    ok(status + " reaps all members before lead", outcome == status and kills == [reviewer, worker, lead])
+    ok(status + " releases member namespaces and lead resources",
+       releases == [("release", reviewer + "/src/file.py", "--for", reviewer),
+                    ("release", worker + "/src/file.py", "--for", worker),
+                    ("release", "src/file.py", "--for", lead)])
+    ok(status + " does not change the card status", not status_call.called)
+
+outcome, kills, _, _, status_call = collect_case(team, dict.fromkeys(team, 0), evidence=["result"])
+ok("submitted team reaps workers then lead", outcome == "submitted" and kills == [reviewer, worker, lead])
+ok("submission never closes the card", not status_call.called)
+for evidence in ([], ["result"]):
+    outcome, kills, _, _, _ = collect_case([lead, worker], {lead: 0, worker: 2}, evidence=evidence)
+    ok("idle lead with busy member stays working, evidence=%r" % evidence,
+       outcome == "working" and not kills)
+outcome, kills, _, _, _ = collect_case([lead, worker], {lead: 0, worker: 0})
+ok("idle member without evidence keeps the lead working", outcome == "working" and not kills)
+outcome, kills, _, _, _ = collect_case([lead, worker], {lead: 2, worker: 0}, evidence=["result"])
+ok("finished member is reaped while busy lead continues", outcome == "working" and kills == [worker])
+outcome, kills, _, _, _ = collect_case([lead, worker], {lead: 2, worker: 3})
+ok("exited member CLI still has its pane reaped", outcome == "working" and kills == [worker])
+for live, states in (([worker, reviewer], {}), (team, {lead: 3})):
+    outcome, kills, releases, _, status_call = collect_case(live, states)
+    ok("dead lead reaps live members and parks card",
+       outcome == "parked" and kills[:2] == [reviewer, worker]
+       and status_call.call_args.args[:2] == ("TM-900", "parked")
+       and len(releases) == 3)
+outcome, kills, _, _, _ = collect_case(team, status="done", kill_failure=worker)
+ok("failed member kill prevents lead reap", outcome == "unresolved" and lead not in kills)
+for state, evidence, expected in ((2, [], "working"), (0, [], "idle"),
+                                  (0, ["result"], "submitted"), (3, [], "parked")):
+    outcome, _, _, _, _ = collect_case([lead], {lead: state}, evidence=evidence)
+    ok("single lead retains " + expected + " behavior", outcome == expected)
+
+section("pool: independent card and global pane limits")
+def pool_case(live, wip, max_agents=None, extra_after_spawn=(), meta=None):
+    live = dict.fromkeys(live, {})
+    cfg = {"dispatchEnabled": True, "dispatchWip": wip}
+    if max_agents is not None:
+        cfg["teamMaxAgents"] = max_agents
+    def spawn(**kwargs):
+        name = "tm-%03d" % (910 + len(started))
+        started.append(name)
+        live[name] = {}
+        live.update(dict.fromkeys(extra_after_spawn, {}))
+        return name
+    started = []
+    with patch.object(dispatch, "collect_all", return_value=[]) as collect, \
+         patch.object(dispatch, "dispatch_view", return_value={"config": cfg}), \
+         patch.object(dispatch, "live_agents", side_effect=lambda: live.copy()), \
+         patch.object(dispatch, "board", return_value=meta or {}), \
+         patch.object(dispatch, "dispatch_one", side_effect=spawn):
+        result = dispatch.pool_once()
+    ok("pool collects before filling slots", collect.call_count == 1)
+    return result["dispatched"]
+
+ok("three-pane team uses one card slot", len(pool_case(team, 2, 8)) == 1)
+ok("global pane cap stops dispatch despite free card slots", pool_case(team, 5, 3) == [])
+ok("manual panes also consume global capacity", pool_case(team + ["manual"], 5, 4) == [])
+ok("pane budget limits the number of newly started leads", len(pool_case(team, 6, 5)) == 2)
+ok("card budget remains binding with pane space available", pool_case(team, 1, 8) == [])
+ok("missing teamMaxAgents uses default eight", len(pool_case(team, 20)) == 5)
+ok("newly hired panes are recounted after dispatch",
+   len(pool_case([lead], 5, 4, [worker, reviewer])) == 1)
+ok("zero card budget disables new dispatch", pool_case([], 0, 8) == [])
+
+ok("team limit is loaded from board metadata when dispatch view omits it",
+   pool_case(team, 20, meta={"config": {"teamMaxAgents": 3}}) == [])
+with patch.object(dispatch, "collect_all", return_value=[]), \
+     patch.object(dispatch, "dispatch_view", return_value={"config": {
+         "dispatchEnabled": True, "dispatchWip": 4}}), \
+     patch.object(dispatch, "board", return_value=None), \
+     patch.object(dispatch, "dispatch_one") as spawn:
+    result = dispatch.pool_once()
+    ok("unavailable team config prevents dispatch", result.get("error") and not spawn.called)
+
 print()
 print("passed %d, failed %d" % (passed, failed))
 sys.exit(1 if failed else 0)

@@ -593,59 +593,72 @@ def collect_one(key, task=None):
     task = task or (entity(key) or {}).get("task") or entity(key)
     if not task:
         return None
-    worker = worker_name(key)
+    lead = worker_name(key)
     touches = list(task.get("touches") or [])
-    alive = worker in live_agents()
+    live = live_agents()
+    members = sorted(name for name in live
+                     if key_of_worker(name) == key and name != lead)
+    alive = lead in live
     status = task.get("status")
-
+    lead_state = None
     if alive and status == "in_progress":
-        # A dispatched CLI does not exit when it finishes - codex and claude both
-        # return to their prompt and sit there. So "the pane is gone" cannot be the
-        # only completion signal, or a finished worker holds its slot and its files
-        # forever and the pool stops after dispatchWip cards.
-        #
-        # `wait` already answers "is this CLI still working": 0 idle, 2 still busy,
-        # 3 exited. It reads the CLI's own busy marker, so the usual case returns
-        # in well under a second and a short timeout is not a guess.
-        rc, _, _ = agentmux("wait", worker, "--timeout", "3", timeout=30)
-        if rc == 2:
+        lead_state, _, _ = agentmux("wait", lead, "--timeout", "3", timeout=30)
+    lead_dead = not alive or lead_state == 3
+
+    def reap(name, pane_alive=True):
+        # Do not release a live pane's claims if killing it failed, or reap the
+        # lead while a member could still be writing. Branches are retained for
+        # the lead to merge (or for recovery after an orphaned team is parked).
+        if pane_alive:
+            rc, _, _ = agentmux("kill", name)
+            if rc and name in live_agents():
+                return False
+        release_all(name, touches, namespace=name if name != lead else None)
+        return True
+
+    # Every role belongs to the card, including reviewers and researchers.
+    # Members are always reaped before the lead. Card evidence alone cannot
+    # justify reaping a busy member: it may be evidence from a different member.
+    remaining = False
+    cleanup_failed = False
+    for member in members:
+        member_state = None
+        if not lead_dead and status == "in_progress":
+            member_state, _, _ = agentmux("wait", member, "--timeout", "3", timeout=30)
+            if member_state != 3 and not (member_state == 0 and task.get("evidence")):
+                remaining = True
+                continue
+        if not reap(member):
+            cleanup_failed = True
+    if cleanup_failed:
+        return {"id": key, "outcome": "unresolved"}
+    if remaining:
+        return {"id": key, "outcome": "working"}
+
+    if not lead_dead and status == "in_progress":
+        if lead_state != 0:
             return {"id": key, "outcome": "working"}
-        if rc == 0:
-            if not (task.get("evidence") or []):
-                # Idle with nothing to show. NOT killed: an agent between turns and
-                # an agent that is stuck look identical from here, and throwing away
-                # a half-finished piece of work to reclaim a slot is the wrong trade.
-                # Surfaced instead, so a person can look.
-                return {"id": key, "outcome": "idle"}
-            # Finished as briefed: evidence attached, card left open. Free the slot
-            # and the files; the card stays in_progress because closing it is the
-            # done gate's judgement, not the collector's.
-            release_all(worker, touches)
-            agentmux("kill", worker)
-            comment(key, "worker %s finished and was reaped; evidence attached, "
-                         "card left in_progress for review." % worker, "orchestrator")
-            log("collect: %s submitted by %s; claims released, pane reaped"
-                % (key, worker))
-            return {"id": key, "outcome": "submitted"}
+        if not task.get("evidence"):
+            # Idle without evidence is not proof of completion.
+            return {"id": key, "outcome": "idle"}
+        if not reap(lead):
+            return {"id": key, "outcome": "unresolved"}
+        comment(key, "worker %s finished and was reaped; evidence attached, "
+                     "card left in_progress for review." % lead, "orchestrator")
+        log("collect: %s submitted by %s; claims released, pane reaped" % (key, lead))
+        return {"id": key, "outcome": "submitted"}
 
-    # The worker is gone, or the card moved. Either way its files are no longer
-    # its own.
-    release_all(worker, touches)
-    if alive:
-        agentmux("kill", worker)
-
-    if status in ("done", "deleted"):
-        log("collect: %s finished (%s); worker reaped" % (key, status))
+    if not reap(lead, pane_alive=alive):
+        return {"id": key, "outcome": "unresolved"}
+    if status in ("done", "deleted", "blocked"):
+        log("collect: %s %s; team reaped, claims released" % (key, status))
         return {"id": key, "outcome": status}
-    if status == "blocked":
-        log("collect: %s blocked by its worker; claims released" % key)
-        return {"id": key, "outcome": "blocked"}
 
-    # In progress with no worker: the agent died, was killed, or exited without
-    # saying anything. Park rather than reopen - "this was tried and did not
-    # finish" is information, and an open card silently re-enters the queue and is
-    # dispatched again forever.
-    reason = "dispatched worker %s exited without completing" % worker
+    # An orphaned team must not keep consuming panes and claims. Park rather
+    # than reopen, which would silently redispatch failed work forever.
+    reason = "dispatched lead %s exited without completing" % lead
+    if members and lead_dead:
+        reason += "; orphaned members reaped"
     if set_status(key, "parked", "orchestrator", reason=reason) is not None:
         comment(key, reason + ". Brief: %s" % brief_path(key), "orchestrator")
         log("collect: %s parked (%s)" % (key, reason))
@@ -716,9 +729,23 @@ def pool_once():
     if not cfg.get("dispatchEnabled"):
         return {"collected": collected, "dispatched": [], "disabled": True}
     wip = int(cfg.get("dispatchWip") or 0)
-    running = len(dispatched_now())
+    # The dispatch view exposes only DISPATCH_KEYS; team policy lives in meta.
+    if "teamMaxAgents" not in cfg:
+        meta = board("GET", "board/meta")
+        if meta is None:
+            return {"collected": collected, "dispatched": [], "error": "board unreachable"}
+        cfg = {**cfg, "teamMaxAgents": (meta.get("config") or {}).get("teamMaxAgents", 8)}
+    max_agents = int(cfg["teamMaxAgents"])
     started = []
-    while running + len(started) < wip:
+    while True:
+        # Refresh both counters after each spawn: hires and manual panes can
+        # appear between dispatches. Count each card once, and every live pane
+        # (including panes outside the dispatch pool) against the global cap.
+        live = set(live_agents()) | set(started)
+        cards = {key_of_worker(name) for name in live
+                 if key_of_worker(name) and role_of_worker(name) == "lead"}
+        if len(cards) >= wip or len(live) >= max_agents:
+            break
         worker = dispatch_one(cli=cfg.get("dispatchCli"), limit=20, quiet=True)
         if not worker:
             break

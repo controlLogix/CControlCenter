@@ -173,7 +173,7 @@ run test_dispatch.py python3 dashboard/test_dispatch.py
 # Missing suites are explicit skips during the staged build; present suites use
 # the same failure accounting as every existing suite above.
 for suite in test_agentdefs.py test_boardagents.py test_boardteams.py \
-             test_launch.sh test_frontend_agents.sh test_frontend_teams.sh; do
+             test_launch.sh test_frontend_agents.sh test_frontend_teams.sh test_frontend_collapse.sh; do
   if [ ! -f "dashboard/$suite" ]; then
     echo "SKIP $suite (EP-015 suite has not landed yet)"
   elif [[ "$suite" == *.py ]]; then

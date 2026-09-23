@@ -31,6 +31,18 @@ restores it in an EXIT trap.
 during a suite lands in a store that is deleted minutes later, and reports success while
 doing it. Run the gate, let it finish, then touch the board.
 
+**A dispatched worker must NOT run the full `run_tests.sh`.** This is not a style
+preference. The suite repoints the *live, shared* server, so one worker running it
+blacks out the board for every other worker and for the orchestrator at the same time —
+`tasks` reports "no open tasks", a known epic reports "not found", and a `task-new`
+silently lands in a store that is about to be deleted. Nothing warns you; it simply looks
+as though the board lost your work.
+
+Run **your own suite** instead — `bash <(tr -d '\r' < dashboard/<your-suite>.sh)` or
+`python3 dashboard/<your-suite>.py` — and attach that as evidence. The orchestrator runs
+the full gate, once, after collecting the wave. If your card's acceptance says "the full
+gate is green", that criterion is the orchestrator's to verify, not yours.
+
 ---
 
 ## C1 — `taskmgmt/agentdefs.py`
