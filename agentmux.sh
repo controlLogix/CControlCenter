@@ -1057,9 +1057,9 @@ cmd_claim() {
   local resource="${1:-}"; shift || true
   [ -n "$resource" ] || die "claim needs a resource, e.g. agentmux claim taskmgmt/courier.py --note 'adding backoff'"
   # --holder is NOT passed through from "$@": argparse takes the last occurrence, so
-  # Python enforces the same binding for direct CLI callers.
   # appending user args after ours let `claim x --holder victim` claim in someone
   # else's name. Identity comes from the environment here, full stop.
+  # Python enforces the same binding for direct CLI callers.
   for arg in "$@"; do
     case "$arg" in --holder|--holder=*) die "claim: --holder is set from \$AGENTMUX_AGENT and cannot be overridden" ;; esac
   done
@@ -1123,6 +1123,18 @@ cmd_run() {
 # decision is that the courier stays up. It also fires two serial 45s Jira calls per
 # bound agent, which can put six minutes inside a teardown.
 cmd_run_teardown() {
+  # Check before reading the run or touching claims, sessions, or sidecars. Reuse
+  # the same outside-pane rule as the Python run verbs, without a test bypass.
+  python3 - "$(coord_py)" <<'PYIDENTITY' || return $?
+import pathlib, sys
+sys.path.insert(0, str(pathlib.Path(sys.argv[1]).parent))
+import coordination
+try:
+    coordination.orchestrator_identity("teardown", allow_test_identity=False)
+except coordination.IdentityError as err:
+    print(err, file=sys.stderr)
+    sys.exit(2)
+PYIDENTITY
   local run_id="${1:-}"
   [ -n "$run_id" ] || die "teardown needs a run id"
   local names

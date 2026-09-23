@@ -196,7 +196,9 @@ def fold(events):
         })
         row["last"] = event.get("at")
         if kind == "assign":
-            row.update(state="assigned", worker=event.get("by"),
+            # Old ledgers used by for the worker; new ones record the actor in by
+            # and the assignment separately. Keep existing runs readable.
+            row.update(state="assigned", worker=event.get("worker", event.get("by")),
                        reviewer=event.get("reviewer"), task=event.get("task"))
         elif kind == "working":
             row["state"] = "working"
@@ -364,6 +366,11 @@ def cmd_start(args):
 
 
 def cmd_assign(args):
+    try:
+        by = coordination.orchestrator_identity("assign")
+    except coordination.IdentityError as err:
+        print(err, file=sys.stderr)
+        return 2
     if not valid_run(args.run):
         print(f"run: invalid run id {args.run!r}", file=sys.stderr)
         return 2
@@ -392,7 +399,8 @@ def cmd_assign(args):
         job = f"{args.run}/{index}"
         if args.brief:
             (directory / "brief.md").write_text(args.brief, encoding="utf-8")
-        append_event(args.run, {"event": "assign", "job": job, "by": args.worker,
+        append_event(args.run, {"event": "assign", "job": job, "by": by,
+                                "worker": args.worker,
                                 "reviewer": args.reviewer, "task": args.task,
                                 "detail": (args.brief or "")[:DETAIL_MAX]})
         print(job)

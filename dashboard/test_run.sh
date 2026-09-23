@@ -244,4 +244,77 @@ else
   bad 'nothing was spilled; the event was silently truncated instead'
 fi
 
+echo '--- assignment and teardown belong to the orchestrator ---'
+# All inputs name a valid run and distinct workers/reviewers, so the refusal cannot
+# come from a missing run or malformed pairing. Disable the synthetic identity bypass.
+guard_run=$(env -u AGENTMUX_AGENT $RUN start 'assignment guard' 2>/dev/null)
+out=$(env -u AGENTMUX_TRUST_IDENTITY AGENTMUX_AGENT=untrusted-pane \
+  $RUN assign "$guard_run" --worker guarded-worker --reviewer guarded-reviewer 2>&1); rc=$?
+guard_count=$($RUN status "$guard_run" --json 2>/dev/null | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["jobs"]))')
+if [ "$rc/$guard_count" = 2/0 ] && [ ! -d "$HOME_DIR/runs/$guard_run/jobs" ] && \
+   [[ "$out" == *"orchestrator's to call"* ]]; then
+  ok 'ownership: a pane cannot assign a job or allocate its directory'
+else
+  bad "ownership: pane assignment was not refused before allocation (rc=$rc jobs=$guard_count)"
+fi
+
+# A positive case alone already passed on the base. Pair acceptance with the
+# ownership boundary, so this assertion also fails against the unguarded CLI.
+owner_run=$(env -u AGENTMUX_AGENT $RUN start 'orchestrator assignment' 2>/dev/null)
+owner_job=$(env -u AGENTMUX_AGENT -u AGENTMUX_TRUST_IDENTITY \
+  $RUN assign "$owner_run" --worker owner-worker --reviewer owner-reviewer 2>/dev/null); owner_rc=$?
+out=$(env -u AGENTMUX_TRUST_IDENTITY AGENTMUX_AGENT=owner-worker \
+  $RUN assign "$owner_run" --worker friendly-worker --reviewer friendly-reviewer 2>&1); pane_rc=$?
+owner_count=$($RUN status "$owner_run" --json 2>/dev/null | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["jobs"]))')
+if [ "$owner_rc/$pane_rc/$owner_count" = 0/2/1 ] && [ "$owner_job" = "$owner_run/1" ]; then
+  ok 'ownership: orchestrator assignment works and a pane cannot add its own pairing'
+else
+  bad "ownership: assignment boundary failed (orchestrator=$owner_rc pane=$pane_rc jobs=$owner_count)"
+fi
+
+# Inspect the actual persisted event AND fold. Include a legacy assignment with no
+# worker field, because existing runs (including this job) still use that schema.
+attribution=$(python3 - "$owner_run" <<'PYATTR'
+import sys
+sys.path.insert(0, 'taskmgmt')
+import run
+run_id = sys.argv[1]
+events = run.load_events(run_id)
+event = next(e for e in events if e.get('event') == 'assign')
+state = run.fold(events)['jobs'][event['job']]
+legacy = run.fold([{'event': 'assign', 'job': 'legacy/1', 'by': 'legacy-worker',
+                    'reviewer': 'legacy-reviewer'}])['jobs']['legacy/1']
+print('/'.join(str(x) for x in (event.get('by'), event.get('worker'), state['worker'],
+                                state['reviewer'], legacy['worker'], legacy['reviewer'])))
+PYATTR
+)
+check 'ownership: actor attribution and new/legacy worker folding' \
+  'orchestrator/owner-worker/owner-worker/owner-reviewer/legacy-worker/legacy-reviewer' "$attribution"
+
+# Exercise the actual shell entry point against an isolated home. Unique, nonexistent
+# session names ensure the broken base cannot kill an operator agent. A sentinel
+# sidecar detects whether teardown got past its guard and performed destructive work.
+teardown_run=$(env -u AGENTMUX_AGENT $RUN start 'teardown guard' 2>/dev/null)
+teardown_worker="ownership-worker-$$"
+teardown_reviewer="ownership-reviewer-$$"
+env -u AGENTMUX_AGENT $RUN assign "$teardown_run" --worker "$teardown_worker" \
+  --reviewer "$teardown_reviewer" >/dev/null 2>&1
+mkdir -p "$HOME_DIR/run"
+printf 'shell\n' > "$HOME_DIR/run/$teardown_worker.cli"
+tr -d '\r' < agentmux.sh > "$HOME_DIR/harness.sh"
+out=$(env -u AGENTMUX_TRUST_IDENTITY AGENTMUX_AGENT="$teardown_worker" AGENTMUX_REPO="$PWD" \
+  bash "$HOME_DIR/harness.sh" run teardown "$teardown_run" 2>&1); pane_rc=$?
+survived=no
+[ -f "$HOME_DIR/run/$teardown_worker.cli" ] && survived=yes
+# Also prove the guard does not disable legitimate teardown. The synthetic names
+# need the normal test-only liveness bypass for coordination, never real sessions.
+env -u AGENTMUX_AGENT AGENTMUX_REPO="$PWD" bash "$HOME_DIR/harness.sh" \
+  run teardown "$teardown_run" >/dev/null 2>&1; owner_rc=$?
+if [ "$pane_rc/$owner_rc/$survived" = 2/0/yes ] && \
+   [[ "$out" == *"orchestrator's to call"* ]] && [ ! -f "$HOME_DIR/run/$teardown_worker.cli" ]; then
+  ok 'ownership: pane teardown is refused before side effects; orchestrator teardown works'
+else
+  bad "ownership: teardown boundary failed (pane=$pane_rc orchestrator=$owner_rc sentinel=$survived)"
+fi
+
 finish
