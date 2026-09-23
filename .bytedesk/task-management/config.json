@@ -56,5 +56,6 @@
   "labels": {},
   "dispatch": {
     "enabled": false
-  }
+  },
+  "activeEpic": "EP-001"
 }
