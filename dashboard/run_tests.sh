@@ -212,6 +212,11 @@ run test_chatter.py python3 dashboard/test_chatter.py
 run test_courier.py python3 dashboard/test_courier.py
 run test_gateway.py python3 dashboard/test_gateway.py
 run test_auth.py  timeout 400 python3 dashboard/test_auth.py
+# Integrated from Forktah. The Agent Roll Call app's node:test suite, and the
+# voice-cli plugin's MCP server against a stub of Voice CLI's API. Neither needs the
+# shared server, tmux, the Windows app or the network.
+run test_roll_call.sh bash /dev/fd/18 18< <(tr -d '\r' < dashboard/test_roll_call.sh)
+run test_voice_mcp.py timeout 120 python3 plugins/voice-cli/tests/test_voice_mcp.py
 
 # test_gateway.py needs no key and makes no network call, so it runs whether or not the
 # Bedrock path is parked. Its last section compares the reconstructed

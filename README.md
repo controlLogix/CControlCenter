@@ -32,6 +32,10 @@ the WSL launcher and the `agentmux` skill are both pointed at it.
 | `dashboard/` | **Controls Control Center (CCC)** — the operations console. `python3 dashboard/server.py`, then open 127.0.0.1:8787. See the table below. |
 | `taskmgmt/` | Jira + Confluence, auth setup, and field tools. `atlassian.py` (REST client), `task.py` (CLI used by the harness and the dashboard reaper), `setup_atlassian.py` and `setup_auth.py` (non-echoing credential setup), `bootp_probe.py` (privileged, read-only BOOTP listener). |
 | `taskmgmt/dispatch.py` | **The board-to-agent seam.** Turns a ready card into a running agent and back: spawn, claim, start through the board's gate, brief, then collect. Drives `agentmux dispatch` / `collect` / `pool`. Decides nothing about readiness - `/api/board/dispatchable` does - and closes nothing. |
+| `.agentmux/agents/` | The repository's agent roster: `netcap-*` for `nettraffic/`, `rollcall-*` for the Agent Roll Call exercise. Committed with the code they work on. |
+| `e2e/roll-call/` | **Agent Roll Call** — a tiny dependency-free Node app that four agents (the `rollcall-*` roster) rebuild from its `BRIEF.md`, to exercise coordination end to end. `node --test` inside it; `dashboard/test_roll_call.sh` puts it in the gate. |
+| `voice-cli/` | **Voice CLI** — standalone Windows app: local Whisper push-to-talk that types speech into any CLI window, with an authenticated local API on 127.0.0.1:47821. Built with uv + PyInstaller + Inno Setup; see its README. |
+| `plugins/voice-cli/`, `.claude-plugin/marketplace.json` | The **voice-cli Claude Code plugin** and the `forktah` marketplace that ships it: a stdlib MCP server over Voice CLI's API plus a `voice` skill. `claude plugin install voice-cli@forktah`. |
 | `~/.local/bin/agentmux` (WSL) | Launcher. Strips CRs at run time, so editing the `.sh` from Windows cannot break it. |
 | `~/.agentmux/logs/<name>.log` (WSL) | Full scrollback per agent, via `pipe-pane`. |
 | `~/.agentmux/run/<name>.*` (WSL) | Per-agent pane id, cli, cwd, start time. |
