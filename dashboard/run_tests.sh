@@ -187,12 +187,15 @@ for suite in test_modbus_poll.py test_enip.py test_orchestration_plugin.py test_
   fi
 done
 run test_github_panel.py python3 dashboard/test_github_panel.py
+run test_codesys_panel.py python3 dashboard/test_codesys_panel.py
 run test_logix.py python3 dashboard/test_logix.py
 run test_ads.py python3 dashboard/test_ads.py
+run test_pn_dcp.py python3 dashboard/test_pn_dcp.py
 run test_ecat_diag.py python3 dashboard/test_ecat_diag.py
 run test_snapshot.py python3 dashboard/test_snapshot.py
 run test_mqtt.py  python3 dashboard/test_mqtt.py
 run test_tickets.py python3 dashboard/test_tickets.py
+run test_chatter.py python3 dashboard/test_chatter.py
 run test_courier.py python3 dashboard/test_courier.py
 run test_gateway.py python3 dashboard/test_gateway.py
 run test_auth.py  timeout 400 python3 dashboard/test_auth.py

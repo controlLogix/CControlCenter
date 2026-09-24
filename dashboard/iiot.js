@@ -95,3 +95,76 @@
   setInterval(render, 50);
   refresh();
 })();
+
+/* PROFINET DCP is a privileged, operator-run helper. Import snapshots only. */
+(() => {
+  'use strict';
+  const root = document.querySelector('#viewIiot .iiot-grid');
+  if (!root) return;
+  function element(tag, text, parent) {
+    const e = document.createElement(tag);
+    if (text) e.textContent = text;
+    parent.appendChild(e);
+    return e;
+  }
+  const panel = element('details', '', root);
+  panel.className = 'card'; panel.open = true;
+  panel.dataset.collapseKey = 'iiot:dcp';
+  element('summary', 'PROFINET DCP', panel);
+  element('p', 'Run Identify on Linux with a real NIC on the plant segment. This dashboard stays unprivileged; WSL NAT cannot carry DCP frames.', panel);
+  element('code', 'sudo python3 taskmgmt/pn_dcp.py --iface eth0 identify > dcp.jsonl', panel);
+  element('p', 'Paste JSON lines or load the saved output. These are imported snapshots, not live device status. Nothing is sent to the plant network by this panel.', panel);
+  const input = element('textarea', '', panel);
+  input.rows = 6; input.style.width = '100%';
+  input.setAttribute('aria-label', 'DCP JSON lines');
+  const file = element('input', '', panel);
+  file.type = 'file'; file.accept = '.jsonl,.json,application/json';
+  file.setAttribute('aria-label', 'DCP saved output');
+  const load = element('button', 'Import DCP snapshot', panel);
+  load.className = 'btn';
+  const status = element('p', '', panel);
+  status.setAttribute('aria-live', 'polite');
+  const table = element('table', '', panel);
+  const columns = ['mac', 'name', 'ip', 'subnet', 'gateway', 'vendor', 'vendor_id', 'device_id', 'at'];
+  const head = element('tr', '', element('thead', '', table));
+  for (const title of ['MAC', 'Station name', 'IP', 'Subnet', 'Gateway', 'Vendor', 'Vendor ID', 'Device ID', 'Observed at']) {
+    element('th', title, head);
+  }
+  const body = element('tbody', '', table);
+  function render(text) {
+    if (text.length > 1024 * 1024) throw new Error('Snapshot limit is 1 MiB.');
+    const lines = text.split(/\r?\n/).filter(line => line.trim());
+    if (!lines.length || lines.length > 2000) throw new Error('Provide 1–2000 JSON records.');
+    const records = lines.map((line, index) => {
+      const r = JSON.parse(line);
+      if (!r || r.kind !== 'dcp-identify' || !/^(?:[0-9a-f]{2}:){5}[0-9a-f]{2}$/i.test(r.mac) ||
+          columns.some(key => r[key] !== null && r[key] !== undefined && !['string', 'number'].includes(typeof r[key]))) {
+        throw new Error(`Line ${index + 1}: expected DCP Identify output.`);
+      }
+      return r;
+    });
+    body.replaceChildren();
+    for (const r of records) {
+      const row = element('tr', '', body);
+      for (const key of columns) element('td', r[key] == null ? '—' : String(r[key]), row);
+    }
+    status.textContent = `Imported ${records.length} station record(s). Snapshot only.`;
+  }
+  load.addEventListener('click', () => {
+    try { render(input.value); }
+    catch (err) { status.textContent = `Import failed: ${err.message}`; }
+  });
+  file.addEventListener('change', async () => {
+    try {
+      const selected = file.files[0];
+      if (!selected) return;
+      if (selected.size > 1024 * 1024) throw new Error('Snapshot limit is 1 MiB.');
+      const text = await selected.text();
+      render(text); input.value = text;
+    } catch (err) { status.textContent = `Import failed: ${err.message}`; }
+  });
+  element('p', 'Set writes a running device permanently. Choose one explicit MAC yourself. The helper reads old values, displays the change, requires typing that MAC on the terminal, and journals the write. A wrong station name can disconnect a machine from its controller.', panel);
+  element('pre', 'sudo python3 taskmgmt/pn_dcp.py --iface eth0 set --mac <MAC> --name <station-name>\n' +
+    'sudo python3 taskmgmt/pn_dcp.py --iface eth0 set --mac <MAC> --ip <IP> --subnet <MASK> --gateway <GATEWAY>', panel);
+  element('p', 'Journal: /var/log/pn-dcp.jsonl (or --journal PATH). After an unknown outcome, inspect the device and journal before retrying. Reset-to-factory is intentionally unavailable.', panel);
+})();

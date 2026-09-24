@@ -3,6 +3,8 @@
 
 import base64
 import boardagents
+import chatter_feed
+import codesys_panel
 import github_panel
 import boardteams
 import ccboard
@@ -1051,11 +1053,13 @@ class Handler(BaseHTTPRequestHandler):
     # bounded body. The op is picked from a table in code, never interpolated.
 
     BOARD_READS = ("board", "meta", "entity", "history", "why", "graph", "doctor",
-                   "find", "next", "sprint", "dispatchable", "agents", "roster")
+                   "find", "next", "sprint", "dispatchable", "agents", "roster",
+                   "targets", "chatter")
     BOARD_WRITES = ("create", "update", "status", "move", "delete", "acceptance",
                     "label", "dep", "evidence", "commit", "touch", "comment",
                     "link", "triage", "state", "config", "override",
-                    "agentdef", "agentdrop", "recruit", "approve", "hire")
+                    "agentdef", "agentdrop", "recruit", "approve", "hire",
+                    "plcstate", "bootapp", "chatsend")
 
     def board_endpoint(self, op, query):
         try:
@@ -1100,6 +1104,10 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(503, {"error": "Control Center storage unavailable"})
 
     def board_read(self, db, op, params):
+        if op == "targets":
+            return codesys_panel.targets(db, params)
+        if op == "chatter":
+            return chatter_feed.chatter(db, params)
         if op == "agents":
             return boardagents.agents(db, params)
         if op == "roster":
@@ -1146,6 +1154,12 @@ class Handler(BaseHTTPRequestHandler):
         return {"hits": ccboard.find(db, one("q"), bounded("limit", 50, 1, 200))}
 
     def board_write(self, db, op, body):
+        if op == "plcstate":
+            return codesys_panel.plcstate(db, body)
+        if op == "bootapp":
+            return codesys_panel.bootapp(db, body)
+        if op == "chatsend":
+            return chatter_feed.chatsend(db, body)
         if op == "agentdef":
             return boardagents.agentdef(db, body)
         if op == "agentdrop":
