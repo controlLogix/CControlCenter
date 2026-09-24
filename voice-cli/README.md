@@ -12,7 +12,7 @@ Ableton or a browser while Claude drives them through MCP.
 - **Live overlay.** Always on top; shows words as you speak and never takes keyboard focus.
 - **Send text anywhere.** To whatever has focus, or to one window you lock (**Ctrl+Alt+L**).
 - **Robust.** Survives a wireless headset switching off and on, falls back to the default mic, and runs as one instance.
-- **Authenticated local API** (HTTP + Server-Sent Events): the seam for the planned ByteDesk agent plugin.
+- **Authenticated local API** (HTTP + Server-Sent Events): what the voice-cli Claude Code plugin (`plugins/voice-cli/`) talks to.
 
 ## Install
 

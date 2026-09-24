@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "voice-cli": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/voice_mcp.py"]
+    }
+  }
+}

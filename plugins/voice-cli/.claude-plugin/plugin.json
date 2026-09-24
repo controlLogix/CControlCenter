@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "voice-cli",
+  "version": "1.0.0",
+  "description": "Voice input for Claude Code through Voice CLI (voice-cli/ in this repo): an MCP server over the app's authenticated local API, and a skill for locking voice onto this session's terminal, switching mode or microphone, and listening for the operator's next spoken phrase. Windows only, like the app.",
+  "author": {
+    "name": "gtownarmy-design",
+    "url": "https://github.com/gtownarmy-design"
+  },
+  "repository": "https://github.com/gtownarmy-design/Forktah",
+  "keywords": ["voice", "speech", "whisper", "push-to-talk", "accessibility", "mcp"]
+}

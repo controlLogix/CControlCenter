@@ -152,6 +152,39 @@
     },
 
     {
+      "id": "voice-cli",
+      "name": "Voice CLI",
+      "kind": "addon",
+      "summary": "Local Whisper push-to-talk that types speech into any CLI window. Windows app in voice-cli/; Claude drives it through the voice-cli plugin in plugins/voice-cli/.",
+      "checks": [
+        { "id": "installed", "label": "installed (Windows)", "type": "command",
+          "argv": ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command",
+                   "Test-Path (Join-Path $env:LOCALAPPDATA 'Programs\\VoiceCLI\\VoiceCLI.exe')"],
+          "expect": "^True", "timeout": 20 },
+        { "id": "running", "label": "running (local API answers)", "type": "command",
+          "argv": ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command",
+                   "(Invoke-WebRequest -UseBasicParsing -TimeoutSec 3 http://127.0.0.1:47821/health).Content"],
+          "_note": "The unauthenticated /health answers only ok, app and version. The dashboard never reads the API token. 47821 is the app's default port.",
+          "expect": "\"app\":\\s*\"voicecli\"", "timeout": 20 },
+        { "id": "plugin", "label": "Claude plugin installed (Windows)", "type": "command",
+          "argv": ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", "claude plugin list"],
+          "expect": "voice-cli@forktah", "timeout": 30, "optional": true }
+      ],
+      "actions": [
+        { "id": "build", "label": "Build the installer (Windows, from voice-cli/)",
+          "command": "powershell -ExecutionPolicy Bypass -File packaging\\build.ps1" },
+        { "id": "self-test", "label": "Self-test the installed app",
+          "command": "& \"$env:LOCALAPPDATA\\Programs\\VoiceCLI\\VoiceCLI.exe\" --self-test" },
+        { "id": "plugin", "label": "Install the Claude plugin (Windows)",
+          "command": "claude plugin marketplace add gtownarmy-design/Forktah; claude plugin install voice-cli@forktah" }
+      ],
+      "notes": [
+        "Windows only. The probes cross into Windows with powershell.exe, so they need WSL interop; from a non-WSL Linux box all three report not installed.",
+        "The app binds 127.0.0.1 on Windows, which WSL cannot reach under NAT networking, so a Claude running inside WSL cannot use the plugin."
+      ]
+    },
+
+    {
       "id": "addons",
       "name": "Plugins & skills",
       "kind": "addon",

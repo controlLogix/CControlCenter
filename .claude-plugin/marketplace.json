@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "forktah",
+  "description": "Plugins that ship with Forktah, the gtownarmy-design fork of CControlCenter (agentmux and the Controls Control Center).",
+  "owner": {
+    "name": "gtownarmy-design",
+    "url": "https://github.com/gtownarmy-design"
+  },
+  "plugins": [
+    {
+      "name": "voice-cli",
+      "description": "See and steer Voice CLI, the local Whisper push-to-talk app in voice-cli/: lock it onto a terminal, switch mode or microphone, and hear the operator's next spoken phrase.",
+      "source": "./plugins/voice-cli"
+    }
+  ]
+}

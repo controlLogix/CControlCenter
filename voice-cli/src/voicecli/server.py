@@ -1,4 +1,4 @@
-"""Local HTTP API on 127.0.0.1, the seam a future ByteDesk plugin will talk to.
+"""Local HTTP API on 127.0.0.1, the seam the voice-cli plugin (plugins/voice-cli/) talks to.
 
 Every request except a bare liveness probe needs `Authorization: Bearer <token>`, where
 the token is the contents of %APPDATA%\\voicecli\\api-token (created on first run, readable
