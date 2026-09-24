@@ -44,3 +44,33 @@ test/             node:test suite
 
 If an avatar file is missing, the card shows a neutral lettered placeholder in the same
 square frame, so the layout does not shift.
+
+## Run it as an agentmux team
+
+The app is also the product of an end-to-end coordination exercise: four agents rebuild it from
+`BRIEF.md`. The agents are defined in the repository roster, `.agentmux/agents/rollcall-*.md`:
+
+| Definition | Role | CLI | Owns |
+|---|---|---|---|
+| `rollcall-lead` | lead | claude | the brief and the definition of done; writes no code |
+| `rollcall-dev` | worker | claude | `server/`, `web/*.html,js,css`, `test/`, `README.md` |
+| `rollcall-imager` | worker | grok | `web/avatars/` |
+| `rollcall-reviewer` | reviewer | grok | the gate: `run verdict`; never edits |
+
+From the repository root, inside WSL:
+
+```sh
+R=$(agentmux run start "Rebuild e2e/roll-call from BRIEF.md")
+for a in lead dev imager reviewer; do
+  agentmux spawn rollcall-$a --agentdef rollcall-$a --cwd "$PWD/e2e/roll-call"
+done
+agentmux run assign "$R" --worker rollcall-dev    --reviewer rollcall-reviewer --brief "server, page, tests, README per BRIEF.md"
+agentmux run assign "$R" --worker rollcall-imager --reviewer rollcall-reviewer --brief "four SVG avatars + manifest per BRIEF.md"
+agentmux run status "$R"      # one line per job
+agentmux run complete "$R"    # refuses until the reviewer has passed every job
+agentmux run teardown "$R"
+```
+
+Coordination uses agentmux's own primitives: `claim`/`release` before editing, `post --kind
+request|reply|finding|status` between agents, `journal` for decisions, `run submit` from a worker
+and `run verdict --pass|--fail` from the reviewer.

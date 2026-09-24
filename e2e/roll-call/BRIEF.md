@@ -29,7 +29,8 @@ the coordination is what is being tested.
 
 1. `node --test` passes.
 2. `node server/index.js` serves the page, which shows 4 cards with 4 avatars.
-3. The reviewer has sent `REVIEW APPROVE` and the conductor has sent `ACCEPT` for each deliverable.
+3. `rollcall-reviewer` has passed both jobs (`agentmux run verdict <job> --pass`), and
+   `agentmux run complete <run>` accepts the run.
 
 ## Out of scope
 
