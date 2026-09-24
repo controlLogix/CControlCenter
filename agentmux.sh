@@ -1972,6 +1972,25 @@ start_idle_watchdog() {
 # The \`tr -d '\r'\` is not decoration: this repo is checked out with CRLF, so bash
 # refuses agentmux.sh read directly. Every other caller uses process substitution
 # for the same reason.
+
+# CLOSE EVERY DESCRIPTOR WE WERE HANDED EXCEPT stdio.
+#
+# A detached daemon inherits the whole fd table of whoever started it, and it then
+# holds those files open for its entire life - which here means until the last agent
+# exits, potentially days. That is not theoretical: dashboard/run_tests.sh takes its
+# single-instance lock with \`exec 200>...\`, spawns agents, and a run killed before
+# its EXIT handler left this watchdog (and the \`sleep\` it forks) holding fd 200
+# forever. Every later run then refused to start, reporting a port conflict that did
+# not exist, and the only way out was hunting the holder with fuser.
+#
+# Done in the CHILD rather than at each call site so it holds for every caller,
+# including ones that have not been written yet.
+for _fd in /proc/self/fd/*; do
+  _n="\${_fd##*/}"
+  [ "\$_n" -gt 2 ] 2>/dev/null && eval "exec \$_n>&-" 2>/dev/null
+done
+unset _fd _n
+
 while sleep "\${AGENTMUX_IDLE_TICK:-60}"; do
   tmux -L "$SOCKET" list-sessions >/dev/null 2>&1 || break
   bash <(tr -d '\r' < "$script") idle >> "$RUNDIR/.idle.log" 2>&1

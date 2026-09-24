@@ -17,7 +17,16 @@ set -u
 # Lease port 8787 for this suite, swap to an empty home, and restore without ever
 # passing --fresh-db. The EXIT handler is installed before the first restart.
 exec 200>"${TMPDIR:-/tmp}/agentmux-dashboard-tests-${UID}.lock"
-flock -n 200 || { echo 'another dashboard suite owns port 8787' >&2; exit 2; }
+flock -n 200 || {
+  # This used to say "another dashboard suite owns port 8787", which sent two
+  # separate investigations to netstat. The guard is a LOCK, not a port probe, so
+  # say so and name the file - the holder is findable in one command from here.
+  echo "another dashboard suite holds the lock (this is a flock, not a port check)" >&2
+  echo "  lock: ${TMPDIR:-/tmp}/agentmux-dashboard-tests-${UID}.lock" >&2
+  echo "  who:  fuser -v '${TMPDIR:-/tmp}/agentmux-dashboard-tests-${UID}.lock'" >&2
+  echo "  a killed run can leave a detached tmux server or idle watchdog holding it" >&2
+  exit 2
+}
 OPERATOR_ROOT="$(python3 dashboard/suite_server.py --fallback "${AGENTMUX_HOME:-$HOME/.agentmux}")" || exit 2
 TEST_ROOT="$(mktemp -d)" || exit 2
 SPAWNED=""
@@ -100,7 +109,11 @@ if command -v tmux >/dev/null 2>&1; then
     export AGENTMUX_REPO="${AGENTMUX_REPO:-$PWD}"
     export AGENTMUX_NO_COURIER=1
     for agent in ccc-selftest-$$-1 ccc-selftest-$$-2; do
-      if bash "$HARNESS" spawn "$agent" --cli shell --cwd /tmp >/dev/null 2>&1; then
+      # 200>&- because the tmux SERVER this starts is a daemon that inherits our fd
+      # table and outlives us. Without it a run killed before its EXIT handler left
+      # tmux holding the single-instance lock, and every later run refused to start.
+      # run() below already closes it for the same reason; this call site was missed.
+      if bash "$HARNESS" spawn "$agent" --cli shell --cwd /tmp >/dev/null 2>&1 200>&-; then
         SPAWNED="$SPAWNED $agent"
       fi
     done
