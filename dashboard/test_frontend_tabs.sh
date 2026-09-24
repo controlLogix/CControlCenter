@@ -511,8 +511,14 @@ test('every view script registers itself without throwing', () => {
   // table, which is the thing you go there to read. The cost is one more rail entry.
   assert.deepEqual(registered.views.sort(), ['github', 'runs'],
                    'GitHub and Runs are the views registered by their own scripts');
-  assert.equal(registered.cards.length, 5, 'five IIOT cards: modbus, dcp, mqtt, scan, codesys');
-  assert.ok(registered.cards.every(v => v === 'iiot'));
+  // Five IIOT field cards plus the Settings > Orchestration card, which runs.js
+  // registers so that app.js and teams.js do not have to change to gain it.
+  assert.deepEqual(registered.cards.slice().sort(),
+                   ['iiot', 'iiot', 'iiot', 'iiot', 'iiot', 'settings'],
+                   'five IIOT cards and one Settings card');
+  // Superseded by the deepEqual above, which names every card and its view - a
+  // strictly stronger check than 'they are all iiot', and one that does not have
+  // to be relaxed each time a card lands on another view.
 
   // And the registries actually took them.
   const registry = vm.runInContext('VIEW_TABS', ctx);

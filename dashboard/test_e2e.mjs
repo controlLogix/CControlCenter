@@ -616,8 +616,12 @@ await test('Settings carries the Atlassian card and the theme importer', async (
   await show('settings');
   const keys = await page.$$eval('#viewSettings details.card',
     ns => ns.map(n => n.dataset.collapseKey));
+  // Orchestration is INSERTED between auth and resources, never reordered - the order
+  // is asserted here precisely so a card cannot quietly move. It sits beside Auth
+  // because both answer "what is this machine permitted to do".
   assert.deepEqual(keys, ['settings:feed', 'settings:appearance', 'settings:atlassian',
-                          'settings:auth', 'settings:resources']);
+                          'settings:auth', 'settings:orchestration',
+                          'settings:resources']);
   await page.waitForFunction(
     () => document.getElementById('atlState')?.childElementCount > 0, null, { timeout: 20000 });
   assert.ok(await page.$('#jiraBase'), 'the Jira site field moved here from the ribbon');

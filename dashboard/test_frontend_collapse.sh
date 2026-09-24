@@ -28,10 +28,10 @@ assert.match(css, /\.iiot-grid > \.card\s*\{[^}]*break-inside: avoid/);
 // .board keeps its grid, and keeps the no-stretch rule that goes with one.
 assert.match(css, /\.board\s*\{[^}]*align-items: start/);
 assert.match(css, /\.card > summary:focus-visible/);
-// Five IIOT field cards and five Settings cards. The count is asserted so that a
+// Five IIOT field cards and six Settings cards. The count is asserted so that a
 // card added without a collapse key - which is how one ends up permanently open -
 // fails here rather than being noticed by an operator.
-const CARD_COUNT = 10;
+const CARD_COUNT = 11;
 const cards = [...html.matchAll(/<details class="card" data-collapse-key="([^"]+)"( open)?>([\s\S]*?)<\/details>/g)];
 assert.equal(cards.length, CARD_COUNT);
 assert.equal(new Set(cards.map(m => m[1])).size, CARD_COUNT);

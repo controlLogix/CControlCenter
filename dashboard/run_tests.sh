@@ -157,7 +157,13 @@ run() {
   # Keep unavailable-history skips visible even when a meta-check exits cleanly.
   printf '%s\n' "$out" | grep '^SKIP ' || true
   case "$rc:$line" in
+    # Two success shapes, because there are two kinds of suite. The shell suites and
+    # the older python ones print "passed N, failed 0" via their own harness; a suite
+    # using raw unittest prints "OK" and exits 0. Matching only the first counted four
+    # passing suites as failures - the gate said "5 suite(s) failed" while every line
+    # above it said OK, which is the kind of noise that gets a gate ignored.
     0:*"failed 0") ;;
+    0:OK|0:OK\ *) ;;
     *) total_fail=$((total_fail + 1))
        # Two failure shapes, because there are two kinds of suite here. The shell
        # suites print '  FAIL  <what>' via testlib; a python unittest suite prints

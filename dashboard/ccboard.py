@@ -121,9 +121,28 @@ DEFAULT_CONFIG = {
     "teamMaxWorkers": 2,
     "teamRequireApproval": True,
     "dashboardMayHire": False,
+    # ── the CCC orchestrator ─────────────────────────────────────────────────
+    #
+    # OFF by default, for the same reason dispatchEnabled is: an LLM that opens runs,
+    # spawns agents and closes cards is not something a fresh checkout should start
+    # doing because a server came up.
+    #
+    # Deliberately NOT here: orchestratorCli, model and posture. Those come from the
+    # on-disk agent definition via agentdefs.resolve(), because `hire`'s bound is
+    # "only id and name are read from the wire" - a config key that overrode the
+    # definition would make that bound decorative. Nor orchestratorWip: one
+    # orchestrator at a time is an INVARIANT enforced against live_agents(), and a
+    # fourth number that can disagree with dispatchWip and the slot semaphore is a
+    # bug generator.
+    "orchestratorEnabled": False,
+    "orchestratorAgent": "",
+    "orchestratorScope": "goal",
+    "orchestratorNotify": True,
+    "orchestratorNotifyCommand": "",
 }
 CONFIG_BOOLS = {"requireAcceptance", "requireEpic", "autoCloseEpic", "dispatchEnabled",
-                "teamRequireApproval", "dashboardMayHire"}
+                "teamRequireApproval", "dashboardMayHire", "orchestratorEnabled",
+                "orchestratorNotify"}
 CONFIG_LISTS = {"requireOnCreate", "requireOnStart", "requireOnDone"}
 # name -> (low, high). Whole numbers, bounded where an unbounded one would be a
 # denial of service against this machine rather than a configuration choice.
@@ -137,6 +156,17 @@ CONFIG_CLIS = {"dispatchCli"}
 DISPATCH_KEYS = ("dispatchEnabled", "dispatchWip", "dispatchPoll",
                  "dispatchIdleExit", "dispatchMaxFailures",
                  "dispatchCli")
+# The same idea for the orchestrator, so `doctor` can ask for this policy without
+# knowing which names carry it.
+ORCHESTRATOR_KEYS = ("orchestratorEnabled", "orchestratorAgent", "orchestratorScope",
+                     "orchestratorNotify", "orchestratorNotifyCommand")
+# An agent NAME, which may be empty - the definition is resolved from disk, and an
+# empty value means "use the default".
+CONFIG_NAMES = {"orchestratorAgent"}
+# A shell command the operator typed, run with the notice on stdin. Bounded in length
+# only: it is never parsed here, and notify.py splits it once with shlex and runs it
+# with shell=False, so nothing in a notice can introduce metacharacters.
+CONFIG_FREETEXT = {"orchestratorNotifyCommand"}
 # The CLI name reaches `agentmux spawn --cli`, which puts it in a launch command.
 # A subset of what spawn accepts, chosen so nothing here can carry shell syntax.
 CLI_RE = re.compile(r"[A-Za-z0-9_-]{1,32}")
@@ -498,6 +528,13 @@ def set_config(db, name, value):
         value = text(value, name, 32, required=True, pattern=CLI_RE)
     elif name == "autoReady":
         value = text(value, name, 16, required=True, choices=("label", "off"))
+    elif name == "orchestratorScope":
+        value = text(value, name, 16, required=True,
+                     choices=("goal", "epic", "queue"))
+    elif name in CONFIG_NAMES:
+        value = text(value, name, 64, required=False, pattern=NAME_RE) or ""
+    elif name in CONFIG_FREETEXT:
+        value = text(value, name, 500) or ""
     db.execute("INSERT INTO board_config (name,value) VALUES (?,?)"
                " ON CONFLICT(name) DO UPDATE SET value=excluded.value",
                (name, json.dumps(value)))

@@ -506,6 +506,14 @@
         </p>
       </details>
 
+      <!-- Inserted between auth and resources, never reordered: the card order is
+           asserted, and this sits beside Auth because both answer "what is this
+           machine permitted to do". runs.js fills it. -->
+      <details class="card" data-collapse-key="settings:orchestration" open>
+        <summary><h3>Orchestration</h3></summary>
+        <div id="orchCard"></div>
+      </details>
+
       <details class="card" data-collapse-key="settings:resources" open>
         <summary><h3>Resources</h3></summary>
         <div class="res-head">

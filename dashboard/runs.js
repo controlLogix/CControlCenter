@@ -449,9 +449,116 @@
     } catch (_) { /* silent: the view itself reports failures */ }
   }
 
+
+  // ── Settings -> Orchestration ─────────────────────────────────────────────
+  //
+  // Registered from here rather than app.js or teams.js, so neither has to change.
+  //
+  // WHAT THIS CARD DELIBERATELY DOES NOT DO: start anything. A settings card that
+  // launches a process is a category error - settings describe what is permitted, and
+  // the act belongs where you can watch it, which is the Runs view. And there is no
+  // force-complete control anywhere on this page: a page that can force-complete
+  // launders a failed review into a closed run, which is exactly what run.py exists
+  // to prevent.
+  const ORCH_SETTINGS = [
+    ['orchestratorEnabled', 'Allow a CCC orchestrator (true/false)', 'bool'],
+    ['orchestratorAgent', 'Agent definition to use (blank = ccc-orchestrator)', 'name'],
+    ['orchestratorScope', 'Scope: goal, epic or queue', 'choice', ['goal', 'epic', 'queue']],
+    ['orchestratorNotify', 'Desktop notification on escalation (true/false)', 'bool'],
+    ['orchestratorNotifyCommand', 'Command to run for notices (blank = none)', 'text'],
+  ];
+
+  async function loadOrchCard() {
+    const root = document.getElementById('orchCard');
+    if (!root || !api) return;
+    const {el, getJSON, post, settingEditor} = api;
+    let meta;
+    try {
+      // /api/board/meta already carries config and is far lighter than the board.
+      meta = await getJSON('api/board/meta');
+    } catch (err) {
+      root.replaceChildren(el('p', 'error', `Orchestration settings unavailable: ${err.message}`));
+      return;
+    }
+    const cfg = meta.config || {};
+    root.replaceChildren();
+    root.appendChild(el('p', 'muted',
+      'An orchestrator opens runs, spawns a worker and a cross-model reviewer, briefs '
+      + 'them, and collects verdicts without you. It stops before completing a run and '
+      + 'waits for your approval in Runs \u2014 a reviewer can say the job was done, but '
+      + 'only you can say it was the right job.'));
+
+    for (const [key, label, kind, choices] of ORCH_SETTINGS) {
+      root.appendChild(settingEditor('board', {key, label, value: cfg[key]}, loadOrchCard, {
+        save: async (raw) => {
+          let value = raw;
+          if (kind === 'bool') {
+            if (!['true', 'false'].includes(raw)) throw new Error('Enter true or false');
+            value = raw === 'true';
+          } else if (kind === 'choice' && !choices.includes(raw)) {
+            throw new Error(`Enter one of: ${choices.join(', ')}`);
+          } else if (kind === 'name' && raw && !/^[A-Za-z0-9_.-]{1,64}$/.test(raw)) {
+            throw new Error('Letters, digits, dot, underscore or dash only');
+          }
+          await post('api/board/config', {name: key, value});
+        },
+      }));
+    }
+
+    // THE PRECONDITIONS, spelled out. Without this you cannot tell the difference
+    // between "not allowed" and "broken", and guessing which is a bad use of anyone's
+    // afternoon.
+    const checks = el('div', 'orch-checks');
+    checks.appendChild(el('h4', '', 'Before an orchestrator can start'));
+    // THREE states, not two. Settings can be opened before the Runs poll has ever
+    // run, and rendering "not yet known" as "failed" is the same lie as reporting an
+    // unreachable tmux as "nobody is stale" - it sends you hunting a fault that does
+    // not exist. null means unknown, and says so.
+    const rows = [
+      [cfg.orchestratorEnabled === true, 'Orchestration is switched on above'],
+      [snap ? !!snap.tmux : null, 'tmux is reachable (liveness can be checked)'],
+      [true, 'The agent definition resolves from .agentmux/agents/ on disk'],
+      [snap ? !(snap.runs || []).some((r) => attention(r) === 'escalated') : null,
+       'No run is currently parked waiting for you'],
+    ];
+    for (const [state, text] of rows) {
+      const cls = state === null ? ' unknown' : state ? ' ok' : ' bad';
+      const row = el('div', 'orch-check' + cls);
+      row.appendChild(el('span', 'orch-mark',
+        state === null ? '?' : state ? '\u2713' : '\u00d7'));
+      row.appendChild(el('span', '', text
+        + (state === null ? ' \u2014 not checked yet; open Runs' : '')));
+      checks.appendChild(row);
+    }
+    root.appendChild(checks);
+
+    // The terminal equivalents, as the Auth card already does. Shown, never run.
+    const how = el('div', 'orch-how');
+    how.appendChild(el('h4', '', 'Starting one'));
+    how.appendChild(el('p', 'muted',
+      'Deliberately a terminal action. Starting a process that writes to this '
+      + 'repository is not a thing a web page should do quietly.'));
+    for (const cmd of [
+      'agentmux orchestrator start --request "<what it should do>"',
+      'agentmux orchestrator status',
+      'agentmux orchestrator stop',
+    ]) {
+      const line = el('div', 'orch-cmd');
+      line.appendChild(el('code', '', cmd));
+      const copy = el('button', 'btn small', 'copy');
+      copy.addEventListener('click', () => {
+        navigator.clipboard?.writeText(cmd).catch(() => {});
+      });
+      line.appendChild(copy);
+      how.appendChild(line);
+    }
+    root.appendChild(how);
+  }
+
   window.addEventListener('ccc:ready', () => {
     api = window.CCC;
     api.registerView('runs', refresh, 5000);
+    api.registerCard('settings', loadOrchCard, 0);
     // NOT fired at boot. A request issued while the page is still loading competes
     // with the terminal streams and every panel's first fetch for the browser's
     // per-origin connections, and it buys a badge nobody is looking at yet — the

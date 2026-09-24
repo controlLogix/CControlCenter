@@ -1507,3 +1507,19 @@ table.run-jobs tr.job.escalated .j-state { color:var(--bad,#c9483f);
                     font-weight:600; }
 table.run-jobs tr.job.verified .j-state { color:var(--ok,#3fa76a); }
 table.run-jobs .j-flags { display:flex; gap:5px; flex-wrap:wrap; }
+
+/* Settings -> Orchestration */
+.orch-checks { margin:14px 0 0; }
+.orch-checks h4, .orch-how h4 { margin:0 0 6px; font-size:.86rem; }
+.orch-check { display:flex; gap:8px; align-items:baseline; font-size:.84rem;
+              padding:2px 0; }
+.orch-mark { width:1em; font-weight:700; }
+.orch-check.ok .orch-mark  { color:var(--ok,#3fa76a); }
+.orch-check.bad .orch-mark { color:var(--bad,#c9483f); }
+.orch-check.bad { color:var(--muted); }
+.orch-how { margin:14px 0 0; }
+.orch-cmd { display:flex; gap:8px; align-items:center; margin:4px 0; }
+.orch-cmd code { font-size:.78rem; padding:3px 7px; border-radius:4px;
+                 background:var(--pane,rgba(128,128,128,.10)); }
+.btn.small { font-size:.72rem; padding:2px 7px; }
+.orch-check.unknown .orch-mark { color:var(--muted); }
