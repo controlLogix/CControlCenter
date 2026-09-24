@@ -208,6 +208,8 @@ run test_runsview.py python3 dashboard/test_runsview.py
 run test_notify.py python3 dashboard/test_notify.py
 # The wire between a completed run and the board cards it was assigned.
 run test_runcards.py python3 dashboard/test_runcards.py
+# The orchestrator warrant: what it permits, and everything it must still refuse.
+run test_warrant.py python3 dashboard/test_warrant.py
 # EP-015 suites are registered at the scaffold seam before their owning tasks land.
 # Missing suites are explicit skips during the staged build; present suites use
 # the same failure accounting as every existing suite above.

@@ -763,6 +763,7 @@ def cmd_start(args):
         # to look when the run stops at the operator gate.
         append_event(run_id, {"event": "start", "by": by,
                               "base": repo_head(REPO_ROOT),
+                              "via": coordination.orchestrator_pane(),
                               "origin": notify.origin_id(),
                               "pane": os.environ.get("TMUX_PANE") or None,
                               "detail": args.request[:DETAIL_MAX]})
@@ -808,6 +809,7 @@ def cmd_assign(args):
         if args.brief:
             (directory / "brief.md").write_text(args.brief, encoding="utf-8")
         append_event(args.run, {"event": "assign", "job": job, "by": by,
+                                "via": coordination.orchestrator_pane(),
                                 "worker": args.worker,
                                 "reviewer": args.reviewer, "task": args.task,
                                 "detail": (args.brief or "")[:DETAIL_MAX]})
@@ -1117,6 +1119,21 @@ def cmd_complete(args):
             print(f"REFUSED: {objection}", file=sys.stderr)
             return 1
 
+        # --FORCE IS NOT THE ORCHESTRATOR'S TO USE.
+        #
+        # Without this, the whole verification gate is one flag deep for an agent that
+        # decides it has waited long enough, and "FORCED" in a ledger is only a control
+        # if somebody reads ledgers. --force exists for a run whose agents died, which
+        # is an accident a person judges; an autonomous orchestrator meeting that case
+        # should escalate, not overrule.
+        via = coordination.orchestrator_pane()
+        if args.force and via:
+            print(f"REFUSED: --force is not available to {via!r}.", file=sys.stderr)
+            print("  A warranted pane may complete a VERIFIED run; forcing past an "
+                  "unverified one\n  is a person's call. Escalate it instead.",
+                  file=sys.stderr)
+            return 2
+
         if blocking and not args.force:
             print(f"REFUSED: {len(blocking)} of {len(state['jobs'])} job(s) are not "
                   f"verified.", file=sys.stderr)
@@ -1144,7 +1161,7 @@ def cmd_complete(args):
             return 1
 
         append_event(args.run, {"event": "forced" if blocking else "complete",
-                                "by": by,
+                                "by": by, "via": via,
                                 "detail": f"{len(state['jobs']) - len(blocking)}"
                                           f"/{len(state['jobs'])} verified"})
     verified = len(state["jobs"]) - len(blocking)

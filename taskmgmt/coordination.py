@@ -33,6 +33,8 @@ import json
 import os
 import re
 import secrets
+import stat
+import tempfile
 import subprocess
 import sys
 import time
@@ -162,6 +164,80 @@ def resolve_identity(claimed, verb, require_live=True):
     return who
 
 
+WARRANT = ROOT / "orchestrator.warrant"
+WARRANT_SECRET_RE = re.compile(r"^[0-9a-f]{64}$")
+
+
+def orchestrator_warrant():
+    """The ONE pane authorised to act as the orchestrator, or None. Never raises.
+
+    WHY A POSITIVE CREDENTIAL AT ALL. orchestrator_identity below proves
+    orchestrator-ness by the ABSENCE of $AGENTMUX_AGENT. That is a negative test, and a
+    negative test is not extensible: there is no value you can put in the environment
+    meaning "yes, more so". Every pane sets that variable, so an orchestrator agent
+    running in its own pane - which is the whole point of driving a run from the CCC -
+    is refused by start, assign, complete and teardown.
+
+    So this is added as a SECOND, NARROWING CONDITION on the existing refusal, never as
+    a replacement. Refusal stays the default; the warrant only excuses the one pane it
+    names, for the four verbs that consult it.
+
+    WHAT IT IS NOT. This is not authentication and must never be cited as such. Every
+    agent on this box runs unrestricted and can read the file. It stops MISTAKES - a
+    worker pane wandering into `run complete`, a verdict attributed to the wrong agent -
+    which is what actually goes wrong. It is still strictly better than proving
+    authority by a variable being absent.
+    """
+    secret = os.environ.get("AGENTMUX_ORCHESTRATOR_WARRANT") or ""
+    if not WARRANT_SECRET_RE.fullmatch(secret):
+        return None
+    try:
+        info = WARRANT.lstat()
+        # Not a symlink, not a hard link to someone else's file, ours, and not
+        # readable by anyone else - the same check agentmux.sh applies to $ROOT/env.
+        if (not stat.S_ISREG(info.st_mode) or info.st_nlink != 1
+                or info.st_uid != os.getuid() or info.st_mode & 0o077):
+            return None
+        record = json.loads(WARRANT.read_text(encoding="utf-8"))
+    except (OSError, ValueError, AttributeError):
+        return None
+    if not isinstance(record, dict) or record.get("version") != 1:
+        return None
+    if not secrets.compare_digest(str(record.get("secret") or ""), secret):
+        return None
+    agent = str(record.get("agent") or "")
+    # THE RESERVED NAME IS LOAD-BEARING. resolve_identity routes who == "orchestrator"
+    # straight into orchestrator_identity with allow_test_identity=False, so a warrant
+    # naming it would let a pane acquire the VIRTUAL identity - which is exactly what
+    # test_coordination.sh:372 exists to forbid.
+    if agent == "orchestrator" or not NAME_PATTERN.fullmatch(agent):
+        return None
+    # BOUND TO THIS PROCESS, not merely "a warrant exists".
+    #
+    # The caller already compares the result against $AGENTMUX_AGENT, so this looks
+    # redundant - and it is the difference between a function that answers "who is
+    # warranted" and one that answers "am I". The first is a footgun for the next
+    # caller, who will reasonably read a non-None return as permission. Outside a pane
+    # there is nothing to bind to and the warrant is irrelevant, because the ordinary
+    # absence-of-$AGENTMUX_AGENT path already grants the identity.
+    if os.environ.get("AGENTMUX_AGENT") != agent:
+        return None
+    try:
+        # Expiry is the dead-man's switch: a warrant nobody revoked revokes itself.
+        if time.time() >= float(record.get("expires_at") or 0):
+            return None
+    except (TypeError, ValueError):
+        return None
+    return agent
+
+
+def orchestrator_pane():
+    """The warranted pane when this process is acting under one, else None. For the
+    ledger, so an autonomous run is distinguishable from an operator-driven one."""
+    env = os.environ.get("AGENTMUX_AGENT")
+    return env if env and orchestrator_warrant() == env else None
+
+
 def orchestrator_identity(verb, claimed=None, allow_test_identity=True):
     """Resolve the outside-pane identity, including run's legacy test bypass.
 
@@ -169,7 +245,13 @@ def orchestrator_identity(verb, claimed=None, allow_test_identity=True):
     be available outside panes, even when synthetic agent liveness is trusted.
     """
     env = os.environ.get("AGENTMUX_AGENT")
-    if env and (not allow_test_identity or os.environ.get("AGENTMUX_TRUST_IDENTITY") != "1"):
+    # ORDER MATTERS. The legacy AGENTMUX_TRUST_IDENTITY bypass short-circuits first, so
+    # the suites - which run without a warrant in scope - never touch the filesystem and
+    # every existing refusal message is byte-identical. The warrant is the LAST thing
+    # consulted, and only narrows: it excuses exactly the one pane it names.
+    if (env and (not allow_test_identity
+                 or os.environ.get("AGENTMUX_TRUST_IDENTITY") != "1")
+            and orchestrator_warrant() != env):
         raise IdentityError(
             f"identity: {verb} is the orchestrator's to call, and this is the {env!r} pane.\n"
             f"  An agent closing out the run it is working in defeats the gate: ask the\n"
@@ -181,6 +263,63 @@ def orchestrator_identity(verb, claimed=None, allow_test_identity=True):
             f"identity: {verb} is always attributed to the orchestrator, so --by {claimed!r} "
             f"cannot be honoured.\n  Drop --by.")
     return "orchestrator"
+
+
+WARRANT_ENV = ROOT / "orchestrator.env"
+WARRANT_HOURS = 8
+
+
+def issue_warrant(agent, cli="?", hours=WARRANT_HOURS, issued_by="operator"):
+    """Mint a warrant for exactly one pane. Returns the secret.
+
+    TWO FILES, and the split is the whole security of it. The warrant names the pane
+    and carries the secret's counterpart; the env file carries the secret and is sourced
+    into THAT PANE ONLY.
+
+    An earlier draft put the secret in $AGENTMUX_HOME/env - which agentmux.sh sources
+    into EVERY pane. That would have handed the credential to every worker on the box
+    and left only the name binding standing. Caught in review; recorded here so it is
+    not reintroduced.
+    """
+    if agent == "orchestrator" or not NAME_PATTERN.fullmatch(agent or ""):
+        raise ValueError(f"refusing to warrant {agent!r}: the name 'orchestrator' is "
+                         f"reserved for the virtual identity, and a warrant naming it "
+                         f"would let a pane acquire that identity")
+    secret = secrets.token_hex(32)
+    now_ts = time.time()
+    record = {"version": 1, "agent": agent, "secret": secret, "cli": str(cli)[:32],
+              "issued_at": int(now_ts), "expires_at": int(now_ts + hours * 3600),
+              "issued_by": str(issued_by)[:64]}
+    ROOT.mkdir(parents=True, exist_ok=True)
+    for path, payload in ((WARRANT, json.dumps(record, indent=2) + "\n"),
+                          (WARRANT_ENV,
+                           f"AGENTMUX_ORCHESTRATOR_WARRANT={secret}\n")):
+        handle, tmp = tempfile.mkstemp(dir=str(ROOT), prefix=".warrant-")
+        try:
+            with os.fdopen(handle, "w", encoding="utf-8") as fh:
+                fh.write(payload)
+            os.chmod(tmp, 0o600)
+            os.replace(tmp, path)
+        except BaseException:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            raise
+    return secret
+
+
+def revoke_warrant():
+    """Remove the authority before anything else. Ordering is load-bearing: the warrant
+    goes first, so a pane that survives the kill that follows is already powerless."""
+    removed = []
+    for path in (WARRANT, WARRANT_ENV):
+        try:
+            path.unlink()
+            removed.append(path.name)
+        except OSError:
+            pass
+    return removed
 
 
 def read_claim(path):
