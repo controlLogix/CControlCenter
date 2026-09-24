@@ -412,6 +412,120 @@ def notify_orchestrator(kind, body, ref=None, recipient="orchestrator"):
         return False
 
 
+# ── the board cards this run was supposed to close ───────────────────────────
+#
+# THE FAILURE THIS EXISTS FOR, exactly. Run bdae05 completed on 2026-09-24 with 2/2
+# jobs verified, printed "COMPLETE", and said nothing about TM-083 - the card it had
+# been assigned. That card sat `open` with five unticked acceptance criteria until
+# somebody noticed by eye, and EP-021 stayed open behind it. Two correct gates with no
+# wire between them: `run complete` knew the task key on every job and never mentioned
+# it, and the board had no idea a run had finished.
+#
+# This is the wire. It only REPORTS - it does not tick acceptance or close anything,
+# because the board's own gate_done is the thing that decides whether a card may close
+# and a second opinion here would be a way around it. What it removes is the silence.
+
+_board = None
+
+
+def board_modules():
+    """(ccstore, ccboard) or None. Never raises: a missing board is not a reason to
+    fail a completion that has already been verified."""
+    global _board
+    if _board is not None:
+        return _board or None
+    directory = str(REPO_ROOT / "dashboard")
+    try:
+        if directory not in sys.path:
+            sys.path.append(directory)      # append, not insert: the dashboard's
+        import ccstore                      # modules must never shadow taskmgmt's
+        import ccboard
+        _board = (ccstore, ccboard)
+    except Exception:
+        _board = False
+        return None
+    return _board
+
+
+def cards_of(state):
+    """Task keys this run's jobs were assigned to, in job order."""
+    out = []
+    for _, row in sorted(state["jobs"].items()):
+        key = row.get("task")
+        if isinstance(key, str) and key and key not in out:
+            out.append(key)
+    return out
+
+
+def card_status(keys):
+    """For each key: its status and what the BOARD says still blocks closing it.
+
+    The gaps come from ccboard.gate_done, so this can never disagree with the refusal
+    an operator would get trying to close the card by hand.
+    """
+    modules = board_modules()
+    if not modules or not keys:
+        return None
+    ccstore, ccboard = modules
+    out = []
+    try:
+        with ccstore.connection() as db:
+            cfg = ccboard.config(db) if hasattr(ccboard, "config") else {}
+            for key in keys:
+                try:
+                    task = ccboard.entity(db, key)
+                except Exception:
+                    out.append({"key": key, "status": "unknown",
+                                "gaps": [], "error": "not on the board"})
+                    continue
+                status = str(task.get("status") or "unknown")
+                gaps = []
+                if status != "done":
+                    # gate_done RAISES Refused; it does not return it. Catching
+                    # Exception and shrugging would have reported every open card with
+                    # no reason attached, which is the silence this whole function
+                    # exists to remove.
+                    try:
+                        ccboard.gate_done(db, task, cfg)
+                    except ccboard.Refused as refusal:
+                        gaps = sorted({g.get("field", "?")
+                                       for g in (refusal.missing or [])})
+                    except Exception:
+                        gaps = []
+                out.append({"key": key, "status": status, "gaps": gaps,
+                            "epic": task.get("epic")})
+    except Exception:
+        return None
+    return out
+
+
+def report_cards(state):
+    """What this run leaves behind on the board.
+
+    Returns (summary_fragment, lines). Computed rather than printed so the caller can
+    put the headline first - the detail belongs under the result, not above it.
+    """
+    keys = cards_of(state)
+    if not keys:
+        return "", []
+    rows = card_status(keys)
+    if rows is None:
+        return "", [f"  cards: {', '.join(keys)} "
+                    f"(board unavailable - check them by hand)"]
+    still_open = [r for r in rows if r["status"] != "done"]
+    if not still_open:
+        return "", [f"  board: all {len(rows)} card(s) already closed - "
+                    f"{', '.join(r['key'] for r in rows)}"]
+    lines = [f"  BOARD: {len(still_open)} of {len(rows)} card(s) are still open:"]
+    for row in still_open:
+        gaps = f" - missing {', '.join(row['gaps'])}" if row["gaps"] else ""
+        note = f" ({row['error']})" if row.get("error") else ""
+        lines.append(f"    {row['key']:<10} {row['status']}{gaps}{note}")
+    lines += ["    A verified run is not a closed card. Tick the acceptance criteria",
+              "    and attach evidence, or the epic behind these stays open too."]
+    return (f"cards still open: {', '.join(r['key'] for r in still_open)}"), lines
+
+
 # ── unread notices, surfaced in whatever terminal asks next ──────────────────
 #
 # THE CASE THIS EXISTS FOR. A tmux pane can be drawn on and a desktop can be toasted.
@@ -1036,11 +1150,17 @@ def cmd_complete(args):
     verified = len(state["jobs"]) - len(blocking)
     summary = (f"run {args.run} {'FORCED' if blocking else 'COMPLETE'}: "
                f"{verified}/{len(state['jobs'])} jobs verified")
+    # THE WIRE THE EP-021 FAILURE EXPOSED: say what this leaves on the board.
+    cards, card_lines = report_cards(state)
+    if cards:
+        summary += f"; {cards}"
     if blocking:
         summary += f"; unverified: {', '.join(blocking)}; see {report}"
     record_notice(args.run, "done" if not blocking else "conflict",
                   summary, state["request"] or "", by, ref=args.run)
     print(summary)
+    for line in card_lines:
+        print(line)
     if report:
         print(f"  forced report: {report}")
     print("  agents are still running - tear them down with: "
