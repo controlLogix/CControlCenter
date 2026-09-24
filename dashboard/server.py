@@ -10,15 +10,20 @@ import boardteams
 import ccboard
 import ccstore
 import datetime as dt
+import github_auth
 import json
 import mqtt
+import mqtt_monitor
 import modbus_poll
+import netscan
 import os
 from pathlib import Path
+import profinet
 import re
 import stat
 import struct
 import subprocess
+import sys
 import threading
 import time
 import unicodedata
@@ -919,6 +924,63 @@ def modbus_service():
         return _modbus_service
 
 
+def journal_event(subject, event):
+    """Append one operational event to the Control Center journal.
+
+    Shared by the field services (MQTT, the network scanner, PROFINET imports and
+    GitHub writes) so every side effect this dashboard causes lands in the same
+    append-only log the Status view reads. Failures here are swallowed by the
+    caller: a journal that is briefly unavailable must not abort an action the
+    operator is watching succeed.
+    """
+    with ccstore.connection() as db:
+        ccstore.write(db, 'journal', {
+            'kind': 'note', 'agent': str(event.get('actor') or 'dashboard')[:64],
+            'subject': subject,
+            'body': json.dumps(event, allow_nan=False, default=str)})
+
+
+_field_lock = threading.Lock()
+_mqtt_monitor = None
+_scanner = None
+_profinet_schema = None
+_github_login = None
+
+
+def mqtt_service():
+    global _mqtt_monitor
+    with _field_lock:
+        if _mqtt_monitor is None:
+            _mqtt_monitor = mqtt_monitor.Monitor(HOME_DIR / 'mqtt-monitor.json')
+        return _mqtt_monitor
+
+
+def scan_service():
+    global _scanner
+    with _field_lock:
+        if _scanner is None:
+            _scanner = netscan.Scanner(
+                lambda event: journal_event('Network scan ' + event['outcome'], event))
+        return _scanner
+
+
+def profinet_service():
+    global _profinet_schema
+    with _field_lock:
+        if _profinet_schema is None:
+            _profinet_schema = profinet.Schema(HOME_DIR / 'profinet-stations.json')
+        return _profinet_schema
+
+
+def github_login_service():
+    global _github_login
+    with _field_lock:
+        if _github_login is None:
+            _github_login = github_auth.Login(
+                lambda event: journal_event('GitHub ' + event['outcome'], event))
+        return _github_login
+
+
 class Handler(BaseHTTPRequestHandler):
     def send_body(self, status, body, content_type):
         self.send_response(status)
@@ -944,6 +1006,23 @@ class Handler(BaseHTTPRequestHandler):
     do_HEAD = do_GET
     do_POST = do_GET
 
+    def allowed_origins(self):
+        """The origins this server may be reached from: its OWN bound port.
+
+        This used to be the literal string "http://127.0.0.1:8787" in two places.
+        That is the same check - the server only ever binds loopback, so its own
+        origin is the only same-origin one there is - but writing the port as a
+        constant meant the guard was really asserting "we are on 8787", and any
+        instance on another port refused every write with `forbidden origin`. That
+        made the write paths untestable anywhere except the one port the operator's
+        own dashboard already owns, which is exactly the port a test must not take.
+
+        Both host spellings are accepted because both address this same server and
+        the browser sends whichever one is in the address bar.
+        """
+        port = self.server.server_address[1]
+        return (f"http://127.0.0.1:{port}", f"http://localhost:{port}")
+
     def read_cc_body(self, max_bytes=1024):
         """Apply the same JSON, origin, length and timeout guards as resize.
 
@@ -957,8 +1036,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(415, {"error": "application/json required"})
             return None
         origins = self.headers.get_all("Origin", [])
-        if origins and (len(origins) != 1 or origins[0] not in (
-                "http://127.0.0.1:8787", "http://localhost:8787")):
+        if origins and (len(origins) != 1 or origins[0] not in self.allowed_origins()):
             self.send_json(403, {"error": "forbidden origin"})
             return None
         lengths = self.headers.get_all("Content-Length", [])
@@ -1456,6 +1534,132 @@ class Handler(BaseHTTPRequestHandler):
         except (OSError, modbus_poll.ModbusError) as err:
             self.send_json(502, {'error': str(err)})
 
+    # -- the field services -------------------------------------------------
+    #
+    # Four endpoints with the same shape: GET returns a snapshot, POST takes a
+    # validated document. Each service owns its own thread and its own bounds, so
+    # the handler's whole job is to translate the module's Invalid into a 400 and
+    # anything operational into a 502/503. None of them accepts a command, a path
+    # or a flag from the request.
+
+    def monitor_endpoint(self, action):
+        service = mqtt_service()
+        try:
+            if self.command == "GET":
+                if action != "monitor":
+                    self.send_json(405, {"error": "POST required"})
+                    return
+                params = parse_qs(self.requestline.split()[1].partition("?")[2],
+                                  keep_blank_values=True, max_num_fields=8)
+                raw_limit = (params.get("limit") or ["200"])[0]
+                raw_since = (params.get("since") or ["0"])[0]
+                if not re.fullmatch(r"[0-9]{1,5}", raw_limit) or not re.fullmatch(r"[0-9]{1,12}", raw_since):
+                    self.send_json(400, {"error": "invalid limit or since"})
+                    return
+                needle = (params.get("q") or [""])[0]
+                self.send_json(200, service.snapshot(int(raw_limit), int(raw_since), needle))
+                return
+            if action == "stop":
+                self.send_json(200, service.stop())
+                return
+            if action == "clear":
+                self.send_json(200, service.clear())
+                return
+            body = self.read_cc_body(CC_BODY_MAX)
+            if body is None:
+                return
+            if action == "publish":
+                # Through the SESSION THAT IS ALREADY OPEN, not a fresh anonymous
+                # connection: the live session is the one carrying the operator's
+                # credentials and TLS, so a broker that requires either would refuse
+                # a second connection made just for this write.
+                unknown = body.keys() - {"topic", "payload", "qos", "retain"}
+                if unknown:
+                    raise mqtt_monitor.Invalid(
+                        f"unknown fields: {', '.join(sorted(unknown))}")
+                self.send_json(200, service.publish(
+                    body.get("topic"), body.get("payload", ""),
+                    body.get("qos", 0), bool(body.get("retain"))))
+                return
+            self.send_json(200, service.start(body))
+        except mqtt_monitor.Invalid as err:
+            self.send_json(400, {"error": str(err)})
+        except mqtt_monitor.Unavailable as err:
+            self.send_json(503, {"error": str(err)})
+        except (OSError, mqtt.MqttError) as err:
+            self.send_json(502, {"error": str(err)})
+
+    def netscan_endpoint(self, action):
+        service = scan_service()
+        try:
+            if self.command == "GET":
+                self.send_json(200, service.snapshot())
+                return
+            if action == "stop":
+                self.send_json(200, service.stop())
+                return
+            body = self.read_cc_body(1024)
+            if body is None:
+                return
+            self.send_json(200, service.start(body))
+        except netscan.Invalid as err:
+            self.send_json(400, {"error": str(err)})
+        except OSError as err:
+            self.send_json(503, {"error": f"scan could not start: {err.strerror or err}"})
+
+    def profinet_endpoint(self, action):
+        service = profinet_service()
+        try:
+            if self.command == "GET":
+                self.send_json(200, service.state())
+                return
+            body = self.read_cc_body(CC_BODY_MAX)
+            if body is None:
+                return
+            if action == "schema":
+                self.send_json(200, service.save_schema(body))
+                return
+            result = service.save_snapshot(body.get("records"), body.get("actor"))
+            journal_event("PROFINET DCP snapshot imported", {
+                "actor": body.get("actor") or "dashboard",
+                "stations": len(result["snapshot"]),
+                "mismatched": result["reconciliation"]["counts"]["mismatch"],
+                "missing": result["reconciliation"]["counts"]["missing"],
+                "unexpected": result["reconciliation"]["counts"]["unexpected"]})
+            self.send_json(200, result)
+        except profinet.Invalid as err:
+            self.send_json(400, {"error": str(err)})
+        except OSError as err:
+            self.send_json(503, {"error": f"schema storage unavailable: {err.strerror or err}"})
+
+    def github_endpoint(self, action):
+        try:
+            if self.command == "GET":
+                self.send_json(200, {"account": github_auth.account(),
+                                     "login": github_login_service().snapshot()})
+                return
+            body = self.read_cc_body(CC_BODY_MAX)
+            if body is None:
+                return
+            if action == "login":
+                self.send_json(200, github_login_service().start(body.get("actor")))
+                return
+            if action == "cancel":
+                self.send_json(200, github_login_service().cancel())
+                return
+            if action == "logout":
+                self.send_json(200, {"account": github_auth.logout(
+                    body.get("actor"),
+                    lambda event: journal_event("GitHub " + event["outcome"], event))})
+                return
+            maker = github_auth.create_repo if action == "repo" else github_auth.create_issue
+            self.send_json(200, maker(
+                body, lambda event: journal_event("GitHub " + event["outcome"], event)))
+        except github_auth.Invalid as err:
+            self.send_json(400, {"error": str(err)})
+        except github_auth.Unavailable as err:
+            self.send_json(503, {"error": str(err)})
+
     def mqtt_endpoint(self, action):
         """POST /api/mqtt/publish | /api/mqtt/subscribe
 
@@ -1537,8 +1741,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(415, {"error": "application/json required"})
             return
         origins = self.headers.get_all("Origin", [])
-        if origins and (len(origins) != 1 or origins[0] not in (
-                "http://127.0.0.1:8787", "http://localhost:8787")):
+        if origins and (len(origins) != 1 or origins[0] not in self.allowed_origins()):
             self.send_json(403, {"error": "forbidden origin"})
             return
         lengths = self.headers.get_all("Content-Length", [])
@@ -1912,6 +2115,32 @@ class Handler(BaseHTTPRequestHandler):
                 else:
                     self.mqtt_endpoint(path.rsplit("/", 1)[1])
                 return
+            if path in ("/api/mqtt/monitor", "/api/mqtt/monitor/stop",
+                        "/api/mqtt/monitor/clear", "/api/mqtt/monitor/publish"):
+                if self.command == "GET" and path != "/api/mqtt/monitor":
+                    self.send_json(405, {"error": "POST required"})
+                else:
+                    self.monitor_endpoint(path.rsplit("/", 1)[1])
+                return
+            if path in ("/api/netscan", "/api/netscan/start", "/api/netscan/stop"):
+                if self.command == "GET" and path != "/api/netscan":
+                    self.send_json(405, {"error": "POST required"})
+                else:
+                    self.netscan_endpoint(path.rsplit("/", 1)[1])
+                return
+            if path in ("/api/profinet", "/api/profinet/schema", "/api/profinet/snapshot"):
+                if self.command == "GET" and path != "/api/profinet":
+                    self.send_json(405, {"error": "POST required"})
+                else:
+                    self.profinet_endpoint(path.rsplit("/", 1)[1])
+                return
+            if path in ("/api/github/auth", "/api/github/login", "/api/github/cancel",
+                        "/api/github/logout", "/api/github/repo", "/api/github/issue"):
+                if self.command == "GET" and path != "/api/github/auth":
+                    self.send_json(405, {"error": "POST required"})
+                else:
+                    self.github_endpoint(path.rsplit("/", 1)[1])
+                return
             if path.startswith("/api/resize/"):
                 if self.command != "POST":
                     self.send_json(405, {"error": "POST required"})
@@ -1981,7 +2210,8 @@ class Handler(BaseHTTPRequestHandler):
             file_path = (ROOT / "index.html").resolve()
             content_type = "text/html; charset=utf-8"
         elif path in ("/app.js", "/fitmatrix.js", "/agents.js", "/teams.js", "/iiot.js",
-                      "/github.js", "/codesys.js", "/chatter.js"):
+                      "/github.js", "/codesys.js", "/chatter.js", "/mqtt.js",
+                      "/netscan.js"):
             # fitmatrix.js is the readability test harness. index.html loads it only
             # when the URL carries ?fit=1, so it is inert on the normal page but can
             # be run against the REAL page rather than a mock.
@@ -2027,18 +2257,37 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
+    # --port exists so a test can bring up a REAL server without taking 8787 from
+    # the operator's running dashboard. It changes nothing else: the bind stays on
+    # loopback, and the write guard derives its allowed origin from whatever port
+    # was bound (see Handler.allowed_origins), so a server on another port is as
+    # locked down as the default one.
+    port = 8787
+    if "--port" in sys.argv:
+        raw = sys.argv[sys.argv.index("--port") + 1]
+        if not re.fullmatch(r"[0-9]{1,5}", raw) or not 1 <= int(raw) <= 65535:
+            raise SystemExit("--port takes a number between 1 and 65535")
+        port = int(raw)
     try:
-        with ThreadingHTTPServer(("127.0.0.1", 8787), Handler) as server:
-            modbus_service()  # Resume persisted polling without a browser tab.
-            print("agentmux dashboard: http://127.0.0.1:8787", flush=True)
+        with ThreadingHTTPServer(("127.0.0.1", port), Handler) as server:
+            # Resume the persisted field services without waiting for a browser
+            # tab. An operator who left a line watched expects it still to be
+            # watched after a restart, and a monitor that only runs while someone
+            # is looking at it cannot tell you what happened while nobody was.
+            modbus_service()
+            mqtt_service()
+            print(f"agentmux dashboard: http://127.0.0.1:{server.server_address[1]}",
+                  flush=True)
             server.serve_forever()
     except KeyboardInterrupt:
         pass
     except OSError:
-        raise SystemExit("Unable to start dashboard on 127.0.0.1:8787")
+        raise SystemExit(f"Unable to start dashboard on 127.0.0.1:{port}")
     finally:
         if _modbus_service is not None:
             _modbus_service.close()
+        if _mqtt_monitor is not None:
+            _mqtt_monitor.close()
 
 
 if __name__ == "__main__":

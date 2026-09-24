@@ -165,6 +165,10 @@ run test_theme_import.sh bash /dev/fd/13 13< <(tr -d '\r' < dashboard/test_theme
 run test_themes.sh bash /dev/fd/13 13< <(tr -d '\r' < dashboard/test_themes.sh)
 run test_frontend.sh bash /dev/fd/12 12< <(tr -d '\r' < dashboard/test_frontend.sh)
 run test_frontend_board.sh bash /dev/fd/14 14< <(tr -d '\r' < dashboard/test_frontend_board.sh)
+run test_frontend_tabs.sh bash /dev/fd/15 15< <(tr -d '\r' < dashboard/test_frontend_tabs.sh)
+# The idle-agent timeout. Sources agentmux.sh for its selection function and tests
+# it against a fixture, so it needs no tmux server and cannot touch a live agent.
+run test_idle.sh bash /dev/fd/17 17< <(tr -d '\r' < dashboard/test_idle.sh)
 run smoke.sh      bash /dev/fd/3 3< <(tr -d '\r' < dashboard/smoke.sh)
 # The board model and the dispatch seam. test_board.py landed with the store and
 # was never listed here, so it had not run in the gate since the day it was
@@ -194,6 +198,15 @@ run test_pn_dcp.py python3 dashboard/test_pn_dcp.py
 run test_ecat_diag.py python3 dashboard/test_ecat_diag.py
 run test_snapshot.py python3 dashboard/test_snapshot.py
 run test_mqtt.py  python3 dashboard/test_mqtt.py
+# The IIOT field services. Self-contained: its own HTTP server on an ephemeral port
+# and its own throwaway AGENTMUX_HOME, so it neither needs nor disturbs the shared
+# server this suite brought up.
+run test_field_panels.py timeout 300 python3 dashboard/test_field_panels.py
+# The browser suite. Brings up its own dashboard and its own stub broker on
+# ephemeral ports, so it needs neither the shared server this suite started nor the
+# 8787 lock. It SKIPS, loudly, if no Playwright installation can be found - see the
+# message it prints for how to get one.
+run test_e2e.sh bash /dev/fd/16 16< <(tr -d '\r' < dashboard/test_e2e.sh)
 run test_tickets.py python3 dashboard/test_tickets.py
 run test_chatter.py python3 dashboard/test_chatter.py
 run test_courier.py python3 dashboard/test_courier.py

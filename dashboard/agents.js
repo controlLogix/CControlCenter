@@ -211,6 +211,6 @@
   }
 
   window.addEventListener('ccc:ready', () => {
-    window.CCC.registerView('agents', loadAgents);
+    window.CCC.registerPanel('organization', 'agents', loadAgents);
   }, { once: true });
 })();

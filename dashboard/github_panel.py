@@ -19,7 +19,11 @@ FAILURES = {'failure', 'timed_out', 'startup_failure', 'action_required'}
 
 def run(argv, cwd=None):
     try:
+        # encoding/errors are explicit: text=True alone decodes with the system
+        # codepage, and one non-ASCII commit subject then throws out of subprocess'
+        # reader thread rather than being reported as a repository error.
         p = subprocess.run(argv, cwd=cwd, capture_output=True, text=True,
+                           encoding='utf-8', errors='replace',
                            timeout=12, env={**os.environ, 'GIT_OPTIONAL_LOCKS': '0',
                                            'GH_PROMPT_DISABLED': '1'})
     except (OSError, subprocess.TimeoutExpired):
@@ -75,11 +79,21 @@ def duration(row):
 def repo_snapshot(config, gh_ready):
     path = str(Path(config['path']).expanduser().resolve())
     result = {'name': config.get('name') or Path(path).name, 'path': path,
-              'errors': [], 'prs': [], 'runs': []}
+              'errors': [], 'prs': [], 'runs': [], 'nwo': None}
     def git(*args):
         return run(['git', '-C', path, *args])
     try:
         result['branch'] = git('rev-parse', '--abbrev-ref', 'HEAD').strip()
+        # owner/name, parsed from the origin URL so the issue form can offer the
+        # repositories already on screen instead of asking you to retype one.
+        try:
+            origin = git('remote', 'get-url', 'origin').strip()
+            match = re.search(r'github\.com[:/]([A-Za-z0-9-]+)/([A-Za-z0-9._-]+?)(?:\.git)?$',
+                              origin)
+            if match:
+                result['nwo'] = f'{match.group(1)}/{match.group(2)}'
+        except ValueError:
+            pass
         # -z keeps newlines and rename pairs from inflating the file count.
         records = iter(git('status', '--porcelain=v1', '-z').split('\0'))
         count = 0

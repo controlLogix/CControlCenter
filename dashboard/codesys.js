@@ -9,7 +9,8 @@
   function base(root) {
     const {el} = window.CCC;
     root.replaceChildren();
-    root.appendChild(el('h2', '', 'CODESYS remote targets'));
+    // No heading: this is a card inside IIOT now, and the card's own <summary>
+    // already names it. A second title inside the body just reads as a repeat.
     root.appendChild(el('p', 'warn', warning));
     root.appendChild(el('p', 'muted', 'CODESYS Control for Linux SL only. Installed versions are verified per box. Every state change requires confirmation and records target, action and actor in the journal.'));
     const refresh = el('button', 'btn', 'Refresh targets');
@@ -114,5 +115,24 @@
       busy = false;
     }
   }
-  window.addEventListener('ccc:ready', () => window.CCC.registerView('codesys', load), {once: true});
+  // A CODESYS runtime is field equipment like everything else on the IIOT view, so
+  // it is a card there rather than a top-level entry of its own.
+  //
+  // AND IT IS LAZY, which is the whole reason it ships collapsed. Every refresh here
+  // is an SSH connection to a controller; opening the IIOT view to look at Modbus
+  // must not quietly reach out to five PLCs. So the card loads when it is OPENED,
+  // and opening it is the operator asking - the same contract the panel has always
+  // had with its Refresh button.
+  window.addEventListener('ccc:ready', () => {
+    const card = document.querySelector('details[data-collapse-key="iiot:codesys"]');
+    if (!card) return;
+    let loaded = false;
+    const maybe = () => {
+      if (!card.open || loaded) return;
+      loaded = true;
+      load();
+    };
+    card.addEventListener('toggle', maybe);
+    window.CCC.registerCard('iiot', maybe, 0);
+  }, {once: true});
 })();

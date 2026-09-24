@@ -45,15 +45,19 @@ const els = {
   jiraBase: document.getElementById('jiraBase'),
   // Views, keyed by the data-view attribute on each nav button. Adding a view is
   // a section and button in index.html plus registerView() for external views.
+  // Seven top-level views. Queue, Feed, Journal and Chatter became tabs of Status;
+  // Agents and Teams became tabs of Organization; Tickets became a tab of Board;
+  // CODESYS became a card in IIOT. A view with tabs declares them in the markup
+  // (data-tabs on the tablist, data-panel on each button) and app.js finds them -
+  // see collectTabs().
   views: {
-    terminals: document.getElementById('viewTerminals'),
-    queue:     document.getElementById('viewQueue'),
-    feed:      document.getElementById('viewFeed'),
-    board:     document.getElementById('viewBoard'),
-    journal:   document.getElementById('viewJournal'),
-    tickets:   document.getElementById('viewTickets'),
-    iiot:      document.getElementById('viewIiot'),
-    settings:  document.getElementById('viewSettings'),
+    terminals:    document.getElementById('viewTerminals'),
+    status:       document.getElementById('viewStatus'),
+    board:        document.getElementById('viewBoard'),
+    organization: document.getElementById('viewOrganization'),
+    iiot:         document.getElementById('viewIiot'),
+    github:       document.getElementById('viewGithub'),
+    settings:     document.getElementById('viewSettings'),
   },
   navItems: Array.from(document.querySelectorAll('.nav-item')),
   badgeQueue: document.getElementById('badgeQueue'),
@@ -62,9 +66,14 @@ const els = {
   themeNote:   document.getElementById('themeNote'),
   swatches:    document.getElementById('swatches'),
 
+  statusStamp:    document.getElementById('statusStamp'),
+  statusExport:   document.getElementById('statusExport'),
+  statusExportAs: document.getElementById('statusExportAs'),
+
   queueList:    document.getElementById('queueList'),
   queueStamp:   document.getElementById('queueStamp'),
   queueKind:    document.getElementById('queueKind'),
+  queueSearch:  document.getElementById('queueSearch'),
   queueFollow:  document.getElementById('queueFollow'),
   queueRefresh: document.getElementById('queueRefresh'),
   planPin:      document.getElementById('planPin'),
@@ -88,41 +97,36 @@ const els = {
   epicTitle:  document.getElementById('epicTitle'),
   epicJira:   document.getElementById('epicJira'),
   epicAdd:    document.getElementById('epicAdd'),
+  boardFree:     document.getElementById('boardFree'),
+  boardTidy:     document.getElementById('boardTidy'),
+  boardExpand:   document.getElementById('boardExpand'),
+  boardCollapse: document.getElementById('boardCollapse'),
 
-  journalList:    document.getElementById('journalList'),
-  journalStamp:   document.getElementById('journalStamp'),
-  journalKind:    document.getElementById('journalKind'),
-  journalSubject: document.getElementById('journalSubject'),
-  journalBody:    document.getElementById('journalBody'),
-  journalAdd:     document.getElementById('journalAdd'),
+  journalList:       document.getElementById('journalList'),
+  journalStamp:      document.getElementById('journalStamp'),
+  journalKind:       document.getElementById('journalKind'),
+  journalSubject:    document.getElementById('journalSubject'),
+  journalBody:       document.getElementById('journalBody'),
+  journalAdd:        document.getElementById('journalAdd'),
+  journalSearch:     document.getElementById('journalSearch'),
+  journalFilterKind: document.getElementById('journalFilterKind'),
 
   ticketList:    document.getElementById('ticketList'),
   ticketStamp:   document.getElementById('ticketStamp'),
+  ticketSearch:  document.getElementById('ticketSearch'),
   ticketRefresh: document.getElementById('ticketRefresh'),
+
+  atlStamp:   document.getElementById('atlStamp'),
+  atlRefresh: document.getElementById('atlRefresh'),
+  atlState:   document.getElementById('atlState'),
 
   authList:    document.getElementById('authList'),
   authStamp:   document.getElementById('authStamp'),
   authRefresh: document.getElementById('authRefresh'),
 
-  iiotStamp:   document.getElementById('iiotStamp'),
-  iiotRefresh: document.getElementById('iiotRefresh'),
-  devList:     document.getElementById('devList'),
-  devName:     document.getElementById('devName'),
-  devKind:     document.getElementById('devKind'),
-  devAddr:     document.getElementById('devAddr'),
-  devPort:     document.getElementById('devPort'),
-  devProto:    document.getElementById('devProto'),
-  devAdd:      document.getElementById('devAdd'),
-  mqHost:      document.getElementById('mqHost'),
-  mqPort:      document.getElementById('mqPort'),
-  mqTopic:     document.getElementById('mqTopic'),
-  mqSub:       document.getElementById('mqSub'),
-  mqPubTopic:  document.getElementById('mqPubTopic'),
-  mqPayload:   document.getElementById('mqPayload'),
-  mqPub:       document.getElementById('mqPub'),
-  mqLog:       document.getElementById('mqLog'),
-  bootpNotice: document.getElementById('bootpNotice'),
-  modbusHint:  document.getElementById('modbusHint'),
+  iiotStamp:    document.getElementById('iiotStamp'),
+  iiotExpand:   document.getElementById('iiotExpand'),
+  iiotCollapse: document.getElementById('iiotCollapse'),
   resList:  document.getElementById('resList'),
   resStamp: document.getElementById('resStamp'),
   resRefresh: document.getElementById('resRefresh'),
@@ -1555,8 +1559,22 @@ function syncAgents(agents) {
 
 // -------------------------------------------------------------------- poll ---
 
+// TWO KINDS OF BANNER, AND ONLY ONE OF THEM IS THE POLL'S TO CLEAR.
+//
+// The poll owns "cannot reach the backend", and clears it the moment it can. But
+// some conditions are about the PAGE rather than the backend - a view script that
+// never loaded, an xterm that is not there - and those do not stop being true
+// because /api/agents answered. They used to be written to the same element, so
+// the first successful poll wiped them: the operator saw the real explanation for
+// half a second, at load, and then a page that looked fine and was not.
+let stickyBanner = '';
 const showBanner = (m) => { els.banner.textContent = m; els.banner.hidden = false; };
-const clearBanner = () => { els.banner.hidden = true; els.banner.textContent = ''; };
+const clearBanner = () => {
+  if (stickyBanner) { showBanner(stickyBanner); return; }
+  els.banner.hidden = true;
+  els.banner.textContent = '';
+};
+const holdBanner = (m) => { stickyBanner = m; showBanner(m); };
 
 async function tick() {
   try {
@@ -1858,7 +1876,8 @@ function drawFeed() {
   // and where a terminal-shaped reader expects it.
   shown.reverse();
 
-  const view = els.views && els.views.feed;
+  publishRows('feed', shown);
+  const view = els.views && els.views.status;
   const pinned = !els.feedFollow || els.feedFollow.checked
     || (view && view.scrollHeight - view.clientHeight - view.scrollTop <= 4);
 
@@ -1886,8 +1905,22 @@ function drawFeed() {
     row.title = `${e.at}  ${e.source}/${e.severity}`;
     els.feedList.appendChild(row);
   }
-  if (pinned && view) requestAnimationFrame(() => { view.scrollTop = view.scrollHeight; });
+  // Only scroll when the FEED is the tab on screen. The feed also redraws from a
+  // slow background poll so the fault badge keeps working while you are elsewhere,
+  // and Status is one scroll container shared by four tabs - so an unguarded
+  // follow yanked whatever you were reading in Journal to the bottom every 30s.
+  if (pinned && view && panelVisible('status', 'feed')) {
+    requestAnimationFrame(() => { view.scrollTop = view.scrollHeight; });
+  }
   updateFeedBadge();
+}
+
+// Is that tab of that view actually on screen right now? The four Status tabs
+// share one view, so "is the feed visible" stopped being a question about the
+// current view the moment they were merged - and the badges, which exist to
+// report what you are NOT looking at, are wrong if they get this wrong.
+function panelVisible(view, name) {
+  return currentView === view && !!VIEW_TABS[view] && VIEW_TABS[view].active === name;
 }
 
 // The badge counts faults the operator has NOT had on screen. Counting everything
@@ -1895,8 +1928,9 @@ function drawFeed() {
 function updateFeedBadge() {
   if (!els.badgeFeed) return;
   const faults = feedEntries.filter((e) => e.severity === 'error').length;
-  const unseen = currentView === 'feed' ? 0 : Math.max(0, faults - feedSeen);
-  if (currentView === 'feed') feedSeen = faults;
+  const watching = panelVisible('status', 'feed');
+  const unseen = watching ? 0 : Math.max(0, faults - feedSeen);
+  if (watching) feedSeen = faults;
   const show = feedPrefs.badge !== false && unseen > 0;
   els.badgeFeed.hidden = !show;
   els.badgeFeed.textContent = show ? String(Math.min(unseen, 99)) : '';
@@ -1923,17 +1957,165 @@ async function loadFeed() {
 }
 
 const VIEW_LOADERS = {
-  settings: () => { loadAuth(); if (!resourcesLoaded) loadResources(false); },
-  queue:    loadQueue,
-  feed:     loadFeed,
-  board:    loadBoard,
-  journal:  loadJournal,
-  tickets:  loadTickets,
-  iiot:     loadIiot,
+  settings: () => { loadAuth(); loadAtlassianState(); if (!resourcesLoaded) loadResources(false); },
 };
 // The feed's interval is the operator's to set, so it is read from prefs at the
 // moment the view opens rather than frozen in this table.
-const VIEW_POLL_MS = { queue: 5000, settings: 20000 };
+const VIEW_POLL_MS = { settings: 20000 };
+
+// -- tabs within a view, and cards within a view ------------------------------
+//
+// THE RULE THAT MAKES THIS SAFE TO ADD TO. Only the VISIBLE thing polls. A hidden
+// view runs no timer, and a tab that is not the active one runs no timer either -
+// so opening Status starts one poller, not four. That is not a performance
+// nicety: the MQTT and Modbus panels talk to real equipment, and a page that
+// quietly keeps polling a PLC after you navigated away is a page that turns up in
+// somebody's network capture and has to be explained.
+//
+// A view declares its tabs in the markup - data-tabs on the tablist, data-panel on
+// each button naming its panel the same way a view names its section (`feed` ->
+// `#viewFeed`). Nothing is hardcoded here, so adding a tab is markup plus one
+// registerPanel call.
+const VIEW_TABS = {};          // view -> { order, panels, active, list }
+const VIEW_CARDS = {};         // view -> [{ loader, pollMs, timer }]
+const TAB_KEY = 'ccc.tab.v1';
+
+function panelNode(name) {
+  return document.getElementById('view' + name[0].toUpperCase() + name.slice(1));
+}
+
+function savedTab(view) {
+  try {
+    const all = JSON.parse(localStorage.getItem(TAB_KEY) || '{}');
+    return all && typeof all === 'object' ? all[view] : undefined;
+  } catch (_) { return undefined; }
+}
+
+function rememberTab(view, panel) {
+  try {
+    const all = JSON.parse(localStorage.getItem(TAB_KEY) || '{}');
+    const next = (all && typeof all === 'object' && !Array.isArray(all)) ? all : {};
+    next[view] = panel;
+    localStorage.setItem(TAB_KEY, JSON.stringify(next));
+  } catch (_) {}
+}
+
+function collectTabs() {
+  for (const list of document.querySelectorAll('[data-tabs]')) {
+    const view = list.dataset.tabs;
+    if (!els.views[view]) continue;
+    const entry = VIEW_TABS[view] = { order: [], panels: {}, active: null, list };
+    for (const button of list.querySelectorAll('.subtab[data-panel]')) {
+      const name = button.dataset.panel;
+      const node = panelNode(name);
+      if (!node) continue;
+      entry.order.push(name);
+      entry.panels[name] = { button, node, loader: null, pollMs: 0, timer: null };
+      button.addEventListener('click', () => showPanel(view, name));
+      button.addEventListener('keydown', (ev) => {
+        const step = ev.key === 'ArrowRight' ? 1 : ev.key === 'ArrowLeft' ? -1 : 0;
+        if (!step) return;
+        ev.preventDefault();
+        const at = entry.order.indexOf(name);
+        const next = entry.order[(at + step + entry.order.length) % entry.order.length];
+        entry.panels[next].button.focus();
+        showPanel(view, next);
+      });
+    }
+    const remembered = savedTab(view);
+    entry.active = entry.panels[remembered] ? remembered : entry.order[0] || null;
+  }
+}
+
+// Tab loaders for the panels app.js owns. External scripts call registerPanel.
+const BUILTIN_PANELS = {
+  status: { feed: [loadFeed, 0], queue: [loadQueue, 5000], journal: [loadJournal, 0] },
+  board:  { boardtasks: [loadBoard, 0], tickets: [loadTickets, 0] },
+};
+
+function applyBuiltinPanels() {
+  for (const [view, panels] of Object.entries(BUILTIN_PANELS)) {
+    for (const [name, [loader, pollMs]] of Object.entries(panels)) {
+      const slot = VIEW_TABS[view] && VIEW_TABS[view].panels[name];
+      if (slot) { slot.loader = loader; slot.pollMs = pollMs; }
+    }
+  }
+}
+
+// External panels use the same view<Name> convention as registerView. Validate
+// before touching any registry so a bad registration cannot half-apply.
+function registerPanel(view, name, loader, pollMs = 0) {
+  if (!VIEW_TABS[view]) throw new Error('No tabbed view: ' + view);
+  if (typeof name !== 'string' || !/^[a-z][a-z0-9]*$/.test(name)) {
+    throw new TypeError('Invalid panel name');
+  }
+  const slot = VIEW_TABS[view].panels[name];
+  if (!slot) throw new Error('Missing panel ' + name + ' in view ' + view);
+  if (typeof loader !== 'function') throw new TypeError('Panel loader must be a function');
+  if (!Number.isFinite(pollMs) || pollMs < 0) {
+    throw new TypeError('Panel poll interval must be a non-negative number');
+  }
+  slot.loader = loader;
+  slot.pollMs = pollMs;
+}
+
+// A card is a <details> panel inside a view that refreshes itself. Several scripts
+// register cards on the SAME view - IIOT has five - so this appends rather than
+// replaces, unlike registerView where one name means one loader.
+function registerCard(view, loader, pollMs = 0) {
+  if (!els.views[view]) throw new Error('No such view: ' + view);
+  if (typeof loader !== 'function') throw new TypeError('Card loader must be a function');
+  if (!Number.isFinite(pollMs) || pollMs < 0) {
+    throw new TypeError('Card poll interval must be a non-negative number');
+  }
+  (VIEW_CARDS[view] = VIEW_CARDS[view] || []).push({ loader, pollMs, timer: null });
+}
+
+function stopCards(view) {
+  for (const card of VIEW_CARDS[view] || []) {
+    if (card.timer) { clearInterval(card.timer); card.timer = null; }
+  }
+}
+
+function startCards(view) {
+  for (const card of VIEW_CARDS[view] || []) {
+    try { card.loader(); } catch (err) { console.error('card loader failed', err); }
+    if (card.pollMs) card.timer = setInterval(card.loader, card.pollMs);
+  }
+}
+
+function stopPanels(view) {
+  const entry = VIEW_TABS[view];
+  if (!entry) return;
+  for (const slot of Object.values(entry.panels)) {
+    if (slot.timer) { clearInterval(slot.timer); slot.timer = null; }
+  }
+}
+
+function showPanel(view, name, options) {
+  const load = !options || options.load !== false;
+  const entry = VIEW_TABS[view];
+  if (!entry || !entry.panels[name]) return;
+  stopPanels(view);
+  entry.active = name;
+  for (const [id, slot] of Object.entries(entry.panels)) {
+    const on = id === name;
+    slot.node.hidden = !on;
+    slot.button.classList.toggle('active', on);
+    slot.button.setAttribute('aria-selected', String(on));
+    slot.button.tabIndex = on ? 0 : -1;
+  }
+  rememberTab(view, name);
+  const slot = entry.panels[name];
+  if (load && slot.loader) {
+    slot.loader();
+    // The feed's interval belongs to the operator, so it is read now rather than
+    // frozen at the moment the panel was registered.
+    const every = name === 'feed' ? feedPrefs.poll : slot.pollMs;
+    if (every) slot.timer = setInterval(slot.loader, every);
+  }
+  updateStatusExport();
+}
 
 // External views use the same view<Name> section convention as the built-in views.
 // Validate before changing any registry so a bad registration cannot half-apply.
@@ -2018,9 +2200,20 @@ function showView(which) {
     els.rToggle.disabled = true;
   }
 
-  // Probes and polls spawn work, so only run them for the visible view.
+  // Probes and polls spawn work, so only run them for the visible view. Every
+  // timer this page owns is stopped here and restarted below for the one view
+  // that is now on screen - tabs and cards included, which is why they are torn
+  // down for EVERY view rather than only for the one being left.
   if (viewTimer) { clearInterval(viewTimer); viewTimer = null; }
   if (resourcesTimer && which !== 'settings') { clearInterval(resourcesTimer); resourcesTimer = null; }
+  // EVERY view, the incoming one included. Clicking the nav button for the view you
+  // are already on re-enters it, and without stopping its own timers first that
+  // doubles them - one more poll against the same equipment per click, with nothing
+  // on screen to show it is happening.
+  for (const name of Object.keys(els.views)) {
+    stopPanels(name);
+    stopCards(name);
+  }
 
   if (onTerm) {
     // Terminals were hidden, so their geometry is stale.
@@ -2028,12 +2221,17 @@ function showView(which) {
   } else {
     const load = VIEW_LOADERS[which];
     if (load) load();
-    const every = which === 'feed' ? feedPrefs.poll : VIEW_POLL_MS[which];
+    const every = VIEW_POLL_MS[which];
     if (every) {
       if (which === 'settings') resourcesTimer = setInterval(() => loadResources(false), every);
-      else viewTimer = setInterval(load, every);
+      else if (load) viewTimer = setInterval(load, every);
     }
+    // A tabbed view opens on the tab it was left on, and only that tab loads.
+    const tabs = VIEW_TABS[which];
+    if (tabs && tabs.active) showPanel(which, tabs.active);
+    startCards(which);
   }
+  updateStatusExport();
 
   try { localStorage.setItem(VIEW_KEY, which); } catch (_) {}
 }
@@ -2315,6 +2513,84 @@ function clock(iso) {
 
 function say(node, msg) { node.textContent = msg; }
 
+// ═══════════════════════════════════════════════════════════════ status ═══════
+//
+// WHAT EXPORT MEANS HERE, EXACTLY. It writes the rows the active tab is showing
+// RIGHT NOW, after every filter, and nothing else. Not the server's full history,
+// not the unfiltered buffer. An export that quietly widened the selection would be
+// worse than useless in the place these get used - attached to an incident write-up
+// as "here is what we were looking at".
+//
+// Each panel publishes its filtered rows as it renders them, so there is one place
+// that knows what is on screen and the download can never drift from the view.
+const statusRows = { feed: [], queue: [], journal: [], chatter: [] };
+
+function publishRows(name, rows) {
+  statusRows[name] = Array.isArray(rows) ? rows : [];
+  updateStatusExport();
+}
+
+function activeStatusTab() {
+  return (VIEW_TABS.status && VIEW_TABS.status.active) || null;
+}
+
+function updateStatusExport() {
+  if (!els.statusExport) return;
+  const tab = currentView === 'status' ? activeStatusTab() : null;
+  const count = tab ? (statusRows[tab] || []).length : 0;
+  els.statusExport.disabled = !tab || !count;
+  els.statusExport.textContent = count ? `export ${count}` : 'export';
+  els.statusExport.title = tab
+    ? `Download the ${count} ${tab} row(s) currently on screen, after filters.`
+    : 'Open a Status tab to export what it is showing.';
+}
+
+// A CSV over rows whose shape varies (the feed and the queue do not carry the same
+// fields) needs a column set before it can be written. Take the union in first-seen
+// order rather than sorting: the order the rows were built in is the order that
+// reads naturally, and alphabetical puts `at` in the middle.
+function toCSV(rows) {
+  const columns = [];
+  for (const row of rows) {
+    for (const key of Object.keys(row)) if (!columns.includes(key)) columns.push(key);
+  }
+  const cell = (value) => {
+    if (value === null || value === undefined) return '';
+    const text = typeof value === 'object' ? JSON.stringify(value) : String(value);
+    return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  };
+  return [columns.join(','), ...rows.map((row) => columns.map((c) => cell(row[c])).join(','))]
+    .join('\r\n') + '\r\n';
+}
+
+function download(name, text, type) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  // Revoke on the next frame, not immediately: Firefox has not started reading the
+  // blob when click() returns and an instant revoke lands an empty file on disk.
+  requestAnimationFrame(() => URL.revokeObjectURL(url));
+}
+
+function exportStatus() {
+  const tab = activeStatusTab();
+  const rows = tab ? (statusRows[tab] || []) : [];
+  if (!rows.length) return;
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  if (els.statusExportAs && els.statusExportAs.value === 'csv') {
+    download(`ccc-${tab}-${stamp}.csv`, toCSV(rows), 'text/csv;charset=utf-8');
+  } else {
+    download(`ccc-${tab}-${stamp}.json`,
+             JSON.stringify({ tab, exported_at: new Date().toISOString(), rows }, null, 2),
+             'application/json');
+  }
+  say(els.statusStamp, `exported ${rows.length} ${tab} row(s)`);
+}
+
 // ═══════════════════════════════════════════════════════════ message queue ════
 
 const MSG_KINDS = new Set(['plan', 'request', 'reply', 'status', 'finding',
@@ -2325,7 +2601,10 @@ async function loadQueue() {
     const data = await getJSON('api/messages?limit=300');
     const all = Array.isArray(data.messages) ? data.messages : [];
     const want = els.queueKind.value;
-    const rows = want ? all.filter((m) => m.kind === want) : all;
+    const needle = (els.queueSearch && els.queueSearch.value || '').trim().toLowerCase();
+    const rows = all.filter((m) => (!want || m.kind === want) && (!needle ||
+      `${m.sender} ${m.recipient} ${m.kind} ${m.body}`.toLowerCase().includes(needle)));
+    publishRows('queue', rows);
 
     // Pin the orchestrator's latest plan: it is the thing you most often want on
     // screen while reading the traffic underneath it.
@@ -2339,8 +2618,9 @@ async function loadQueue() {
 
     els.queueList.replaceChildren();
     if (!rows.length) {
-      els.queueList.appendChild(el('p', 'empty',
-        'No messages. Agents append JSON lines to $AGENTMUX_HOME/queue/<agent>.jsonl (default: ~/.agentmux/queue/<agent>.jsonl)'));
+      els.queueList.appendChild(el('p', 'empty', all.length
+        ? 'Nothing matches the current filters.'
+        : 'No messages. Agents append JSON lines to $AGENTMUX_HOME/queue/<agent>.jsonl (default: ~/.agentmux/queue/<agent>.jsonl)'));
     }
     for (const m of rows) {
       const kind = String(m.kind || 'status');
@@ -2359,7 +2639,7 @@ async function loadQueue() {
       els.queueList.appendChild(row);
     }
 
-    say(els.queueStamp, `${rows.length} message${rows.length === 1 ? '' : 's'}`);
+    say(els.queueStamp, `${rows.length} of ${all.length} message${all.length === 1 ? '' : 's'}`);
     if (els.queueFollow.checked && els.queueList.lastElementChild) {
       els.queueList.lastElementChild.scrollIntoView({ block: 'nearest' });
     }
@@ -2387,7 +2667,7 @@ function markQueueSeen(newest) {
 }
 
 async function refreshQueueBadge() {
-  if (currentView === 'queue') return;   // loadQueue owns the badge while visible
+  if (panelVisible('status', 'queue')) return;   // loadQueue owns it while visible
   try {
     const since = queueSeenAt ? `since=${encodeURIComponent(queueSeenAt)}&` : '';
     const data = await getJSON(`api/messages?${since}limit=1000`);
@@ -2505,6 +2785,130 @@ async function loadDispatch() {
   }
 }
 
+// ── moving things on the board ───────────────────────────────────────────────
+//
+// TWO KINDS OF MOVEMENT, AND THEY ARE NOT THE SAME KIND OF THING.
+//
+//   Dragging a TASK onto another epic refiles it. That is real state: it goes
+//   through /api/board/move, the store reopens a finished epic that receives an
+//   unfinished task, the CLI sees it, and everyone else's dashboard sees it too.
+//   So it is confirmed by the drop itself and reported in the stamp, and a refusal
+//   from the board (409) is shown rather than swallowed.
+//
+//   Dragging a CARD positions it. That is a view preference: it lives in this
+//   browser, it is never sent anywhere, and it means nothing to anybody else. Free
+//   layout is therefore opt-in and `tidy` always brings every card back - the
+//   Terminals grid learned the same lesson, that a layout you cannot undo is a
+//   layout you stop trusting.
+//
+// They are deliberately different gestures. Tasks use HTML5 drag-and-drop, which
+// gives keyboard-free dragging and a drop target for free; cards move by their own
+// handle with pointer events, so grabbing a card never starts a task drag and
+// clicking the summary still just collapses the card.
+const BOARD_PLACE_KEY = 'ccc.boardPlacements.v1';
+const BOARD_FREE_KEY = 'ccc.boardFree';
+let boardFree = false;
+try { boardFree = localStorage.getItem(BOARD_FREE_KEY) === '1'; } catch (_) {}
+
+function boardPlacements() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(BOARD_PLACE_KEY) || '{}');
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch (_) { return {}; }
+}
+
+function saveBoardPlacement(key, box) {
+  const all = boardPlacements();
+  if (box) all[key] = box; else delete all[key];
+  try { localStorage.setItem(BOARD_PLACE_KEY, JSON.stringify(all)); } catch (_) {}
+}
+
+function applyBoardFree() {
+  els.boardList.classList.toggle('free', boardFree);
+  const placed = boardPlacements();
+  for (const card of els.boardList.querySelectorAll('.epic')) {
+    const key = card.dataset.epic || '';
+    const box = boardFree ? placed[key] : null;
+    if (box) {
+      card.style.left = `${box.x}px`;
+      card.style.top = `${box.y}px`;
+      if (box.w) card.style.width = `${box.w}px`;
+    } else {
+      card.style.left = card.style.top = card.style.width = '';
+    }
+  }
+  // An absolutely positioned child does not stretch its parent, so the container
+  // would collapse to nothing and the page would stop scrolling to reach a card
+  // dragged past the fold.
+  if (boardFree) {
+    let bottom = 0;
+    for (const card of els.boardList.querySelectorAll('.epic')) {
+      bottom = Math.max(bottom, card.offsetTop + card.offsetHeight);
+    }
+    els.boardList.style.minHeight = `${bottom + 24}px`;
+  } else {
+    els.boardList.style.minHeight = '';
+  }
+}
+
+function makeCardMovable(card, handle, key) {
+  handle.addEventListener('pointerdown', (ev) => {
+    if (!boardFree || ev.button !== 0) return;
+    ev.preventDefault();
+    const list = els.boardList.getBoundingClientRect();
+    const box = card.getBoundingClientRect();
+    const grabX = ev.clientX - box.left;
+    const grabY = ev.clientY - box.top;
+    // Fix the width before going absolute: a card sized by the grid collapses to
+    // its content the instant it leaves the flow, and it visibly jumps under the
+    // cursor mid-drag.
+    card.style.width = `${box.width}px`;
+    card.classList.add('dragging');
+    handle.setPointerCapture(ev.pointerId);
+    const move = (m) => {
+      const x = Math.max(0, m.clientX - list.left - grabX);
+      const y = Math.max(0, m.clientY - list.top - grabY);
+      card.style.left = `${x}px`;
+      card.style.top = `${y}px`;
+    };
+    const drop = () => {
+      handle.removeEventListener('pointermove', move);
+      handle.removeEventListener('pointerup', drop);
+      handle.removeEventListener('pointercancel', drop);
+      card.classList.remove('dragging');
+      saveBoardPlacement(key, {
+        x: parseFloat(card.style.left) || 0,
+        y: parseFloat(card.style.top) || 0,
+        w: parseFloat(card.style.width) || 0,
+      });
+      applyBoardFree();
+    };
+    handle.addEventListener('pointermove', move);
+    handle.addEventListener('pointerup', drop);
+    handle.addEventListener('pointercancel', drop);
+  });
+}
+
+async function refileTask(taskKey, epicKey) {
+  say(els.boardStamp, `moving ${taskKey} to ${epicKey}…`);
+  try {
+    await post('api/board/move', { id: taskKey, epic: epicKey, actor: 'dashboard' });
+    await loadBoard();
+    say(els.boardStamp, `${taskKey} moved to ${epicKey}`);
+  } catch (err) {
+    // A refusal here is usually the board protecting an invariant - a closed epic,
+    // an unmet dependency - so the reason matters more than the failure.
+    say(els.boardStamp, `${taskKey} not moved: ${err.message}`);
+  }
+}
+
+function setEpicsOpen(open) {
+  for (const card of els.boardList.querySelectorAll('details.epic')) {
+    card.open = open;
+    if (card.dataset.collapseKey) rememberOpen(card.dataset.collapseKey, open);
+  }
+}
+
 async function loadBoard() {
   loadDispatch();
   try {
@@ -2518,24 +2922,47 @@ async function loadBoard() {
     if (!groups.length) els.boardList.appendChild(el('p', 'empty', 'No epics yet. Add one above.'));
 
     for (const e of groups) {
-      const card = el('article', 'epic');
-      const head = el('div', 'epic-head');
+      // Epics default OPEN: a board that opens collapsed hides the work. The
+      // operator's own choice per epic is remembered, as everywhere else.
+      const card = collapsible(`board:epic:${e.key || 'none'}`, 'epic', true);
+      card.dataset.epic = e.key || '';
+      const head = el('summary', 'epic-head item-summary');
+      const grip = el('span', 'grip', '∷');
+      grip.title = 'Drag to place this card (free layout only)';
+      grip.setAttribute('aria-hidden', 'true');
+      head.appendChild(grip);
       if (e.key) head.appendChild(el('span', 'board-key', e.key));
       head.appendChild(el('span', 'epic-title', String(e.title || '(untitled)')));
-      if (e.key) head.appendChild(statusSelect('epic', e.key, e.status, EPIC_STATUSES,
-                                              loadBoard, els.boardStamp));
       if (e.jira_key) head.appendChild(el('span', 'epic-meta', String(e.jira_key)));
       const tasks = e.key ? allTasks.filter((t) => t.epic === e.key) : ungrouped;
       const done = tasks.filter((t) => t.status === 'done').length;
       if (tasks.length) head.appendChild(el('span', 'epic-meta', `${done}/${tasks.length}`));
       head.appendChild(el('span', 'spacer'));
-      if (e.key) head.appendChild(deleteButton('epic', e.key, `${e.key} ${e.title || ''}`,
-        loadBoard, els.boardStamp, () => post('api/board/delete', { id: e.key, actor: 'dashboard' })));
       card.appendChild(head);
+      makeCardMovable(card, grip, e.key || '');
+
+      const controls = el('div', 'epic-controls');
+      if (e.key) controls.appendChild(statusSelect('epic', e.key, e.status, EPIC_STATUSES,
+                                                   loadBoard, els.boardStamp));
+      if (e.key) controls.appendChild(deleteButton('epic', e.key, `${e.key} ${e.title || ''}`,
+        loadBoard, els.boardStamp, () => post('api/board/delete', { id: e.key, actor: 'dashboard' })));
+      card.appendChild(controls);
 
       const rows = el('div', 'task-rows');
       for (const t of tasks) {
         const r = el('div', 'task-row');
+        r.draggable = true;
+        r.dataset.task = t.key;
+        r.dataset.epic = t.epic || '';
+        r.addEventListener('dragstart', (ev) => {
+          ev.dataTransfer.effectAllowed = 'move';
+          ev.dataTransfer.setData('text/plain', t.key);
+          r.classList.add('dragging');
+        });
+        r.addEventListener('dragend', () => r.classList.remove('dragging'));
+        const handle = el('span', 'grip', '∷');
+        handle.setAttribute('aria-hidden', 'true');
+        r.appendChild(handle);
         r.appendChild(el('span', 'board-key', t.key));
         r.appendChild(statusSelect('task', t.key, t.status, TASK_STATUSES,
                                    loadBoard, els.boardStamp));
@@ -2546,6 +2973,29 @@ async function loadBoard() {
         rows.appendChild(r);
       }
       card.appendChild(rows);
+
+      // Only an epic with a key can receive a task; "Tasks without an epic" is a
+      // display grouping, not a destination.
+      if (e.key) {
+        card.addEventListener('dragover', (ev) => {
+          if (!ev.dataTransfer.types.includes('text/plain')) return;
+          ev.preventDefault();
+          ev.dataTransfer.dropEffect = 'move';
+          card.classList.add('drop-target');
+        });
+        card.addEventListener('dragleave', (ev) => {
+          if (!card.contains(ev.relatedTarget)) card.classList.remove('drop-target');
+        });
+        card.addEventListener('drop', (ev) => {
+          ev.preventDefault();
+          card.classList.remove('drop-target');
+          const key = ev.dataTransfer.getData('text/plain');
+          const row = els.boardList.querySelector(`.task-row[data-task="${CSS.escape(key)}"]`);
+          if (!key || !row) return;
+          if (row.dataset.epic === e.key) return;   // dropped where it already was
+          refileTask(key, e.key);
+        });
+      }
 
       const add = el('div', 'row');
       const title = el('input', 'rin');
@@ -2574,7 +3024,9 @@ async function loadBoard() {
 
       els.boardList.appendChild(card);
     }
-    say(els.boardStamp, `${epics.length} epic${epics.length === 1 ? '' : 's'}`);
+    applyBoardFree();
+    say(els.boardStamp, `${epics.length} epic${epics.length === 1 ? '' : 's'}`
+      + `, ${allTasks.length} task${allTasks.length === 1 ? '' : 's'}`);
   } catch (err) {
     say(els.boardStamp, `board unavailable: ${err.message}`);
   }
@@ -2587,9 +3039,17 @@ const JOURNAL_KINDS = new Set(['note', 'decision', 'incident', 'change']);
 async function loadJournal() {
   try {
     const data = await getJSON('api/journal?limit=200');
-    const rows = Array.isArray(data.journal) ? data.journal : [];
+    const all = Array.isArray(data.journal) ? data.journal : [];
+    const wantKind = (els.journalFilterKind && els.journalFilterKind.value) || '';
+    const needle = (els.journalSearch && els.journalSearch.value || '').trim().toLowerCase();
+    const rows = all.filter((j) => (!wantKind || j.kind === wantKind) && (!needle ||
+      `${j.subject} ${j.body} ${j.agent} ${j.kind}`.toLowerCase().includes(needle)));
+    publishRows('journal', rows);
     els.journalList.replaceChildren();
-    if (!rows.length) els.journalList.appendChild(el('p', 'empty', 'Journal is empty.'));
+    if (!rows.length) {
+      els.journalList.appendChild(el('p', 'empty',
+        all.length ? 'Nothing matches the current filters.' : 'Journal is empty.'));
+    }
     for (const j of rows) {
       const kind = String(j.kind || 'note');
       // Journal subjects form a useful index; default bodies closed for long histories.
@@ -2604,7 +3064,7 @@ async function loadJournal() {
       if (j.body) box.appendChild(el('p', 'jentry-body', String(j.body)));
       els.journalList.appendChild(box);
     }
-    say(els.journalStamp, `${rows.length} entr${rows.length === 1 ? 'y' : 'ies'}`);
+    say(els.journalStamp, `${rows.length} of ${all.length} entr${all.length === 1 ? 'y' : 'ies'}`);
   } catch (err) {
     say(els.journalStamp, `journal unavailable: ${err.message}`);
   }
@@ -2735,12 +3195,17 @@ async function loadTickets(force) {
       return;
     }
 
-    // Prefer the base URL Jira itself reported; fall back to the ribbon field.
+    // Prefer the base URL Jira itself reported; fall back to the Settings field.
     const base = (data.base_url || els.jiraBase.value || '').trim().replace(/\/+$/, '');
-    const issues = data.issues || [];
+    const all = data.issues || [];
+    const needle = (els.ticketSearch && els.ticketSearch.value || '').trim().toLowerCase();
+    const issues = needle ? all.filter((i) =>
+      `${i.key} ${i.summary} ${i.status} ${i.assignee} ${(i.labels || []).join(' ')}`
+        .toLowerCase().includes(needle)) : all;
     if (!issues.length) {
-      els.ticketList.appendChild(el('p', 'empty',
-        `No issues returned${data.project ? ` for project ${data.project}` : ''}.`));
+      els.ticketList.appendChild(el('p', 'empty', all.length
+        ? 'Nothing matches the current filter.'
+        : `No issues returned${data.project ? ` for project ${data.project}` : ''}.`));
     }
     // Which local epics reference a Jira key, so the board and Jira can be seen
     // together rather than in two places.
@@ -2765,7 +3230,7 @@ async function loadTickets(force) {
       els.ticketList.appendChild(row);
     }
     say(els.ticketStamp,
-        `${issues.length} issue${issues.length === 1 ? '' : 's'}`
+        `${issues.length} of ${all.length} issue${all.length === 1 ? '' : 's'}`
         + (data.project ? ` in ${data.project}` : ''));
   } catch (err) {
     say(els.ticketStamp, `tickets unavailable: ${err.message}`);
@@ -2822,6 +3287,11 @@ const wiredCollapsibles = new WeakSet();
 function wireCollapsible(box, key, startOpen) {
   if (wiredCollapsibles.has(box)) return box;
   wiredCollapsibles.add(box);
+  // The key goes ON the element, not just into this closure. A card built in JS
+  // was otherwise indistinguishable from an unmanaged <details> once it was in the
+  // document, so "collapse all" could set them but never record the choice - they
+  // sprang back open on the next render, which read as the button not working.
+  box.dataset.collapseKey = key;
   const remembered = openState()[key];
   box.open = typeof remembered === 'boolean' ? remembered : startOpen;
   box.addEventListener('toggle', () => rememberOpen(key, box.open));
@@ -3075,45 +3545,51 @@ els.authRefresh.addEventListener('click', loadAuth);
 
 // ══════════════════════════════════════════════════════════════════ IIOT ══════
 
-function renderPrivilegeNotices() {
-  // BOOTP is stated honestly rather than faked: binding UDP 67/68 needs root and
-  // this server runs unprivileged, so there is nothing to show but the truth.
-  els.bootpNotice.replaceChildren();
-  els.bootpNotice.appendChild(el('p', null,
-    'Serving BOOTP/DHCP means binding UDP 67/68, which requires root. This server runs unprivileged, so it cannot - and will not pretend to.'));
-  const run = el('p', null, 'Run the privileged helper yourself: ');
-  run.appendChild(el('code', null, 'sudo python3 taskmgmt/bootp_probe.py --iface eth0'));
-  els.bootpNotice.appendChild(run);
-
-}
-
-function mqLog(line) {
-  const at = new Date().toLocaleTimeString();
-  els.mqLog.appendChild(el('div', null, `${at}  ${line}`));
-  while (els.mqLog.childElementCount > 200) els.mqLog.removeChild(els.mqLog.firstElementChild);
-  els.mqLog.scrollTop = els.mqLog.scrollHeight;
-}
-
-async function loadIiot() {
-  renderPrivilegeNotices();
+// ═══════════════════════════════════════════════════════════════ atlassian ════
+//
+// Settings reports what the Board's Atlassian tab is pointed at and whether the
+// credential exists. It does NOT accept one: that is still setup_atlassian.py in a
+// real terminal, as with every other secret on this page.
+async function loadAtlassianState() {
+  if (!els.atlState) return;
+  els.atlState.replaceChildren();
   try {
-    const data = await getJSON('api/devices');
-    const rows = Array.isArray(data.devices) ? data.devices : [];
-    els.devList.replaceChildren();
-    if (!rows.length) els.devList.appendChild(el('p', 'note', 'No devices registered.'));
-    for (const d of rows) {
-      const r = el('div', 'dev');
-      r.appendChild(el('span', 'dev-name', String(d.name || '')));
-      r.appendChild(el('span', 'dev-kind', String(d.kind || '')));
-      r.appendChild(el('span', 'dev-addr', String(d.address || '') + (d.port ? `:${d.port}` : '')));
-      r.appendChild(el('span', 'dev-proto', String(d.protocol || '')));
-      r.appendChild(deleteButton('device', d.id, String(d.name || ''),
-                                 loadIiot, els.iiotStamp));
-      els.devList.appendChild(r);
+    const data = await getJSON('api/tickets');
+    if (!data.configured) {
+      els.atlState.appendChild(el('p', 'notice',
+        `Not configured. ${data.reason || ''} The Board's Atlassian tab will stay empty until this is set up.`));
+      const actions = el('div', 'res-actions');
+      for (const a of (data.setup || [])) {
+        const act = el('div', `act${a.secret ? ' secret' : ''}`);
+        act.appendChild(el('span', 'act-label', a.label));
+        act.appendChild(el('code', 'act-cmd', a.command));
+        if (a.secret) act.appendChild(el('span', 'act-secret-tag', 'your terminal'));
+        actions.appendChild(act);
+      }
+      els.atlState.appendChild(actions);
+      say(els.atlStamp, 'not configured');
+      return;
     }
-    say(els.iiotStamp, `${rows.length} device${rows.length === 1 ? '' : 's'}`);
+    const line = el('div', 'act');
+    line.appendChild(el('span', 'act-label', 'Connection'));
+    line.appendChild(stateChip(true, []));
+    els.atlState.appendChild(line);
+    if (data.project) {
+      const project = el('div', 'act');
+      project.appendChild(el('span', 'act-label', 'Default project'));
+      project.appendChild(el('code', 'act-cmd', data.project));
+      els.atlState.appendChild(project);
+    }
+    if (data.base_url) {
+      const site = el('div', 'act');
+      site.appendChild(el('span', 'act-label', 'Site'));
+      site.appendChild(el('code', 'act-cmd', data.base_url));
+      els.atlState.appendChild(site);
+    }
+    if (data.error) els.atlState.appendChild(el('p', 'notice', `${data.error}. ${data.detail || ''}`));
+    say(els.atlStamp, data.error ? 'configured, but the last query failed' : 'configured');
   } catch (err) {
-    say(els.iiotStamp, `devices unavailable: ${err.message}`);
+    say(els.atlStamp, `unavailable: ${err.message}`);
   }
 }
 
@@ -3121,6 +3597,41 @@ async function loadIiot() {
 
 els.queueRefresh.addEventListener('click', loadQueue);
 els.queueKind.addEventListener('change', loadQueue);
+if (els.queueSearch) els.queueSearch.addEventListener('input', loadQueue);
+if (els.journalSearch) els.journalSearch.addEventListener('input', loadJournal);
+if (els.journalFilterKind) els.journalFilterKind.addEventListener('change', loadJournal);
+if (els.ticketSearch) els.ticketSearch.addEventListener('input', () => loadTickets(false));
+if (els.statusExport) els.statusExport.addEventListener('click', exportStatus);
+if (els.atlRefresh) els.atlRefresh.addEventListener('click', loadAtlassianState);
+
+// Board layout controls. `tidy` clears every remembered placement, which is the
+// only way a card ever moves without the operator dragging it.
+if (els.boardFree) {
+  els.boardFree.checked = boardFree;
+  els.boardFree.addEventListener('change', () => {
+    boardFree = els.boardFree.checked;
+    try { localStorage.setItem(BOARD_FREE_KEY, boardFree ? '1' : '0'); } catch (_) {}
+    applyBoardFree();
+  });
+}
+if (els.boardTidy) els.boardTidy.addEventListener('click', () => {
+  try { localStorage.removeItem(BOARD_PLACE_KEY); } catch (_) {}
+  applyBoardFree();
+  say(els.boardStamp, 'cards returned to the grid');
+});
+if (els.boardExpand) els.boardExpand.addEventListener('click', () => setEpicsOpen(true));
+if (els.boardCollapse) els.boardCollapse.addEventListener('click', () => setEpicsOpen(false));
+
+// IIOT cards. Same contract as the board's: the operator's own per-card choice is
+// remembered, and these two buttons set every one of them at once.
+function setIiotOpen(open) {
+  for (const card of document.querySelectorAll('#viewIiot details.card')) {
+    card.open = open;
+    if (card.dataset.collapseKey) rememberOpen(card.dataset.collapseKey, open);
+  }
+}
+if (els.iiotExpand) els.iiotExpand.addEventListener('click', () => setIiotOpen(true));
+if (els.iiotCollapse) els.iiotCollapse.addEventListener('click', () => setIiotOpen(false));
 
 els.epicAdd.addEventListener('click', async () => {
   const title = els.epicTitle.value.trim();
@@ -3153,61 +3664,6 @@ els.journalAdd.addEventListener('click', async () => {
 });
 
 els.ticketRefresh.addEventListener('click', () => loadTickets(true));
-els.iiotRefresh.addEventListener('click', loadIiot);
-
-els.devAdd.addEventListener('click', async () => {
-  const name = els.devName.value.trim();
-  if (!name) return;
-  els.devAdd.disabled = true;
-  try {
-    await post('api/devices', {
-      name,
-      kind: els.devKind.value,
-      address: els.devAddr.value.trim() || null,
-      port: els.devPort.value ? Number(els.devPort.value) : null,
-      protocol: els.devProto.value,
-    });
-    els.devName.value = '';
-    els.devAddr.value = '';
-    els.devPort.value = '';
-    await loadIiot();
-  } catch (err) { say(els.iiotStamp, err.message); } finally { els.devAdd.disabled = false; }
-});
-
-// MQTT: the backend owns the socket; the page only asks and reports. A failure is
-// always written to the log - a button that silently does nothing is worse than one
-// that says why it could not.
-async function mqttCall(path, body, describe) {
-  mqLog(describe);
-  try {
-    const out = await post(path, body);
-    mqLog(out.detail ? String(out.detail) : 'ok');
-    for (const m of (out.messages || [])) {
-      mqLog(`  ${m.topic}  ${m.payload}`);
-    }
-  } catch (err) {
-    mqLog(`failed: ${err.message}`);
-  }
-}
-
-els.mqSub.addEventListener('click', () => {
-  const host = els.mqHost.value.trim();
-  const topic = els.mqTopic.value.trim();
-  if (!host || !topic) { mqLog('need a broker host and a topic'); return; }
-  mqttCall('api/mqtt/subscribe',
-    { host, port: Number(els.mqPort.value) || 1883, topic },
-    `subscribe ${host}:${els.mqPort.value || 1883} ${topic}`);
-});
-
-els.mqPub.addEventListener('click', () => {
-  const host = els.mqHost.value.trim();
-  const topic = els.mqPubTopic.value.trim();
-  if (!host || !topic) { mqLog('need a broker host and a publish topic'); return; }
-  mqttCall('api/mqtt/publish',
-    { host, port: Number(els.mqPort.value) || 1883, topic, payload: els.mqPayload.value },
-    `publish ${topic}`);
-});
-
 els.resRefresh.addEventListener('click', () => loadResources(true));
 
 // Re-fit on window resize. relayout() recomputes the column count (auto mode depends on
@@ -3242,14 +3698,45 @@ window.addEventListener('keydown', (e) => {
 });
 
 // The view scripts load first and subscribe once to this synchronous event.
-// Register before restoring the saved view, including on a reload into Agents/Teams.
+// Register before restoring the saved view, including on a reload into a tab.
+//
+// ORDER MATTERS. collectTabs() must run before ccc:ready, because registerPanel
+// refuses a view it has not collected - and the scripts that call it are already
+// loaded and waiting on that event. applyBuiltinPanels() then fills in the panels
+// app.js owns itself.
 initCollapsibles();
+collectTabs();
+applyBuiltinPanels();
 
-window.CCC = { el, getJSON, post, say, deleteButton, collapsible, settingEditor, registerView };
+window.CCC = { el, getJSON, post, say, deleteButton, collapsible, settingEditor,
+               registerView, registerPanel, registerCard, publishRows, download,
+               stateChip, initCollapsibles };
 window.dispatchEvent(new Event('ccc:ready'));
 
+// A VIEW SCRIPT THAT DID NOT LOAD MUST SAY SO.
+//
+// Every panel on this page is drawn by a script that registers itself on the event
+// above. If one of those files never reaches the browser, nothing registers, its
+// panel renders nothing, and there is no error anywhere an operator would look -
+// the page appears to work, with two cards inexplicably blank.
+//
+// The way that actually happens: server.py serves static files from an ALLOWLIST,
+// so a new .js file is invisible until it is added there and the server is
+// restarted. A page whose HTML is newer than the process serving it therefore asks
+// for scripts that come back as a JSON 404, which the browser refuses to execute.
+// The inline listener at the top of index.html records exactly that, and this turns
+// it into the one sentence that names the problem and the fix.
+if (Array.isArray(window.CCC_SCRIPT_ERRORS) && window.CCC_SCRIPT_ERRORS.length) {
+  const missing = [...new Set(window.CCC_SCRIPT_ERRORS)];
+  holdBanner(`Some panels will be empty: ${missing.join(', ')} did not load. `
+    + `This usually means the dashboard server is an older process than the files `
+    + `on disk — restart it (dashboard/restart.sh), then reload this page.`);
+  console.error('CCC: view scripts failed to load:', missing.join(', '));
+}
+
 if (!window.Terminal) {
-  showBanner('xterm.js failed to load from vendor/ — terminals cannot render.');
+  // Sticky: a missing xterm does not become present because the backend answered.
+  holdBanner('xterm.js failed to load from vendor/ — terminals cannot render.');
 } else {
   loadPrefs();
   wireRibbon();
@@ -3297,14 +3784,15 @@ if (!window.Terminal) {
   if (els.feedPoll) els.feedPoll.addEventListener('change', () => {
     feedPrefs.poll = parseInt(els.feedPoll.value, 10) || 0;
     saveFeedPrefs();
-    if (currentView === 'feed') showView('feed');      // restart on the new interval
+    // Restart on the new interval, without re-running the whole view.
+    if (panelVisible('status', 'feed')) showPanel('status', 'feed');
   });
 
   // The feed is polled in the background at a slow floor even when it is not the
   // visible view, because the whole point of the badge is to tell you a fault landed
   // while you were looking somewhere else. Faults-only would be cheaper, but the
   // endpoint is one cached call and the badge needs the same data the view draws.
-  setInterval(() => { if (currentView !== 'feed') loadFeed(); }, 30000);
+  setInterval(() => { if (!panelVisible('status', 'feed')) loadFeed(); }, 30000);
   loadFeed();
 
   setInterval(refreshQueueBadge, 10000);

@@ -1,0 +1,691 @@
+/* End-to-end: the real dashboard, in a real browser, driven by Playwright.
+ *
+ * WHY THIS EXISTS AND WHAT IT IS FOR. Every other frontend suite here runs the
+ * production functions against a DOM stub. That catches logic, and it caught a
+ * lot - but it cannot catch the class of bug where the code is correct and the
+ * PAGE is wrong: a script that loads after the event it listens for, a panel that
+ * renders into an element that is not on screen, a card whose contents overflow
+ * its box. Those are exactly the failures a stub cannot see, because a stub has no
+ * load order, no layout and no box.
+ *
+ * The specific bug that prompted it: iiot.js, mqtt.js and netscan.js sat BELOW
+ * app.js in index.html. app.js dispatches `ccc:ready` synchronously on its last
+ * line, so all three subscribed to an event that had already fired, and four of
+ * the five IIOT panels rendered nothing at all. Every unit test passed.
+ *
+ * Usage (test_e2e.sh handles all of this):
+ *     node dashboard/test_e2e.mjs <base-url> <playwright-dir> [broker-port]
+ */
+
+import { createRequire } from 'node:module';
+import assert from 'node:assert/strict';
+
+const [baseURL, playwrightDir, brokerPort] = process.argv.slice(2);
+if (!baseURL || !playwrightDir) {
+  console.error('usage: test_e2e.mjs <base-url> <playwright-dir> [broker-port]');
+  process.exit(2);
+}
+const { firefox } = createRequire(import.meta.url)(playwrightDir);
+
+let passed = 0, failed = 0;
+const failures = [];
+async function test(name, fn) {
+  try { await fn(); passed++; console.log('PASS ' + name); }
+  catch (err) {
+    failed++;
+    failures.push(name);
+    console.error('FAIL ' + name + '\n      ' + (err && err.message || err).split('\n')[0]);
+  }
+}
+
+const browser = await firefox.launch({ headless: true });
+const context = await browser.newContext({ viewport: { width: 1400, height: 950 } });
+const page = await context.newPage();
+
+// Anything the page logs as an error is a failure of its own. A dashboard that
+// works only because nobody opened the console is not working.
+const consoleErrors = [];
+page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()); });
+page.on('pageerror', (e) => consoleErrors.push('pageerror: ' + e.message));
+
+await page.goto(baseURL, { waitUntil: 'load' });
+await page.waitForFunction(() => !!window.CCC, null, { timeout: 15000 });
+
+const show = async (view) => {
+  await page.click(`.nav-item[data-view="${view}"]`);
+  await page.waitForSelector(`#view${view[0].toUpperCase() + view.slice(1)}:not([hidden])`);
+};
+const tab = async (view, panel) => {
+  await page.click(`[data-tabs="${view}"] .subtab[data-panel="${panel}"]`);
+  await page.waitForSelector(`#view${panel[0].toUpperCase() + panel.slice(1)}:not([hidden])`);
+};
+const text = (sel) => page.textContent(sel);
+
+// ── the rail ────────────────────────────────────────────────────────────────
+
+await test('the rail has exactly the seven views, in order', async () => {
+  const labels = await page.$$eval('.nav-item .nav-label', (ns) => ns.map(n => n.textContent));
+  assert.deepEqual(labels, ['Terminals', 'Status', 'Board', 'Organization', 'IIOT',
+                            'GitHub', 'Settings']);
+});
+
+await test('every rail button reveals its view and hides the others', async () => {
+  for (const view of ['status', 'board', 'organization', 'iiot', 'github', 'settings',
+                      'terminals']) {
+    await show(view);
+    const visible = await page.$$eval('.views > .view',
+      (ns) => ns.filter(n => !n.hidden).map(n => n.id));
+    assert.deepEqual(visible, ['view' + view[0].toUpperCase() + view.slice(1)],
+                     `showing ${view} left ${visible.join(', ')} on screen`);
+  }
+});
+
+// ── IIOT: the regression this file was written for ─────────────────────────
+
+await test('all five IIOT cards render content, not just CODESYS', async () => {
+  await show('iiot');
+  const cards = await page.$$eval('#viewIiot details.card', (ns) => ns.map(n => ({
+    key: n.dataset.collapseKey,
+    title: n.querySelector('summary h3')?.textContent,
+    open: n.open,
+  })));
+  assert.deepEqual(cards.map(c => c.key),
+    ['iiot:modbus', 'iiot:dcp', 'iiot:mqtt', 'iiot:scan', 'iiot:codesys']);
+  assert.deepEqual(cards.map(c => c.title),
+    ['Modbus', 'PROFINET DCP', 'MQTT', 'Ethernet scanner', 'CODESYS targets']);
+
+  // The bug: the body element existed but nothing ever filled it.
+  for (const id of ['modbusHint', 'profinetPanel', 'mqttPanel', 'scanPanel']) {
+    await page.waitForFunction(
+      (elementId) => {
+        const node = document.getElementById(elementId);
+        return node && node.childElementCount > 0;
+      }, id, { timeout: 15000 });
+    const count = await page.$eval('#' + id, (n) => n.childElementCount);
+    assert.ok(count > 0, `#${id} rendered nothing`);
+  }
+});
+
+await test('every card title is bold, and they all match', async () => {
+  const weights = await page.$$eval('#viewIiot details.card > summary h3',
+    (ns) => ns.map(n => getComputedStyle(n).fontWeight));
+  assert.equal(new Set(weights).size, 1, 'card titles disagree: ' + weights.join(', '));
+  assert.ok(Number(weights[0]) >= 600, 'card titles are not bold: ' + weights[0]);
+});
+
+await test('no card overflows its box', async () => {
+  // The two-line `sudo python3 taskmgmt/pn_dcp.py ... set --mac ...` used to run
+  // straight out of the PROFINET card. Anything wider than its own box fails here.
+  const overflow = await page.$$eval('#viewIiot details.card', (ns) => ns
+    .filter(n => n.scrollWidth > n.clientWidth + 1)
+    .map(n => `${n.dataset.collapseKey} (${n.scrollWidth} > ${n.clientWidth})`));
+  assert.deepEqual(overflow, []);
+  const wide = await page.$eval('#viewIiot',
+    (n) => n.scrollWidth > n.clientWidth + 1);
+  assert.equal(wide, false, 'the IIOT view scrolls sideways');
+});
+
+await test('the cards pack into columns with no dead space between them', async () => {
+  await show('iiot');
+  await page.evaluate(() => document.querySelectorAll('#viewIiot details.card')
+    .forEach(c => { c.open = true; }));
+  await page.waitForTimeout(1200);
+  const layout = await page.evaluate(() => {
+    const grid = document.querySelector('.iiot-grid');
+    const box = grid.getBoundingClientRect();
+    const cards = [...grid.querySelectorAll('.card')].map(c => {
+      const r = c.getBoundingClientRect();
+      return { key: c.dataset.collapseKey, x: Math.round(r.left - box.left),
+               top: Math.round(r.top - box.top), bottom: Math.round(r.bottom - box.top) };
+    });
+    return { height: Math.round(box.height), cards };
+  });
+  assert.equal(layout.cards.length, 5);
+
+  // THE ACTUAL COMPLAINT, stated as a measurement. Group the cards into columns by
+  // their left edge; inside a column, the space between one card's bottom and the
+  // next card's top must be the gutter and nothing more. Under the old grid this
+  // was 255px in one column - a card-sized hole in the middle of the page - because
+  // a grid row cannot be shorter than its tallest cell.
+  const columns = new Map();
+  for (const card of layout.cards) {
+    if (!columns.has(card.x)) columns.set(card.x, []);
+    columns.get(card.x).push(card);
+  }
+  const gaps = [];
+  for (const [x, cards] of columns) {
+    cards.sort((a, b) => a.top - b.top);
+    for (let i = 1; i < cards.length; i++) {
+      gaps.push({ x, after: cards[i - 1].key, gap: cards[i].top - cards[i - 1].bottom });
+    }
+  }
+  const worst = gaps.reduce((m, g) => (g.gap > m.gap ? g : m), { gap: 0, after: 'none' });
+  assert.ok(worst.gap <= 24,
+    `${worst.gap}px of dead space after ${worst.after} — cards are not packing`);
+  assert.ok(columns.size >= 2, 'expected more than one column at this viewport width');
+});
+
+await test('expand all and collapse all drive every card', async () => {
+  await page.click('#iiotCollapse');
+  assert.deepEqual(await page.$$eval('#viewIiot details.card', ns => ns.map(n => n.open)),
+                   [false, false, false, false, false]);
+  await page.click('#iiotExpand');
+  assert.deepEqual(await page.$$eval('#viewIiot details.card', ns => ns.map(n => n.open)),
+                   [true, true, true, true, true]);
+  // The choice has to survive a reload, which is the whole point of the key.
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => !!window.CCC);
+  await show('iiot');
+  assert.deepEqual(await page.$$eval('#viewIiot details.card', ns => ns.map(n => n.open)),
+                   [true, true, true, true, true]);
+  await page.click('#iiotCollapse');
+  await page.click('#iiotExpand');
+});
+
+// ── MQTT: a live broker, a real topic tree ─────────────────────────────────
+
+if (brokerPort) {
+  await test('the MQTT panel browses a real broker', async () => {
+    await show('iiot');
+    await page.fill('#mqttPanel input[aria-label="Broker host"]', '127.0.0.1');
+    await page.fill('#mqttPanel input[aria-label="Broker port"]', String(brokerPort));
+    await page.fill('#mqttPanel input[aria-label="Topic filters"]', 'plant/#');
+    await page.click('#mqttPanel button:has-text("Monitor")');
+
+    await page.waitForFunction(
+      () => /CONNECTED/.test(document.querySelector('#mqttPanel .field-state')?.textContent || ''),
+      null, { timeout: 20000 });
+    // The tree folds on '/', so `plant` is a branch and the leaves sit under it.
+    await page.waitForSelector('#mqttPanel .mq-branch', { timeout: 20000 });
+    const segments = await page.$$eval('#mqttPanel .mq-segment', ns => ns.map(n => n.textContent));
+    assert.ok(segments.includes('plant'), 'no plant branch: ' + segments.join(', '));
+    await page.waitForFunction(
+      () => document.querySelectorAll('#mqttPanel .mq-leaf').length >= 3,
+      null, { timeout: 20000 });
+    const topics = await page.$$eval('#mqttPanel .mq-leaf .mq-topic',
+      ns => ns.map(n => n.title));
+    for (const wanted of ['plant/line1/temp', 'plant/line1/state', 'plant/line2/press']) {
+      assert.ok(topics.includes(wanted), `missing ${wanted}: ${topics.join(', ')}`);
+    }
+  });
+
+  await test('a retained value is marked retained and a live one is not', async () => {
+    const meta = await page.$$eval('#mqttPanel .mq-leaf', ns => ns.map(n => ({
+      topic: n.querySelector('.mq-topic')?.title,
+      meta: n.querySelector('.mq-meta')?.textContent,
+    })));
+    const state = meta.find(m => m.topic === 'plant/line1/state');
+    const temp = meta.find(m => m.topic === 'plant/line1/temp');
+    assert.match(state.meta, /retained/);
+    assert.doesNotMatch(temp.meta, /retained/);
+    assert.match(temp.meta, /ago|just now/, 'a value with no age is a value you cannot trust');
+  });
+
+  await test('the tree opens deep enough to show a value without clicking', async () => {
+    // A browser that shows you `plant` and nothing else has not browsed anything.
+    const visible = await page.$$eval('#mqttPanel .mq-leaf .mq-topic',
+      ns => ns.filter(n => n.offsetParent !== null).map(n => n.title));
+    assert.ok(visible.includes('plant/line1/temp'),
+              'no leaf is visible without expanding: ' + visible.join(', '));
+  });
+
+  await test('clicking a topic inspects it, with its payload pretty-printed', async () => {
+    await page.click('#mqttPanel .mq-leaf .mq-topic[title="plant/line2/press"]');
+    await page.waitForSelector('#mqttPanel .mq-inspect-topic');
+    assert.equal(await text('#mqttPanel .mq-inspect-topic'), 'plant/line2/press');
+    const payload = await text('#mqttPanel .mq-payload');
+    assert.match(payload, /\{\n\s+"bar"/, 'JSON payload was not pretty-printed: ' + payload);
+  });
+
+  await test('the log tab shows arrival order and the buffer can be cleared', async () => {
+    await page.click('#mqttPanel .mq-tabs .subtab:has-text("Log")');
+    await page.waitForSelector('#mqttPanel .mq-log-row');
+    const rows = await page.$$eval('#mqttPanel .mq-log-row', ns => ns.length);
+    assert.ok(rows > 0, 'the log is empty');
+    await page.click('#mqttPanel button:has-text("Clear buffer")');
+    await page.waitForFunction(
+      () => /0 topics|no topics/i.test(
+        document.querySelector('#mqttPanel .field-state')?.textContent || '')
+        || document.querySelectorAll('#mqttPanel .mq-log-row').length === 0,
+      null, { timeout: 10000 });
+  });
+
+  await test('the panel names its client and whether this broker has credentials', async () => {
+    // Both matter the moment a broker refuses you: "Not authorized" reads very
+    // differently once you know the server had no username to offer it.
+    const hint = await text('#mqttPanel .hint');
+    assert.match(hint, /paho-mqtt \d+\.\d+/, 'the client is not named: ' + hint);
+    assert.match(hint, /no credentials on file for this broker/);
+    assert.match(hint, /never entered here/, 'it must say credentials are not typed in here');
+  });
+
+  await test('a publish goes out on the session the monitor already holds', async () => {
+    // Not a second anonymous connection: that one would be refused by any broker
+    // the monitor needed a credential to reach.
+    const posted = [];
+    await page.route('**/api/mqtt/monitor/publish', async (route) => {
+      posted.push(JSON.parse(route.request().postData() || '{}'));
+      await route.fulfill({ status: 200, contentType: 'application/json',
+                            body: '{"ok":true,"detail":"Acknowledged by the broker at QoS 1."}' });
+    });
+    // Opened directly rather than by clicking the summary: this test is about the
+    // publish contract, not about the disclosure widget.
+    await page.evaluate(() => {
+      document.querySelector('#mqttPanel details.subcard').open = true;
+    });
+    await page.fill('#mqttPanel input[aria-label="Publish topic"]', 'plant/line1/setpoint');
+    await page.fill('#mqttPanel input[aria-label="Publish payload"]', '42');
+    await page.selectOption('#mqttPanel select[aria-label="Publish QoS"]', '1');
+    await page.check('#mqttPanel input[aria-label="Retain this message"]');
+    let prompt = '';
+    const onDialog = (d) => { prompt = d.message(); d.accept(); };
+    page.once('dialog', onDialog);
+    try {
+      await page.click('#mqttPanel button[aria-label="Publish message"]');
+      await page.waitForFunction(
+        () => /Acknowledged/.test(document.querySelector('#mqttPanel')?.textContent || ''),
+        null, { timeout: 15000 });
+    } finally {
+      // A `once` handler that never fired stays armed and silently eats the NEXT
+      // test's confirm - which is how one failure here took the scanner down with
+      // it and then crashed the run on a double-accept.
+      page.off('dialog', onDialog);
+    }
+    assert.deepEqual(posted, [{ topic: 'plant/line1/setpoint', payload: '42',
+                                qos: 1, retain: true }]);
+    assert.match(prompt, /RETAINED/, 'a retained publish must say it outlives the session');
+    assert.match(prompt, /QoS 1/);
+    await page.unroute('**/api/mqtt/monitor/publish');
+    await page.uncheck('#mqttPanel input[aria-label="Retain this message"]');
+  });
+
+  await test('stopping the monitor is reported, and it stays stopped', async () => {
+    await page.click('#mqttPanel button:has-text("Stop")');
+    await page.waitForFunction(
+      () => /STOPPED/.test(document.querySelector('#mqttPanel .field-state')?.textContent || ''),
+      null, { timeout: 10000 });
+  });
+}
+
+// ── the scanner ─────────────────────────────────────────────────────────────
+
+await test('the scanner finds a host on a port it was told to probe', async () => {
+  await show('iiot');
+  // This server's own port, which is ephemeral and so is not one of the named
+  // industrial ports - which is precisely what the "Also probe" field is for, and
+  // it makes the expected result knowable rather than "whatever else is listening
+  // on this machine".
+  const port = new URL(baseURL).port;
+  await page.fill('#scanPanel input[aria-label="Range to scan"]', '127.0.0.1/32');
+  await page.fill('#scanPanel input[aria-label="Operator name"]', 'e2e');
+  await page.evaluate(() => {
+    const card = document.querySelector('#scanPanel details.subcard');
+    card.open = true;
+    // Untick the standard set: the point is to assert on one known-open port.
+    for (const box of card.querySelectorAll('input[type=checkbox]')) {
+      box.checked = false;
+      box.dispatchEvent(new Event('change'));
+    }
+  });
+  await page.fill('#scanPanel input[aria-label="Additional ports"]', port);
+  page.once('dialog', d => d.accept());
+  await page.click('#scanPanel button:has-text("Scan")');
+  await page.waitForFunction(
+    () => /DONE|ERROR/.test(
+      document.querySelector('#scanPanel .field-state')?.textContent || ''),
+    null, { timeout: 90000 });
+  const state = await text('#scanPanel .field-state');
+  assert.match(state, /DONE/, 'scan did not finish: ' + state);
+  const rows = await page.$$eval('#scanPanel .scan-table tbody tr',
+    ns => ns.map(n => [...n.querySelectorAll('td')].map(t => t.textContent)));
+  assert.equal(rows.length, 1, 'expected exactly one host: ' + JSON.stringify(rows));
+  assert.equal(rows[0][0], '127.0.0.1');
+  assert.match(rows[0][4], new RegExp(`\\b${port}\\b`), 'the open port is not listed');
+  assert.match(state, /MACs? resolved/, 'the scan must say how many MACs it resolved');
+  // An address and a MAC have no sensible break point; wrapping them across lines
+  // makes the one column you scan down unreadable.
+  const wrapped = await page.$$eval('#scanPanel .scan-table td.mono',
+    ns => ns.filter(n => n.getClientRects().length > 1).map(n => n.textContent));
+  assert.deepEqual(wrapped, [], 'an address or MAC is wrapped across lines');
+});
+
+await test('a malformed extra port is named, not silently dropped', async () => {
+  await page.fill('#scanPanel input[aria-label="Additional ports"]', 'not-a-port');
+  await page.click('#scanPanel button:has-text("Scan")');
+  await page.waitForFunction(
+    () => /is not a port or a port range/.test(
+      document.querySelector('#scanPanel')?.textContent || ''),
+    null, { timeout: 15000 });
+});
+
+await test('the scanner refuses a public range, in the page', async () => {
+  const port = new URL(baseURL).port;
+  await page.fill('#scanPanel input[aria-label="Additional ports"]', port);
+  await page.fill('#scanPanel input[aria-label="Range to scan"]', '8.8.8.0/24');
+  page.once('dialog', d => d.accept());
+  await page.click('#scanPanel button:has-text("Scan")');
+  await page.waitForFunction(
+    () => /only private ranges/.test(document.querySelector('#scanPanel')?.textContent || ''),
+    null, { timeout: 15000 });
+});
+
+// ── PROFINET ────────────────────────────────────────────────────────────────
+
+await test('PROFINET reconciles an imported snapshot against the shared schema', async () => {
+  await show('iiot');
+  const schemaBox = '#profinetPanel textarea[aria-label="PROFINET station schema JSON"]';
+  await page.click('#profinetPanel details.subcard:has-text("Expected stations") > summary');
+  await page.fill(schemaBox, JSON.stringify({
+    segment: 'cell-3',
+    stations: [
+      { mac: '00:1b:1b:00:00:01', name: 'drive-a', ip: '192.168.1.11', role: 'drive' },
+      { mac: '00:0f:8f:00:00:02', name: 'io-b', ip: '192.168.1.12' },
+    ],
+  }, null, 2));
+  await page.click('#profinetPanel button:has-text("Save shared schema")');
+  await page.waitForFunction(
+    () => /Shared schema saved/.test(document.querySelector('#profinetPanel')?.textContent || ''),
+    null, { timeout: 15000 });
+
+  await page.click('#profinetPanel details.subcard:has-text("Import a DCP") > summary');
+  await page.fill('#profinetPanel textarea[aria-label="DCP JSON lines"]', [
+    JSON.stringify({ kind: 'dcp-identify', mac: '00:1b:1b:00:00:01', name: 'drive-a',
+                     ip: '192.168.1.99' }),
+    JSON.stringify({ kind: 'dcp-identify', mac: 'aa:bb:cc:dd:ee:ff', name: 'stranger' }),
+  ].join('\n'));
+  await page.fill('#profinetPanel input[aria-label="Import actor"]', 'e2e');
+  await page.click('#profinetPanel button:has-text("Import snapshot")');
+  // Wait for the IMPORT, not just for any row. Saving the schema alone already
+  // produces two MISSING rows, so `.dcp-row` is on screen before the import has
+  // been sent - waiting on that selector raced the re-render and read the
+  // pre-import table.
+  await page.waitForFunction(
+    () => /Imported 2 station record/.test(
+      document.querySelector('#profinetPanel')?.textContent || ''),
+    null, { timeout: 20000 });
+
+  const rows = await page.$$eval('#profinetPanel .dcp-row', ns => ns.map(n => ({
+    cls: n.className, chip: n.querySelector('.status-chip')?.textContent,
+  })));
+  assert.deepEqual(rows.map(r => r.chip), ['MISMATCH', 'MISSING', 'UNEXPECTED'],
+                   'what needs attention must sort first, got ' + JSON.stringify(rows));
+  const summary = await text('#profinetPanel .field-state');
+  assert.match(summary, /1 mismatched/);
+  assert.match(summary, /1 missing/);
+  assert.match(summary, /1 unexpected/);
+  const diff = await text('#profinetPanel .dcp-row.mismatch td.diff');
+  assert.match(diff, /192\.168\.1\.99/);
+  assert.match(diff, /expected 192\.168\.1\.11/);
+});
+
+// ── Status ──────────────────────────────────────────────────────────────────
+
+await test('Status carries four tabs and shows exactly one at a time', async () => {
+  await show('status');
+  const labels = await page.$$eval('[data-tabs="status"] .subtab',
+    ns => ns.map(n => n.textContent));
+  assert.deepEqual(labels, ['Feed', 'Queue', 'Journal', 'Chatter']);
+  for (const panel of ['feed', 'queue', 'journal', 'chatter']) {
+    await tab('status', panel);
+    const visible = await page.$$eval('#viewStatus .panels > .panel',
+      ns => ns.filter(n => !n.hidden).map(n => n.id));
+    assert.deepEqual(visible, ['view' + panel[0].toUpperCase() + panel.slice(1)]);
+    const selected = await page.getAttribute(
+      `[data-tabs="status"] .subtab[data-panel="${panel}"]`, 'aria-selected');
+    assert.equal(selected, 'true');
+  }
+});
+
+await test('the chosen Status tab survives a reload', async () => {
+  await tab('status', 'journal');
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => !!window.CCC);
+  await show('status');
+  await page.waitForSelector('#viewJournal:not([hidden])');
+  assert.equal(await page.getAttribute(
+    '[data-tabs="status"] .subtab[data-panel="journal"]', 'aria-selected'), 'true');
+});
+
+await test('the journal appends, filters and exports what is on screen', async () => {
+  await show('status');
+  await tab('status', 'journal');
+  for (const subject of ['e2e alpha entry', 'e2e beta entry']) {
+    await page.fill('#journalSubject', subject);
+    await page.click('#journalAdd');
+    await page.waitForFunction(
+      (s) => document.querySelector('#journalList')?.textContent.includes(s),
+      subject, { timeout: 15000 });
+  }
+  const before = await page.$$eval('#journalList .jentry', ns => ns.length);
+  assert.ok(before >= 2);
+
+  await page.fill('#journalSearch', 'alpha');
+  await page.waitForFunction(
+    () => document.querySelectorAll('#journalList .jentry').length === 1,
+    null, { timeout: 15000 });
+  assert.match(await text('#journalStamp'), /^1 of \d+ entr/);
+
+  // Export writes what the filter left, not the whole journal.
+  const download = page.waitForEvent('download', { timeout: 20000 });
+  await page.click('#statusExport');
+  const file = await download;
+  const stream = await file.createReadStream();
+  let body = '';
+  for await (const chunk of stream) body += chunk;
+  const exported = JSON.parse(body);
+  assert.equal(exported.tab, 'journal');
+  assert.equal(exported.rows.length, 1, 'export must follow the filter');
+  assert.match(exported.rows[0].subject, /alpha/);
+  await page.fill('#journalSearch', '');
+});
+
+await test('the export button names the active tab, not the last one to load', async () => {
+  await tab('status', 'feed');
+  const feedLabel = await text('#statusExport');
+  await tab('status', 'journal');
+  const journalLabel = await text('#statusExport');
+  assert.match(feedLabel, /^export/);
+  assert.match(journalLabel, /^export/);
+  const journalRows = await page.$$eval('#journalList .jentry', ns => ns.length);
+  assert.equal(journalLabel.trim(), `export ${journalRows}`);
+});
+
+// ── Board ───────────────────────────────────────────────────────────────────
+
+await test('Board carries Tasks and Atlassian, and Atlassian says how to set it up',
+  async () => {
+    await show('board');
+    assert.deepEqual(
+      await page.$$eval('[data-tabs="board"] .subtab', ns => ns.map(n => n.textContent)),
+      ['Tasks', 'Atlassian']);
+    await tab('board', 'tickets');
+    const body = await text('#viewTickets');
+    assert.match(body, /not configured|issue/i);
+    await tab('board', 'boardtasks');
+  });
+
+await test('epics are collapsible cards and the choice survives a reload', async () => {
+  await show('board');
+  await tab('board', 'boardtasks');
+  for (const title of ['E2E alpha epic', 'E2E beta epic']) {
+    await page.fill('#epicTitle', title);
+    await page.click('#epicAdd');
+    await page.waitForFunction(
+      (t) => document.querySelector('#boardList')?.textContent.includes(t),
+      title, { timeout: 15000 });
+  }
+  const cards = await page.$$eval('#boardList details.epic', ns => ns.map(n => n.tagName));
+  assert.ok(cards.length >= 2);
+  assert.ok(cards.every(t => t === 'DETAILS'));
+  assert.deepEqual(await page.$$eval('#boardList details.epic', ns => ns.map(n => n.open)),
+                   cards.map(() => true), 'a board that opens collapsed hides the work');
+
+  await page.click('#boardCollapse');
+  assert.deepEqual(await page.$$eval('#boardList details.epic', ns => ns.map(n => n.open)),
+                   cards.map(() => false));
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => !!window.CCC);
+  await show('board');
+  await page.waitForSelector('#boardList details.epic');
+  assert.deepEqual(await page.$$eval('#boardList details.epic', ns => ns.map(n => n.open)),
+                   cards.map(() => false), 'collapse all was not remembered');
+  await page.click('#boardExpand');
+});
+
+await test('dragging a task onto another epic refiles it for real', async () => {
+  await show('board');
+  const epics = await page.$$eval('#boardList details.epic', ns => ns.map(n => n.dataset.epic));
+  const [from, to] = epics.filter(Boolean);
+  assert.ok(from && to, 'need two epics with keys');
+  await page.fill(`#boardList details.epic[data-epic="${from}"] input[placeholder="new task"]`,
+                  'E2E draggable task');
+  await page.click(`#boardList details.epic[data-epic="${from}"] button:has-text("add task")`);
+  await page.waitForSelector(`#boardList details.epic[data-epic="${from}"] .task-row`);
+
+  const row = await page.$(`#boardList details.epic[data-epic="${from}"] .task-row`);
+  const key = await row.evaluate(n => n.dataset.task);
+  const target = await page.$(`#boardList details.epic[data-epic="${to}"]`);
+
+  // Firefox needs the drag to be a real sequence of moves, not a single jump.
+  const a = await row.boundingBox();
+  const b = await target.boundingBox();
+  await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(b.x + b.width / 2, b.y + 20, { steps: 24 });
+  await page.mouse.move(b.x + b.width / 2, b.y + 24, { steps: 6 });
+  await page.mouse.up();
+
+  await page.waitForFunction(
+    (args) => {
+      const moved = document.querySelector(
+        `#boardList details.epic[data-epic="${args.to}"] .task-row[data-task="${args.key}"]`);
+      return !!moved;
+    }, { to, key }, { timeout: 20000 }).catch(() => {});
+
+  // The drop is only real if the STORE moved it, so ask the API, not the DOM.
+  const server = await page.evaluate(async () => {
+    const r = await fetch('api/board/board', { cache: 'no-store' });
+    return r.json();
+  });
+  const task = server.tasks.find(t => t.key === key);
+  assert.ok(task, `task ${key} vanished`);
+  assert.equal(task.epic, to, `${key} is still filed under ${task.epic}`);
+  assert.match(await text('#boardStamp'), new RegExp(`${key} moved to ${to}`));
+});
+
+// ── Organization, GitHub, Settings ─────────────────────────────────────────
+
+await test('Organization carries Agents and Teams, and both render', async () => {
+  await show('organization');
+  assert.deepEqual(
+    await page.$$eval('[data-tabs="organization"] .subtab', ns => ns.map(n => n.textContent)),
+    ['Agents', 'Teams']);
+  await tab('organization', 'agents');
+  await page.waitForFunction(
+    () => document.getElementById('viewAgents').childElementCount > 0, null, { timeout: 15000 });
+  await tab('organization', 'teams');
+  await page.waitForFunction(
+    () => document.getElementById('viewTeams').childElementCount > 0, null, { timeout: 15000 });
+});
+
+await test('the GitHub panel shows an account card and never renders a token', async () => {
+  await show('github');
+  await page.waitForSelector('#viewGithub .gh-account', { timeout: 20000 });
+  const body = await text('#viewGithub');
+  assert.match(body, /Signed in as|Not signed in|gh is not installed/);
+  assert.doesNotMatch(body, /gh[pousr]_[A-Za-z0-9]{10}/, 'a token-shaped string is on screen');
+  assert.doesNotMatch(body, /github_pat_/);
+  // The write forms are present, and both are disclosures rather than loose buttons.
+  const summaries = await page.$$eval('#viewGithub .gh-writes > details > summary',
+    ns => ns.map(n => n.textContent));
+  assert.deepEqual(summaries, ['Create a repository', 'Open an issue']);
+});
+
+await test('Settings carries the Atlassian card and the theme importer', async () => {
+  await show('settings');
+  const keys = await page.$$eval('#viewSettings details.card',
+    ns => ns.map(n => n.dataset.collapseKey));
+  assert.deepEqual(keys, ['settings:feed', 'settings:appearance', 'settings:atlassian',
+                          'settings:auth', 'settings:resources']);
+  await page.waitForFunction(
+    () => document.getElementById('atlState')?.childElementCount > 0, null, { timeout: 20000 });
+  assert.ok(await page.$('#jiraBase'), 'the Jira site field moved here from the ribbon');
+});
+
+await test('nothing that was removed is reachable any more', async () => {
+  const body = await page.content();
+  for (const gone of ['data-view="tickets"', 'data-view="queue"', 'data-view="feed"',
+                      'data-view="journal"', 'data-view="agents"', 'data-view="teams"',
+                      'data-view="chatter"', 'data-view="codesys"', 'bootpNotice',
+                      'devList', 'mqLog']) {
+    assert.ok(!body.includes(gone), `${gone} is still in the page`);
+  }
+});
+
+// ── a panel whose script never arrives says so ──────────────────────────────
+
+await test('with everything loaded, no banner is shown', async () => {
+  assert.equal(await page.$eval('#banner', n => n.hidden), true,
+               'a banner is showing when nothing is wrong: ' + await text('#banner'));
+});
+
+await test('a view script that fails to load is named, and the notice sticks', async () => {
+  // Exactly what an operator hits when the dashboard's Python process is older
+  // than the files on disk: server.py serves static files from an allowlist, so a
+  // file it does not know about comes back as a JSON 404 and the browser refuses
+  // to execute it under nosniff. The panel is then blank with no explanation.
+  const broken = await context.newPage();
+  const seen = [];
+  broken.on('console', (m) => { if (m.type() === 'error') seen.push(m.text()); });
+  for (const name of ['mqtt.js', 'netscan.js']) {
+    await broken.route('**/' + name, (route) => route.fulfill({
+      status: 404, contentType: 'application/json', body: '{"error": "not found"}' }));
+  }
+  await broken.goto(baseURL, { waitUntil: 'load' });
+  await broken.waitForFunction(() => !!window.CCC, null, { timeout: 15000 });
+  await broken.waitForFunction(
+    () => { const b = document.getElementById('banner'); return b && !b.hidden; },
+    null, { timeout: 15000 });
+
+  const message = await broken.textContent('#banner');
+  assert.match(message, /mqtt\.js/);
+  assert.match(message, /netscan\.js/);
+  assert.match(message, /restart/i, 'the notice must say what to do, not just what broke');
+
+  // And it must SURVIVE the backend poll, which owns the other banner and clears
+  // it on every success - that is what made this notice vanish half a second
+  // after load, leaving a page that looked fine and was not.
+  await broken.waitForTimeout(6000);
+  assert.equal(await broken.$eval('#banner', n => n.hidden), false,
+               'the notice was wiped by a successful backend poll');
+  assert.match(await broken.textContent('#banner'), /mqtt\.js/);
+
+  // The two panels really are the empty ones, and the other three still work.
+  await broken.click('.nav-item[data-view="iiot"]');
+  await broken.waitForTimeout(2500);
+  const bodies = await broken.$$eval('#viewIiot .cardbody',
+    (ns) => ns.map(n => [n.id, n.childElementCount]));
+  const byId = Object.fromEntries(bodies);
+  assert.equal(byId.mqttPanel, 0, 'mqtt panel should be the empty one here');
+  assert.equal(byId.scanPanel, 0, 'scanner panel should be the empty one here');
+  assert.ok(byId.modbusHint > 0, 'modbus should still render');
+  assert.ok(byId.profinetPanel > 0, 'profinet should still render');
+  assert.ok(seen.some(line => /failed to load/i.test(line)),
+            'nothing was written to the console either');
+  await broken.close();
+});
+
+// ── and the console stayed quiet ───────────────────────────────────────────
+
+await test('the page logged no errors while all of that happened', () => {
+  // Failed fetches from panels pointed at absent equipment are the page working,
+  // not the page breaking; a thrown exception is not.
+  const real = consoleErrors.filter(line =>
+    !/Failed to load resource|NetworkError|ERR_CONNECTION|favicon/i.test(line));
+  assert.deepEqual(real, []);
+});
+
+await browser.close();
+console.log(`\npassed ${passed}, failed ${failed}`);
+if (failures.length) console.log('failed: ' + failures.join('; '));
+process.exit(failed ? 1 : 0);

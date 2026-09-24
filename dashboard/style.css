@@ -620,11 +620,41 @@ select.status-chip option {
 
 /* ───────────────────────── IIOT ───────────────────────── */
 
+/* COLUMNS, NOT A GRID, AND HERE IS WHY.
+ *
+ * These five cards have wildly different natural heights - the Modbus tag-table
+ * editor is ~650px, the PROFINET summary ~400. In a grid every card in a row is
+ * laid out against the tallest one in that row, so the short cards ended their
+ * column early and left a band of dead space across the middle of the page before
+ * the next row started. `align-items: start` stopped the cards STRETCHING to fill
+ * that space (which was its own bug - see the note on .board), but it could not
+ * stop the space existing, because a grid row cannot be shorter than its tallest
+ * cell.
+ *
+ * CSS columns have no rows at all. The browser flows the cards down one column and
+ * on to the next, balancing the column heights, so a short card is simply followed
+ * by the next card rather than by a gap. `break-inside: avoid` keeps a card whole
+ * rather than splitting it across the fold.
+ *
+ * The cost, stated honestly: flow order becomes column-major, and expanding a card
+ * can move a later card into a different column. Both are acceptable here - these
+ * are five independent panels with no reading order between them, and expanding one
+ * is a deliberate act where reflow is expected. */
 .iiot-grid {
-  display: grid; gap: 10px;
-  align-items: start;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
-  align-content: start;
+  column-width: 420px;
+  column-gap: 10px;
+}
+.iiot-grid > .card {
+  break-inside: avoid;
+  /* Belt and braces for engines that still only honour the paged spelling. */
+  page-break-inside: avoid;
+  /* A column box is not a block container for margin collapsing, so the card's own
+     bottom margin is what separates it from the next one down the column. */
+  margin: 0 0 10px;
+  /* Without this a card can be measured before its contents are laid out and get
+     broken across the column boundary anyway. */
+  display: inline-block;
+  width: 100%;
 }
 .iiot-grid .card { margin-bottom: 0; }
 .dev-list { display: flex; flex-direction: column; gap: 3px; }
@@ -948,7 +978,9 @@ details.ticket[open] > .ticket-actions { margin-top: 8px; flex-wrap: wrap; }
 .card h3, .teams-card h3, .teams-settings h3 { margin: 0 0 var(--space-3); }
 .card > summary h3 { margin: 0; }
 .card[open] > summary { margin-bottom: var(--space-4); }
-.board, .iiot-grid, .res-list, .teams-content, .teams-list { gap: var(--space-3); }
+.board, .res-list, .teams-content, .teams-list { gap: var(--space-3); }
+.iiot-grid { column-gap: var(--space-3); }
+.iiot-grid > .card { margin-bottom: var(--space-3); }
 .teams-list > .teams-card { margin-bottom: 0; }
 .row, .res-head { gap: var(--space-2); margin-bottom: var(--space-3); }
 .hint { margin: var(--space-3) 0 0; line-height: var(--leading-body); }
@@ -1034,3 +1066,285 @@ select:focus-visible, .rin:focus-visible, .btn:focus-visible, .ta:focus-visible,
 .theme-transfer .row { flex-wrap: wrap; }
 .theme-transfer input[type="file"] { max-width: 100%; }
 .theme-transfer .note { overflow-wrap: anywhere; }
+
+/* ═════════════════════════ tabs within a view ═════════════════════════
+
+   One row of tabs under a view's own heading. Deliberately NOT styled like the
+   activity rail on the left: that rail switches what you are doing, these switch
+   which slice of one thing you are reading, and making the two look alike is how
+   an operator loses track of where they are. The rail uses colour and a bar on
+   its edge; these use an underline and weight. */
+
+.subtabs {
+  display: flex; gap: var(--space-1); flex-wrap: wrap;
+  border-bottom: 1px solid var(--line);
+  margin: 0 0 var(--space-3);
+}
+.subtab {
+  appearance: none; background: none; border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--muted); font: inherit; font-size: var(--type-base);
+  padding: var(--space-2) var(--space-3); cursor: pointer;
+  margin-bottom: -1px;
+}
+.subtab:hover { color: var(--text); }
+.subtab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.subtab.active {
+  color: var(--accent); font-weight: 600;
+  border-bottom-color: var(--accent);
+}
+.panels { min-width: 0; }
+.panel { min-width: 0; }
+
+/* A panel's own control strip. Same shape as .vhead but one level down, so a tab's
+   filters do not compete with the view's title for the eye. */
+.phead {
+  display: flex; align-items: center; gap: var(--space-2);
+  flex-wrap: wrap; margin-bottom: var(--space-3);
+}
+.phead .spacer { flex: 1 1 auto; }
+
+/* ═════════════════════════ field cards ═════════════════════════ */
+
+.cardbody { min-width: 0; }
+.cardbody > p { margin: 0 0 var(--space-2); }
+
+/* A nested disclosure inside a card: the parts of a panel that are reference
+   material or a dangerous action, rather than the thing you came to read. */
+.subcard {
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--panel-2); padding: var(--space-2) var(--space-3);
+  margin: var(--space-3) 0;
+}
+.subcard > summary {
+  cursor: pointer; color: var(--muted); font-size: var(--type-sm);
+  font-weight: 600; text-transform: uppercase; letter-spacing: .04em;
+}
+.subcard > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.subcard[open] > summary { margin-bottom: var(--space-2); }
+/* Anything that writes to equipment is red-edged wherever it appears, so the
+   gesture is recognisable before the label is read. */
+.subcard.danger { border-left: 3px solid var(--danger); }
+
+/* A command you are meant to run somewhere else. It was previously a bare <code>
+   with no width management, and a two-line pn_dcp invocation ran straight out of
+   the card. */
+.cmd-block, code.act-cmd, .subcard code {
+  display: block; max-width: 100%; box-sizing: border-box;
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); padding: var(--space-2);
+  font-family: ui-monospace, Consolas, monospace; font-size: var(--type-sm);
+  color: var(--text);
+  white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word;
+  margin: var(--space-2) 0;
+}
+.code-area {
+  width: 100%; box-sizing: border-box; resize: vertical;
+  background: var(--panel-2); color: var(--text);
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  font-family: ui-monospace, Consolas, monospace; font-size: var(--type-sm);
+}
+
+/* The one-line "what is this thing doing right now" banner every field panel has.
+   Colour comes from a data attribute rather than a class so a panel can set it
+   without knowing the palette. */
+.field-state {
+  font-weight: 600; font-size: var(--type-sm);
+  letter-spacing: .03em;
+  padding: var(--space-2) var(--space-3); margin: var(--space-2) 0;
+  border-left: 3px solid var(--state-idle);
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  overflow-wrap: anywhere;
+}
+.field-state[data-state="ok"]   { border-left-color: var(--safe); color: var(--safe); }
+.field-state[data-state="warn"] { border-left-color: var(--warn); color: var(--warn); }
+.field-state[data-state="bad"]  { border-left-color: var(--danger); color: var(--danger); }
+
+.mono { font-family: ui-monospace, Consolas, monospace; }
+
+/* ═════════════════════════ Modbus tags ═════════════════════════ */
+
+.tag-rows { display: flex; flex-direction: column; gap: var(--space-1); margin: var(--space-2) 0; }
+.tag-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto;
+  gap: var(--space-2); align-items: center;
+  padding: var(--space-1) var(--space-2);
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); font-size: var(--type-sm);
+}
+.tag-row[data-stale="true"] { border-color: color-mix(in srgb, var(--danger) 45%, var(--line)); }
+.tag-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tag-value { font-family: ui-monospace, Consolas, monospace; }
+.tag-seen { color: var(--muted); font-size: var(--type-xs); white-space: nowrap; }
+.status-chip.ok { color: var(--safe); border-color: color-mix(in srgb, var(--safe) 40%, transparent); }
+.status-chip.bad { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
+
+/* ═════════════════════════ PROFINET reconciliation ═════════════════════════ */
+
+.dcp-table, .scan-table {
+  width: 100%; border-collapse: collapse; font-size: var(--type-sm);
+  margin: var(--space-2) 0; display: block; overflow-x: auto;
+}
+.dcp-table th, .scan-table th {
+  text-align: left; color: var(--muted); font-weight: 600;
+  font-size: var(--type-xs); text-transform: uppercase; letter-spacing: .05em;
+  padding: var(--space-1) var(--space-2); border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.dcp-table td, .scan-table td {
+  padding: var(--space-1) var(--space-2); border-bottom: 1px solid var(--line);
+  vertical-align: top; overflow-wrap: anywhere;
+}
+.dcp-row.mismatch { background: color-mix(in srgb, var(--danger) 8%, transparent); }
+.dcp-row.missing { background: color-mix(in srgb, var(--warn) 8%, transparent); }
+.dcp-row.unexpected { background: color-mix(in srgb, var(--state-blocked) 8%, transparent); }
+.dcp-table td.diff { color: var(--danger); font-weight: 600; }
+.dcp-table td.diff .was { color: var(--muted); font-weight: 400; font-size: var(--type-xs); }
+
+/* ═════════════════════════ MQTT topic browser ═════════════════════════ */
+
+.mq-connect { flex-wrap: wrap; }
+.mq-tabs { margin-top: var(--space-3); }
+.mq-pane { max-height: 420px; overflow: auto; }
+.mq-warn { margin: var(--space-2) 0; }
+
+.mq-branch { margin-left: var(--space-3); }
+.mq-branch > summary {
+  cursor: pointer; padding: 2px 0; list-style-position: outside;
+}
+.mq-branch > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mq-branch-head { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
+.mq-segment { font-weight: 600; font-family: ui-monospace, Consolas, monospace; }
+.mq-count {
+  color: var(--muted); font-size: var(--type-xs);
+  border: 1px solid var(--line); border-radius: 999px; padding: 0 5px;
+}
+.mq-leaf {
+  display: grid; grid-template-columns: minmax(0, 14em) minmax(0, 1fr) auto;
+  gap: var(--space-2); align-items: baseline;
+  padding: 2px var(--space-2); margin-left: var(--space-3);
+  border-left: 2px solid var(--line);
+}
+/* Staleness is the whole point of this panel, so it is shown by dimming the value
+   itself rather than by a badge somewhere off to the side. */
+.mq-leaf[data-stale="true"] .mq-value { color: var(--muted); font-style: italic; }
+.mq-leaf[data-stale="true"] { border-left-color: color-mix(in srgb, var(--danger) 50%, var(--line)); }
+.mq-topic {
+  appearance: none; background: none; border: 0; padding: 0; text-align: left;
+  color: var(--accent); font-family: ui-monospace, Consolas, monospace;
+  font-size: var(--type-sm); cursor: pointer;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mq-topic:hover { text-decoration: underline; }
+.mq-topic:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mq-value {
+  font-family: ui-monospace, Consolas, monospace; font-size: var(--type-sm);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mq-meta { color: var(--muted); font-size: var(--type-xs); white-space: nowrap; }
+.mq-inspect-topic {
+  font-family: ui-monospace, Consolas, monospace; overflow-wrap: anywhere;
+  margin: 0 0 var(--space-2);
+}
+.mq-payload {
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); padding: var(--space-3);
+  font-family: ui-monospace, Consolas, monospace; font-size: var(--type-base);
+  white-space: pre-wrap; overflow-wrap: anywhere; max-height: 260px; overflow: auto;
+}
+.mq-history { display: flex; flex-direction: column; gap: 2px; }
+.mq-history-row, .mq-log-row {
+  display: flex; gap: var(--space-2); align-items: baseline;
+  padding: 2px var(--space-2); border-bottom: 1px solid var(--line); min-width: 0;
+}
+.mq-log-row .mq-topic { flex: 0 1 18em; }
+.mq-log-row .mq-value { flex: 1 1 auto; min-width: 0; }
+
+/* ═════════════════════════ Ethernet scanner ═════════════════════════ */
+
+.port-grid { gap: var(--space-2); }
+.port-grid .toggle { font-size: var(--type-sm); }
+.scan-table td .status-chip {
+  display: inline-block;
+  margin: 0 var(--space-1) 2px 0;
+}
+/* An IPv4 address and a MAC have a known width and no sensible break point. In a
+   420px column the generic `overflow-wrap: anywhere` was folding 192.168.0.109
+   onto two lines and a MAC onto three, which is unreadable in the one column you
+   scan down. They stay on one line; the table scrolls inside the card instead. */
+.scan-table td.mono, .dcp-table td:nth-child(2) {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+.scan-table th, .scan-table td { vertical-align: middle; }
+/* `anywhere` breaks inside a word even when a space is available, which turned
+   "ASUSTek COMPUTER" into "ASUSTe / k / COMPU / TER" in a 420px column. Vendor
+   names break at spaces and only split a word when one genuinely will not fit. */
+.scan-table td { overflow-wrap: break-word; }
+
+/* ═════════════════════════ board: collapse and movement ═════════════════════════
+
+   The grip is the ONLY part of a card that starts a move. Everything else keeps
+   its normal behaviour - the summary still toggles, the selects still select -
+   so there is no gesture that means two things depending on where you grabbed. */
+
+.grip {
+  color: var(--muted); cursor: grab; user-select: none;
+  font-size: var(--type-sm); letter-spacing: -1px; flex-shrink: 0;
+}
+.grip:active { cursor: grabbing; }
+.board:not(.free) .epic > summary .grip { cursor: default; opacity: .35; }
+
+details.epic > summary { cursor: pointer; list-style-position: outside; }
+details.epic > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+details.epic[open] > summary { margin-bottom: var(--space-2); }
+.epic-controls {
+  display: flex; align-items: center; gap: var(--space-2);
+  flex-wrap: wrap; margin-bottom: var(--space-2);
+}
+
+.task-row[draggable="true"] { cursor: grab; }
+.task-row.dragging { opacity: .45; }
+.epic.drop-target {
+  outline: 2px dashed var(--accent); outline-offset: 2px;
+  background: color-mix(in srgb, var(--accent) 7%, var(--panel));
+}
+
+/* Free layout. The container becomes the positioning context and each card is
+   placed absolutely; `tidy` clears every placement and the grid returns. */
+.board.free { position: relative; display: block; }
+.board.free .epic { position: absolute; margin: 0; z-index: 1; }
+.board.free .epic.dragging { z-index: 2; box-shadow: 0 6px 18px rgb(0 0 0 / .45); }
+
+/* ═════════════════════════ GitHub ═════════════════════════ */
+
+.gh-account, .gh-repo {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius-card); padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+}
+.gh-account { border-top: 2px solid var(--accent); }
+.gh-writes { display: grid; gap: var(--space-2); margin-bottom: var(--space-3); }
+.gh-code {
+  margin-top: var(--space-3); padding: var(--space-3);
+  border: 1px dashed color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+.gh-code-value {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: var(--type-title); font-weight: 700; letter-spacing: .18em;
+  color: var(--accent); margin: var(--space-2) 0;
+}
+.gh-code-link { color: var(--accent); overflow-wrap: anywhere; }
+
+/* ═════════════════════════ shared overflow guard ═════════════════════════
+
+   Every panel on this page can be handed text nobody sized: a broker payload, a
+   gh error, a two-line sudo invocation. One rule, so a new panel inherits it
+   rather than discovering the problem in production. */
+.cardbody pre, .panel pre, .gh-account pre {
+  white-space: pre-wrap; overflow-wrap: anywhere; max-width: 100%;
+}

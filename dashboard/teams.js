@@ -188,6 +188,6 @@
   }
 
   window.addEventListener('ccc:ready', () => {
-    window.CCC.registerView('teams', loadTeams);
+    window.CCC.registerPanel('organization', 'teams', loadTeams);
   }, { once: true });
 })();

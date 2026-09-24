@@ -19,9 +19,11 @@ const app = fs.readFileSync('dashboard/app.js', 'utf8');
 const html = fs.readFileSync('dashboard/index.html', 'utf8');
 const server = fs.readFileSync('dashboard/server.py', 'utf8');
 assert.match(source, /async function loadTeams\(/);
-assert.match(source, /window\.CCC\.registerView\('teams', loadTeams\)/);
+// Teams is a TAB of Organization now, not a view of its own.
+assert.match(source, /window\.CCC\.registerPanel\('organization', 'teams', loadTeams\)/);
 assert.match(app, /VIEW_LOADERS\[name\] = loader/);
-for (const pattern of [/src="teams.js"/, /href="teams.css"/, /id="viewTeams"/, /data-view="teams"/]) assert.match(html, pattern);
+for (const pattern of [/src="teams.js"/, /href="teams.css"/, /id="viewTeams"/,
+                       /data-panel="teams"/, /data-tabs="organization"/]) assert.match(html, pattern);
 for (const path of ['/teams.js', '/teams.css']) assert.ok(server.includes('"' + path + '"'));
 assert.doesNotMatch(source, /innerHTML|setInterval|setTimeout/);
 class Node {
@@ -71,7 +73,9 @@ context.window.CCC = {
     assert.equal(url, 'api/board/roster?id=TM-051');
     return {members, gaps: ['Capability <img src=x onerror=alert(2)>: no definition provides it']};
   },
-  registerView: (name, fn) => { assert.equal(name, 'teams'); loader = fn; }
+  registerPanel: (view, name, fn) => {
+    assert.equal(view, 'organization'); assert.equal(name, 'teams'); loader = fn;
+  }
 };
 vm.runInContext(source, context);
 (async () => {

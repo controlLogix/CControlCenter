@@ -6,13 +6,17 @@
   function draw() {
     list.replaceChildren();
     const groups = new Map();
+    const shown = [];
     for (const row of entries) {
       if (agent.value && ![row.sender, row.recipient].includes(agent.value)) continue;
       if (card.value && row.ref !== card.value) continue;
       if (state.value && row.state !== state.value) continue;
+      shown.push(row);
       if (!groups.has(row.thread)) groups.set(row.thread, []);
       groups.get(row.thread).push(row);
     }
+    // Status owns the export button; every tab hands it what it is showing.
+    api.publishRows('chatter', shown);
     for (const [id, rows] of groups) {
       const first = rows[0];
       const thread = api.collapsible(`chatter:thread:${id}`, 'chatter-thread', false);
@@ -53,7 +57,7 @@
     root = document.getElementById('viewChatter');
     const style = api.el('style', '');
     style.textContent = '#viewChatter{padding:16px}.chatter-controls,.chatter-compose{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}.chatter-compose textarea{min-width:280px;min-height:70px}.chatter-thread{margin:8px 0;padding:10px;border:1px solid currentColor}.chatter-item{margin:8px;padding:8px;border-left:4px solid #888}.chatter-item pre{white-space:pre-wrap;overflow-wrap:anywhere}.state-delivered{border-color:#3a8}.state-queued{border-color:#59d}.state-retried{border-color:#da4}.state-dropped{border-color:#e55}.state-dead-recipient{border-color:#b6d}#viewChatter summary{cursor:pointer}';
-    root.append(style, api.el('h2', '', 'Chatter'));
+    root.append(style);
     status = api.el('p', ''); status.setAttribute('role', 'status'); root.append(status);
     const controls = api.el('div', 'chatter-controls'); root.append(controls);
     agent = select('Agent', controls); card = select('Card', controls); state = select('State', controls);
@@ -89,6 +93,6 @@
     finally { loading = false; }
   }
   window.addEventListener('ccc:ready', () => {
-    api = window.CCC; api.registerView('chatter', load, 5000);
+    api = window.CCC; api.registerPanel('status', 'chatter', load, 5000);
   }, {once: true});
 })();

@@ -9,6 +9,25 @@
 set -uo pipefail
 
 SOCKET="agentmux"
+# Where THIS script lives on disk, for the idle watchdog to re-invoke minutes later.
+#
+# Not $0 and not BASH_SOURCE alone: agentmux is habitually run through process
+# substitution (`bash <(tr -d '\r' < agentmux.sh)`) because the working tree has CRLF
+# line endings, and inside that both are a /dev/fd entry that stops existing the
+# moment the pipeline ends. Every candidate is therefore CHECKED, and a path that is
+# not a real file is discarded rather than handed to a background process that would
+# fail on it every tick forever - which is exactly what happened the first time.
+agentmux_self() {
+  local candidate
+  for candidate in "${AGENTMUX_REPO:-}/agentmux.sh" \
+                   "$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)/agentmux.sh" \
+                   "$(cd "$(dirname "$0")" 2>/dev/null && pwd)/agentmux.sh" \
+                   "$PWD/agentmux.sh"; do
+    case "$candidate" in /dev/fd/*|/proc/self/fd/*) continue ;; esac
+    [ -f "$candidate" ] && { printf '%s\n' "$candidate"; return 0; }
+  done
+  return 1
+}
 ROOT="${AGENTMUX_HOME:-$HOME/.agentmux}"
 LOGDIR="$ROOT/logs"
 RUNDIR="$ROOT/run"
@@ -313,6 +332,11 @@ agentmux - drive other agent CLIs in tmux panes
                                going through `kill`, so orphans accumulate; the
                                dashboard shows each as `stale` but never removes it.
                                Logs are left alone
+  idle   [--minutes N] [--dry-run]
+                               close agents with no pane activity for N minutes
+                               (default 60, AGENTMUX_IDLE_MINUTES, 0 disables).
+                               Attached sessions are never closed. Runs
+                               automatically every minute while any agent is up
   attach <name>                print the command to watch the agent live
   exec   <text...> [--cwd DIR] [--model M]
                                headless one-shot "codex exec", no tmux
@@ -326,6 +350,8 @@ Env: AGENTMUX_QUIET_MS, AGENTMUX_TIMEOUT_S, AGENTMUX_POLL_MS, AGENTMUX_COLS/ROWS
                                  marker. Use if a CLI changes its footer and
                                  `ask` starts returning early
      AGENTMUX_COURIER_INTERVAL, AGENTMUX_SEND_DELAY[_MULTILINE]
+     AGENTMUX_IDLE_MINUTES       close an agent after this many minutes with no
+                                 pane activity (default 60; 0 disables)
 USAGE
 }
 
@@ -760,6 +786,13 @@ cmd_spawn() (
         && printf "  courier: started (queued messages will be delivered)\n"
     fi
     rm -rf "$clock" 2>/dev/null
+  fi
+  # Same lifecycle as the courier, for the same reason: tie it to there being an
+  # agent, so nothing polls an empty tmux server and nothing has to be started at
+  # boot. Idempotent - a watchdog already running is left alone.
+  if start_idle_watchdog && [ "${AGENTMUX_IDLE_MINUTES:-$IDLE_MINUTES}" != 0 ]; then
+    printf '  idle:    closes after %sm without pane activity\n' \
+      "${AGENTMUX_IDLE_MINUTES:-$IDLE_MINUTES}"
   fi
   case "$cli" in codex|claude|grok) printf '  posture: %s\n' "$posture" ;; esac
   printf "watch it:  wsl -d Ubuntu -- tmux -L %s attach -t %s\n" "$SOCKET" "$name"
@@ -1758,6 +1791,7 @@ cmd_kill() {
   if [ "$target" = "--all" ]; then
     if tm kill-server 2>/dev/null; then echo "killed all agents"; else echo "no agents running"; fi
     stop_courier_if_idle
+    stop_idle_watchdog_if_no_agents
     return 0
   fi
   need "$target"
@@ -1786,9 +1820,11 @@ cmd_kill() {
   else
     printf "could not kill '%s'; its sidecars are left in place\n" "$target" >&2
     stop_courier_if_idle
+    stop_idle_watchdog_if_no_agents
     return 1
   fi
   stop_courier_if_idle
+  stop_idle_watchdog_if_no_agents
 }
 
 # All names that have sidecars under run/, live or not.
@@ -1822,6 +1858,141 @@ EOF
 # Deletion is deliberately an explicit verb rather than a side effect of listing or
 # of a GET. A read that quietly removes state is how you lose the one sidecar that
 # would have explained an incident.
+# ── idle agents ──────────────────────────────────────────────────────────────
+#
+# An agent nobody is using still holds a CLI process, a provider session and, if it
+# was spawned unrestricted, a shell with the approval bypass turned off. Leaving one
+# up for days is how a `dev` pane sits at 3.4 hours of zero activity with an
+# unrestricted codex behind it, which is what prompted this.
+#
+# WHAT COUNTS AS "NO USE": tmux's own `session_activity`, which is the last time the
+# pane produced output or received input. That is the honest signal - it moves when
+# the agent is thinking out loud, when it prints a result, and when anyone types at
+# it. It is NOT wall-clock uptime: a busy agent that has been running for six hours
+# is in use, and a fresh one that has done nothing for an hour is not.
+#
+# WHAT IT WILL NOT DO:
+#   - kill an ATTACHED session. Somebody has it on screen; the fact that they have
+#     not typed for an hour is not permission to close their terminal.
+#   - kill anything when tmux cannot be queried. A failed query is indistinguishable
+#     from an idle session, and guessing in that direction ends a live agent.
+#   - kill silently. Every timeout goes through cmd_kill, so the bound Jira issue is
+#     closed out and the sidecars are swept exactly as a hand-typed kill would.
+#
+# AGENTMUX_IDLE_MINUTES=0 disables it entirely.
+IDLE_MINUTES="${AGENTMUX_IDLE_MINUTES:-60}"
+
+# Sessions idle longer than $1 minutes and not attached. One "name idle_seconds"
+# per line. Split out from cmd_idle so the selection can be tested without a tmux
+# server - test_idle.sh feeds it a fixture.
+idle_candidates() {
+  local limit_s="$1" now="$2" line name activity attached idle
+  while read -r line; do
+    [ -n "$line" ] || continue
+    name="${line%% *}"; line="${line#* }"
+    activity="${line%% *}"; attached="${line##* }"
+    case "$activity$attached" in *[!0-9]*) continue ;; esac
+    [ "$attached" != "0" ] && continue
+    idle=$(( now - activity ))
+    [ "$idle" -ge "$limit_s" ] && printf '%s %s\n' "$name" "$idle"
+  done
+  return 0
+}
+
+cmd_idle() {
+  local dry=0 minutes="$IDLE_MINUTES"
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --dry-run|-n) dry=1; shift ;;
+      --minutes|-m) minutes="${2:?--minutes needs a number}"; shift 2 ;;
+      *) die "idle takes --minutes N and --dry-run (got '$1')" ;;
+    esac
+  done
+  case "$minutes" in ''|*[!0-9]*) die "idle: --minutes takes a whole number of minutes" ;; esac
+  [ "$minutes" = 0 ] && { printf 'idle timeout disabled (AGENTMUX_IDLE_MINUTES=0)\n'; return 0; }
+
+  command -v tmux >/dev/null 2>&1 \
+    || die "tmux not found - cannot tell an idle session from a broken query; refusing to act"
+
+  local listing
+  # No sessions at all is not a failure, it is the normal quiet state.
+  listing="$(tm list-sessions -F '#{session_name} #{session_activity} #{session_attached}' 2>/dev/null)" \
+    || return 0
+  [ -n "$listing" ] || return 0
+
+  local now; now="$(date +%s)"
+  local limit_s=$(( minutes * 60 ))
+  local name idle killed=0
+  while read -r name idle; do
+    [ -n "$name" ] || continue
+    if [ "$dry" = 1 ]; then
+      printf 'would close %-14s (idle %sm, limit %sm)\n' "$name" "$(( idle / 60 ))" "$minutes"
+      continue
+    fi
+    printf 'closing %s after %sm idle (limit %sm)\n' "$name" "$(( idle / 60 ))" "$minutes"
+    # Through cmd_kill, not tmux directly: an agent that times out gets the same
+    # close-out as one the operator ends by hand.
+    cmd_kill "$name" >/dev/null 2>&1 && killed=$((killed + 1))
+  done <<EOF
+$(printf '%s\n' "$listing" | idle_candidates "$limit_s" "$now")
+EOF
+  [ "$dry" = 1 ] || [ "$killed" = 0 ] || printf 'closed %s idle agent(s)\n' "$killed"
+  return 0
+}
+
+# The watchdog that makes the timeout automatic.
+#
+# Same shape as the courier: started with the first agent, stopped with the last, so
+# nothing is left polling an empty tmux server. One process regardless of how many
+# agents are up. It re-execs this script rather than carrying the logic inline, so a
+# fix to cmd_idle reaches a watchdog that is already running on its next tick.
+idle_watchdog_running() {
+  local pid; pid="$(cat "$RUNDIR/.idle.pid" 2>/dev/null || true)"
+  [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null
+}
+
+start_idle_watchdog() {
+  [ "${AGENTMUX_IDLE_MINUTES:-$IDLE_MINUTES}" = 0 ] && return 1
+  idle_watchdog_running && return 0
+
+  local script; script="$(agentmux_self)" || {
+    # Better to say the timeout is not armed than to leave a watchdog that cannot
+    # find the script it exists to run.
+    printf 'agentmux: cannot locate agentmux.sh on disk; idle timeout NOT armed\n' >&2
+    printf '          set AGENTMUX_REPO=/path/to/repo to enable it\n' >&2
+    return 1
+  }
+  mkdir -p "$RUNDIR" 2>/dev/null
+  local self="$RUNDIR/.idle-watchdog.sh"
+  cat > "$self" <<WATCHDOG
+#!/usr/bin/env bash
+# Started by agentmux spawn; ends when the last agent does. Do not edit - rewritten
+# on every spawn from agentmux.sh.
+#
+# The \`tr -d '\r'\` is not decoration: this repo is checked out with CRLF, so bash
+# refuses agentmux.sh read directly. Every other caller uses process substitution
+# for the same reason.
+while sleep "\${AGENTMUX_IDLE_TICK:-60}"; do
+  tmux -L "$SOCKET" list-sessions >/dev/null 2>&1 || break
+  bash <(tr -d '\r' < "$script") idle >> "$RUNDIR/.idle.log" 2>&1
+done
+rm -f "$RUNDIR/.idle.pid" "$self" 2>/dev/null
+WATCHDOG
+  chmod +x "$self" 2>/dev/null
+  setsid bash "$self" >/dev/null 2>&1 &
+  printf '%s\n' "$!" > "$RUNDIR/.idle.pid"
+  return 0
+}
+
+stop_idle_watchdog_if_no_agents() {
+  tm list-sessions >/dev/null 2>&1 && return 0
+  local pid; pid="$(cat "$RUNDIR/.idle.pid" 2>/dev/null || true)"
+  [ -n "$pid" ] || return 0
+  kill "$pid" 2>/dev/null
+  rm -f "$RUNDIR/.idle.pid" "$RUNDIR/.idle-watchdog.sh" 2>/dev/null
+  return 0
+}
+
 cmd_reap() {
   local dry=0
   case "${1:-}" in
@@ -1959,6 +2130,7 @@ case "${1:-}" in
   list)   shift; cmd_list   "$@" ;;
   kill)   shift; cmd_kill   "$@" ;;
   reap)   shift; cmd_reap   "$@" ;;
+  idle)   shift; cmd_idle   "$@" ;;
   attach) shift; cmd_attach "$@" ;;
   exec)   shift; cmd_exec   "$@" ;;
   ""|-h|--help|help) usage ;;

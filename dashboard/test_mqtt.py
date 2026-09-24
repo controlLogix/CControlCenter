@@ -269,8 +269,12 @@ broker2.start()
 status, payload = post("api/mqtt/subscribe",
                        {"host": "127.0.0.1", "port": broker2.port, "topic": "plant/#"})
 check("subscribe -> 200", 200, status)
+# qos/retain/bytes came in with the topic monitor, which needs to show whether a
+# value is a live publish or a retained one the broker replayed at connect. The
+# bounded subscribe shares the decoder, so it reports them too.
 check("delivered the broker's message",
-      [{"topic": "plant/line1/temp", "payload": "22.0"}], (payload or {}).get("messages"))
+      [{"topic": "plant/line1/temp", "payload": "22.0",
+        "qos": 0, "retain": False, "bytes": 4}], (payload or {}).get("messages"))
 subs = broker2.packets(mqtt.SUBSCRIBE)
 check("broker got one SUBSCRIBE", 1, len(subs))
 if subs:

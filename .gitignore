@@ -66,3 +66,12 @@ tmp/
 # vendor, but theirs to distribute - not ours to commit. docs/vendor/README.md
 # carries the URLs so anyone can fetch the same document.
 docs/vendor/*.pdf
+
+# Browser-automation output and dashboard screenshots. Captured state, not
+# source: the .yml files are accessibility-tree dumps of a running instance and
+# a screenshot of a live dashboard can carry whatever was on screen at the time
+# - agent names, a scanned plant segment, device MACs. This repo is public.
+# Root-anchored, not a blanket *.png: dashboard/assets/ may legitimately need an
+# image one day, and a rule that silently swallows it is worse than this one.
+.playwright-mcp/
+/*.png

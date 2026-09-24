@@ -145,10 +145,16 @@ class GithubTests(unittest.TestCase):
         script = r"""
 const fs = require('fs'), vm = require('vm'), assert = require('assert');
 class Element {
-  constructor(tag, cls, text) { this.tag = tag; this.text = text || ''; this.children = []; }
+  constructor(tag, cls, text) { this.tag = tag; this.text = text || ''; this.children = []; this.dataset = {}; }
+  // Real code sets textContent after creating a node as often as it passes text
+  // in; the fixture has to model both or it silently drops half the output.
+  get textContent() { return this.text; }
+  set textContent(value) { this.text = value === undefined ? '' : String(value); }
   appendChild(n) { this.children.push(n); return n; }
+  append(...nodes) { nodes.forEach(n => this.appendChild(n)); }
   replaceChildren(...nodes) { this.children = nodes; }
   addEventListener() {}
+  setAttribute() {}
 }
 const root = new Element('section');
 let loader;
@@ -158,19 +164,48 @@ let data = {checked_at: 'now', gh: {state: 'ready'}, errors: [], repos: [{
   prs: [{number: 1, title: 'PR', ci: 'FAILURE', reviewDecision: 'CHANGES_REQUESTED', url: 'javascript:alert(1)'}],
   runs: [{displayTitle: 'Build', conclusion: 'failure', status: 'completed', duration_seconds: 63, url: 'https://github.com/a/b/actions/runs/1'}]
 }]};
+// The panel reads TWO snapshots now: the account (for sign-in state and the write
+// forms) and the repository list. A token is never part of either.
+let auth = {account: {cli: true, authenticated: true, login: 'octo', name: 'Octo',
+                      url: 'https://github.com/octo', scopes: ['repo'], rate: null,
+                      can_login: true, hostname: 'github.com', scopes_requested: ['repo']},
+            login: {state: 'idle', code: null, url: 'https://github.com/login/device',
+                    error: null, available: true, command: 'gh auth login --web'}};
+const seen = [];
 global.window = {CCC: {
   el: (...args) => new Element(...args),
-  getJSON: async path => { assert.equal(path, '/api/github'); return data; },
+  getJSON: async path => {
+    seen.push(path);
+    if (path === 'api/github/auth') return auth;
+    assert.equal(path, 'api/github');
+    return data;
+  },
+  post: async () => ({}),
   registerView: (name, fn, ms) => { assert.equal(name, 'github'); assert.equal(ms, 30000); loader = fn; }
-}, addEventListener: (name, fn) => { assert.equal(name, 'ccc:ready'); fn(); }};
-global.document = {getElementById: () => root};
+}, confirm: () => true, addEventListener: (name, fn) => { assert.equal(name, 'ccc:ready'); fn(); }};
+global.document = {getElementById: () => root, createElement: tag => new Element(tag)};
+global.navigator = {clipboard: {writeText: async () => {}}};
 vm.runInThisContext(fs.readFileSync(process.argv[1], 'utf8'));
 function flatten(n) { return [n, ...n.children.flatMap(flatten)]; }
 (async () => {
   await loader();
+  assert.deepEqual(seen.sort(), ['api/github', 'api/github/auth']);
   const nodes = flatten(root), text = nodes.map(n => n.text).join(' ');
-  for (const expected of ['19 UNPUSHED COMMITS', 'DIRTY: 2 files', 'CHANGES_REQUESTED', 'FAILURE', 'failure', '63s', '<img src=x']) assert(text.includes(expected), expected);
+  for (const expected of ['19 UNPUSHED COMMITS', 'DIRTY: 2 files', 'CHANGES_REQUESTED',
+                          'FAILURE', 'failure', '63s', '<img src=x',
+                          'Signed in as octo']) assert(text.includes(expected), expected);
   assert.equal(nodes.filter(n => n.tag === 'a').length, 1);
+
+  // A one-time device code is displayed; it is not a secret and is useless without
+  // the operator's own GitHub session. A TOKEN must never appear anywhere.
+  auth = {account: {...auth.account, authenticated: false, login: null},
+          login: {...auth.login, state: 'waiting', code: 'ABCD-1234'}};
+  await loader();
+  const signedOut = flatten(root).map(n => n.text).join(' ');
+  assert(signedOut.includes('ABCD-1234'), 'the one-time code is shown');
+  assert(signedOut.includes('Not signed in.'));
+  assert(!/gh[pousr]_[A-Za-z0-9]/.test(signedOut), 'no token-shaped string is rendered');
+
   data = {...data, gh: {state: 'missing', message: 'gh is missing', command: 'sudo apt install gh'}, repos: []};
   await loader();
   assert(flatten(root).some(n => n.text.includes('sudo apt install gh')));

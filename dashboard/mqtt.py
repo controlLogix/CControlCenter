@@ -25,12 +25,20 @@ import time
 
 CONNECT, CONNACK, PUBLISH, SUBSCRIBE, SUBACK = 1, 2, 3, 8, 9
 UNSUBSCRIBE, UNSUBACK, PINGREQ, PINGRESP, DISCONNECT = 10, 11, 12, 13, 14
+PUBACK, PUBREC = 4, 5
 
 CONNECT_TIMEOUT = 5.0
 READ_TIMEOUT = 5.0
 MAX_TOPIC_BYTES = 256
 MAX_PAYLOAD_BYTES = 4096
-MAX_PACKET_BYTES = 65536      # a single inbound packet we are willing to buffer
+# A single inbound packet we are willing to buffer. This was 64 KiB, which a real
+# broker walked straight through: a zigbee2mqtt bridge publishes a 217 KB retained
+# message, the read raised, and because the message is RETAINED it arrived again on
+# every re-subscribe - an unbreakable loop against an ordinary broker. MQTT's own
+# ceiling is 256 MB, so any number here is a policy, not a protocol limit; this one
+# is large enough for the payloads real brokers actually carry and still bounds what
+# one hostile peer can make this process allocate.
+MAX_PACKET_BYTES = 4 * 1024 * 1024
 MAX_MESSAGES = 50
 SUBSCRIBE_WINDOW = 3.0
 
@@ -185,6 +193,78 @@ class Connection:
             pass   # we are about to disconnect anyway
         return messages
 
+    # -- long-lived session, for the topic monitor ----------------------------
+    #
+    # subscribe() above is a bounded poll: it connects, listens for a window and
+    # disconnects, which is the right shape for an HTTP handler. The topic browser
+    # is not that - it has to hold the socket open for hours and keep the broker's
+    # keepalive satisfied. These three verbs are that half, and they are deliberately
+    # separate rather than options on subscribe(): a request handler must never be
+    # able to enter a loop that does not end on its own.
+
+    def subscribe_only(self, topics, qos=0):
+        """SUBSCRIBE to one or more filters and wait for the SUBACK.
+
+        Returns the granted QoS per filter. 0x80 means the broker refused THAT
+        filter while accepting the others, so it is reported per topic rather than
+        raised - one bad filter must not take down a monitor watching five.
+        """
+        if not topics:
+            raise MqttError("no topics to subscribe to")
+        self._packet_id = (self._packet_id + 1) & 0xFFFF or 1
+        packet_id = self._packet_id
+        body = struct.pack("!H", packet_id)
+        for topic in topics:
+            body += _string(topic) + bytes([qos])
+        self._send(_packet(SUBSCRIBE, 0x02, body))
+        deadline = time.monotonic() + READ_TIMEOUT
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise MqttError("broker did not acknowledge the subscription")
+            self.sock.settimeout(remaining)
+            kind, _flags, payload = self._read_packet()
+            if kind != SUBACK:
+                continue
+            if len(payload) < 2 + len(topics):
+                raise MqttError("truncated SUBACK")
+            return dict(zip(topics, payload[2:2 + len(topics)]))
+
+    def ping(self):
+        """PINGREQ. A broker drops a session that goes quiet past the keepalive."""
+        self._send(_packet(PINGREQ, 0, b""))
+
+    def poll(self, timeout):
+        """Wait up to `timeout` seconds for one packet.
+
+        Returns a decoded message dict for a PUBLISH, or None for anything else
+        (PINGRESP, SUBACK, a timeout). The caller loops; returning None rather than
+        blocking again is what keeps the keepalive and the stop flag responsive.
+        """
+        if timeout <= 0:
+            return None
+        try:
+            self.sock.settimeout(timeout)
+            kind, flags, payload = self._read_packet()
+        except (TimeoutError, socket.timeout):
+            return None
+        if kind == PINGREQ:
+            self._send(_packet(PINGRESP, 0, b""))
+            return None
+        if kind != PUBLISH:
+            return None
+        message = self._decode_publish(flags, payload)
+        if message["qos"] in (1, 2):
+            # We never request above QoS 0, but a broker replaying a stored message
+            # can still send one, and it expects an acknowledgement. Without it the
+            # broker redelivers forever, which reaches the browser as a topic that
+            # will not stop updating with a value that never changes.
+            topic_len = struct.unpack("!H", payload[:2])[0]
+            packet_id = struct.unpack("!H", payload[2 + topic_len:4 + topic_len])[0]
+            self._send(_packet(PUBACK if message["qos"] == 1 else PUBREC, 0,
+                               struct.pack("!H", packet_id)))
+        return message
+
     @staticmethod
     def _decode_publish(flags, payload):
         if len(payload) < 2:
@@ -200,7 +280,8 @@ class Connection:
             # broker replaying a stored message could still send one.
             offset += 2
         body = payload[offset:] if offset <= len(payload) else b""
-        return {"topic": topic, "payload": body.decode("utf-8", "replace")}
+        return {"topic": topic, "payload": body.decode("utf-8", "replace"),
+                "qos": qos, "retain": bool(flags & 0x01), "bytes": len(body)}
 
     # ------------------------------------------------------------------ wire --
     def _send(self, data):

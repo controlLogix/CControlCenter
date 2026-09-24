@@ -18,11 +18,28 @@ assert.ok(code.includes('function initCollapsibles('));
 assert.doesNotMatch(code, /innerHTML/);
 assert.equal((app.match(/^initCollapsibles\(\);/gm) || []).length, 1);
 assert.ok(app.indexOf('\ninitCollapsibles();') < app.indexOf('if (!window.Terminal)'));
-assert.match(css, /\.iiot-grid\s*\{[^}]*align-items: start/);
+// The IIOT panels are packed into COLUMNS, not laid out in grid rows. A grid row
+// is as tall as its tallest card, so short cards left a band of dead space across
+// the middle of the page - measured at 307px wasted and a 255px hole under the
+// PROFINET card. `align-items: start` used to be asserted here; it stopped cards
+// STRETCHING into that space but could not stop the space existing.
+assert.match(css, /\.iiot-grid\s*\{[^}]*column-width/);
+assert.match(css, /\.iiot-grid > \.card\s*\{[^}]*break-inside: avoid/);
+// .board keeps its grid, and keeps the no-stretch rule that goes with one.
+assert.match(css, /\.board\s*\{[^}]*align-items: start/);
 assert.match(css, /\.card > summary:focus-visible/);
+// Five IIOT field cards and five Settings cards. The count is asserted so that a
+// card added without a collapse key - which is how one ends up permanently open -
+// fails here rather than being noticed by an operator.
+const CARD_COUNT = 10;
 const cards = [...html.matchAll(/<details class="card" data-collapse-key="([^"]+)"( open)?>([\s\S]*?)<\/details>/g)];
-assert.equal(cards.length, 8);
-assert.equal(new Set(cards.map(m => m[1])).size, 8);
+assert.equal(cards.length, CARD_COUNT);
+assert.equal(new Set(cards.map(m => m[1])).size, CARD_COUNT);
+// Every IIOT panel is a card, and they all carry the same bold <h3> summary. The
+// PROFINET panel used to build its own <details> in JS with a bare-text summary,
+// so it alone rendered unbold and out of line with the rest.
+const iiot = cards.filter(m => m[1].startsWith('iiot:')).map(m => m[1]);
+assert.deepEqual(iiot, ['iiot:modbus', 'iiot:dcp', 'iiot:mqtt', 'iiot:scan', 'iiot:codesys']);
 assert.doesNotMatch(html, /<section class="card">/);
 for (const card of cards) assert.match(card[3], /^\s*<summary><h3>[^<]+<\/h3><\/summary>/);
 let passed = 0;
@@ -30,6 +47,7 @@ function test(name, fn) { fn(); passed++; console.log('PASS: ' + name); }
 class Details {
   constructor(key, open = true) {
     this.dataset = {collapseKey: key}; this.open = open; this.events = [];
+    this.key = key;
     this.children = [{id: 'existing-control'}];
   }
   addEventListener(type, fn) { assert.equal(type, 'toggle'); this.events.push(fn); }
@@ -46,10 +64,12 @@ function page(nodes, store = storage) {
   Object.defineProperty(context, 'localStorage', {get() { if (store instanceof Error) throw store; return store; }});
   vm.createContext(context); vm.runInContext(code, context); context.initCollapsibles(); return context;
 }
-test('all eight markup cards toggle independently and survive fresh initialization', () => {
+test('every markup card toggles independently and survives fresh initialization', () => {
   const nodes = cards.map(m => new Details(m[1], Boolean(m[2])));
   page(nodes);
-  for (const node of nodes) assert.equal(node.open, true);
+  // Against the MARKUP default, not a blanket "everything is open". The CODESYS
+  // card ships closed on purpose: opening it is what makes an SSH connection.
+  nodes.forEach((node, i) => assert.equal(node.open, Boolean(cards[i][2])));
   nodes.forEach((node, i) => node.toggle(i % 2 === 0));
   const reload = cards.map(m => new Details(m[1], Boolean(m[2])));
   page(reload);
@@ -133,7 +153,7 @@ test('serialized size cap migrates large legacy maps and handles oversized keys'
 
 // Exercise the production list renderers, not copies of their key expressions.
 class Node {
-  constructor(tag, cls, text) { this.tag = tag; this.className = cls; this.textContent = text; this.children = []; this.events = {}; this.open = false; }
+  constructor(tag, cls, text) { this.tag = tag; this.className = cls; this.textContent = text; this.children = []; this.events = {}; this.open = false; this.dataset = {}; }
   appendChild(n) { this.children.push(n); return n; }
   append(...nodes) { nodes.forEach(n => this.appendChild(n)); }
   replaceChildren() { this.children = []; }
@@ -142,10 +162,18 @@ class Node {
 }
 function renderer(store, rows) {
   const els = {};
-  for (const name of ['feedList', 'queueList', 'journalList', 'ticketList', 'planPin', 'queueKind', 'queueStamp', 'journalStamp', 'ticketStamp', 'queueFollow', 'jiraBase']) els[name] = new Node('div');
-  els.queueKind.value = ''; els.jiraBase.value = '';
+  for (const name of ['feedList', 'queueList', 'journalList', 'ticketList', 'planPin',
+                      'queueKind', 'queueStamp', 'journalStamp', 'ticketStamp',
+                      'queueFollow', 'jiraBase', 'queueSearch', 'journalSearch',
+                      'journalFilterKind', 'ticketSearch']) els[name] = new Node('div');
+  for (const name of ['queueKind', 'jiraBase', 'queueSearch', 'journalSearch',
+                      'journalFilterKind', 'ticketSearch']) els[name].value = '';
+  // Each Status tab hands the export button the rows it is showing; the renderers
+  // call it on every draw, so the fixture has to accept it.
+  const published = {};
   const ctx = {els, el: (tag, cls, text) => new Node(tag, cls, text),
     feedEntries: rows.feed, feedPrefs: {max: 500}, feedPasses: () => true,
+    publishRows: (name, list) => { published[name] = list; }, published,
     updateFeedBadge() {}, markQueueSeen() {}, clock: x => x, say() {},
     MSG_KINDS: new Set(['status']), JOURNAL_KINDS: new Set(['note']),
     issueLink: key => new Node('a', 't-key', key), ticketActions: () => new Node('div', 'ticket-actions'),

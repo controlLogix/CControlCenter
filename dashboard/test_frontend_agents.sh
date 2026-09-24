@@ -21,12 +21,14 @@ const source = fs.readFileSync('dashboard/agents.js', 'utf8');
 const app = fs.readFileSync('dashboard/app.js', 'utf8');
 const html = fs.readFileSync('dashboard/index.html', 'utf8');
 assert.match(source, /async function loadAgents\(/);
-assert.match(source, /window\.CCC\.registerView\('agents', loadAgents\)/);
+// Agents is a TAB of Organization now, not a view of its own.
+assert.match(source, /window\.CCC\.registerPanel\('organization', 'agents', loadAgents\)/);
 assert.match(app, /VIEW_LOADERS\[name\] = loader/);
 assert.match(html, /src="agents.js"/);
 assert.match(html, /href="agents.css"/);
 assert.match(html, /id="viewAgents"/);
-assert.match(html, /data-view="agents"/);
+assert.match(html, /data-panel="agents"/);
+assert.match(html, /data-tabs="organization"/);
 assert.doesNotMatch(source, /innerHTML|createElement|setInterval|setTimeout|VIEW_POLL_MS/);
 assert.doesNotMatch(app.match(/const VIEW_POLL_MS = \{[^}]*\}/)[0], /agents/);
 class Node {
@@ -83,7 +85,10 @@ vm.runInNewContext(source, {
         }
         assert.equal(url, 'api/board/agents'); calls++; return payload;
       },
-      registerView: (...args) => { assert.equal(args[0], 'agents'); assert.equal(args.length, 2); loader = args[1]; }
+      registerPanel: (...args) => {
+        assert.equal(args[0], 'organization'); assert.equal(args[1], 'agents');
+        assert.equal(args.length, 3); loader = args[2];
+      }
     }
   }
 });
