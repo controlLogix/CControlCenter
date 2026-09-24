@@ -176,7 +176,7 @@ run test_sandbox_coordination.py python3 dashboard/test_sandbox_coordination.py
 # EP-015 suites are registered at the scaffold seam before their owning tasks land.
 # Missing suites are explicit skips during the staged build; present suites use
 # the same failure accounting as every existing suite above.
-for suite in test_modbus_poll.py test_enip.py test_orchestration_plugin.py test_plugin_skills.py test_agentdefs.py test_agentcli.py test_teamcli.py test_boardagents.py test_boardteams.py \
+for suite in test_modbus_poll.py test_modbus_rtu.py test_enip.py test_orchestration_plugin.py test_plugin_skills.py test_agentdefs.py test_agentcli.py test_teamcli.py test_boardagents.py test_boardteams.py \
              test_launch.sh test_frontend_agents.sh test_frontend_teams.sh test_frontend_collapse.sh; do
   if [ ! -f "dashboard/$suite" ]; then
     echo "SKIP $suite (EP-015 suite has not landed yet)"

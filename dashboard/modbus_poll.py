@@ -1,4 +1,4 @@
-"""In-process Modbus TCP and a persisted, shared tag table.
+"""In-process Modbus TCP/RTU and a persisted, shared tag table.
 
 Addresses are zero-based. Words use network byte order; word_order is high/low
 for 32-bit values. Wire contract: modbus.org Modbus Application Protocol V1.1b3.
@@ -37,6 +37,9 @@ class Client:
     def __init__(self, host, port=502, timeout=1):
         self.host, self.port, self.timeout = host, port, timeout
         self.transaction = 0
+
+    def target(self):
+        return dict(host=self.host, port=self.port)
 
     def exchange(self, unit, function, data):
         integer(unit, 1, 247)
@@ -112,7 +115,7 @@ class Client:
                 packed = struct.pack('!'+'H'*len(values), *values)
             expected = struct.pack('!HH', address, len(values))
             data = expected + bytes([len(packed)]) + packed
-        event = dict(id=uuid.uuid4().hex, actor=actor, host=self.host, port=self.port,
+        event = dict(id=uuid.uuid4().hex, actor=actor, **self.target(),
                      unit=unit, function=function, address=address, value=values)
         journal(dict(event, outcome='intent'))  # Failure here prevents transmission.
         try:
@@ -141,8 +144,15 @@ def validate(config):
     import ipaddress
     if not isinstance(config, dict):
         raise ValueError('table must be an object')
-    host = str(ipaddress.ip_address(config.get('host', '')))
-    port = integer(config.get('port', 502), 1, 65535)
+    transport = config.get('transport', 'tcp')
+    if transport == 'rtu':
+        from modbus_rtu import serial_config
+        endpoint = dict(transport='rtu', **serial_config(config))
+    elif transport == 'tcp':
+        endpoint = dict(host=str(ipaddress.ip_address(config.get('host', ''))),
+                        port=integer(config.get('port', 502), 1, 65535))
+    else:
+        raise ValueError('transport must be tcp or rtu')
     interval = finite(config.get('interval', 2))
     if not 0.2 <= interval <= 3600:
         raise ValueError('interval must be 0.2..3600 seconds')
@@ -175,7 +185,20 @@ def validate(config):
                            function=function, type=dtype, count=count, word_order=order,
                            scale=finite(tag.get('scale', 1)), offset=finite(tag.get('offset', 0)),
                            engineering_unit=unit_text))
-    return dict(host=host, port=port, interval=interval, tags=result)
+    return dict(endpoint, interval=interval, tags=result)
+
+
+def target(config):
+    keys = ('transport', 'device', 'baud', 'parity', 'stopbits') if config.get('transport') == 'rtu' else ('host', 'port')
+    return {key: config[key] for key in keys}
+
+
+def client_for(config, timeout=1):
+    if config.get('transport') == 'rtu':
+        from modbus_rtu import Client as RTUClient
+        return RTUClient(config['device'], baud=config['baud'], parity=config['parity'],
+                         stopbits=config['stopbits'], timeout=timeout)
+    return Client(config['host'], config['port'], timeout)
 
 
 class Poller:
@@ -236,7 +259,7 @@ class Poller:
                 remaining = deadline-time.monotonic()
                 if remaining <= 0:
                     raise TimeoutError('poll interval exhausted')
-                client = Client(config['host'], config['port'], remaining)
+                client = client_for(config, remaining)
                 value = decode(client.read(tag['unit'], tag['function'], tag['address'], tag['count']), tag)
                 with self.lock:
                     if self.config is not config:
@@ -261,9 +284,9 @@ class Poller:
         with self.lock:
             if not self.config:
                 raise ValueError('configure a device first')
-            if body.get('target') != {k: self.config[k] for k in ('host', 'port')}:
+            if body.get('target') != target(self.config):
                 raise ValueError('target changed; review and confirm again')
-            Client(self.config['host'], self.config['port']).write(
+            client_for(self.config).write(
                 body.get('unit'), body.get('function'), body.get('address'), body.get('values', []),
                 confirm=body.get('confirm'), actor=body.get('actor'), journal=self.journal)
         return {'ok': True}

@@ -10,10 +10,11 @@
     parent.appendChild(e);
     return e;
   }
-  node('p', 'Modbus TCP — zero-based addresses. Polling continues on the server.');
+  node('p', 'Modbus TCP / RTU — zero-based addresses. Polling continues on the server.');
   const status = node('p');
   status.setAttribute('aria-live', 'polite');
   node('p', 'Shared tag table (JSON). word_order: high = high word first; low = low word first. Scaling: raw × scale + offset.');
+  node('p', 'For RTU, replace host/port with transport: \"rtu\", device: \"/dev/ttyUSB0\", baud: 9600, parity: \"E\", stopbits: 1. Use one master per bus and an RS-485 adapter with automatic direction control. WSL2 USB adapters require usbipd attachment; a listed COM port does not guarantee access.');
   const editor = node('textarea');
   editor.setAttribute('aria-label', 'Modbus tag table JSON');
   editor.rows = 12;
@@ -85,8 +86,10 @@
       if (!config) throw new Error('Save a device configuration first.');
       if (!actor.value.trim()) throw new Error('Actor is required.');
       const body = {...JSON.parse(writeEditor.value), actor: actor.value.trim(),
-        target: {host: config.host, port: config.port}};
-      if (!window.confirm(`Write to physical device ${body.target.host}:${body.target.port}?\n${JSON.stringify(body, null, 2)}`)) return;
+        target: config.transport === 'rtu'
+          ? Object.fromEntries(['transport', 'device', 'baud', 'parity', 'stopbits'].map(k => [k, config[k]]))
+          : {host: config.host, port: config.port}};
+      if (!window.confirm(`Write to physical device ${config.transport === 'rtu' ? config.device : `${config.host}:${config.port}`}?\n${JSON.stringify(body, null, 2)}`)) return;
       await api('write', {...body, confirm: true});
       message.textContent = 'Write acknowledged and journalled.';
     } catch (err) { message.textContent = `${err.message} — do not retry an uncertain write without checking equipment.`; }
