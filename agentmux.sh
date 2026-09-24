@@ -2228,10 +2228,35 @@ coordination.issue_warrant(sys.argv[2], cli=sys.argv[3], hours=float(sys.argv[4]
     "${AGENTMUX_REPO:-$PWD}/taskmgmt" "$name" "shell" "$hours" || {
       printf 'orchestrator: could not mint a warrant\n' >&2; return 1; }
 
+  # THE CLI COMES FROM THE DEFINITION ON DISK, never from here.
+  #
+  # Hardcoding it was the first version and it was wrong twice over: it named `claude`,
+  # which is a Windows binary and is not on PATH inside WSL where the pane actually
+  # runs, so the spawn would have failed on this machine; and it duplicated a fact that
+  # .agentmux/agents/<name>.md already owns, which is exactly the "only id and name are
+  # read from the wire" bound that keeps the definition authoritative.
+  local cli
+  cli="$(AGENTMUX_REPO="${AGENTMUX_REPO:-$PWD}" python3 -c '
+import sys
+sys.path.insert(0, sys.argv[1] + "/taskmgmt")
+import agentdefs
+spec = agentdefs.resolve(sys.argv[2], sys.argv[1])
+print(getattr(spec, "cli", None) or (spec or {}).get("cli", "") if spec else "")
+' "${AGENTMUX_REPO:-$PWD}" "$name" 2>/dev/null)"
+  if [ -z "$cli" ]; then
+    printf 'orchestrator: no definition for %s in .agentmux/agents/ - revoking
+' "$name" >&2
+    AGENTMUX_HOME="$ROOT" python3 -c 'import sys
+sys.path.insert(0, sys.argv[1]); import coordination; coordination.revoke_warrant()'       "${AGENTMUX_REPO:-$PWD}/taskmgmt" 2>/dev/null
+    return 1
+  fi
+  printf 'spawning %s (%s)...
+' "$name" "$cli"
+
   # Spawned as --role lead on purpose. dispatch.WORKER_RE is card-scoped and this name
   # does not match it, so collect/pool ignore the orchestrator for free - no new role
   # vocabulary to add in five files.
-  if ! cmd_spawn "$name" --cli claude --cwd "${AGENTMUX_REPO:-$PWD}" --role lead; then
+  if ! cmd_spawn "$name" --cli "$cli" --cwd "${AGENTMUX_REPO:-$PWD}" --role lead; then
     printf 'orchestrator: spawn failed - revoking the warrant\n' >&2
     AGENTMUX_HOME="$ROOT" python3 -c 'import sys
 sys.path.insert(0, sys.argv[1]); import coordination; coordination.revoke_warrant()' \
