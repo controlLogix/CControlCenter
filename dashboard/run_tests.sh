@@ -186,7 +186,10 @@ for suite in test_modbus_poll.py test_enip.py test_orchestration_plugin.py test_
     run "$suite" bash /dev/fd/13 13< <(tr -d '\r' < "dashboard/$suite")
   fi
 done
+run test_github_panel.py python3 dashboard/test_github_panel.py
+run test_logix.py python3 dashboard/test_logix.py
 run test_ads.py python3 dashboard/test_ads.py
+run test_ecat_diag.py python3 dashboard/test_ecat_diag.py
 run test_snapshot.py python3 dashboard/test_snapshot.py
 run test_mqtt.py  python3 dashboard/test_mqtt.py
 run test_tickets.py python3 dashboard/test_tickets.py

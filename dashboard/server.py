@@ -3,6 +3,7 @@
 
 import base64
 import boardagents
+import github_panel
 import boardteams
 import ccboard
 import ccstore
@@ -1920,6 +1921,9 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(403, {"error": "forbidden"})
             return
 
+        if path == "/api/github":
+            self.send_json(200, github_panel.snapshot(HOME_DIR))
+            return
         if path == "/api/tickets":
             force = parse_qs(parsed.query).get("refresh", ["0"])[0] == "1"
             self.send_json(200, tickets_snapshot(force=force))
@@ -1962,12 +1966,14 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/":
             file_path = (ROOT / "index.html").resolve()
             content_type = "text/html; charset=utf-8"
-        elif path in ("/app.js", "/fitmatrix.js", "/agents.js", "/teams.js", "/iiot.js"):
+        elif path in ("/app.js", "/fitmatrix.js", "/agents.js", "/teams.js", "/iiot.js",
+                      "/github.js", "/codesys.js", "/chatter.js"):
             # fitmatrix.js is the readability test harness. index.html loads it only
             # when the URL carries ?fit=1, so it is inert on the normal page but can
             # be run against the REAL page rather than a mock.
             content_type = "text/javascript; charset=utf-8"
-        elif path in ("/style.css", "/agents.css", "/teams.css"):
+        elif path in ("/style.css", "/agents.css", "/teams.css",
+                      "/codesys.css", "/chatter.css"):
             content_type = "text/css; charset=utf-8"
         elif path == "/themes.json":
             content_type = "application/json"
