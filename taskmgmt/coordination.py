@@ -79,20 +79,36 @@ def now():
     return time.strftime("%Y-%m-%dT%H:%M:%S") + time.strftime("%z")
 
 
+class IdentityError(Exception):
+    """Raised when a caller cannot be who it says it is. See resolve_identity."""
+
+
+class TmuxUnavailable(IdentityError):
+    """Liveness is unknown, not empty; never infer a dead worker from this."""
+
+
 def live_agents():
     try:
         done = subprocess.run(["tmux", "-L", SOCKET, "list-sessions", "-F",
                                "#{session_name}"],
                               capture_output=True, text=True, timeout=10)
-        if done.returncode != 0:
+    except (OSError, subprocess.SubprocessError) as err:
+        raise TmuxUnavailable(
+            f"coordination: tmux unreachable on socket {SOCKET!r}: {err}. "
+            "Check sandbox permissions and tmux availability; liveness is unknown.") from err
+    if done.returncode != 0:
+        detail = (done.stderr or done.stdout).strip()
+        # ENOENT from tmux means the socket does not exist: no server was
+        # started. This differs from ENOENT launching tmux above (missing binary).
+        # Permission denial (EACCES/EPERM) must remain unknown liveness.
+        missing_socket = detail.endswith("(No such file or directory)") or detail.endswith("(ENOENT)")
+        if missing_socket or detail == "no sessions" or detail.startswith("no server running on "):
             return set()
-        return {line.strip() for line in done.stdout.splitlines() if line.strip()}
-    except (OSError, subprocess.SubprocessError):
-        return set()
-
-
-class IdentityError(Exception):
-    """Raised when a caller cannot be who it says it is. See resolve_identity."""
+        raise TmuxUnavailable(
+            f"coordination: tmux unreachable on socket {SOCKET!r} "
+            f"(exit {done.returncode}): {detail or 'no diagnostic'}. "
+            "Check sandbox permissions and tmux availability; liveness is unknown.")
+    return {line.strip() for line in done.stdout.splitlines() if line.strip()}
 
 
 def resolve_identity(claimed, verb, require_live=True):
@@ -249,7 +265,12 @@ def broadcast(sender, kind, body, skip=(), resource=None, everyone=False):
     Pass `everyone=True` only for something that genuinely concerns all agents. The
     default is the interested set, which is usually nobody.
     """
-    live = live_agents()
+    try:
+        live = live_agents()
+    except TmuxUnavailable as err:
+        # Notification is best effort; the already-written claim remains valid.
+        print(f"{err} Notification skipped.", file=sys.stderr)
+        return 0
     if everyone or resource is None:
         audience = live
     else:
@@ -1446,7 +1467,11 @@ def main(argv=None):
         except IdentityError as err:
             print(str(err), file=sys.stderr)
             return 2
-    return args.func(args)
+    try:
+        return args.func(args)
+    except TmuxUnavailable as err:
+        print(str(err), file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

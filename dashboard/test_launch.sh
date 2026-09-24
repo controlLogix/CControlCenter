@@ -95,9 +95,9 @@ elif cmd == 'display-message':
     run('shell-posture', '--cli', 'shell', '--posture', 'read-only', success=False, error='cannot enforce')
     check('unverified Grok/custom postures fail closed, including machine clamp')
     persona = root / 'persona secret.txt'; persona.write_text('PRIVATE PERSONA $(touch SHOULD_NOT_EXIST)\nsecond line\n')
-    run('metadata', '--agentdef', 'reviewer', '--posture', 'read-only', '--team', 'TM-042',
+    run('metadata', '--agentdef', 'reviewer', '--posture', 'unrestricted', '--team', 'TM-042',
         '--role', 'reviewer', '--persona-file', str(persona), '--tools', 'Read,Grep', '--deny-tools', 'Write')
-    for field, expected in [('agentdef','reviewer'), ('posture','read-only'), ('team','TM-042'), ('role','reviewer')]:
+    for field, expected in [('agentdef','reviewer'), ('posture','unrestricted'), ('team','TM-042'), ('role','reviewer')]:
         raw = (root / 'home/run' / ('metadata.'+field)).read_bytes()
         assert raw == expected.encode()+b'\n' and len(raw) <= 512
         assert all(32 <= c < 127 for c in raw[:-1])

@@ -566,6 +566,14 @@ def dispatch_one(key=None, cli=None, dry_run=False, limit=10, quiet=False):
         log("dispatch: agent definition %s: %s" % (problem["path"], problem["error"]))
     spec = agentdefs.choose_roster(task, specs, cfg, cli_override=cli)[0]
     cli = spec.cli
+    log("dispatch: lead %s (%s), cli=%s, posture=%s" %
+        (spec.name, spec.path or "built-in fallback", cli, spec.posture))
+    if spec.posture != "unrestricted" or os.environ.get("AGENTMUX_NO_BYPASS") == "1":
+        log("dispatch: sandbox posture is incompatible with coordination for %s; "
+            "tmux socket and claim/journal state are outside the workspace. "
+            "Configure an unrestricted lead and disable AGENTMUX_NO_BYPASS to dispatch."
+            % key)
+        return None
     try:
         brief_text(task, spec)
     except ValueError as err:
@@ -1021,7 +1029,11 @@ def main(argv=None):
     status.set_defaults(func=cmd_pool, action="status")
 
     args = parser.parse_args(argv)
-    return args.func(args)
+    try:
+        return args.func(args)
+    except coordination.TmuxUnavailable as err:
+        log(str(err))
+        return 2
 
 
 if __name__ == "__main__":

@@ -170,6 +170,7 @@ run smoke.sh      bash /dev/fd/3 3< <(tr -d '\r' < dashboard/smoke.sh)
 # test_testlib.sh is held to above.
 run test_board.py python3 dashboard/test_board.py
 run test_dispatch.py python3 dashboard/test_dispatch.py
+run test_sandbox_coordination.py python3 dashboard/test_sandbox_coordination.py
 # EP-015 suites are registered at the scaffold seam before their owning tasks land.
 # Missing suites are explicit skips during the staged build; present suites use
 # the same failure accounting as every existing suite above.

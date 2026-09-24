@@ -280,7 +280,7 @@ card = {"id": "TM-900", "title": "dispatch seam", "body": "Complete task body.",
         "touches": ["first.py", "last/claimed.py"]}
 spec = replace(agentdefs.choose_roster(card, {}, {})[0], name="specialist",
                cli="claude", model="test-model", auth="test-auth",
-               posture="read-only", persona="Review the code carefully.")
+               posture="unrestricted", persona="Review the code carefully.")
 plain = dispatch.write_brief(card).read_text()
 brief = dispatch.write_brief(card, spec).read_text()
 ok("chosen persona appears under its heading",
@@ -336,7 +336,7 @@ spawn = calls[0]
 ok("chosen CLI, model, auth and posture reach spawn",
    result == "tm-900" and spawn == (
        "spawn", "tm-900", "--cli", "claude", "--cwd", str(dispatch.REPO),
-       "--posture", "read-only", "--model", "test-model", "--auth", "test-auth"))
+       "--posture", "unrestricted", "--model", "test-model", "--auth", "test-auth"))
 ok("spawn precedes claims and brief delivery",
    [call[0] for call in calls] == ["spawn", "claim", "claim", "wait", "send"])
 ok("dispatch writes chosen persona and sends the brief path",

@@ -537,6 +537,10 @@ cmd_spawn() (
     printf 'agentmux: AGENTMUX_NO_BYPASS clamps unrestricted to workspace-write\n' >&2
     posture=workspace-write
   fi
+  # Team members must claim, journal and prove identity outside the workspace.
+  if [ -n "$team" ] && [ "$posture" != unrestricted ]; then
+    die "sandbox posture '$posture' is incompatible with dispatch/team coordination: tmux socket and claim/journal state are outside the workspace"
+  fi
   local bypass=0
   [ "$posture" = unrestricted ] && bypass=1
   case "$cli" in

@@ -33,8 +33,11 @@ class TeamCLI(unittest.TestCase):
         return result
 
     def test_roundtrip_json_and_actor(self):
+        # `gaps` joined the payload with roster inference (TM-067): a capability no
+        # definition provides is reported rather than silently dropped, and an empty
+        # roster has an empty list rather than no field at all.
         self.assertEqual(json.loads(self.cli("roster", self.key, "--json").stdout),
-                         {"id": self.key, "members": [], "count": 0})
+                         {"id": self.key, "members": [], "count": 0, "gaps": []})
         proposed = json.loads(self.cli("recruit", self.key, "--json").stdout)
         self.assertEqual(proposed["count"], 2)
         self.assertTrue(all(r["status"] == "proposed" and r["proposed_by"] == "teamcli-test"
