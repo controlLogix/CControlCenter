@@ -216,7 +216,7 @@ run test_auth.py  timeout 400 python3 dashboard/test_auth.py
 # voice-cli plugin's MCP server against a stub of Voice CLI's API. Neither needs the
 # shared server, tmux, the Windows app or the network.
 run test_roll_call.sh bash /dev/fd/18 18< <(tr -d '\r' < dashboard/test_roll_call.sh)
-run test_voice_mcp.py timeout 120 python3 plugins/voice-cli/tests/test_voice_mcp.py
+run test_voice_mcp.py timeout 120 python3 dashboard/test_voice_mcp.py
 
 # test_gateway.py needs no key and makes no network call, so it runs whether or not the
 # Bedrock path is parked. Its last section compares the reconstructed

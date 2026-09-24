@@ -71,7 +71,9 @@ and a last line ending `failed 0`.
   missing summary, and on a run where no tests were found.
 - `plugins/voice-cli/tests/test_voice_mcp.py` has 17 checks. It drives the real MCP
   server over stdio against a stub that enforces the app's guards: loopback Host, no Origin,
-  bearer token.
+  bearer token. The gate reaches it through `dashboard/test_voice_mcp.py`, because
+  `test_residue.sh` stubs every `dashboard/test_*` when it tests the runner. A suite
+  registered by a path outside `dashboard/` would run for real inside that fixture and fail it.
 
 Voice CLI's own pytest suite, 36 tests, needs Windows (WASAPI, SendInput, the tray). Run it
 from `voice-cli/` with `uv run pytest`. It is not in the WSL gate.
