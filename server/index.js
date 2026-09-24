@@ -1,11 +1,21 @@
 'use strict';
 
+// Agent Roll Call: a dependency-free HTTP server.
+// GET /api/agents, GET /api/health, everything else static from web/.
+
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
-const { AGENTS } = require('./agents');
 
 const WEB_ROOT = path.resolve(__dirname, '..', 'web');
+const DEFAULT_PORT = 4173;
+
+const AGENTS = Object.freeze([
+  { id: 'conductor', name: 'Conductor', role: 'orchestrator', provider: 'Claude' },
+  { id: 'developer', name: 'Developer', role: 'full-stack developer', provider: 'Claude' },
+  { id: 'imager', name: 'Imager', role: 'image generator', provider: 'Grok' },
+  { id: 'reviewer', name: 'Reviewer', role: 'final reviewer', provider: 'Grok' },
+].map((a) => Object.freeze({ ...a, avatar: `/avatars/${a.id}.svg` })));
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -18,81 +28,77 @@ const MIME = {
   '.txt': 'text/plain; charset=utf-8',
 };
 
-function send(res, status, body, type) {
+function send(res, status, body, type = 'text/plain; charset=utf-8') {
+  const buf = Buffer.isBuffer(body) ? body : Buffer.from(String(body));
   res.writeHead(status, {
     'Content-Type': type,
-    'Content-Length': Buffer.byteLength(body),
+    'Content-Length': buf.length,
     'X-Content-Type-Options': 'nosniff',
   });
-  res.end(body);
+  res.end(buf);
 }
 
 function sendJson(res, status, value) {
   send(res, status, JSON.stringify(value), 'application/json; charset=utf-8');
 }
 
-function sendText(res, status, text) {
-  send(res, status, text + '\n', 'text/plain; charset=utf-8');
-}
-
-// True when the raw request path tries to climb out of web/ — a ".." segment,
-// literal or percent-encoded, with either slash style.
-function isTraversal(rawPath) {
+// Resolve a request path to a file inside WEB_ROOT, or return an error status.
+function resolveStatic(rawPath) {
   let decoded;
   try {
     decoded = decodeURIComponent(rawPath);
   } catch {
-    return true; // malformed encoding is treated as hostile
+    return { status: 400 };
   }
-  return decoded.split(/[\\/]/).includes('..') || decoded.includes('\0');
+  // Reject traversal in any form: "..", encoded "%2e%2e", backslashes, NUL bytes.
+  if (decoded.includes('\0') || decoded.includes('\\')) return { status: 400 };
+  if (decoded.split('/').includes('..')) return { status: 403 };
+
+  const rel = decoded === '/' ? 'index.html' : decoded.replace(/^\/+/, '');
+  const file = path.resolve(WEB_ROOT, rel);
+  if (file !== WEB_ROOT && !file.startsWith(WEB_ROOT + path.sep)) return { status: 403 };
+  return { file };
 }
 
-function serveStatic(req, res, rawPath) {
-  let relative = decodeURIComponent(rawPath);
-  if (relative.endsWith('/')) relative += 'index.html';
-  const filePath = path.resolve(WEB_ROOT, '.' + relative);
-  // Belt and braces: the resolved file must still be inside web/.
-  if (filePath !== WEB_ROOT && !filePath.startsWith(WEB_ROOT + path.sep)) {
-    return sendText(res, 400, 'Bad Request');
-  }
-  fs.stat(filePath, (err, stat) => {
-    if (err || !stat.isFile()) return sendText(res, 404, 'Not Found');
-    const type = MIME[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
-    res.writeHead(200, {
-      'Content-Type': type,
-      'Content-Length': stat.size,
-      'X-Content-Type-Options': 'nosniff',
-    });
-    if (req.method === 'HEAD') return res.end();
-    fs.createReadStream(filePath).pipe(res);
-  });
-}
-
-function handle(req, res) {
+function handler(req, res) {
   const rawPath = (req.url || '/').split('?')[0].split('#')[0];
+
+  if (rawPath === '/api/agents' || rawPath === '/api/health') {
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      res.setHeader('Allow', 'GET, HEAD');
+      return sendJson(res, 405, { error: 'method not allowed' });
+    }
+    return sendJson(res, 200, rawPath === '/api/agents' ? AGENTS : { ok: true });
+  }
+  if (rawPath.startsWith('/api/')) return sendJson(res, 404, { error: 'not found' });
 
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.setHeader('Allow', 'GET, HEAD');
-    return sendText(res, 405, 'Method Not Allowed');
+    return send(res, 405, 'Method Not Allowed');
   }
-  if (!rawPath.startsWith('/') || isTraversal(rawPath)) {
-    return sendText(res, 400, 'Bad Request');
-  }
-  if (rawPath === '/api/agents') return sendJson(res, 200, AGENTS);
-  if (rawPath === '/api/health') return sendJson(res, 200, { ok: true });
-  if (rawPath === '/api' || rawPath.startsWith('/api/')) return sendText(res, 404, 'Not Found');
-  return serveStatic(req, res, rawPath);
-}
 
-function createServer() {
-  return http.createServer(handle);
-}
+  const { status, file } = resolveStatic(rawPath);
+  if (status) return send(res, status, status === 400 ? 'Bad Request' : 'Forbidden');
 
-if (require.main === module) {
-  const port = Number(process.env.PORT) || 4173;
-  createServer().listen(port, () => {
-    console.log(`Agent Roll Call on http://localhost:${port}`);
+  fs.stat(file, (err, stat) => {
+    if (err || !stat.isFile()) return send(res, 404, 'Not Found');
+    fs.readFile(file, (readErr, data) => {
+      if (readErr) return send(res, 404, 'Not Found');
+      const type = MIME[path.extname(file).toLowerCase()] || 'application/octet-stream';
+      send(res, 200, data, type);
+    });
   });
 }
 
-module.exports = { createServer };
+function createServer() {
+  return http.createServer(handler);
+}
+
+module.exports = { createServer, AGENTS, WEB_ROOT, DEFAULT_PORT };
+
+if (require.main === module) {
+  const port = Number(process.env.PORT) || DEFAULT_PORT;
+  createServer().listen(port, () => {
+    console.log(`Agent Roll Call listening on http://localhost:${port}`);
+  });
+}
