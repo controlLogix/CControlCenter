@@ -174,6 +174,10 @@ function renderer(store, rows) {
   const ctx = {els, el: (tag, cls, text) => new Node(tag, cls, text),
     feedEntries: rows.feed, feedPrefs: {max: 500}, feedPasses: () => true,
     publishRows: (name, list) => { published[name] = list; }, published,
+    // The queue, journal and feed renderers tag agent names for the live pass.
+    liveAgents: new Map(),
+    markAgent: (node, name) => { if (node && name) node.dataset.agent = name; return node; },
+    refreshLiveMarks: () => {},
     updateFeedBadge() {}, markQueueSeen() {}, clock: x => x, say() {},
     MSG_KINDS: new Set(['status']), JOURNAL_KINDS: new Set(['note']),
     issueLink: key => new Node('a', 't-key', key), ticketActions: () => new Node('div', 'ticket-actions'),

@@ -73,6 +73,8 @@ context.window.CCC = {
     assert.equal(url, 'api/board/roster?id=TM-051');
     return {members, gaps: ['Capability <img src=x onerror=alert(2)>: no definition provides it']};
   },
+  markAgent: (node, name) => { if (node && name) node.dataset = {agent: name}; return node; },
+  refreshLiveMarks: () => {},
   registerPanel: (view, name, fn) => {
     assert.equal(view, 'organization'); assert.equal(name, 'teams'); loader = fn;
   }

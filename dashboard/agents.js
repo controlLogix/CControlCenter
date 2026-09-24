@@ -175,7 +175,9 @@
       for (const agent of data.agents) {
         const card = el('article', 'agents-definition');
         const title = el('div', 'agents-title');
-        title.appendChild(el('h4', '', agent.name));
+        // A definition is a file; an AGENT is a running process. Marking the name
+        // here is what tells you which of these definitions is currently spawned.
+        title.appendChild(window.CCC.markAgent(el('h4', '', agent.name), agent.name));
         title.appendChild(el('span', 'agents-scope', agent.scope));
         card.appendChild(title);
         if (agent.description) card.appendChild(el('p', '', agent.description));
@@ -200,6 +202,7 @@
       }
       nodes.push(list);
       content.replaceChildren(...nodes);
+      window.CCC.refreshLiveMarks(document.getElementById('viewAgents'));
       say(stamp, `${data.agents.length} definitions · ${data.problems.length} problems`);
     } catch (err) {
       // Retain the last successful result, but clearly mark it as stale.

@@ -20,11 +20,26 @@
     for (const [id, rows] of groups) {
       const first = rows[0];
       const thread = api.collapsible(`chatter:thread:${id}`, 'chatter-thread', false);
-      thread.append(api.el('summary', '', `${first.pair.join(' ↔ ')} · ${first.ref || 'No card'} · ${rows.length} events`));
+      const head = api.el('summary', '', '');
+      first.pair.forEach((who, index) => {
+        if (index) head.append(document.createTextNode(' ↔ '));
+        head.append(api.markAgent(api.el('span', 'chat-who', who), who));
+      });
+      head.append(document.createTextNode(` · ${first.ref || 'No card'} · ${rows.length} events`));
+      thread.append(head);
       for (const row of rows) {
         const item = api.collapsible(`chatter:message:${row.id}`, `chatter-item state-${row.state}`, false);
-        const summary = api.el('summary', '', `${row.at} · ${row.sender} → ${row.recipient || 'broadcast'} · `);
-        summary.append(api.el('strong', '', row.state), document.createTextNode(` · ${row.kind}`));
+        // Sender and recipient are separate elements so each can be marked live and
+        // clicked through to its own pane; as one interpolated string neither could.
+        const summary = api.el('summary', '', `${row.at} · `);
+        summary.append(api.markAgent(api.el('span', 'chat-who', row.sender), row.sender),
+                       document.createTextNode(' → '),
+                       row.recipient
+                         ? api.markAgent(api.el('span', 'chat-who', row.recipient), row.recipient)
+                         : api.el('span', 'chat-who', 'broadcast'),
+                       document.createTextNode(' · '),
+                       api.el('strong', '', row.state),
+                       document.createTextNode(` · ${row.kind}`));
         item.append(summary, api.el('pre', '', row.body));
         item.append(api.el('p', '', [row.reason, row.attempts != null ? `Attempts: ${row.attempts}` : '',
           row.next_at ? `Next attempt: ${new Date(row.next_at * 1000).toLocaleString()}` : '',
@@ -34,6 +49,7 @@
       list.append(thread);
     }
     if (!groups.size) list.append(api.el('p', 'empty', entries.length ? 'Nothing matches these filters.' : 'No conversation history yet.'));
+    api.refreshLiveMarks(list);
   }
   function select(label, parent) {
     const wrap = api.el('label', '', label + ' '), input = api.el('select', '');

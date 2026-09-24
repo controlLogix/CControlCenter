@@ -19,6 +19,7 @@
 
 import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 
 const [baseURL, playwrightDir, brokerPort] = process.argv.slice(2);
 if (!baseURL || !playwrightDir) {
@@ -673,6 +674,131 @@ await test('a view script that fails to load is named, and the notice sticks', a
   assert.ok(seen.some(line => /failed to load/i.test(line)),
             'nothing was written to the console either');
   await broken.close();
+});
+
+// ── what is running, and getting to its pane ────────────────────────────────
+//
+// Every view names agents; none of them used to say which of those names is a
+// process that exists right now. These check the marking is driven by the LIVE
+// roster rather than by the text, because the board is full of historical
+// assignees - `claude`, `tm-041` - that must stay inert.
+
+// The roster is STUBBED rather than spawned. This suite runs on a throwaway home
+// with no tmux, and what is under test is the frontend's marking logic, not the
+// harness's ability to start a process. Stubbing also buys the one case a real
+// spawn cannot easily produce: a live agent and a dead one side by side, which is
+// the whole point - if everything were marked the mark would mean nothing.
+const LIVE = 'e2e-live-agent';
+const DEAD = 'e2e-dead-agent';
+
+async function withRoster(target, names) {
+  await target.route('**/api/agents', async (route) => {
+    const response = await route.fetch();
+    const body = await response.json();
+    body.agents = names.map((name) => ({
+      name, cli: 'shell', state: 'detached', task: 'TM-E2E',
+      cwd: '/tmp', perms: 'UNRESTRICTED', started: new Date().toISOString(),
+    }));
+    body.tmux_server = true;
+    await route.fulfill({ response, json: body });
+  });
+}
+
+await test('a running agent is marked and a finished one is not', async () => {
+  // Two tasks on the board, one assigned to each name.
+  await show('board');
+  await tab('board', 'boardtasks');
+  const epic = await page.$eval('#boardList details.epic[data-epic]', (n) => n.dataset.epic);
+  for (const who of [LIVE, DEAD]) {
+    await page.fill(`#boardList details.epic[data-epic="${epic}"] input[placeholder="new task"]`,
+                    `task for ${who}`);
+    await page.fill(`#boardList details.epic[data-epic="${epic}"] input[placeholder="agent"]`, who);
+    await page.click(`#boardList details.epic[data-epic="${epic}"] button:has-text("add task")`);
+    await page.waitForFunction((n) => document.querySelector('#boardList')?.textContent.includes(n),
+                              who, { timeout: 15000 });
+  }
+  await withRoster(page, [LIVE]);
+  // Force the poll that owns the roster, then let the board redraw.
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => !!window.CCC);
+  await show('board');
+  await page.waitForFunction((n) => {
+    const node = [...document.querySelectorAll('[data-agent]')].find(e => e.dataset.agent === n);
+    return node && node.classList.contains('is-live');
+  }, LIVE, { timeout: 20000 });
+
+  const marked = await page.$$eval('#viewBoard [data-agent]', (ns) => ns.map(n => ({
+    name: n.dataset.agent, live: n.classList.contains('is-live') })));
+  const live = marked.filter(m => m.live).map(m => m.name);
+  const inert = marked.filter(m => !m.live).map(m => m.name);
+  assert.ok(live.includes(LIVE), `${LIVE} is running and was not marked`);
+  assert.ok(inert.includes(DEAD), `${DEAD} is not running and was marked`);
+  assert.deepEqual([...new Set(live)], [LIVE],
+    'something other than the running agent was marked live');
+});
+
+await test('a live name is a button; a finished one is inert text', async () => {
+  const live = await page.$(`#viewBoard [data-agent="${LIVE}"]`);
+  assert.equal(await live.getAttribute('role'), 'button');
+  assert.equal(await live.getAttribute('tabindex'), '0');
+  assert.match(await live.getAttribute('title'), /is running.*click to open its pane/);
+  const dead = await page.$(`#viewBoard [data-agent="${DEAD}"]`);
+  assert.equal(await dead.getAttribute('role'), null, 'a dead agent must not be a button');
+  assert.equal(await dead.getAttribute('title'), null,
+               'a dead agent must not claim it can be opened');
+});
+
+await test('clicking a live item opens the pane serving it', async () => {
+  await page.click(`#viewBoard [data-agent="${LIVE}"]`);
+  await page.waitForSelector('#viewTerminals:not([hidden])', { timeout: 15000 });
+  await page.waitForFunction(() => document.querySelectorAll('.cell.focused').length === 1,
+                             null, { timeout: 15000 });
+  const focused = await page.$eval('.cell.focused', (n) => n.textContent.slice(0, 80));
+  assert.ok(focused.includes(LIVE), `focused the wrong pane: ${focused}`);
+  assert.equal(await page.$eval('#grid', (n) => n.classList.contains('focusing')), true);
+});
+
+await test('clicking a finished agent does nothing at all', async () => {
+  await show('board');
+  await page.waitForTimeout(800);
+  await page.click(`#viewBoard [data-agent="${DEAD}"]`);
+  await page.waitForTimeout(700);
+  const visible = await page.$$eval('.views > .view',
+    (ns) => ns.filter(n => !n.hidden).map(n => n.id));
+  assert.deepEqual(visible, ['viewBoard'],
+    'clicking a dead agent navigated somewhere; it must be inert');
+});
+
+await test('an agent name never wraps mid-word', async () => {
+  // "demo-beta" broken across two lines is unreadable and ambiguous next to
+  // "demo-alpha". The task TITLE is the truncatable thing in that row.
+  await show('board');
+  await page.waitForTimeout(1200);
+  const wrapped = await page.$$eval('[data-agent]',
+    (ns) => ns.filter(n => n.getClientRects().length > 1).map(n => n.dataset.agent));
+  assert.deepEqual(wrapped, []);
+});
+
+await test('every renderer that names an agent tags it', async () => {
+  // Source-level, deliberately. Whether a given view has a row on screen depends on
+  // what happens to be in the store; whether its RENDERER tags agent names is a
+  // property of the code, and a renderer that forgets should fail here rather than
+  // be noticed by an operator wondering why chatter never lights up.
+  const sources = {
+    'app.js (board, queue, journal, feed)': ['t-agent', 'msg-who', 'f-who', 'epic-agent'],
+    'chatter.js': ['chat-who'],
+    'agents.js': ['agent.name'],
+    'teams.js': ['member.agent_name'],
+  };
+  for (const [file, needles] of Object.entries(sources)) {
+    const name = file.split(' ')[0];
+    const src = fs.readFileSync('dashboard/' + name, 'utf8');
+    assert.match(src, /markAgent\(/, `${name} names agents but never calls markAgent`);
+    for (const needle of needles) {
+      const at = src.indexOf(needle);
+      assert.ok(at > 0, `${name}: expected to find ${needle}`);
+    }
+  }
 });
 
 // ── and the console stayed quiet ───────────────────────────────────────────

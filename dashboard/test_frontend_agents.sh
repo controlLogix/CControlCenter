@@ -85,6 +85,10 @@ vm.runInNewContext(source, {
         }
         assert.equal(url, 'api/board/agents'); calls++; return payload;
       },
+      // A definition is a file; an agent is a running process. The view tags the
+      // name so the live pass can say which definitions are currently spawned.
+      markAgent: (node, name) => { if (node && name) node.dataset = {agent: name}; return node; },
+      refreshLiveMarks: () => {},
       registerPanel: (...args) => {
         assert.equal(args[0], 'organization'); assert.equal(args[1], 'agents');
         assert.equal(args.length, 3); loader = args[2];

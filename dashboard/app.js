@@ -1447,7 +1447,118 @@ function relayout() {
   requestAnimationFrame(() => panes.forEach((rec) => applyFit(rec)));
 }
 
+// ── which agents are alive, and getting from a row to its pane ───────────────
+//
+// THE PROBLEM THIS SOLVES. Every view in this dashboard names agents - the board
+// assigns tasks to them, chatter is between them, the journal and the queue are
+// written by them - and none of it said which of those names is a process running
+// right now. A board showing `netcap-dev` looks identical whether that agent is
+// mid-edit or was torn down an hour ago, and finding its pane meant reading the
+// name, switching to Terminals and hunting for it by eye.
+//
+// So: ONE roster, refreshed by the poll that already fetches it, and one marking
+// pass that decorates anything carrying a data-agent attribute. A renderer opts in
+// by tagging an element with the agent's name; it does not have to know whether
+// that agent is live, subscribe to anything, or re-render when the answer changes.
+//
+// The marking is DECOUPLED FROM RENDERING on purpose. Views poll at their own
+// intervals (the board not at all), so tying "is it live" to a re-render would mean
+// a task showing a dead agent as running until something unrelated redrew it. The
+// pass walks the DOM instead, so an agent dying updates every view that is on
+// screen within one tick.
+const liveAgents = new Map();          // name -> agent record from /api/agents
+
+function isLiveAgent(name) {
+  return typeof name === 'string' && liveAgents.has(name);
+}
+
+// Jump to the pane serving this agent. Sets focus rather than toggling it: arriving
+// from a board card, "focus" is an instruction, not a switch whose previous position
+// the operator is tracking.
+function focusAgent(name) {
+  if (!isLiveAgent(name)) return false;
+  showView('terminals');
+  focused = name;
+  applyFocus();
+  const rec = panes.get(name);
+  if (rec && rec.cell) {
+    requestAnimationFrame(() => {
+      rec.cell.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      rec.cell.classList.add('just-focused');
+      setTimeout(() => rec.cell.classList.remove('just-focused'), 1200);
+    });
+  }
+  return true;
+}
+
+// Tag an element as belonging to an agent. `refreshLiveMarks` does the rest.
+function markAgent(node, name) {
+  if (!node || typeof name !== 'string' || !name) return node;
+  node.dataset.agent = name;
+  return node;
+}
+
+// Walk everything tagged with data-agent and bring it into line with the roster.
+// Cheap: an attribute selector over the document, only the classes that actually
+// changed are touched, and the click handler is attached once per element.
+function refreshLiveMarks(root = document) {
+  for (const node of root.querySelectorAll('[data-agent]')) {
+    const name = node.dataset.agent;
+    const live = isLiveAgent(name);
+    if (node.classList.contains('is-live') === live) {
+      if (!live) continue;                      // nothing to do, still dead
+    }
+    node.classList.toggle('is-live', live);
+    if (!live) {
+      node.removeAttribute('title');
+      node.removeAttribute('role');
+      node.removeAttribute('tabindex');
+      continue;
+    }
+    const agent = liveAgents.get(name);
+    const task = agent && agent.task ? ` · ${agent.task}` : '';
+    node.title = `${name} is running (${agent && agent.cli || '?'}${task}) — click to open its pane`;
+    node.setAttribute('role', 'button');
+    node.tabIndex = 0;
+  }
+  if (!refreshLiveMarks.wired) {
+    refreshLiveMarks.wired = true;
+    // ONE delegated listener on the document rather than one per row. These lists
+    // are rebuilt wholesale on every poll, so per-element handlers would be
+    // re-attached hundreds of times an hour and leak with the nodes they were on.
+    const activate = (ev) => {
+      const node = ev.target.closest('[data-agent].is-live');
+      if (!node) return;
+      if (ev.type === 'keydown' && ev.key !== 'Enter' && ev.key !== ' ') return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      focusAgent(node.dataset.agent);
+    };
+    document.addEventListener('click', activate, true);
+    document.addEventListener('keydown', activate, true);
+  }
+}
+
 function syncAgents(agents) {
+  // The roster first: everything that decorates a view reads this, and a board
+  // rendered a moment later must not be marked against a stale one.
+  //
+  // `stale` means the sidecars are there but the tmux session is not, so those
+  // names are deliberately NOT in the roster - a row that offers to open a pane
+  // which no longer exists is worse than one that offers nothing.
+  const rostered = new Set();
+  for (const agent of agents) {
+    if (agent && typeof agent.name === 'string' && agent.name
+        && agent.state !== 'stale') {
+      liveAgents.set(agent.name, agent);
+      rostered.add(agent.name);
+    }
+  }
+  for (const name of [...liveAgents.keys()]) {
+    if (!rostered.has(name)) liveAgents.delete(name);
+  }
+  refreshLiveMarks();
+
   const list = agents.slice();
   const seen = new Set();
 
@@ -1894,7 +2005,7 @@ function drawFeed() {
     const head = el('summary', 'item-summary');
     head.appendChild(el('span', 'f-at', (e.at || '').slice(11, 19)));
     head.appendChild(el('span', `f-src ${e.source}`, e.source));
-    head.appendChild(el('span', 'f-who', e.who || '—'));
+    head.appendChild(markAgent(el('span', 'f-who', e.who || '—'), e.who));
     head.appendChild(el('span', 'f-text item-preview', e.text));
     if (e.ref) {
       const ref = el('span', 'f-ref', e.ref);
@@ -1909,6 +2020,7 @@ function drawFeed() {
   // slow background poll so the fault badge keeps working while you are elsewhere,
   // and Status is one scroll container shared by four tabs - so an unguarded
   // follow yanked whatever you were reading in Journal to the bottom every 30s.
+  refreshLiveMarks(els.feedList);
   if (pinned && view && panelVisible('status', 'feed')) {
     requestAnimationFrame(() => { view.scrollTop = view.scrollHeight; });
   }
@@ -2630,8 +2742,8 @@ async function loadQueue() {
       const row = collapsible(`queue:${key}`, MSG_KINDS.has(kind) ? `msg ${kind}` : 'msg', false);
       const head = el('summary', 'item-summary');
       head.appendChild(el('span', 'msg-at', clock(m.at)));
-      const who = el('span', 'msg-who', String(m.sender || '?'));
-      if (m.recipient) who.appendChild(el('span', 'to', ` \u2192 ${m.recipient}`));
+      const who = markAgent(el('span', 'msg-who', String(m.sender || '?')), m.sender);
+      if (m.recipient) who.appendChild(markAgent(el('span', 'to', ` \u2192 ${m.recipient}`), m.recipient));
       head.appendChild(who);
       head.appendChild(el('span', 'msg-kind', kind));
       head.appendChild(el('span', 'item-preview', String(m.body || '')));
@@ -2639,6 +2751,7 @@ async function loadQueue() {
       els.queueList.appendChild(row);
     }
 
+    refreshLiveMarks(els.queueList);
     say(els.queueStamp, `${rows.length} of ${all.length} message${all.length === 1 ? '' : 's'}`);
     if (els.queueFollow.checked && els.queueList.lastElementChild) {
       els.queueList.lastElementChild.scrollIntoView({ block: 'nearest' });
@@ -2937,6 +3050,17 @@ async function loadBoard() {
       const tasks = e.key ? allTasks.filter((t) => t.epic === e.key) : ungrouped;
       const done = tasks.filter((t) => t.status === 'done').length;
       if (tasks.length) head.appendChild(el('span', 'epic-meta', `${done}/${tasks.length}`));
+      // An epic is "running" when something inside it is. Put it on the SUMMARY so a
+      // collapsed card still says so - otherwise the one signal worth seeing is the
+      // one hidden behind the disclosure that made the board readable.
+      const busy = new Set();
+      for (const [name, agent] of liveAgents) {
+        if (tasks.some((t) => t.key === agent.task || t.assignee === name)) busy.add(name);
+      }
+      for (const name of [...busy].sort()) {
+        head.appendChild(markAgent(el('span', 'epic-agent', name), name));
+      }
+      if (busy.size) card.classList.add('has-live');
       head.appendChild(el('span', 'spacer'));
       card.appendChild(head);
       makeCardMovable(card, grip, e.key || '');
@@ -2967,7 +3091,18 @@ async function loadBoard() {
         r.appendChild(statusSelect('task', t.key, t.status, TASK_STATUSES,
                                    loadBoard, els.boardStamp));
         r.appendChild(el('span', 't-title', String(t.title || '')));
-        if (t.assignee) r.appendChild(el('span', 't-agent', String(t.assignee)));
+        if (t.assignee) {
+          r.appendChild(markAgent(el('span', 't-agent', String(t.assignee)), t.assignee));
+        }
+        // An agent can be bound to a card from ITS side - the `.task` sidecar -
+        // without the card naming it back. That is the normal shape during a run,
+        // so the board looks both ways; otherwise a card being actively worked on
+        // shows nothing at all.
+        for (const [name, agent] of liveAgents) {
+          if (agent.task === t.key && name !== t.assignee) {
+            r.appendChild(markAgent(el('span', 't-agent working', name), name));
+          }
+        }
         r.appendChild(deleteButton('task', t.key, `${t.key} ${t.title || ''}`,
           loadBoard, els.boardStamp, () => post('api/board/delete', { id: t.key, actor: 'dashboard' })));
         rows.appendChild(r);
@@ -3025,6 +3160,7 @@ async function loadBoard() {
       els.boardList.appendChild(card);
     }
     applyBoardFree();
+    refreshLiveMarks(els.boardList);
     say(els.boardStamp, `${epics.length} epic${epics.length === 1 ? '' : 's'}`
       + `, ${allTasks.length} task${allTasks.length === 1 ? '' : 's'}`);
   } catch (err) {
@@ -3059,11 +3195,12 @@ async function loadJournal() {
       head.appendChild(el('span', 'jentry-subject', String(j.subject || '(no subject)')));
       head.appendChild(el('span', 'status-chip', kind));
       head.appendChild(el('span', 'epic-meta', clock(j.at)));
-      if (j.agent) head.appendChild(el('span', 'epic-meta', String(j.agent)));
+      if (j.agent) head.appendChild(markAgent(el('span', 'epic-meta j-agent', String(j.agent)), j.agent));
       box.appendChild(head);
       if (j.body) box.appendChild(el('p', 'jentry-body', String(j.body)));
       els.journalList.appendChild(box);
     }
+    refreshLiveMarks(els.journalList);
     say(els.journalStamp, `${rows.length} of ${all.length} entr${all.length === 1 ? 'y' : 'ies'}`);
   } catch (err) {
     say(els.journalStamp, `journal unavailable: ${err.message}`);
@@ -3710,7 +3847,9 @@ applyBuiltinPanels();
 
 window.CCC = { el, getJSON, post, say, deleteButton, collapsible, settingEditor,
                registerView, registerPanel, registerCard, publishRows, download,
-               stateChip, initCollapsibles };
+               stateChip, initCollapsibles,
+               // Live-agent marking, for the views drawn by their own scripts.
+               markAgent, refreshLiveMarks, isLiveAgent, focusAgent };
 window.dispatchEvent(new Event('ccc:ready'));
 
 // A VIEW SCRIPT THAT DID NOT LOAD MUST SAY SO.

@@ -53,7 +53,8 @@
     save.disabled = true;
     for (const member of roster.members) {
       const row = el('div', 'teams-member');
-      row.appendChild(el('strong', '', member.agent_name));
+      row.appendChild(window.CCC.markAgent(el('strong', '', member.agent_name),
+                                           member.agent_name));
       row.appendChild(el('span', '', `${member.role} · ${member.status}`));
       if (member.approved_by) row.appendChild(el('span', '', `Approved by ${member.approved_by}`));
       if (member.status === 'approved' && !closed && config.dashboardMayHire === true) {
@@ -169,6 +170,7 @@
     if (!tasks.length) list.appendChild(el('p', 'empty', 'No task cards found.'));
     tasks.forEach((task, index) => list.appendChild(rosterCard(task, rosters[index], data.config)));
     ui.content.replaceChildren(settings, list);
+    window.CCC.refreshLiveMarks(ui.content);
     say(ui.stamp, `${tasks.length} task rosters loaded`);
   }
 

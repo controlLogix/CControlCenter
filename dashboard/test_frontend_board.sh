@@ -69,6 +69,11 @@ function setup(seed) {
       n.dataset.collapseKey = key;      // as wireCollapsible does on the real one
       return n;
     },
+    // Live-agent marking. The renderer tags names; a separate pass decorates them,
+    // so the fixture only has to record the tag.
+    liveAgents: new Map(),
+    markAgent:(node, name) => { if (node && name) node.dataset.agent = name; return node; },
+    refreshLiveMarks:() => {},
     rememberOpen:(key, open) => { store.set('open:' + key, open); },
     localStorage:{
       getItem:(k)=>store.has(k)?store.get(k):null,
@@ -224,6 +229,29 @@ await test('empty board and read failures remain visible',async()=>{
   assert.equal(nodes(s.root,'empty').length,1);
   s.ctx.getJSON=async()=>{throw Error('offline');}; await s.ctx.loadBoard();
   assert.equal(s.ctx.els.boardStamp.textContent,'board unavailable: offline');
+});
+await test('an assignee is tagged with its agent name, for the live pass to find',async()=>{
+  const s=setup(); await s.ctx.loadBoard();
+  const tagged=nodes(s.root).filter(n=>n.dataset.agent);
+  assert.deepEqual(tagged.map(n=>n.dataset.agent),['worker'],
+                   'the task assignee must carry data-agent');
+  assert.equal(tagged[0].className,'t-agent');
+});
+await test('an agent bound to a card from ITS side is shown too',async()=>{
+  // The `.task` sidecar binds agent -> card without the card naming the agent
+  // back. That is the normal shape during a run, so the board looks both ways.
+  const s=setup();
+  s.ctx.liveAgents.set('runner',{name:'runner',task:'TM-038',cli:'codex'});
+  await s.ctx.loadBoard();
+  const names=nodes(s.root).filter(n=>n.dataset.agent).map(n=>n.dataset.agent);
+  assert.ok(names.includes('runner'),'an agent bound by sidecar was not shown: '+names);
+  const epicCard=nodes(s.root,'epic')[0];
+  assert.ok(epicCard.classList.contains('has-live'),
+            'the epic containing a worked-on task must be marked');
+});
+await test('an epic with nothing running is not marked',async()=>{
+  const s=setup(); await s.ctx.loadBoard();
+  assert.ok(!nodes(s.root,'epic')[0].classList.contains('has-live'));
 });
 await test('the stamp counts both epics and tasks',async()=>{
   const s=setup(); await s.ctx.loadBoard();
