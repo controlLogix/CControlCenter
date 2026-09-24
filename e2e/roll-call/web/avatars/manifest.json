@@ -1,0 +1,39 @@
+{
+  "set": "Agent Roll Call",
+  "model": "grok-4.7",
+  "note": "Hand-written SVG marks. This run requires original SVG and forbids image APIs, so there is no seed and no sampler settings.",
+  "avatars": [
+    {
+      "id": "conductor",
+      "file": "conductor.svg",
+      "agent": "conductor",
+      "model": "grok-4.7",
+      "intent": "A gold hub tied to three cream nodes shows the orchestrator holding the other agents in one run.",
+      "palette": ["#14161f", "#1e2230", "#f0b429", "#f4f0e6"]
+    },
+    {
+      "id": "developer",
+      "file": "developer.svg",
+      "agent": "developer",
+      "model": "grok-4.7",
+      "intent": "Three stacked slabs in deep teal, bright teal, and cream, with a code chevron, show the full stack a developer ships.",
+      "palette": ["#14161f", "#1e2230", "#14665c", "#2ec4b6", "#f4f0e6"]
+    },
+    {
+      "id": "imager",
+      "file": "imager.svg",
+      "agent": "imager",
+      "model": "grok-4.7",
+      "intent": "A violet picture frame holding a gold sun and two peaks shows the picture an image generator makes.",
+      "palette": ["#14161f", "#1e2230", "#8b6cff", "#221c33", "#f0b429", "#c3b4ff", "#f4f0e6"]
+    },
+    {
+      "id": "reviewer",
+      "file": "reviewer.svg",
+      "agent": "reviewer",
+      "model": "grok-4.7",
+      "intent": "A crimson shield with a cream check shows the final reviewer marking the work approved.",
+      "palette": ["#14161f", "#1e2230", "#ff4d57", "#f4f0e6"]
+    }
+  ]
+}

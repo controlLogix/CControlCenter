@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "name": "four-agent-e2e",
+  "description": "Four-agent coordination test: a Claude conductor, a Claude full-stack developer, a Grok image generator and a Grok final reviewer build BRIEF.md with one shared vocabulary; each agent's session closes only after REVIEW APPROVE and ACCEPT.",
+  "inputs": {
+    "max_rounds": {
+      "description": "Maximum REVISE rounds per deliverable before the conductor sends HANDOFF",
+      "default": "3"
+    },
+    "workdir": {
+      "description": "Repository the agents build in (the consumer stays the parent, which has the responsive repo lead and reviewer)",
+      "default": "coord-e2e"
+    }
+  },
+  "session": "coord-{{run_id}}",
+  "cwd": "{{consumer}}/{{inputs.workdir}}",
+  "layout": "grid",
+  "agents": [
+    {
+      "id": "conductor",
+      "role": "orchestrator",
+      "candidates": [
+        "claude:opus",
+        "claude:sonnet"
+      ],
+      "coordinates_only": true,
+      "auto_approve": true,
+      "skills": [
+        "orchestration-conduct",
+        "{{consumer}}/{{inputs.workdir}}/.claude/skills/agent-verbiage"
+      ],
+      "instructions": "Mission: get BRIEF.md built by developer (backend, frontend, tests, README) and imager (4 avatars), reviewed by reviewer, and closed. Every message you send starts with the agent-verbiage header line. 1) Send BRIEF to developer and to imager; the imager needs the avatar list from BRIEF.md, and the developer references avatars as /avatars/<id>.svg. 2) When a worker sends DELIVER, send that deliverable to reviewer. 3) On REVIEW CHANGES, send REVISE to the worker with the findings, at most {{inputs.max_rounds}} rounds, then HANDOFF. 4) On REVIEW APPROVE, check the deliverable yourself (read the files, run `node --test` for the developer) and send ACCEPT, then CLOSE to that worker. 5) When a worker answers CLOSED, end its pane with `tmux kill-pane -t <pane>` (the pane id is in `ao-topology status --run <run_dir> --json`). 6) After both workers are closed, ask the reviewer for one final REVIEW of the whole repo; on APPROVE send ACCEPT and CLOSE to the reviewer, then kill its pane after CLOSED. 7) Write artifacts/REPORT.md, post `/mnt/c/Users/brent/ticket-board/.bytedesk/task-management/bin/tm comment TM-001 \"DONE TM-053 ...\"` with the run id, and finally run `ao-topology stop --run <run_dir> --keep-files`. Never close an agent without both REVIEW APPROVE and ACCEPT."
+    },
+    {
+      "id": "developer",
+      "role": "implementer",
+      "candidates": [
+        "claude:opus",
+        "claude:sonnet"
+      ],
+      "auto_approve": true,
+      "skills": [
+        "{{consumer}}/{{inputs.workdir}}/.claude/skills/agent-verbiage"
+      ],
+      "instructions": "You are the full-stack developer. Build the backend (server/), frontend (web/index.html, app.js, style.css), tests (node --test) and README.md exactly as BRIEF.md says; do not create web/avatars/* (the imager owns them), but show a neutral placeholder if an avatar file is missing. Avatar paths in /api/agents are /avatars/<id>.svg, and the page frames each avatar as a square with object-fit: cover. Start every reply with the agent-verbiage header line: CLAIM when you start, TOUCH before editing, DELIVER when done (list files and the exact check commands). Commit your work to git with clear messages. Work only inside this repository. After CLOSE, answer CLOSED and stop."
+    },
+    {
+      "id": "imager",
+      "role": "image-gen",
+      "candidates": [
+        "grok:grok-4.7",
+        "grok:grok-4.6"
+      ],
+      "auto_approve": true,
+      "skills": [
+        "{{consumer}}/{{inputs.workdir}}/.claude/skills/agent-verbiage"
+      ],
+      "instructions": "You are the image generator. Draw one original SVG avatar per agent in BRIEF.md (conductor, developer, imager, reviewer) as web/avatars/<id>.svg: viewBox=\"0 0 256 256\", no embedded raster, no external references, no text that must be read at small sizes, visually one set, readable at 96px, and no real people or brand logos. This run's brief overrides your role pack's raster-only rule: SVG is the deliverable here. Do not call any image API and do not use API keys; you work only through your own tools. Write web/avatars/manifest.json listing for each file: file, agent, model (your model id), intent (one sentence), palette. Check each file is well-formed XML (for example with `python3 -c 'import xml.dom.minidom,sys;xml.dom.minidom.parse(sys.argv[1])' <file>`). Start every reply with the agent-verbiage header line: CLAIM, TOUCH web/avatars/, DELIVER (list the files and the manifest). Work only inside web/avatars/. After CLOSE, answer CLOSED and stop."
+    },
+    {
+      "id": "reviewer",
+      "role": "reviewer",
+      "candidates": [
+        "grok:grok-4.7",
+        "grok:grok-4.6"
+      ],
+      "auto_approve": true,
+      "skills": [
+        "{{consumer}}/{{inputs.workdir}}/.claude/skills/agent-verbiage"
+      ],
+      "instructions": "You are the final reviewer. Your verdict words come from agent-verbiage and replace the role pack's disposition words: the first line of every reply is `REVIEW APPROVE|CHANGES|BLOCKED <deliverable> from=reviewer to=conductor`, followed by numbered findings (file:line, what, why, fix). Check against BRIEF.md: run `node --test`, start `PORT=4199 node server/index.js` in the background, curl /api/health, /api/agents, a 404 and a `..` path, then stop the server; check that each of the 4 avatars is a well-formed SVG with viewBox 0 0 256 256, no <image> or external href, that manifest.json lists all 4, and that the page frames avatars square. Never edit files, never commit. After CLOSE, answer CLOSED and stop."
+    }
+  ],
+  "stages": [
+    {
+      "stage": "brief",
+      "from": "conductor",
+      "to": [
+        "developer",
+        "imager"
+      ],
+      "description": "BRIEF to both workers"
+    },
+    {
+      "stage": "build",
+      "wait_for": [
+        "developer",
+        "imager"
+      ],
+      "timeout": "45m",
+      "description": "workers CLAIM, TOUCH, then DELIVER"
+    },
+    {
+      "stage": "review",
+      "from": "conductor",
+      "to": [
+        "reviewer"
+      ],
+      "timeout": "20m",
+      "description": "each DELIVER goes to the reviewer for REVIEW"
+    },
+    {
+      "stage": "revise",
+      "from": "conductor",
+      "to": [
+        "developer",
+        "imager"
+      ],
+      "loop_until": "reviewer.verdict == APPROVE",
+      "max_rounds": 3,
+      "description": "REVISE with findings until REVIEW APPROVE"
+    },
+    {
+      "stage": "accept-close",
+      "from": "conductor",
+      "to": [
+        "developer",
+        "imager"
+      ],
+      "description": "ACCEPT then CLOSE each approved worker; kill its pane after CLOSED"
+    },
+    {
+      "stage": "final-review",
+      "from": "conductor",
+      "to": [
+        "reviewer"
+      ],
+      "timeout": "20m",
+      "description": "whole-repo REVIEW, then ACCEPT, CLOSE, CLOSED for the reviewer; DONE and stop the run"
+    }
+  ],
+  "artifacts": {
+    "dir": "artifacts"
+  }
+}
