@@ -66,8 +66,12 @@ MAX_TTL = 86400
 # cosmetic, and the kinds below render unstyled. Do not "fix" that by narrowing this
 # list to app.js's four, which would lose `claim`, `release`, `handoff` and `blocked`
 # - the ones that carry coordination meaning.
+# "waiting" is not a synonym for "blocked". Blocked means the harness is stuck and
+# something has gone wrong; waiting means it finished its part correctly and is now
+# holding for a person to decide. Colouring the second as an error trains people to
+# ignore the first.
 JOURNAL_KINDS = ("claim", "release", "conflict", "note", "handoff", "blocked",
-                 "done", "plan")
+                 "waiting", "done", "plan")
 
 
 def flatten(resource):

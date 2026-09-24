@@ -513,7 +513,8 @@ FEED_SEVERITIES = ("info", "warn", "error")
 # kind -> severity, for queue messages and journal entries alike.
 _KIND_SEVERITY = {
     "error": "error", "blocked": "error", "conflict": "error",
-    "finding": "warn", "claim": "info", "release": "info",
+    # Warn, not error: a run waiting on your review is the gate working, not failing.
+    "waiting": "warn", "finding": "warn", "claim": "info", "release": "info",
     "plan": "info", "request": "info", "reply": "info", "status": "info",
     "note": "info", "handoff": "info", "done": "info",
 }

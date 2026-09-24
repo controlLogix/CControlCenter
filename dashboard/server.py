@@ -729,6 +729,20 @@ def feed_snapshot(limit=200):
         entries.append(ccstore.feed_entry(now_iso(), "fault", "error", "dashboard",
                                           f"feed could not read resources: {err}"))
 
+    # 5b. Run notices. ccstore.FEED_SOURCES has carried "run" since the feed was
+    #     written and Settings has shown a "runs" checkbox the whole time, with nothing
+    #     behind either of them - so the one control an operator had for "tell me about
+    #     runs" did nothing. This is what makes it mean something, and it costs no
+    #     frontend change at all.
+    #
+    #     Read from the orchestrator inbox rather than re-folding every ledger: these
+    #     are the notices run.py already decided were worth a person's attention, so
+    #     the feed and the toast cannot disagree about what is worth saying.
+    try:
+        entries.extend(run_notice_entries())
+    except Exception:
+        pass
+
     # 5. Faults the other sources cannot express: messages the courier gave up on.
     #    These are the ones that matter most and were previously visible only by
     #    running `agentmux courier dead`.
@@ -741,6 +755,42 @@ def feed_snapshot(limit=200):
     return {"generated_at": now_iso(), "entries": entries[:limit],
             "sources": list(ccstore.FEED_SOURCES),
             "severities": list(ccstore.FEED_SEVERITIES)}
+
+
+def run_notice_entries(cap=40):
+    """The run notices a person was meant to see, as feed lines.
+
+    Read-only and bounded, like dead_letter_entries beside it. The inbox is run.py's
+    file; this never claims, truncates or marks anything read - `agentmux run notices`
+    owns that, and a reader that quietly consumed them would mean opening the dashboard
+    silently cleared the terminal's copy.
+    """
+    path = HOME_DIR / "inbox" / "orchestrator.jsonl"
+    out = []
+    try:
+        raw = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return out
+    for line in raw.splitlines()[-cap:]:
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except ValueError:
+            continue
+        if not isinstance(row, dict):
+            continue
+        body = str(row.get("body") or "")
+        # "kind" here is the inbox's own vocabulary (error/status), not the journal's.
+        # A notice about a run that needs review is a warning, not a failure - see the
+        # same distinction in run.record_notice.
+        severity = "error" if row.get("kind") == "error" else "info"
+        if "waiting on your review" in body:
+            severity = "warn"
+        out.append(ccstore.feed_entry(row.get("at"), "run", severity,
+                                      str(row.get("ref") or "run"), body,
+                                      row.get("ref")))
+    return out
 
 
 def dead_letter_entries(cap=40):

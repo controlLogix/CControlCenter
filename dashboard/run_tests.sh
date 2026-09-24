@@ -145,7 +145,17 @@ run() {
   printf '%s\n' "$out" | grep '^SKIP ' || true
   case "$rc:$line" in
     0:*"failed 0") ;;
-    *) total_fail=$((total_fail + 1)); printf '%s\n' "$out" | grep -E '^\s+FAIL' ;;
+    *) total_fail=$((total_fail + 1))
+       # Two failure shapes, because there are two kinds of suite here. The shell
+       # suites print '  FAIL  <what>' via testlib; a python unittest suite prints
+       # 'FAIL: <test>' at column zero followed by its traceback. Matching only the
+       # first meant a failing .py suite reported the bare word FAILED and nothing
+       # else - you could see THAT it broke and never WHAT broke, which is how the
+       # last person to hit this ended up bisecting by hand.
+       if printf '%s\n' "$out" | grep -E '^[[:space:]]+FAIL'; then :; else
+         printf '%s\n' "$out" | grep -E '^(FAIL|ERROR):' -A 12 | head -40
+       fi ;;
+
   esac
 }
 
@@ -179,6 +189,10 @@ run test_dispatch.py python3 dashboard/test_dispatch.py
 run test_sandbox_coordination.py python3 dashboard/test_sandbox_coordination.py
 # The Runs read surface and the human approval gate in front of completion.
 run test_runsview.py python3 dashboard/test_runsview.py
+# Notification channels, and who hears about what. AGENTMUX_NO_TOAST keeps the
+# desktop channel out of it - a suite that pops toasts is a suite people stop
+# running - so the real toast is exercised by hand via taskmgmt/notify.py.
+run test_notify.py python3 dashboard/test_notify.py
 # EP-015 suites are registered at the scaffold seam before their owning tasks land.
 # Missing suites are explicit skips during the staged build; present suites use
 # the same failure accounting as every existing suite above.

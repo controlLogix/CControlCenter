@@ -50,7 +50,8 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import coordination                                    # noqa: E402  reuse, do not restate
+import coordination
+import notify                                    # noqa: E402  reuse, do not restate
 
 ROOT = Path(os.environ.get("AGENTMUX_HOME", str(Path.home() / ".agentmux")))
 RUNS_DIR = ROOT / "runs"
@@ -181,12 +182,16 @@ def fold(events):
     jobs = {}
     request = None
     base = None
+    origin = None
+    pane = None
     forced = False
     for event in events:
         kind = event.get("event")
         if kind == "start":
             request = event.get("detail")
             base = event.get("base") or base
+            origin = event.get("origin") or origin
+            pane = event.get("pane") or pane
             continue
         if kind == "forced":
             forced = True
@@ -220,7 +225,8 @@ def fold(events):
         elif kind == "escalate":
             row["state"] = "escalated"
             row["detail"] = event.get("detail")
-    return {"request": request, "base": base, "jobs": jobs, "forced": forced}
+    return {"request": request, "base": base, "origin": origin, "pane": pane,
+            "jobs": jobs, "forced": forced}
 
 
 def repo_head(repo=None):
@@ -382,7 +388,7 @@ def approval_blocks_completion(run_id, repo=None):
 
 # ── notification (never the record) ──────────────────────────────────────────
 
-def notify_orchestrator(kind, body, ref=None):
+def notify_orchestrator(kind, body, ref=None, recipient="orchestrator"):
     """Append straight to the orchestrator's inbox.
 
     NOT `agentmux post`. courier.deliver() refuses a self-addressed message, and
@@ -394,15 +400,111 @@ def notify_orchestrator(kind, body, ref=None):
     try:
         INBOX_DIR.mkdir(parents=True, exist_ok=True)
         os.chmod(INBOX_DIR, 0o700)
-        path = INBOX_DIR / "orchestrator.jsonl"
+        safe = recipient if NAME_PATTERN.fullmatch(recipient or "") else "orchestrator"
+        path = INBOX_DIR / f"{safe}.jsonl"
         with path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps({
-                "at": now(), "sender": "run", "recipient": "orchestrator",
+                "at": now(), "sender": "run", "recipient": safe,
                 "kind": kind, "body": body[:8192], "ref": ref}) + "\n")
         os.chmod(path, 0o600)
         return True
     except OSError:
         return False
+
+
+# ── unread notices, surfaced in whatever terminal asks next ──────────────────
+#
+# THE CASE THIS EXISTS FOR. A tmux pane can be drawn on and a desktop can be toasted.
+# A Claude Code session is neither: it has no tty of its own (each command is a fresh
+# non-interactive process), no pane, and nothing polling on its behalf. So the only
+# honest way to reach it is to leave the message where it will be picked up, and make
+# every subsequent command say so.
+#
+# "Non-blocking" is the whole design. Nothing is injected into anyone's input, nothing
+# waits for acknowledgement, and a terminal that never asks simply never sees it - the
+# ledger and the inbox are still the record. It is a comment, not a prompt.
+
+def unread_path(who):
+    return INBOX_DIR / f"{who}.read"
+
+
+def unread_notices(who=None, cap=20):
+    """Notices this terminal has not been shown yet. Never raises."""
+    who = who or notify.origin_id()
+    if not NAME_PATTERN.fullmatch(who or ""):
+        return []
+    try:
+        lines = [l for l in (INBOX_DIR / f"{who}.jsonl").read_text(
+            encoding="utf-8", errors="replace").splitlines() if l.strip()]
+    except OSError:
+        return []
+    try:
+        seen = int(unread_path(who).read_text(encoding="utf-8").strip() or 0)
+    except (OSError, ValueError):
+        seen = 0
+    out = []
+    # A marker ahead of the file means the inbox was rotated or truncated. Showing
+    # everything again beats silently showing nothing for the rest of time.
+    for line in lines[seen:] if seen <= len(lines) else lines:
+        try:
+            row = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(row, dict):
+            out.append(row)
+    return out[-cap:]
+
+
+def mark_notices_read(who=None):
+    who = who or notify.origin_id()
+    if not NAME_PATTERN.fullmatch(who or ""):
+        return
+    try:
+        count = len([l for l in (INBOX_DIR / f"{who}.jsonl").read_text(
+            encoding="utf-8", errors="replace").splitlines() if l.strip()])
+        INBOX_DIR.mkdir(parents=True, exist_ok=True)
+        unread_path(who).write_text(str(count), encoding="utf-8")
+        os.chmod(unread_path(who), 0o600)
+    except OSError:
+        pass
+
+
+def print_unread(stream=None):
+    """One compact block, above whatever the command was actually asked to do."""
+    stream = stream or sys.stderr
+    rows = unread_notices()
+    if not rows:
+        return 0
+    who = notify.origin_id()
+    print(f"\n  {len(rows)} notice(s) for this terminal since you last looked:",
+          file=stream)
+    for row in rows:
+        mark = "!!" if row.get("kind") == "error" else " ·"
+        first = (row.get("body") or "").splitlines()[0][:110]
+        print(f"  {mark} {first}", file=stream)
+        if row.get("ref"):
+            print(f"       agentmux run status {row['ref']}", file=stream)
+    print(f"  (clear with: agentmux run notices --read)\n", file=stream)
+    return len(rows)
+
+
+def cmd_notices(args):
+    rows = unread_notices(args.who)
+    if args.json:
+        print(json.dumps({"who": args.who or notify.origin_id(), "notices": rows},
+                         indent=2))
+    elif not rows:
+        print("no unread notices")
+    else:
+        for row in rows:
+            print(f"[{row.get('at', '?')}] {row.get('kind', '?')} "
+                  f"{('(' + row['ref'] + ')') if row.get('ref') else ''}")
+            for line in (row.get("body") or "").splitlines():
+                print(f"  {line}")
+    if args.read:
+        mark_notices_read(args.who)
+        print(f"marked {len(rows)} notice(s) read", file=sys.stderr)
+    return 0
 
 
 # ── serialising the gate ─────────────────────────────────────────────────────
@@ -469,10 +571,48 @@ def record_notice(run_id, kind, subject, body, by, ref=None):
     The ledger is the durable record, so a failure is written THERE as well as said on
     stderr: whatever else is down, the run's own events file is local and already open.
     """
+    # TWO SEPARATE QUESTIONS, and collapsing them was a real mistake in the first draft
+    # of this. "Does it interrupt someone" is not "is it a failure": a run waiting on
+    # your review needs you now, and is the gate working exactly as designed. Shipping
+    # that as an error teaches people that red means nothing, which costs you the
+    # escalations that genuinely are red.
+    interrupts = kind in ("blocked", "conflict", "waiting", "done")
+    severity = ("error" if kind in ("blocked", "conflict")
+                else "warn" if kind == "waiting" else "info")
+    urgent = severity == "error"
     where = coordination.journal(kind, subject, body, by)
-    delivered = notify_orchestrator("error" if kind in ("blocked", "conflict") else "status",
-                                    subject if not body else f"{subject}\n{body}"[:8192],
-                                    ref=ref)
+    message = subject if not body else f"{subject}\n{body}"[:8192]
+    delivered = notify_orchestrator("error" if urgent else "status", message, ref=ref)
+
+    # AND BACK TO WHOEVER ASKED FOR THE WORK.
+    #
+    # The orchestrator inbox is a shared tray; it is not the session that opened this
+    # run and is waiting on the answer. Written as a SECOND copy rather than instead of
+    # the first, because the shared tray is what `agentmux inbox` and the dashboard
+    # already read, and a notice that moved out of it would vanish from both.
+    state = fold(load_events(run_id))
+    origin = state.get("origin")
+    if origin and origin != "orchestrator":
+        notify_orchestrator("error" if urgent else "status", message, ref=ref,
+                            recipient=origin)
+
+    # OUT-OF-PROCESS CHANNELS, and only for what is worth interrupting someone for.
+    # A passing verdict is not. These are bounded and never raise: a toast that could
+    # not be drawn must not be able to stop a run from completing.
+    channels = []
+    if interrupts:
+        try:
+            channels = notify.deliver(
+                subject, body, severity, ref=ref,
+                toast_enabled=os.environ.get("AGENTMUX_NOTIFY_TOAST", "1") != "0",
+                command=os.environ.get("AGENTMUX_NOTIFY_COMMAND", ""),
+                pane=state.get("pane"))
+        except Exception as err:               # never trust an operator-supplied command
+            channels = [{"channel": "notify", "ok": False, "reason": type(err).__name__}]
+    for row in [c for c in channels if not c["ok"]]:
+        print(f"  WARNING: {row['channel']} notification failed: {row['reason']}",
+              file=sys.stderr)
+
     if where.startswith("NOWHERE") or not delivered:
         problem = (f"notification degraded: journal={where}, "
                    f"orchestrator inbox={'ok' if delivered else 'FAILED'}")
@@ -503,8 +643,14 @@ def cmd_start(args):
             continue
         os.chmod(directory, 0o700)
         (directory / "request.md").write_text(args.request, encoding="utf-8")
+        # WHERE THIS WAS ASKED FOR, so a notice can go back to it. The toast reaches
+        # whoever is at this machine's desktop; it does not reach the session holding
+        # the context that knows what the run was for. That session is the one that has
+        # to look when the run stops at the operator gate.
         append_event(run_id, {"event": "start", "by": by,
                               "base": repo_head(REPO_ROOT),
+                              "origin": notify.origin_id(),
+                              "pane": os.environ.get("TMUX_PANE") or None,
                               "detail": args.request[:DETAIL_MAX]})
         coordination.journal("plan", f"run {run_id} started", args.request[:2000], by)
         print(run_id)
@@ -677,6 +823,31 @@ def cmd_verdict(args):
         after = fold(load_events(run_id))["jobs"][args.job]
 
     print(f"{args.job}: {result} (attempt {attempt}) -> {after['state']}")
+
+    # THE RUN HAS STOPPED AND IS WAITING ON A PERSON.
+    #
+    # This is the notice the operator gate made necessary. Everything else the harness
+    # announces is something that happened; this one is a request, and until it is
+    # answered nothing else moves. Without it the gate turns an orchestration into a
+    # thing that silently stalls the moment nobody happens to be looking at the Runs
+    # view - which is most of the time, because the whole point was not having to watch.
+    #
+    # Fired from the LAST verdict rather than from the orchestrator, so it is true for
+    # a run driven by hand as well as an autonomous one, and so a persona that forgets
+    # to announce itself cannot suppress it.
+    settled = fold(load_events(run_id))
+    if (args.passed and settled["jobs"]
+            and not any(r["state"] in BLOCKING for r in settled["jobs"].values())
+            and not complete_path(run_id).exists()
+            and not load_approval(run_id)):
+        total = len(settled["jobs"])
+        record_notice(run_id, "waiting", f"run {run_id} is waiting on your review",
+                      f"All {total} job(s) verified. Read the diff and approve it "
+                      f"before this run can complete: agentmux run status {run_id}",
+                      by, ref=run_id)
+        print(f"  all {total} job(s) verified - this run now needs YOUR approval "
+              f"before it can complete")
+
     if after["state"] == "escalated":
         message = (f"ESCALATED {args.job} after {MAX_ATTEMPTS} failed reviews. "
                    f"Last reason: {reason[:400]}")
@@ -704,6 +875,8 @@ def derive_stale(state):
 
 
 def cmd_status(args):
+    if not args.json:
+        print_unread()
     if not valid_run(args.run):
         print(f"run: invalid run id {args.run!r}", file=sys.stderr)
         return 2
@@ -909,6 +1082,13 @@ def main(argv=None):
     verdict.add_argument("--reason", default="")
     verdict.add_argument("--reason-file", default=None)
     verdict.set_defaults(func=cmd_verdict)
+
+    notices = sub.add_parser("notices")
+    notices.add_argument("--who", default=None)
+    notices.add_argument("--read", action="store_true",
+                         help="mark them read so they stop being surfaced")
+    notices.add_argument("--json", action="store_true")
+    notices.set_defaults(func=cmd_notices)
 
     status = sub.add_parser("status")
     status.add_argument("run")
