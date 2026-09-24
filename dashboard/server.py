@@ -9,6 +9,7 @@ import ccstore
 import datetime as dt
 import json
 import mqtt
+import modbus_poll
 import os
 from pathlib import Path
 import re
@@ -897,6 +898,24 @@ def agents_snapshot():
             "tmux_server": sessions is not None, "agents": agents}
 
 
+_modbus_service = None
+_modbus_lock = threading.Lock()
+
+
+def modbus_service():
+    global _modbus_service
+    with _modbus_lock:
+        if _modbus_service is None:
+            def journal(event):
+                with ccstore.connection() as db:
+                    ccstore.write(db, 'journal', {
+                        'kind': 'note', 'agent': event['actor'],
+                        'subject': 'Modbus write ' + event['outcome'],
+                        'body': json.dumps(event, allow_nan=False)})
+            _modbus_service = modbus_poll.Poller(HOME_DIR / 'modbus-tags.json', journal)
+        return _modbus_service
+
+
 class Handler(BaseHTTPRequestHandler):
     def send_body(self, status, body, content_type):
         self.send_response(status)
@@ -1401,6 +1420,27 @@ class Handler(BaseHTTPRequestHandler):
             _ticket_cache.update(at=0.0, data=None)   # the list is now stale
         self.send_json(200, {"ok": True, "detail": detail})
 
+    def modbus_endpoint(self, action):
+        if self.command == 'GET' and action == 'tags':
+            self.send_json(200, modbus_service().snapshot())
+            return
+        if self.command != 'POST' or action not in ('tags', 'write'):
+            self.send_json(405, {'error': 'POST required'})
+            return
+        body = self.read_cc_body(9999)
+        if body is None:
+            return
+        try:
+            if not isinstance(body, dict):
+                raise ValueError('JSON object required')
+            service = modbus_service()
+            result = service.save(body) if action == 'tags' else service.write(body)
+            self.send_json(200, result)
+        except (ValueError, TypeError, KeyError) as err:
+            self.send_json(400, {'error': str(err)})
+        except (OSError, modbus_poll.ModbusError) as err:
+            self.send_json(502, {'error': str(err)})
+
     def mqtt_endpoint(self, action):
         """POST /api/mqtt/publish | /api/mqtt/subscribe
 
@@ -1848,6 +1888,9 @@ class Handler(BaseHTTPRequestHandler):
                 else:
                     self.ticket_action(path.rsplit("/", 1)[1])
                 return
+            if path in ('/api/modbus/tags', '/api/modbus/write'):
+                self.modbus_endpoint(path.rsplit('/', 1)[1])
+                return
             if path in ("/api/mqtt/publish", "/api/mqtt/subscribe"):
                 if self.command != "POST":
                     self.send_json(405, {"error": "POST required"})
@@ -1919,7 +1962,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/":
             file_path = (ROOT / "index.html").resolve()
             content_type = "text/html; charset=utf-8"
-        elif path in ("/app.js", "/fitmatrix.js", "/agents.js", "/teams.js"):
+        elif path in ("/app.js", "/fitmatrix.js", "/agents.js", "/teams.js", "/iiot.js"):
             # fitmatrix.js is the readability test harness. index.html loads it only
             # when the URL carries ?fit=1, so it is inert on the normal page but can
             # be run against the REAL page rather than a mock.
@@ -1966,12 +2009,16 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     try:
         with ThreadingHTTPServer(("127.0.0.1", 8787), Handler) as server:
+            modbus_service()  # Resume persisted polling without a browser tab.
             print("agentmux dashboard: http://127.0.0.1:8787", flush=True)
             server.serve_forever()
     except KeyboardInterrupt:
         pass
     except OSError:
         raise SystemExit("Unable to start dashboard on 127.0.0.1:8787")
+    finally:
+        if _modbus_service is not None:
+            _modbus_service.close()
 
 
 if __name__ == "__main__":

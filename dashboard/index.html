@@ -379,6 +379,17 @@
           <span id="themeNote" class="note"></span>
         </div>
         <div id="swatches" class="swatches"></div>
+        <div class="theme-transfer">
+          <label for="themeJSON">Theme JSON</label>
+          <textarea id="themeJSON" rows="6" spellcheck="false" aria-describedby="themeImportStatus" placeholder="Paste a complete theme object (id, dark, tokens; optional name and note)"></textarea>
+          <div class="row">
+            <button id="themeImport" class="btn" type="button">Import pasted JSON</button>
+            <label for="themeFile">Import .json file</label>
+            <input id="themeFile" type="file" accept=".json,application/json">
+            <button id="themeExport" class="btn" type="button">Export current theme</button>
+          </div>
+          <p id="themeImportStatus" class="note" role="status" aria-live="polite"></p>
+        </div>
       </details>
 
       <details class="card" data-collapse-key="settings:auth" open>
@@ -425,6 +436,7 @@
 <script src="agents.js"></script>
 <script src="teams.js"></script>
 <script src="app.js"></script>
+<script src="iiot.js"></script>
 <script>
   // Readability matrix, on demand only: open 127.0.0.1:8787/?fit=1 and run
   // `await fitMatrix()` in the console. Kept out of the normal page so test code

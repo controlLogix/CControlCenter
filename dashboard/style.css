@@ -1028,3 +1028,9 @@ select:focus-visible, .rin:focus-visible, .btn:focus-visible, .ta:focus-visible,
 @media (max-width: 900px) {
   :root { --nav-w: 34px; }
 }
+
+.theme-transfer { display: grid; gap: 8px; margin-top: 16px; }
+.theme-transfer textarea { width: 100%; box-sizing: border-box; resize: vertical; background: var(--panel-2); color: var(--text); border: 1px solid var(--line); padding: 8px; font: inherit; }
+.theme-transfer .row { flex-wrap: wrap; }
+.theme-transfer input[type="file"] { max-width: 100%; }
+.theme-transfer .note { overflow-wrap: anywhere; }

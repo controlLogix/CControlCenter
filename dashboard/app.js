@@ -2050,6 +2050,8 @@ for (const btn of els.navItems) {
 // is harder to debug than one that fails visibly, so missing tokens are named.
 
 const THEME_KEY = 'ccc.theme';
+const IMPORTED_THEMES_KEY = 'ccc.importedThemes';
+let builtInThemeIds = new Set();
 
 // A token value must be a COLOUR, and only a colour.
 //
@@ -2076,29 +2078,123 @@ function safeColour(value) {
 
 let themeData = null;
 
-function applyTheme(id) {
-  if (!themeData) return;
-  const theme = themeData.themes.find((t) => t.id === id) || themeData.themes[0];
-  if (!theme) return;
-
+function validateTheme(theme) {
   // A theme may only set tokens themes.json DECLARES. Otherwise a theme could set
   // --title-h or --nav-w and resize the chrome, which is layout, not theming.
   const declared = new Set(themeData.tokens || []);
   const rejected = [];
   const validated = [];
   for (const [token, value] of Object.entries(theme.tokens || {})) {
-    const colour = declared.has(token) ? safeColour(value) : null;
+    const colour = declared.has(token) && typeof value === 'string' ? safeColour(value) : null;
     if (colour) {
       validated.push([token, colour]);
     } else {
       rejected.push(token);
     }
   }
-  const missing = (themeData.tokens || []).filter((t) => !(t in (theme.tokens || {})));
+  const missing = (themeData.tokens || []).filter((t) => !Object.prototype.hasOwnProperty.call(theme.tokens || {}, t));
   const problems = [
     missing.length ? `missing ${missing.join(', ')}` : '',
     rejected.length ? `rejected ${rejected.join(', ')}` : '',
   ].filter(Boolean);
+  return { validated, problems };
+}
+
+function themeImportStatus(message, warn = false) {
+  const status = document.getElementById('themeImportStatus');
+  status.textContent = message;
+  status.classList.toggle('warn', warn);
+}
+
+function parseImportedTheme(text) {
+  const theme = JSON.parse(text);
+  if (!theme || typeof theme !== 'object' || Array.isArray(theme)) {
+    throw new Error('theme must be a JSON object');
+  }
+  const rejected = Object.keys(theme).filter(k => !['id', 'name', 'note', 'dark', 'tokens'].includes(k));
+  if (typeof theme.id !== 'string' || !theme.id.trim()) rejected.push('id');
+  for (const key of ['name', 'note']) {
+    if (key in theme && typeof theme[key] !== 'string') rejected.push(key);
+  }
+  if (typeof theme.dark !== 'boolean') rejected.push('dark');
+  if (!theme.tokens || typeof theme.tokens !== 'object' || Array.isArray(theme.tokens)) rejected.push('tokens');
+  const problems = rejected.length ? [`rejected ${rejected.join(', ')}`] : [];
+  if (theme.tokens && typeof theme.tokens === 'object' && !Array.isArray(theme.tokens)) {
+    problems.push(...validateTheme(theme).problems);
+  }
+  if (problems.length) throw new Error(problems.join('; '));
+  return theme;
+}
+
+function sameTheme(a, b) {
+  return ['id', 'name', 'note', 'dark'].every(k => a[k] === b[k]) &&
+    themeData.tokens.every(k => a.tokens[k] === b.tokens[k]);
+}
+
+function addImportedTheme(theme) {
+  const existing = themeData.themes.find(t => t.id === theme.id);
+  if (existing) {
+    // Reimporting an exact export selects the original without replacing it.
+    if (sameTheme(existing, theme)) return;
+    throw new Error(`rejected id "${theme.id}": already exists${builtInThemeIds.has(theme.id) ? ' as a built-in theme' : ''}; choose a new id`);
+  }
+  themeData.themes.push(theme);
+}
+
+function renderThemeOptions() {
+  els.themeSelect.replaceChildren();
+  for (const t of themeData.themes) {
+    const option = document.createElement('option');
+    option.value = t.id;
+    option.textContent = t.name || t.id;
+    els.themeSelect.appendChild(option);
+  }
+}
+
+function importTheme(text) {
+  try {
+    if (!themeData) throw new Error('themes are not loaded');
+    const theme = parseImportedTheme(text);
+    addImportedTheme(theme);
+    renderThemeOptions();
+    applyTheme(theme.id);
+    try {
+      localStorage.setItem(IMPORTED_THEMES_KEY, JSON.stringify(themeData.themes.filter(t => !builtInThemeIds.has(t.id))));
+      themeImportStatus(`Imported ${theme.id}.`);
+    } catch (_) {
+      themeImportStatus(`Imported ${theme.id} for this session; browser storage is unavailable.`, true);
+    }
+    return true;
+  } catch (err) {
+    themeImportStatus(`Import refused: ${err.message}`, true);
+    return false;
+  }
+}
+
+function exportTheme() {
+  const theme = themeData && themeData.themes.find(t => t.id === document.documentElement.dataset.theme);
+  if (!theme) {
+    themeImportStatus('No active theme to export.', true);
+    return;
+  }
+  // Keep original strings, including whitespace, for an exact JSON round trip.
+  const text = JSON.stringify(theme, null, 2);
+  document.getElementById('themeJSON').value = text;
+  const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'theme.json';
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  themeImportStatus('Exported current theme; JSON is also available below.');
+}
+
+function applyTheme(id) {
+  if (!themeData) return;
+  const theme = themeData.themes.find((t) => t.id === id) || themeData.themes[0];
+  if (!theme) return;
+
+  const { validated, problems } = validateTheme(theme);
   els.themeNote.textContent = problems.length
     ? `incomplete theme ${theme.id} - ${problems.join('; ')}`
     : (theme.note || '');
@@ -2155,17 +2251,31 @@ async function loadThemes() {
     if (!themeData || !Array.isArray(themeData.themes) || !themeData.themes.length) {
       throw new Error('no themes declared');
     }
-    els.themeSelect.replaceChildren();
-    for (const t of themeData.themes) {
-      const o = document.createElement('option');
-      o.value = t.id;
-      o.textContent = t.name || t.id;
-      els.themeSelect.appendChild(o);
-    }
+    builtInThemeIds = new Set(themeData.themes.map(t => t.id));
+    const restoreProblems = [];
+    try {
+      const stored = JSON.parse(localStorage.getItem(IMPORTED_THEMES_KEY) || '[]');
+      if (!Array.isArray(stored)) throw new Error('expected a theme array');
+      for (const [index, item] of stored.entries()) {
+        try { addImportedTheme(parseImportedTheme(JSON.stringify(item))); }
+        catch (err) { restoreProblems.push(`entry ${index + 1}: ${err.message}`); }
+      }
+    } catch (err) { restoreProblems.push(err.message); }
+    renderThemeOptions();
     let want = themeData.default;
     try { want = localStorage.getItem(THEME_KEY) || want; } catch (_) {}
     applyTheme(want);
     els.themeSelect.addEventListener('change', () => applyTheme(els.themeSelect.value));
+    if (restoreProblems.length) themeImportStatus(`Could not restore saved themes: ${restoreProblems.join('; ')}`, true);
+    document.getElementById('themeImport').addEventListener('click', () => importTheme(document.getElementById('themeJSON').value));
+    document.getElementById('themeFile').addEventListener('change', async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      try { importTheme(await file.text()); }
+      catch (err) { themeImportStatus(`Could not read file: ${err.message}`, true); }
+      event.target.value = '';
+    });
+    document.getElementById('themeExport').addEventListener('click', exportTheme);
   } catch (err) {
     // The CSS :root block is the cc-dark fallback, so a failure here degrades to
     // the right palette rather than to an unstyled page.
@@ -2975,9 +3085,6 @@ function renderPrivilegeNotices() {
   run.appendChild(el('code', null, 'sudo python3 taskmgmt/bootp_probe.py --iface eth0'));
   els.bootpNotice.appendChild(run);
 
-  els.modbusHint.replaceChildren();
-  els.modbusHint.appendChild(el('p', null,
-    'Modbus goes through the modbus MCP server via an agent rather than being reimplemented here - one tested protocol implementation instead of two.'));
 }
 
 function mqLog(line) {
