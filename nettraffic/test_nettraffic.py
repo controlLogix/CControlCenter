@@ -1,4 +1,4 @@
-"""Run with python3 -m unittest discover -s nettraffic -v."""
+"""Run with python3 nettraffic/test_nettraffic.py or python3 -m nettraffic.test_nettraffic."""
 import io
 from pathlib import Path
 import struct
@@ -7,6 +7,10 @@ import sys
 import tempfile
 import unittest
 import zlib
+
+# Direct script execution puts nettraffic/, rather than its parent, on sys.path.
+if not __package__:
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from nettraffic import analyze, make_fixture, pcap, png
 
