@@ -358,17 +358,30 @@ def approval_drift(run_id, repo=None):
                         if current.get(name) != was))
 
 
-def approval_blocks_completion(run_id, repo=None):
+def approval_blocks_completion(run_id, repo=None, agent=None):
     """Why this run may not complete yet, or None. Consulted by the gate.
 
-    Deliberately NOT "an approval is required": a person completing their own run at a
-    terminal IS the approval, and demanding they first click a button in a browser
-    would be ceremony. What this refuses is completing in defiance of a decision that
-    was actually made - changes asked for, or an approval that no longer covers the
-    bytes on disk.
+    TWO DIFFERENT CALLERS, two different rules, and the difference is the whole point.
+
+    A PERSON at a terminal is the approval. Demanding they first click a button in a
+    browser to approve work they are in the middle of finishing would be ceremony, so
+    for them this refuses only a decision that was MADE and defied: changes asked for,
+    or an approval that no longer covers the bytes on disk.
+
+    AN ORCHESTRATOR must have one. It wrote the brief the reviewer checked against, so
+    a passing review only says the job matched the brief - it cannot say the brief was
+    right. If the orchestrator misread what was wanted, every job passes and the run is
+    still wrong, and the only person who can catch that is the one who asked. So a
+    warranted caller needs an explicit approval on record, not merely the absence of an
+    objection.
     """
     record = load_approval(run_id)
     if not record:
+        if agent:
+            return (f"{agent} has not been approved to complete this run.\n"
+                    "  Every job is verified, which says the work matched its brief -\n"
+                    "  and you wrote that brief. Only the operator can say it was the\n"
+                    "  right brief. Approve it in the CCC's Runs view, then retry.")
         return None
     if record.get("decision") == "changes":
         note = (record.get("note") or "").strip()
@@ -1106,33 +1119,40 @@ def cmd_complete(args):
 
         blocking = sorted(j for j, r in state["jobs"].items() if r["state"] in BLOCKING)
 
-        # THE OPERATOR'S DECISION, CHECKED INSIDE THE SAME LOCK AS THE GATE.
-        #
-        # Taken before the verification gate because it outranks it: if the person
-        # who asked for the work has said it is not what they wanted, how many
-        # reviewers passed it is beside the point. --force does NOT override this.
-        # --force exists to close out a run whose agents died, which is an accident;
-        # completing over a human's stated objection is a decision, and no flag on
-        # this command should be able to make it.
-        objection = approval_blocks_completion(args.run)
-        if objection:
-            print(f"REFUSED: {objection}", file=sys.stderr)
-            return 1
+        # WHO IS CALLING. None for a person at a terminal, the pane name for a
+        # warranted orchestrator. Both rules below turn on this distinction, so it is
+        # resolved once, first.
+        via = coordination.orchestrator_pane()
 
-        # --FORCE IS NOT THE ORCHESTRATOR'S TO USE.
+        # --FORCE IS NOT THE ORCHESTRATOR'S TO USE, and this is checked FIRST.
         #
-        # Without this, the whole verification gate is one flag deep for an agent that
+        # Ordering matters for the message rather than the outcome: an orchestrator
+        # forcing without an approval is refused either way, but "get approval" would
+        # send it off to obtain one and bring it straight back to a second, different
+        # refusal. The flag is never available to it, so say that.
+        #
+        # Without this the whole verification gate is one flag deep for an agent that
         # decides it has waited long enough, and "FORCED" in a ledger is only a control
         # if somebody reads ledgers. --force exists for a run whose agents died, which
         # is an accident a person judges; an autonomous orchestrator meeting that case
         # should escalate, not overrule.
-        via = coordination.orchestrator_pane()
         if args.force and via:
             print(f"REFUSED: --force is not available to {via!r}.", file=sys.stderr)
             print("  A warranted pane may complete a VERIFIED run; forcing past an "
                   "unverified one\n  is a person's call. Escalate it instead.",
                   file=sys.stderr)
             return 2
+
+        # THE OPERATOR'S DECISION, CHECKED INSIDE THE SAME LOCK AS THE GATE.
+        #
+        # Taken before the verification gate because it outranks it: if the person who
+        # asked for the work has said it is not what they wanted, how many reviewers
+        # passed it is beside the point. --force does not reach here at all for a
+        # warranted caller, and for a person it does not override a stated objection.
+        objection = approval_blocks_completion(args.run, agent=via)
+        if objection:
+            print(f"REFUSED: {objection}", file=sys.stderr)
+            return 1
 
         if blocking and not args.force:
             print(f"REFUSED: {len(blocking)} of {len(state['jobs'])} job(s) are not "

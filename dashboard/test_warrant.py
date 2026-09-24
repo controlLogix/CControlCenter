@@ -48,6 +48,11 @@ class WarrantBase(unittest.TestCase):
         self.addCleanup(self._restore)
         import coordination
         self.co = importlib.reload(coordination)
+        # run.py reads AGENTMUX_HOME at import, so it has to be reloaded against this
+        # test's home too - otherwise write_approval below looks for the run in
+        # whichever home the module happened to see first.
+        import run as runmod
+        self.run = importlib.reload(runmod)
 
     def _restore(self):
         for key, value in self._saved.items():
@@ -247,6 +252,11 @@ class TestItBuysExactlyFourVerbs(WarrantBase):
                      env=dict(trust, AGENTMUX_AGENT="w-a"))
         self.run_cli("verdict", job, "--by", "r-a", "--pass", "--reason", "ok",
                      env=dict(trust, AGENTMUX_AGENT="r-a"))
+        # The operator's approval, which a warranted caller now requires. Without it
+        # this asserts the four verbs work AND that the gate in front of the fourth
+        # does not - which is not a thing anyone wants to have proved.
+        self.run.write_approval(rid, "operator (dashboard)", "read the diff",
+                                "approved")
         done = self.run_cli("complete", rid, env=env)
         self.assertEqual(done.returncode, 0, done.stderr)
         self.assertIn("COMPLETE", done.stdout)
@@ -280,6 +290,42 @@ class TestItBuysExactlyFourVerbs(WarrantBase):
                                env=env)
             self.assertNotEqual(out.returncode, 0,
                                 f"the orchestrator signed off work itself ({extra})")
+
+    def test_a_warranted_pane_cannot_complete_without_an_approval(self):
+        # THE USER-FACING REQUIREMENT, and it was missing until a live orchestration
+        # completed without ever asking. A passing review says the work matched its
+        # brief - and the orchestrator wrote that brief, so it cannot also be the
+        # thing that says the brief was right.
+        rid, job, secret, env = self.seeded_run()
+        trust = dict(env, AGENTMUX_TRUST_IDENTITY="1")
+        self.run_cli("submit", job, "--by", "w-a", "--summary", "done",
+                     env=dict(trust, AGENTMUX_AGENT="w-a"))
+        self.run_cli("verdict", job, "--by", "r-a", "--pass", "--reason", "ok",
+                     env=dict(trust, AGENTMUX_AGENT="r-a"))
+        out = self.run_cli("complete", rid, env=env)
+        self.assertNotEqual(out.returncode, 0,
+                            "the orchestrator completed its own run unapproved")
+        self.assertIn("has not been approved", out.stderr)
+        self.assertFalse((self.home / "runs" / rid / "COMPLETE").exists())
+
+        # And once approved, it may. Without this the refusal above proves nothing.
+        self.run.write_approval(rid, "operator (dashboard)", "read the diff",
+                                "approved")
+        done = self.run_cli("complete", rid, env=env)
+        self.assertEqual(done.returncode, 0, done.stderr)
+
+    def test_a_person_still_needs_no_approval(self):
+        # The asymmetry is the design: someone completing their own run at a terminal
+        # IS the approval, and making them click a button first would be ceremony.
+        rid, job, secret, env = self.seeded_run()
+        trust = dict(env, AGENTMUX_TRUST_IDENTITY="1")
+        self.run_cli("submit", job, "--by", "w-a", "--summary", "done",
+                     env=dict(trust, AGENTMUX_AGENT="w-a"))
+        self.run_cli("verdict", job, "--by", "r-a", "--pass", "--reason", "ok",
+                     env=dict(trust, AGENTMUX_AGENT="r-a"))
+        plain = dict(env, AGENTMUX_AGENT=None, AGENTMUX_ORCHESTRATOR_WARRANT=None)
+        done = self.run_cli("complete", rid, env=plain)
+        self.assertEqual(done.returncode, 0, done.stderr)
 
     def test_force_is_refused_to_a_warranted_pane(self):
         # Without this the entire verification gate is one flag deep for an agent that
