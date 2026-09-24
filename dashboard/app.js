@@ -2085,26 +2085,36 @@ function applyTheme(id) {
   // --title-h or --nav-w and resize the chrome, which is layout, not theming.
   const declared = new Set(themeData.tokens || []);
   const rejected = [];
+  const validated = [];
   for (const [token, value] of Object.entries(theme.tokens || {})) {
     const colour = declared.has(token) ? safeColour(value) : null;
     if (colour) {
-      document.documentElement.style.setProperty(token, colour);
+      validated.push([token, colour]);
     } else {
       rejected.push(token);
     }
   }
-  document.documentElement.style.colorScheme = theme.dark ? 'dark' : 'light';
-
   const missing = (themeData.tokens || []).filter((t) => !(t in (theme.tokens || {})));
-  els.themeSelect.value = theme.id;
   const problems = [
     missing.length ? `missing ${missing.join(', ')}` : '',
     rejected.length ? `rejected ${rejected.join(', ')}` : '',
   ].filter(Boolean);
   els.themeNote.textContent = problems.length
-    ? `incomplete theme - ${problems.join('; ')}`
+    ? `incomplete theme ${theme.id} - ${problems.join('; ')}`
     : (theme.note || '');
   els.themeNote.classList.toggle('warn', problems.length > 0);
+  // Validate the entire palette before changing any colours or persistence.
+  // A broken theme must never borrow tokens from the previously selected one.
+  if (problems.length) {
+    els.themeSelect.value = document.documentElement.dataset.theme || '';
+    return;
+  }
+  for (const [token, colour] of validated) {
+    document.documentElement.style.setProperty(token, colour);
+  }
+  document.documentElement.style.colorScheme = theme.dark ? 'dark' : 'light';
+  document.documentElement.dataset.theme = theme.id;
+  els.themeSelect.value = theme.id;
 
   renderSwatches(theme);
   // Terminals carry their own colour table, so retheme the live ones too.

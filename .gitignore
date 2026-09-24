@@ -61,3 +61,8 @@ __pycache__/
 # Scratch a dispatched worker was given to write in. The smoke card's evidence
 # points here, so the directory is kept and its contents are not.
 tmp/
+
+# Vendor protocol manuals, fetched on demand. Freely downloadable from the
+# vendor, but theirs to distribute - not ours to commit. docs/vendor/README.md
+# carries the URLs so anyone can fetch the same document.
+docs/vendor/*.pdf
