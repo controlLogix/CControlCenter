@@ -111,7 +111,11 @@ if declare -f agentmux_self >/dev/null; then
     /dev/fd/*|/proc/self/fd/*) bad "a /dev/fd path is never returned" "$found" ;;
     *) ok "a /dev/fd path is never returned" ;;
   esac
-  ( cd / && [ -z "$(agentmux_self 2>/dev/null)" ] ) \
+  # AGENTMUX_REPO must be cleared too, or this does not test what it says: it is the
+  # FIRST candidate agentmux_self tries, so with it set the function correctly finds
+  # the repo from any directory and the assertion fails for the right reason. Run
+  # alone this passed by luck; run after any suite that exports it, it went red.
+  ( cd / && unset AGENTMUX_REPO && [ -z "$(agentmux_self 2>/dev/null)" ] ) \
     && ok "and it refuses rather than guessing when the repo is nowhere to be found" \
     || bad "and it refuses rather than guessing"
 else

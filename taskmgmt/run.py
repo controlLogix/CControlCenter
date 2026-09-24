@@ -44,6 +44,7 @@ import os
 import re
 import secrets
 import subprocess
+import tempfile
 import sys
 import time
 from pathlib import Path
@@ -55,6 +56,7 @@ ROOT = Path(os.environ.get("AGENTMUX_HOME", str(Path.home() / ".agentmux")))
 RUNS_DIR = ROOT / "runs"
 INBOX_DIR = ROOT / "inbox"
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
 RUN_PATTERN = re.compile(r"[0-9a-f]{6}")
 JOB_PATTERN = re.compile(r"([0-9a-f]{6})/([0-9]{1,4})")
 NAME_PATTERN = coordination.NAME_PATTERN
@@ -178,11 +180,13 @@ def fold(events):
     """Derive every job's current state from the log. Never reads stored state."""
     jobs = {}
     request = None
+    base = None
     forced = False
     for event in events:
         kind = event.get("event")
         if kind == "start":
             request = event.get("detail")
+            base = event.get("base") or base
             continue
         if kind == "forced":
             forced = True
@@ -216,7 +220,26 @@ def fold(events):
         elif kind == "escalate":
             row["state"] = "escalated"
             row["detail"] = event.get("detail")
-    return {"request": request, "jobs": jobs, "forced": forced}
+    return {"request": request, "base": base, "jobs": jobs, "forced": forced}
+
+
+def repo_head(repo=None):
+    """The commit this run starts from, or None outside a repo.
+
+    WHY IT IS RECORDED AT ALL. A reviewer - human or agent - asked to look at what a
+    run changed needs a base to compare against, and `git diff HEAD` is not it: the
+    moment a worker commits, that diff goes empty and the review surface shows nothing
+    while the work is sitting right there in the history. Pinning the starting commit
+    makes "what did this run change" answerable for the whole life of the run and
+    afterwards, whether or not anything was committed along the way.
+    """
+    try:
+        proc = subprocess.run(["git", "-C", str(repo or Path.cwd()), "rev-parse", "HEAD"],
+                              capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    sha = (proc.stdout or "").strip()
+    return sha if proc.returncode == 0 and re.fullmatch(r"[0-9a-f]{40}", sha) else None
 
 
 def digest(repo, files):
@@ -231,6 +254,130 @@ def digest(repo, files):
         except OSError:
             out[name] = "missing"
     return out
+
+
+# ── the operator's approval, which the gate consults ─────────────────────────
+#
+# WHY THIS GATE EXISTS ON TOP OF THE REVIEWER GATE. A reviewer verdict answers "was
+# the job done as briefed". It cannot answer "was that the right job", because the
+# same orchestrator wrote the brief the reviewer checked against - so an orchestrator
+# that misreads what was wanted produces a run where every job passes review and the
+# whole thing is wrong. Only the person who asked for the work can catch that, and the
+# last moment they can catch it is before the run is declared finished.
+#
+# THE APPROVAL PINS BYTES. digest() above exists because a verdict naming files without
+# hashing them describes bytes that may since have changed. Approval has the same
+# exposure and a worse consequence, being the final gate: without the pin, work could
+# be approved and then quietly changed before completion, and "approved" would only
+# ever have meant "approved something".
+
+APPROVAL_VERSION = 1
+NOTE_MAX = 2000
+
+
+def approval_path(run_id):
+    return run_dir(run_id) / "APPROVAL.json"
+
+
+def submitted_files(state):
+    """Every file any job in this run submitted, deduplicated, in job order."""
+    out = []
+    for _, row in sorted(state["jobs"].items()):
+        for name in row.get("files") or []:
+            if isinstance(name, str) and name and name not in out:
+                out.append(name)
+    return out
+
+
+def load_approval(run_id):
+    try:
+        value = json.loads(approval_path(run_id).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return value if isinstance(value, dict) else None
+
+
+def write_approval(run_id, by, note, decision="approved", repo=None):
+    """Record the operator's decision. Atomic: a torn approval is a half-open gate."""
+    if decision not in ("approved", "changes"):
+        raise ValueError(f"unknown decision {decision!r}")
+    if not valid_run(run_id):
+        raise ValueError(f"invalid run id {run_id!r}")
+    directory = run_dir(run_id)
+    if not directory.is_dir():
+        raise ValueError(f"no such run {run_id}")
+    if complete_path(run_id).exists():
+        raise ValueError(f"run {run_id} is already complete - nothing left to approve")
+    state = fold(load_events(run_id))
+    if not state["jobs"]:
+        raise ValueError("no jobs in this run - nothing to review")
+    if decision == "approved":
+        blocking = sorted(j for j, r in state["jobs"].items() if r["state"] in BLOCKING)
+        if blocking:
+            # Approving unverified work would wave through exactly what the reviewer
+            # gate catches. The two reviews are not interchangeable: the reviewer
+            # checks the job was done, the operator checks it was worth doing.
+            raise ValueError(
+                f"{len(blocking)} job(s) are not verified yet: {', '.join(blocking)}. "
+                "Approval is the gate after review, not instead of it.")
+    record = {"version": APPROVAL_VERSION, "run": run_id, "decision": decision,
+              "by": by, "at": now(), "note": (note or "")[:NOTE_MAX],
+              "files": digest(str(repo or REPO_ROOT), submitted_files(state))}
+    handle, tmp = tempfile.mkstemp(dir=str(directory), prefix=".approval-")
+    try:
+        with os.fdopen(handle, "w", encoding="utf-8") as fh:
+            json.dump(record, fh, indent=2)
+        os.chmod(tmp, 0o600)
+        os.replace(tmp, approval_path(run_id))
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+    append_event(run_id, {"event": "review", "by": by, "result": decision,
+                          "detail": (note or "")[:DETAIL_MAX]})
+    return record
+
+
+def approval_drift(run_id, repo=None):
+    """Files that moved since approval. () means it still holds; None means there is
+    no standing approval to hold."""
+    record = load_approval(run_id)
+    if not record or record.get("decision") != "approved":
+        return None
+    pinned = record.get("files") or {}
+    current = digest(str(repo or REPO_ROOT), sorted(pinned))
+    return tuple(sorted(name for name, was in pinned.items()
+                        if current.get(name) != was))
+
+
+def approval_blocks_completion(run_id, repo=None):
+    """Why this run may not complete yet, or None. Consulted by the gate.
+
+    Deliberately NOT "an approval is required": a person completing their own run at a
+    terminal IS the approval, and demanding they first click a button in a browser
+    would be ceremony. What this refuses is completing in defiance of a decision that
+    was actually made - changes asked for, or an approval that no longer covers the
+    bytes on disk.
+    """
+    record = load_approval(run_id)
+    if not record:
+        return None
+    if record.get("decision") == "changes":
+        note = (record.get("note") or "").strip()
+        return (f"the operator asked for changes on {record.get('at')}"
+                + (f": {note[:300]}" if note else "")
+                + "\n  Approve the run once the changes are in, or record a new"
+                  " decision.")
+    drift = approval_drift(run_id, repo)
+    if drift:
+        return (f"{len(drift)} file(s) changed after the operator approved this run: "
+                f"{', '.join(drift[:6])}"
+                + ("" if len(drift) <= 6 else f" (+{len(drift) - 6} more)")
+                + "\n  The approval covered different bytes. Have it reviewed"
+                  " again.")
+    return None
 
 
 # ── notification (never the record) ──────────────────────────────────────────
@@ -357,6 +504,7 @@ def cmd_start(args):
         os.chmod(directory, 0o700)
         (directory / "request.md").write_text(args.request, encoding="utf-8")
         append_event(run_id, {"event": "start", "by": by,
+                              "base": repo_head(REPO_ROOT),
                               "detail": args.request[:DETAIL_MAX]})
         coordination.journal("plan", f"run {run_id} started", args.request[:2000], by)
         print(run_id)
@@ -668,6 +816,19 @@ def cmd_complete(args):
             return 2
 
         blocking = sorted(j for j, r in state["jobs"].items() if r["state"] in BLOCKING)
+
+        # THE OPERATOR'S DECISION, CHECKED INSIDE THE SAME LOCK AS THE GATE.
+        #
+        # Taken before the verification gate because it outranks it: if the person
+        # who asked for the work has said it is not what they wanted, how many
+        # reviewers passed it is beside the point. --force does NOT override this.
+        # --force exists to close out a run whose agents died, which is an accident;
+        # completing over a human's stated objection is a decision, and no flag on
+        # this command should be able to make it.
+        objection = approval_blocks_completion(args.run)
+        if objection:
+            print(f"REFUSED: {objection}", file=sys.stderr)
+            return 1
 
         if blocking and not args.force:
             print(f"REFUSED: {len(blocking)} of {len(state['jobs'])} job(s) are not "

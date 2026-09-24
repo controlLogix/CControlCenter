@@ -64,15 +64,18 @@ const text = (sel) => page.textContent(sel);
 
 // ── the rail ────────────────────────────────────────────────────────────────
 
-await test('the rail has exactly the seven views, in order', async () => {
+await test('the rail has exactly the eight views, in order', async () => {
+  // Runs sits directly after Board because a run is what a board card becomes once
+  // someone starts working on it, and the order is asserted rather than sorted so a
+  // new entry has to be placed deliberately instead of landing wherever.
   const labels = await page.$$eval('.nav-item .nav-label', (ns) => ns.map(n => n.textContent));
-  assert.deepEqual(labels, ['Terminals', 'Status', 'Board', 'Organization', 'IIOT',
-                            'GitHub', 'Settings']);
+  assert.deepEqual(labels, ['Terminals', 'Status', 'Board', 'Runs', 'Organization',
+                            'IIOT', 'GitHub', 'Settings']);
 });
 
 await test('every rail button reveals its view and hides the others', async () => {
-  for (const view of ['status', 'board', 'organization', 'iiot', 'github', 'settings',
-                      'terminals']) {
+  for (const view of ['status', 'board', 'runs', 'organization', 'iiot', 'github',
+                      'settings', 'terminals']) {
     await show(view);
     const visible = await page.$$eval('.views > .view',
       (ns) => ns.filter(n => !n.hidden).map(n => n.id));
@@ -500,6 +503,13 @@ await test('Board carries Tasks and Atlassian, and Atlassian says how to set it 
       await page.$$eval('[data-tabs="board"] .subtab', ns => ns.map(n => n.textContent)),
       ['Tasks', 'Atlassian']);
     await tab('board', 'tickets');
+    // WAIT for the panel rather than reading it the instant the tab is clicked. The
+    // loader is a fetch, so asserting immediately was a race this test happened to
+    // win - until anything else on the page competed for a connection, at which
+    // point it failed while the panel was working perfectly.
+    await page.waitForFunction(
+      () => /not configured|issue/i.test(document.querySelector('#viewTickets')?.textContent || ''),
+      null, { timeout: 15000 });
     const body = await text('#viewTickets');
     assert.match(body, /not configured|issue/i);
     await tab('board', 'boardtasks');
@@ -798,6 +808,137 @@ await test('every renderer that names an agent tags it', async () => {
       const at = src.indexOf(needle);
       assert.ok(at > 0, `${name}: expected to find ${needle}`);
     }
+  }
+});
+
+// ── Runs, and the gate that waits for a person ─────────────────────────────
+//
+// The harness seeded two runs: e2e001 with every job verified and nothing left but an
+// operator's decision, and e2e002 still in flight with a worker that never existed.
+// Between them they cover both shapes this view has to draw.
+
+await test('Runs lists what is in flight and says what is blocking each one', async () => {
+  await show('runs');
+  await page.waitForFunction(
+    () => document.querySelectorAll('#viewRuns details.run').length >= 2,
+    null, { timeout: 15000 });
+  const ids = await page.$$eval('#viewRuns .run-id', ns => ns.map(n => n.textContent));
+  assert.ok(ids.includes('e2e001') && ids.includes('e2e002'), `saw ${ids.join(', ')}`);
+  // The blocking line is the product here: a job table answers eventually, one
+  // sentence answers at a glance.
+  const blocking = await page.$$eval('#viewRuns .run-blocking', ns => ns.map(n => n.textContent));
+  assert.ok(blocking.some(t => /e2e002\/1 submitted, waiting on e2e-reviewer/.test(t)),
+            `no blocking line named the reviewer: ${blocking.join(' | ')}`);
+  assert.ok(blocking.every(t => !/e2e001/.test(t)),
+            'a fully verified run must not claim to be blocked');
+});
+
+await test('an attempt count is always shown against its ceiling', async () => {
+  // "tries=2" means nothing without the maximum, and the maximum is MAX_ATTEMPTS in
+  // run.py - served in the payload so raising it there cannot leave this reading 2/3.
+  await page.waitForFunction(
+    () => document.querySelector('#viewRuns table.run-jobs .j-tries'),
+    null, { timeout: 15000 });
+  const tries = await page.$$eval('#viewRuns .j-tries', ns => ns.map(n => n.textContent));
+  assert.ok(tries.length, 'no job rows rendered');
+  for (const value of tries) assert.match(value, /^\d+\/\d+$/);
+});
+
+await test('worker and reviewer cells are tagged for the live-agent marking', async () => {
+  const tagged = await page.$$eval('#viewRuns [data-agent]', ns => ns.map(n => n.dataset.agent));
+  assert.ok(tagged.includes('e2e-worker') && tagged.includes('e2e-reviewer'),
+            `runs tagged ${tagged.join(', ')}`);
+  // None of these agents exist, so none may be marked live or made clickable.
+  const live = await page.$$eval('#viewRuns [data-agent].is-live', ns => ns.length);
+  assert.equal(live, 0, 'a torn-down agent must not be presented as running');
+});
+
+await test('a verified run asks the operator to decide, and shows the diff', async () => {
+  await page.waitForSelector('#viewRuns .run-review.pending', { timeout: 15000 });
+  const ask = await page.$eval('.run-review.pending .run-review-head', n => n.textContent);
+  assert.match(ask, /will not complete this run until you do/);
+  await page.waitForFunction(
+    () => !document.querySelector('.run-diff')?.textContent.startsWith('Loading'),
+    null, { timeout: 15000 });
+  // This run was seeded with a base commit that does not exist, so the view has to say
+  // what it is comparing against rather than quietly showing a different diff.
+  const note = await page.$$eval('.run-review.pending .run-diff-rejected',
+                                 ns => ns.map(n => n.textContent).join(' '));
+  assert.match(note, /predates|against HEAD/i);
+  const files = await page.$eval('.run-diff-files', n => n.textContent);
+  assert.match(files, /dashboard\/runs\.js/);
+});
+
+await test('the rail badge says a run is waiting on you', async () => {
+  await page.waitForFunction(() => !document.getElementById('badgeRuns').hidden,
+                             null, { timeout: 20000 });
+  const badge = await page.$eval('#badgeRuns',
+    n => ({ text: n.textContent, title: n.title }));
+  assert.equal(badge.text, '1');
+  assert.match(badge.title, /e2e001: review/);
+});
+
+await test('a rejection with no reason is refused before it is sent', async () => {
+  // A "request changes" carrying no reason gives the orchestrator nothing to act on,
+  // so it never leaves the page.
+  let posts = 0;
+  await page.route('**/api/runs/*/review', async (route) => { posts += 1; await route.continue(); });
+  try {
+    await page.click('.run-review.pending .run-acts button:not(.primary)');
+    await page.waitForSelector('.runs-notice', { timeout: 10000 });
+    assert.equal(posts, 0, 'an empty rejection was sent to the server');
+    assert.match(await page.$eval('.runs-notice', n => n.textContent), /Say what needs changing/);
+  } finally {
+    await page.unroute('**/api/runs/*/review');
+  }
+});
+
+await test('a half-typed note survives the poll that redraws the view', async () => {
+  // THE BUG THIS EXISTS FOR. This view polls every five seconds and draws itself with
+  // replaceChildren; rebuilding regardless detached the button you were reaching for
+  // and emptied the box you were typing in. You cannot use a review form that
+  // reconstructs itself under your hands twice a minute.
+  const note = await page.$('.run-review.pending .run-note');
+  await note.fill('halfway through a thought');
+  await page.waitForTimeout(7000);            // longer than the 5s poll
+  assert.equal(await page.$eval('.run-review.pending .run-note', n => n.value),
+               'halfway through a thought');
+});
+
+await test('approving records the decision and the run stops asking', async () => {
+  page.once('dialog', (d) => d.accept());
+  await page.click('.run-review.pending .run-acts button.primary');
+  await page.waitForSelector('#viewRuns .run-review.approved', { timeout: 15000 });
+  const head = await page.$eval('.run-review.approved .run-review-head', n => n.textContent);
+  assert.match(head, /Approved by .* the orchestrator may complete this run/);
+  // And the badge clears, because nothing is waiting on the operator any more.
+  await page.waitForFunction(() => document.getElementById('badgeRuns').hidden,
+                             null, { timeout: 20000 });
+});
+
+await test('the server refuses to approve a run whose jobs are unverified', async () => {
+  // The gate is the server's, not the button's - the page merely declines to offer a
+  // control. Prove the refusal survives someone calling the endpoint directly.
+  const out = await page.evaluate(async () => {
+    const r = await fetch('api/runs/e2e002/review', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ decision: 'approved' }),
+    });
+    return { status: r.status, body: await r.text() };
+  });
+  assert.equal(out.status, 409);
+  assert.match(out.body, /not verified yet/);
+});
+
+await test('runs are read-only over HTTP apart from that one decision', async () => {
+  for (const [path, method] of [['api/runs', 'POST'], ['api/runs/e2e001', 'POST'],
+                                ['api/runs/e2e001/diff', 'POST']]) {
+    const status = await page.evaluate(async ([p, m]) => {
+      const r = await fetch(p, { method: m, headers: { 'Content-Type': 'application/json' },
+                                 body: '{}' });
+      return r.status;
+    }, [path, method]);
+    assert.equal(status, 405, `${method} ${path} should be 405, got ${status}`);
   }
 });
 

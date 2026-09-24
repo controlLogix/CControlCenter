@@ -1433,3 +1433,77 @@ details.epic[open] > summary { margin-bottom: var(--space-2); }
 @media (prefers-reduced-motion: reduce) {
   [data-agent].is-live::before, .cell.just-focused { animation: none; }
 }
+
+/* ── Runs ──────────────────────────────────────────────────────────────────
+ *
+ * The one layout rule that matters here: the blocking line and the review block
+ * outrank the job table. What an operator needs is "what is holding this and who
+ * do I chase", and a table of every job answers that only after you have read it.
+ */
+.runs-head { display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+             margin:0 0 14px; }
+.runs-head h2 { margin:0; font-size:1.15rem; }
+.runs-count { color:var(--muted); font-size:.85rem; }
+.runs-filter { margin-left:auto; color:var(--muted); font-size:.82rem;
+               display:flex; align-items:center; gap:5px; cursor:pointer; }
+.runs-notice { margin:0 0 12px; padding:8px 11px; border-radius:6px;
+               background:var(--warn-bg,rgba(220,160,40,.12));
+               border:1px solid var(--warn,rgba(220,160,40,.4)); font-size:.86rem; }
+.runs-empty { color:var(--muted); font-size:.9rem; padding:18px 0; }
+
+details.card.run { margin:0 0 10px; }
+details.card.run > summary { display:flex; align-items:center; gap:9px;
+                             flex-wrap:wrap; }
+.run-id { font-family:var(--mono,ui-monospace,monospace); font-weight:600;
+          letter-spacing:.02em; }
+.run-count, .run-time { color:var(--muted); font-size:.82rem; }
+.run-chip { font-size:.72rem; padding:1px 7px; border-radius:10px;
+            border:1px solid var(--line,rgba(128,128,128,.35));
+            color:var(--muted); white-space:nowrap; }
+.run-chip.ok   { color:var(--ok,#3fa76a);   border-color:var(--ok,#3fa76a); }
+.run-chip.warn { color:var(--warn,#c98a24); border-color:var(--warn,#c98a24); }
+.run-chip.bad  { color:var(--bad,#c9483f);  border-color:var(--bad,#c9483f);
+                 font-weight:600; }
+.run-request { margin:8px 0 0; font-size:.88rem; }
+.run-blocking { margin:8px 0 0; font-size:.86rem; color:var(--warn,#c98a24); }
+.run-loading { margin:10px 0 0; color:var(--muted); font-size:.84rem; }
+
+/* The gate. Bordered and set apart because it asks for a decision rather than
+ * reporting one, and the two must never look the same. */
+.run-review { margin:12px 0 0; padding:11px 13px; border-radius:7px;
+              border:1px solid var(--line,rgba(128,128,128,.35)); }
+.run-review.pending, .run-review.stale { border-color:var(--warn,#c98a24);
+              background:var(--warn-bg,rgba(220,160,40,.07)); }
+.run-review.stale { border-color:var(--bad,#c9483f); }
+.run-review.approved { border-color:var(--ok,#3fa76a); }
+.run-review-head { font-size:.88rem; font-weight:600; }
+.run-review-note { margin:6px 0 0; font-size:.84rem; color:var(--muted);
+                   white-space:pre-wrap; }
+.run-diff-files { margin:8px 0 0; font-size:.8rem; color:var(--muted);
+                  word-break:break-all; }
+.run-diff-label { font-weight:600; }
+.run-diff-rejected { margin:4px 0 0; color:var(--bad,#c9483f); }
+.run-diff { margin:8px 0 0; max-height:420px; overflow:auto; padding:9px 11px;
+            border-radius:5px; background:var(--pane,rgba(128,128,128,.08));
+            font-family:var(--mono,ui-monospace,monospace); font-size:.76rem;
+            line-height:1.45; white-space:pre; }
+.run-note { margin:9px 0 0; width:100%; box-sizing:border-box; resize:vertical;
+            font:inherit; font-size:.84rem; padding:6px 8px; border-radius:5px;
+            border:1px solid var(--line,rgba(128,128,128,.35));
+            background:var(--pane,rgba(128,128,128,.06)); color:inherit; }
+.run-acts { margin:9px 0 0; display:flex; gap:8px; flex-wrap:wrap; }
+
+table.run-jobs { margin:12px 0 0; width:100%; border-collapse:collapse;
+                 font-size:.82rem; }
+table.run-jobs th { text-align:left; font-weight:600; color:var(--muted);
+                    padding:3px 8px 6px 0; font-size:.74rem;
+                    text-transform:uppercase; letter-spacing:.05em; }
+table.run-jobs td { padding:4px 8px 4px 0; vertical-align:top; }
+table.run-jobs .j-id, table.run-jobs .j-tries {
+                    font-family:var(--mono,ui-monospace,monospace); }
+/* An agent name broken across two lines is unreadable next to a similar one. */
+table.run-jobs .j-who { white-space:nowrap; }
+table.run-jobs tr.job.escalated .j-state { color:var(--bad,#c9483f);
+                    font-weight:600; }
+table.run-jobs tr.job.verified .j-state { color:var(--ok,#3fa76a); }
+table.run-jobs .j-flags { display:flex; gap:5px; flex-wrap:wrap; }

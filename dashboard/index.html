@@ -83,6 +83,11 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="7" rx="1"/></svg>
       <span class="nav-label">Board</span>
     </button>
+    <button class="nav-item" data-view="runs" role="tab" aria-selected="false" title="Runs — what is being worked on right now, and what is waiting on you">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 109 9"/><path d="M12 7v5l3.5 2"/><path d="M21 3v5h-5"/></svg>
+      <span class="nav-label">Runs</span>
+      <span class="nav-badge alert" id="badgeRuns" hidden></span>
+    </button>
     <button class="nav-item" data-view="organization" role="tab" aria-selected="false" title="Organization — agent definitions and task teams">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="7" r="3"/><circle cx="18" cy="8" r="2"/><path d="M2 21v-3a6 6 0 0112 0v3M16 13a5 5 0 016 5v3"/></svg>
       <span class="nav-label">Organization</span>
@@ -108,6 +113,7 @@
     <div id="banner" class="banner" role="alert" hidden></div>
 
     <section id="viewGithub" class="view pad" role="tabpanel" aria-label="GitHub" hidden></section>
+    <section id="viewRuns" class="view pad" role="tabpanel" aria-label="Runs" hidden></section>
     <!-- ═══ Terminals ═══ -->
     <section id="viewTerminals" class="view" role="tabpanel" aria-label="Terminals">
       <section id="ribbon" class="ribbon" aria-label="Terminal configuration">
@@ -533,7 +539,7 @@
 <script src="chatter.js"></script>
 <script src="iiot.js"></script>
 <script src="mqtt.js"></script>
-<script src="netscan.js"></script>
+<script src="netscan.js"></script><script src="runs.js"></script>
 <script src="app.js"></script>
 <script>
   // Readability matrix, on demand only: open 127.0.0.1:8787/?fit=1 and run

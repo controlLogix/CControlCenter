@@ -317,4 +317,97 @@ else
   bad "ownership: teardown boundary failed (pane=$pane_rc orchestrator=$owner_rc sentinel=$survived)"
 fi
 
+echo '--- THE OPERATOR GATE: a human decision outranks the reviewers ---'
+# WHY THIS SITS ON TOP OF THE REVIEWER GATE. A reviewer verdict answers "was the job
+# done as briefed"; it cannot answer "was that the right job", because the same
+# orchestrator wrote the brief the reviewer checked against. Only the person who asked
+# for the work can catch that, and completion is the last moment they can.
+
+approve() { python3 - "$@" <<'PYAPPROVE'
+import sys
+sys.path.insert(0, 'taskmgmt')
+import run
+run.write_approval(sys.argv[1], 'operator', sys.argv[3] if len(sys.argv) > 3 else '',
+                   sys.argv[2])
+PYAPPROVE
+}
+
+# The paired positive FIRST: without it, every refusal below is indistinguishable from
+# the command simply being broken.
+ra=$($RUN start 'operator gate: approved' 2>/dev/null)
+ja=$($RUN assign "$ra" --worker approve-w --reviewer approve-r 2>/dev/null)
+$RUN submit "$ja" --by approve-w --summary done >/dev/null 2>&1
+$RUN verdict "$ja" --by approve-r --pass --reason fine >/dev/null 2>&1
+approve "$ra" approved 'read the diff, this is what I asked for'
+$RUN complete "$ra" >/dev/null 2>&1
+rc_is 'an approved run completes' 0 $?
+
+# Changes requested: completion is refused, and --force must NOT override it. --force
+# exists for a run whose agents died, which is an accident; completing over a stated
+# human objection is a decision, and no flag on this command should be able to make it.
+rb=$($RUN start 'operator gate: changes asked for' 2>/dev/null)
+jb=$($RUN assign "$rb" --worker changes-w --reviewer changes-r 2>/dev/null)
+$RUN submit "$jb" --by changes-w --summary done >/dev/null 2>&1
+$RUN verdict "$jb" --by changes-r --pass --reason fine >/dev/null 2>&1
+approve "$rb" changes 'this solves the wrong problem'
+out=$($RUN complete "$rb" 2>&1); rc=$?
+if [ $rc -ne 0 ] && [[ "$out" == *"asked for changes"* ]]; then
+  ok 'completion is refused while the operator has asked for changes'
+else
+  bad "changes-requested run completed anyway (rc=$rc): $out"
+fi
+$RUN complete "$rb" --force >/dev/null 2>&1; rc=$?
+if [ $rc -ne 0 ] && [ ! -f "$HOME_DIR/runs/$rb/COMPLETE" ]; then
+  ok 'and --force does not override a human objection'
+else
+  bad "--force completed over the operator's objection (rc=$rc)"
+fi
+# An objection is a decision, not a wall: a fresh approval clears it.
+approve "$rb" approved 'fixed now'
+$RUN complete "$rb" >/dev/null 2>&1
+rc_is 'a new approval reopens the way to completion' 0 $?
+
+# An approval pins the bytes it covered. Work that changed afterwards was never seen,
+# so "approved" would otherwise have meant "approved something".
+rdrift=$($RUN start 'operator gate: drift' 2>/dev/null)
+jc=$($RUN assign "$rdrift" --worker drift-w --reviewer drift-r 2>/dev/null)
+mkdir -p "$HOME_DIR/repo"
+printf 'original\n' > "$HOME_DIR/repo/drifty.txt"
+$RUN submit "$jc" --by drift-w --files drifty.txt --repo "$HOME_DIR/repo" \
+  --summary done >/dev/null 2>&1
+$RUN verdict "$jc" --by drift-r --pass --reason fine >/dev/null 2>&1
+python3 - "$rdrift" "$HOME_DIR/repo" <<'PYDRIFT'
+import sys
+sys.path.insert(0, 'taskmgmt')
+import run
+run.write_approval(sys.argv[1], 'operator', 'looks right', 'approved', repo=sys.argv[2])
+PYDRIFT
+printf 'changed after you looked\n' > "$HOME_DIR/repo/drifty.txt"
+out=$(AGENTMUX_REPO="$HOME_DIR/repo" $RUN complete "$rdrift" 2>&1); rc=$?
+if [ $rc -ne 0 ] && [[ "$out" == *"changed after the operator approved"* ]]; then
+  ok 'an approval stops covering work that changed after it was given'
+else
+  bad "drifted approval still completed (rc=$rc): $out"
+fi
+
+# A run nobody reviewed by hand still completes. This gate refuses a decision that was
+# MADE and defied; it does not demand a browser click from someone completing their
+# own run at a terminal - they are the approval.
+rd=$($RUN start 'operator gate: no decision recorded' 2>/dev/null)
+jd=$($RUN assign "$rd" --worker plain-w --reviewer plain-r 2>/dev/null)
+$RUN submit "$jd" --by plain-w --summary done >/dev/null 2>&1
+$RUN verdict "$jd" --by plain-r --pass --reason fine >/dev/null 2>&1
+$RUN complete "$rd" >/dev/null 2>&1
+rc_is 'no recorded decision is not an objection' 0 $?
+
+# And approval can never stand in for review.
+rskip=$($RUN start 'operator gate: cannot skip review' 2>/dev/null)
+je=$($RUN assign "$rskip" --worker skip-w --reviewer skip-r 2>/dev/null)
+$RUN submit "$je" --by skip-w --summary done >/dev/null 2>&1
+if approve "$rskip" approved 'ship it' 2>/dev/null; then
+  bad 'an unverified run was approved'
+else
+  ok 'approval is refused while a job is still unverified'
+fi
+
 finish

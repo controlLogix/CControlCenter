@@ -342,7 +342,15 @@ class CodesysTests(unittest.TestCase):
         self.assertEqual(code, 400)
         code, data = request('GET', '/codesys.js')
         self.assertEqual(code, 200)
-        self.assertIn(b"registerView('codesys', load)", data)
+        # CODESYS moved from a top-level view to a card on IIOT, where the rest of the
+        # field equipment lives. This assertion still pinned the old registration and
+        # so had been failing since that move. What it is actually here to protect is
+        # that the panel registers itself at all and never builds DOM from a string.
+        self.assertIn(b"registerCard('iiot', maybe, 0)", data)
+        # And that it stays LAZY: every refresh is an SSH connection to a controller,
+        # so a poll interval here would reach out to every PLC just because someone
+        # opened IIOT to look at Modbus.
+        self.assertIn(b"if (!card.open || loaded) return;", data)
         self.assertNotIn(b'innerHTML', data)
 
     def test_runtime_service_down_and_gateway_retarget_clear_state(self):

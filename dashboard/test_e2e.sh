@@ -90,6 +90,41 @@ BROKER_PORT=$(free_port)
 
 echo "dashboard: 127.0.0.1:$PORT   broker: 127.0.0.1:$BROKER_PORT   home: $TEST_HOME"
 
+# ONE RUN, ALREADY VERIFIED AND WAITING ON A PERSON.
+#
+# The Runs view has nothing to draw without one, and the state worth exercising in a
+# browser is precisely the one a suite cannot reach by clicking: every job passed
+# review, so the run is sitting at the operator gate. Seeded here rather than in the
+# .mjs because it is filesystem state under AGENTMUX_HOME, which is this script's job.
+AGENTMUX_HOME="$TEST_HOME" python3 - <<'SEEDRUN'
+import sys
+sys.path.insert(0, 'taskmgmt')
+import run
+rid = "e2e001"
+run.run_dir(rid).mkdir(parents=True, exist_ok=True)
+run.append_event(rid, {"event": "start", "by": "orchestrator",
+                       "base": "0" * 40,      # no such commit: exercises the fallback
+                       "detail": "e2e: a run waiting on the operator"})
+for i in (1, 2):
+    job = f"{rid}/{i}"
+    run.append_event(rid, {"event": "assign", "job": job, "by": "orchestrator",
+                           "worker": "e2e-worker", "reviewer": "e2e-reviewer",
+                           "task": "TM-E2E"})
+    run.append_event(rid, {"event": "submit", "job": job, "by": "e2e-worker",
+                           "files": ["dashboard/runs.js"]})
+    run.append_event(rid, {"event": "verdict", "job": job, "by": "e2e-reviewer",
+                           "result": "pass", "attempt": 1, "detail": "ran it"})
+# A second run that is still blocked, so the view has both shapes to draw.
+rid2 = "e2e002"
+run.run_dir(rid2).mkdir(parents=True, exist_ok=True)
+run.append_event(rid2, {"event": "start", "by": "orchestrator",
+                        "detail": "e2e: a run still in flight"})
+run.append_event(rid2, {"event": "assign", "job": f"{rid2}/1", "by": "orchestrator",
+                        "worker": "e2e-ghost", "reviewer": "e2e-reviewer"})
+run.append_event(rid2, {"event": "submit", "job": f"{rid2}/1", "by": "e2e-ghost",
+                        "files": ["x.txt"]})
+SEEDRUN
+
 AGENTMUX_HOME="$TEST_HOME" python3 dashboard/server.py --port "$PORT" >"$TEST_HOME/server.log" 2>&1 &
 SERVER_PID=$!
 python3 dashboard/stub_broker.py --port "$BROKER_PORT" --quiet >"$TEST_HOME/broker.log" 2>&1 &

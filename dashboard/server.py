@@ -19,6 +19,7 @@ import netscan
 import os
 from pathlib import Path
 import profinet
+import runsview
 import re
 import stat
 import struct
@@ -1139,6 +1140,70 @@ class Handler(BaseHTTPRequestHandler):
                     "agentdef", "agentdrop", "recruit", "approve", "hire",
                     "plcstate", "bootapp", "chatsend")
 
+    def runs_endpoint(self, rest, query):
+        """Runs, read-only, plus the one write: the operator's review decision.
+
+        `rest` is what followed /api/runs - "" for the list, "<id>" for one run,
+        "<id>/diff" for what it changed, "<id>/review" for the decision. Every id is
+        validated by run.valid_run() before it reaches a path join; the six-hex shape
+        is the only thing that ever indexes into ~/.agentmux/runs.
+        """
+        parts = [p for p in rest.split("/") if p] if rest else []
+        try:
+            if not parts:
+                if self.command != "GET":
+                    self.send_json(405, {"error": "read-only endpoint"})
+                    return
+                raw = parse_qs(query).get("limit", ["20"])[0]
+                limit = int(raw) if re.fullmatch(r"[0-9]{1,3}", raw) else 20
+                self.send_json(200, runsview.list_runs(limit))
+                return
+            run_id, tail = parts[0], (parts[1] if len(parts) > 1 else "")
+            if len(parts) > 2 or not runsview.runmod.valid_run(run_id):
+                self.send_json(404, {"error": "not found"})
+                return
+            if tail == "review":
+                # The ONE write here, and it is the human gate in front of
+                # completion - see runsview's approval comment for why an agent
+                # verifying every job is not the same as the work being wanted.
+                if self.command != "POST":
+                    self.send_json(405, {"error": "POST required"})
+                    return
+                body = self.read_cc_body(4096)
+                if body is None:
+                    return
+                decision = body.get("decision")
+                if decision not in ("approved", "changes"):
+                    self.send_json(400, {"error": "decision must be approved or changes"})
+                    return
+                note = body.get("note")
+                if note is not None and not isinstance(note, str):
+                    self.send_json(400, {"error": "note must be a string"})
+                    return
+                # The reviewer is the person at this browser. There is no identity to
+                # check on loopback and pretending otherwise would be theatre; what
+                # matters is that the decision is recorded and attributable to a
+                # surface, which "operator (dashboard)" says honestly.
+                record = runsview.write_approval(run_id, "operator (dashboard)",
+                                                 note, decision)
+                self.send_json(200, {"ok": True, "review": record})
+                return
+            if self.command != "GET":
+                self.send_json(405, {"error": "read-only endpoint"})
+                return
+            if tail == "diff":
+                self.send_json(200, runsview.review_diff(run_id))
+                return
+            if tail:
+                self.send_json(404, {"error": "not found"})
+                return
+            self.send_json(200, runsview.detail(run_id))
+        except runsview.ReviewError as err:
+            # 409, matching the board: the request was well formed and the run said no.
+            self.send_json(409, {"error": str(err)})
+        except (OSError, ValueError) as err:
+            self.send_json(500, {"error": f"runs unavailable ({type(err).__name__})"})
+
     def board_endpoint(self, op, query):
         try:
             if self.command == "POST":
@@ -2081,6 +2146,14 @@ class Handler(BaseHTTPRequestHandler):
                          and 1 <= int(raw) <= 2000 else 200)
                 self.send_json(200, feed_snapshot(limit))
                 return
+            if path == "/api/runs" or path.startswith("/api/runs/"):
+                # Deliberately NOT under /api/board/, whose op regex is [a-z]{1,16}
+                # with no slash - a run id and a sub-resource would not survive it.
+                # Routed here in the shared block for the same reason /api/feed is:
+                # from the GET-only section a POST falls through to 404, which tells
+                # the caller the endpoint does not exist when it plainly does.
+                self.runs_endpoint(path[len("/api/runs"):].strip("/"), parsed.query)
+                return
             if path == "/api/board" or path.startswith("/api/board/"):
                 op = path[len("/api/board/"):] if len(path) > len("/api/board") else "board"
                 if not re.fullmatch(r"[a-z]{1,16}", op):
@@ -2211,7 +2284,7 @@ class Handler(BaseHTTPRequestHandler):
             content_type = "text/html; charset=utf-8"
         elif path in ("/app.js", "/fitmatrix.js", "/agents.js", "/teams.js", "/iiot.js",
                       "/github.js", "/codesys.js", "/chatter.js", "/mqtt.js",
-                      "/netscan.js"):
+                      "/netscan.js", "/runs.js"):
             # fitmatrix.js is the readability test harness. index.html loads it only
             # when the URL carries ?fit=1, so it is inert on the normal page but can
             # be run against the REAL page rather than a mock.
