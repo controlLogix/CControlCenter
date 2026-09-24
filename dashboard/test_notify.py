@@ -395,5 +395,155 @@ class TestUnreadNotices(TestNoticeRouting):
         self.assertEqual(mode, 0)
 
 
+# ── the feed block, and not letting one source starve the rest ───────────────
+
+class TestFeedRationing(unittest.TestCase):
+    """The run notices were wired into the feed and still did not appear.
+
+    They were not dropped - they were CROWDED OUT. The journal and chatter blocks each
+    fetch up to `limit` rows of their own, so a busy day puts several hundred newer
+    entries ahead of everything else and a plain truncation cuts every other source
+    entirely. The client filters by source afterwards, so anything lost here is
+    invisible no matter what the operator ticks, which is what makes the truncation the
+    wrong place to be purely chronological.
+    """
+
+    def setUp(self):
+        sys.path.insert(0, str(HERE))
+        import server
+        self.server = server
+        import ccstore
+        self.ccstore = ccstore
+
+    def entry(self, at, source):
+        return self.ccstore.feed_entry(at, source, "info", "who", "text")
+
+    def test_a_flood_from_one_source_cannot_erase_another(self):
+        flood = [self.entry(f"2026-09-24T12:{m:02d}:00+00:00", "journal")
+                 for m in range(59)]
+        rare = [self.entry("2020-01-01T00:00:00+00:00", "run")]
+        out = self.server.ration(sorted(flood + rare,
+                                        key=lambda e: e["at"], reverse=True), 20)
+        self.assertEqual(len(out), 20)
+        self.assertIn("run", {e["source"] for e in out},
+                      "the one entry a person was waiting on was cut")
+
+    def test_the_result_is_still_newest_first(self):
+        # The reserved picks are taken per source, so they land in the intermediate
+        # list ahead of newer entries from a busier source. A uniform spread hides
+        # that - it comes out sorted by luck - so this deliberately makes the quiet
+        # source OLD and the busy one NEW, which is the shape that actually scrambles.
+        old_rare = [self.entry(f"2020-01-01T00:{m:02d}:00+00:00", "run")
+                    for m in range(10)]
+        new_busy = [self.entry(f"2026-09-24T12:{m:02d}:00+00:00", "journal")
+                    for m in range(50)]
+        out = self.server.ration(
+            sorted(old_rare + new_busy, key=lambda e: e["at"], reverse=True), 30)
+        self.assertEqual([e["at"] for e in out],
+                         sorted((e["at"] for e in out), reverse=True),
+                         "the feed came back out of chronological order")
+
+    def test_feed_snapshot_actually_rations_what_it_returns(self):
+        # THE GAP THAT LET THIS SHIP BROKEN ONCE. Testing ration() in isolation says
+        # nothing about whether feed_snapshot uses it, and the first version of these
+        # tests passed happily with the call removed.
+        called = {}
+        real = self.server.ration
+
+        def spy(entries, limit):
+            called["entries"] = len(entries)
+            called["limit"] = limit
+            return real(entries, limit)
+
+        self.server.ration = spy
+        try:
+            out = self.server.feed_snapshot(25)
+        finally:
+            self.server.ration = real
+        self.assertIn("limit", called, "feed_snapshot truncated without rationing")
+        self.assertEqual(called["limit"], 25)
+        self.assertLessEqual(len(out["entries"]), 25)
+
+    def test_nothing_is_invented_or_duplicated(self):
+        mixed = [self.entry(f"2026-09-24T00:{m:02d}:00+00:00", s)
+                 for m in range(30) for s in ("journal", "run")]
+        out = self.server.ration(sorted(mixed, key=lambda e: e["at"], reverse=True), 25)
+        self.assertEqual(len(out), 25)
+        self.assertEqual(len({id(e) for e in out}), 25, "an entry appeared twice")
+        for entry in out:
+            self.assertIn(entry, mixed)
+
+    def test_a_short_feed_is_returned_untouched(self):
+        few = [self.entry("2026-09-24T00:00:00+00:00", "run")] * 3
+        self.assertEqual(self.server.ration(few, 200), few)
+
+    def test_the_busiest_source_still_dominates(self):
+        # A floor, not a quota: the feed must still read as what is happening, and a
+        # quiet source must not be padded up to parity with a busy one.
+        flood = [self.entry(f"2026-09-24T12:{m:02d}:00+00:00", "journal")
+                 for m in range(59)]
+        rare = [self.entry("2020-01-01T00:00:00+00:00", "run")]
+        out = self.server.ration(sorted(flood + rare,
+                                        key=lambda e: e["at"], reverse=True), 40)
+        journal = sum(1 for e in out if e["source"] == "journal")
+        # 39 of 40: the floor costs the busy source exactly the one slot the quiet
+        # source needed. An equal-share quota would give it 40/6 = 6 and turn the feed
+        # into a summary of every source rather than a record of what is happening.
+        self.assertEqual(journal, 39, "the floor became a quota")
+
+
+class TestRunNoticesReachTheFeed(unittest.TestCase):
+    def setUp(self):
+        sys.path.insert(0, str(HERE))
+        import server
+        self.server = server
+        self.tmp = Path(tempfile.mkdtemp(prefix="feed-home-"))
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+        self._saved = server.HOME_DIR
+        server.HOME_DIR = self.tmp
+        self.addCleanup(lambda: setattr(server, "HOME_DIR", self._saved))
+        (self.tmp / "inbox").mkdir(parents=True)
+
+    def write(self, rows):
+        (self.tmp / "inbox" / "orchestrator.jsonl").write_text(
+            "".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+
+    def test_a_waiting_notice_is_a_warning_not_an_error(self):
+        self.write([{"at": "2026-09-24T12:00:00-0500", "kind": "status",
+                     "body": "run abc123 is waiting on your review", "ref": "abc123"}])
+        out = self.server.run_notice_entries()
+        self.assertEqual(len(out), 1)
+        self.assertEqual(out[0]["severity"], "warn")
+        self.assertEqual(out[0]["source"], "run")
+        self.assertEqual(out[0]["ref"], "abc123")
+
+    def test_an_escalation_is_an_error(self):
+        self.write([{"at": "2026-09-24T12:00:00-0500", "kind": "error",
+                     "body": "job escalated", "ref": "abc123"}])
+        self.assertEqual(self.server.run_notice_entries()[0]["severity"], "error")
+
+    def test_a_completion_is_information(self):
+        self.write([{"at": "2026-09-24T12:00:00-0500", "kind": "status",
+                     "body": "run abc123 COMPLETE: 2/2", "ref": "abc123"}])
+        self.assertEqual(self.server.run_notice_entries()[0]["severity"], "info")
+
+    def test_a_torn_or_missing_inbox_is_quiet(self):
+        self.assertEqual(self.server.run_notice_entries(), [])
+        (self.tmp / "inbox" / "orchestrator.jsonl").write_text(
+            '{"at": "broken"\nnot json at all\n', encoding="utf-8")
+        self.assertEqual(self.server.run_notice_entries(), [])
+
+    def test_the_reader_never_marks_anything_read(self):
+        # Opening the dashboard must not silently clear the terminal's copy.
+        rows = [{"at": "2026-09-24T12:00:00-0500", "kind": "status",
+                 "body": "one", "ref": "r"}]
+        self.write(rows)
+        before = (self.tmp / "inbox" / "orchestrator.jsonl").read_bytes()
+        self.server.run_notice_entries()
+        self.assertEqual((self.tmp / "inbox" / "orchestrator.jsonl").read_bytes(),
+                         before)
+        self.assertFalse((self.tmp / "inbox" / "orchestrator.read").exists())
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

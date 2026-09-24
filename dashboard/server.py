@@ -752,9 +752,48 @@ def feed_snapshot(limit=200):
         pass
 
     entries.sort(key=lambda e: e.get("at") or "", reverse=True)
-    return {"generated_at": now_iso(), "entries": entries[:limit],
+    return {"generated_at": now_iso(), "entries": ration(entries, limit),
             "sources": list(ccstore.FEED_SOURCES),
             "severities": list(ccstore.FEED_SEVERITIES)}
+
+
+def ration(entries, limit):
+    """Take the newest `limit`, but never let one source starve the others.
+
+    WHY THIS IS NOT JUST entries[:limit]. The journal and chatter blocks each fetch up
+    to `limit` rows of their own, so a busy day produces several hundred entries newer
+    than anything else the feed knows about - and a plain truncation then drops every
+    other source entirely. Run notices are the sharpest case: there are a handful of
+    them, they are the ones a person is actually waiting on, and they were being cut
+    before anyone saw them. The Settings checkbox for them stayed decorative for a
+    different reason than before, which is not an improvement.
+
+    The client filters by source AFTER this, so anything cut here is invisible no
+    matter what the operator ticks. That is what makes the cut the wrong place to be
+    democratic about recency.
+
+    Each source is guaranteed its newest few; whatever is left over is filled by
+    recency across everything, so a quiet system still reads as one chronological
+    stream and nothing is reordered.
+    """
+    if len(entries) <= limit:
+        return entries
+    reserve = max(5, limit // (len(ccstore.FEED_SOURCES) * 2))
+    picked, seen = [], {}
+    for entry in entries:                      # already newest-first
+        source = entry.get("source")
+        if seen.get(source, 0) < reserve:
+            seen[source] = seen.get(source, 0) + 1
+            picked.append(id(entry))
+    keep = set(picked[:limit])
+    out = [e for e in entries if id(e) in keep]
+    for entry in entries:                      # fill the rest by pure recency
+        if len(out) >= limit:
+            break
+        if id(entry) not in keep:
+            out.append(entry)
+    out.sort(key=lambda e: e.get("at") or "", reverse=True)
+    return out[:limit]
 
 
 def run_notice_entries(cap=40):
