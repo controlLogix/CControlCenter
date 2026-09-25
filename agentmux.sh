@@ -51,6 +51,71 @@ die() { printf 'agentmux: %s\n' "$*" >&2; exit 1; }
 have() { tm has-session -t "=$1" 2>/dev/null; }
 need() { have "$1" || die "no such agent: '$1' (try: agentmux list)"; }
 
+# Finish a restore that a killed gate run could not.
+#
+# dashboard/run_tests.sh repoints the live dashboard at a disposable home and restores it
+# from an EXIT trap. The trap is careful and even verifies itself - but it cannot survive
+# SIGKILL, and the idle watchdog kills panes. When that happens the dashboard is left
+# serving a temp directory which is then deleted, and the board renders every column
+# empty with nothing anywhere naming the cause. It took twenty minutes to diagnose once.
+#
+# So the gate now writes the address down first, and this finishes the job.
+#
+# THE FAST PATH IS ONE stat, and it has to be: this runs before every single verb,
+# including `agentmux help`. Everything below the second line runs only when a marker
+# exists - during a gate run, where it stops at one kill -0, or after a killed one.
+#
+# The marker lives in the OPERATOR's home, which does the scoping for free: run_tests.sh
+# exports AGENTMUX_HOME=$TEST_ROOT, so every agentmux call INSIDE a gate resolves ROOT to
+# the test home, finds nothing, and returns. Only the operator's own invocations repair.
+check_stale_takeover() {
+  [ "${AGENTMUX_NO_AUTO_RESTORE:-0}" = 1 ] && return 0
+  [ -f "$ROOT/.dashboard-takeover.json" ] || return 0
+
+  # One winner. Several agents can hit this at once after a kill, and restarting the
+  # dashboard four times in parallel is worse than the fault being repaired. The loser
+  # skips rather than waits - the winner is already fixing it.
+  local lock="$ROOT/.dashboard-takeover.repairing"
+  mkdir "$lock" 2>/dev/null || return 0
+  trap "rmdir '$lock' 2>/dev/null" RETURN
+
+  # Bootstrap: which checkout can do the repair. Read from the marker rather than from
+  # agentmux_self, because under `bash <(tr -d '\r' < agentmux.sh)` - how every suite and
+  # the watchdog invoke this script - BASH_SOURCE is /dev/fd/N and self-location fails.
+  # The marker names the checkout that took the dashboard over, which is the right one.
+  local repo
+  repo="$(python3 -c 'import json,sys
+try: print(json.load(open(sys.argv[1]))["repo"])
+except Exception: pass' "$ROOT/.dashboard-takeover.json" 2>/dev/null)" || return 0
+  [ -n "$repo" ] && [ -f "$repo/dashboard/suite_server.py" ] || return 0
+
+  # --stale exits non-zero for BOTH "no marker" and "the gate is still running". Those
+  # are the same instruction to us, and keeping them indistinguishable is deliberate:
+  # every validation of the file - version, ownership, liveness - stays in one place.
+  local line operator test_home
+  line="$(cd "$repo" && python3 dashboard/suite_server.py --stale --operator "$ROOT" 2>/dev/null)" || return 0
+  operator="${line%%$'\t'*}"
+  test_home="${line##*$'\t'}"
+  [ -n "$operator" ] || return 0
+
+  # 200>&- for the same reason restart_for_home closes it: the suite takes its lock with
+  # `exec 200>`, and a detached server inheriting that fd holds it for its whole life,
+  # after which every later gate run refuses to start over a lock nobody holds.
+  if ( cd "$repo" && AGENTMUX_HOME="$operator" \
+         bash <(tr -d '\r' < dashboard/restart.sh) >/dev/null 2>&1 200>&- &&
+       python3 dashboard/suite_server.py --expect "$operator" >/dev/null 2>&1 ); then
+    ( cd "$repo" && python3 dashboard/suite_server.py --clear --operator "$operator" 2>/dev/null )
+    # STDERR, NOT STDOUT. `run start` prints a run id that callers capture; a repair
+    # line on stdout would be read as part of it.
+    printf 'agentmux: the dashboard was serving %s (left by a gate run that was\n' "$test_home" >&2
+    printf '  killed). Restored to %s.\n' "$operator" >&2
+  else
+    printf 'agentmux: the dashboard is serving %s, left by a gate run that was killed,\n' "$test_home" >&2
+    printf '  and restoring it failed. Fix by hand:\n' >&2
+    printf '    cd %s && AGENTMUX_HOME=%s bash dashboard/restart.sh\n' "$repo" "$operator" >&2
+  fi
+}
+
 # Strip ANSI CSI / OSC / charset escapes and CRs so captured text is diffable.
 strip_ansi() {
   sed -e "s/${ESC}\[[0-9;:?]*[ -\/]*[@-~]//g" \
@@ -2302,6 +2367,9 @@ print(" ".join(coordination.revoke_warrant()) or "nothing to revoke")' \
     printf 'orchestrator: no pane to stop\n'
   fi
 }
+
+# Before every verb, including `help`. One stat when there is nothing to do.
+check_stale_takeover
 
 case "${1:-}" in
   spawn)  shift; cmd_spawn  "$@" ;;

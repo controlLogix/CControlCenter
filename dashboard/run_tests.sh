@@ -67,8 +67,13 @@ cleanup() {
   fi
   if [ "$restore_status" != 0 ]; then
     echo "  FAIL  could not restore dashboard home $OPERATOR_ROOT; retained test home $TEST_ROOT for recovery" >&2
+    echo "  the takeover marker is left in place; the next agentmux command will retry" >&2
     status=1
   else
+    # Cleared only once --expect has PROVED the restore, never merely attempted it. A
+    # marker that outlives a failed restore is the whole point: the next agentmux
+    # invocation reads it and finishes the job.
+    python3 dashboard/suite_server.py --clear --operator "$OPERATOR_ROOT" 2>/dev/null
     rm -rf "$TEST_ROOT"
   fi
   exit "$status"
@@ -82,6 +87,18 @@ export AGENTMUX_NO_COURIER=1
 # Suites simulate several identities; an invoking worker is not their identity.
 unset AGENTMUX_AGENT
 RESTORE_NEEDED=1
+# WRITE THE ADDRESS DOWN BEFORE MOVING THE DASHBOARD.
+#
+# OPERATOR_ROOT was discovered by reading /proc, so until this line the only record of
+# where the dashboard belongs is a variable in this shell. The EXIT trap below restores
+# it - but a trap cannot survive SIGKILL, and the idle watchdog kills panes. When that
+# happened the dashboard was left serving $TEST_ROOT, which is then deleted, and the
+# board rendered every column empty with nothing in any log naming the cause.
+#
+# Deliberately before restart_for_home rather than after: a death BETWEEN arming the
+# restore and completing it is exactly the window this protects.
+python3 dashboard/suite_server.py --mark --operator "$OPERATOR_ROOT" \
+  --test-home "$TEST_ROOT" --gate-pid $$ --repo "$PWD" || exit 1
 restart_for_home "$TEST_ROOT" >/dev/null || exit 1
 python3 dashboard/suite_server.py --expect "$TEST_ROOT" || exit 1
 
@@ -189,6 +206,7 @@ run test_inbox_guard.sh bash /dev/fd/5 5< <(tr -d '\r' < dashboard/test_inbox_gu
 run test_coordination.sh bash /dev/fd/6 6< <(tr -d '\r' < dashboard/test_coordination.sh)
 run test_run.sh   bash /dev/fd/7 7< <(tr -d '\r' < dashboard/test_run.sh)
 run test_residue.sh bash /dev/fd/12 12< <(tr -d '\r' < dashboard/test_residue.sh)
+run test_takeover_recovery.sh bash /dev/fd/21 21< <(tr -d '\r' < dashboard/test_takeover_recovery.sh)
 run test_lifecycle.sh bash /dev/fd/10 10< <(tr -d '\r' < dashboard/test_lifecycle.sh)
 run test_theme_import.sh bash /dev/fd/13 13< <(tr -d '\r' < dashboard/test_theme_import.sh)
 run test_themes.sh bash /dev/fd/13 13< <(tr -d '\r' < dashboard/test_themes.sh)

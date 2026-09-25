@@ -64,7 +64,11 @@ try:
     check('a failed suite cannot pass a clean residue gate', failed.returncode != 0
           and 'SUITE FAILED: exit 7' in failed.stdout, f'(rc={failed.returncode})')
 
-    for mode in ('normal', 'suite-failure', 'INT', 'TERM', 'start-failure', 'restore-failure', 'different-caller-home', 'wrong-server-home'):
+    # KILL is the case the marker exists for: SIGKILL to the process group, so the EXIT
+    # trap that normally restores the dashboard never runs at all. That is not
+    # hypothetical - the idle watchdog kills panes, and it took these panes three times
+    # in one night.
+    for mode in ('normal', 'suite-failure', 'INT', 'TERM', 'KILL', 'start-failure', 'restore-failure', 'different-caller-home', 'wrong-server-home'):
         fixture = work / ('runner-' + mode)
         fixture.mkdir()
         live = fixture / 'operator'
@@ -72,7 +76,25 @@ try:
         put(live / 'cc.db', 'operator database\n')
         copy('dashboard/run_tests.sh', fixture)
         # Model discovery/verification without inspecting or restarting any server.
-        put(fixture / 'dashboard/suite_server.py', "import os, sys\nif '--expect' not in sys.argv: print(os.environ['ORIGINAL_SERVER_HOME'])\nelif os.environ['CASE_MODE'] == 'wrong-server-home' and sys.argv[-1] != os.environ['ORIGINAL_SERVER_HOME']: sys.exit(1)\n")
+        # Models discovery, verification AND the takeover marker. The marker has to be
+        # real here: the whole point of the KILL case is that the note outlives a runner
+        # that never got to run its trap, so a stub that only pretends to write it would
+        # prove nothing.
+        put(fixture / 'dashboard/suite_server.py',
+            "import json, os, sys, time, pathlib\n"
+            "a = sys.argv\n"
+            "def opt(name):\n"
+            "    return a[a.index(name) + 1] if name in a else None\n"
+            "marker = pathlib.Path(os.environ['ORIGINAL_SERVER_HOME']) / '.dashboard-takeover.json'\n"
+            "if '--mark' in a:\n"
+            "    marker.parent.mkdir(parents=True, exist_ok=True)\n"
+            "    marker.write_text(json.dumps({'version': 1, 'operator_home': opt('--operator'),\n"
+            "        'test_home': opt('--test-home'), 'gate_pid': int(opt('--gate-pid')),\n"
+            "        'repo': opt('--repo'), 'started_at': int(time.time())}, indent=2) + '\\n')\n"
+            "elif '--clear' in a:\n"
+            "    marker.unlink(missing_ok=True)\n"
+            "elif '--expect' not in a: print(os.environ['ORIGINAL_SERVER_HOME'])\n"
+            "elif os.environ['CASE_MODE'] == 'wrong-server-home' and a[-1] != os.environ['ORIGINAL_SERVER_HOME']: sys.exit(1)\n")
         put(fixture / 'agentmux.sh', '# fixture\n')
         put(fixture / 'dashboard/server.py', '# existence only; never started\n')
         # All external effects terminate at these fixture-owned stubs.
@@ -124,12 +146,16 @@ print('passed 1, failed 0')
         proc = subprocess.Popen(['bash', 'dashboard/run_tests.sh'], cwd=fixture, env=env,
                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, start_new_session=True,
                                 preexec_fn=lambda: signal.signal(signal.SIGINT, signal.SIG_DFL))
-        if mode in ('INT', 'TERM'):
+        if mode in ('INT', 'TERM', 'KILL'):
             deadline = time.monotonic() + 8
             while not (fixture / 'ready').exists() and proc.poll() is None and time.monotonic() < deadline:
                 time.sleep(0.02)
             if (fixture / 'ready').exists():
-                os.kill(proc.pid, getattr(signal, 'SIG' + mode))
+                if mode == 'KILL':
+                    # The whole process group, so nothing gets a chance to clean up.
+                    os.killpg(proc.pid, signal.SIGKILL)
+                else:
+                    os.kill(proc.pid, getattr(signal, 'SIG' + mode))
         try:
             output, _ = proc.communicate(timeout=15)
         except subprocess.TimeoutExpired:
@@ -138,6 +164,30 @@ print('passed 1, failed 0')
         rows = [json.loads(line) for line in (fixture / 'restarts').read_text().splitlines()]
         rc = {'normal': 0, 'different-caller-home': 0, 'INT': 130, 'TERM': 143}.get(mode, 1)
         isolated = bool(rows) and rows[0]['home'] != str(live)
+        marker = live / '.dashboard-takeover.json'
+        if mode == 'KILL':
+            # No restore is possible here and none is expected. What must survive is the
+            # ADDRESS: without it the operator's home is unrecoverable, because
+            # OPERATOR_ROOT was only ever a variable in the shell that just died.
+            record = json.loads(marker.read_text()) if marker.exists() else {}
+            check('a killed runner leaves the dashboard address behind',
+                  proc.returncode == -signal.SIGKILL and isolated and marker.exists()
+                  and record.get('operator_home') == str(live)
+                  and record.get('test_home') == rows[0]['home'],
+                  f'(rc={proc.returncode}, marker={marker.exists()}, '
+                  f'home={record.get("operator_home")})')
+            continue
+        # The note is cleared only once the restore is PROVED, so restore-failure keeps
+        # it on purpose - that is the case where the next agentmux invocation has to
+        # finish the job, and discarding the address there would lose it for good.
+        # Everywhere else it must be gone, which is what proves the clear path runs at
+        # all rather than the marker simply never landing.
+        if mode == 'restore-failure':
+            check('a failed restore keeps the address for the next invocation',
+                  marker.exists(), f'(marker={marker.exists()})')
+        else:
+            check('no takeover marker is left behind on ' + mode, not marker.exists(),
+                  f'(marker={marker.exists()})')
         restored = len(rows) == 2 and rows[-1]['home'] == str(live) and not rows[-1]['writer_running']
         safe = all(not row['args'] for row in rows) and (live / 'cc.db').read_bytes() == b'operator database\n'
         cleanup = isolated and (Path(rows[0]['home']).exists() if mode == 'restore-failure' else not Path(rows[0]['home']).exists())
