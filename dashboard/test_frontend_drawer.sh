@@ -76,7 +76,7 @@ function setup(initial = fresh(), options = {}) {
   vm.runInNewContext(postSource+'\nwindow.CCC.post = post;',ctx);
   vm.runInNewContext(source,ctx);ready();
   const nodes = () => all(body);
-  return {ctx, body, root, posts, requests, open: key => ctx.window.CCCOpenCard(key || entity.key, async()=>{}), load:()=>loader(),
+  return {ctx, body, root, posts, requests, open: key => ctx.window.CCCOpenCard(key || entity.key, options.after || (async()=>{})), load:()=>loader(),
     read:fn=>{reader=fn;}, respond:fn=>{responder=fn;}, entity:value=>{entity=value;},
     drawer:()=>nodes().find(n=>n.id==='cardDrawer'), form:name=>nodes().find(n=>n.dataset.field===name),
     section:name=>nodes().find(n=>n.dataset.section===name), criteria:()=>nodes().filter(n=>n.className==='drawer-criterion'),
@@ -90,6 +90,13 @@ async function submit(p,field,values=[],remove=false) {
 }
 function response(payload,status=200) { return {ok:status<400,status,json:async()=>payload}; }
 
+test('post preserves 409 status payload and existing message',async()=>{
+  const p=setup();const payload={error:'Gate refused',missing:[{field:'body',hint:'exact <hint>'}]};
+  p.respond(()=>response(payload,409));
+  await assert.rejects(p.ctx.window.CCC.post('api/board/status',{}),e=>e.status===409&&e.payload===payload&&e.message==='Gate refused');
+  p.respond(()=>({ok:false,status:503,json:async()=>{throw Error('not json');}}));
+  await assert.rejects(p.ctx.window.CCC.post('api/board/status',{}),e=>e.status===503&&e.message==='HTTP 503');
+});
 test('kanban writes exclusively through api.post',async()=>{
   assert.doesNotMatch(source,/\bfetch\s*\(/);assert.doesNotMatch(source,/shell post helper discards/);
   const p=setup();await p.load();let called=false;
@@ -124,6 +131,56 @@ test('epics skip task-only reads and fields',async()=>{
   assert.deepEqual(p.requests,['api/board/entity?id=EP-1','api/board/history?id=EP-1&limit=200']);
   assert.equal(p.form('deps'),undefined);assert.equal(p.form('assignee'),undefined);
 });
+test('acceptance uses one-based DOM indices and renumbers after remove then tick',async()=>{
+  const p=setup();await p.open();
+  let row=p.criteria()[0],tick=all(row).find(n=>n.type==='checkbox');tick.checked=true;await tick.events.change();assert.equal(p.posts.at(-1).index,1);
+  await p.criteria()[1].children[1].events.click();assert.equal(p.posts.at(-1).index,2);assert.equal(p.posts.at(-1).remove,true);
+  row=p.criteria()[1];assert.ok(text(row).includes('third'));assert.equal(row.dataset.index,'2');
+  tick=all(row).find(n=>n.type==='checkbox');tick.checked=true;await tick.events.change();assert.equal(p.posts.at(-1).index,2);
+  assert.equal(all(p.criteria()[1]).find(n=>n.type==='checkbox').checked,true);
+  // Reading the DOM index at click time is intentional, not a captured forEach ordinal.
+  row=p.criteria()[0];row.dataset.index='2';tick=all(row).find(n=>n.type==='checkbox');tick.checked=false;await tick.events.change();assert.equal(p.posts.at(-1).index,2);
+});
+const mappings=[
+ ['body',['new body'],'update',{patch:{body:'new body'}}],
+ ['title',['New title'],'update',{patch:{title:'New title'}}],
+ ['assignee',['new-worker'],'update',{patch:{assignee:'new-worker'}}],
+ ['priority',['low'],'update',{patch:{priority:'low'}}],
+ ['estimate',['5.5'],'update',{patch:{estimate:5.5}}],
+ ['status',['blocked','waiting for equipment'],'status',{status:'blocked',reason:'waiting for equipment'}],
+ ['labels',['ready-for-agent'],'label',{label:'ready-for-agent',present:true}],
+ ['deps',['TM-2'],'dep',{blockedBy:'TM-2',present:true}],
+ ['evidence',['proof.log'],'evidence',{ref:'proof.log'}],
+ ['commits',['abc1234'],'commit',{ref:'abc1234'}],
+ ['comments',['read this'],'comment',{text:'read this'}],
+ ['links',['related','TM-3'],'link',{type:'related',target:'TM-3',present:true}],
+ ['touches',['src/file.js'],'touch',{path:'src/file.js'}],
+ ['epic',['EP-2'],'move',{epic:'EP-2'}],
+ ['acceptance',['new check'],'acceptance',{text:'new check'}],
+];
+for(const [field,values,op,payload] of mappings)test('field endpoint: '+field,async()=>{
+  const p=setup();await p.open();await submit(p,field,values);
+  assert.deepEqual(p.posts,[{endpoint:'api/board/'+op,id:'TM-1',...payload,actor:'dashboard'}]);
+});
+for(const [field,values,op,key] of [['labels',['ready'],'label','label'],['deps',['TM-2'],'dep','blockedBy'],['links',['related','TM-3'],'link','type']])test('remove endpoint: '+field,async()=>{
+  const p=setup();await p.open();await submit(p,field,values,true);
+  assert.equal(p.posts[0].endpoint,'api/board/'+op);assert.equal(p.posts[0].present,false);assert.equal(p.posts[0][key],values[0]);
+});
+test('writes normalize direct nested absent and deleted entity responses',async()=>{
+  const p=setup();await p.open();
+  p.respond(()=>response(fresh({title:'Direct'})));await submit(p,'title',['Direct']);assert.ok(text(p.drawer()).includes('Direct'));
+  p.respond(()=>response({entity:fresh({title:'Nested'})}));await submit(p,'status',['open','']);assert.ok(text(p.drawer()).includes('Nested'));
+  p.entity(fresh({title:'Fetched'}));p.respond(()=>response({changed:false}));await submit(p,'epic',['EP-1']);assert.ok(text(p.drawer()).includes('Fetched'));
+  const reads=p.requests.length;p.respond(()=>response({deleted:'TM-1'}));await p.find('btn drawer-delete').events.click();
+  assert.equal(p.posts.at(-1).endpoint,'api/board/delete');assert.equal(p.drawer().hidden,true);assert.equal(p.requests.length,reads);
+});
+test('409 renders every verbatim hint and message-only refusal; bypass is explicit',async()=>{
+  const p=setup();await p.open();
+  p.respond(()=>response({error:'Gate refused',missing:[{field:'body',hint:'exact --body <text>'},{field:'future',hint:'literal "future" remedy'}]},409));
+  await submit(p,'status',['done','reason']);for(const str of ['Gate refused','body','future','exact --body <text>','literal "future" remedy'])assert.ok(text(p.find('drawer-notice')).includes(str),str);
+  p.respond(()=>response({error:'No missing list'},409));await submit(p,'status',['done','']);assert.equal(text(p.find('drawer-notice')).trim(),'No missing list');
+  p.respond(()=>response({entity:fresh({status:'done'}),bypassed:{reason:'operator override'}}));await submit(p,'status',['done','']);assert.ok(text(p.find('drawer-notice')).includes('Gate bypassed: operator override'));
+});
 test('drawer emits no data-agent because test_e2e.mjs page.$ is first-match',async()=>{
   const p=setup();await p.open();await settled();
   assert.equal(all(p.drawer()).some(n=>'agent' in n.dataset||'data-agent' in n.attrs),false,'test_e2e.mjs page.$ is first-match; a hidden drawer must not shadow live agent nodes');
@@ -141,6 +198,20 @@ test('late entity responses and close cannot reopen or replace the current card'
   const slow=p.open();p.entity(fresh({key:'TM-2',title:'Second'}));await p.open('TM-2');resolve(fresh());await slow;assert.ok(text(p.drawer()).includes('Second'));
   p.ctx.window.events.keydown({key:'Escape',preventDefault(){}});assert.equal(p.drawer().hidden,true);
   assert.equal(p.ctx.document.activeElement.focused,true);
+});
+test('write lock prevents duplicates and refusal keeps acceptance unchecked for retry',async()=>{
+  const p=setup();await p.open();let resolve;
+  p.respond(()=>new Promise(r=>{resolve=r;}));const first=submit(p,'title',['pending']);await submit(p,'title',['duplicate']);assert.equal(p.posts.length,1);
+  resolve(response({error:'offline'},409));await first;
+  p.respond(()=>response({error:'No tick'},409));const tick=all(p.criteria()[0]).find(n=>n.type==='checkbox');tick.checked=true;await tick.events.change();assert.equal(tick.checked,false);assert.equal(p.posts.length,2);
+});
+test('completed write unlocks before a slow board refresh',async()=>{
+  let resolve;const refresh=new Promise(r=>{resolve=r;});
+  const p=setup(fresh(),{after:()=>refresh});await p.open();
+  const first=submit(p,'title',['saved']);await settled();
+  const second=submit(p,'body',['next edit']);await settled();
+  assert.equal(p.posts.length,2,'a saved entity must accept edits while the board refresh is pending');
+  resolve();await Promise.all([first,second]);
 });
 test('entity load failure is visible and can be retried',async()=>{
   const p=setup(fresh(),{read:path=>path.includes('/entity?')?Promise.reject(Error('entity offline')):undefined});

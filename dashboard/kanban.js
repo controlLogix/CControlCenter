@@ -163,6 +163,47 @@
     }
   }
 
+  // Status wraps its entity; unchanged move and delete do not return one.
+  async function writtenEntity(op, reply, key) {
+    if (op === 'delete') return null;
+    if (reply?.entity?.key === key) return reply.entity;
+    if (reply?.key === key) return reply;
+    return api.getJSON(`api/board/entity?id=${encodeURIComponent(key)}`);
+  }
+
+  async function writeDetail(op, fields) {
+    if (saving) return;
+    saving = true;
+    const key = detailKey, version = detailVersion, after = detailAfter;
+    let written = false;
+    drawer.setAttribute('aria-busy', 'true');
+    detailNotice.replaceChildren(api.el('p', '', 'Saving…'));
+    try {
+      const reply = await api.post(`api/board/${op}`, {id: key, ...fields, actor: 'dashboard'});
+      const entity = await writtenEntity(op, reply, key);
+      if (version !== detailVersion) return;
+      if (!entity) closeCard();
+      else {
+        renderDetail(entity);
+        detailNotice.replaceChildren(api.el('p', '', reply?.bypassed
+          ? `Gate bypassed: ${reply.bypassed.reason || 'override'}` : 'Saved.'));
+      }
+      written = true;
+    } catch (error) {
+      if (version === detailVersion) showWriteError(detailNotice, error);
+    } finally {
+      if (version === detailVersion) { saving = false; drawer.setAttribute('aria-busy', 'false'); }
+    }
+    // The server response completes the write. A slow board refresh must not
+    // silently discard the next edit made to the newly rendered entity.
+    if (written) {
+      try { await after(); }
+      catch (error) {
+        if (version === detailVersion) detailNotice.append(api.el('p', '', `Saved, but board refresh failed: ${error.message}`));
+      }
+    }
+  }
+
   function control(label, value = '', type = 'text') {
     const wrap = api.el('label', 'drawer-field', label);
     const input = api.el(type === 'textarea' ? 'textarea' : 'input');
@@ -171,6 +212,23 @@
     input.setAttribute('aria-label', label);
     wrap.append(input);
     return {wrap, input};
+  }
+
+  function editor(field, label, inputs, op, values, remove = false) {
+    const form = api.el('form', 'drawer-editor');
+    form.dataset.field = field;
+    for (const item of inputs) form.append(item.wrap);
+    const save = api.el('button', 'btn', label);
+    save.type = 'submit';
+    form.append(save);
+    form.addEventListener('submit', ev => { ev.preventDefault(); return writeDetail(op, values(true)); });
+    if (remove) {
+      const drop = api.el('button', 'btn', 'Remove');
+      drop.type = 'button';
+      drop.addEventListener('click', () => writeDetail(op, values(false)));
+      form.append(drop);
+    }
+    detailContent.append(form);
   }
 
   function renderDetail(entity) {
@@ -198,17 +256,49 @@
     for (const field of ['title', 'body', ...(entity.kind === 'task' ? ['assignee', 'priority', 'estimate'] : [])]) {
       const item = control(field, entity[field], field === 'body' ? 'textarea' : field === 'estimate' ? 'number' : 'text');
       if (field === 'estimate') { item.input.min = '0'; item.input.step = 'any'; }
-      const form = api.el('form', 'drawer-editor');
-      form.dataset.field = field;
-      item.input.readOnly = true;
-      form.append(item.wrap);
-      detailContent.append(form);
+      editor(field, `Save ${field}`, [item], 'update', () => ({patch: {
+        [field]: field === 'estimate' ? (item.input.value === '' ? null : Number(item.input.value)) : item.input.value,
+      }}));
     }
-    detailContent.append(api.el('p', '', `Status: ${entity.status}`));
+    const status = control('status', entity.status), reason = control('reason', '');
+    editor('status', 'Change status', [status, reason], 'status', () => ({status: status.input.value, reason: reason.input.value}));
+
     const acceptance = api.el('section', 'drawer-acceptance');
     acceptance.append(api.el('h3', '', 'Acceptance'));
-    for (const item of entity.acceptance || []) acceptance.append(api.el('p', '', `${item.done ? '✓' : '○'} ${item.text}`));
+    (entity.acceptance || []).forEach((item, index) => {
+      const row = api.el('div', 'drawer-criterion');
+      row.dataset.index = String(index + 1);
+      const label = api.el('label', '', item.text), tick = api.el('input');
+      tick.type = 'checkbox'; tick.checked = !!item.done;
+      tick.addEventListener('change', () => {
+        const done = tick.checked;
+        tick.checked = !!item.done; // The server, including a refusal, owns the checked state.
+        return writeDetail('acceptance', {index: Number(row.dataset.index), done});
+      });
+      label.append(tick);
+      const remove = api.el('button', 'btn', 'Remove criterion');
+      remove.type = 'button';
+      remove.addEventListener('click', () => writeDetail('acceptance', {index: Number(row.dataset.index), remove: true}));
+      row.append(label, remove); acceptance.append(row);
+    });
     detailContent.append(acceptance);
+    const ac = control('New acceptance criterion');
+    editor('acceptance', 'Add criterion', [ac], 'acceptance', () => ({text: ac.input.value}));
+
+    const label = control('Label');
+    editor('labels', 'Add label', [label], 'label', present => ({label: label.input.value, present}), true);
+    if (entity.kind === 'task') {
+      const dep = control('Blocking task');
+      editor('deps', 'Add dependency', [dep], 'dep', present => ({blockedBy: dep.input.value, present}), true);
+      const epic = control('Epic', entity.epic);
+      editor('epic', 'Move to epic', [epic], 'move', () => ({epic: epic.input.value || null}));
+    }
+    for (const [field, op, key] of [['evidence', 'evidence', 'ref'], ['commits', 'commit', 'ref'], ['comments', 'comment', 'text'], ['touches', 'touch', 'path']]) {
+      const item = control(field, '', field === 'comments' ? 'textarea' : 'text');
+      editor(field, `Add ${field}`, [item], op, () => ({[key]: item.input.value}));
+    }
+    const type = control('Link type'), target = control('Link target');
+    editor('links', 'Add link', [type, target], 'link', present => ({type: type.input.value, target: target.input.value, present}), true);
     for (const field of ['labels', 'blockedBy', 'evidence', 'commits', 'comments', 'links', 'touches']) {
       const section = api.el('section', 'drawer-values');
       section.append(api.el('h3', '', field === 'blockedBy' ? 'Dependencies' : field));
@@ -219,6 +309,10 @@
       }
       detailContent.append(section);
     }
+    const remove = api.el('button', 'btn drawer-delete', 'Delete card');
+    remove.type = 'button';
+    remove.addEventListener('click', () => { if (window.confirm(`Delete ${entity.key}?`)) return writeDetail('delete', {}); });
+    detailContent.append(remove);
     void secondaryDetails(entity);
   }
 

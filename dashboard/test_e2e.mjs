@@ -29,14 +29,29 @@ if (!baseURL || !playwrightDir) {
 const { firefox } = createRequire(import.meta.url)(playwrightDir);
 
 let passed = 0, failed = 0;
-const failures = [];
+const failures = [], unfinished = new Set();
+let suiteFinished = false;
+process.on('exit', () => {
+  for (const name of unfinished) console.error('FAIL ' + name + ': registered test did not finish');
+  if (!suiteFinished || unfinished.size || failed || !passed) process.exitCode = 1;
+});
 async function test(name, fn) {
-  try { await fn(); passed++; console.log('PASS ' + name); }
+  unfinished.add(name);
+  let timer;
+  try {
+    await Promise.race([fn(), new Promise((_, reject) => {
+      timer = setTimeout(() => reject(Error('async test did not finish')), 120000);
+    })]);
+    passed++; console.log('PASS ' + name);
+  }
   catch (err) {
     failed++;
     failures.push(name);
-    console.error('FAIL ' + name + '\n      ' + (err && err.message || err).split('\n')[0]);
-  }
+    console.error('FAIL ' + name, err);
+    console.error('browser diagnostics', await page.evaluate(() => ({url: location.href, ready: !!window.CCC,
+      stamp: document.getElementById('boardStamp')?.textContent,
+      epics: [...document.querySelectorAll('#boardList details.epic')].map(n => ({key:n.dataset.epic,open:n.open,rows:n.querySelectorAll('.task-row').length}))})).catch(() => 'page unavailable'));
+  } finally { clearTimeout(timer); unfinished.delete(name); }
 }
 
 const browser = await firefox.launch({ headless: true });
@@ -607,6 +622,51 @@ await test('dragging a task onto another epic refiles it for real', async () => 
   assert.match(await text('#boardStamp'), new RegExp(`${key} moved to ${to}`));
 });
 
+await test('detail drawer edits persist from Tasks and Kanban without hiding the board', async () => {
+  // Seed our own complete card: this test must not depend on the preceding drag.
+  const key = await page.evaluate(async () => {
+    const board = await (await fetch('api/board/board')).json();
+    const res = await fetch('api/board/create', {method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({kind:'task', title:'Drawer integration task', body:'Fixture body',
+        acceptance:['fixture criterion'], epic:board.epics[0].key, actor:'dashboard'})});
+    const entity = await res.json(); if (!res.ok) throw Error(JSON.stringify(entity)); return entity.key;
+  });
+  await show('board'); await tab('board', 'kanban'); await tab('board', 'boardtasks');
+  await page.waitForSelector(`#boardList .task-row[data-task="${key}"]`, {state:'attached'});
+  await page.$$eval('#boardList details.epic', ns => ns.forEach(n => { n.open = true; }));
+  await page.click(`#boardList .task-row[data-task="${key}"] .board-key`);
+  await page.waitForSelector('#cardDrawer [data-field="body"] textarea');
+  assert.equal(await page.$eval('#cardDrawer', n => getComputedStyle(n).position), 'fixed');
+  assert.equal(await page.locator('#viewBoardtasks').isVisible(), true);
+  assert.equal(await page.locator('#cardDrawer [data-agent]').count(), 0,
+    'page.$ is first-match; a hidden drawer must never shadow agent names');
+  await page.fill('#cardDrawer [data-field="body"] textarea', 'Full drawer body <literal>');
+  await page.click('#cardDrawer [data-field="body"] button[type="submit"]');
+  await page.waitForFunction(() => document.querySelector('#cardDrawer .drawer-notice').textContent.includes('Saved.'));
+  await page.click('#cardDrawer .drawer-criterion button');
+  await page.waitForFunction(() => document.querySelectorAll('#cardDrawer .drawer-criterion').length === 0);
+  for (const title of ['first drawer check', 'second drawer check', 'third drawer check']) {
+    await page.fill('#cardDrawer [data-field="acceptance"] input', title);
+    await page.click('#cardDrawer [data-field="acceptance"] button[type="submit"]');
+    await page.waitForFunction(t => document.querySelector('#cardDrawer .drawer-acceptance').textContent.includes(t), title);
+  }
+  await page.click('#cardDrawer .drawer-criterion:nth-of-type(2) button');
+  await page.waitForFunction(() => !document.querySelector('#cardDrawer .drawer-acceptance').textContent.includes('second drawer check'));
+  await page.click('#cardDrawer .drawer-criterion:nth-of-type(2) input');
+  await page.waitForFunction(() => document.querySelector('#cardDrawer .drawer-notice').textContent.includes('Saved.'));
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#cardDrawer').isVisible(), false);
+  await tab('board', 'kanban');
+  await page.click(`#viewKanban .kanban-card[data-task="${key}"] .kanban-open`);
+  await page.waitForSelector('#cardDrawer [data-field="body"] textarea');
+  assert.equal(await page.inputValue('#cardDrawer [data-field="body"] textarea'), 'Full drawer body <literal>');
+  assert.equal(await page.isChecked('#cardDrawer .drawer-criterion:nth-of-type(2) input'), true);
+  const stored = await page.evaluate(async key => (await fetch(`api/board/entity?id=${key}`)).json(), key);
+  assert.equal(stored.body, 'Full drawer body <literal>');
+  assert.deepEqual(stored.acceptance.map(x => [x.text, x.done]), [['first drawer check', false], ['third drawer check', true]]);
+  await page.keyboard.press('Escape'); await tab('board', 'boardtasks');
+});
+
 // ── Organization, GitHub, Settings ─────────────────────────────────────────
 
 await test('Organization carries Agents and Teams, and both render', async () => {
@@ -1025,4 +1085,5 @@ await test('the page logged no errors while all of that happened', () => {
 await browser.close();
 console.log(`\npassed ${passed}, failed ${failed}`);
 if (failures.length) console.log('failed: ' + failures.join('; '));
+suiteFinished = true;
 process.exit(failed ? 1 : 0);
