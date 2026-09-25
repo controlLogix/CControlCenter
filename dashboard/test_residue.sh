@@ -3,7 +3,7 @@
 # and suite subjects are stubs: even a broken historical runner cannot stop a live
 # dashboard or write a real database. Only production scripts under test are copied.
 set -u
-. dashboard/testlib.sh
+. <(tr -d '\r' < dashboard/testlib.sh)   # tr: testlib may arrive CRLF; bash cannot source that
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 python3 - "$PWD" "$work" > "$work/results" <<'PY'
@@ -139,7 +139,10 @@ print('passed 1, failed 0')
             put(fixture / 'dashboard' / source.name, first + 'python3 subject.py\n')
         for source in (repo / 'dashboard').glob('test_*.py'):
             put(fixture / 'dashboard' / source.name, subject)
-        for name in ('smoke.sh', 'check_test_failability.sh'):
+        # Every non-test_* suite run_tests.sh invokes. A new one added there and
+        # not here leaves the fixture without the file, and the runner fails on a
+        # missing script rather than on the thing this case is testing.
+        for name in ('smoke.sh', 'check_test_failability.sh', 'check_line_endings.sh'):
             put(fixture / 'dashboard' / name, 'python3 subject.py\n')
         env = dict(os.environ, AGENTMUX_HOME=str(fixture / 'caller-home') if mode == 'different-caller-home' else str(live), ORIGINAL_SERVER_HOME=str(live), FIXTURE=str(fixture), CASE_MODE=mode,
                    TMPDIR=str(fixture), PATH=str(fixture / 'bin') + os.pathsep + os.environ['PATH'])

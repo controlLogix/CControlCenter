@@ -274,6 +274,10 @@ run test_netscan.py python3 dashboard/test_netscan.py
 # what it REFUSES. Asserted before any write route exists, because a write route
 # added later inherits whatever posture is already here.
 run test_field_sidecar.py python3 dashboard/test_field_sidecar.py
+# Files that are PARSED rather than read must be LF. A CRLF testlib makes every
+# suite exit 127 with no assertions; a CRLF task store makes tm board render
+# "undefined undefined" while the documents are perfectly intact.
+run check_line_endings.sh bash /dev/fd/22 22< <(tr -d '\r' < dashboard/check_line_endings.sh)
 # The localStorage key migration, run against the real block in index.html.
 # These keys are persisted operator state; renaming them without carrying the
 # values across wipes themes and board layout silently.

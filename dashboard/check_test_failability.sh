@@ -33,7 +33,7 @@ if [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" != true ]; then
 fi
 REPO="$(git rev-parse --show-toplevel)"
 cd "$REPO" || exit 2
-. dashboard/testlib.sh
+. <(tr -d '\r' < dashboard/testlib.sh)   # tr: testlib may arrive CRLF; bash cannot source that
 WORK="$(mktemp -d)" || exit 2
 trap 'rm -rf "$WORK"' EXIT
 skipped=0

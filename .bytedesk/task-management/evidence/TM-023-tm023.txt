@@ -1,0 +1,42 @@
+Fixed end to end, 2026-09-25. Gate: all suites passed, 2062 assertions, 56 suites.
+
+THE PROOF THAT MATTERS: a genuinely fresh `git clone` on this machine, with
+core.autocrlf=true confirmed in force for the clone.
+
+  line endings in the fresh clone
+    dashboard/testlib.sh                    LF
+    EP-002-agentmux-the-node-rewrite.md     LF
+
+  documents parsed the way the plugin parses them (split on the frontmatter fence)
+    parsed with id+title : 50
+    empty/unparseable    : 0
+    VERDICT: a fresh clone yields a readable board
+
+Before the pin, every one of those 50 would have been CRLF and parsed to {}.
+
+WHAT WENT WRONG ORIGINALLY. core.autocrlf converts on checkout, the fence stops
+matching, and every document parses EMPTY - so tm board rendered
+"undefined undefined - 0/19 done" while the .md files were perfectly intact. That
+is what makes it dangerous: the obvious reading is "the store is corrupt", and it
+is not. Measured at the time: 2 of 2 epics, 19 of 22 tasks and 10 of 25 ADRs
+unreadable, while the single task the plugin had written AFTER the checkout was
+LF and parsed fine.
+
+I caused this instance with `git checkout -- .` while fixing the same class of
+problem for shell scripts - a fair measure of how easy it is to hit.
+
+RECOVERY, once the endings are right, is `tm reindex`: it rebuilds the index from
+documents that were never damaged, and took the board straight back to
+EP-002 16/22 done.
+
+ALSO FIXED HERE: the previous .gitattributes edit went through a shell heredoc
+that mangled its escapes, leaving carriage returns inside a comment. Git parsed
+the broken lines as attribute names and warned on every invocation
+("< is not a valid attribute name: .gitattributes:16"). Rewritten as a file.
+
+THE DOCTOR CRITERION IS UPSTREAM. tm doctor reported this as
+"orphan-epic: epic EP-002 does not exist" - a true observation and a misleading
+diagnosis, since EP-002 existed and simply could not be parsed. Telling "absent"
+from "unparseable" belongs in the plugin, which lives outside this repo. What is
+in scope here is that check_line_endings.sh now catches the CRLF condition before
+doctor gets the chance to misreport it.

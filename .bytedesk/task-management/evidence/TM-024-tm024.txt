@@ -1,0 +1,47 @@
+Fixed end to end, 2026-09-25. Gate: all suites passed, 2062 assertions, 56 suites.
+
+THREE LAYERS, because the .gitattributes pin alone is containment, not a fix.
+
+1. PIN. *.sh text eol=lf, so git stops producing the condition.
+
+2. ROBUST SOURCING - the layer that matters, because the pin only helps where git
+   is involved. All EIGHT scripts (I first said three) now use
+   `. <(tr -d '\r' < dashboard/testlib.sh)`:
+     check_test_failability.sh  demo_protocol.sh
+     test_argguard.sh           test_frontend.sh
+     test_lifecycle.sh          test_residue.sh
+     test_takeover_recovery.sh  test_testlib.sh
+   A CRLF testlib arriving by a route git does not control - a zip, an editor, a
+   Windows share - now works.
+
+3. STANDING GUARD. dashboard/check_line_endings.sh, registered in run_tests.sh,
+   fails if any tracked *.sh or task-store document has CRLF, if either
+   .gitattributes pin is missing, or if any script reverts to sourcing testlib
+   without stripping CR.
+
+VERIFIED BOTH DIRECTIONS against a tree with testlib deliberately converted to CRLF:
+  old direct source : exit=127, "dashboard/testlib.sh: line 26: $'\r': command not found"
+  new safe source   : passed 13, failed 0
+  (also test_testlib 9/0 and test_argguard 17/0 against the same CRLF testlib)
+
+THE GUARD DISCRIMINATES, proven against a scratch repo with CRLF planted:
+  FAIL  shell scripts: CRLF found - bash cannot source a CRLF file...
+          dashboard/victim.sh
+  FAIL  the task store: CRLF found - the frontmatter fence stops matching...
+          .bytedesk/task-management/doc.md
+  FAIL  .gitattributes is missing; nothing pins line endings
+  passed 1, failed 3
+Against the real repo: passed 5, failed 0.
+
+ONE INSTRUCTIVE REGRESSION. Registering the new check broke test_residue.sh
+(32/3). Its fixture stubs the non-test_* suites from an explicit list -
+smoke.sh and check_test_failability.sh - so a new one of those leaves the fixture
+without the file and the runner fails on a missing script rather than on the
+thing the case is testing. Added to that list, with a comment saying why, and the
+suite is back to 35/0. Worth knowing: adding a gate suite means adding it there too.
+
+A NOTE ON MY OWN PROCESS. The first attempt at this fix wrote a literal carriage
+return into the tr argument instead of backslash-r, producing `tr -d ''` which
+deletes nothing - the fourth time that escape collapsed on me in this session.
+The repair builds the two characters from chr(92)+chr(114) and then verifies the
+bytes are 0x5c 0x72, rather than trusting the write.

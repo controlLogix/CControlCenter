@@ -15,7 +15,7 @@
 set -u
 [ -f dashboard/testlib.sh ] || { echo 'run this from the agentmux repo root' >&2; exit 2; }
 # shellcheck source=/dev/null
-. dashboard/testlib.sh
+. <(tr -d '\r' < dashboard/testlib.sh)   # tr: testlib may arrive CRLF; bash cannot source that
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT

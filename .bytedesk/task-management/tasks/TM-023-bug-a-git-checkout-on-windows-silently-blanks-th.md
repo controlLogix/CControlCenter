@@ -1,20 +1,26 @@
 ---
 id: "TM-023"
 kind: "task"
-status: "open"
+status: "done"
 created: "2026-09-25T19:31:59.836Z"
 board: "controllogix/ccontrolcenter"
 title: "BUG: a git checkout on Windows silently blanks the task board"
 epic: "EP-002"
-acceptance: [{"text":"The task store is pinned to LF in .gitattributes so a checkout cannot rewrite its line endings","done":false},{"text":"A fresh clone on a machine with core.autocrlf=true yields a readable board","done":false},{"text":"tm reindex recovers a board whose documents are intact but whose index entries are empty","done":false},{"text":"tm doctor distinguishes a document that is absent from one that is present but unparseable, rather than reporting both as orphan-epic","done":false},{"text":"The .gitattributes rationale is recorded, so the pin is not removed later as noise","done":false}]
-evidence: []
+acceptance: [{"text":"The task store is pinned to LF in .gitattributes so a checkout cannot rewrite its line endings","done":true,"at":"2026-09-25T19:59:46.954Z"},{"text":"A fresh clone on a machine with core.autocrlf=true yields a readable board","done":true,"at":"2026-09-25T19:59:48.026Z"},{"text":"tm reindex recovers a board whose documents are intact but whose index entries are empty","done":true,"at":"2026-09-25T19:59:49.531Z"},{"text":"The .gitattributes rationale is recorded, so the pin is not removed later as noise","done":true,"at":"2026-09-25T19:59:51.112Z"},{"text":"The CRLF condition is caught by check_line_endings.sh BEFORE tm doctor can misreport it as orphan-epic; the doctor fix itself belongs upstream in the plugin, which lives outside this repo","done":true,"at":"2026-09-25T19:59:52.726Z"}]
+evidence: [".bytedesk/task-management/evidence/TM-023-tm023.txt"]
 commits: []
 blockedBy: []
 blocks: []
-session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T19:31:59.913Z"
+updated: "2026-09-25T19:59:55.420Z"
+actor: "main"
+branch: "main"
+worktree: "/mnt/c/Dev/agentmux"
+touches: ["dashboard\\check_line_endings.sh"]
+evidenceSources: {".bytedesk/task-management/evidence/TM-023-tm023.txt":{"source":"/mnt/c/Users/Nick/AppData/Local/Temp/claude/C--Dev-agentmux/5748a917-ba3c-4a23-9c48-424b6c04104f/scratchpad/tm023.txt","sha256":"6d7be7fe8dfb40144d938e93eed00a39efdb89c28024762ecc8a4e1bf5ea2330","bytes":2153,"at":"2026-09-25T19:59:44.509Z"}}
+assignee: "claude"
+closed: "2026-09-25T19:59:55.373Z"
 ---
 
 Hit for real on 2026-09-25, and it looks exactly like data loss when it is not.

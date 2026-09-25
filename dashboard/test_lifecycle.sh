@@ -25,7 +25,7 @@
 set -u
 [ -f dashboard/testlib.sh ] || { echo 'run this from the agentmux repo root' >&2; exit 2; }
 # shellcheck source=/dev/null
-. dashboard/testlib.sh
+. <(tr -d '\r' < dashboard/testlib.sh)   # tr: testlib may arrive CRLF; bash cannot source that
 
 command -v tmux >/dev/null 2>&1 || { echo 'tmux not found; lifecycle suite needs it' >&2; exit 2; }
 
