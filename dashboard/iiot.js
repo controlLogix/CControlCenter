@@ -137,6 +137,83 @@
     } finally { button.disabled = false; }
   }
 
+
+  // The current value of each register this write is about to overwrite, matched
+  // out of the live tag table by unit + address. Returns null when nothing
+  // matches, and the card then says so rather than implying it read something.
+  function currentFor(unitId, address) {
+    // `snapshot` is the module's existing poll result; no second copy.
+    const tags = (snapshot && snapshot.tags) || [];
+    return tags.find(t => t.unit === unitId && t.address === address) || null;
+  }
+
+  // ADR-0020: a confirmation is a CARD in the blade, never a browser dialog. A
+  // dialog blocks the page, cannot render what is being overwritten, and cannot
+  // be left open while you walk over and look at the panel.
+  async function confirmWrite(body, where) {
+    const blade = window.AGENTMUX_BLADE;
+    const values = Array.isArray(body.values) ? body.values : [body.values];
+    const rendering = values.map((after, i) => {
+      const address = Number(body.address) + i;
+      const tag = currentFor(body.unit, address);
+      return {
+        label: (tag && tag.name) ? `${tag.name} (${body.unit}:${address})`
+                                 : `unit ${body.unit} address ${address}`,
+        // The server's own staleness verdict. Never Date.now() minus a server
+        // clock - that subtracts two different clocks and iiot.js:95 already
+        // does it once too often.
+        before: tag ? `${tag.value === null ? '—' : tag.value}`
+                      + (tag.stale ? ' (stale)' : '') : null,
+        after: String(after),
+        unit: tag ? (tag.engineering_unit || '') : '',
+        changed: !tag || String(tag.value) !== String(after),
+      };
+    });
+    const anyRead = rendering.some(r => r.before !== null);
+
+    if (!blade || typeof blade.confirm !== 'function') {
+      // Degrade, but say so: a weaker gate that announces itself beats one that
+      // silently replaces a stronger one.
+      const ok = window.confirm(
+        `The agent console is unavailable, so this is the weaker confirmation.\n\n`
+        + `Write to physical device ${where}?\n${JSON.stringify(body, null, 2)}`);
+      if (!ok) return;
+      await send(body);
+      return;
+    }
+
+    blade.confirm({
+      kind: 'industrial_write',
+      risk: 'critical',
+      title: `Modbus write to ${where}`,
+      action: {
+        tool: `modbus function ${body.function}`,
+        target: {system: 'modbus', device: where, path: `unit ${body.unit} @ ${body.address}`},
+        after: values.join(', '),
+      },
+      rendering,
+      readBackAt: anyRead ? 'as last polled' : null,
+      killSwitch: {scope: 'industrial', engaged: false},
+      onDecide: async (outcome) => {
+        if (outcome !== 'committed') {
+          message.textContent = 'Write rejected. Nothing was sent.';
+          return;
+        }
+        await send(body);
+      },
+    });
+    message.textContent = 'Waiting on your confirmation in the console →';
+  }
+
+  async function send(body) {
+    try {
+      await call('write', {...body, confirm: true});
+      message.textContent = 'Write acknowledged and journalled.';
+    } catch (err) {
+      message.textContent = `${err.message} — do not retry an uncertain write without checking equipment.`;
+    }
+  }
+
   async function onWrite(button) {
     button.disabled = true;
     try {
@@ -147,9 +224,7 @@
           ? Object.fromEntries(['transport', 'device', 'baud', 'parity', 'stopbits'].map(k => [k, config[k]]))
           : {host: config.host, port: config.port}};
       const where = config.transport === 'rtu' ? config.device : `${config.host}:${config.port}`;
-      if (!window.confirm(`Write to physical device ${where}?\n${JSON.stringify(body, null, 2)}`)) return;
-      await call('write', {...body, confirm: true});
-      message.textContent = 'Write acknowledged and journalled.';
+      await confirmWrite(body, where);
     } catch (err) {
       message.textContent = `${err.message} — do not retry an uncertain write without checking equipment.`;
     } finally { button.disabled = false; }

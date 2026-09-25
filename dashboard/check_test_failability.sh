@@ -60,6 +60,9 @@ test_netscan.py              6afd65b    5
 # property fails cleanly rather than crashing - which is the point: a crashed
 # suite is not proof, so the block's absence must FAIL, not throw.
 test_frontend_storage.sh     6afd65b    8
+# The equipment-write gate. Against the commit before it, iiot.js still used a
+# one-click window.confirm and four of the five properties do not hold.
+test_frontend_iiot_write.sh  00912ba    4
 BASELINES
   SELF_TEST=1
 else
