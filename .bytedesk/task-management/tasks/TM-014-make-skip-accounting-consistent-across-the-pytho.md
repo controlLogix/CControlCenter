@@ -14,10 +14,11 @@ blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T16:22:41.644Z"
+updated: "2026-09-25T17:31:39.016Z"
 evidenceSources: {".bytedesk/task-management/evidence/TM-014.txt":{"source":"/tmp/phase0-evidence/TM-014.txt","sha256":"cc56ea534f9c73b4fc0797bfae4f0e3ce5d3613d79628e338011b07b020cd6f1","bytes":1596,"at":"2026-09-25T16:22:28.995Z"}}
 assignee: "claude"
 closed: "2026-09-25T16:22:41.611Z"
+comments: [{"author":"main","ts":"2026-09-25T17:31:38.957Z","text":"Third instance of this defect family, found 2026-09-25 and fixed. The first two were inside the suites (seven python tallies counting a skip as a pass; test_frontend_agents.sh emitting an indented note the gate cannot grep). This one is in the GATE itself. Four suites - test_runsview.py, test_notify.py, test_runcards.py, test_warrant.py - end with plain unittest.main(verbosity=2) and report a bare OK rather than a tally. run_tests.sh:183 allows that with the case 0:OK|0:OK\\ *, whose second alternative exists so shapes like OK (expected failures=1) pass. But unittest also prints OK (skipped=1), which that glob accepts too, and the grep for ^SKIP at :175 cannot see it because the text is OK (skipped=1), not a line beginning SKIP. So a skipped test in any of those four counted as a pass AND was invisible. run_tests.sh now surfaces that shape as a SKIP line rather than reclassifying it: a skip is an unknown, not a failure, and a gate that goes red on every skip stops being read - the same reasoning that put a SKIP line rather than a tally change into the python suites. Verified by summary shape: OK passes silently; OK (expected failures=2) passes silently, because an expected failure is not a skip; OK (skipped=1) passes but is now surfaced; passed 12, failed 1 still fails."}]
 ---
 
 Found while hunting the silent-skip bug class on 2026-09-25. **Latent, not active** - worth being precise, because my first read of this was wrong and the correction matters.

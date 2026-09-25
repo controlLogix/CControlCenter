@@ -173,6 +173,14 @@ run() {
   printf '%s\n' "$line"
   # Keep unavailable-history skips visible even when a meta-check exits cleanly.
   printf '%s\n' "$out" | grep '^SKIP ' || true
+  # And the shape that grep cannot see. A suite ending in plain unittest.main()
+  # reports `OK (skipped=1)`, which the `0:OK *` case below accepts as success -
+  # so a test that did not run looks exactly like one that passed. Surface it
+  # here rather than failing the suite: a skip is an unknown, not a failure, and
+  # a gate that goes red on every skip stops being read.
+  case "$line" in
+    OK\ *skipped=*) echo "SKIP $label reported $line" ;;
+  esac
   case "$rc:$line" in
     # Two success shapes, because there are two kinds of suite. The shell suites and
     # the older python ones print "passed N, failed 0" via their own harness; a suite
