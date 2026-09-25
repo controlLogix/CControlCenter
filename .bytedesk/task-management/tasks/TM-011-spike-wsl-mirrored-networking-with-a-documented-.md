@@ -6,7 +6,7 @@ created: "2026-09-25T15:20:33.454Z"
 board: "controllogix/ccontrolcenter"
 title: "Spike WSL mirrored networking, with a documented rollback"
 epic: "EP-002"
-acceptance: [{"text":"A Windows listener on 127.0.0.1:9999 is reachable from WSL, and a WSL listener on 127.0.0.1:9998 is reachable from Windows, both verified by curl","done":false},{"text":"DNS resolution, any VPN client in use, and Docker Desktop are each verified working or the interaction is documented","done":false},{"text":"The rollback is exercised once: delete .wslconfig, wsl --shutdown, confirm NAT behaviour returns","done":false},{"text":"docs/wsl-networking.md records the decision, the verification commands and the rollback","done":false},{"text":"If mirrored mode is rejected, the fallback is implemented and every loopback-only claim in the docs is corrected to loopback plus the WSL adapter","done":false}]
+acceptance: [{"text":"A Windows listener on 127.0.0.1:9999 is reachable from WSL, and a WSL listener on 127.0.0.1:9998 is reachable from Windows, both verified by curl","done":false},{"text":"DNS resolution, any VPN client in use, and Docker Desktop are each verified working or the interaction is documented","done":false},{"text":"The rollback is exercised once: delete .wslconfig, wsl --shutdown, confirm NAT behaviour returns","done":false},{"text":"docs/wsl-networking.md records the decision, the verification commands and the rollback","done":true,"at":"2026-09-25T16:25:29.759Z"},{"text":"If mirrored mode is rejected, the fallback is implemented and every loopback-only claim in the docs is corrected to loopback plus the WSL adapter","done":false}]
 evidence: []
 commits: []
 blockedBy: []
@@ -14,7 +14,9 @@ blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T15:20:33.529Z"
+updated: "2026-09-25T16:25:32.219Z"
+comments: [{"author":"main","ts":"2026-09-25T16:25:31.274Z","text":"Half done, and deliberately stopped short. The BEFORE state is measured and written up in docs/wsl-networking.md: WSL eth0 172.30.116.31/20, gateway 172.30.112.1, and both failing directions proven by curl - 127.0.0.1:9999 from WSL is unreachable, and so is the gateway address, because the Windows listener is loopback-bound. That second result is the one that matters: reaching Windows from WSL under NAT is not just using the gateway, the Windows service must also bind the vEthernet address. So loopback-only and API-in-WSL cannot both hold. The flip itself is NOT applied. Mirrored networking is a machine-wide change that brings WSL traffic under Windows Firewall and has known interactions with other hypervisors virtual adapters - and this host has VMware VMnet1 and VMnet8 up right now. It also needs wsl --shutdown, restarting every distro. Nothing in Phase 1 exists yet that needs the hop, so flipping it while the operator is away buys nothing and risks disturbing VMware networking nobody can observe. Apply it when Phase 1.1 stands the sidecar up, with the operator present. The procedure, both-direction verification, the VMware/Docker/VPN checks and the one-line rollback are all in the doc."}]
+assignee: "claude"
 ---
 
 The other Phase 1 prerequisite, and the one with blast radius outside this repo.
