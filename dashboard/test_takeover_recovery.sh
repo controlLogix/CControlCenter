@@ -39,7 +39,10 @@ python3 - "$FIX" <<'PY'
 import pathlib, sys
 p = pathlib.Path(sys.argv[1]) / 'dashboard' / 'suite_server.py'
 s = p.read_text(encoding='utf-8')
-old = "        home = server_home()\n        if args.expect:"
+# Anchored on the real --expect branch rather than the line above it: main()
+# gained a --server-cwd branch in between. This guard existing at all is why
+# that drift was loud rather than silent.
+old = "        if args.expect:\n            if home != str(Path(args.expect).resolve()):"
 assert old in s, 'suite_server.py main() shape changed; fixture shim needs updating'
 p.write_text(s.replace(old, "        if args.expect:\n            return\n" + old), encoding='utf-8')
 PY
@@ -168,5 +171,96 @@ check "the gate marks BEFORE it moves the dashboard" "1" \
      done)"
 check "and clears only on the proved-restore branch" "1" \
   "$(printf '%s' "$gate" | grep -c 'suite_server.py --clear')"
+
+# ── TM-020: the dashboard must go back to the OPERATOR's checkout ────────────
+#
+# The gate runs from an ext4 clone, because 9p drops EIO under load, so its $PWD
+# is almost never the checkout the operator is editing. Restoring the home
+# without the working directory put their dashboard back on the clone: the page
+# worked, nothing logged an error, and the only symptom was that their edits did
+# not appear. Measured live on 2026-09-25, serving /home/nick/gate-agentmux with
+# AGENTMUX_HOME pointing at a temp directory that was about to be deleted.
+
+check "the restore is given the operator checkout, not the gate's" "1" \
+  "$(printf '%s\n' "$gate" | grep -c 'restart_for_home "$OPERATOR_ROOT" "$OPERATOR_REPO"')"
+check "and the takeover still serves the gate's own checkout" "1" \
+  "$(printf '%s\n' "$gate" | grep -c 'restart_for_home "$TEST_ROOT" "$PWD"')"
+# The marker is the recovery path when the EXIT trap never runs, so it has to
+# name the same checkout the trap would have restored to. Passing $PWD here was
+# half the bug: even the repair put it back in the wrong place.
+check "the marker records the operator checkout too" "1" \
+  "$(printf '%s\n' "$gate" | grep -c -- '--repo "$OPERATOR_REPO"')"
+check "and OPERATOR_REPO comes from the running dashboard" "1" \
+  "$(printf '%s\n' "$gate" | grep -c 'OPERATOR_REPO="$(python3 dashboard/suite_server.py --server-cwd)"')"
+
+# The branch that would take the whole gate down if it were wrong. Whether a
+# dashboard happens to be running while this suite runs is not something the
+# suite controls, so assert the property that holds either way: it must succeed,
+# and whatever it prints must be usable as a checkout by the caller that falls
+# back on it.
+cwd_out="$(cd "$FIX" && python3 "$SS" --server-cwd 2>"$FIX/cwd.err")"
+cwd_rc=$?
+check "--server-cwd succeeds whether or not a dashboard is up" "0" "$cwd_rc"
+check "and says nothing on stderr" "0" "$(wc -c < "$FIX/cwd.err" | tr -d ' ')"
+if [ -z "$cwd_out" ]; then
+  ok "--server-cwd printed nothing, so the caller keeps its own checkout"
+elif [ -f "$cwd_out/dashboard/restart.sh" ]; then
+  ok "--server-cwd printed a checkout that can actually restart a dashboard"
+else
+  bad "--server-cwd printed $cwd_out, which has no dashboard/restart.sh; the gate would restore into it"
+fi
+
+# And it reports a cwd when there IS one. The suite's own python is not a
+# dashboard, so this asserts the shape rather than a live value: server_location
+# returns a pair, and both halves come from the same process.
+check "server_location returns a (home, cwd) pair" "2" \
+  "$(cd "$FIX" && python3 -c '
+import sys
+sys.path.insert(0, "dashboard")
+import suite_server
+print(len(suite_server.server_location()))')"
+check "server_home is still the home alone" "1" \
+  "$(cd "$FIX" && python3 -c '
+import sys
+sys.path.insert(0, "dashboard")
+import suite_server
+home = suite_server.server_home()
+print(0 if isinstance(home, tuple) else 1)')"
+
+# ── TM-020, the other half: discovery must cover what the kill covers ────────
+#
+# restart.sh:18-20 kills every process matching 'dashboard/serv', from any
+# checkout. Discovery used to recognise only THIS checkout's server.py - so a
+# gate running from the ext4 clone displaced the operator's dashboard without
+# ever identifying it, and then had nothing to put back. That asymmetry is the
+# bug; "this checkout's dashboard" was written as a feature.
+OTHER="$FIX/../other-checkout"
+mkdir -p "$OTHER/dashboard"
+: > "$OTHER/dashboard/server.py"
+: > "$OTHER/dashboard/restart.sh"
+NOTADASH="$FIX/../not-a-dashboard"
+mkdir -p "$NOTADASH/dashboard"
+: > "$NOTADASH/dashboard/server.py"          # no restart.sh beside it
+
+shape() { cd "$FIX" && python3 -c '
+import sys
+from pathlib import Path
+sys.path.insert(0, "dashboard")
+import suite_server
+print("yes" if suite_server.is_dashboard(Path(sys.argv[1])) else "no")' "$1"; }
+
+check "a dashboard in ANOTHER checkout is recognised" "yes" \
+  "$(shape "$OTHER/dashboard/server.py")"
+check "a server.py with no restart.sh beside it is not" "no" \
+  "$(shape "$NOTADASH/dashboard/server.py")"
+check "a server.py outside a dashboard directory is not" "no" \
+  "$(shape "$FIX/server.py")"
+# The parent IS named dashboard here, so this reaches the filesystem call rather
+# than short-circuiting before it. These paths can live on the 9p mount, where a
+# stat under load raises EIO out of a call that reads as total - the TM-013
+# family - so a process this cannot classify must simply not be counted, and
+# must never take the caller down with it.
+check "a missing path answers no rather than raising" "no" \
+  "$(shape "$FIX/no-such-checkout/dashboard/server.py")"
 
 finish

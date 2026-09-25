@@ -28,6 +28,17 @@ flock -n 200 || {
   exit 2
 }
 OPERATOR_ROOT="$(python3 dashboard/suite_server.py --fallback "${AGENTMUX_HOME:-$HOME/.agentmux}")" || exit 2
+# WHICH CHECKOUT the operator's dashboard is serving, not just which home.
+#
+# TM-020: this gate runs from an ext4 clone, because 9p drops EIO under load -
+# so the gate's $PWD is almost never the operator's checkout. Restoring without
+# this put their dashboard back on the clone: the page worked, nothing logged an
+# error, and the only symptom was that their edits did not appear.
+#
+# Empty when no dashboard is running, in which case this checkout is the only
+# answer available and is also the right one.
+OPERATOR_REPO="$(python3 dashboard/suite_server.py --server-cwd)" || exit 2
+[ -n "$OPERATOR_REPO" ] && [ -f "$OPERATOR_REPO/dashboard/restart.sh" ] || OPERATOR_REPO="$PWD"
 TEST_ROOT="$(mktemp -d)" || exit 2
 SPAWNED=""
 HARNESS=""
@@ -35,10 +46,15 @@ SUITE_PID=""
 RESTORE_NEEDED=0
 
 restart_for_home() {
+  # $1 the home, $2 the CHECKOUT to serve from. Both, because restoring one
+  # without the other is what TM-020 was: the right board, the wrong files.
+  local home="$1" repo="${2:-$PWD}"
   # Cleanup ignores repeated interrupts, but the restored server must retain its
-  # normal signal handlers so the next restart can stop it.
-  AGENTMUX_HOME="$1" python3 -c 'import os, signal, sys; signal.signal(signal.SIGINT, signal.SIG_DFL); signal.signal(signal.SIGTERM, signal.SIG_DFL); os.execvp("bash", ["bash", sys.argv[1]])' \
-    <(tr -d '\r' < dashboard/restart.sh) 200>&-
+  # normal signal handlers so the next restart can stop it. os.chdir before the
+  # exec, because restart.sh refuses unless dashboard/server.py is under the
+  # working directory - and that is the whole point here.
+  AGENTMUX_HOME="$home" python3 -c 'import os, signal, sys; signal.signal(signal.SIGINT, signal.SIG_DFL); signal.signal(signal.SIGTERM, signal.SIG_DFL); os.chdir(sys.argv[2]); os.execvp("bash", ["bash", sys.argv[1]])' \
+    <(tr -d '\r' < "$repo/dashboard/restart.sh") "$repo" 200>&-
 }
 
 cleanup() {
@@ -61,7 +77,7 @@ cleanup() {
   done
   [ -n "$HARNESS" ] && rm -f "$HARNESS"
   if [ "$RESTORE_NEEDED" = 1 ]; then
-    restart_for_home "$OPERATOR_ROOT" >/dev/null &&
+    restart_for_home "$OPERATOR_ROOT" "$OPERATOR_REPO" >/dev/null &&
       python3 dashboard/suite_server.py --expect "$OPERATOR_ROOT"
     restore_status=$?
   fi
@@ -98,8 +114,8 @@ RESTORE_NEEDED=1
 # Deliberately before restart_for_home rather than after: a death BETWEEN arming the
 # restore and completing it is exactly the window this protects.
 python3 dashboard/suite_server.py --mark --operator "$OPERATOR_ROOT" \
-  --test-home "$TEST_ROOT" --gate-pid $$ --repo "$PWD" || exit 1
-restart_for_home "$TEST_ROOT" >/dev/null || exit 1
+  --test-home "$TEST_ROOT" --gate-pid $$ --repo "$OPERATOR_REPO" || exit 1
+restart_for_home "$TEST_ROOT" "$PWD" >/dev/null || exit 1
 python3 dashboard/suite_server.py --expect "$TEST_ROOT" || exit 1
 
 
