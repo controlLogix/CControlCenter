@@ -84,6 +84,9 @@
        One wrapping span keeps it a single item, and the 7px gap then does
        what it was for: separating the wordmark from the badge. -->
   <span class="brand"><span class="brand-word"><b>agent</b>mux</span><span class="brand-abbr">AMX</span></span>
+  <span id="modeSwitch" class="mode-switch"></span>
+  <button id="bladeToggle" class="btn btn-blade" title="Agent console (Ctrl+`)"
+          aria-label="Toggle the agent console" aria-expanded="false">console</button>
   <span class="count" id="count"></span>
   <span class="spacer"></span>
   <select id="uiScale" title="Scale the interface — bars, headers and panels. 'auto' follows the window size; a fixed percentage overrides it. Terminal text is governed by the ribbon's Text control, so this never fights the fit.">
@@ -563,6 +566,28 @@
     </section>
 
   </div><!-- /views -->
+
+  <!-- ─────────────────────── the blade ─────────────────────── -->
+  <!-- A third flex child of .shell, deliberately: PINNED reflows the main
+       content rather than covering it, which is the difference between a
+       usable terminal grid and one with a panel sitting on top of it. Overlay
+       is the same element with position: fixed. -->
+  <aside id="blade" class="blade" data-state="hidden" role="complementary"
+         aria-label="Agent console">
+    <div id="bladeResize" class="blade-resize" role="separator"
+         aria-orientation="vertical" aria-label="Resize the console" tabindex="0"></div>
+    <header class="blade-head">
+      <span class="blade-title">Console</span>
+      <span id="bladeMode" class="blade-mode" title="Active mode"></span>
+      <span class="spacer"></span>
+      <button id="bladePin" class="btn btn-icon" title="Pin (reflow) or overlay"
+              aria-label="Pin or overlay the console">pin</button>
+      <button id="bladeClose" class="btn btn-icon" title="Hide the console (Ctrl+`)"
+              aria-label="Hide the console">×</button>
+    </header>
+    <nav id="bladeTabs" class="blade-tabs" role="tablist" aria-label="Console panels"></nav>
+    <div id="bladePanels" class="blade-panels"></div>
+  </aside>
 </div><!-- /shell -->
 
 <footer>
@@ -586,6 +611,8 @@
 <script src="iiot.js"></script>
 <script src="mqtt.js"></script>
 <script src="netscan.js"></script><script src="runs.js"></script>
+<script src="blade.js"></script>
+<script src="modes.js"></script>
 <script src="app.js"></script>
 <script>
   // Readability matrix, on demand only: open 127.0.0.1:8787/?fit=1 and run

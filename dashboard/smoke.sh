@@ -22,7 +22,7 @@ echo '--- static assets ---'
 # its contents via /api/resources, which strips secret_output details.
 check '/ serves the page'   200 "$(code '')"
 check 'resources.json withheld' 404 "$(code 'resources.json')"
-for f in app.js style.css themes.json assets/logo-agentmux.svg assets/logo-agentmux-24.svg \
+for f in app.js blade.js modes.js style.css themes.json assets/logo-agentmux.svg assets/logo-agentmux-24.svg \
          vendor/xterm.js vendor/addon-fit.js vendor/xterm.css; do
   check "$f" 200 "$(code "$f")"
 done

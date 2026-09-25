@@ -1,0 +1,31 @@
+# Research — durable sessions, background agents, sourced findings.
+#
+# The one mode with session.durable: a research thread is worth resuming
+# tomorrow, and a finding without its source is an assertion rather than a
+# result, so source capture is on.
+version: 1
+id: research
+title: Research
+description: Long-running investigation — durable sessions, findings written as artifacts.
+icon: search
+order: 10
+
+theme: parchment
+views: [board, status, runs, github, settings]
+default_view: board
+
+mcp:    []
+agents: [agentmux-orchestrator]
+skills: []
+
+blade:
+  default_state: pinned
+  width: 520
+  panels: [conversation, runs, confirmations]
+
+session:
+  durable: true
+  idle_ttl_minutes: 0
+  background_agents: true
+  source_capture: true
+  artifact_dir: .bytedesk/task-management/research

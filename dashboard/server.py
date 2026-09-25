@@ -9,6 +9,7 @@ import github_panel
 import boardteams
 import ccboard
 import ccstore
+import modes
 import datetime as dt
 import github_auth
 import json
@@ -23,6 +24,7 @@ import runsview
 import re
 import stat
 import struct
+import shutil
 import subprocess
 import sys
 import threading
@@ -1885,6 +1887,62 @@ class Handler(BaseHTTPRequestHandler):
         finally:
             MQTT_SLOTS.release()
 
+    def blade_send(self):
+        """One turn of the blade's console. Interim: shells `claude -p`.
+
+        ADR-0023 chose the Agent SDK inside the Node API; that does not exist yet,
+        so this is a stopgap and its limits are real - no continuity between
+        turns, no tool use, no streaming. Phase 2 replaces it.
+
+        This is NOT send-keys into a pane. It starts a fresh headless process and
+        cannot reach an existing agent's session, so the read-only terminal rule
+        is untouched.
+        """
+        body = self.read_cc_body()
+        if body is None:
+            return
+        prompt = body.get("text")
+        if not isinstance(prompt, str) or not prompt.strip():
+            self.send_json(400, {"error": "text is required"})
+            return
+        prompt = prompt.strip()
+        if len(prompt) > 4000:
+            self.send_json(413, {"error": "message too long"})
+            return
+
+        binary = shutil.which("claude")
+        if not binary:
+            # nvm is not sourced in a non-interactive shell, which is the usual
+            # reason. Name the fix rather than failing blankly.
+            found = sorted(Path.home().glob(".nvm/versions/node/*/bin/claude"))
+            binary = str(found[-1]) if found else None
+        if not binary:
+            self.send_json(503, {"error": "no claude CLI on PATH; the console needs one "
+                                          "(nvm install 24, then claude)"})
+            return
+
+        try:
+            # argv list, never a shell: the operator's text must not be parsed by
+            # anything before it reaches the process.
+            done = subprocess.run([binary, "-p", prompt],
+                                  capture_output=True, text=True, timeout=180,
+                                  stdin=subprocess.DEVNULL, check=False,
+                                  cwd=str(ROOT.parent))
+        except subprocess.TimeoutExpired:
+            self.send_json(504, {"error": "the console did not answer within 180s"})
+            return
+        except (OSError, subprocess.SubprocessError) as exc:
+            self.send_json(502, {"error": f"{type(exc).__name__}: {exc}"})
+            return
+
+        reply = (done.stdout or "").strip()
+        if not reply:
+            reply = (done.stderr or "").strip() or "(the console returned nothing)"
+        # Bounded: the panel renders textContent, but an unbounded reply is a
+        # memory and legibility problem regardless.
+        self.send_json(200, {"text": reply[:20000], "exit": done.returncode,
+                             "runtime": "claude -p (interim; Phase 2 replaces this)"})
+
     def resize_agent(self, name):
         if not NAME_PATTERN.fullmatch(name):
             self.send_json(400, {"error": "invalid name"})
@@ -2303,6 +2361,21 @@ class Handler(BaseHTTPRequestHandler):
                 else:
                     self.github_endpoint(path.rsplit("/", 1)[1])
                 return
+            if path == "/api/modes":
+                if self.command != "GET":
+                    self.send_json(405, {"error": "GET required"})
+                else:
+                    # Never raises: an unparseable mode file comes back as a
+                    # diagnostic, so a YAML typo degrades the rail rather than
+                    # blanking it.
+                    self.send_json(200, modes.snapshot())
+                return
+            if path == "/api/blade/send":
+                if self.command != "POST":
+                    self.send_json(405, {"error": "POST required"})
+                else:
+                    self.blade_send()
+                return
             if path.startswith("/api/resize/"):
                 if self.command != "POST":
                     self.send_json(405, {"error": "POST required"})
@@ -2373,7 +2446,7 @@ class Handler(BaseHTTPRequestHandler):
             content_type = "text/html; charset=utf-8"
         elif path in ("/app.js", "/fitmatrix.js", "/agents.js", "/teams.js", "/iiot.js",
                       "/github.js", "/codesys.js", "/chatter.js", "/mqtt.js",
-                      "/netscan.js", "/runs.js", "/kanban.js"):
+                      "/netscan.js", "/runs.js", "/kanban.js", "/blade.js", "/modes.js"):
             # fitmatrix.js is the readability test harness. index.html loads it only
             # when the URL carries ?fit=1, so it is inert on the normal page but can
             # be run against the REAL page rather than a mock.

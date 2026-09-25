@@ -1,0 +1,30 @@
+# PLC — field and controls work.
+#
+# A mode is the whole shape of the console for one kind of work: which views are
+# on the rail, which agents and skills are in scope, the theme, and how the blade
+# behaves. Adding a mode is adding a file here; no code changes.
+version: 1
+id: plc
+title: PLC
+description: Field and controls work — protocols, runtimes, commissioning.
+icon: cpu
+order: 20
+
+theme: cc-dark
+views: [terminals, iiot, board, runs, organization, settings]
+default_view: iiot
+
+# Names resolve to MCP servers, .agentmux/agents/*.md and ~/.claude/skills/*.
+# Anything that cannot be resolved becomes a diagnostic, never a failed boot.
+mcp:    [codesys_rt, modbus, drawio]
+agents: [agentmux-orchestrator]
+skills: [codesys-mcp, codesys-oop, paste-guide, hmi-test]
+
+blade:
+  default_state: pinned
+  width: 420
+  panels: [conversation, confirmations, runs]
+
+session:
+  durable: false
+  idle_ttl_minutes: 30

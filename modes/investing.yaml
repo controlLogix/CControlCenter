@@ -1,0 +1,28 @@
+# Investing — research, charts and positions.
+#
+# The only mode whose confirmations can spend money. Its blade opens PINNED and
+# on the confirmations panel deliberately: a trade ticket must not be something
+# you have to go looking for.
+version: 1
+id: investing
+title: Investing
+description: Charts, positions and order tickets — every submission behind a typed confirmation.
+icon: chart
+order: 30
+
+theme: abyss
+views: [board, runs, status, settings]
+default_view: board
+
+mcp:    [bank]
+agents: []
+skills: []
+
+blade:
+  default_state: pinned
+  width: 460
+  panels: [confirmations, conversation, runs]
+
+session:
+  durable: false
+  idle_ttl_minutes: 30

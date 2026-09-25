@@ -1523,3 +1523,156 @@ table.run-jobs .j-flags { display:flex; gap:5px; flex-wrap:wrap; }
                  background:var(--pane,rgba(128,128,128,.10)); }
 .btn.small { font-size:.72rem; padding:2px 7px; }
 .orch-check.unknown .orch-mark { color:var(--muted); }
+
+/* ─────────────────────────── the blade ───────────────────────────
+   A third flex child of .shell. PINNED gives it a width and the main content
+   narrows — that is the whole point, and the reason it is a flex child rather
+   than an overlay: a panel sitting on top of a terminal grid or a chart is
+   useless, and the fitting subsystem measures its own container, so narrowing
+   the container is what makes the terminals re-fit correctly.
+
+   OVERLAY is the same element taken out of flow for a quick glance without
+   disturbing a layout you have arranged. HIDDEN is display:none, so nothing
+   inside it is focusable or measurable.
+
+   No CSS transform is used on the blade. fitmatrix.js records that a transform
+   resamples terminal glyphs into mush; width is animated instead, and blade.js
+   re-fits on transitionend rather than per frame. */
+.blade {
+  flex: 0 0 var(--blade-w, 420px);
+  width: var(--blade-w, 420px);
+  min-width: 0;
+  display: flex; flex-direction: column;
+  background: var(--panel-2);
+  border-left: 1px solid var(--line);
+  position: relative;
+  transition: flex-basis .16s ease, width .16s ease;
+}
+.blade[data-state="hidden"] { display: none; }
+.blade[data-state="overlay"] {
+  position: fixed; inset-block: 0; right: 0; z-index: 40;
+  box-shadow: -14px 0 34px rgba(0, 0, 0, .42);
+  border-left: 1px solid var(--accent);
+}
+/* Overlay must not also reserve flex space, or the content shifts under it. */
+.blade[data-state="overlay"] { flex: 0 0 0; width: var(--blade-w, 420px); }
+
+.blade-resize {
+  position: absolute; inset-block: 0; left: -3px; width: 6px;
+  cursor: col-resize; z-index: 2;
+}
+.blade-resize:hover, .blade-resize:focus-visible {
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
+  outline: none;
+}
+
+.blade-head {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 9px;
+  border-bottom: 1px solid var(--line);
+  flex: 0 0 auto;
+}
+.blade-title { font-weight: 650; font-size: var(--type-sm); }
+.blade-mode {
+  font-size: var(--type-xs); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 3px; padding: 1px 5px;
+}
+.blade-head .spacer { flex: 1 1 auto; }
+.btn-icon { padding: 2px 7px; line-height: 1.4; }
+.btn-blade { margin-left: 10px; }
+.btn-blade[aria-expanded="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.blade-tabs {
+  display: flex; gap: 2px; padding: 5px 7px 0;
+  border-bottom: 1px solid var(--line);
+  flex: 0 0 auto; overflow-x: auto;
+}
+.blade-tab {
+  background: none; border: 1px solid transparent; border-bottom: none;
+  color: var(--muted); font: inherit; font-size: var(--type-sm);
+  padding: 4px 9px; cursor: pointer; border-radius: 3px 3px 0 0;
+  white-space: nowrap;
+}
+.blade-tab:hover { color: var(--text); }
+.blade-tab[aria-selected="true"] {
+  color: var(--text); background: var(--panel);
+  border-color: var(--line); border-bottom-color: var(--panel);
+  margin-bottom: -1px;
+}
+
+.blade-panels { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 9px; }
+.blade-panel[hidden] { display: none; }
+
+/* A confirmation is a CARD inside the blade, never a browser dialog: a dialog
+   blocks the page, cannot show a dry run, and cannot be left open while you go
+   and check something. */
+.confirm-card {
+  border: 1px solid var(--accent);
+  border-radius: 4px; background: var(--panel);
+  padding: 9px; margin-bottom: 9px;
+}
+.confirm-card[data-risk="critical"] { border-width: 2px; }
+.confirm-card[data-decided] { border-color: var(--line); opacity: .62; }
+.confirm-what {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--type-sm);
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 3px;
+  padding: 5px 7px; margin: 6px 0;
+  overflow-x: auto; white-space: pre;
+}
+.confirm-diff { display: grid; grid-template-columns: auto 1fr; gap: 2px 9px;
+                font-size: var(--type-sm); margin: 6px 0; }
+.confirm-diff dt { color: var(--muted); }
+.confirm-diff dd { margin: 0; font-family: ui-monospace, monospace; }
+.confirm-diff .changed { color: var(--accent); }
+.confirm-age { color: var(--muted); font-size: var(--type-xs); }
+.confirm-phrase { display: flex; gap: 6px; align-items: center; margin-top: 7px; }
+.confirm-phrase input { flex: 1 1 auto; font-family: ui-monospace, monospace; }
+.confirm-note { color: var(--muted); font-size: var(--type-xs); margin-top: 5px; }
+.confirm-killed {
+  color: var(--bad, #e06c6c); font-size: var(--type-xs); margin-top: 5px;
+}
+
+.blade-msg { margin-bottom: 9px; }
+.blade-msg .who {
+  font-size: var(--type-xs); letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted);
+}
+.blade-msg .body { white-space: pre-wrap; overflow-wrap: anywhere; }
+.blade-msg[data-who="operator"] .body {
+  border-left: 2px solid var(--accent); padding-left: 7px;
+}
+.blade-compose { display: flex; gap: 6px; padding: 7px 9px; border-top: 1px solid var(--line); }
+.blade-compose textarea {
+  flex: 1 1 auto; resize: none; min-height: 34px; max-height: 140px;
+  font: inherit; font-size: var(--type-sm);
+}
+.blade-empty { color: var(--muted); font-size: var(--type-sm); }
+
+/* Narrow: the blade cannot reflow to a useful width, so it overlays instead. */
+@media (max-width: 900px) {
+  .blade[data-state="pinned"] {
+    position: fixed; inset-block: 0; right: 0; z-index: 40;
+    flex: 0 0 0; box-shadow: -14px 0 34px rgba(0, 0, 0, .42);
+  }
+}
+
+/* The mode switcher. A mode NARROWS the rail to match the work in front of you;
+   it is not an access control, and nothing here should ever be mistaken for one —
+   every endpoint stays exactly as reachable as it was. */
+.mode-switch { display: flex; align-items: center; gap: 6px; margin-left: 10px; }
+.mode-select {
+  background: var(--panel); color: var(--text);
+  border: 1px solid var(--line); border-radius: 3px;
+  font: inherit; font-size: var(--type-sm); padding: 2px 5px;
+}
+.mode-warn {
+  font-size: var(--type-xs); color: var(--accent); cursor: help;
+  border-bottom: 1px dotted var(--accent);
+}
+.nav-item[hidden] { display: none; }
