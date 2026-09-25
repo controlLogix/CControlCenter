@@ -76,3 +76,24 @@ docs/vendor/*.pdf
 # image one day, and a rule that silently swallows it is worse than this one.
 .playwright-mcp/
 /*.png
+
+# ── FINANCIAL ARTIFACTS ARE NEVER COMMITTED. THIS REPO IS PUBLIC. ────────────
+#
+# gh repo view: controlLogix/CControlCenter, isPrivate: false. Phase 5 adds a
+# brokerage session, and a push cannot be taken back - a file deleted afterwards
+# stays in the history, and by then it has been cloned and indexed.
+#
+# These paths are ignored so that an artifact written there lands ignored rather
+# than staged. dashboard/check_no_financial_artifacts.sh fails if these pins go
+# missing, for the same reason the eol pins are checked: a guard that only looks
+# at today's tree passes the moment someone removes it and before anyone looks
+# again.
+#
+# WHERE THEY GO INSTEAD, and this is the half that has to be written down:
+#   %LOCALAPPDATA%\agentmux\broker\   the Fidelity session, its profile, orders
+#   $AGENTMUX_HOME/investing/         positions, balances, research state
+# Both are outside the repo on purpose. See docs/investing-boundary.md.
+investing/
+broker/
+agentmux-broker/
+research/sessions/

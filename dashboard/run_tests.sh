@@ -346,6 +346,12 @@ run check_field_writes.sh bash /dev/fd/26 26< <(tr -d '\r' < dashboard/check_fie
 # been violated four separate ways here, each time silently, and each time the
 # symptom was a gate that was technically correct and practically useless.
 run test_gate_reporting.sh bash /dev/fd/27 27< <(tr -d '\r' < dashboard/test_gate_reporting.sh)
+# THIS REPO IS PUBLIC, and Phase 5 adds a brokerage session. A push cannot be
+# taken back, so the boundary is gated before the feature that needs it exists.
+# The guard has its own suite because one that silently always passed would be
+# counted as coverage - smoke.sh:181 is the recorded precedent here.
+run check_no_financial_artifacts.sh bash /dev/fd/29 29< <(tr -d '\r' < dashboard/check_no_financial_artifacts.sh)
+run test_no_financial_artifacts.sh bash /dev/fd/30 30< <(tr -d '\r' < dashboard/test_no_financial_artifacts.sh)
 # The gate in front of a write to PHYSICAL EQUIPMENT. Until 2026-09-25 that was a
 # one-click window.confirm and nothing tested it at all.
 run test_frontend_iiot_write.sh bash /dev/fd/23 23< <(tr -d '\r' < dashboard/test_frontend_iiot_write.sh)
