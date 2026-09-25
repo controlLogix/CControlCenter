@@ -142,7 +142,8 @@ print('passed 1, failed 0')
         # Every non-test_* suite run_tests.sh invokes. A new one added there and
         # not here leaves the fixture without the file, and the runner fails on a
         # missing script rather than on the thing this case is testing.
-        for name in ('smoke.sh', 'check_test_failability.sh', 'check_line_endings.sh'):
+        for name in ('smoke.sh', 'check_test_failability.sh', 'check_line_endings.sh',
+                     'check_vendor.sh'):
             put(fixture / 'dashboard' / name, 'python3 subject.py\n')
         env = dict(os.environ, AGENTMUX_HOME=str(fixture / 'caller-home') if mode == 'different-caller-home' else str(live), ORIGINAL_SERVER_HOME=str(live), FIXTURE=str(fixture), CASE_MODE=mode,
                    TMPDIR=str(fixture), PATH=str(fixture / 'bin') + os.pathsep + os.environ['PATH'])

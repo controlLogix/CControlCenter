@@ -129,7 +129,11 @@ class DiagnosticsTests(unittest.TestCase):
         self.assertEqual(sum(cmd == 3 for cmd, _ in self.calls), 2)
 
     def test_failed_journal_prevents_write(self):
-        with patch.object(self.client, '_journal', side_effect=OSError('disk full')):
+        # The seam is the journal object now: durability moved to
+        # writejournal.py, so that is where a failure to record must stop the
+        # write - ecat_diag reaches the wire through ADSClient, so it inherits
+        # the guarantee rather than restating it.
+        with patch.object(self.client.journal, 'append', side_effect=OSError('disk full')):
             with self.assertRaises(OSError):
                 self.diag.request_state(1001, 'OP', confirm=True, actor='test')
         self.assertTrue(all(cmd == 2 for cmd, _ in self.calls))

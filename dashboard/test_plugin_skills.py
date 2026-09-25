@@ -22,16 +22,22 @@ def plugin_location():
                 return Path(location) / 'plugins/agentmux-orchestration'
     return Path(__file__).resolve().parents[2] / 'marketplace/plugins/agentmux-orchestration'
 
+import ninep
+
 PLUGIN = plugin_location()
 
-@unittest.skipUnless(PLUGIN.is_dir(), 'external plugin absent; set AGENTMUX_PLUGIN_ROOT')
+# reachable(), not is_dir(): the plugin lives on /mnt/c, and is_dir() re-raises
+# EIO rather than answering.
+@unittest.skipUnless(ninep.reachable(PLUGIN),
+                     'external plugin absent or unreadable; set AGENTMUX_PLUGIN_ROOT')
 class InstalledLauncher(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.installed = self.root / 'installed copy'
-        shutil.copytree(PLUGIN, self.installed)
+        # 9p can fail mid-copy; that is the subject being unreadable, not a defect.
+        ninep.guard(shutil.copytree, PLUGIN, PLUGIN, self.installed)
         self.launcher = self.installed / 'skills/agent-config/scripts/runtime.py'
         self.runtime = self.root / 'runtime with spaces'
         (self.runtime / 'taskmgmt').mkdir(parents=True)

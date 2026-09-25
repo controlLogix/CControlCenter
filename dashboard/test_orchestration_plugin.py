@@ -28,17 +28,28 @@ def plugin_root():
         return Path(__file__).resolve().parents[2] / "marketplace/plugins/agentmux-orchestration"
 
 
+import ninep
+
 PLUGIN = plugin_root()
 
 
-@unittest.skipUnless(PLUGIN.is_dir(), "external plugin absent; set AGENTMUX_PLUGIN_ROOT")
+# reachable(), not is_dir(): the plugin lives on /mnt/c, and is_dir() re-raises
+# EIO rather than answering. "we could not find out" is not "it is here".
+@unittest.skipUnless(ninep.reachable(PLUGIN),
+                     "external plugin absent or unreadable; set AGENTMUX_PLUGIN_ROOT")
 class PluginTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.temp = tempfile.TemporaryDirectory()
+        # Registered before anything that can fail: a SkipTest out of setUpClass
+        # skips tearDownClass too, and the directory would otherwise leak.
+        cls.addClassCleanup(cls.temp.cleanup)
         cls.root = Path(cls.temp.name)
         cls.plugin = cls.root / "installed plugin with spaces"
-        shutil.copytree(PLUGIN, cls.plugin)
+        # copytree over 9p raises shutil.Error carrying one entry per file it
+        # could not read - 22 of them, once. That is not this suite failing, it
+        # is this suite being unable to start, and it must say which.
+        ninep.guard(shutil.copytree, PLUGIN, PLUGIN, cls.plugin)
         cls.shim = cls.plugin / "hooks/agentmux-hook.sh"
         cls.entry = cls.plugin / "bin/agentmux-plugin"
         cls.members = []
@@ -83,7 +94,7 @@ class PluginTests(unittest.TestCase):
         cls.server.shutdown()
         cls.server.server_close()
         cls.thread.join()
-        cls.temp.cleanup()
+        # cls.temp is closed by the class cleanup registered in setUpClass.
 
     def setUp(self):
         type(self).members = []

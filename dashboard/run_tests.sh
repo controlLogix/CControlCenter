@@ -170,6 +170,18 @@ run() {
   out="$(cat "$TEST_ROOT/suite.out")"
   local line
   line="$(printf '%s\n' "$out" | tail -1)"
+  # A suite cannot have passed a negative number of tests, and one reported
+  # "passed -1, failed 1" on 2026-09-25. The suites share a
+  # `testsRun - failed - skipped` formula, and when setUpClass errors unittest
+  # records the error while testsRun stays at zero - so the count goes below
+  # zero and the gate prints it without blinking.
+  #
+  # Deliberately NOT clamped in the suites: a number that cannot be true is the
+  # only evidence that the class never ran, and clamping it to 0 would make that
+  # look like an ordinary empty suite. Name it here instead, where it is read.
+  case "$line" in
+    passed\ -*) line="DID NOT RUN - class or module setup failed ($line)" ;;
+  esac
   printf '%s\n' "$line"
   # Keep unavailable-history skips visible even when a meta-check exits cleanly.
   printf '%s\n' "$out" | grep '^SKIP ' || true
@@ -283,6 +295,10 @@ run test_field_sidecar.py python3 dashboard/test_field_sidecar.py
 # suite exit 127 with no assertions; a CRLF task store makes tm board render
 # "undefined undefined" while the documents are perfectly intact.
 run check_line_endings.sh bash /dev/fd/22 22< <(tr -d '\r' < dashboard/check_line_endings.sh)
+# Vendored third-party code: are these the bytes that were reviewed? Checked
+# offline by hash, because the whole point of vendoring is the boxes that cannot
+# reach PyPI - and a check that needed PyPI would not run on them.
+run check_vendor.sh bash /dev/fd/25 25< <(tr -d '\r' < dashboard/check_vendor.sh)
 # The gate in front of a write to PHYSICAL EQUIPMENT. Until 2026-09-25 that was a
 # one-click window.confirm and nothing tested it at all.
 run test_frontend_iiot_write.sh bash /dev/fd/23 23< <(tr -d '\r' < dashboard/test_frontend_iiot_write.sh)

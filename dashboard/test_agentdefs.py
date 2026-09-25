@@ -13,7 +13,9 @@ from unittest.mock import patch
 import warnings
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "taskmgmt"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import agentdefs as ad
+import ninep
 
 
 class AgentDefinitions(unittest.TestCase):
@@ -266,14 +268,23 @@ class AgentDefinitions(unittest.TestCase):
     def test_existing_claude_definitions_unchanged(self):
         # Portable CI uses representative names; on the dispatched machine, copy
         # the actual five bytes-for-byte into the isolated fixture and test them.
-        source = Path("/home/nick/.claude/agents")
+        # Path.home(), not a hardcoded /home/nick: the hardcode made this test
+        # about one account rather than about the machine it runs on.
+        source = Path.home() / ".claude/agents"
         names = ("hr-recruiter", "plc-dev", "plc-test-engineer", "scheduler", "senior-reviewer")
         for name in names:
             p = source / (name + ".md")
-            if p.is_file():
-                self.write(name, 3, raw=p.read_bytes())
-            else:
+            # Three outcomes, not two. ~/.claude can be a link onto /mnt/c, where
+            # is_file() raises EIO instead of answering - and "we could not read
+            # it" is neither "it is absent" (use the representative name) nor a
+            # defect in the definitions this test exists to check.
+            reason = ninep.unreachable_reason(p, "file")
+            if reason is None:
+                self.write(name, 3, raw=ninep.guard(p.read_bytes, p))
+            elif reason.endswith("is absent"):
                 self.write(name, 3)
+            else:
+                self.skipTest(reason)
         specs, problems = self.load()
         self.assertEqual(problems, [])
         self.assertEqual(set(specs), set(names))
