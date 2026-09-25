@@ -1,7 +1,34 @@
 # agentmux
 
-Drive other coding-agent CLIs (codex, claude, any REPL) from Claude Code, as
-long-lived tmux panes you can also attach to and watch.
+Drive other coding-agent CLIs (codex, claude, grok, any REPL) as long-lived tmux panes
+you can attach to and watch — and drive **orchestrations** across them, where one agent
+hands work to a worker, a second agent on a different model reviews it, and nothing is
+declared finished until a person says so.
+
+![The Runs view](docs/images/runs-view.png)
+
+That is a real screenshot, not a mock. Every run in it happened:
+
+- **`5057cd`** — an orchestrator agent opened the run, hired a worker and a reviewer on
+  different models, briefed them from the board card, collected the verdict and closed
+  the card. Then it stopped and waited for the approval shown.
+- **`952ce9`** — *parked for you*. Three honest review failures on a card that asked for
+  something impossible (a collision-free 32-bit digest). Nobody forced it through.
+- **`f1279b`** — the note records that attempt 1 was rejected for returning `''` on
+  punctuation-only input, fixed, and re-verified.
+
+## What this actually is
+
+Two things that grew together:
+
+| | |
+| --- | --- |
+| **`agentmux.sh`** | The harness. Spawns agent CLIs into tmux panes, sends prompts, reads output, detects idleness, enforces permissions, and coordinates claims between agents. |
+| **`dashboard/`** | The **Controls Control Center** — a stdlib-only Python server and vanilla-JS console on `127.0.0.1`. Watch panes, drive a task board, run an orchestration, review what agents changed, and talk to field equipment. |
+
+Nothing here has a dependency you have to install. No framework, no bundler, no ORM,
+no message broker. Python 3 standard library, POSIX shell, and vanilla JS, because this
+also runs on plant boxes with no route to PyPI.
 
 ## Why this shape
 
@@ -16,7 +43,192 @@ redraws and key handling; a Linux binary in a Linux pty does not. The tradeoff
 is that the WSL `codex` has its own `~/.codex` — separate login, separate
 `config.toml`, separate MCP servers from the Windows install.
 
+## Orchestration: who may say the work is finished
+
+The hard part of running agents is not starting them. It is knowing when to believe
+them. This repo answers that with three gates, in order, and none of them can be
+skipped by the thing they constrain.
+
+```
+   worker submits
+        │
+        ▼
+   ① a DIFFERENT model reviews it        ← cannot be the worker; cross-model on purpose
+        │  pass                fail ×3 ──► escalated, card parked, operator notified
+        ▼
+   ② every job verified                  ← run.py's gate; --force records what it skipped
+        │
+        ▼
+   ③ a PERSON approves the diff          ← an orchestrator cannot approve its own work
+        │
+        ▼
+   run complete  →  which board cards are still open?
+```
+
+### Why gate ③ exists
+
+A reviewer answers *"was the job done as briefed"*. It cannot answer *"was that the
+right brief"* — because the orchestrator wrote the brief the reviewer checked against.
+If the orchestrator misread what was wanted, every job passes and the run is still
+wrong. Only the person who asked can catch that.
+
+This is not hypothetical. In testing, a worker was briefed *incompletely* on purpose:
+the brief omitted one of the card's acceptance criteria. The work passed its brief and
+failed the card — punctuation-only input returned `''` where the card required a named
+fallback. The reviewer caught it **because it was told to read the card**. An
+orchestrator grading its own brief would not have.
+
+So a warranted orchestrator must have an explicit approval on record before
+`run complete` will do anything:
+
+```
+REFUSED: ccc-orchestrator has not been approved to complete this run.
+  Every job is verified, which says the work matched its brief -
+  and you wrote that brief. Only the operator can say it was the
+  right brief. Approve it in the CCC's Runs view, then retry.
+```
+
+A **person** at a terminal needs no approval — they *are* the approval, and demanding
+they click a button first would be ceremony. That asymmetry is the design.
+
+### The approval pins bytes
+
+An approval records the SHA-256 of every file the run submitted. If anything changes
+afterwards, the run shows `approval out of date` and the gate refuses again. Otherwise
+"approved" would only ever have meant "approved something".
+
+### `--force` is not the orchestrator's to use
+
+`--force` exists for a run whose agents died — an accident a person judges. An
+autonomous orchestrator meeting that case should escalate, not overrule. Without this
+the whole verification gate is one flag deep for an agent that decides it has waited
+long enough, and "FORCED" in a ledger is only a control if somebody reads ledgers.
+
+### Authority: the warrant
+
+`orchestrator_identity` proves orchestrator-ness by the **absence** of
+`$AGENTMUX_AGENT`. Every pane sets that variable, so an orchestrator running in its own
+pane is refused by `start`, `assign`, `complete` and `teardown`. A negative test is not
+extensible — there is no value meaning "yes, more so".
+
+A **warrant** is added as a second, *narrowing* condition on the existing refusal:
+
+- Two files, both `0600`. One names the single pane it authorises; the other carries
+  the credential and is sourced into **that pane only** (never `$AGENTMUX_HOME/env`,
+  which every pane sources).
+- The name `orchestrator` is reserved on both sides, or a pane could acquire the
+  virtual identity.
+- Eight-hour expiry as a dead-man's switch.
+- `via` on every ledger event, so an autonomous run is distinguishable from yours.
+
+**It buys exactly four verbs.** `resolve_identity` never consults it, so verdicts,
+submits, claims and board writes are refused for a warranted pane exactly as they are
+for any other. A test proves a worker still cannot sign off its own job with a valid
+warrant in scope.
+
+It is **not authentication**, and the code says so. Every agent here runs unrestricted
+and can read the file. It stops *mistakes*, which is what actually goes wrong, and it
+is strictly better than proving authority by a variable being absent.
+
+```
+agentmux orchestrator start --request "Deliver TM-089 end to end"
+agentmux orchestrator status
+agentmux orchestrator stop        # revokes FIRST, then kills the pane
+```
+
+Stop revokes before it kills, so a pane that survives the kill is already powerless.
+
+### When it gets stuck
+
+Three failed reviews escalate automatically. The card is parked, claims released, and
+a notice goes out. Nothing retries a fourth time.
+
+![The Status feed, showing both runs end to end](docs/images/status-feed.png)
+
+The feed above is one orchestration, read top to bottom: the orchestrator opens the
+run, `od-dev` claims the two files it will touch, the card moves to `in_progress`, the
+run announces it is **waiting on your review**, `od-rev` records a pass that names what
+it actually checked, the card closes, the claims are released — and then a second run
+escalates in red, quoting the reviewer's reason including the two colliding inputs it
+found by search.
+
+Sources are merged **server-side** from the journal, the message queue, agent state,
+the resource probes and the courier's dead letters. Each source has a floor, so a busy
+journal cannot starve the rest: before that, run notices existed in the feed's
+vocabulary and were crowded out of every window — 0 of 13 survived the cut.
+
+## Getting told
+
+A run that stops and waits for someone who is not looking waits forever. Four channels,
+only the first unconditional:
+
+| Channel | Reaches you when |
+| --- | --- |
+| **The dashboard** | It is open. Rail badge, Status feed, the Runs view. |
+| **Desktop toast** | You are at this machine. WSL → WinRT through interop; no BurntToast, no dependency. |
+| **Command hook** | Anywhere. `AGENTMUX_NOTIFY_COMMAND` gets the notice on stdin — wire ntfy, Pushover, Slack, email. This repo gains no transport. |
+| **Your terminal** | `agentmux run notices`, and unread ones printed above `run status`. |
+
+Fired for: a run waiting on your review, a card parked after three failures, a run
+completing. **Not** per-job progress, spawns, or passing verdicts — a notification you
+did not need is annoying in a way that accumulates, and the cost is the ones you do
+need being ignored.
+
+`send-keys` is **forbidden**, with a test enforcing it. It types into whatever is
+reading stdin — an agent's prompt, a half-typed command, a y/n confirmation. That is
+remote input, not notification, and pointing it at an LLM turns any text in a verdict
+into an instruction. Only tmux's status line and files people choose to read.
+
+## The board, and the wire to it
+
+![The task board](docs/images/board.png)
+
+Epics and cards with acceptance criteria, evidence and commits, in SQLite at
+`~/.agentmux/cc.db`. Cards gate their own closure: no body, no acceptance, no evidence,
+no close.
+
+A run and a card used to be strangers. Run `bdae05` completed with 2/2 jobs verified,
+printed COMPLETE, and said nothing about `TM-083` — which sat open with five unticked
+criteria until somebody noticed by eye. Two correct gates with no wire between them.
+Now:
+
+```
+run 193dd1 COMPLETE: 1/1 jobs verified; cards still open: TM-001
+  BOARD: 1 of 1 card(s) are still open:
+    TM-001     open - missing acceptance, actor, evidence
+    A verified run is not a closed card.
+```
+
+It **reports** and does not close: `ccboard.gate_done` decides whether a card may
+close, and the gaps above come from calling it, so the two can never disagree.
+
+## Settings
+
+![Settings, Orchestration](docs/images/settings-orchestration.png)
+
+The Orchestration card cannot start anything, and there is no force-complete control
+anywhere on the page. A settings card that launches a process is a category error, and
+a page that can force-complete launders a failed review into a closed run.
+
+The preconditions checklist has **three** states, not two. Settings can be opened before
+the Runs poll has run, and rendering "not yet known" as "failed" is the same lie as
+reporting an unreachable tmux as "nobody is stale".
+
+## Field equipment
+
+![The IIOT view](docs/images/iiot.png)
+
+Modbus TCP/RTU, PROFINET DCP, an MQTT monitor and topic browser, an Ethernet segment
+scanner, EtherNet/IP, ADS, EtherCAT diagnostics and CODESYS runtime control. Every
+panel is stdlib-only or vendored, and each one says what it cannot see rather than
+rendering an empty list that reads as "nothing there".
+
+The scanner is unprivileged and says so: ordinary TCP connects, no raw frames. A device
+that is present but has every scanned port closed will not appear, which the panel
+states rather than hides.
+
 ## Layout
+
 
 The checkout directory goes on the **user** `PATH`, so `agentmux.cmd` is callable
 from any shell. The harness and its audit history live together in one directory;
@@ -146,21 +358,59 @@ server never runs them.
 
 ## Controls Control Center (`dashboard/`)
 
-Python 3 **stdlib only**, bound to **127.0.0.1 only**. A left activity bar
-switches seven views: Terminals, Message Queue, Task Board, Journal, Ticket
-Reviewer, IIOT Field, Settings.
+Python 3 **stdlib only**, bound to **127.0.0.1 only**. A left activity bar switches
+eight views:
 
-The Ticket Reviewer reads real Jira issues and can comment on or transition them.
-Those two endpoints are the only ones that write to a system outside this machine,
-so the UI confirms first and there is deliberately **no dry-run mode** on them — a
-client-supplied "pretend" flag reintroduces the did-it-actually-happen ambiguity
-this codebase has already been bitten by three times. Until Atlassian is
-configured the view says so and shows the setup commands, rather than rendering an
-empty list that reads as "no tickets".
+| View | What it answers |
+| --- | --- |
+| **Terminals** | What is every agent doing right now? Read-only; the page never sends a keystroke. |
+| **Status** | Feed, queue, journal and chatter in one place, with filters and CSV export. |
+| **Board** | Epics and cards. Drag a task between epics; drag a card anywhere. |
+| **Runs** | What is in flight, what is blocking it, and what is waiting on you. |
+| **Organization** | Agent definitions and task teams. |
+| **IIOT** | Modbus, PROFINET, MQTT, the segment scanner, CODESYS. |
+| **GitHub** | Account, repositories, pull requests, workflow runs. |
+| **Settings** | Feed, appearance, Atlassian, auth, orchestration, resources. |
+
+An earlier layout had thirteen entries and a Ticket Reviewer of its own; Jira now lives
+as a tab under Board. Those two Jira endpoints are the only ones that write to a system
+outside this machine, so the UI confirms first and there is deliberately **no dry-run
+mode** on them — a client-supplied "pretend" flag reintroduces the
+did-it-actually-happen ambiguity this codebase has already been bitten by three times.
+Until Atlassian is configured the view says so and shows the setup commands, rather
+than rendering an empty list that reads as "no tickets".
+
+### The Runs view
+
+Two read-only endpoints (`GET /api/runs`, `GET /api/runs/<id>`) and exactly one write:
+the operator's decision. Three rules it obeys:
+
+1. **It never re-implements the fold.** `run.fold()` is the single answer to what
+   happened in a run, derived from an append-only log. A second implementation here
+   would be a second answer that drifts.
+2. **It never writes `events.jsonl`.** `append_event` is `O_APPEND` with records
+   bounded by `EVENT_MAX` so one append is atomic; a second writer without that
+   discipline breaks the guarantee the whole design rests on.
+3. **An unreachable tmux returns `stale: null`, not `{}`.** Unknown and "nobody is
+   stale" are different answers, and rendering the second as the first reports a whole
+   run as healthy because a socket blinked.
+
+The diff you review is scoped to the files the run submitted and measured **from the
+commit the run started at** — recorded on the `start` event, because `git diff HEAD`
+goes empty the moment a worker commits and would have shown you nothing. Files the run
+*created* are rendered too: most runs create rather than edit, and without that the
+eight new files of one run would have been reviewed blind.
 
 | Path | What |
 | --- | --- |
 | `server.py` | HTTP + SSE. Routing, the static allowlist, agent metadata, the resource probe engine, the Jira reaper, the Control Center and MQTT endpoints. |
+| `runsview.py` | Runs, read-only, plus the operator approval that gates completion. Imports `run.py` rather than re-deriving anything. |
+| `runs.js` | The Runs view and the Settings > Orchestration card. Registered via `registerView`/`registerCard`, so `app.js` and `teams.js` did not change to gain either. |
+| `notify.py` | Desktop toast (WSL -> WinRT), the operator's command hook, and a tmux status line. Never `send-keys`. |
+| `test_warrant.py` | 29 checks: what the orchestrator warrant permits and everything it must still refuse. Every negative paired with the positive that proves the call would otherwise have succeeded. |
+| `test_runsview.py` | 48 checks: the fold surface, approval pinning bytes, and the scoped diff. |
+| `test_notify.py` | 49 checks: every channel carried its payload, a subject can never become code, and the feed cannot be starved by one source. |
+| `test_runcards.py` | 10 checks: a completed run reporting the board cards it left open. |
 | `ccstore.py` | SQLite store at `~/.agentmux/cc.db` — epics, tasks, journal, messages, devices. WAL, `foreign_keys` on, a new connection per request (the server is threaded). |
 | `mqtt.py` | Minimal MQTT 3.1.1 client on stdlib sockets: CONNECT, PUBLISH QoS 0, a bounded SUBSCRIBE poll. **No TLS and no credentials** — deliberately, since no secret may travel from the browser. |
 | `index.html` / `app.js` / `style.css` | The console. Terminals are read-only: the page never sends a keystroke to an agent and cannot spawn or kill one. |
@@ -819,12 +1069,70 @@ agentmux kill --all
 - Files under `/mnt/c` are slower than the WSL filesystem. Fine for source
   trees, avoid for build output.
 
+## Working from Windows
+
+Every interaction with WSL goes through `wsl.py` (the `wsl-cli` skill), never
+`wsl.exe -d Ubuntu -- bash -lc '...'`. That second form does not send what you typed:
+the **local** shell parses it first, stripping quotes, splitting on `;`, and expanding
+`$(...)` and `$VAR` against Windows. Measured — `bash -lc 'L="/tmp/x-$(id -u).lock"'`
+arrives as `bash -lc L=/tmp/x-.lock` and the rest runs on Windows.
+
+SSH does not fix it: the damage is local, and `ssh host 'cmd'` adds a second parse.
+The fix is structural — argv as a list, script on stdin, exactly one shell in the chain.
+
+```powershell
+$W = "$env:USERPROFILE\.claude\skills\wsl-cli\scripts\wsl.py"
+python $W run build.sh --cwd C:\Dev\agentmux --node
+python $W py analyse.py            # a python file, no nested quoting
+python $W exec --user root -c 'apt-get install -y openssh-server'
+python $W lock /tmp/some.lock      # who holds it, and is it free
+python $W selftest                 # 15 historical failures, re-run here
+```
+
+### SSH into WSL
+
+`sshd` listens on **127.0.0.1:2222 only**, key-only, no root login, `ssh.socket`
+disabled so `sshd_config` actually governs the listener. Loopback is what makes a
+passphraseless key acceptable: nothing off this box can open a connection.
+
+```
+ssh -i ~/.ssh/wsl_agentmux_ed25519 -p 2222 nick@127.0.0.1
+```
+
+What it buys over `wsl.exe` is a **persistent session with a real TTY** — every
+`wsl.exe` call is a fresh non-interactive process with no cwd, no env and no terminal.
+It does not fix the quoting.
+
+## Testing
+
+```
+bash <(tr -d '
+' < dashboard/run_tests.sh)      # everything, including e2e
+```
+
+Green means **all suites passed** with nothing skipped. Suites that skip because an
+interpreter is missing used to be counted as failures; a gate that always reports one
+failure is a gate nobody reads.
+
+Claims in this repo are expected to be **mutation-tested**, not merely asserted: break
+the line the test exists for and watch it go red. That practice has caught more real
+defects here than review has, including a credential check that was silently removed
+by an interrupted mutation run and survived a full restore.
+
 ## Status and history
 
-Start here when picking this up again:
+Start here when picking this up again. The **git log is the current record** — these
+are point-in-time notes, useful for why rather than what.
 
-- `STATUS_CCC_2026-09-20.md` — current state, open items, and the tooling traps
-  that will otherwise be rediscovered the hard way
-- `STATUS_CCC_2026-09-19.md` — the rebrand phase (theme system, seven views, store)
+- `HANDOVER.md` — the harness contract and what a session needs to know
+- `STATUS_CCC_2026-09-20.md` — state and tooling traps that would otherwise be
+  rediscovered the hard way
+- `STATUS_CCC_2026-09-19.md` — the rebrand phase (theme system, the view split, store)
 - `PENDING_USER_ACTION.md` — everything that needs the operator, urgency-ordered
 - `RESUME.md` — the harness as of 2026-09-18; superseded for the dashboard
+- `.bytedesk/task-management/` — epics, ADRs and plans, including the orchestration
+  design and the two decisions it turned on
+
+Commit messages here carry the reasoning, deliberately. A change that only says *what*
+it did leaves the next person to rediscover *why* — which is how most of the defects
+recorded above were introduced in the first place.
