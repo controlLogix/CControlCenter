@@ -8,13 +8,13 @@ title: "BUG: the gate's dashboard restore restores the home but not the working 
 epic: "EP-002"
 acceptance: [{"text":"The restore brings the dashboard back up with the repo root as its working directory, not the gate clone's","done":true,"at":"2026-09-25T22:01:44.554Z"},{"text":"A dashboard serving from a directory other than the repo root says so visibly rather than looking normal","done":true,"at":"2026-09-25T22:01:44.758Z"},{"text":"The takeover marker records the working directory alongside the home, so a restore can verify both","done":true,"at":"2026-09-25T22:01:44.964Z"},{"text":"Running the full gate leaves the operator's dashboard serving the repo's own files, verified against /proc/<pid>/cwd afterwards","done":true,"at":"2026-09-25T22:01:45.171Z"},{"text":"A regression test covers the restored working directory, not just the restored home","done":true,"at":"2026-09-25T22:01:45.375Z"}]
 evidence: [".bytedesk\\task-management\\evidence\\TM-020-1790373444399.log",".bytedesk\\task-management\\evidence\\TM-020-1790373720840.log"]
-commits: ["b7c7bd7"]
+commits: ["b7c7bd7","bc6dcf2"]
 blockedBy: []
 blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T22:07:40.062Z"
+updated: "2026-09-25T22:08:38.055Z"
 evidenceSources: {".bytedesk\\task-management\\evidence\\TM-020-1790373444399.log":{"source":null,"sha256":"6b0aee58cf940872e153c427bd228b8cfdbdb5155ca58831e5b8ecad933ae87d","bytes":3223,"at":"2026-09-25T21:57:24.400Z"},".bytedesk\\task-management\\evidence\\TM-020-1790373720840.log":{"source":null,"sha256":"a1ebf93cd9cd721d93dc47f1c29652694af89c163a000e86b0b0cc6fe01c464a","bytes":2990,"at":"2026-09-25T22:02:00.841Z"}}
 assignee: "claude"
 closed: "2026-09-25T22:02:22.185Z"

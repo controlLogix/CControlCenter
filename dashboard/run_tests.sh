@@ -224,8 +224,13 @@ run() {
        # first meant a failing .py suite reported the bare word FAILED and nothing
        # else - you could see THAT it broke and never WHAT broke, which is how the
        # last person to hit this ended up bisecting by hand.
+       #
+       # THREE shapes, not two. test_e2e.mjs prints 'FAIL <name>' at column zero
+       # with NO colon, so it matched neither pattern and a failing e2e run said
+       # nothing whatsoever - which is what happened on 2026-09-25 and cost a
+       # full re-run just to learn which suite it had been.
        if printf '%s\n' "$out" | grep -E '^[[:space:]]+FAIL'; then :; else
-         printf '%s\n' "$out" | grep -E '^(FAIL|ERROR):' -A 12 | head -40
+         printf '%s\n' "$out" | grep -E '^(FAIL|ERROR)[: ]' -A 12 | head -40
        fi ;;
 
   esac
@@ -334,6 +339,10 @@ run check_vendor.sh bash /dev/fd/25 25< <(tr -d '\r' < dashboard/check_vendor.sh
 # are properties of what is ABSENT, which is the kind that gets deleted by
 # accident because nothing visibly depends on it.
 run check_field_writes.sh bash /dev/fd/26 26< <(tr -d '\r' < dashboard/check_field_writes.sh)
+# Can the gate say WHAT broke, not just THAT something did? That property has
+# been violated four separate ways here, each time silently, and each time the
+# symptom was a gate that was technically correct and practically useless.
+run test_gate_reporting.sh bash /dev/fd/27 27< <(tr -d '\r' < dashboard/test_gate_reporting.sh)
 # The gate in front of a write to PHYSICAL EQUIPMENT. Until 2026-09-25 that was a
 # one-click window.confirm and nothing tested it at all.
 run test_frontend_iiot_write.sh bash /dev/fd/23 23< <(tr -d '\r' < dashboard/test_frontend_iiot_write.sh)

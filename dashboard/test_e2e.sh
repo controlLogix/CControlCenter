@@ -151,11 +151,23 @@ if ! curl -fsS -o /dev/null "http://127.0.0.1:$PORT/"; then
   exit 1
 fi
 
-node dashboard/test_e2e.mjs "http://127.0.0.1:$PORT" "$PW" "$BROKER_PORT"
-status=$?
+node dashboard/test_e2e.mjs "http://127.0.0.1:$PORT" "$PW" "$BROKER_PORT" 2>&1 | tee "$TEST_HOME/e2e.out"
+status=${PIPESTATUS[0]}
+summary="$(tail -1 "$TEST_HOME/e2e.out")"
 
 if [ "$status" != 0 ]; then
   echo '--- test server log ---' >&2
   tail -40 "$TEST_HOME/server.log" >&2
+  # THE SUMMARY HAS TO COME LAST. run_tests.sh reports a suite by its final line,
+  # and this diagnostic used to be printed after it - so a failing e2e reported
+  # the tail of an unrelated log where its counts should have been, and the gate
+  # said "1 suite(s) failed" with nothing at all about what. Observed 2026-09-25.
+  case "$summary" in
+    'passed '*', failed '*) printf '%s\n' "$summary" ;;
+    # No summary at all means node died before it could count - a crash, a
+    # browser that never launched, an OOM. Say that, rather than letting the
+    # last line be whatever happened to be on stdout.
+    *) printf 'passed 0, failed 1 (test_e2e.mjs exited %s without reporting counts)\n' "$status" ;;
+  esac
 fi
 exit "$status"
