@@ -7,14 +7,15 @@ board: "controllogix/ccontrolcenter"
 title: "BUG: test_e2e.sh flakes, and a failing e2e run reports nothing at all"
 epic: "EP-002"
 acceptance: [{"text":"A failing test_e2e.sh reports passed/failed counts as its last line, never a log tail","done":true,"at":"2026-09-25T22:18:45.853Z"},{"text":"The runner prints the FAIL lines of a failing e2e run, not just the suite name","done":true,"at":"2026-09-25T22:18:46.061Z"},{"text":"A run that dies before counting anything says that, rather than reporting an unrelated line","done":true,"at":"2026-09-25T22:18:46.277Z"},{"text":"The root cause of the intermittent failure is identified, with evidence from a captured failing run","done":false},{"text":"The gate gives the same verdict on three consecutive runs of an unchanged tree, e2e included","done":false}]
-evidence: []
+evidence: [".bytedesk\\task-management\\evidence\\TM-031-1790375058608.log"]
 commits: []
 blockedBy: []
 blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T22:18:46.294Z"
+updated: "2026-09-25T22:24:18.651Z"
+evidenceSources: {".bytedesk\\task-management\\evidence\\TM-031-1790375058608.log":{"source":null,"sha256":"7e71f6ed32241b022a3b46f5d2d831dbe3043240b4890137fca165049a15c77f","bytes":3042,"at":"2026-09-25T22:24:18.609Z"}}
 ---
 
 Found 2026-09-25 by running the gate twice on the **same commit** (`77696cb`): `1 suite(s) failed`, then `all suites passed`. The suite was `test_e2e.sh`, which also passes 50/0 when run on its own.
