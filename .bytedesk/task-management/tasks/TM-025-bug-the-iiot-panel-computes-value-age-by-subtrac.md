@@ -6,15 +6,16 @@ created: "2026-09-25T20:10:11.564Z"
 board: "controllogix/ccontrolcenter"
 title: "BUG: the IIOT panel computes value age by subtracting two different clocks"
 epic: "EP-002"
-acceptance: [{"text":"The IIOT panel never subtracts a server timestamp from a browser timestamp","done":false},{"text":"The server supplies both the staleness verdict and an age measured at the source","done":false},{"text":"The client renders a ticking age using a monotonic clock only, never wall-clock arithmetic","done":false},{"text":"A test fakes a ten-minute client clock skew and the staleness verdicts are unchanged","done":false},{"text":"A tag with no reading still renders visibly as having no value, rather than as zero or blank","done":false}]
-evidence: []
+acceptance: [{"text":"The IIOT panel never subtracts a server timestamp from a browser timestamp","done":true,"at":"2026-09-25T20:46:04.871Z"},{"text":"The server supplies both the staleness verdict and an age measured at the source","done":true,"at":"2026-09-25T20:46:07.703Z"},{"text":"The client renders a ticking age using a monotonic clock only, never wall-clock arithmetic","done":true,"at":"2026-09-25T20:46:10.599Z"},{"text":"A test fakes a ten-minute client clock skew and the staleness verdicts are unchanged","done":true,"at":"2026-09-25T20:46:13.664Z"},{"text":"A tag with no reading still renders visibly as having no value, rather than as zero or blank","done":true,"at":"2026-09-25T20:46:16.298Z"}]
+evidence: [".bytedesk\\task-management\\evidence\\TM-025-1790369189374.log"]
 commits: []
 blockedBy: []
 blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T20:10:11.639Z"
+updated: "2026-09-25T20:46:29.399Z"
+evidenceSources: {".bytedesk\\task-management\\evidence\\TM-025-1790369189374.log":{"source":null,"sha256":"22366002caf9cdefd1c41ce1fae4f0bc07e7c01732d3a8c178c822a4fa3614e2","bytes":2602,"at":"2026-09-25T20:46:29.375Z"}}
 ---
 
 Found while wiring the equipment-write confirmation, 2026-09-25. Not fixed — the confirmation card deliberately avoids it, but the panel itself still does it.

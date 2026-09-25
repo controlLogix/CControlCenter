@@ -8,7 +8,8 @@ Symbol operations acquire/release handles per call. If transport loss prevents
 release, cleanup raises an error; remote reclamation cannot be guaranteed.
 Writes (including arbitrary Read Write) require confirm=True and a named actor.
 A durable intent precedes transmission; unknown outcomes must not be retried
-blindly. Default journal: ~/.agentmux/ads-writes.jsonl.
+blindly. The journal is the shared one in writejournal.py
+(~/.agentmux/field-writes.jsonl), tagged transport='ads'.
 
 Wire references: Beckhoff AMS Header / Structure AMS/TCP Packet and
 https://github.com/Beckhoff/ADS/blob/master/AdsLib/standalone/AdsDef.h
@@ -16,15 +17,13 @@ The command-line diagnostic UI exposes reads only; use the explicit Python
 write methods for confirmed control or value changes.
 """
 import argparse
-from contextlib import contextmanager
 import json
 import math
-import os
-from pathlib import Path
 import socket
 import struct
-import time
-import uuid
+from contextlib import contextmanager
+
+import writejournal
 
 TCP = struct.Struct('<HI')
 AMS = struct.Struct('<6sH6sHHHIII')
@@ -82,7 +81,9 @@ class ADSClient:
             raise ValueError('timeout must be positive and finite')
         self.host, self.tcp_port, self.timeout = host, tcp_port, timeout
         self.target_port, self.source_port = target_port, source_port
-        self.journal_path = Path(journal_path) if journal_path else Path.home() / '.agentmux/ads-writes.jsonl'
+        # One journal for every transport (writejournal.py). This client used to
+        # keep a third separate file, which nothing but this module knew about.
+        self.journal = writejournal.WriteJournal(journal_path, transport='ads')
         self.sock = None
         self.invoke = 0
 
@@ -178,30 +179,30 @@ class ADSClient:
         if not isinstance(actor, str) or not actor.strip():
             raise ValueError('write requires a named actor')
 
-    def _journal(self, record):
-        self.journal_path.parent.mkdir(parents=True, exist_ok=True)
-        with self.journal_path.open('a', encoding='utf-8') as f:
-            f.write(json.dumps(dict(record, time=time.time())) + '\n')
-            f.flush()
-            os.fsync(f.fileno())
+    @property
+    def journal_path(self):
+        # Kept: callers and tests name the path, not the object behind it.
+        return self.journal.path
 
     def _write_operation(self, command, payload, operation, confirm, actor, read_size=None):
         self._authorize(confirm, actor)
         if len(payload) > MAX_DATA:
             raise ValueError('ADS payload exceeds 1 MiB limit')
-        record = dict(id=uuid.uuid4().hex, actor=actor, operation=operation,
-                      host=self.host, tcp_port=self.tcp_port,
-                      target_net_id='.'.join(map(str, self.target)), target_port=self.target_port,
-                      command=command, payload_hex=payload.hex())
-        self._journal(dict(record, outcome='intent'))
+        # Durable BEFORE transmission, and it raises if it cannot be - in which
+        # case nothing below this line runs and nothing reaches the wire.
+        handle = self.journal.intent(dict(
+            actor=actor, operation=operation, host=self.host, tcp_port=self.tcp_port,
+            target_net_id='.'.join(map(str, self.target)), target_port=self.target_port,
+            command=command, payload_hex=payload.hex()))
         try:
             value = (self._fixed(command, payload, 0) if read_size is None else
                      self._read_response(command, payload, read_size))
         except Exception as exc:
-            self._journal(dict(record, outcome='rejected' if isinstance(exc, ADSError)
-                               else 'unknown', error=str(exc)))
+            # An ADS error status means the device refused. Anything else means
+            # we do not know whether it applied - investigated, never retried.
+            handle.settle(writejournal.classify(isinstance(exc, ADSError)), error=str(exc))
             raise
-        self._journal(dict(record, outcome='success'))
+        handle.settle('success')
         return value
 
     def write(self, index_group, index_offset, data, *, confirm=False, actor=None):

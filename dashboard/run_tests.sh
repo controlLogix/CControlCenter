@@ -262,6 +262,11 @@ run test_github_panel.py python3 dashboard/test_github_panel.py
 run test_codesys_panel.py python3 dashboard/test_codesys_panel.py
 run test_logix.py python3 dashboard/test_logix.py
 run test_ads.py python3 dashboard/test_ads.py
+# The one journal every write to physical equipment goes through. Its ordering
+# and fail-closed properties are what make "every write is audited" true rather
+# than aspirational, and the census test is what keeps a fourth client from
+# quietly starting a fourth file the way ads.py did.
+run test_writejournal.py python3 dashboard/test_writejournal.py
 run test_pn_dcp.py python3 dashboard/test_pn_dcp.py
 run test_ecat_diag.py python3 dashboard/test_ecat_diag.py
 run test_snapshot.py python3 dashboard/test_snapshot.py

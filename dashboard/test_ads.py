@@ -192,7 +192,10 @@ class ADSTests(unittest.TestCase):
         self.assertEqual(records[0]['id'], records[1]['id'])
 
     def test_journal_failure_prevents_control(self):
-        with patch.object(self.client, '_journal', side_effect=OSError('disk full')):
+        # The seam is the journal object now: durability moved to
+        # writejournal.py, so that is where a failure to record must stop the
+        # write before it reaches the device.
+        with patch.object(self.client.journal, 'append', side_effect=OSError('disk full')):
             with self.assertRaises(OSError):
                 self.client.write_control('STOP', confirm=True, actor='operator')
         self.assertEqual(self.sim.requests, [])

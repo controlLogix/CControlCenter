@@ -176,7 +176,10 @@ class Tests(unittest.TestCase):
 
     def test_write_guards_prevent_network(self):
         client = enip.LogixClient('unused')
-        with patch.object(client, 'request') as request, patch.object(client, '_journal') as journal:
+        # The seam is the journal object now, not a private method on the client:
+        # durability moved to writejournal.py, so that is where a failure to
+        # record has to stop the write.
+        with patch.object(client, 'request') as request, patch.object(client.journal, 'append') as journal:
             for confirm in (False, 1, 'true', None):
                 with self.assertRaises(PermissionError):
                     client.write_tag('Count', 1, 'DINT', confirm=confirm, actor='tester')
@@ -225,6 +228,13 @@ class Tests(unittest.TestCase):
                         client.write_tag('Count', 5, 'DINT', confirm=True, actor='tester')
                 rows = [json.loads(line) for line in journal.read_text().splitlines()]
                 self.assertEqual([r['outcome'] for r in rows], ['intent', outcome])
+                # One journal now carries every transport, so each row has to say
+                # which one it came from - otherwise a shared file is less
+                # informative than the two separate ones it replaced.
+                self.assertEqual({r['transport'] for r in rows}, {'enip'})
+                # Both rows are the same write, and the id is how anyone reading
+                # the file pairs an outcome back to its intent.
+                self.assertEqual(len({r['id'] for r in rows}), 1)
 
     def test_protocol_failures(self):
         for fault in ['context', 'session', 'encapsulation', 'cpf', 'type', 'cip', 'disconnect']:

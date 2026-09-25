@@ -68,6 +68,12 @@ test_frontend_iiot_write.sh  00912ba    4
 # staleness with Date.now()/1000 - last_good - so a fresh feed reads STALE the
 # moment the browser's clock is ten minutes fast. 4 of 6 fail there.
 test_frontend_iiot_age.sh    6b2d581    4
+# The unified write journal. Against the commit before it, enip/logix/ads each
+# kept their own file and writejournal.py does not exist - so all 22 fail, via
+# the suite's guarded import rather than an ImportError that would crash it and
+# prove nothing. A floor rather than an equality: the count only grows, since a
+# tree without the module fails every test in the suite by construction.
+test_writejournal.py         aaa5cae    22
 BASELINES
   SELF_TEST=1
 else

@@ -8,21 +8,20 @@ managers. Reads return the device's type code, type name and scalar value.
 Writes require confirm=True and a nonempty actor; a durable JSONL intent is
 recorded BEFORE transmission, then success/rejected/unknown is recorded. An
 unknown outcome must be investigated, never automatically retried. The journal
-defaults to ~/.agentmux/enip-writes.jsonl; pass journal_path to override it.
+is the shared one in writejournal.py (~/.agentmux/field-writes.jsonl), tagged
+transport='enip'; pass journal_path to override it.
 
 Wire references: ODVA-compatible OpENer enet_encap/encap.c and Rockwell
 publication 1756-PM020 (Logix 5000 Controllers Data Access).
 """
 
-import json
 import math
 import os
-from pathlib import Path
 import re
 import socket
 import struct
-import time
-import uuid
+
+import writejournal
 
 
 class ProtocolError(Exception):
@@ -211,8 +210,10 @@ class LogixClient(CIPClient):
 
     def __init__(self, host, port=44818, timeout=3.0, *, journal_path=None):
         super().__init__(host, port, timeout)
-        self.journal_path = (Path(journal_path) if journal_path is not None else
-                             Path.home() / '.agentmux' / 'enip-writes.jsonl')
+        # One journal for every transport (writejournal.py). This client used to
+        # keep its own file; two audit trails answer "what did we send to that
+        # controller?" only for someone who remembers both exist.
+        self.journal = writejournal.WriteJournal(journal_path, transport='enip')
 
     def read_tag(self, tag):
         data = self.request(0x4C, symbolic_path(tag), b'\x01\x00')
@@ -227,13 +228,10 @@ class LogixClient(CIPClient):
                         'value': struct.unpack('<' + fmt, data[2:])[0]}
         raise ProtocolError(f'unsupported atomic type 0x{code:04x}')
 
-    def _journal(self, record):
-        self.journal_path.parent.mkdir(parents=True, exist_ok=True)
-        line = json.dumps(dict(record, time=time.time()), allow_nan=False) + '\n'
-        with self.journal_path.open('a', encoding='utf-8') as stream:
-            stream.write(line)
-            stream.flush()
-            os.fsync(stream.fileno())
+    @property
+    def journal_path(self):
+        # Kept: callers and tests name the path, not the object behind it.
+        return self.journal.path
 
     def write_tag(self, tag, value, data_type, *, confirm=False, actor=None):
         """Write one atomic value; errors after transmission may mean it was applied."""
@@ -257,15 +255,19 @@ class LogixClient(CIPClient):
             encoded = (b'\xff' if value else b'\x00') if data_type == 'BOOL' else struct.pack('<' + fmt, value)
         except (struct.error, OverflowError) as exc:
             raise ValueError('value outside atomic type range') from exc
-        record = {'id': uuid.uuid4().hex, 'actor': actor, 'host': self.host,
-                  'port': self.port, 'tag': tag, 'type': data_type, 'value': value}
-        self._journal(dict(record, outcome='intent'))
+        # Durable BEFORE transmission, and it raises if it cannot be - in which
+        # case nothing below this line runs and nothing reaches the wire.
+        handle = self.journal.intent({'actor': actor, 'host': self.host,
+                                      'port': self.port, 'tag': tag,
+                                      'type': data_type, 'value': value})
         try:
             response = self.request(0x4D, path, struct.pack('<HH', code, 1) + encoded)
             if response:
                 raise ProtocolError('unexpected Write Tag response data')
         except Exception as exc:
-            self._journal(dict(record, outcome='rejected' if isinstance(exc, CIPError)
-                               else 'unknown', error=str(exc)))
+            # A CIP status means the device refused and nothing changed. Anything
+            # else means we do not know whether it applied - a different fact,
+            # investigated at the equipment and never automatically retried.
+            handle.settle(writejournal.classify(isinstance(exc, CIPError)), error=str(exc))
             raise
-        self._journal(dict(record, outcome='success'))
+        handle.settle('success')

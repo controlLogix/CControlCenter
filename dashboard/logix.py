@@ -12,20 +12,17 @@ layout decoding is not included. For writes the caller must supply the handle
 and element size from a known template (pp.12-13), not guess a UDT layout.
 
 Every write requires confirm=True and an actor. A durable intent records the
-observed old value and requested new value before any write, followed by outcome.
+observed old value and requested new value before any write, followed by outcome,
+in the shared journal (writejournal.py) tagged transport='logix'.
 Observations are not snapshots: controller logic can change tags between requests.
 Fragmented transfers are not atomic. RMW executes controller-side OR then AND,
 but its audit pre-read races with controller logic; predicted new value is not a
 claim of the value at execution. Unknown/partial writes are never retried.
 """
-import json
 import math
-import os
-from pathlib import Path
 import struct
-import time
-import uuid
 
+import writejournal
 from enip import CIPClient, CIPError, ProtocolError, cip_request, _cpf_data, symbolic_path
 
 # Manual p.12, including BOOL's n bit-position field (0..7).
@@ -96,7 +93,11 @@ class LogixClient(CIPClient):
         if type(max_read_bytes) is not int or not 1 <= max_read_bytes <= 0xFFFFFFFF:
             raise ValueError('invalid read limit')
         self.version, self.max_packet, self.max_read_bytes = version, max_packet, max_read_bytes
-        self.journal_path = Path(journal_path) if journal_path is not None else Path.home() / '.agentmux/logix-writes.jsonl'
+        # One journal for every transport (writejournal.py). This client used to
+        # keep its own file, with its own field names; two audit trails answer
+        # "what did we send to that controller?" only for someone who remembers
+        # both exist.
+        self.journal = writejournal.WriteJournal(journal_path, transport='logix')
 
     def _path(self, tag):
         if type(tag) is int:
@@ -164,24 +165,18 @@ class LogixClient(CIPClient):
         if not isinstance(actor, str) or not actor.strip():
             raise ValueError('write requires a named actor')
 
-    def _journal(self, record):
-        def encode(value):
-            if isinstance(value, bytes):
-                return {'hex': value.hex()}
-            raise TypeError('unsupported journal value')
-        line = json.dumps(dict(record, time=time.time()), default=encode, allow_nan=False) + '\n'
-        self.journal_path.parent.mkdir(parents=True, exist_ok=True)
-        with self.journal_path.open('a', encoding='utf-8') as stream:
-            stream.write(line)
-            stream.flush()
-            os.fsync(stream.fileno())
+    @property
+    def journal_path(self):
+        # Kept: callers and tests name the path, not the object behind it.
+        return self.journal.path
 
     def _write(self, tag, actor, old, new_raw, requests, **extra):
         # Raw bytes preserve NaN/Inf and packed BOOL bits without JSON ambiguity.
-        record = dict(id=uuid.uuid4().hex, actor=actor, host=self.host, port=self.port,
-                      tag=tag, old_value=old['raw'], new_value=new_raw,
-                      type_descriptor=old['descriptor'], **extra)
-        self._journal(dict(record, outcome='intent'))
+        # Durable BEFORE transmission, and it raises if it cannot be - in which
+        # case nothing below this line runs and nothing reaches the wire.
+        handle = self.journal.intent(dict(actor=actor, host=self.host, port=self.port,
+                                          tag=tag, old_value=old['raw'], new_value=new_raw,
+                                          type_descriptor=old['descriptor'], **extra))
         completed = 0
         try:
             for service, path, data in requests:
@@ -190,10 +185,13 @@ class LogixClient(CIPClient):
                     raise ProtocolError('unexpected write response data')
                 completed += 1
         except Exception as exc:
-            outcome = 'partial' if completed else ('rejected' if isinstance(exc, CIPError) else 'unknown')
-            self._journal(dict(record, outcome=outcome, completed_fragments=completed, error=str(exc)))
+            # Fragments that already landed outrank why the rest failed: the
+            # controller now holds a value neither side asked for, which is a
+            # worse thing to know than either 'rejected' or 'unknown' alone.
+            handle.settle(writejournal.classify(isinstance(exc, CIPError), completed),
+                          completed_fragments=completed, error=str(exc))
             raise
-        self._journal(dict(record, outcome='success', completed_fragments=completed))
+        handle.settle('success', completed_fragments=completed)
 
     def write_tag(self, tag, value, data_type, *, confirm=False, actor=None,
                   fragmented=False, elements=None, structure_handle=None, structure_size=None):

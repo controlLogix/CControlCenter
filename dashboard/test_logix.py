@@ -16,6 +16,7 @@ import unittest
 from unittest.mock import patch
 
 import logix
+import writejournal
 
 
 def exact(sock, size):
@@ -299,7 +300,10 @@ class Tests(unittest.TestCase):
 
     def test_journal_failure_prevents_write(self):
         with Controller() as device, self.client(device) as client:
-            with patch.object(client, '_journal', side_effect=OSError('disk full')):
+            # The seam is the journal object now: durability moved to
+            # writejournal.py, so that is where a failure to record must stop
+            # the write before it reaches the controller.
+            with patch.object(client.journal, 'append', side_effect=OSError('disk full')):
                 with self.assertRaises(OSError):
                     client.write_tag('CartonSize', 14, 'DINT', confirm=True, actor='operator')
             self.assertEqual(device.writes, [])
@@ -311,7 +315,10 @@ class Tests(unittest.TestCase):
                 if service == 0x4D:
                     self.assertEqual(self.records()[-1]['outcome'], 'intent')
                 return original(service, path, data)
-            with patch.object(client, '_tag_request', side_effect=checked), patch('logix.os.fsync', wraps=logix.os.fsync) as sync:
+            # fsync is checked at the syscall, not inferred from the code: the
+            # ordering guarantee is worth nothing if the bytes are only buffered.
+            # Two calls for one write - the intent and its outcome.
+            with patch.object(client, '_tag_request', side_effect=checked),                  patch('writejournal.os.fsync', wraps=writejournal.os.fsync) as sync:
                 client.write_tag('CartonSize', 14, 'DINT', confirm=True, actor='operator')
                 self.assertEqual(sync.call_count, 2)
 
