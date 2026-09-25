@@ -7,7 +7,7 @@ import json
 import os
 from pathlib import Path
 import re
-import shutil
+import github_auth
 import subprocess
 import threading
 import time
@@ -23,7 +23,7 @@ def run(argv, cwd=None):
         # codepage, and one non-ASCII commit subject then throws out of subprocess'
         # reader thread rather than being reported as a repository error.
         p = subprocess.run(argv, cwd=cwd, capture_output=True, text=True,
-                           encoding='utf-8', errors='replace',
+                           encoding='utf-8', errors='replace', stdin=subprocess.DEVNULL,
                            timeout=12, env={**os.environ, 'GIT_OPTIONAL_LOCKS': '0',
                                            'GH_PROMPT_DISABLED': '1'})
     except (OSError, subprocess.TimeoutExpired):
@@ -76,7 +76,7 @@ def duration(row):
         return None
 
 
-def repo_snapshot(config, gh_ready):
+def repo_snapshot(config, gh_binary):
     path = str(Path(config['path']).expanduser().resolve())
     result = {'name': config.get('name') or Path(path).name, 'path': path,
               'errors': [], 'prs': [], 'runs': [], 'nwo': None}
@@ -116,14 +116,14 @@ def repo_snapshot(config, gh_ready):
     except ValueError as exc:
         result['errors'].append(str(exc))
         return result
-    if gh_ready:
+    if gh_binary:
         queries = [('prs', ['pr', 'list', '--state', 'open', '--limit', '30', '--json',
                            'number,title,url,reviewDecision,statusCheckRollup']),
                    ('runs', ['run', 'list', '--limit', '20', '--json',
                             'databaseId,displayTitle,url,status,conclusion,startedAt,updatedAt'])]
         for key, args in queries:
             try:
-                rows = json.loads(run(['gh', *args], cwd=path))
+                rows = json.loads(run([gh_binary, *args], cwd=path))
                 if not isinstance(rows, list) or any(not isinstance(r, dict) for r in rows):
                     raise ValueError('Invalid gh response')
                 for row in rows:
@@ -146,19 +146,22 @@ def snapshot(home):
         if key in _CACHE and now - _CACHE[key][0] < 30:
             return _CACHE[key][1]
         gh = {'state': 'ready', 'message': 'gh authenticated', 'command': ''}
-        if not shutil.which('gh'):
+        binary = github_auth.gh_path()
+        if not binary:
             gh = {'state': 'missing', 'message': 'gh is not installed or not on PATH.',
                   'command': 'sudo apt install gh'}
         else:
             try:
-                run(['gh', 'auth', 'status'])
+                run([binary, 'auth', 'status'])
             except ValueError:
                 gh = {'state': 'unauthenticated', 'message': 'gh authentication check failed; credentials may be missing or expired.',
                       'command': 'gh auth login'}
+                if github_auth.is_windows_gh(binary):
+                    gh['message'] += ' ' + github_auth.WINDOWS_LOGIN
         data = {'gh': gh, 'repos': [], 'errors': [],
                 'checked_at': dt.datetime.now(dt.timezone.utc).isoformat()}
         try:
-            data['repos'] = [repo_snapshot(r, gh['state'] == 'ready') for r in configured_repos(home)]
+            data['repos'] = [repo_snapshot(r, binary if gh['state'] == 'ready' else None) for r in configured_repos(home)]
         except (OSError, ValueError, KeyError, TypeError):
             data['errors'].append('Invalid github.json. Expected {"repos": [{"name": "repo", "path": "/path/to/repo"}]}.')
         _CACHE[key] = (time.monotonic(), data)

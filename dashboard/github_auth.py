@@ -68,7 +68,15 @@ class Unavailable(RuntimeError):
 
 
 def gh_path():
-    return shutil.which("gh")
+    return shutil.which("gh") or shutil.which("gh.exe")
+
+
+def is_windows_gh(binary):
+    return bool(binary) and os.path.basename(binary).lower() == "gh.exe"
+
+
+WINDOWS_LOGIN = ("Sign in on the Windows side in PowerShell or Command Prompt: "
+                 f"gh auth login --web --scopes {SCOPES}")
 
 
 def _run(args, timeout=20, stdin_text=None):
@@ -89,7 +97,8 @@ def _run(args, timeout=20, stdin_text=None):
             # UnicodeDecodeError out of a reader thread, which surfaces as a
             # server error with no connection to what was actually read.
             encoding="utf-8", errors="replace",
-            input=stdin_text,
+            **({"input": stdin_text} if stdin_text is not None
+               else {"stdin": subprocess.DEVNULL}),
             env={**os.environ, "GH_PROMPT_DISABLED": "1", "GH_NO_UPDATE_NOTIFIER": "1",
                  "CLICOLOR": "0", "NO_COLOR": "1"})
     except (OSError, subprocess.SubprocessError):
@@ -101,14 +110,19 @@ def _run(args, timeout=20, stdin_text=None):
 
 def account():
     """Who gh is signed in as, and with what. Never returns or logs a token."""
-    state = {"cli": bool(gh_path()), "authenticated": False, "login": None,
+    binary = gh_path()
+    windows = is_windows_gh(binary)
+    state = {"cli": bool(binary), "authenticated": False, "login": None,
              "name": None, "url": None, "scopes": [], "rate": None,
-             "can_login": HAVE_PTY and bool(gh_path()), "hostname": "github.com",
+             "can_login": HAVE_PTY and bool(binary) and not windows, "hostname": "github.com",
              "scopes_requested": SCOPES.split(",")}
     if not state["cli"]:
         state["message"] = "gh is not installed. Install it, then sign in from here."
         state["command"] = "sudo apt install gh"
         return state
+    if windows:
+        state["message"] = WINDOWS_LOGIN
+        state["command"] = f"gh auth login --web --scopes {SCOPES}"
     try:
         # --include prints the response headers, and X-Oauth-Scopes is the only
         # honest source for what this token may actually do. Asking `gh auth status`
@@ -117,6 +131,8 @@ def account():
     except Unavailable as err:
         state["message"] = ("gh is installed but not signed in. " + str(err)
                             if "failed" in str(err) else str(err))
+        if windows:
+            state["message"] += " " + WINDOWS_LOGIN
         state["command"] = f"gh auth login --web --scopes {SCOPES}"
         return state
     head, _, body = raw.partition("\n\n") if "\n\n" in raw else raw.partition("\r\n\r\n")
@@ -144,6 +160,8 @@ def account():
         state["message"] = (f"Signed in, but the token is missing the {', '.join(missing)} "
                             f"scope, so creating repositories will be refused. "
                             f"Sign in again to widen it.")
+        if windows:
+            state["message"] += " " + WINDOWS_LOGIN
     return state
 
 
@@ -168,7 +186,8 @@ class Login:
         self._cancel = threading.Event()
 
     def available(self):
-        return HAVE_PTY and bool(gh_path())
+        binary = gh_path()
+        return HAVE_PTY and bool(binary) and not is_windows_gh(binary)
 
     def start(self, actor):
         actor = str(actor or "").strip()
@@ -176,6 +195,8 @@ class Login:
             raise Invalid("an operator name is required before signing in")
         if not gh_path():
             raise Unavailable("gh is not installed or not on PATH.")
+        if is_windows_gh(gh_path()):
+            raise Unavailable(WINDOWS_LOGIN)
         if not HAVE_PTY:
             raise Unavailable(
                 "This host cannot run the interactive flow. Run it in a terminal: "

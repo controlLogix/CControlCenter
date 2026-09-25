@@ -12,6 +12,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 import github_panel as panel
+import github_auth as auth
 
 
 class GithubTests(unittest.TestCase):
@@ -33,6 +34,85 @@ class GithubTests(unittest.TestCase):
 
     def git(self, *args):
         return subprocess.check_output(['git', '-C', str(self.repo), *args], stderr=subprocess.DEVNULL, text=True)
+
+    def test_windows_discovery_and_native_precedence(self):
+        windows = '/mnt/c/Program Files/GitHub CLI/gh.exe'
+        with patch.object(auth.shutil, 'which', side_effect=lambda name: windows if name == 'gh.exe' else None) as which:
+            self.assertEqual(auth.gh_path(), windows)
+            self.assertEqual([c.args for c in which.call_args_list], [('gh',), ('gh.exe',)])
+        with patch.object(auth.shutil, 'which', return_value='/usr/bin/gh') as which:
+            self.assertEqual(auth.gh_path(), '/usr/bin/gh')
+            which.assert_called_once_with('gh')
+
+    def test_windows_account_cannot_login_and_guidance(self):
+        raw = 'X-Oauth-Scopes: repo\n\n{"login": "octo"}'
+        with patch.object(auth, 'gh_path', return_value='/mnt/c/Program Files/GitHub CLI/gh.exe'), patch.object(auth, 'HAVE_PTY', True):
+            for response in (raw, auth.Unavailable('gh api failed (exit 1).')):
+                with self.subTest(response=str(response)), patch.object(auth, '_run', side_effect=[response, '{}']):
+                    state = auth.account()
+                    self.assertTrue(state['cli'])
+                    self.assertIs(state['can_login'], False)
+                    self.assertEqual(state['authenticated'], isinstance(response, str))
+                    self.assertIn('Windows side', state['message'])
+                    self.assertIn('gh auth login', state['command'])
+                    self.assertNotIn('apt install', str(state))
+
+    def test_windows_login_unavailable(self):
+        with patch.object(auth, 'gh_path', return_value='/mnt/c/Program Files/GitHub CLI/gh.exe'), patch.object(auth, 'HAVE_PTY', True):
+            self.assertIs(auth.Login().available(), False)
+
+    def test_windows_login_start_refused_before_thread(self):
+        with patch.object(auth, 'gh_path', return_value='/mnt/c/Program Files/GitHub CLI/gh.exe'), patch.object(auth, 'HAVE_PTY', True), patch.object(auth.threading, 'Thread') as thread:
+            with self.assertRaisesRegex(auth.Unavailable, 'Windows side'):
+                auth.Login().start('operator')
+            thread.assert_not_called()
+
+    def test_auth_resolved_binary_and_closed_stdin(self):
+        binary = '/mnt/c/Program Files/GitHub CLI/gh.exe'
+        with patch.object(auth, 'gh_path', return_value=binary), patch.object(auth.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, 'ok')) as run:
+            self.assertEqual(auth._run(['auth', 'logout', '--hostname', 'github.com']), 'ok')
+            self.assertEqual(run.call_args.args[0], [binary, 'auth', 'logout', '--hostname', 'github.com'])
+            self.assertEqual(run.call_args.kwargs['stdin'], subprocess.DEVNULL)
+            self.assertNotIn('input', run.call_args.kwargs)
+
+    def test_issue_body_keeps_pipe(self):
+        with patch.object(auth, 'gh_path', return_value='/bin/gh'), patch.object(auth.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, 'https://github.com/a/b/issues/1')) as run:
+            auth.create_issue({'repo': 'a/b', 'title': 'Issue', 'body': 'body\ntext', 'actor': 'operator', 'confirm': True})
+            self.assertEqual(run.call_args.args[0], ['/bin/gh', 'issue', 'create', '--repo', 'a/b', '--title', 'Issue', '--body-file', '-'])
+            self.assertEqual(run.call_args.kwargs['input'], 'body\ntext')
+            self.assertNotIn('stdin', run.call_args.kwargs)
+
+    def test_panel_closes_stdin(self):
+        with patch.object(panel.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, 'ok')) as run:
+            self.assertEqual(panel.run(['/resolved/gh.exe', 'auth', 'status']), 'ok')
+            self.assertEqual(run.call_args.kwargs['stdin'], subprocess.DEVNULL)
+
+    def test_windows_panel_resolved_calls_and_remediation(self):
+        binary = '/mnt/c/Program Files/GitHub CLI/gh.exe'
+        real_run = panel.run
+        calls = []
+        def fake(argv, cwd=None):
+            if argv[0] == 'git':
+                return real_run(argv, cwd)
+            calls.append(argv)
+            self.assertEqual(argv[0], binary)
+            return '[]'
+        with patch.object(auth.shutil, 'which', side_effect=lambda name: binary if name == 'gh.exe' else None), patch.object(panel, 'run', side_effect=fake):
+            row = panel.snapshot(self.root)
+            self.assertEqual(row['gh']['state'], 'ready')
+            self.assertEqual([c[1:3] for c in calls], [['auth', 'status'], ['pr', 'list'], ['run', 'list']])
+            self.assertNotIn('apt install', str(row))
+        panel._CACHE.clear()
+        def failed(argv, cwd=None):
+            if argv[0] == binary:
+                raise ValueError('auth failed')
+            return real_run(argv, cwd)
+        with patch.object(auth, 'gh_path', return_value=binary), patch.object(panel, 'run', side_effect=failed):
+            row = panel.snapshot(self.root)
+            self.assertEqual(row['gh']['state'], 'unauthenticated')
+            self.assertIn('Windows side', row['gh']['message'])
+            self.assertEqual(row['gh']['command'], 'gh auth login')
+            self.assertNotIn('apt install', str(row))
 
     def test_ahead_behind_dirty_commits(self):
         self.git('branch', 'tracking')
@@ -64,7 +144,7 @@ class GithubTests(unittest.TestCase):
         self.assertTrue(panel.repo_snapshot({'path': str(self.root / 'absent')}, False)['errors'])
 
     def test_missing_auth_and_cache(self):
-        with patch.object(panel.shutil, 'which', return_value=None):
+        with patch.object(auth.shutil, 'which', return_value=None):
             row = panel.snapshot(self.root)
             self.assertEqual(row['gh']['state'], 'missing')
             self.assertEqual(row['gh']['command'], 'sudo apt install gh')
@@ -74,10 +154,10 @@ class GithubTests(unittest.TestCase):
         panel._CACHE.clear()
         real_run = panel.run
         def auth_failure(argv, cwd=None):
-            if argv[0] == 'gh':
+            if argv[0] == '/bin/gh':
                 raise ValueError('failed')
             return real_run(argv, cwd)
-        with patch.object(panel.shutil, 'which', return_value='/bin/gh'), patch.object(panel, 'run', side_effect=auth_failure):
+        with patch.object(auth.shutil, 'which', return_value='/bin/gh'), patch.object(panel, 'run', side_effect=auth_failure):
             self.assertEqual(panel.snapshot(self.root)['gh']['command'], 'gh auth login')
 
     def test_pr_checks_runs_order_duration_and_read_only_commands(self):
@@ -92,7 +172,7 @@ class GithubTests(unittest.TestCase):
                                    {'number': 2, 'reviewDecision': 'CHANGES_REQUESTED', 'statusCheckRollup': [{'state': 'FAILURE'}]}])
             return json.dumps([{'conclusion': c, 'status': 'completed', 'startedAt': '2026-09-23T00:00:00Z', 'updatedAt': '2026-09-23T00:01:03Z'} for c in ['success', 'failure']])
         with patch.object(panel, 'run', side_effect=fake):
-            row = panel.repo_snapshot(self.config, True)
+            row = panel.repo_snapshot(self.config, 'gh')
         self.assertEqual(row['prs'][0]['number'], 2)
         self.assertEqual(row['prs'][0]['reviewDecision'], 'CHANGES_REQUESTED')
         self.assertEqual(row['runs'][0]['conclusion'], 'failure')
@@ -103,7 +183,7 @@ class GithubTests(unittest.TestCase):
 
     def test_config_errors(self):
         (self.root / 'github.json').write_text('{broken')
-        with patch.object(panel.shutil, 'which', return_value=None):
+        with patch.object(auth.shutil, 'which', return_value=None):
             self.assertTrue(panel.snapshot(self.root)['errors'])
 
     def test_cli_errors_redact_stderr(self):
@@ -123,7 +203,7 @@ class GithubTests(unittest.TestCase):
                 return 'invalid json'
             return real_run(argv, cwd)
         with patch.object(panel, 'run', side_effect=fake):
-            row = panel.repo_snapshot(self.config, True)
+            row = panel.repo_snapshot(self.config, 'gh')
         self.assertEqual(row['branch'], 'main')
         self.assertEqual(len([e for e in row['errors'] if e.startswith(('prs:', 'runs:'))]), 2)
 
