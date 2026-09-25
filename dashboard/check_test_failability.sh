@@ -90,6 +90,11 @@ test_field_tickets.py        838c5f9    14
 # where the gate runs: on a platform with no os.getuid the marker cases skip
 # and only 3 fail, which is why the number is measured rather than counted.
 test_serving.py              bb0ae43    8
+# Can the gate say WHAT broke? Against the commit before the reporting fixes,
+# test_e2e.sh printed its diagnostic after its summary, test_e2e.mjs printed
+# its roll-call after the counts, and the runner's grep could not match the
+# e2e failure shape at all. 5 of 14 fail there.
+test_gate_reporting.sh       77696cb    5
 BASELINES
   SELF_TEST=1
 else
