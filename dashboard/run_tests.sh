@@ -196,6 +196,7 @@ run test_frontend.sh bash /dev/fd/12 12< <(tr -d '\r' < dashboard/test_frontend.
 run test_frontend_board.sh bash /dev/fd/14 14< <(tr -d '\r' < dashboard/test_frontend_board.sh)
 run test_frontend_post.sh bash /dev/fd/19 19< <(tr -d '\r' < dashboard/test_frontend_post.sh)
 run test_frontend_kanban.sh bash /dev/fd/18 18< <(tr -d '\r' < dashboard/test_frontend_kanban.sh)
+run test_frontend_drawer.sh bash /dev/fd/20 20< <(tr -d '\r' < dashboard/test_frontend_drawer.sh)
 run test_frontend_tabs.sh bash /dev/fd/15 15< <(tr -d '\r' < dashboard/test_frontend_tabs.sh)
 # The idle-agent timeout. Sources agentmux.sh for its selection function and tests
 # it against a fixture, so it needs no tmux server and cannot touch a live agent.

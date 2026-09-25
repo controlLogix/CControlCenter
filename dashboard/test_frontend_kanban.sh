@@ -65,6 +65,8 @@ function setup(tasks = []) {
     fetch: async (path, opts) => { posts.push({path, ...opts, headers: {...opts.headers}, body: JSON.parse(opts.body)}); return response(); },
     localStorage: {getItem: () => null, setItem: (...args) => storage.push(args)},
   };
+  const shell = fs.readFileSync('dashboard/app.js', 'utf8');
+  vm.runInNewContext(shell.slice(shell.indexOf('async function post('), shell.indexOf('function clock(')) + '\nwindow.CCC.post = post;', ctx);
   vm.runInNewContext(source, ctx); ready();
   return {root, requests, posts, registrations, storage, load: () => loader(),
     rows: value => { rows = value; }, response: fn => { response = fn; },

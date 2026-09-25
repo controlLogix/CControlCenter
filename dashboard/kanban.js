@@ -14,27 +14,24 @@
     refresh.disabled = true;
     notice.replaceChildren(api.el('p', '', `Moving ${key}…`));
     try {
-      // The shell post helper discards structured 409 remedies. Keep every hint.
-      const response = await fetch('api/board/status', {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({id: key, status: destination, actor: 'dashboard'}),
-      });
-      const reply = await response.json();
-      if (!response.ok) {
-        notice.replaceChildren(api.el('p', '', reply.error || `HTTP ${response.status}`));
-        for (const item of reply.missing || []) {
-          notice.append(api.el('p', '', String(item.field || '')),
-                        api.el('pre', '', String(item.hint || '')));
-        }
-        return;
-      }
-      notice.replaceChildren(api.el('p', '', `${key} moved to ${destination.replace('_', ' ')}.`));
+      const reply = await api.post('api/board/status', {id: key, status: destination, actor: 'dashboard'});
+      notice.replaceChildren(api.el('p', '', reply.bypassed
+        ? `Gate bypassed: ${reply.bypassed.reason || 'override'}`
+        : `${key} moved to ${destination.replace('_', ' ')}.`));
       await load(); // Only the accepted server snapshot can relocate a card.
     } catch (error) {
-      notice.replaceChildren(api.el('p', '', `Could not move ${key}: ${error.message}`));
+      showWriteError(notice, error, `Could not move ${key}: `);
     } finally {
       pending = false;
       refresh.disabled = false;
+    }
+  }
+
+  function showWriteError(target, error, prefix = '') {
+    target.replaceChildren(api.el('p', '', prefix + error.message));
+    for (const item of error.payload?.missing || []) {
+      target.append(api.el('p', '', String(item.field || '')),
+                    api.el('pre', '', String(item.hint || '')));
     }
   }
 
