@@ -281,6 +281,10 @@ run check_line_endings.sh bash /dev/fd/22 22< <(tr -d '\r' < dashboard/check_lin
 # The gate in front of a write to PHYSICAL EQUIPMENT. Until 2026-09-25 that was a
 # one-click window.confirm and nothing tested it at all.
 run test_frontend_iiot_write.sh bash /dev/fd/23 23< <(tr -d '\r' < dashboard/test_frontend_iiot_write.sh)
+# TM-025: the age beside a value, driven through the real render path under a
+# faked browser clock. An age computed across two clocks is worse than none -
+# it still looks authoritative, and it decides whether a value reads as live.
+run test_frontend_iiot_age.sh bash /dev/fd/24 24< <(tr -d '\r' < dashboard/test_frontend_iiot_age.sh)
 # The localStorage key migration, run against the real block in index.html.
 # These keys are persisted operator state; renaming them without carrying the
 # values across wipes themes and board layout silently.

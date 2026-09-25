@@ -19,6 +19,9 @@
 
   let api, status, editor, rows, writeEditor, actor, message;
   let config = null, initialized = false, snapshot = null, receivedAt = 0;
+  // Monotonic, so an NTP correction or a clock change mid-session cannot make
+  // an age tick backwards. Paired with the server's age_ms, never with its epoch.
+  let arrivedMono = 0;
 
   function node(tag, text, parent) {
     const e = document.createElement(tag);
@@ -88,11 +91,31 @@
     return data;
   }
 
+  // "never read" is its own state and must not render as an age. A blank or a
+  // zero here reads as "just now", which is the opposite of the truth.
+  function ageText(tag) {
+    if (tag.age_ms === null || tag.age_ms === undefined) {
+      return tag.last_good === null ? 'never read' : 'age unknown';
+    }
+    const ms = tag.age_ms + Math.max(0, performance.now() - arrivedMono);
+    const s = ms / 1000;
+    if (s < 1) return 'just now';
+    if (s < 90) return `${Math.round(s)}s ago`;
+    if (s < 5400) return `${Math.round(s / 60)}m ago`;
+    return `${Math.round(s / 3600)}h ago`;
+  }
+
   function render() {
     if (!snapshot || !status) return;
+    // `expired` compares two BROWSER timestamps - how long since this snapshot
+    // arrived here - which is a legitimate thing for the client to know.
     const expired = config && Date.now() - receivedAt >= config.interval * 1000;
-    const connected = snapshot.connected && !expired && snapshot.tags.every(t =>
-      t.last_good !== null && Date.now() / 1000 - t.last_good < config.interval);
+    // The staleness verdict itself is the SERVER's. It used to be recomputed here
+    // as `Date.now()/1000 - t.last_good`, which subtracts the browser's clock from
+    // the server's; those agree only by luck, and WSL2 drifts against its host
+    // after sleep. modbus_poll.py:245 already decides this correctly.
+    const connected = snapshot.connected && !expired
+      && snapshot.tags.every(t => !t.stale);
     status.textContent = `${connected ? 'CONNECTED' : 'DISCONNECTED'}${snapshot.error ? ': ' + snapshot.error : ''}`;
     status.dataset.state = connected ? 'ok' : 'bad';
     rows.replaceChildren();
@@ -112,8 +135,10 @@
       state.textContent = stale ? 'STALE' : 'live';
       const seen = document.createElement('span');
       seen.className = 'tag-seen';
-      seen.textContent = tag.last_good === null ? 'never read'
-        : `last good ${new Date(tag.last_good * 1000).toLocaleTimeString()}`;
+      // An AGE, not a clock reading. `age_ms` was measured on the server; the
+      // only thing added here is monotonic elapsed time since the snapshot
+      // arrived, so the number ticks smoothly and never crosses two wall clocks.
+      seen.textContent = ageText(tag);
       row.append(name, value, state, seen);
       rows.appendChild(row);
     }
@@ -235,6 +260,7 @@
     try {
       snapshot = await call('tags');
       receivedAt = Date.now();
+      arrivedMono = performance.now();
       config = snapshot.config;
       if (!initialized) {
         if (config) editor.value = JSON.stringify(config, null, 2);

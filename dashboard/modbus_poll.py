@@ -243,7 +243,12 @@ class Poller:
             for tag in config['tags'] if config else []:
                 state = self.values.get(tag['name'], dict(value=None, last_good=None))
                 stale = not connected or state['last_good'] is None or now-state['last_good'] >= interval
-                rows.append(dict(tag, **state, stale=stale))
+                # Age measured HERE, where the timestamp was taken. The browser
+                # cannot compute it: subtracting our epoch from its own is two
+                # different clocks, and iiot.js:11-14 is right that a wrong age is
+                # worse than none because it still looks authoritative.
+                age_ms = None if state['last_good'] is None else int((now - state['last_good']) * 1000)
+                rows.append(dict(tag, **state, stale=stale, age_ms=age_ms))
             return dict(config=config, tags=rows, connected=connected, error=self.error,
                         retry_in=max(0, self.next_poll-time.monotonic()))
 

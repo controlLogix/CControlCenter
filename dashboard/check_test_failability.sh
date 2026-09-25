@@ -63,6 +63,11 @@ test_frontend_storage.sh     6afd65b    8
 # The equipment-write gate. Against the commit before it, iiot.js still used a
 # one-click window.confirm and four of the five properties do not hold.
 test_frontend_iiot_write.sh  00912ba    4
+# TM-025, the two-clock age. Against the commit before the fix the panel renders
+# a CLOCK READING ("last good 6:26:40 AM") instead of an age, and decides
+# staleness with Date.now()/1000 - last_good - so a fresh feed reads STALE the
+# moment the browser's clock is ten minutes fast. 4 of 6 fail there.
+test_frontend_iiot_age.sh    6b2d581    4
 BASELINES
   SELF_TEST=1
 else

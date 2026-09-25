@@ -196,6 +196,33 @@ class ModbusTests(unittest.TestCase):
         self.assertEqual(stale['tags'][0]['last_good'], first['tags'][0]['last_good'])
         self.assertEqual(stale['tags'][0]['value'], first['tags'][0]['value'])
 
+    def test_age_is_measured_here_not_by_the_browser(self):
+        # The browser cannot compute this: subtracting our epoch from its own is
+        # two different clocks, and they only agree by luck. iiot.js:11-14 is
+        # right that a WRONG age is worse than none, because it still looks
+        # authoritative. So the age travels with the reading.
+        self.slave.registers[0] = 123
+        self.poller.save(self.config)
+        self.poller.poll_once()
+        fresh = self.poller.snapshot()['tags'][0]
+        self.assertIsNotNone(fresh['age_ms'])
+        self.assertLess(fresh['age_ms'], 1000, 'a just-polled tag should be ~0ms old')
+
+        # Age grows with the SERVER's clock, and tracks it.
+        with patch.object(mb.time, 'time', return_value=time.time() + 5):
+            later = self.poller.snapshot()['tags'][0]
+        self.assertGreaterEqual(later['age_ms'], 4500)
+        self.assertLessEqual(later['age_ms'], 6000)
+
+    def test_a_tag_never_read_has_no_age_rather_than_a_zero_one(self):
+        # A zero age reads as "just now", which is the opposite of the truth for
+        # a tag that has never returned a value.
+        self.poller.save(self.config)
+        never = self.poller.snapshot()['tags'][0]
+        self.assertIsNone(never['last_good'])
+        self.assertIsNone(never['age_ms'])
+        self.assertTrue(never['stale'])
+
     def test_disconnect_within_interval_and_backoff(self):
         self.poller.save(self.config)
         self.poller.poll_once()
