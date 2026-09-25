@@ -262,6 +262,10 @@ run test_mqtt.py  python3 dashboard/test_mqtt.py
 # WSL fallback, and the never-fatal contract. Added after a 9p EIO stat inside
 # neighbour_table killed whole scans on ~60% of e2e runs.
 run test_netscan.py python3 dashboard/test_netscan.py
+# The field sidecar's HTTP shell: the shared secret, the loopback assertion, and
+# what it REFUSES. Asserted before any write route exists, because a write route
+# added later inherits whatever posture is already here.
+run test_field_sidecar.py python3 dashboard/test_field_sidecar.py
 # The localStorage key migration, run against the real block in index.html.
 # These keys are persisted operator state; renaming them without carrying the
 # values across wipes themes and board layout silently.

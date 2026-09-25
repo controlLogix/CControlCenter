@@ -1,0 +1,59 @@
+Done, 2026-09-25. field/app.py + dashboard/test_field_sidecar.py, 13 tests.
+
+RUNS ON BOTH HOSTS, verified separately - it is meant to run on Windows, and
+testing only in WSL would have proved the wrong thing:
+
+  WSL:      bind 127.0.0.1 | protocols: 10 | protocol_errors: {}
+  Windows:  platform win32 | protocols: 10 | protocol_errors: {}
+
+All ten protocol modules import on Windows with no extra install, because
+modbus_rtu imports pyserial lazily (:86-88) and mqtt_monitor's paho is vendored
+(:56-71). So the "missing wheel disables one panel" posture is inherited, not
+re-invented.
+
+  no key   -> 401
+  with key -> 200
+
+THE POSTURE, asserted now because a write route added later inherits whatever is
+already here:
+
+  * Shared secret in X-AgentMux-Field-Key, hmac.compare_digest, checked BEFORE the
+    body is read. Unauthenticated gets a bodyless 401 - it learns nothing about
+    what is behind this. A one-character-short key is refused, and that test exists
+    so nobody replaces the comparison with startswith.
+  * assert_loopback refuses 0.0.0.0, a LAN address and ::, and runs both before the
+    bind and against the address actually bound.
+  * No write routes. POST is 405 with the key, 401 without - authorization precedes
+    the method, so an unauthenticated caller cannot even enumerate methods.
+  * No raw-CIP surface: no generic_message passthrough, proven by parsing the
+    module with ast. That absence is the real audit boundary. The capability
+    wrapper planned for pycomm3 is defence in depth - Python has no private, and a
+    determined caller reaches the driver anyway - so the process boundary is what
+    actually holds and the HTTP surface is the thing to keep honest.
+  * Each protocol module imports in its own try; /health reports what loaded and
+    the exact error for anything that did not.
+
+ADDITIVE, NOT A MOVE, and the plan was updated to match. The plan's 1.1 said
+`git mv` first. Doing that first churns ~13 test files - test_enip.py:16 is a bare
+`import enip` relying on Python putting the script's own directory on sys.path -
+for no functional gain while the sidecar does not exist. This is the plan's own
+"two consumers, one library" with no move: field/app.py imports from dashboard/,
+server.py is untouched. The move becomes 1.1b, a pure rename with a green gate
+either side, and the one sys.path line is all that follows the modules.
+
+TWO FLAWS IN MY OWN TEST, both found by running it rather than reading it:
+
+  1. The raw-CIP assertion grepped the file TEXT and tripped on the docstring that
+     explains that very rule. A test that cannot tell an implementation from a
+     comment about the implementation is not asserting what it claims. It now walks
+     the ast, exempting docstrings, and inspects string constants, attributes and
+     names - the forms a route can actually take.
+  2. Its failure printed three kilobytes of identifiers. A failure should name the
+     problem: it now reports ['/field/generic_message'] != [].
+
+FAILABILITY PROVEN for the assertion that matters. Injecting a
+/field/generic_message route into a scratch copy:
+    FAIL: test_there_is_no_raw_cip_route
+    AssertionError: Lists differ: ['/field/generic_message'] != []
+    passed 12, failed 1
+Clean again against the real module: passed 13, failed 0.
