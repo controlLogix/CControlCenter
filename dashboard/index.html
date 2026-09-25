@@ -88,6 +88,15 @@
   <button id="bladeToggle" class="btn btn-blade" title="Agent console (Ctrl+`)"
           aria-label="Toggle the agent console" aria-expanded="false">console</button>
   <span class="count" id="count"></span>
+  <!-- WHICH CHECKOUT IS BEING SERVED. Always on screen, never a banner.
+       TM-020: a gate run put this dashboard back in the wrong checkout and the
+       page looked entirely normal - it answered, every panel rendered, and it
+       simply served different files than the ones on disk. The operator had no
+       way to tell except reading /proc. A banner would be wrong here, because
+       the usual state is fine and a banner that fires every load is one nobody
+       reads; this is the quiet permanent answer to "which code am I looking
+       at". app.js fills it from /api/serving and hides it until it knows. -->
+  <span class="served" id="servedFrom" hidden></span>
   <span class="spacer"></span>
   <select id="uiScale" title="Scale the interface — bars, headers and panels. 'auto' follows the window size; a fixed percentage overrides it. Terminal text is governed by the ribbon's Text control, so this never fights the fit.">
     <option value="auto" selected>UI auto</option>

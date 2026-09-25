@@ -1162,6 +1162,24 @@ select:focus-visible, .rin:focus-visible, .btn:focus-visible, .ta:focus-visible,
 .field-state[data-state="warn"] { border-left-color: var(--warn); color: var(--warn); }
 .field-state[data-state="bad"]  { border-left-color: var(--danger); color: var(--danger); }
 
+/* WHICH CHECKOUT IS BEING SERVED - quiet, permanent, never a banner.
+   TM-020: a gate run put the dashboard back in the wrong checkout and the page
+   looked entirely normal. The usual state is fine, so this must not shout; the
+   point is that "which code am I looking at" is answerable at a glance instead
+   of by reading /proc. Amber only when this is the throwaway dashboard a gate
+   started, where an empty board IS expected and the home is a path in /tmp. */
+.served {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: var(--type-xs, .72rem);
+  color: color-mix(in srgb, var(--text) 45%, transparent);
+  padding: 0 var(--space-2);
+  border-left: 2px solid color-mix(in srgb, var(--text) 18%, transparent);
+  white-space: nowrap; cursor: default;
+}
+.served[data-temporary="true"] {
+  color: var(--warn); border-left-color: var(--warn);
+}
+
 .mono { font-family: ui-monospace, Consolas, monospace; }
 
 /* ═════════════════════════ Modbus tags ═════════════════════════ */

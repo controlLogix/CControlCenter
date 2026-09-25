@@ -130,6 +130,42 @@ else
   bad 'board cards stretch to row height and pad the grid with dead scroll extent'
 fi
 
+echo '--- which checkout is being served (TM-020) ---'
+# A gate run put this dashboard back in the WRONG checkout, and the page looked
+# entirely normal: it answered, every panel rendered, and it simply served
+# different files than the ones on disk. Diagnosing it took reading /proc.
+if grep -q 'id="servedFrom"' dashboard/index.html; then
+  ok 'the header has a permanent slot for the served checkout'
+else
+  bad 'nothing on the page says which checkout is being served'
+fi
+# Permanent and quiet, NOT a banner. The usual state is fine, and a banner that
+# fires on every load is one nobody reads - which is how it would stop working.
+if grep -q 'servedFrom' "$APP" && ! awk '/getElementById\('"'"'servedFrom'"'"'\)/,/^  }/' "$APP" | grep -q 'holdBanner'; then
+  ok 'the indicator is a quiet permanent element, not a banner'
+else
+  bad 'the served-checkout indicator raises a banner; it would fire on every load'
+fi
+# Hidden until it knows. An empty or wrong value in the header is worse than no
+# value, because it is the one thing on screen claiming to answer this question.
+if grep -q 'slot.hidden = false' "$APP"; then
+  ok 'it stays hidden until the server has answered'
+else
+  bad 'the indicator is shown before it has a value to show'
+fi
+# The throwaway dashboard a gate starts has a home in /tmp and an empty board.
+# That is expected, and alarming only when nothing says so.
+if grep -q 'this_is_the_temporary_one' "$APP"; then
+  ok 'the throwaway dashboard during a gate run is marked as such'
+else
+  bad 'a temporary gate dashboard is indistinguishable from the real one'
+fi
+if grep -q '\.served\[data-temporary="true"\]' dashboard/style.css; then
+  ok 'and it is styled differently from the normal state'
+else
+  bad 'the temporary state has no styling, so the flag changes nothing on screen'
+fi
+
 echo '--- app.js still parses ---'
 if command -v node >/dev/null 2>&1; then
   if node --check "$APP" 2>/dev/null; then ok 'node --check passes'; else bad 'app.js is not valid JavaScript'; fi

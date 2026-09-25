@@ -108,6 +108,28 @@ class TakeoverTests(_NeedsServer):
         self.assertEqual(takeover['operator_home'], str(self.home))
         self.assertEqual(takeover['repo'], str(HERE.parent))
 
+    def test_the_throwaway_dashboard_says_it_is_the_throwaway_one(self):
+        # The dashboard the operator is ACTUALLY looking at during a gate run is
+        # the temporary one, whose home is a path in /tmp. Seeing that with no
+        # explanation is alarming; it is also entirely expected. The marker names
+        # which home is the throwaway one, so the flag comes from the record
+        # rather than from guessing at the path.
+        suite_server.write_marker(str(self.home), str(self.home),
+                                  os.getpid(), str(HERE.parent))
+        takeover = self.snapshot()['takeover']
+        self.assertTrue(takeover['this_is_the_temporary_one'])
+
+    def test_the_operators_own_dashboard_does_not_claim_to_be_throwaway(self):
+        # The negative that makes the flag mean something: a marker whose
+        # test_home is somewhere else describes a different dashboard, and this
+        # one must not adopt it.
+        elsewhere = self.home / 'some-other-home'
+        suite_server.write_marker(str(self.home), str(elsewhere),
+                                  os.getpid(), str(HERE.parent))
+        takeover = self.snapshot()['takeover']
+        self.assertFalse(takeover['this_is_the_temporary_one'])
+        self.assertEqual(takeover['state'], 'in_progress')
+
     def test_a_marker_whose_gate_is_alive_is_in_progress_not_an_alarm(self):
         # A gate run is MEANT to do this, and it restores on exit. Reporting it
         # as a fault would make the banner cry wolf on every gate run, and a

@@ -508,15 +508,38 @@ def serving_snapshot():
     # That is the stranded case, and it is otherwise invisible.
     try:
         import suite_server
-        record = suite_server.read_marker(str(HOME_DIR))
-        if record is not None:
+        # TWO PLACES TO LOOK, because the marker lives in the OPERATOR's home and
+        # the dashboard reading this may be the temporary one a gate started -
+        # whose home is the throwaway directory, not the one holding the marker.
+        # Checking only HOME_DIR meant the dashboard the operator is actually
+        # looking at during a gate run explained nothing about why its home is a
+        # path in /tmp.
+        homes = [str(HOME_DIR)]
+        default_home = str(Path.home() / ".agentmux")
+        if default_home not in homes:
+            homes.append(default_home)
+        for home in homes:
+            record = suite_server.read_marker(home)
+            if record is None:
+                continue
             alive = suite_server.gate_alive(record["gate_pid"])
+            # A marker found in someone else's home only describes US if it says
+            # so. Without this check a dashboard serving the operator home would
+            # claim to be the temporary one, which is the opposite of the truth.
+            mine = (home == str(HOME_DIR)
+                    or record["test_home"] == str(HOME_DIR))
+            if not mine:
+                continue
             snapshot["takeover"] = {
                 "state": "in_progress" if alive else "stranded",
+                # Whether THIS dashboard is the throwaway one. The operator sees
+                # a home in /tmp and needs to know that is expected.
+                "this_is_the_temporary_one": record["test_home"] == str(HOME_DIR),
                 "operator_home": record["operator_home"],
                 "repo": record["repo"],
                 "gate_pid": record["gate_pid"],
             }
+            break
     except Exception as err:                    # noqa: BLE001 - report, never fail
         snapshot["takeover_error"] = f"{type(err).__name__}: {err}"
     return snapshot

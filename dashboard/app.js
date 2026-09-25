@@ -3905,13 +3905,31 @@ fetch('/api/serving').then(r => r.ok ? r.json() : null).then(info => {
     holdBanner(`This dashboard was left behind by a gate run that did not finish. `
       + `${where} Put it back with:  cd ${takeover.repo} && `
       + `AGENTMUX_HOME=${takeover.operator_home} bash dashboard/restart.sh`);
-  } else if (takeover && takeover.state === 'in_progress') {
-    // Not an error: a gate run is meant to do this, and it restores on exit.
-    holdBanner(`A test run is using this port, so this is a temporary dashboard `
-      + `on a throwaway home. ${where} It will be restored when the run finishes.`);
+  } else if (takeover && takeover.state === 'in_progress'
+             && takeover.this_is_the_temporary_one) {
+    // Not an error: a gate run is meant to do this and restores on exit. But
+    // this IS the dashboard the operator is looking at right now, and its home
+    // is a path in /tmp - which is alarming with no explanation and entirely
+    // expected with one. Saying it is the difference between the two.
+    holdBanner(`A test run is using this port, so this is a TEMPORARY dashboard `
+      + `on a throwaway home - an empty board here is expected. ${where} `
+      + `The real one is restored when the run finishes.`);
   }
-  // Always available for a human to check, even when nothing is wrong: "which
-  // checkout am I looking at" should never require reading /proc.
+  // Always on screen, never a banner. The usual state is fine, and a banner
+  // that fires on every load is one nobody reads - but "which code am I looking
+  // at" should never require reading /proc, which is what it took to diagnose
+  // this the first time. The basename is enough to notice at a glance; the
+  // whole path is one hover away.
+  const slot = document.getElementById('servedFrom');
+  if (slot) {
+    const parts = String(info.root).split(/[\/]/).filter(Boolean);
+    slot.textContent = parts[parts.length - 1] || info.root;
+    slot.title = `Serving ${info.root}
+Home ${info.home}
+pid ${info.pid}`;
+    slot.dataset.temporary = String(Boolean(takeover && takeover.this_is_the_temporary_one));
+    slot.hidden = false;
+  }
   console.info('agentmux: ' + where);
 }).catch(() => {});
 
