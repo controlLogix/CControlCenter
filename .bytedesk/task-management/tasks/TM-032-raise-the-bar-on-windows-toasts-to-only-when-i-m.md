@@ -8,13 +8,13 @@ title: "Raise the bar on Windows toasts to \"only when I must act\""
 epic: "EP-002"
 acceptance: [{"text":"Every call site of notify.deliver is checked against the bar its own docstring states, and any that fires for progress rather than for a decision is changed or removed","done":false},{"text":"A toast fires only when a person must act: a run waiting on a human, a review gate, a dead worker, a finished orchestration","done":false},{"text":"Claude Code's own desktop notifications are separated from this repo's in the write-up, so the operator knows which setting governs which","done":false},{"text":"The volume is measured before and after, from events.jsonl, rather than asserted","done":false},{"text":"git_link_unattributed stops firing for every git command that names no task, or stops being surfaced at all","done":false}]
 evidence: []
-commits: []
+commits: ["85e6ddb"]
 blockedBy: []
 blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T22:48:02.601Z"
+updated: "2026-09-25T22:48:16.373Z"
 ---
 
 Asked and answered 2026-09-25. Parked with the investigation already done, so whoever picks this up does not repeat it.

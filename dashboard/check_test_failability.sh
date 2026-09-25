@@ -95,6 +95,11 @@ test_serving.py              bb0ae43    8
 # its roll-call after the counts, and the runner's grep could not match the
 # e2e failure shape at all. 5 of 14 fail there.
 test_gate_reporting.sh       77696cb    5
+# The device tree. Against the commit before it neither devicetree.py nor
+# devicetree.js exists, and both suites fail cleanly through their guards
+# rather than crashing - which is what makes the proof mean anything.
+test_devicetree.py           85e6ddb    18
+test_frontend_devicetree.sh  85e6ddb    1
 BASELINES
   SELF_TEST=1
 else

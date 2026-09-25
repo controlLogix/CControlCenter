@@ -311,6 +311,9 @@ run test_field_tickets.py python3 dashboard/test_field_tickets.py
 # covers is the one nobody reports - the page looked entirely normal and
 # simply served different files than the ones on disk.
 run test_serving.py python3 dashboard/test_serving.py
+# The device tree: the segment scan and CIP discovery merged without pretending
+# they are equal kinds of knowing. Pure logic, no network.
+run test_devicetree.py python3 dashboard/test_devicetree.py
 run test_pn_dcp.py python3 dashboard/test_pn_dcp.py
 run test_ecat_diag.py python3 dashboard/test_ecat_diag.py
 run test_snapshot.py python3 dashboard/test_snapshot.py
@@ -350,6 +353,9 @@ run test_frontend_iiot_write.sh bash /dev/fd/23 23< <(tr -d '\r' < dashboard/tes
 # faked browser clock. An age computed across two clocks is worse than none -
 # it still looks authoritative, and it decides whether a value reads as live.
 run test_frontend_iiot_age.sh bash /dev/fd/24 24< <(tr -d '\r' < dashboard/test_frontend_iiot_age.sh)
+# The device tree panel, driven through its real render: a guess and a statement
+# must not look alike on screen, which is the whole reason the panel exists.
+run test_frontend_devicetree.sh bash /dev/fd/28 28< <(tr -d '\r' < dashboard/test_frontend_devicetree.sh)
 # The localStorage key migration, run against the real block in index.html.
 # These keys are persisted operator state; renaming them without carrying the
 # values across wipes themes and board layout silently.

@@ -1180,6 +1180,56 @@ select:focus-visible, .rin:focus-visible, .btn:focus-visible, .ta:focus-visible,
   color: var(--warn); border-left-color: var(--warn);
 }
 
+/* DEVICE TREE. The visual job here is one thing: a device that identified
+   itself must not look the same as one that merely had a port open. The left
+   border carries that - solid accent for self-reported, faint for inferred -
+   because it survives at a glance across forty rows where a label does not. */
+.device-group h4 {
+  margin: var(--space-3) 0 var(--space-2); font-size: var(--type-sm);
+  display: flex; gap: var(--space-2); align-items: baseline;
+}
+.group-count { font-weight: 400; color: color-mix(in srgb, var(--text) 55%, transparent); }
+.device-row {
+  border-left: 3px solid color-mix(in srgb, var(--text) 15%, transparent);
+  padding: var(--space-2) var(--space-3); margin-bottom: var(--space-2);
+  background: color-mix(in srgb, var(--text) 3%, transparent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+/* The device told us what it is. */
+.device-row[data-self-reported="true"] { border-left-color: var(--accent); }
+.device-head { display: flex; gap: var(--space-2); align-items: baseline; flex-wrap: wrap; }
+.device-addr { font-family: ui-monospace, Consolas, monospace; font-weight: 600; }
+.device-name { font-weight: 600; }
+/* "unidentified" is a real answer and must read as one rather than as a gap. */
+.device-row[data-self-reported="false"] .device-name {
+  font-weight: 400; font-style: italic;
+  color: color-mix(in srgb, var(--text) 55%, transparent);
+}
+.device-sources { display: flex; gap: 4px; margin-left: auto; }
+.src-chip {
+  font-size: var(--type-xs, .7rem); padding: 1px 6px; border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--text) 20%, transparent);
+  color: color-mix(in srgb, var(--text) 60%, transparent); cursor: help;
+}
+.src-chip[data-source="cip-listidentity"],
+.src-chip[data-source="opcua-endpoints"] { border-color: var(--accent); color: var(--accent); }
+.src-chip[data-source="promoted"] { border-color: var(--safe); color: var(--safe); }
+.device-detail {
+  display: flex; gap: var(--space-3); flex-wrap: wrap;
+  font-size: var(--type-sm); margin-top: 4px;
+  color: color-mix(in srgb, var(--text) 70%, transparent);
+}
+/* Where a value came from, always beside the value. */
+.kv-src { font-size: var(--type-xs, .7rem); color: color-mix(in srgb, var(--text) 45%, transparent); }
+/* Disagreement is shown, never resolved - so it has to be visible. */
+.device-conflict {
+  margin-top: 4px; padding: 4px var(--space-2); font-size: var(--type-sm);
+  border-left: 2px solid var(--warn); color: var(--warn);
+  display: flex; gap: var(--space-3); flex-wrap: wrap;
+}
+.conflict-label { font-weight: 600; }
+.device-saved { margin-top: 4px; font-size: var(--type-sm); color: var(--safe); }
+
 .mono { font-family: ui-monospace, Consolas, monospace; }
 
 /* ═════════════════════════ Modbus tags ═════════════════════════ */

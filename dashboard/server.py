@@ -16,6 +16,7 @@ import json
 import mqtt
 import mqtt_monitor
 import modbus_poll
+import devicetree
 import netscan
 import os
 from pathlib import Path
@@ -1113,6 +1114,38 @@ def mqtt_service():
         return _mqtt_monitor
 
 
+_cip_discovery = {"at": None, "devices": [], "error": None, "available": None}
+
+
+def cip_discover():
+    """One CIP ListIdentity broadcast, and what it found. Never raises.
+
+    UDP broadcast, so it finds devices a TCP sweep cannot and returns each
+    device's OWN account of itself rather than an inference from an open port.
+    Read-only by construction: ListIdentity has no write form.
+
+    rockwell.py lives in field/ and imports the vendored pycomm3. Optional, like
+    every other protocol module here - a missing wheel disables one panel and
+    says so, rather than failing the dashboard.
+    """
+    global _cip_discovery
+    with _field_lock:
+        record = dict(_cip_discovery)
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "field"))
+        import rockwell
+        if not rockwell.available():
+            record.update(available=False, error=rockwell.IMPORT_ERROR, devices=[])
+        else:
+            record.update(available=True, devices=rockwell.discover(), error=None)
+    except Exception as err:                      # noqa: BLE001 - report, never die
+        record.update(available=False, error=f"{type(err).__name__}: {err}")
+    record["at"] = time.time()
+    with _field_lock:
+        _cip_discovery = record
+    return record
+
+
 def scan_service():
     global _scanner
     with _field_lock:
@@ -1811,6 +1844,52 @@ class Handler(BaseHTTPRequestHandler):
         except (OSError, mqtt.MqttError) as err:
             self.send_json(502, {"error": str(err)})
 
+    def devicetree_endpoint(self, action):
+        """The merged device tree, and the one action that puts traffic on a wire.
+
+        GET is pure: it merges the scanner's last result, the last CIP discovery
+        and the saved devices, and touches no network. That matters because a
+        panel someone leaves open must not be quietly broadcasting on a plant
+        segment.
+        """
+        if self.command == "GET":
+            scan = scan_service().snapshot()
+            with _field_lock:
+                discovery = dict(_cip_discovery)
+            try:
+                with ccstore.connection() as db:
+                    saved = ccstore.read(db, "devices", 1000)
+            except Exception:                     # noqa: BLE001 - a panel, not a gate
+                # A device tree that cannot reach cc.db still has a scan and a
+                # discovery to show. Failing the whole panel because the saved
+                # list is unreadable would lose the part that still works.
+                saved = []
+            rows = devicetree.merge(scanned=scan.get("hosts") or [],
+                                    identified=discovery.get("devices") or [],
+                                    promoted=saved)
+            payload = devicetree.tree(rows, scan_request=scan.get("request"))
+            # What produced this, so the panel can say "nothing has scanned yet"
+            # rather than rendering an empty list as though it meant "nothing is
+            # out there". They are not the same answer.
+            payload["scan_state"] = scan.get("state")
+            payload["discovery"] = {k: discovery.get(k) for k in ("at", "error", "available")}
+            payload["discovery"]["count"] = len(discovery.get("devices") or [])
+            self.send_json(200, payload)
+            return
+
+        if action == "discover":
+            body = self.read_cc_body(512)
+            if body is None:
+                return
+            result = cip_discover()
+            if result.get("available") is False:
+                self.send_json(503, {"error": f"CIP discovery is unavailable: {result.get('error')}"})
+                return
+            self.send_json(200, {"count": len(result["devices"]), "at": result["at"],
+                                 "devices": result["devices"]})
+            return
+        self.send_json(404, {"error": "no such route"})
+
     def netscan_endpoint(self, action):
         service = scan_service()
         try:
@@ -2408,6 +2487,13 @@ class Handler(BaseHTTPRequestHandler):
                 else:
                     self.monitor_endpoint(path.rsplit("/", 1)[1])
                 return
+            if path in ("/api/devices/tree", "/api/devices/discover"):
+                # GET the tree, POST the discovery. A broadcast is an action.
+                if self.command == "GET" and path != "/api/devices/tree":
+                    self.send_json(405, {"error": "discovery is a POST"})
+                else:
+                    self.devicetree_endpoint(path.rsplit("/", 1)[1])
+                return
             if path in ("/api/netscan", "/api/netscan/start", "/api/netscan/stop"):
                 if self.command == "GET" and path != "/api/netscan":
                     self.send_json(405, {"error": "POST required"})
@@ -2518,7 +2604,8 @@ class Handler(BaseHTTPRequestHandler):
             content_type = "text/html; charset=utf-8"
         elif path in ("/app.js", "/fitmatrix.js", "/agents.js", "/teams.js", "/iiot.js",
                       "/github.js", "/codesys.js", "/chatter.js", "/mqtt.js",
-                      "/netscan.js", "/runs.js", "/kanban.js", "/blade.js", "/modes.js"):
+                      "/netscan.js", "/runs.js", "/kanban.js", "/blade.js", "/modes.js",
+                      "/devicetree.js"):
             # fitmatrix.js is the readability test harness. index.html loads it only
             # when the URL carries ?fit=1, so it is inert on the normal page but can
             # be run against the REAL page rather than a mock.

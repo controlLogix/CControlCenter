@@ -444,6 +444,15 @@
           <div id="scanPanel" class="cardbody"></div>
         </details>
 
+        <!-- The device tree: the scanner's results and CIP discovery merged,
+             with every row saying WHICH of them reported it. A device that
+             answered ListIdentity told you what it is; one that merely had a
+             port open did not, and the panel must not render those alike. -->
+        <details class="card" data-collapse-key="iiot:devices" open>
+          <summary><h3>Device tree</h3></summary>
+          <div id="devicePanel" class="cardbody"></div>
+        </details>
+
         <details class="card" data-collapse-key="iiot:codesys">
           <summary><h3>CODESYS targets</h3></summary>
           <div id="viewCodesys" class="cardbody"></div>
@@ -619,7 +628,8 @@
 <script src="kanban.js"></script>
 <script src="iiot.js"></script>
 <script src="mqtt.js"></script>
-<script src="netscan.js"></script><script src="runs.js"></script>
+<script src="netscan.js"></script>
+<script src="devicetree.js"></script><script src="runs.js"></script>
 <script src="blade.js"></script>
 <script src="modes.js"></script>
 <script src="app.js"></script>
