@@ -115,7 +115,12 @@ for pin in 'investing/' 'broker/' 'agentmux-broker/' 'research/sessions/'; do
   # comment block names "$AGENTMUX_HOME/investing/" - so deleting the actual
   # rule still passed. Matching prose about the thing instead of the thing is
   # the same mistake as a grep that trips on a docstring.
-  grep -qxF "$pin" .gitignore 2>/dev/null || missing="$missing$pin"$'\n'
+  # CR-TOLERANT, because anchoring the match made it line-ending sensitive.
+  # .gitignore is not pinned in .gitattributes, so under core.autocrlf it checks
+  # out with trailing carriage returns and an exact whole-line match misses
+  # every rule. This passed locally on LF and failed in the gate clone - which
+  # is the fresh-Windows-clone case, and the one that matters.
+  tr -d '\r' < .gitignore 2>/dev/null | grep -qxF "$pin" || missing="$missing$pin"$'\n'
 done
 if [ -z "$missing" ]; then
   ok '.gitignore pins every path a financial artifact would be written to'

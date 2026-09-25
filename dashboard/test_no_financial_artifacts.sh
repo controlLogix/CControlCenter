@@ -121,6 +121,47 @@ git -C "$FIX" checkout -q -- docs/investing-boundary.md 2>/dev/null || \
   cp "$REPO/docs/investing-boundary.md" "$FIX/docs/"
 git -C "$FIX" add -A >/dev/null 2>&1
 
+# ── a CRLF .gitignore, which is what a fresh Windows clone gets ─────────────
+#
+# .gitignore is not pinned in .gitattributes, so under core.autocrlf every rule
+# checks out with a trailing carriage return. The pin check is anchored to a
+# whole line, which made it line-ending sensitive: it passed on the LF working
+# copy here and failed in the gate clone, where the file is CRLF. Local green
+# and gate red for the same tree is the worst shape a check can have.
+#
+# The byte values are built numerically rather than written as escapes. The
+# first version used them and they did not survive being written through a
+# shell heredoc - the block then split on the wrong thing and this case could
+# not fail at all, which is the one thing a proof must never do quietly.
+python3 - "$FIX" <<'CRLFCASE'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]) / '.gitignore'
+data = p.read_bytes().replace(bytes([13, 10]), bytes([10])).replace(bytes([10]), bytes([13, 10]))
+p.write_bytes(data)
+CRLFCASE
+git -C "$FIX" add -A >/dev/null 2>&1
+crlf_out="$(run_check)"
+if printf '%s' "$crlf_out" | grep -q '  FAIL'; then
+  bad 'a CRLF .gitignore breaks the guard, so it fails on any fresh Windows clone'
+  printf '%s\n' "$crlf_out" | sed 's/^/          /'
+else
+  ok 'a CRLF .gitignore is read correctly, so a Windows clone is not a false alarm'
+fi
+
+# ...and the rule genuinely missing must STILL fail, CRLF or not. Tolerating the
+# line ending must not quietly become tolerating the absence.
+python3 - "$FIX" <<'CRLFGONE'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]) / '.gitignore'
+crlf = bytes([13, 10])
+kept = [l for l in p.read_bytes().split(crlf) if l.strip() != b'investing/']
+p.write_bytes(crlf.join(kept))
+CRLFGONE
+git -C "$FIX" add -A >/dev/null 2>&1
+expect_caught 'a pin removed from a CRLF .gitignore' 'investing/'
+cp "$REPO/.gitignore" "$FIX/.gitignore"
+git -C "$FIX" add -A >/dev/null 2>&1
+
 # ── and it must NOT fire on ordinary code ────────────────────────────────────
 #
 # The false-positive half. A bare nine-digit number is a port, a timestamp or an
