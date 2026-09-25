@@ -1,8 +1,9 @@
 """The field sidecar's HTTP shell: the secret, the bind, and what it refuses.
 
-These assert the properties that are load-bearing BEFORE any write route exists,
-because a write route added later inherits whatever posture is already here. If
-the shell is wrong, every protocol call through it is wrong.
+These assert the properties the write route inherits: the secret is checked
+before a body is read, the bind is loopback, and the surface offers no way to
+name a raw CIP service. If the shell is wrong, every protocol call through it is
+wrong - which is why these came first and the write route came second.
 
 Nothing here talks to hardware, and nothing here needs a protocol module to be
 importable - the shell must come up and SAY what is unavailable rather than dying.
@@ -28,6 +29,10 @@ class Sidecar:
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), field_app.Handler)
         self.server.key = key
         self.server.verbose = False
+        # In memory and per-server, exactly as main() wires it: a ticket that
+        # outlived the process would be an authorisation nobody is still at the
+        # desk for.
+        self.server.tickets = field_app.tickets.TicketStore()
         self.port = self.server.server_address[1]
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
 
@@ -39,15 +44,27 @@ class Sidecar:
         self.server.shutdown()
         self.server.server_close()
 
-    def request(self, method, path, headers=None):
+    def request(self, method, path, headers=None, body=None):
         conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
         try:
-            conn.request(method, path, headers=headers or {})
+            headers = dict(headers or {})
+            payload = None
+            if body is not None:
+                payload = json.dumps(body).encode("utf-8")
+                headers.setdefault("Content-Type", "application/json")
+                headers["Content-Length"] = str(len(payload))
+            conn.request(method, path, body=payload, headers=headers)
             response = conn.getresponse()
-            body = response.read()
-            return response.status, body
+            return response.status, response.read()
         finally:
             conn.close()
+
+    def json(self, method, path, headers=None, body=None):
+        status, raw = self.request(method, path, headers, body)
+        try:
+            return status, json.loads(raw)
+        except ValueError:
+            return status, {"raw": raw.decode("utf-8", "replace")}
 
 
 KEY = "k" * 64
@@ -85,20 +102,99 @@ class SharedSecret(unittest.TestCase):
             self.assertEqual(status, 404)
 
 
-class NoWriteRoutes(unittest.TestCase):
-    """Writes arrive with the ticket mechanism, not before it."""
+class WriteSurface(unittest.TestCase):
+    """There is exactly one way in, and it cannot say what to write."""
 
-    def test_post_is_refused_even_with_the_key(self):
+    def test_an_invented_write_route_does_not_exist(self):
         with Sidecar() as s:
-            status, body = s.request("POST", "/field/enip/write", AUTH)
-            self.assertEqual(status, 405)
-            self.assertIn("no write routes", json.loads(body)["error"])
+            status, body = s.json("POST", "/field/enip/write", AUTH, {"value": 1})
+            self.assertEqual(status, 404)
+            self.assertIn("no such route", body["error"])
 
-    def test_post_without_the_key_is_401_not_405(self):
-        """Authorization is checked before anything else, including the method."""
+    def test_post_without_the_key_is_401_before_any_route_is_considered(self):
+        """Authorization is checked before anything else, including the path."""
         with Sidecar() as s:
+            status, _ = s.request("POST", "/rockwell/write")
+            self.assertEqual(status, 401)
+            # And for a path that does not exist either, so a caller with no key
+            # cannot map the surface by watching which paths answer differently.
             status, _ = s.request("POST", "/field/enip/write")
             self.assertEqual(status, 401)
+
+    def test_the_write_route_refuses_a_request_that_states_the_write(self):
+        """The target and the value live on the ticket. There is no way to
+        supply them here, and an attempt is refused rather than ignored -
+        ignoring it would let a caller believe it had specified something."""
+        with Sidecar() as s:
+            for field, value in (("tag", "CartonCount"), ("value", 7),
+                                 ("path", "10.1.2.3/bp/1"), ("kind", "write_tag")):
+                with self.subTest(field=field):
+                    status, body = s.json("POST", "/rockwell/write", AUTH, {
+                        "ticket_id": "x" * 32, "actor": "operator", "confirm": True,
+                        field: value})
+                    self.assertEqual(status, 400)
+                    self.assertIn(field, body["error"])
+                    self.assertIn("on the ticket", body["error"])
+
+    def test_the_write_route_needs_an_actor_and_a_confirmation(self):
+        with Sidecar() as s:
+            status, body = s.json("POST", "/rockwell/write", AUTH,
+                                  {"ticket_id": "x" * 32, "confirm": True})
+            self.assertEqual(status, 400)
+            self.assertIn("actor", body["error"])
+            status, body = s.json("POST", "/rockwell/write", AUTH,
+                                  {"ticket_id": "x" * 32, "actor": "operator"})
+            self.assertEqual(status, 400)
+            self.assertIn("confirm", body["error"])
+
+    def test_the_body_guards_match_the_dashboard(self):
+        """Same shape as read_cc_body: a write route is the last place to relax."""
+        with Sidecar() as s:
+            status, _ = s.request("POST", "/rockwell/ticket", AUTH, body=None)
+            self.assertEqual(status, 415, "no content type should be refused")
+            status, body = s.json("POST", "/rockwell/ticket",
+                                  dict(AUTH, **{"Content-Type": "application/json"}),
+                                  body=["not", "an", "object"])
+            self.assertEqual(status, 400)
+            self.assertIn("JSON object", body["error"])
+
+    def test_minting_validates_before_it_authorises_anything(self):
+        with Sidecar() as s:
+            base = {"kind": "write_tag", "path": "10.1.2.3/bp/1",
+                    "tag": "CartonCount", "value": 7}
+            for missing in ("kind", "path", "tag", "value"):
+                with self.subTest(missing=missing):
+                    body = {k: v for k, v in base.items() if k != missing}
+                    status, _ = s.json("POST", "/rockwell/ticket", AUTH, body)
+                    self.assertEqual(status, 400)
+            status, _ = s.json("POST", "/rockwell/ticket", AUTH,
+                               dict(base, kind="generic_message"))
+            self.assertEqual(status, 400, "an arbitrary CIP service must not be mintable")
+
+    def test_a_minted_ticket_carries_the_write_and_is_not_the_write(self):
+        with Sidecar() as s:
+            status, body = s.json("POST", "/rockwell/ticket", AUTH, {
+                "kind": "write_tag", "path": "10.1.2.3/bp/1",
+                "tag": "CartonCount", "value": 7})
+            self.assertEqual(status, 201)
+            self.assertEqual(body["action"], {
+                "kind": "write_tag", "path": "10.1.2.3/bp/1",
+                "tag": "CartonCount", "value": 7})
+            self.assertFalse(body["redeemed"])
+            self.assertGreater(body["expires_in"], 0)
+            # Minting sends nothing anywhere; it only records what was authorised.
+            self.assertEqual(s.server.tickets.peek(body["ticket_id"])["action"]["tag"],
+                             "CartonCount")
+
+    def test_an_unknown_ticket_is_refused_and_nothing_is_attempted(self):
+        with Sidecar() as s:
+            status, body = s.json("POST", "/rockwell/write", AUTH, {
+                "ticket_id": "0" * 32, "actor": "operator", "confirm": True})
+            # 503 when pycomm3 is unavailable on this machine, 409 when it is
+            # present and the ticket is simply not real. Either way: not 200,
+            # and nothing was written.
+            self.assertIn(status, (409, 503))
+            self.assertNotEqual(status, 200)
 
     def test_there_is_no_raw_cip_route(self):
         """The ABSENCE of a generic-message passthrough is the audit boundary.

@@ -282,6 +282,10 @@ run test_writejournal.py python3 dashboard/test_writejournal.py
 # The audited pycomm3 wrapper: tag browsing and UDT decoding on the read side,
 # and on the write side a path that cannot be taken without leaving a record.
 run test_rockwell.py python3 dashboard/test_rockwell.py
+# Single-use, expiring write authorisations. The write route names a ticket
+# and cannot say what to write; the ticket carries that, fixed when it was
+# minted. This is the gate that had to exist before the route did.
+run test_field_tickets.py python3 dashboard/test_field_tickets.py
 run test_pn_dcp.py python3 dashboard/test_pn_dcp.py
 run test_ecat_diag.py python3 dashboard/test_ecat_diag.py
 run test_snapshot.py python3 dashboard/test_snapshot.py

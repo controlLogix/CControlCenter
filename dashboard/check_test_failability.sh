@@ -79,6 +79,10 @@ test_writejournal.py         aaa5cae    22
 # an ImportError that would crash it. A floor, like the row above: the count
 # only grows, since a tree without the module fails every test by construction.
 test_rockwell.py             9855905    20
+# The ticket gate. Against the commit before it, field/tickets.py does not
+# exist and all 14 fail through the guarded import. A floor: the count only
+# grows, since a tree without the module fails every test by construction.
+test_field_tickets.py        838c5f9    14
 BASELINES
   SELF_TEST=1
 else
