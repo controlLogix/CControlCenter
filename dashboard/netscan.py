@@ -40,6 +40,7 @@ import socket
 import subprocess
 import threading
 import time
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -243,7 +244,17 @@ def neighbour_table():
     Returns (table, source) where source names where the addresses came from, so
     the panel can say "these MACs are the Windows host's, not this machine's"
     rather than presenting them as something it observed directly.
+
+    "Never fatal" is enforced here rather than asserted: a scan that has already
+    found hosts must not be discarded because a MAC lookup could not be read.
     """
+    try:
+        return _neighbour_table()
+    except OSError:
+        return {}, "unavailable (the neighbour cache could not be read)"
+
+
+def _neighbour_table():
     native = _run_table(["ip", "-4", "neigh", "show"]) or _run_table(["arp", "-a"])
     if os.name == "nt":
         return native or _run_table(["arp", "-a"]), "this host"
@@ -255,8 +266,17 @@ def neighbour_table():
         return native, "this host"
 
     for candidate in WINDOWS_ARP:
-        if candidate.startswith("/") and not Path(candidate).exists():
-            continue
+        # Path.exists() swallows only ENOENT/ENOTDIR/EBADF/ELOOP and re-raises
+        # everything else. A stat of /mnt/c under load raises EIO - the same
+        # transient 9p failure run_tests.sh warns about - and that propagated out
+        # of a function documented as "Never fatal", killing the whole scan and
+        # discarding hosts that had already answered.
+        if candidate.startswith("/"):
+            try:
+                if not Path(candidate).exists():
+                    continue
+            except OSError:
+                continue
         windows = _run_table([candidate, "-a"])
         if windows:
             merged = dict(windows)
@@ -397,9 +417,16 @@ class Scanner:
                     self.state = "done"
             self._journal("cancelled" if cancel.is_set() else "completed", len(rows))
         except Exception as err:
+            # The class name alone is not a diagnosis. "OSError" tells an operator
+            # nothing they can act on; "OSError: [Errno 24] Too many open files"
+            # names the fix. Bounded so a pathological message cannot fill the
+            # status line, and the full traceback goes to the server log.
+            detail = str(err).strip().replace("\n", " ")
+            self_error = f"{type(err).__name__}: {detail}" if detail else type(err).__name__
+            traceback.print_exc()
             with self.lock:
                 self.state = "error"
-                self.error = f"{type(err).__name__}"
+                self.error = self_error[:200]
                 self.finished_at = time.time()
             self._journal("error", 0)
 

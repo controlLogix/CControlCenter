@@ -29,7 +29,7 @@
 
   // Remembered per browser: the range and operator name you scan from do not
   // change between visits, and retyping a CIDR every time is how a typo happens.
-  const PREF_KEY = 'ccc.netscan.v1';
+  const PREF_KEY = 'agentmux.netscan.v1';
   function prefs() {
     try { return JSON.parse(localStorage.getItem(PREF_KEY) || '{}') || {}; }
     catch (_) { return {}; }
@@ -299,7 +299,7 @@
       ? `"${String(value).replace(/"/g, '""')}"` : String(value);
     const csv = [header, ...rows.map(r => Object.values(r).map(cell).join(','))].join('\r\n') + '\r\n';
     const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    api.download(`ccc-scan-${stamp}.csv`, csv, 'text/csv;charset=utf-8');
+    api.download(`agentmux-scan-${stamp}.csv`, csv, 'text/csv;charset=utf-8');
     notice = `Exported ${rows.length} row(s).`;
     render();
   }
@@ -315,8 +315,8 @@
     }
   }
 
-  window.addEventListener('ccc:ready', () => {
-    api = window.CCC;
+  window.addEventListener('agentmux:ready', () => {
+    api = window.AGENTMUX;
     api.registerCard('iiot', refresh, 1500);
   }, {once: true});
 })();

@@ -1,4 +1,4 @@
-# CC — Control Center
+# SPEC — agentmux
 
 Rebrand and overhaul of the agentmux dashboard into a multi-view operations
 console. **This pass is a rough-in**: real architecture, real persistence, real
@@ -11,10 +11,28 @@ unprivileged.
 | Backend + data | codex | SQLite store, API endpoints, MQTT client, device registry |
 | Reviewer | grok | correctness + security review of the whole pass |
 
-Standing constraints from the existing dashboard, all still binding:
+Standing constraints from the existing dashboard. Five still bind as written; the
+first two are restated because they were inaccurate, and an inaccurate constraint
+is worse than none — it gets cited to block something it never governed, or
+ignored wholesale once somebody notices it is wrong.
 
-- Python 3 **stdlib only**. No pip.
-- Bind **127.0.0.1** only.
+- **No third-party code arrives at install time.** The sidecar and the dashboard
+  install from a clone, with no network and no `pip`. This is what "stdlib only"
+  was protecting, and the repo already meets it by **vendoring**:
+  `dashboard/vendor/paho` is paho-mqtt 2.1.0 unpacked from a wheel with its
+  sha256 recorded in `vendor/README.md`, put on `sys.path` at
+  `mqtt_monitor.py:56-71`. Nine of the eleven protocol modules are genuinely
+  stdlib-only. The single real pip dependency is **pyserial**, imported lazily at
+  `modbus_rtu.py:86-88` behind a message naming the fix, and it degrades to one
+  disabled panel rather than a failed boot. New dependencies follow the paho
+  precedent: pure-Python wheel, pinned by hash, licence recorded.
+- Bind **127.0.0.1** only — enforced at `server.py:2434`. This is the one
+  constraint remote access will change, and the order matters: the same-origin
+  guard at `server.py:1099-1113` derives the allowed origin from the server's own
+  bound port and is the *whole* of the current authorisation story. The codebase
+  says so in three places — "Port 8787 is unauthenticated; the Origin allowlist
+  only stops a browser". Real session authentication must land **before** the bind
+  widens, not after.
 - **No secret is ever entered through the browser.** Credentialed actions are
   displayed as commands with a "your terminal" tag.
 - Terminals stay read-only; the page never sends keystrokes to an agent.
@@ -25,7 +43,7 @@ Standing constraints from the existing dashboard, all still binding:
 
 ## Brand
 
-**CC — Control Center.** Valve-era Steam: flat dark slate panels, tight 1px
+**CC — agentmux.** Valve-era Steam: flat dark slate panels, tight 1px
 borders, low-chroma greys, dense information. Modernised — no gradients, no
 bevels, no gloss. Accent is a **thin light orange** (Half-Life 2 / Orange Box),
 used sparingly: active nav item, focus ring, key values, one-pixel rules. Orange

@@ -435,12 +435,12 @@ server is ever bound off `127.0.0.1`.
 
 ---
 
-## C9 — `window.CCC`
+## C9 — `window.AGENTMUX`
 
 `app.js` is a classic script, not a module, so globals are shared.
 
 ```js
-window.CCC = { el, getJSON, post, say, deleteButton, collapsible, settingEditor,
+window.AGENTMUX = { el, getJSON, post, say, deleteButton, collapsible, settingEditor,
                registerView };
 // registerView(name, loaderFn, pollMs?) writes els.views[name], VIEW_LOADERS[name]
 //                                       and VIEW_POLL_MS[name] in one call

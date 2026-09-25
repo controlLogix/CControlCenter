@@ -159,14 +159,14 @@ test('the first tab is active until one is remembered', () => {
   const p = page();
   assert.equal(p.registry().status.active, 'feed');
   const q = page();
-  q.store.set('ccc.tab.v1', JSON.stringify({status: 'journal'}));
+  q.store.set('agentmux.tab.v1', JSON.stringify({status: 'journal'}));
   q.ctx.collectTabs();
   assert.equal(q.registry().status.active, 'journal');
 });
 
 test('a remembered tab that no longer exists falls back rather than breaking', () => {
   const p = page();
-  p.store.set('ccc.tab.v1', JSON.stringify({status: 'gone'}));
+  p.store.set('agentmux.tab.v1', JSON.stringify({status: 'gone'}));
   p.ctx.collectTabs();
   assert.equal(p.registry().status.active, 'feed');
 });
@@ -232,7 +232,7 @@ test('the chosen tab is remembered per view, not globally', () => {
   const p = page();
   p.ctx.showPanel('status', 'journal');
   p.ctx.showPanel('board', 'tickets');
-  assert.deepEqual(JSON.parse(p.store.get('ccc.tab.v1')),
+  assert.deepEqual(JSON.parse(p.store.get('agentmux.tab.v1')),
                    {status: 'journal', board: 'tickets'});
 });
 
@@ -345,7 +345,7 @@ test('a JSON export carries the tab, a timestamp and the rows as shown', () => {
   p.ctx.publishRows('feed', [{at: 'x', text: 'one'}]);
   p.ctx.exportStatus();
   assert.equal(written.length, 1);
-  assert.match(written[0].name, /^ccc-feed-.*\.json$/);
+  assert.match(written[0].name, /^agentmux-feed-.*\.json$/);
   assert.equal(written[0].type, 'application/json');
   const body = JSON.parse(written[0].text);
   assert.equal(body.tab, 'feed');
@@ -364,7 +364,7 @@ test('exporting nothing writes nothing', () => {
 
 // ── the boot sequence, with the real view scripts ───────────────────────────
 //
-// WHY THIS IS HERE. Eight scripts subscribe once to a synchronous `ccc:ready` and
+// WHY THIS IS HERE. Eight scripts subscribe once to a synchronous `agentmux:ready` and
 // register themselves into the registries above. If any one of them throws while
 // doing it - a renamed id, a registration naming a view that no longer exists -
 // the page does not degrade, it stops: the listeners after it never run and the
@@ -446,7 +446,7 @@ test('every view script registers itself without throwing', () => {
     ctx.els.views[name] = new El('section');
   }
   ctx.window = {
-    addEventListener: (type, fn) => { if (type === 'ccc:ready') ready.push(fn); },
+    addEventListener: (type, fn) => { if (type === 'agentmux:ready') ready.push(fn); },
   };
   vm.createContext(ctx);
   vm.runInContext(exporter, ctx);
@@ -454,7 +454,7 @@ test('every view script registers itself without throwing', () => {
   ctx.collectTabs();
 
   // The real registrars, wrapped so the test can see what each script asked for.
-  ctx.window.CCC = {
+  ctx.window.AGENTMUX = {
     el: (tag, cls, text) => { const n = new El(tag); n.textContent = text; return n; },
     getJSON: async () => ({}),
     post: async () => ({}),
@@ -480,7 +480,7 @@ test('every view script registers itself without throwing', () => {
     },
   };
 
-  // IN THE ORDER index.html LOADS THEM, and `ccc:ready` fires where app.js sits -
+  // IN THE ORDER index.html LOADS THEM, and `agentmux:ready` fires where app.js sits -
   // which is what app.js does on its last line. The first version of this test used
   // its own array and dispatched afterwards, so it booted a page that does not
   // exist: the real page had iiot.js, mqtt.js and netscan.js BELOW app.js, where the
@@ -501,7 +501,7 @@ test('every view script registers itself without throwing', () => {
   }
   assert.ok(dispatched, 'app.js is in the load order');
   assert.equal(ready.length >= scripts.length, true,
-               `only ${ready.length} scripts subscribed to ccc:ready`);
+               `only ${ready.length} scripts subscribed to agentmux:ready`);
 
   assert.deepEqual(registered.panels.sort(), [
     ['board', 'kanban'], ['organization', 'agents'], ['organization', 'teams'], ['status', 'chatter'],
@@ -552,16 +552,16 @@ test('server.py serves every script and stylesheet the page asks for', () => {
 test('a script that fails to load is reported instead of leaving a blank panel', () => {
   // The listener has to be installed BEFORE the scripts it watches, or it sees
   // nothing; and it has to be capture-phase, because resource errors do not bubble.
-  const listenerAt = html.indexOf('CCC_SCRIPT_ERRORS = []');
+  const listenerAt = html.indexOf('AGENTMUX_SCRIPT_ERRORS = []');
   assert.ok(listenerAt > 0, 'no script-error listener in the page');
   const firstScript = html.indexOf('<script src="');
   assert.ok(listenerAt < firstScript,
             'the listener is installed after the scripts it is meant to watch');
   assert.match(html.slice(listenerAt, listenerAt + 600), /addEventListener\('error'[\s\S]*?true\)/);
-  assert.match(app, /CCC_SCRIPT_ERRORS[\s\S]{0,900}?restart it/);
+  assert.match(app, /AGENTMUX_SCRIPT_ERRORS[\s\S]{0,900}?restart it/);
 });
 
-test('every script that waits for ccc:ready is loaded before app.js', () => {
+test('every script that waits for agentmux:ready is loaded before app.js', () => {
   // app.js dispatches the event synchronously on its last line. Anything loaded
   // after it subscribes to an event that has already fired.
   const order = [...html.matchAll(/<script src="([a-z_/.]+\.js)"><\/script>/g)].map(m => m[1]);
@@ -570,9 +570,9 @@ test('every script that waits for ccc:ready is loaded before app.js', () => {
   for (const name of order) {
     if (name === 'app.js' || name.startsWith('vendor/')) continue;
     const source = fs.readFileSync('dashboard/' + name, 'utf8');
-    if (!source.includes("'ccc:ready'")) continue;
+    if (!source.includes("'agentmux:ready'")) continue;
     assert.ok(order.indexOf(name) < appAt,
-              `${name} listens for ccc:ready but loads after app.js, so it never runs`);
+              `${name} listens for agentmux:ready but loads after app.js, so it never runs`);
   }
 });
 

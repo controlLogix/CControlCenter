@@ -54,8 +54,8 @@ class Details {
   toggle(open) { this.open = open; this.events.forEach(fn => fn()); }
 }
 const storage = {value: null, writes: 0,
-  getItem(key) { assert.equal(key, 'ccc.authOpen'); return this.value; },
-  setItem(key, value) { assert.equal(key, 'ccc.authOpen'); this.value = value; this.writes++; }
+  getItem(key) { assert.equal(key, 'agentmux.authOpen'); return this.value; },
+  setItem(key, value) { assert.equal(key, 'agentmux.authOpen'); this.value = value; this.writes++; }
 };
 function page(nodes, store = storage) {
   const context = {document: {querySelectorAll(selector) {

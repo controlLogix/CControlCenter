@@ -1,0 +1,20 @@
+test_launch.sh teardown race.
+
+  test_launch.sh   OSError: [Errno 39] Directory not empty: 'home'
+
+Its eight assertions had all passed; the teardown failed. test_launch.sh:7 used
+tempfile.TemporaryDirectory as a context manager, and rmtree walked <root>/home
+while a process spawned through the fake tmux was still writing into it.
+
+Load-dependent: 4 of 4 standalone runs passed. It appeared only with a doc capture
+and a node probe running on the same box - the worst shape of gate failure, since
+it reads as "the launch tests broke" when nothing about launching broke.
+
+Fixed with ignore_cleanup_errors=True (CPython added it in 3.10 for this; WSL here
+is 3.12.3), with the reason recorded in the source so it is not later removed as
+noise. Leaked files remain check_test_residue.sh's job, which has its own suite.
+
+Three consecutive standalone runs green afterwards, and:
+Gate 6 (clean run, ext4 clone, nothing else on the box):
+  all suites passed - 2039 assertions across 54 suites, every suite reporting a
+  clean tally. Baseline before Phase 0 was '2 suite(s) failed'.

@@ -175,7 +175,7 @@ def orchestrator_warrant():
     orchestrator-ness by the ABSENCE of $AGENTMUX_AGENT. That is a negative test, and a
     negative test is not extensible: there is no value you can put in the environment
     meaning "yes, more so". Every pane sets that variable, so an orchestrator agent
-    running in its own pane - which is the whole point of driving a run from the CCC -
+    running in its own pane - which is the whole point of driving a run from agentmux -
     is refused by start, assign, complete and teardown.
 
     So this is added as a SECOND, NARROWING CONDITION on the existing refusal, never as

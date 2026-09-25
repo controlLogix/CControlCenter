@@ -9,7 +9,10 @@ if ! command -v node >/dev/null 2>&1; then
   fi
 fi
 if ! command -v node >/dev/null 2>&1; then
-  echo '  (node not on PATH; skipping Agents frontend checks)'
+  # Column zero and the word SKIP: run_tests.sh:175 greps '^SKIP ' to surface
+  # these, and an indented note is invisible to it - a suite that ran nothing
+  # then looks exactly like one that passed.
+  echo 'SKIP test_frontend_agents: node is not on PATH, no Agents checks ran'
   echo 'passed 0, failed 0'
   exit 0
 fi
@@ -22,7 +25,7 @@ const app = fs.readFileSync('dashboard/app.js', 'utf8');
 const html = fs.readFileSync('dashboard/index.html', 'utf8');
 assert.match(source, /async function loadAgents\(/);
 // Agents is a TAB of Organization now, not a view of its own.
-assert.match(source, /window\.CCC\.registerPanel\('organization', 'agents', loadAgents\)/);
+assert.match(source, /window\.AGENTMUX\.registerPanel\('organization', 'agents', loadAgents\)/);
 assert.match(app, /VIEW_LOADERS\[name\] = loader/);
 assert.match(html, /src="agents.js"/);
 assert.match(html, /href="agents.css"/);
@@ -72,8 +75,8 @@ vm.runInNewContext(source, {
   },
   document: {getElementById: id => { assert.equal(id, 'viewAgents'); return root; }},
   window: {
-    addEventListener: (event, fn, options) => { assert.equal(event, 'ccc:ready'); assert.equal(options.once, true); ready = fn; },
-    CCC: {
+    addEventListener: (event, fn, options) => { assert.equal(event, 'agentmux:ready'); assert.equal(options.once, true); ready = fn; },
+    AGENTMUX: {
       el, say, deleteButton,
       getJSON: async url => {
         if (failure) throw failure;

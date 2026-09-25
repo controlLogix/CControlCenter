@@ -12,7 +12,7 @@
 
   function setup() {
     if (ui) return ui;
-    const { el } = window.CCC;
+    const { el } = window.AGENTMUX;
     const header = el('div', 'teams-header');
     header.appendChild(el('h2', '', 'Teams'));
     const refresh = el('button', 'btn', 'Refresh');
@@ -35,7 +35,7 @@
   }
 
   function rosterCard(task, roster, config) {
-    const { el, post, say } = window.CCC;
+    const { el, post, say } = window.AGENTMUX;
     const card = el('article', 'teams-card');
     card.appendChild(el('h3', '', `${task.key} · ${task.title}`));
     for (const gap of roster.gaps || []) {
@@ -53,7 +53,7 @@
     save.disabled = true;
     for (const member of roster.members) {
       const row = el('div', 'teams-member');
-      row.appendChild(window.CCC.markAgent(el('strong', '', member.agent_name),
+      row.appendChild(window.AGENTMUX.markAgent(el('strong', '', member.agent_name),
                                            member.agent_name));
       row.appendChild(el('span', '', `${member.role} · ${member.status}`));
       if (member.approved_by) row.appendChild(el('span', '', `Approved by ${member.approved_by}`));
@@ -140,7 +140,7 @@
   }
 
   async function refreshTeams() {
-    const { el, getJSON, post, say, settingEditor } = window.CCC;
+    const { el, getJSON, post, say, settingEditor } = window.AGENTMUX;
     const data = await getJSON('api/board/board');
     if (!data || !Array.isArray(data.tasks) || !data.config) throw new Error('Invalid board response');
     const tasks = data.tasks.filter(task => task.status !== 'deleted');
@@ -170,7 +170,7 @@
     if (!tasks.length) list.appendChild(el('p', 'empty', 'No task cards found.'));
     tasks.forEach((task, index) => list.appendChild(rosterCard(task, rosters[index], data.config)));
     ui.content.replaceChildren(settings, list);
-    window.CCC.refreshLiveMarks(ui.content);
+    window.AGENTMUX.refreshLiveMarks(ui.content);
     say(ui.stamp, `${tasks.length} task rosters loaded`);
   }
 
@@ -182,14 +182,14 @@
     try {
       await refreshTeams();
     } catch (err) {
-      window.CCC.say(ui.stamp, `Teams unavailable: ${err.message}. Displayed results may be out of date; refresh to retry.`);
+      window.AGENTMUX.say(ui.stamp, `Teams unavailable: ${err.message}. Displayed results may be out of date; refresh to retry.`);
     } finally {
       loading = false;
       ui.refresh.disabled = false;
     }
   }
 
-  window.addEventListener('ccc:ready', () => {
-    window.CCC.registerPanel('organization', 'teams', loadTeams);
+  window.addEventListener('agentmux:ready', () => {
+    window.AGENTMUX.registerPanel('organization', 'teams', loadTeams);
   }, { once: true });
 })();

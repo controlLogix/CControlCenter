@@ -142,7 +142,7 @@ def validate(config):
     checked = [check_topic_filter(item) for item in filters]
     if len(set(checked)) != len(checked):
         raise Invalid("duplicate topic filter")
-    client_id = config.get("client_id") or "ccc-monitor"
+    client_id = config.get("client_id") or "agentmux-monitor"
     if not re.fullmatch(r"[A-Za-z0-9_.:-]{1,23}", str(client_id)):
         # 23 characters is the MQTT 3.1.1 floor a broker must accept. Longer ids
         # are legal but optional, and a broker that refuses one fails the CONNECT

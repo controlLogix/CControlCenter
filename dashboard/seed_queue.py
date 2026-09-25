@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Seed ~/.agentmux/queue/*.jsonl with this session's real orchestration traffic.
 
-Not filler: these are the actual plan, hand-offs and findings from the CCC pass,
+Not filler: these are the actual plan, hand-offs and findings from agentmux pass,
 written in the format agents use so the Message Queue view is exercised against
 genuine data. Run once; re-running appends duplicates.
 
@@ -23,7 +23,7 @@ def at(hhmmss):
 TRAFFIC = {
     "orchestrator": [
         (at("20:41:00"), None, "plan",
-         "Controls Control Center (CCC) rebrand - initial pass, near enterprise ready.\n"
+         "agentmux rebrand - initial pass, near enterprise ready.\n"
          "\n"
          "Roles:\n"
          "  claude  orchestrator + frontend  theme system, shell, all seven views\n"
@@ -31,7 +31,7 @@ TRAFFIC = {
          "  grok    analyst                  correctness + security review\n"
          "\n"
          "Sequence:\n"
-         "  1. capacity check, then SPEC_CC.md as the contract\n"
+         "  1. capacity check, then SPEC_agentmux.md as the contract\n"
          "  2. codex phase 1: cc.db + endpoints   (done, 107 checks)\n"
          "  3. codex: PLC logo, thin-line, currentColor + orange LEDs  (done, 4 SVGs)\n"
          "  4. claude: themes.json, index.html shell, style.css, app.js router\n"
@@ -41,7 +41,7 @@ TRAFFIC = {
          "Standing constraints: stdlib only, 127.0.0.1 only, no secret through the\n"
          "browser, terminals stay read-only, every mutating endpoint keeps the\n"
          "/api/resize guards."),
-        (at("20:44:10"), "codex", "request", "Phase 1: build ccstore.py and the Control Center endpoints per SPEC_CC.md."),
+        (at("20:44:10"), "codex", "request", "Phase 1: build ccstore.py and the agentmux endpoints per SPEC_agentmux.md."),
         (at("21:02:30"), "codex", "request",
          "Logo brief: a PLC. Four SVGs - 32/24/16 and a wordmark. Thin line, "
          "currentColor for structure so it follows the theme, #ff9b4c only for the "

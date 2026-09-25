@@ -311,7 +311,7 @@ class Element {
 const root=new Element('div');
 let state={schema:{stations:[]},snapshot:[],reconciliation:{counts:{match:0,mismatch:0,missing:0,unexpected:0},rows:[]}};
 const document={getElementById:id=>id==='profinetPanel'?root:null,activeElement:null};
-const window={addEventListener:(name,fn)=>{assert.equal(name,'ccc:ready');fn();},CCC:{
+const window={addEventListener:(name,fn)=>{assert.equal(name,'agentmux:ready');fn();},AGENTMUX:{
  el:(...args)=>new Element(...args),registerCard:(view,fn,poll)=>{assert.equal(view,'iiot');assert.equal(poll,0);loader=fn;},
  getJSON:async path=>{assert.equal(path,'api/profinet');return state;},
  post:async(path,body)=>{assert.equal(path,'api/profinet/snapshot');posts.push(body);const record=body.records[0];

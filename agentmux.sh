@@ -2227,7 +2227,7 @@ cmd_exec() {
   fi
 }
 
-# ── the CCC orchestrator ─────────────────────────────────────────────────────
+# ── the agentmux orchestrator ─────────────────────────────────────────────────────
 #
 # One agent, in its own pane, holding a warrant that lets it call the four verbs an
 # orchestration needs: run start, assign, complete, teardown. Everything else it does -
@@ -2238,7 +2238,7 @@ cmd_exec() {
 # orchestrator is not a concurrency problem to tune, it is two things deciding what is
 # finished, and a number in a config that can disagree with reality is a bug generator.
 
-ORCH_DEFAULT_AGENT="ccc-orchestrator"
+ORCH_DEFAULT_AGENT="agentmux-orchestrator"
 
 orchestrator_live() {
   # The warranted name, if a pane by that name is actually running.
@@ -2349,7 +2349,7 @@ sys.path.insert(0, sys.argv[1]); import coordination; coordination.revoke_warran
 
   printf '%s\n' "$request" > "$ROOT/run/$name.request" 2>/dev/null || true
   printf '\norchestrator %s is up. Brief it with:\n  agentmux send %s "<your request>"\n' "$name" "$name"
-  printf 'Watch it: the Runs view in the CCC, or\n  agentmux attach %s\n' "$name"
+  printf 'Watch it: the Runs view in agentmux, or\n  agentmux attach %s\n' "$name"
 }
 
 orchestrator_stop() {

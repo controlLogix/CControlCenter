@@ -88,7 +88,7 @@ def _packet(kind, flags, body):
 class Connection:
     """One short-lived MQTT session. Use as a context manager."""
 
-    def __init__(self, host, port, client_id="ccc-dashboard"):
+    def __init__(self, host, port, client_id="agentmux-dashboard"):
         self.host = host
         self.port = port
         self.client_id = client_id

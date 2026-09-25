@@ -1,0 +1,35 @@
+The visible brand.
+
+The mark is INLINE SVG at index.html:71-81, not an <img src> - the comment at
+:67-70 explains why (currentColor does not inherit into an <img>) and was
+rewritten rather than deleted. The four assets/logo-ccc*.svg files are
+favicon-only, so swapping them alone changes nothing visible; the draft plan had
+this backwards.
+
+Changed: title, favicon href, the inline mark, aria-label, and BOTH tokens on the
+brand line. Assets git mv'd to logo-agentmux*.svg, and their <title> elements -
+which are the accessible name and the browser tooltip - still said "Controls
+Control Center" and were fixed too.
+
+Also user-visible and easy to miss:
+  server.py:1209,1336  API error string "Control Center storage unavailable"
+  app.js:2702,2704     CSV/JSON download filenames
+  mqtt.py:91           MQTT client_id "ccc-dashboard"  - goes ON THE WIRE
+  mqtt_monitor.py:145  MQTT client_id "ccc-monitor"    - goes ON THE WIRE
+  agentmux.sh:2352     printf "the Runs view in the CCC"
+  taskmgmt/run.py:384  "Approve it in the CCC's Runs view"
+  /tmp/ccc-server.log  with test_residue.sh:204 in the same commit
+
+A BREAK I INTRODUCED AND FIXED: smoke.sh:25 still fetched the old asset names and
+would have 404'd. Caught by checking every referenced path resolves; smoke.sh now
+passes 96, failed 0.
+
+The brand also rendered as "agent mux" - .brand is display:flex with gap:7px, so a
+bare text node beside <b> becomes its own flex item. Wrapped in one span.
+
+Verified live: the running dashboard on 8787 serves <title>agentmux</title>,
+logo-agentmux.svg -> 200, logo-ccc.svg -> 404.
+
+Gate 6 (clean run, ext4 clone, nothing else on the box):
+  all suites passed - 2039 assertions across 54 suites, every suite reporting a
+  clean tally. Baseline before Phase 0 was '2 suite(s) failed'.

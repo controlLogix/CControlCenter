@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Controls Control Center</title>
-<link rel="icon" href="assets/logo-ccc.svg" type="image/svg+xml">
+<title>agentmux</title>
+<link rel="icon" href="assets/logo-agentmux.svg" type="image/svg+xml">
 <script>
   // WHY THIS IS HERE, BEFORE ANYTHING ELSE. A view script that fails to LOAD cannot
   // report that it failed to load - it renders nothing, and its panel is simply
@@ -17,13 +17,42 @@
   // A capture-phase listener is the only thing that sees a resource-load failure,
   // and it has to be installed before the scripts it is watching. app.js turns this
   // list into a banner naming the files and what to do about it.
-  window.CCC_SCRIPT_ERRORS = [];
+  window.AGENTMUX_SCRIPT_ERRORS = [];
   window.addEventListener('error', function (event) {
     var node = event.target;
     if (node && node.tagName === 'SCRIPT' && node.src) {
-      window.CCC_SCRIPT_ERRORS.push(node.src.split('/').pop());
+      window.AGENTMUX_SCRIPT_ERRORS.push(node.src.split('/').pop());
     }
   }, true);
+
+  // ONE-TIME KEY MIGRATION, and it has to be here rather than in app.js. These are
+  // persisted OPERATOR data - theme, board layout, collapse state, current view -
+  // so renaming the keys without carrying the values across silently wipes them on
+  // the next load, with no error and nothing to roll back to. app.js is the LAST
+  // script on the page, so a migration there would not provably run before
+  // netscan.js and runs.js read their own keys. This script is first by
+  // construction, which is the only ordering guarantee worth having.
+  //
+  // Read-through and idempotent: a value already under the new name always wins, so
+  // re-running this can never clobber newer state with a stale copy.
+  (function () {
+    var KEYS = ['authOpen', 'boardFree', 'boardPlacements.v1', 'feed.v1',
+                'importedThemes', 'netscan.v1', 'panePlacement', 'queueSeenAt',
+                'runs.v1', 'tab.v1', 'theme', 'view'];
+    try {
+      for (var i = 0; i < KEYS.length; i++) {
+        var from = 'ccc.' + KEYS[i], to = 'agentmux.' + KEYS[i];
+        if (localStorage.getItem(to) !== null) { localStorage.removeItem(from); continue; }
+        var value = localStorage.getItem(from);
+        if (value === null) continue;
+        localStorage.setItem(to, value);
+        localStorage.removeItem(from);
+      }
+    } catch (err) {
+      // Private mode, or storage disabled. Losing a remembered layout is a far
+      // smaller problem than a page that will not boot.
+    }
+  })();
 </script>
 <link rel="stylesheet" href="vendor/xterm.css">
 <link rel="stylesheet" href="agents.css">
@@ -37,10 +66,10 @@
 <header class="titlebar">
   <!-- Inlined, not <img src>: currentColor does not inherit into an <img>, so a
        referenced copy would render black on dark slate and ignore the theme.
-       assets/logo-ccc.svg stays on disk for the favicon, which needs a literal
+       assets/logo-agentmux.svg stays on disk for the favicon, which needs a literal
        colour of its own. -->
   <svg id="brandMark" class="brand-mark" viewBox="0 0 32 32" role="img"
-       aria-label="Controls Control Center" fill="none" stroke="currentColor"
+       aria-label="agentmux" fill="none" stroke="currentColor"
        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
     <rect x="4.5" y="3.5" width="23" height="23" rx="1.5"/>
     <path d="M7.5 6.5h3v3h-3zM12.5 6.5h3v3h-3zM17.5 6.5h3v3h-3zM22.5 6.5h2v3h-2z"/>
@@ -50,7 +79,11 @@
     </g>
     <path d="M9 26.5v3M23 26.5v3M2 29.5h28"/>
   </svg>
-  <span class="brand"><b>Controls</b> Control Center<span class="brand-abbr">CCC</span></span>
+  <!-- .brand is display:flex with gap:7px, so a bare text node beside <b>
+       becomes its own flex item and the wordmark renders as "agent mux".
+       One wrapping span keeps it a single item, and the 7px gap then does
+       what it was for: separating the wordmark from the badge. -->
+  <span class="brand"><span class="brand-word"><b>agent</b>mux</span><span class="brand-abbr">AMX</span></span>
   <span class="count" id="count"></span>
   <span class="spacer"></span>
   <select id="uiScale" title="Scale the interface — bars, headers and panels. 'auto' follows the window size; a fixed percentage overrides it. Terminal text is governed by the ribbon's Text control, so this never fights the fit.">
@@ -538,7 +571,7 @@
 
 <script src="vendor/xterm.js"></script>
 <script src="vendor/addon-fit.js"></script>
-<!-- EVERY view script goes ABOVE app.js. app.js dispatches `ccc:ready` synchronously
+<!-- EVERY view script goes ABOVE app.js. app.js dispatches `agentmux:ready` synchronously
      on its last line, so a script loaded after it subscribes to an event that has
      already fired and is never called at all - its panel simply never renders, with
      nothing in the console to say why. iiot.js/mqtt.js/netscan.js sat below app.js

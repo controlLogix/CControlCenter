@@ -21,7 +21,7 @@
   }
 
   function editor(agent) {
-    const { el, getJSON, say } = window.CCC;
+    const { el, getJSON, say } = window.AGENTMUX;
     const details = el('details', 'agents-editor');
     details.appendChild(el('summary', '', agent ? 'Edit definition' : 'Create definition'));
     const host = el('div');
@@ -121,7 +121,7 @@
 
   function setup() {
     if (ui) return ui;
-    const { el } = window.CCC;
+    const { el } = window.AGENTMUX;
     const section = document.getElementById('viewAgents');
     const header = el('div', 'agents-header');
     header.appendChild(el('h2', '', 'Agents'));
@@ -141,7 +141,7 @@
   }
 
   async function loadAgents() {
-    const { el, getJSON, say } = window.CCC;
+    const { el, getJSON, say } = window.AGENTMUX;
     const { refresh, stamp, content } = setup();
     if (loading) return;
     loading = true;
@@ -177,7 +177,7 @@
         const title = el('div', 'agents-title');
         // A definition is a file; an AGENT is a running process. Marking the name
         // here is what tells you which of these definitions is currently spawned.
-        title.appendChild(window.CCC.markAgent(el('h4', '', agent.name), agent.name));
+        title.appendChild(window.AGENTMUX.markAgent(el('h4', '', agent.name), agent.name));
         title.appendChild(el('span', 'agents-scope', agent.scope));
         card.appendChild(title);
         if (agent.description) card.appendChild(el('p', '', agent.description));
@@ -192,7 +192,7 @@
           card.appendChild(editor(agent));
           const stamp = el('p', 'stamp');
           stamp.setAttribute('aria-live', 'polite');
-          card.appendChild(window.CCC.deleteButton('agent definition', agent.name, agent.name,
+          card.appendChild(window.AGENTMUX.deleteButton('agent definition', agent.name, agent.name,
             loadAgents, stamp, () => writeDefinition('agentdrop', {
               name: agent.name, scope: agent.scope, path: agent.path, checksum: agent.checksum
             })));
@@ -202,7 +202,7 @@
       }
       nodes.push(list);
       content.replaceChildren(...nodes);
-      window.CCC.refreshLiveMarks(document.getElementById('viewAgents'));
+      window.AGENTMUX.refreshLiveMarks(document.getElementById('viewAgents'));
       say(stamp, `${data.agents.length} definitions · ${data.problems.length} problems`);
     } catch (err) {
       // Retain the last successful result, but clearly mark it as stale.
@@ -213,7 +213,7 @@
     }
   }
 
-  window.addEventListener('ccc:ready', () => {
-    window.CCC.registerPanel('organization', 'agents', loadAgents);
+  window.addEventListener('agentmux:ready', () => {
+    window.AGENTMUX.registerPanel('organization', 'agents', loadAgents);
   }, { once: true });
 })();

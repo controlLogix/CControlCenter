@@ -1,0 +1,24 @@
+window.CCC namespace rename. 79 replacements across 20 files.
+
+  window.CCC     -> window.AGENTMUX      46
+  ccc:ready      -> agentmux:ready       28
+  CCCOpenCard    -> AGENTMUXOpenCard      5
+
+Residual check for all three tokens across dashboard/: none.
+CCC_SCRIPT_ERRORS deliberately untouched here - that is TM-005.
+
+THE MISS THE GATE CAUGHT. The first pass used a `window\.CCC` pattern, which
+missed two forms and took five suites from green to 0-passed:
+  1. `{CCC: {...}}` - fixtures build the namespace as a bare OBJECT KEY, so
+     production read window.AGENTMUX while the fixture still provided window.CCC
+     and every panel loader got undefined.
+  2. `window\.CCC` inside test REGEX literals, where the dot is escaped, so a
+     literal-dot pattern does not match.
+Both fixed; the five suites are green again:
+  test_frontend_kanban.sh passed 10  test_frontend_drawer.sh passed 36
+  test_frontend_agents.sh passed 1   test_frontend_teams.sh  passed 1
+  test_github_panel.py    passed 18
+
+Gate 6 (clean run, ext4 clone, nothing else on the box):
+  all suites passed - 2039 assertions across 54 suites, every suite reporting a
+  clean tally. Baseline before Phase 0 was '2 suite(s) failed'.

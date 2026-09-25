@@ -329,5 +329,12 @@ if __name__ == '__main__':
     result = unittest.TextTestRunner(stream=sys.stdout, verbosity=2).run(
         unittest.defaultTestLoader.loadTestsFromModule(sys.modules[__name__]))
     failures = len(result.failures) + len(result.errors)
-    print(f'passed {result.testsRun - failures}, failed {failures}')
+    # A skipped test is not a passed one. result.testsRun counts skips, so the old
+    # `testsRun - failures` reported them as passes and a suite that silently ran
+    # nothing looked identical to one that ran everything. run_tests.sh:175 already
+    # greps for '^SKIP ', so naming them here is what makes them visible in the gate.
+    for case, reason in result.skipped:
+        print(f'SKIP {case} - {reason}')
+    print(f'passed {result.testsRun - failures - len(result.skipped)}, '
+          f'failed {failures}')
     sys.exit(bool(failures))

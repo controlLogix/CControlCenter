@@ -34,7 +34,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
-HOME = tempfile.mkdtemp(prefix="ccc-field-")
+HOME = tempfile.mkdtemp(prefix="agentmux-field-")
 os.environ["AGENTMUX_HOME"] = HOME
 
 import mqtt                                      # noqa: E402

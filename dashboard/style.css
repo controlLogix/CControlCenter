@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════════════════
-   Controls Control Center (CCC)
+   agentmux
 
    Valve-era Steam in spirit: flat dark slate, tight 1px borders, dense
    information, no gradients or bevels. Modernised, with a thin light-orange
@@ -1380,7 +1380,7 @@ details.epic[open] > summary { margin-bottom: var(--space-2); }
   vertical-align: middle;
   /* The dot breathes so a still screenshot and a live screen are different things.
      Honoured by the reduced-motion block at the foot of this file. */
-  animation: ccc-live-pulse 2s ease-in-out infinite;
+  animation: agentmux-live-pulse 2s ease-in-out infinite;
 }
 [data-agent].is-live:hover {
   background: color-mix(in srgb, var(--accent) 20%, transparent);
@@ -1390,7 +1390,7 @@ details.epic[open] > summary { margin-bottom: var(--space-2); }
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
-@keyframes ccc-live-pulse {
+@keyframes agentmux-live-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50%      { opacity: .45; transform: scale(.78); }
 }
@@ -1423,9 +1423,9 @@ details.epic[open] > summary { margin-bottom: var(--space-2); }
 .cell.just-focused {
   outline: 2px solid var(--accent);
   outline-offset: -2px;
-  animation: ccc-arrive 1.2s ease-out;
+  animation: agentmux-arrive 1.2s ease-out;
 }
-@keyframes ccc-arrive {
+@keyframes agentmux-arrive {
   0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 65%, transparent); }
   100% { box-shadow: 0 0 0 18px transparent; }
 }

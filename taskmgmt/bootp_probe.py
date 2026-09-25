@@ -6,7 +6,7 @@
 WHY THIS IS A SEPARATE, PRIVILEGED SCRIPT
 -----------------------------------------
 Receiving BOOTP means binding UDP 67 (server) and 68 (client), both privileged
-ports. The CCC dashboard runs unprivileged (uid 1000) and must stay that way, so
+ports. The agentmux dashboard runs unprivileged (uid 1000) and must stay that way, so
 it cannot do this and does not pretend to - its IIOT view names this command
 instead. Run it yourself, under sudo, and paste or pipe the output.
 

@@ -140,7 +140,7 @@
 
   // Public bridge for existing Tasks rows; afterSave refreshes their existing layout.
   // This is the only drawer global. It adds no node to the Tasks row itself.
-  window.CCCOpenCard = openCard;
+  window.AGENTMUXOpenCard = openCard;
   async function openCard(key, afterSave = load) {
     if (!api) return;
     ensureDrawer();
@@ -342,8 +342,8 @@
     }));
   }
 
-  window.addEventListener('ccc:ready', () => {
-    api = window.CCC;
+  window.addEventListener('agentmux:ready', () => {
+    api = window.AGENTMUX;
     // No polling: a redraw during dragging would detach the source node.
     api.registerPanel('board', 'kanban', load, 0);
   }, {once: true});

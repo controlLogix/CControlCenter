@@ -375,8 +375,8 @@
     } finally { loading = false; }
   }
 
-  window.addEventListener('ccc:ready', () => {
-    api = window.CCC;
+  window.addEventListener('agentmux:ready', () => {
+    api = window.AGENTMUX;
     api.registerView('github', load, 30000);
   }, {once: true});
 })();

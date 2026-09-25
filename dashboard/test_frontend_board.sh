@@ -215,8 +215,8 @@ await test('a refused move reports the reason instead of swallowing it',async()=
 
 // ── free layout is a view preference and never leaves the browser ───────────
 await test('free layout positions cards from local storage and tidy clears them',async()=>{
-  const s=setup({'ccc.boardFree':'1',
-                 'ccc.boardPlacements.v1':JSON.stringify({'EP-015':{x:40,y:80,w:300}})});
+  const s=setup({'agentmux.boardFree':'1',
+                 'agentmux.boardPlacements.v1':JSON.stringify({'EP-015':{x:40,y:80,w:300}})});
   await s.ctx.loadBoard();
   const card=nodes(s.root,'epic').find(c=>c.dataset.epic==='EP-015');
   assert.equal(card.style.left,'40px');

@@ -1,0 +1,19 @@
+CCC_SCRIPT_ERRORS and the ccc-* CSS identifiers.
+
+window.CCC_SCRIPT_ERRORS -> window.AGENTMUX_SCRIPT_ERRORS, 7 replacements, both
+ends atomically: index.html:20 (set), :24 (push), app.js:3883-3884 (consume),
+test_frontend_tabs.sh:555,561 (assert). A half-rename produces a load-failure
+banner that never fires - exactly the failure it exists to catch. The ordering
+assertion at :555 (listener before the scripts it watches) is preserved.
+
+CSS: ccc-live-pulse and ccc-arrive renamed in style.css.
+
+Two of the six ccc-* hits were NOT CSS and were checked individually:
+  netscan.js:302  a CSV DOWNLOAD FILENAME, ccc-scan- -> agentmux-scan- (correct)
+  runs.js:465     a Settings HELP STRING naming the default orchestrator agent.
+                  Renaming it made the UI briefly lie, since the real default was
+                  still ccc-orchestrator - closed by doing TM-006 immediately.
+
+Gate 6 (clean run, ext4 clone, nothing else on the box):
+  all suites passed - 2039 assertions across 54 suites, every suite reporting a
+  clean tally. Baseline before Phase 0 was '2 suite(s) failed'.

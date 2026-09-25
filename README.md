@@ -24,7 +24,7 @@ Two things that grew together:
 | | |
 | --- | --- |
 | **`agentmux.sh`** | The harness. Spawns agent CLIs into tmux panes, sends prompts, reads output, detects idleness, enforces permissions, and coordinates claims between agents. |
-| **`dashboard/`** | The **Controls Control Center** — a stdlib-only Python server and vanilla-JS console on `127.0.0.1`. Watch panes, drive a task board, run an orchestration, review what agents changed, and talk to field equipment. |
+| **`dashboard/`** | The **agentmux** — a stdlib-only Python server and vanilla-JS console on `127.0.0.1`. Watch panes, drive a task board, run an orchestration, review what agents changed, and talk to field equipment. |
 
 Nothing here has a dependency you have to install. No framework, no bundler, no ORM,
 no message broker. Python 3 standard library, POSIX shell, and vanilla JS, because this
@@ -82,10 +82,10 @@ So a warranted orchestrator must have an explicit approval on record before
 `run complete` will do anything:
 
 ```
-REFUSED: ccc-orchestrator has not been approved to complete this run.
+REFUSED: agentmux-orchestrator has not been approved to complete this run.
   Every job is verified, which says the work matched its brief -
   and you wrote that brief. Only the operator can say it was the
-  right brief. Approve it in the CCC's Runs view, then retry.
+  right brief. Approve it in agentmux's Runs view, then retry.
 ```
 
 A **person** at a terminal needs no approval — they *are* the approval, and demanding
@@ -241,7 +241,7 @@ the WSL launcher and the `agentmux` skill are both pointed at it.
 | `install.sh` | Portable installer. Discovers the checkout, node and tmux at run time and generates `~/.local/bin/agentmux`. Assumes no username, distro, drive letter or node version. |
 | `link-windows-state.sh` | Shares `~/.codex` and the claude config dir with the Windows installs. `--check` / `--apply` / `--revert`. Resolves `CLAUDE_CONFIG_DIR` rather than assuming `~/.claude`, and keeps the two path-bearing plugin files per-OS so sharing cannot break Windows plugins. |
 | `ANALYSIS_2026-09-18.md` | What this is, how to use it, and the reliability caveats. **Read before trusting a relayed answer.** |
-| `dashboard/` | **Controls Control Center (CCC)** — the operations console. `python3 dashboard/server.py`, then open 127.0.0.1:8787. See the table below. |
+| `dashboard/` | **agentmux** — the operations console. `python3 dashboard/server.py`, then open 127.0.0.1:8787. See the table below. |
 | `taskmgmt/` | Jira + Confluence, auth setup, and field tools. `atlassian.py` (REST client), `task.py` (CLI used by the harness and the dashboard reaper), `setup_atlassian.py` and `setup_auth.py` (non-echoing credential setup), `bootp_probe.py` (privileged, read-only BOOTP listener). |
 | `taskmgmt/dispatch.py` | **The board-to-agent seam.** Turns a ready card into a running agent and back: spawn, claim, start through the board's gate, brief, then collect. Drives `agentmux dispatch` / `collect` / `pool`. Decides nothing about readiness - `/api/board/dispatchable` does - and closes nothing. |
 | `~/.local/bin/agentmux` (WSL) | Launcher. Strips CRs at run time, so editing the `.sh` from Windows cannot break it. |
@@ -356,7 +356,7 @@ Selecting a method is possible from Settings → Authentication. **Entering a
 credential is not**: those commands are shown with a "your terminal" tag and the
 server never runs them.
 
-## Controls Control Center (`dashboard/`)
+## agentmux (`dashboard/`)
 
 Python 3 **stdlib only**, bound to **127.0.0.1 only**. A left activity bar switches
 eight views:
@@ -403,7 +403,7 @@ eight new files of one run would have been reviewed blind.
 
 | Path | What |
 | --- | --- |
-| `server.py` | HTTP + SSE. Routing, the static allowlist, agent metadata, the resource probe engine, the Jira reaper, the Control Center and MQTT endpoints. |
+| `server.py` | HTTP + SSE. Routing, the static allowlist, agent metadata, the resource probe engine, the Jira reaper, the agentmux and MQTT endpoints. |
 | `runsview.py` | Runs, read-only, plus the operator approval that gates completion. Imports `run.py` rather than re-deriving anything. |
 | `runs.js` | The Runs view and the Settings > Orchestration card. Registered via `registerView`/`registerCard`, so `app.js` and `teams.js` did not change to gain either. |
 | `notify.py` | Desktop toast (WSL -> WinRT), the operator's command hook, and a tmux status line. Never `send-keys`. |
@@ -416,7 +416,7 @@ eight new files of one run would have been reviewed blind.
 | `index.html` / `app.js` / `style.css` | The console. Terminals are read-only: the page never sends a keystroke to an agent and cannot spawn or kill one. |
 | `themes.json` | **Theme manifest.** Adding a theme is a data change here — no CSS and no JS. Applied by writing tokens onto `documentElement`, so there is no stylesheet swap and no flash. |
 | `resources.json` | **Resource manifest** driving the Resources section of Settings. Adding an MCP server, a CLI or an addon is a data change here. The backend runs only the probes it declares; a request can name an id but never supply a command. |
-| `SPEC_CC.md` | The Control Center contract: roles, brand, schema, and what "done" means. |
+| `SPEC_agentmux.md` | The agentmux contract: roles, brand, schema, and what "done" means. |
 | `auth.json` | **Auth manifest** — providers and their shared attributes, plus one method per `(cli, provider)` pairing. See Authentication above. |
 | `fitmatrix.js` | Readability matrix for the terminal grid. Loaded only with `?fit=1`. See Terminal text fitting below. |
 | `smoke.sh` | 79 checks: static allowlist, endpoint guards, traversal, theme consistency, body caps, the full status vocabularies, delete + cascade, DB round-trips. |
@@ -791,7 +791,7 @@ holder is the process that was told it won.
 
 ```
 agentmux claims                                      # who is on what, right now
-agentmux claim taskmgmt/courier.py --note "backoff" --task CCC-42
+agentmux claim taskmgmt/courier.py --note "backoff" --task agentmux-42
 agentmux release taskmgmt/courier.py
 ```
 
@@ -929,7 +929,7 @@ agentmux board    config [<name> [<value>]]          the dispatch policy lives h
 ```
 
 **One store.** `~/.agentmux/cc.db` is canonical. The board, `agentmux tasks`, the
-Control Center's Task Board view and the dispatcher all read and write that one
+agentmux's Task Board view and the dispatcher all read and write that one
 database through `/api/board`. The `.bytedesk/task-management/` directory is the
 upstream plugin whose identifier and record model this board mirrors — it is not a
 second place work is tracked, and its own dispatch loop stays off. A card lives in
@@ -992,7 +992,7 @@ turning dispatch off does not mean finding the process.
 | `dispatchMaxFailures` | 3 | consecutive board failures before the pool pauses; `pool resume` releases the brake |
 | `dispatchCli` | `codex` | which CLI a dispatched worker runs |
 
-**The Control Center reports dispatch and cannot perform it.** The Task Board view
+**The agentmux reports dispatch and cannot perform it.** The Task Board view
 carries a strip showing whether dispatch is on, which cards are in flight and what
 is ready — and no button. The same rule that keeps the Terminals view unable to
 spawn or kill a pane applies here and more so: dispatching starts an unrestricted

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Shared test helpers for the CCC suites.
+# Shared test helpers for agentmux suites.
 #
 #   source dashboard/testlib.sh       # from the repo root
 #

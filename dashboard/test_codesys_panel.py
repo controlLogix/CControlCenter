@@ -453,7 +453,7 @@ let row = {id:'lab', name:'<img src=x>', address:'admin@lab', reachable:true, st
 let offline=false;
 const shellCard = new El('details'); shellCard.open=false;
 global.document={getElementById:id=>{assert.equal(id,'viewCodesys');return root;}, querySelector:selector=>{assert.equal(selector,'details[data-collapse-key="iiot:codesys"]');return shellCard;}};
-global.window={confirm:t=>{confirms.push(t); return approve;}, addEventListener:(k,f)=>f(), CCC:{
+global.window={confirm:t=>{confirms.push(t); return approve;}, addEventListener:(k,f)=>f(), AGENTMUX:{
  el:(...a)=>new El(...a), registerCard:(k,f,poll)=>{assert.equal(k,'iiot');assert.equal(poll,0);loader=async()=>{if(!shellCard.open){shellCard.open=true;f();await new Promise(setImmediate);}else await root.children.find(n=>n.tag==='button'&&n.text==='Refresh targets').events.click();};},
  getJSON:async p=>{assert.equal(p,'/api/board/targets'); if(offline) throw Error('offline'); return {targets:[row]};},
  post:async(p,b)=>{posts.push({p,b}); return b.phase==='prepare'?{token:'abc',confirmation:'RESET lab Cold destructive'}:{ok:true,message:'done'};}

@@ -20,7 +20,7 @@ const html = fs.readFileSync('dashboard/index.html', 'utf8');
 const server = fs.readFileSync('dashboard/server.py', 'utf8');
 assert.match(source, /async function loadTeams\(/);
 // Teams is a TAB of Organization now, not a view of its own.
-assert.match(source, /window\.CCC\.registerPanel\('organization', 'teams', loadTeams\)/);
+assert.match(source, /window\.AGENTMUX\.registerPanel\('organization', 'teams', loadTeams\)/);
 assert.match(app, /VIEW_LOADERS\[name\] = loader/);
 for (const pattern of [/src="teams.js"/, /href="teams.css"/, /id="viewTeams"/,
                        /data-panel="teams"/, /data-tabs="organization"/]) assert.match(html, pattern);
@@ -61,10 +61,10 @@ const context = vm.createContext({
   document: {getElementById: id => { assert.equal(id, 'viewTeams'); return root; }, createElement: tag => new Node(tag)},
   el: (...args) => new Node(...args), say: (node, value) => { node.textContent = value; }, post,
   els: {authStamp: new Node('span')},
-  window: {addEventListener: (event, fn, options) => { assert.equal(event, 'ccc:ready'); assert.equal(options.once, true); ready = fn; }}
+  window: {addEventListener: (event, fn, options) => { assert.equal(event, 'agentmux:ready'); assert.equal(options.once, true); ready = fn; }}
 });
 vm.runInContext(app.slice(app.indexOf('function settingEditor('), app.indexOf('// Non-secret settings')), context);
-context.window.CCC = {
+context.window.AGENTMUX = {
   el: context.el, say: context.say, post, settingEditor: context.settingEditor,
   getJSON: async url => {
     reads++;

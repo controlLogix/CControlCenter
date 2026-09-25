@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# CCC dashboard smoke test. Run from the repo root inside WSL:
+# agentmux dashboard smoke test. Run from the repo root inside WSL:
 #   bash <(tr -d '\r' < dashboard/smoke.sh)
 #
 # Read-only except the round-trip section, which creates a throwaway epic/task/
@@ -22,7 +22,7 @@ echo '--- static assets ---'
 # its contents via /api/resources, which strips secret_output details.
 check '/ serves the page'   200 "$(code '')"
 check 'resources.json withheld' 404 "$(code 'resources.json')"
-for f in app.js style.css themes.json assets/logo-ccc.svg assets/logo-ccc-24.svg \
+for f in app.js style.css themes.json assets/logo-agentmux.svg assets/logo-agentmux-24.svg \
          vendor/xterm.js vendor/addon-fit.js vendor/xterm.css; do
   check "$f" 200 "$(code "$f")"
 done

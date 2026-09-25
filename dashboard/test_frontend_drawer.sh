@@ -61,7 +61,7 @@ function setup(initial = fresh(), options = {}) {
     throw Error('unexpected GET ' + path);
   };
   const ctx = {URL, document: {body, activeElement: new Node('button'), getElementById: id => id === 'jiraBase' ? jira : id === 'viewKanban' ? root : id === 'viewBoard' ? body : null},
-    window: {events: {}, confirm: () => options.confirm !== false, addEventListener: (name,fn) => { if (name === 'ccc:ready') ready=fn; else ctx.window.events[name]=fn; }, CCC: {el: (...args)=>new Node(...args), getJSON, registerPanel: (a,b,fn)=>{loader=fn;}}},
+    window: {events: {}, confirm: () => options.confirm !== false, addEventListener: (name,fn) => { if (name === 'agentmux:ready') ready=fn; else ctx.window.events[name]=fn; }, AGENTMUX: {el: (...args)=>new Node(...args), getJSON, registerPanel: (a,b,fn)=>{loader=fn;}}},
     fetch: async (path, opts) => {
       const payload = JSON.parse(opts.body); posts.push({endpoint: path, ...payload});
       if (responder) return responder(path,payload);
@@ -73,10 +73,10 @@ function setup(initial = fresh(), options = {}) {
       if (payload.patch) Object.assign(entity,payload.patch);
       return {ok:true,status:200,json:async()=>structuredClone(entity)};
     }};
-  vm.runInNewContext(postSource+'\nwindow.CCC.post = post;',ctx);
+  vm.runInNewContext(postSource+'\nwindow.AGENTMUX.post = post;',ctx);
   vm.runInNewContext(source,ctx);ready();
   const nodes = () => all(body);
-  return {ctx, body, root, posts, requests, open: key => ctx.window.CCCOpenCard(key || entity.key, options.after || (async()=>{})), load:()=>loader(),
+  return {ctx, body, root, posts, requests, open: key => ctx.window.AGENTMUXOpenCard(key || entity.key, options.after || (async()=>{})), load:()=>loader(),
     read:fn=>{reader=fn;}, respond:fn=>{responder=fn;}, entity:value=>{entity=value;},
     drawer:()=>nodes().find(n=>n.id==='cardDrawer'), form:name=>nodes().find(n=>n.dataset.field===name),
     section:name=>nodes().find(n=>n.dataset.section===name), criteria:()=>nodes().filter(n=>n.className==='drawer-criterion'),
@@ -93,14 +93,14 @@ function response(payload,status=200) { return {ok:status<400,status,json:async(
 test('post preserves 409 status payload and existing message',async()=>{
   const p=setup();const payload={error:'Gate refused',missing:[{field:'body',hint:'exact <hint>'}]};
   p.respond(()=>response(payload,409));
-  await assert.rejects(p.ctx.window.CCC.post('api/board/status',{}),e=>e.status===409&&e.payload===payload&&e.message==='Gate refused');
+  await assert.rejects(p.ctx.window.AGENTMUX.post('api/board/status',{}),e=>e.status===409&&e.payload===payload&&e.message==='Gate refused');
   p.respond(()=>({ok:false,status:503,json:async()=>{throw Error('not json');}}));
-  await assert.rejects(p.ctx.window.CCC.post('api/board/status',{}),e=>e.status===503&&e.message==='HTTP 503');
+  await assert.rejects(p.ctx.window.AGENTMUX.post('api/board/status',{}),e=>e.status===503&&e.message==='HTTP 503');
 });
 test('kanban writes exclusively through api.post',async()=>{
   assert.doesNotMatch(source,/\bfetch\s*\(/);assert.doesNotMatch(source,/shell post helper discards/);
   const p=setup();await p.load();let called=false;
-  p.ctx.window.CCC.post=async(path,body)=>{called=true;assert.equal(path,'api/board/status');assert.equal(body.status,'blocked');return {};};
+  p.ctx.window.AGENTMUX.post=async(path,body)=>{called=true;assert.equal(path,'api/board/status');assert.equal(body.status,'blocked');return {};};
   const col=all(p.root).find(n=>n.dataset.status==='blocked'&&n.className==='kanban-column');
   await col.events.drop({preventDefault(){},dataTransfer:{getData:()=> 'TM-1'}});assert.equal(called,true);
 });
@@ -108,7 +108,7 @@ test('both entry points are accessible without shifting task row nodes',async()=
   const p=setup();await p.load();await p.find('kanban-open').events.click();assert.equal(p.drawer().hidden,false);
   let opened; const r=new Node('div'),t=fresh();
   const start=shell.indexOf("const keyLink = el('span', 'board-key', t.key);");const end=shell.indexOf('r.appendChild(keyLink);',start)+'r.appendChild(keyLink);'.length;
-  assert.ok(start>=0);vm.runInNewContext(shell.slice(start,end),{r,t,el:(...args)=>new Node(...args),loadBoard:()=>{},window:{CCCOpenCard:(key)=>{opened=key;}}});
+  assert.ok(start>=0);vm.runInNewContext(shell.slice(start,end),{r,t,el:(...args)=>new Node(...args),loadBoard:()=>{},window:{AGENTMUXOpenCard:(key)=>{opened=key;}}});
   assert.equal(r.children.length,1);assert.equal(r.children[0].tag,'span');assert.equal(r.children[0].attrs.role,'button');
   r.children[0].events.click();assert.equal(opened,'TM-1');opened=null;
   r.children[0].events.keydown({key:'Enter',preventDefault(){}});assert.equal(opened,'TM-1');

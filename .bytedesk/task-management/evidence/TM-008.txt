@@ -1,0 +1,28 @@
+Documentation screenshots re-captured.
+
+New dashboard/capture_docs.{sh,mjs}: brings up a real dashboard on an ephemeral
+port with a throwaway AGENTMUX_HOME and a stub broker, seeds a populated board and
+two runs, navigates the five views and screenshots them. Reuses test_e2e.sh's
+find_playwright() verbatim - an npx cache can hold a WINDOWS playwright whose
+firefox cannot launch from WSL, and ~/pw is the linux install.
+
+Deliberately NOT in run_tests.sh: ~450 KB of binary churn per gate run is repo
+poison. It is an operator command.
+
+All five regenerated, each newer than the rebrand commits, none showing the old
+wordmark. Checked by eye, not just by exit code: board.png shows the agentmux
+wordmark with the AMX badge, EP-001 and three cards; runs-view.png shows two runs,
+one waiting on review with a real diff.
+
+FOUR BUGS IN MY OWN SCRIPT, found by running it:
+  1. ESM import of playwright/index.js gave undefined - must use createRequire
+     against the directory, as test_e2e.mjs:29 does.
+  2. Board seed 409'd: ccboard.create enforces the same gates as the CLI, so a
+     card needs acceptance criteria at creation.
+  3. Status seed 400'd "missing id": server.py:1410 target() reads "id", not "key".
+  4. Runs view was empty: run ids must be SIX HEX characters (run.valid_run), and
+     "doc001" contains 'o'. Renamed to d0c001/d0c002.
+
+Gate 6 (clean run, ext4 clone, nothing else on the box):
+  all suites passed - 2039 assertions across 54 suites, every suite reporting a
+  clean tally. Baseline before Phase 0 was '2 suite(s) failed'.

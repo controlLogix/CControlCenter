@@ -57,7 +57,7 @@ function setup(tasks = []) {
   let ready, loader, rows = tasks, response = async () => ({ok: true, json: async () => ({})});
   const ctx = {
     document: {getElementById: id => { assert.equal(id, 'viewKanban'); return root; }},
-    window: {addEventListener: (event, fn) => { assert.equal(event, 'ccc:ready'); ready = fn; }, CCC: {
+    window: {addEventListener: (event, fn) => { assert.equal(event, 'agentmux:ready'); ready = fn; }, AGENTMUX: {
       el: (...args) => new Node(...args),
       getJSON: async path => { requests.push(path); assert.equal(path, 'api/board/board'); return {tasks: rows}; },
       registerPanel: (...args) => { registrations.push(args); loader = args[2]; },
@@ -66,7 +66,7 @@ function setup(tasks = []) {
     localStorage: {getItem: () => null, setItem: (...args) => storage.push(args)},
   };
   const shell = fs.readFileSync('dashboard/app.js', 'utf8');
-  vm.runInNewContext(shell.slice(shell.indexOf('async function post('), shell.indexOf('function clock(')) + '\nwindow.CCC.post = post;', ctx);
+  vm.runInNewContext(shell.slice(shell.indexOf('async function post('), shell.indexOf('function clock(')) + '\nwindow.AGENTMUX.post = post;', ctx);
   vm.runInNewContext(source, ctx); ready();
   return {root, requests, posts, registrations, storage, load: () => loader(),
     rows: value => { rows = value; }, response: fn => { response = fn; },

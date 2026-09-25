@@ -252,7 +252,7 @@ let auth = {account: {cli: true, authenticated: true, login: 'octo', name: 'Octo
             login: {state: 'idle', code: null, url: 'https://github.com/login/device',
                     error: null, available: true, command: 'gh auth login --web'}};
 const seen = [];
-global.window = {CCC: {
+global.window = {AGENTMUX: {
   el: (...args) => new Element(...args),
   getJSON: async path => {
     seen.push(path);
@@ -262,7 +262,7 @@ global.window = {CCC: {
   },
   post: async () => ({}),
   registerView: (name, fn, ms) => { assert.equal(name, 'github'); assert.equal(ms, 30000); loader = fn; }
-}, confirm: () => true, addEventListener: (name, fn) => { assert.equal(name, 'ccc:ready'); fn(); }};
+}, confirm: () => true, addEventListener: (name, fn) => { assert.equal(name, 'agentmux:ready'); fn(); }};
 global.document = {getElementById: () => root, createElement: tag => new Element(tag)};
 global.navigator = {clipboard: {writeText: async () => {}}};
 vm.runInThisContext(fs.readFileSync(process.argv[1], 'utf8'));
@@ -289,7 +289,7 @@ function flatten(n) { return [n, ...n.children.flatMap(flatten)]; }
   data = {...data, gh: {state: 'missing', message: 'gh is missing', command: 'sudo apt install gh'}, repos: []};
   await loader();
   assert(flatten(root).some(n => n.text.includes('sudo apt install gh')));
-  window.CCC.getJSON = async () => { throw Error('offline'); };
+  window.AGENTMUX.getJSON = async () => { throw Error('offline'); };
   await loader();
   assert(flatten(root).some(n => n.text.includes('offline')));
 })().catch(e => { console.error(e); process.exitCode = 1; });

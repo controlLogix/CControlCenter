@@ -1,0 +1,38 @@
+Prose and specs.
+
+README.md, docs/CONTRACTS_agents.md, the BRIEF/REVIEW docs and the agent
+definitions rebranded. dashboard/BRIEF_review_ccc.md -> BRIEF_review_agentmux.md,
+REVIEW_CCC_FINDINGS.md -> REVIEW_AGENTMUX_FINDINGS.md.
+
+SPEC_CC.md -> dashboard/SPEC_agentmux.md, and two of its six standing constraints
+were restated because they were INACCURATE, which is worse than absent - an
+inaccurate constraint gets cited to block something it never governed, or ignored
+wholesale once somebody notices it is wrong:
+
+  "Python 3 stdlib only. No pip." The repo does not work that way. It VENDORS:
+  dashboard/vendor/paho is paho-mqtt 2.1.0 from a wheel, sha256 recorded in
+  vendor/README.md, loaded via sys.path at mqtt_monitor.py:56-71. Nine of eleven
+  protocol modules are genuinely stdlib-only. The one real pip dependency is
+  pyserial, lazy at modbus_rtu.py:86-88, degrading to one disabled panel. The rule
+  being protected was "installs from a clone, no network, no pip" - restated as
+  that, with the paho precedent as the pattern for new dependencies.
+
+  "Bind 127.0.0.1 only." True today (server.py:2434) but it is the constraint
+  remote access will change, so the ordering is now written down: the same-origin
+  guard at server.py:1099-1113 derives from the bound port and is the WHOLE of the
+  current authorisation story - the codebase says "Port 8787 is unauthenticated;
+  the Origin allowlist only stops a browser" in three places. Session auth must
+  land BEFORE the bind widens.
+
+Seven dangling SPEC_CC.md references were found and fixed; a rename that leaves
+those is a broken rename.
+
+ACCEPTANCE GREP is clean - no brand residue outside the documented retentions
+(the Rockwell PDF, ccstore/ccboard/cc.db identifiers, cc-dark/cc-light theme
+values, the Jira project key CCC in test_tickets.py, CCC-42 in
+test_coordination.sh, the STATUS_CCC_* files and the .gitignore line that ignores
+them, and the ccc.* fixtures in the migration test).
+
+Gate 6 (clean run, ext4 clone, nothing else on the box):
+  all suites passed - 2039 assertions across 54 suites, every suite reporting a
+  clean tally. Baseline before Phase 0 was '2 suite(s) failed'.

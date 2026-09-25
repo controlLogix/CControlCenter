@@ -1,0 +1,30 @@
+Skip accounting made consistent. See the task body for the correction to my own
+first reading - this was LATENT, not active.
+
+Seven suites used passed = testsRun - failures, which counts a skip as a pass.
+Four sibling suites already subtracted len(result.skipped) - and they are exactly
+the four that call skipTest(). None of the seven skips today, so nothing was being
+miscounted; the defect was that the formula is wrong and the codebase disagreed
+with itself.
+
+Patched: test_agentcli, test_agentdefs, test_enip, test_modbus_poll,
+test_modbus_rtu, test_netscan, test_teamcli.
+
+PROVEN with a deliberate skip injected into a scratch copy:
+  Ran 13 tests
+  SKIP test_linux_ip_neigh (ArpParsing.test_linux_ip_neigh) - deliberate: proving skip accounting
+  passed 12, failed 0
+Before: would have printed "passed 13, failed 0" with no indication.
+
+The SKIP line shape was chosen deliberately: run_tests.sh:182 matches the last
+line against 0:*"failed 0", anchored at the end, so appending ", skipped N" to the
+tally would reclassify every skip as a suite FAILURE. But run_tests.sh:175 already
+greps '^SKIP ' - so this reuses a mechanism that exists.
+
+Shell variant also fixed: test_frontend_agents.sh:12 printed an INDENTED note that
+grep '^SKIP ' cannot match, then reported passed 0, failed 0 - scored as success
+with zero assertions. Now a column-zero SKIP, matching test_e2e.sh's good pattern.
+
+Gate 6 (clean run, ext4 clone, nothing else on the box):
+  all suites passed - 2039 assertions across 54 suites, every suite reporting a
+  clean tally. Baseline before Phase 0 was '2 suite(s) failed'.

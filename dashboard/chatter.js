@@ -108,7 +108,7 @@
     } catch (error) { status.textContent = `Could not refresh chatter: ${error.message}. Previous snapshot retained.`; }
     finally { loading = false; }
   }
-  window.addEventListener('ccc:ready', () => {
-    api = window.CCC; api.registerPanel('status', 'chatter', load, 5000);
+  window.addEventListener('agentmux:ready', () => {
+    api = window.AGENTMUX; api.registerPanel('status', 'chatter', load, 5000);
   }, {once: true});
 })();

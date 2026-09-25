@@ -3,7 +3,7 @@
 
 WHY IT EXISTS. coordination.orchestrator_identity proves orchestrator-ness by the
 ABSENCE of $AGENTMUX_AGENT. Every pane sets that variable, so an orchestrator agent
-running in its own pane - the whole point of driving a run from the CCC - is refused by
+running in its own pane - the whole point of driving a run from agentmux - is refused by
 start, assign, complete and teardown. A negative test is not extensible: there is no
 value you can put in the environment meaning "yes, more so". The warrant is a positive
 credential added as a NARROWING condition on that refusal, never a replacement.
@@ -31,7 +31,7 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 sys.path.insert(0, str(REPO / "taskmgmt"))
 
-AGENT = "ccc-orchestrator"
+AGENT = "agentmux-orchestrator"
 
 
 class WarrantBase(unittest.TestCase):

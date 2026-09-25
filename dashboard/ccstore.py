@@ -1,4 +1,4 @@
-"""Phase 1 Control Center persistence and bounded, read-only queue ingestion."""
+"""Phase 1 agentmux persistence and bounded, read-only queue ingestion."""
 
 from contextlib import contextmanager
 import datetime as dt

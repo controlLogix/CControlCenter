@@ -9,7 +9,7 @@
  * load order, no layout and no box.
  *
  * The specific bug that prompted it: iiot.js, mqtt.js and netscan.js sat BELOW
- * app.js in index.html. app.js dispatches `ccc:ready` synchronously on its last
+ * app.js in index.html. app.js dispatches `agentmux:ready` synchronously on its last
  * line, so all three subscribed to an event that had already fired, and four of
  * the five IIOT panels rendered nothing at all. Every unit test passed.
  *
@@ -48,7 +48,7 @@ async function test(name, fn) {
     failed++;
     failures.push(name);
     console.error('FAIL ' + name, err);
-    console.error('browser diagnostics', await page.evaluate(() => ({url: location.href, ready: !!window.CCC,
+    console.error('browser diagnostics', await page.evaluate(() => ({url: location.href, ready: !!window.AGENTMUX,
       stamp: document.getElementById('boardStamp')?.textContent,
       epics: [...document.querySelectorAll('#boardList details.epic')].map(n => ({key:n.dataset.epic,open:n.open,rows:n.querySelectorAll('.task-row').length}))})).catch(() => 'page unavailable'));
   } finally { clearTimeout(timer); unfinished.delete(name); }
@@ -65,7 +65,7 @@ page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text(
 page.on('pageerror', (e) => consoleErrors.push('pageerror: ' + e.message));
 
 await page.goto(baseURL, { waitUntil: 'load' });
-await page.waitForFunction(() => !!window.CCC, null, { timeout: 15000 });
+await page.waitForFunction(() => !!window.AGENTMUX, null, { timeout: 15000 });
 
 const show = async (view) => {
   await page.click(`.nav-item[data-view="${view}"]`);
@@ -193,7 +193,7 @@ await test('expand all and collapse all drive every card', async () => {
                    [true, true, true, true, true]);
   // The choice has to survive a reload, which is the whole point of the key.
   await page.reload({ waitUntil: 'load' });
-  await page.waitForFunction(() => !!window.CCC);
+  await page.waitForFunction(() => !!window.AGENTMUX);
   await show('iiot');
   assert.deepEqual(await page.$$eval('#viewIiot details.card', ns => ns.map(n => n.open)),
                    [true, true, true, true, true]);
@@ -458,7 +458,7 @@ await test('Status carries four tabs and shows exactly one at a time', async () 
 await test('the chosen Status tab survives a reload', async () => {
   await tab('status', 'journal');
   await page.reload({ waitUntil: 'load' });
-  await page.waitForFunction(() => !!window.CCC);
+  await page.waitForFunction(() => !!window.AGENTMUX);
   await show('status');
   await page.waitForSelector('#viewJournal:not([hidden])');
   assert.equal(await page.getAttribute(
@@ -568,7 +568,7 @@ await test('epics are collapsible cards and the choice survives a reload', async
   assert.deepEqual(await page.$$eval('#boardList details.epic', ns => ns.map(n => n.open)),
                    cards.map(() => false));
   await page.reload({ waitUntil: 'load' });
-  await page.waitForFunction(() => !!window.CCC);
+  await page.waitForFunction(() => !!window.AGENTMUX);
   await show('board');
   await page.waitForSelector('#boardList details.epic');
   assert.deepEqual(await page.$$eval('#boardList details.epic', ns => ns.map(n => n.open)),
@@ -750,7 +750,7 @@ await test('a view script that fails to load is named, and the notice sticks', a
       status: 404, contentType: 'application/json', body: '{"error": "not found"}' }));
   }
   await broken.goto(baseURL, { waitUntil: 'load' });
-  await broken.waitForFunction(() => !!window.CCC, null, { timeout: 15000 });
+  await broken.waitForFunction(() => !!window.AGENTMUX, null, { timeout: 15000 });
   await broken.waitForFunction(
     () => { const b = document.getElementById('banner'); return b && !b.hidden; },
     null, { timeout: 15000 });
@@ -850,7 +850,7 @@ await test('a running agent is marked and a finished one is not', async () => {
   await withRoster(page, [LIVE]);
   // Force the poll that owns the roster, then let the board redraw.
   await page.reload({ waitUntil: 'load' });
-  await page.waitForFunction(() => !!window.CCC);
+  await page.waitForFunction(() => !!window.AGENTMUX);
   await show('board');
   await page.waitForFunction((n) => {
     const node = [...document.querySelectorAll('[data-agent]')].find(e => e.dataset.agent === n);

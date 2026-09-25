@@ -1,0 +1,20 @@
+Agent definitions renamed, with the binding the draft plan flagged.
+
+  git mv .agentmux/agents/ccc-frontend-dev.md      -> agentmux-frontend-dev.md
+  git mv .agentmux/agents/ccc-frontend-reviewer.md -> agentmux-frontend-reviewer.md
+  git mv .agentmux/agents/ccc-orchestrator.md      -> agentmux-orchestrator.md
+
+and in the SAME commit, agentmux.sh:2241 ORCH_DEFAULT_AGENT (plus :2230, :2352)
+and dashboard/test_warrant.py:34. Renaming the files alone breaks orchestration
+SILENTLY - the orchestrator simply fails to resolve its definition.
+
+Verified by running, not by inspection:
+  test_warrant.py   OK
+  test_agentdefs.py passed 15, failed 0
+  test_agentcli.py  passed 5, failed 0
+  ORCH_DEFAULT_AGENT="agentmux-orchestrator" matches agentmux-orchestrator.md
+The three netcap-*.md definitions are untouched.
+
+Gate 6 (clean run, ext4 clone, nothing else on the box):
+  all suites passed - 2039 assertions across 54 suites, every suite reporting a
+  clean tally. Baseline before Phase 0 was '2 suite(s) failed'.

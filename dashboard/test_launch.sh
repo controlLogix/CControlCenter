@@ -4,7 +4,12 @@ set -euo pipefail
 python3 - <<'PY'
 import json, os, pathlib, subprocess, tempfile, concurrent.futures
 repo = pathlib.Path.cwd()
-with tempfile.TemporaryDirectory(prefix='agentmux-launch-') as td:
+# ignore_cleanup_errors: this suite spawns processes through a fake tmux, and a
+# straggler still writing into <root>/home when the context manager unwinds made
+# rmtree raise OSError [Errno 39] Directory not empty - failing a suite whose
+# assertions had all already passed. Observed under concurrent load, 2026-09-25.
+# Leaked files are the residue check's job, not this teardown's.
+with tempfile.TemporaryDirectory(prefix='agentmux-launch-', ignore_cleanup_errors=True) as td:
     root = pathlib.Path(td)
     harness = root / 'agentmux.sh'
     harness.write_text((repo / 'agentmux.sh').read_text())

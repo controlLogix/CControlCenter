@@ -2,7 +2,7 @@
 
 WHY THIS FILE EXISTS
 --------------------
-The Control Center board stored a title, a status, an agent and an integer primary
+The agentmux board stored a title, a status, an agent and an integer primary
 key. That is a list, not a task management system. An integer primary key is not an
 identifier anybody can say out loud, write in a commit message, or put in a branch
 name - it is a row number, it is not stable across a restore from backup, and two
@@ -17,8 +17,8 @@ having. Same prefixes, same padding, same status vocabulary, same gate semantics
 WHAT IS DELIBERATELY DIFFERENT
 ------------------------------
 Upstream persists one markdown file per entity and derives an index. Here the store
-is SQLite in `cc.db`, because that is what every existing Control Center endpoint,
-the CLI and the test suites already read, and because `dashboard/SPEC_CC.md` binds
+is SQLite in `cc.db`, because that is what every existing agentmux endpoint,
+the CLI and the test suites already read, and because `dashboard/SPEC_agentmux.md` binds
 this project to the Python 3 standard library with no pip. So:
 
   * `nextId` reads a directory for max+1 under a file lock. Here a `board_counters`
@@ -121,7 +121,7 @@ DEFAULT_CONFIG = {
     "teamMaxWorkers": 2,
     "teamRequireApproval": True,
     "dashboardMayHire": False,
-    # ── the CCC orchestrator ─────────────────────────────────────────────────
+    # ── agentmux orchestrator ─────────────────────────────────────────────────
     #
     # OFF by default, for the same reason dispatchEnabled is: an LLM that opens runs,
     # spawns agents and closes cards is not something a fresh checkout should start
@@ -298,7 +298,7 @@ def columns(db, table):
 
 
 def migrate(db):
-    """Bring a Control Center database up to the task-management schema.
+    """Bring a agentmux database up to the task-management schema.
 
     Idempotent and safe on an empty database: every statement is IF NOT EXISTS or
     guarded by a PRAGMA read, so this runs on every connection the way the base

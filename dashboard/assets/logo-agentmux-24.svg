@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-  <title>Controls Control Center PLC</title>
+  <title>agentmux</title>
   <rect x="3" y="2.5" width="18" height="19" rx="1.5"/>
   <path d="M5.5 5h2.5v2.5H5.5zM10.75 5h2.5v2.5h-2.5zM16 5h2.5v2.5H16zM3 10h18M6 16.5h12V19H6z"/>
   <g stroke="#ff9b4c">

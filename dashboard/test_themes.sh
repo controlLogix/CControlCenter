@@ -54,19 +54,19 @@ function page() {
   return {context,style,storage,term,calls,apply:id=>context.applyTheme(id)};
 }
 test('all themes apply sequentially, update selector, persistence and terminal',()=>{
-  const p=page();for(const theme of data.themes){p.apply(theme.id);for(const k of data.tokens)assert.equal(p.style[k],theme.tokens[k]);assert.equal(p.context.els.themeSelect.value,theme.id);assert.equal(p.storage['ccc.theme'],theme.id);assert.equal(p.style.colorScheme,theme.dark?'dark':'light');assert.equal(p.term.options.theme.background,theme.tokens['--panel-2']);assert.equal(p.context.els.themeNote.classList.warn,false);}
-  p.apply('unknown');assert.equal(p.storage['ccc.theme'],data.themes[0].id);
+  const p=page();for(const theme of data.themes){p.apply(theme.id);for(const k of data.tokens)assert.equal(p.style[k],theme.tokens[k]);assert.equal(p.context.els.themeSelect.value,theme.id);assert.equal(p.storage['agentmux.theme'],theme.id);assert.equal(p.style.colorScheme,theme.dark?'dark':'light');assert.equal(p.term.options.theme.background,theme.tokens['--panel-2']);assert.equal(p.context.els.themeNote.classList.warn,false);}
+  p.apply('unknown');assert.equal(p.storage['agentmux.theme'],data.themes[0].id);
 });
 for(const token of data.tokens) test('missing '+token+' is named and rejects the whole theme',()=>{
   const p=page();p.apply('high-contrast');const before=JSON.stringify(p.style);
   const broken=structuredClone(data.themes[0]);broken.id='incomplete-fixture';delete broken.tokens[token];p.context.input.themes.push(broken);p.context.els.themeSelect.value=broken.id;p.apply(broken.id);
-  assert.ok(p.context.els.themeNote.textContent.includes('missing '+token));assert.ok(p.context.els.themeNote.textContent.includes(broken.id));assert.equal(p.context.els.themeNote.classList.warn,true);assert.equal(JSON.stringify(p.style),before);assert.equal(p.storage['ccc.theme'],'high-contrast');assert.equal(p.context.els.themeSelect.value,'high-contrast');assert.deepEqual(p.calls,['high-contrast']);
+  assert.ok(p.context.els.themeNote.textContent.includes('missing '+token));assert.ok(p.context.els.themeNote.textContent.includes(broken.id));assert.equal(p.context.els.themeNote.classList.warn,true);assert.equal(JSON.stringify(p.style),before);assert.equal(p.storage['agentmux.theme'],'high-contrast');assert.equal(p.context.els.themeSelect.value,'high-contrast');assert.deepEqual(p.calls,['high-contrast']);
 });
 for(const [token,value] of [['--nav-w','#ffffff'],['--info','url(//example.invalid/pixel)'],['--series-1','image-set(url(x))']]) test('rejected '+token+' is named, cannot change layout or poison palette',()=>{
-  const p=page();p.apply('cc-light');const before=JSON.stringify(p.style);const broken=structuredClone(data.themes[0]);broken.id='rejected-fixture';broken.tokens[token]=value;p.context.input.themes.push(broken);p.apply(broken.id);assert.ok(p.context.els.themeNote.textContent.includes('rejected '+token));assert.equal(JSON.stringify(p.style),before);assert.equal(p.storage['ccc.theme'],'cc-light');p.apply('high-contrast');assert.equal(p.context.els.themeNote.classList.warn,false);assert.equal(p.storage['ccc.theme'],'high-contrast');
+  const p=page();p.apply('cc-light');const before=JSON.stringify(p.style);const broken=structuredClone(data.themes[0]);broken.id='rejected-fixture';broken.tokens[token]=value;p.context.input.themes.push(broken);p.apply(broken.id);assert.ok(p.context.els.themeNote.textContent.includes('rejected '+token));assert.equal(JSON.stringify(p.style),before);assert.equal(p.storage['agentmux.theme'],'cc-light');p.apply('high-contrast');assert.equal(p.context.els.themeNote.classList.warn,false);assert.equal(p.storage['agentmux.theme'],'high-contrast');
 });
 test('incomplete first selection writes no partial palette',()=>{
- const p=page();delete p.context.input.themes[0].tokens['--info'];p.apply('cc-dark');assert.equal(p.style['--bg'],undefined);assert.equal(p.storage['ccc.theme'],undefined);assert.equal(p.context.els.themeSelect.value,'');
+ const p=page();delete p.context.input.themes[0].tokens['--info'];p.apply('cc-dark');assert.equal(p.style['--bg'],undefined);assert.equal(p.storage['agentmux.theme'],undefined);assert.equal(p.context.els.themeSelect.value,'');
 });
 } catch(e) { failed++; console.log('FAIL: suite setup — '+e.stack); }
 console.log(`passed ${passed}, failed ${failed}`);process.exitCode=failed?1:0;

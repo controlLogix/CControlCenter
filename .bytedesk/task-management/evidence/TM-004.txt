@@ -1,0 +1,30 @@
+localStorage key migration - the dangerous one.
+
+12 keys renamed ccc.* -> agentmux.*, 30 literals across 8 files. These are
+persisted OPERATOR data (theme, board layout, collapse state, current view), so
+a plain rename wipes them on next load with no error and nothing to roll back to.
+
+A read-through migration was added to the INLINE HEAD SCRIPT in index.html, not
+app.js: app.js is the LAST script on the page (index.html:556, after netscan.js
+and runs.js), so a migration there would not provably run before those modules
+read their own keys. The inline script is first by construction.
+
+The theme VALUES cc-dark / cc-light are deliberately NOT renamed. They are stored
+values, not keys - renaming them resets every operator's theme even after a
+correct key migration.
+
+New suite dashboard/test_frontend_storage.sh runs the REAL block extracted from
+index.html (not a copy, which would drift), 7 tests:
+  ok  every remembered key is carried by the migration
+  ok  operator state is carried across and the old keys are cleared
+  ok  the stored theme value cc-dark is preserved verbatim
+  ok  running the migration twice is a no-op
+  ok  a value already under the new name is never clobbered by a stale one
+  ok  a fresh browser stores nothing
+  ok  storage that throws does not break boot
+It also asserts the block precedes every <script src>, and that all 12 keys are
+carried - which is what catches a 13th key added later.
+
+Gate 6 (clean run, ext4 clone, nothing else on the box):
+  all suites passed - 2039 assertions across 54 suites, every suite reporting a
+  clean tally. Baseline before Phase 0 was '2 suite(s) failed'.

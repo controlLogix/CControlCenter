@@ -51,11 +51,12 @@
       }
     }
   },
+  "boardId": "controllogix/ccontrolcenter",
   "ntfy": {},
   "plugin": {},
   "labels": {},
   "dispatch": {
     "enabled": false
   },
-  "activeEpic": "EP-001"
+  "activeEpic": "EP-002"
 }

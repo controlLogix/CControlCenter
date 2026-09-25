@@ -1237,7 +1237,7 @@ function autoCols(paneCount) {
 //
 // That is the whole point: a resize still keeps the TEXT readable (applyFit re-runs off
 // each pane's own size), but it never reshuffles a layout you arranged by hand.
-const PLACE_KEY = 'ccc.panePlacement';
+const PLACE_KEY = 'agentmux.panePlacement';
 const MIN_PANE_W = 240;
 const MIN_PANE_H = MIN_USEFUL_CELL;
 const CANVAS_PAD = 12;
@@ -1847,7 +1847,7 @@ async function loadResources(force) {
   }
 }
 
-const VIEW_KEY = 'ccc.view';
+const VIEW_KEY = 'agentmux.view';
 
 // What each view needs loaded, and how often to refresh it while visible. A table
 // rather than a switch, so a new view is one entry.
@@ -1886,7 +1886,7 @@ const VIEW_KEY = 'ccc.view';
 // change to what is recorded - two people on the same dashboard can watch different
 // slices of the same truth, and nobody can hide a fault from anyone else by
 // unticking a box.
-const FEED_KEY = 'ccc.feed.v1';
+const FEED_KEY = 'agentmux.feed.v1';
 const FEED_SOURCE_LABELS = {
   chatter:  'agent chatter',
   journal:  'journal',
@@ -2090,7 +2090,7 @@ const VIEW_POLL_MS = { settings: 20000 };
 // registerPanel call.
 const VIEW_TABS = {};          // view -> { order, panels, active, list }
 const VIEW_CARDS = {};         // view -> [{ loader, pollMs, timer }]
-const TAB_KEY = 'ccc.tab.v1';
+const TAB_KEY = 'agentmux.tab.v1';
 
 function panelNode(name) {
   return document.getElementById('view' + name[0].toUpperCase() + name.slice(1));
@@ -2359,8 +2359,8 @@ for (const btn of els.navItems) {
 // must declare the full token set: a half-defined theme that silently inherits
 // is harder to debug than one that fails visibly, so missing tokens are named.
 
-const THEME_KEY = 'ccc.theme';
-const IMPORTED_THEMES_KEY = 'ccc.importedThemes';
+const THEME_KEY = 'agentmux.theme';
+const IMPORTED_THEMES_KEY = 'agentmux.importedThemes';
 let builtInThemeIds = new Set();
 
 // A token value must be a COLOUR, and only a colour.
@@ -2699,9 +2699,9 @@ function exportStatus() {
   if (!rows.length) return;
   const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
   if (els.statusExportAs && els.statusExportAs.value === 'csv') {
-    download(`ccc-${tab}-${stamp}.csv`, toCSV(rows), 'text/csv;charset=utf-8');
+    download(`agentmux-${tab}-${stamp}.csv`, toCSV(rows), 'text/csv;charset=utf-8');
   } else {
-    download(`ccc-${tab}-${stamp}.json`,
+    download(`agentmux-${tab}-${stamp}.json`,
              JSON.stringify({ tab, exported_at: new Date().toISOString(), rows }, null, 2),
              'application/json');
   }
@@ -2772,7 +2772,7 @@ async function loadQueue() {
 // else, so it cannot be driven by loadQueue() - that only runs when the queue is
 // open. /api/messages?since= filters strictly after the timestamp, so the unseen
 // count is just the length of that response.
-const SEEN_KEY = 'ccc.queueSeenAt';
+const SEEN_KEY = 'agentmux.queueSeenAt';
 let queueSeenAt = null;
 try { queueSeenAt = localStorage.getItem(SEEN_KEY); } catch (_) {}
 
@@ -2923,8 +2923,8 @@ async function loadDispatch() {
 // gives keyboard-free dragging and a drop target for free; cards move by their own
 // handle with pointer events, so grabbing a card never starts a task drag and
 // clicking the summary still just collapses the card.
-const BOARD_PLACE_KEY = 'ccc.boardPlacements.v1';
-const BOARD_FREE_KEY = 'ccc.boardFree';
+const BOARD_PLACE_KEY = 'agentmux.boardPlacements.v1';
+const BOARD_FREE_KEY = 'agentmux.boardFree';
 let boardFree = false;
 try { boardFree = localStorage.getItem(BOARD_FREE_KEY) === '1'; } catch (_) {}
 
@@ -3096,10 +3096,10 @@ async function loadBoard() {
         keyLink.setAttribute('role', 'button');
         keyLink.setAttribute('tabindex', '0');
         keyLink.setAttribute('aria-label', `Open ${t.key} details`);
-        keyLink.addEventListener('click', () => window.CCCOpenCard?.(t.key, loadBoard));
+        keyLink.addEventListener('click', () => window.AGENTMUXOpenCard?.(t.key, loadBoard));
         keyLink.addEventListener('keydown', ev => {
           if (ev.key === 'Enter' || ev.key === ' ') {
-            ev.preventDefault(); window.CCCOpenCard?.(t.key, loadBoard);
+            ev.preventDefault(); window.AGENTMUXOpenCard?.(t.key, loadBoard);
           }
         });
         r.appendChild(keyLink);
@@ -3399,7 +3399,7 @@ async function loadTickets(force) {
 // Collapsed/expanded state, per provider and per method, so a long list stays
 // navigable and reopening Settings does not undo how you left it. <details> gives
 // keyboard support and correct semantics for free - no ARIA to get wrong.
-const OPEN_KEY = 'ccc.authOpen';
+const OPEN_KEY = 'agentmux.authOpen';
 
 // A MAP of key -> boolean, not a set of open keys. With a set there is no way to
 // distinguish "collapsed by the operator" from "never seen", so a newly added
@@ -3852,7 +3852,7 @@ window.addEventListener('keydown', (e) => {
 // The view scripts load first and subscribe once to this synchronous event.
 // Register before restoring the saved view, including on a reload into a tab.
 //
-// ORDER MATTERS. collectTabs() must run before ccc:ready, because registerPanel
+// ORDER MATTERS. collectTabs() must run before agentmux:ready, because registerPanel
 // refuses a view it has not collected - and the scripts that call it are already
 // loaded and waiting on that event. applyBuiltinPanels() then fills in the panels
 // app.js owns itself.
@@ -3860,12 +3860,12 @@ initCollapsibles();
 collectTabs();
 applyBuiltinPanels();
 
-window.CCC = { el, getJSON, post, say, deleteButton, collapsible, settingEditor,
+window.AGENTMUX = { el, getJSON, post, say, deleteButton, collapsible, settingEditor,
                registerView, registerPanel, registerCard, publishRows, download,
                stateChip, initCollapsibles,
                // Live-agent marking, for the views drawn by their own scripts.
                markAgent, refreshLiveMarks, isLiveAgent, focusAgent };
-window.dispatchEvent(new Event('ccc:ready'));
+window.dispatchEvent(new Event('agentmux:ready'));
 
 // A VIEW SCRIPT THAT DID NOT LOAD MUST SAY SO.
 //
@@ -3880,12 +3880,12 @@ window.dispatchEvent(new Event('ccc:ready'));
 // for scripts that come back as a JSON 404, which the browser refuses to execute.
 // The inline listener at the top of index.html records exactly that, and this turns
 // it into the one sentence that names the problem and the fix.
-if (Array.isArray(window.CCC_SCRIPT_ERRORS) && window.CCC_SCRIPT_ERRORS.length) {
-  const missing = [...new Set(window.CCC_SCRIPT_ERRORS)];
+if (Array.isArray(window.AGENTMUX_SCRIPT_ERRORS) && window.AGENTMUX_SCRIPT_ERRORS.length) {
+  const missing = [...new Set(window.AGENTMUX_SCRIPT_ERRORS)];
   holdBanner(`Some panels will be empty: ${missing.join(', ')} did not load. `
     + `This usually means the dashboard server is an older process than the files `
     + `on disk — restart it (dashboard/restart.sh), then reload this page.`);
-  console.error('CCC: view scripts failed to load:', missing.join(', '));
+  console.error('agentmux: view scripts failed to load:', missing.join(', '));
 }
 
 if (!window.Terminal) {

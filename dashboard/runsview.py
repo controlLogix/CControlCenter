@@ -44,7 +44,7 @@ class ReviewError(Exception):
 # An orchestrating AGENT can verify every job and still be wrong about whether the work
 # was what was wanted. A reviewer verdict answers "was the job done"; it cannot answer
 # "was that the right job", because the same orchestrator wrote the brief the reviewer
-# is checking against. So a run driven by the CCC orchestrator stops here and waits for
+# is checking against. So a run driven by the agentmux orchestrator stops here and waits for
 # a person, who reads the diff and says yes.
 #
 # The approval PINS BYTES. run.digest() exists because a verdict naming files without

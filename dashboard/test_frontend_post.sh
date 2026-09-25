@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
+if ! command -v node >/dev/null 2>&1; then
+  post_node_dir=$(ls -d "$HOME"/.nvm/versions/node/*/bin 2>/dev/null | sort -V | tail -1 || true)
+  [ -z "$post_node_dir" ] || export PATH="$post_node_dir:$PATH"
+fi
 node <<'JS'
 const assert = require('node:assert/strict'), fs = require('node:fs'), vm = require('node:vm');
 const source = fs.readFileSync('dashboard/app.js', 'utf8');

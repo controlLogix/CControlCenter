@@ -37,7 +37,7 @@
   const root = document.getElementById('viewRuns');
   const badge = document.getElementById('badgeRuns');
 
-  const PREF_KEY = 'ccc.runs.v1';
+  const PREF_KEY = 'agentmux.runs.v1';
   function prefs() {
     try { return JSON.parse(localStorage.getItem(PREF_KEY) || '{}') || {}; }
     catch (_) { return {}; }
@@ -461,8 +461,8 @@
   // launders a failed review into a closed run, which is exactly what run.py exists
   // to prevent.
   const ORCH_SETTINGS = [
-    ['orchestratorEnabled', 'Allow a CCC orchestrator (true/false)', 'bool'],
-    ['orchestratorAgent', 'Agent definition to use (blank = ccc-orchestrator)', 'name'],
+    ['orchestratorEnabled', 'Allow an agentmux orchestrator (true/false)', 'bool'],
+    ['orchestratorAgent', 'Agent definition to use (blank = agentmux-orchestrator)', 'name'],
     ['orchestratorScope', 'Scope: goal, epic or queue', 'choice', ['goal', 'epic', 'queue']],
     ['orchestratorNotify', 'Desktop notification on escalation (true/false)', 'bool'],
     ['orchestratorNotifyCommand', 'Command to run for notices (blank = none)', 'text'],
@@ -555,8 +555,8 @@
     root.appendChild(how);
   }
 
-  window.addEventListener('ccc:ready', () => {
-    api = window.CCC;
+  window.addEventListener('agentmux:ready', () => {
+    api = window.AGENTMUX;
     api.registerView('runs', refresh, 5000);
     api.registerCard('settings', loadOrchCard, 0);
     // NOT fired at boot. A request issued while the page is still loading competes

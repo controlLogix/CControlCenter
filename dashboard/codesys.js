@@ -7,7 +7,7 @@
   const warning = 'apt purge does NOT clear the runtime password. Device user management under /var/opt/codesys survives package removal and reinstall.';
   const labels = {start: 'Start', stop: 'Stop', reset: 'Reset', boot: 'Create boot application', install: 'Install runtime', update: 'Update runtime'};
   function base(root) {
-    const {el} = window.CCC;
+    const {el} = window.AGENTMUX;
     root.replaceChildren();
     // No heading: this is a card inside IIOT now, and the card's own <summary>
     // already names it. A second title inside the body just reads as a repeat.
@@ -35,18 +35,18 @@
     busy = true;
     const root = document.getElementById('viewCodesys');
     base(root);
-    root.appendChild(window.CCC.el('p', '', 'Preparing action; verifying target identity and version…'));
+    root.appendChild(window.AGENTMUX.el('p', '', 'Preparing action; verifying target identity and version…'));
     const path = action === 'boot' ? '/api/board/bootapp' : '/api/board/plcstate';
     const body = {target: target.id, actor: actorValue, action, phase: 'prepare'};
     if (action === 'reset') body.reset_type = resetType;
     try {
-      const prepared = await window.CCC.post(path, body);
+      const prepared = await window.AGENTMUX.post(path, body);
       if (!prepared.token || !prepared.confirmation) throw Error('No valid confirmation returned; action not sent.');
       if (!window.confirm(prepared.confirmation)) {
         notice = 'Cancelled; no runtime change requested.';
       } else {
-        root.appendChild(window.CCC.el('p', '', 'Executing confirmed operation. Do not retry if the connection is interrupted.'));
-        const result = await window.CCC.post(path, {...body, phase: 'execute', token: prepared.token, confirm: true});
+        root.appendChild(window.AGENTMUX.el('p', '', 'Executing confirmed operation. Do not retry if the connection is interrupted.'));
+        const result = await window.AGENTMUX.post(path, {...body, phase: 'execute', token: prepared.token, confirm: true});
         notice = result.message || 'Operation completed; refresh target state.';
       }
     } catch (err) {
@@ -56,14 +56,14 @@
       // Do not make another SSH connection after failure or cancellation. Discard
       // pre-action states, and let the operator explicitly refresh the target.
       base(root);
-      root.appendChild(window.CCC.el('p', 'muted', 'Target state is unknown until you refresh.'));
+      root.appendChild(window.AGENTMUX.el('p', 'muted', 'Target state is unknown until you refresh.'));
     }
   }
   async function load() {
     if (busy) return;
     busy = true;
     const root = document.getElementById('viewCodesys');
-    const {el, getJSON} = window.CCC;
+    const {el, getJSON} = window.AGENTMUX;
     base(root);
     const pending = el('p', 'muted', 'Checking targets… previous state is not current.');
     root.appendChild(pending);
@@ -123,7 +123,7 @@
   // must not quietly reach out to five PLCs. So the card loads when it is OPENED,
   // and opening it is the operator asking - the same contract the panel has always
   // had with its Refresh button.
-  window.addEventListener('ccc:ready', () => {
+  window.addEventListener('agentmux:ready', () => {
     const card = document.querySelector('details[data-collapse-key="iiot:codesys"]');
     if (!card) return;
     let loaded = false;
@@ -133,6 +133,6 @@
       load();
     };
     card.addEventListener('toggle', maybe);
-    window.CCC.registerCard('iiot', maybe, 0);
+    window.AGENTMUX.registerCard('iiot', maybe, 0);
   }, {once: true});
 })();

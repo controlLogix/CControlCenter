@@ -1015,7 +1015,7 @@ def modbus_service():
 
 
 def journal_event(subject, event):
-    """Append one operational event to the Control Center journal.
+    """Append one operational event to the agentmux journal.
 
     Shared by the field services (MQTT, the network scanner, PROFINET imports and
     GitHub writes) so every side effect this dashboard causes lands in the same
@@ -1206,7 +1206,7 @@ class Handler(BaseHTTPRequestHandler):
         except ccstore.sqlite3.IntegrityError:
             self.send_json(409, {"error": "record conflicts with existing data"})
         except (ccstore.sqlite3.Error, OSError, RuntimeError):
-            self.send_json(503, {"error": "Control Center storage unavailable"})
+            self.send_json(503, {"error": "agentmux storage unavailable"})
 
     # ── the task-management surface ──────────────────────────────────────────
     #
@@ -1333,7 +1333,7 @@ class Handler(BaseHTTPRequestHandler):
         except ccstore.sqlite3.IntegrityError:
             self.send_json(409, {"error": "record conflicts with existing data"})
         except (ccstore.sqlite3.Error, OSError, RuntimeError):
-            self.send_json(503, {"error": "Control Center storage unavailable"})
+            self.send_json(503, {"error": "agentmux storage unavailable"})
 
     def board_read(self, db, op, params):
         if op == "targets":

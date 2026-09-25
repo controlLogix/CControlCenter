@@ -27,6 +27,11 @@ set -u
 # shellcheck source=/dev/null
 . dashboard/testlib.sh
 
+if ! command -v node >/dev/null 2>&1; then
+  frontend_node_dir=$(ls -d "$HOME"/.nvm/versions/node/*/bin 2>/dev/null | sort -V | tail -1 || true)
+  [ -z "$frontend_node_dir" ] || export PATH="$frontend_node_dir:$PATH"
+fi
+
 APP=dashboard/app.js
 [ -f "$APP" ] || { echo "missing $APP" >&2; exit 2; }
 
@@ -129,7 +134,7 @@ echo '--- app.js still parses ---'
 if command -v node >/dev/null 2>&1; then
   if node --check "$APP" 2>/dev/null; then ok 'node --check passes'; else bad 'app.js is not valid JavaScript'; fi
 else
-  echo '  (node not on PATH; run under bash -ic for nvm to parse-check app.js)'
+  bad 'node not on PATH even after nvm discovery - app.js was never parse-checked'
 fi
 
 finish

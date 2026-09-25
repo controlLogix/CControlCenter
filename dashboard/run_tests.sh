@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run every CCC suite. From the repo root, inside WSL:
+# Run every agentmux suite. From the repo root, inside WSL:
 #   bash <(tr -d '\r' < dashboard/run_tests.sh)
 #
 # Runs the server on a disposable AGENTMUX_HOME at the usual port, restores the
@@ -125,7 +125,7 @@ if command -v tmux >/dev/null 2>&1; then
     tr -d '\r' < agentmux.sh > "$HARNESS"
     export AGENTMUX_REPO="${AGENTMUX_REPO:-$PWD}"
     export AGENTMUX_NO_COURIER=1
-    for agent in ccc-selftest-$$-1 ccc-selftest-$$-2; do
+    for agent in agentmux-selftest-$$-1 agentmux-selftest-$$-2; do
       # 200>&- because the tmux SERVER this starts is a daemon that inherits our fd
       # table and outlives us. Without it a run killed before its EXIT handler left
       # tmux holding the single-instance lock, and every later run refused to start.
@@ -258,6 +258,14 @@ run test_pn_dcp.py python3 dashboard/test_pn_dcp.py
 run test_ecat_diag.py python3 dashboard/test_ecat_diag.py
 run test_snapshot.py python3 dashboard/test_snapshot.py
 run test_mqtt.py  python3 dashboard/test_mqtt.py
+# netscan internals test_field_panels.py does not reach: the ARP parsers, the
+# WSL fallback, and the never-fatal contract. Added after a 9p EIO stat inside
+# neighbour_table killed whole scans on ~60% of e2e runs.
+run test_netscan.py python3 dashboard/test_netscan.py
+# The localStorage key migration, run against the real block in index.html.
+# These keys are persisted operator state; renaming them without carrying the
+# values across wipes themes and board layout silently.
+run test_frontend_storage.sh bash /dev/fd/17 17< <(tr -d '\r' < dashboard/test_frontend_storage.sh)
 # The IIOT field services. Self-contained: its own HTTP server on an ephemeral port
 # and its own throwaway AGENTMUX_HOME, so it neither needs nor disturbs the shared
 # server this suite brought up.

@@ -483,8 +483,8 @@
     }
   }
 
-  window.addEventListener('ccc:ready', () => {
-    api = window.CCC;
+  window.addEventListener('agentmux:ready', () => {
+    api = window.AGENTMUX;
     api.registerCard('iiot', refresh, 1000);
   }, {once: true});
 })();

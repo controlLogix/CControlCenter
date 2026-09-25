@@ -176,8 +176,8 @@
     }
   }
 
-  window.addEventListener('ccc:ready', () => {
-    api = window.CCC;
+  window.addEventListener('agentmux:ready', () => {
+    api = window.AGENTMUX;
     // A second, every time the card's view is open - and NOTHING while it is not.
     // The old version recursed on a 100ms setTimeout that never stopped, so the
     // page kept polling a PLC from a tab nobody was looking at.
@@ -394,8 +394,8 @@
     }
   }
 
-  window.addEventListener('ccc:ready', () => {
-    api = window.CCC;
+  window.addEventListener('agentmux:ready', () => {
+    api = window.AGENTMUX;
     // No poll. The observed side only changes when somebody imports, and the
     // expected side only when somebody saves - re-fetching on a timer would imply
     // a liveness this panel does not have.

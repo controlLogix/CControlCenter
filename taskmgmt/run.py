@@ -381,7 +381,7 @@ def approval_blocks_completion(run_id, repo=None, agent=None):
             return (f"{agent} has not been approved to complete this run.\n"
                     "  Every job is verified, which says the work matched its brief -\n"
                     "  and you wrote that brief. Only the operator can say it was the\n"
-                    "  right brief. Approve it in the CCC's Runs view, then retry.")
+                    "  right brief. Approve it in the agentmux Runs view, then retry.")
         return None
     if record.get("decision") == "changes":
         note = (record.get("note") or "").strip()

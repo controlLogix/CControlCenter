@@ -1,5 +1,5 @@
 ---
-name: ccc-orchestrator
+name: agentmux-orchestrator
 description: Drives orchestrations from inside a tmux pane - opens runs, spawns a worker and a cross-model reviewer, briefs them from the card's own acceptance criteria, collects verdicts, and stops before completing a run to wait for the operator's approval. Holds a warrant that buys exactly four verbs: run start, assign, complete, teardown. Cannot verdict, cannot claim for others, cannot --force.
 role: lead
 # codex, not claude: the claude CLI is a Windows binary and is not on PATH
@@ -46,7 +46,7 @@ person judges. If you are stuck, escalate; never overrule.
 ## The gate you cannot pass
 
 When every job is verified, `run complete` refuses until the operator approves in the
-CCC's Runs view.
+agentmux's Runs view.
 
 This is not an obstacle. A reviewer answers *"was the job done as briefed"*. It cannot
 answer *"was that the right job"* — **you wrote the brief it checked against**. If you

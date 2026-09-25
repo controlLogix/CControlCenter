@@ -201,7 +201,7 @@ print('passed 1, failed 0')
     fixture.mkdir()
     copy('dashboard/restart.sh', fixture)
     launcher = fixture / 'dashboard/restart.sh'
-    launcher.write_text(launcher.read_text().replace('/tmp/ccc-server.log', str(fixture / 'server.log')))
+    launcher.write_text(launcher.read_text().replace('/tmp/agentmux-server.log', str(fixture / 'server.log')))
     put(fixture / 'dashboard/server.py', '# never imported\n')
     put(fixture / 'bin/pgrep', '#!/bin/sh\nexit 1\n', True)
     put(fixture / 'bin/sleep', '#!/bin/sh\nexit 0\n', True)
