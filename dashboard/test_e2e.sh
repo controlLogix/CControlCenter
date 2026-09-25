@@ -35,8 +35,17 @@ find_playwright() {
     printf '%s' "$PLAYWRIGHT_DIR"
     return 0
   fi
+  # A LOCAL install first, and it has to be first. The npx caches below can hold a
+  # WINDOWS playwright build - this repo lives on /mnt/c - whose firefox binary cannot
+  # be launched from WSL. Finding that one made the suite fail with "Executable doesn't
+  # exist" rather than skip, which reads like a broken test rather than a missing
+  # browser. ~/pw is the linux install; prefer it.
+  if [ -d "$HOME/pw/node_modules/playwright" ]; then
+    printf '%s' "$HOME/pw/node_modules/playwright"
+    return 0
+  fi
   local cache
-  for cache in "${LOCALAPPDATA:-}/npm-cache/_npx" "$HOME/.npm/_npx"; do
+  for cache in "$HOME/.npm/_npx" "${LOCALAPPDATA:-}/npm-cache/_npx"; do
     [ -d "$cache" ] || continue
     local found
     found=$(find "$cache" -maxdepth 3 -type d -name playwright 2>/dev/null | head -1)
@@ -53,8 +62,10 @@ PW=$(find_playwright) || {
 SKIP test_e2e: no Playwright installation found.
 
   Install one, then re-run:
-      npx -y @playwright/mcp@latest --help     # unpacks playwright into the npm cache
-      npx playwright install firefox           # fetches the browser itself
+      mkdir -p ~/pw && cd ~/pw && npm init -y && npm install playwright
+      npx playwright install firefox           # the LINUX browser
+
+  A Windows playwright under /mnt/c will be found but cannot launch from WSL.
 
   Or point at an existing one:
       PLAYWRIGHT_DIR=/path/to/node_modules/playwright bash dashboard/test_e2e.sh

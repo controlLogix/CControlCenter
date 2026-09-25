@@ -548,6 +548,11 @@ await test('dragging a task onto another epic refiles it for real', async () => 
   const epics = await page.$$eval('#boardList details.epic', ns => ns.map(n => n.dataset.epic));
   const [from, to] = epics.filter(Boolean);
   assert.ok(from && to, 'need two epics with keys');
+  // Both open before touching them. A collapsed epic renders no .task-row and has no
+  // bounding box to drop onto, so this waited 30s for something that could not appear.
+  // Which epics are open is remembered in localStorage and driven by the collapse-all
+  // test above - a sibling's UI state, which no test should depend on.
+  await page.$$eval('#boardList details.epic', ns => ns.forEach(n => { n.open = true; }));
   await page.fill(`#boardList details.epic[data-epic="${from}"] input[placeholder="new task"]`,
                   'E2E draggable task');
   await page.click(`#boardList details.epic[data-epic="${from}"] button:has-text("add task")`);
@@ -714,7 +719,17 @@ async function withRoster(target, names) {
       cwd: '/tmp', perms: 'UNRESTRICTED', started: new Date().toISOString(),
     }));
     body.tmux_server = true;
-    await route.fulfill({ response, json: body });
+    // Fulfilled EXPLICITLY, not as `{response, json}`. Passing both was accepted by
+    // Playwright 1.62 and silently stopped overriding the body in 1.63, so these four
+    // tests passed against the Windows package in the npx cache and timed out against
+    // the Linux one - a version difference masquerading as a product bug. The body is
+    // being replaced wholesale anyway; the fetched response is only here so the stub
+    // keeps the real payload's shape if it gains fields.
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(body),
+    });
   });
 }
 
@@ -723,13 +738,26 @@ await test('a running agent is marked and a finished one is not', async () => {
   await show('board');
   await tab('board', 'boardtasks');
   const epic = await page.$eval('#boardList details.epic[data-epic]', (n) => n.dataset.epic);
+  // OPEN IT FIRST, and wait inside ITS OWN subtree below.
+  //
+  // A collapsed epic renders no task rows, so the old whole-board textContent check
+  // could never see the name and timed out at 15s with nothing to say. Whether it was
+  // open depended on what an earlier test had left in localStorage - the collapse-all
+  // test drives exactly that, three tests earlier - which made this pass on one
+  // machine and hang on another. A test that reads a sibling's UI state is not
+  // testing what it claims to.
+  await page.$eval(`#boardList details.epic[data-epic="${epic}"]`, (n) => { n.open = true; });
   for (const who of [LIVE, DEAD]) {
     await page.fill(`#boardList details.epic[data-epic="${epic}"] input[placeholder="new task"]`,
                     `task for ${who}`);
     await page.fill(`#boardList details.epic[data-epic="${epic}"] input[placeholder="agent"]`, who);
     await page.click(`#boardList details.epic[data-epic="${epic}"] button:has-text("add task")`);
-    await page.waitForFunction((n) => document.querySelector('#boardList')?.textContent.includes(n),
-                              who, { timeout: 15000 });
+    await page.waitForFunction(
+      ([key, n]) => {
+        const card = document.querySelector(`#boardList details.epic[data-epic="${key}"]`);
+        if (card && !card.open) card.open = true;   // a redraw can re-collapse it
+        return card?.textContent.includes(n);
+      }, [epic, who], { timeout: 25000 });
   }
   await withRoster(page, [LIVE]);
   // Force the poll that owns the roster, then let the board redraw.
@@ -849,6 +877,14 @@ await test('an attempt count is always shown against its ceiling', async () => {
 });
 
 await test('worker and reviewer cells are tagged for the live-agent marking', async () => {
+  // Open every run card and wait for its job table. A card's open state is remembered
+  // in localStorage, so which ones are expanded depends on what ran before - the same
+  // cross-test dependency that made the live-agent tests above pass on one machine and
+  // hang on another. Assert against all of them, not whichever happened to be open.
+  await page.$$eval('#viewRuns details.run', ns => ns.forEach(n => { n.open = true; }));
+  await page.waitForFunction(
+    () => document.querySelectorAll('#viewRuns table.run-jobs tr.job').length >= 3,
+    null, { timeout: 25000 });
   const tagged = await page.$$eval('#viewRuns [data-agent]', ns => ns.map(n => n.dataset.agent));
   assert.ok(tagged.includes('e2e-worker') && tagged.includes('e2e-reviewer'),
             `runs tagged ${tagged.join(', ')}`);
@@ -951,8 +987,20 @@ await test('runs are read-only over HTTP apart from that one decision', async ()
 await test('the page logged no errors while all of that happened', () => {
   // Failed fetches from panels pointed at absent equipment are the page working,
   // not the page breaking; a thrown exception is not.
+  // "can't establish a connection to the server" is how FIREFOX reports a failed
+  // EventSource - the terminal stream with no agents behind it. Chromium says
+  // "Failed to load resource", which was already exempt. Same event, same
+  // non-failure, different browser wording; the filter only knew one of them.
   const real = consoleErrors.filter(line =>
-    !/Failed to load resource|NetworkError|ERR_CONNECTION|favicon/i.test(line));
+    !/Failed to load resource|NetworkError|ERR_CONNECTION|favicon/i.test(line)
+    && !/can.t establish a connection to the server/i.test(line));
+  // Printed as well as asserted: deepEqual against [] truncates the actual array in
+  // the harness output, so a failure here used to say only that something was logged
+  // and never what - which is the least useful shape a console-error test can take.
+  if (real.length) {
+    console.log('      console errors the page logged:');
+    for (const line of real.slice(0, 8)) console.log('        ' + line.slice(0, 160));
+  }
   assert.deepEqual(real, []);
 });
 

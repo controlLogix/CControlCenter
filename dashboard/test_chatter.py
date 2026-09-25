@@ -5,6 +5,7 @@ import os
 import re
 from pathlib import Path
 import sqlite3
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -165,12 +166,22 @@ cmd_send bob '[operator]: --force'
         self.assertIn('chatsend', handler.BOARD_WRITES)
 
     def test_js_syntax_and_view_contract(self):
-        nodes = sorted(Path('/c/Users/Nick/.nvm/versions/node').glob('*/bin/node'))
-        if not nodes:
-            print('\nSKIP chatter JavaScript runtime: node absent from /c/Users/Nick/.nvm/versions/node/*/bin')
-            self.skipTest('requested node installation absent')
+        # FIND node, do not assume one person's Windows home.
+        #
+        # This looked only in /c/Users/Nick/.nvm - a Git Bash spelling of a Windows
+        # path - so it skipped forever on the machine it was written for, because the
+        # suites run inside WSL where node lives under /home/<user>/.nvm. The gate then
+        # reported a failing suite that was really an unreachable interpreter.
+        node = shutil.which('node')
+        if not node:
+            candidates = sorted(Path.home().glob('.nvm/versions/node/*/bin/node'))
+            candidates += sorted(Path('/c/Users/Nick/.nvm/versions/node').glob('*/bin/node'))
+            node = str(candidates[-1]) if candidates else None
+        if not node:
+            print('\nSKIP chatter JavaScript runtime: no node on PATH or under ~/.nvm')
+            self.skipTest('no node available')
         script = Path(__file__).with_name('chatter.js')
-        result = subprocess.run([str(nodes[-1]), '--check', str(script)], capture_output=True, text=True)
+        result = subprocess.run([node, '--check', str(script)], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_view_contract(self):
