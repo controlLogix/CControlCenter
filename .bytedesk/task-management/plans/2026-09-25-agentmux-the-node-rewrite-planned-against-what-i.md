@@ -30,7 +30,7 @@ corrected, because those numbers were used to size the work.
 
 | Was | Now | Why |
 |---|---|---|
-| Node API + Python sidecar both on **Windows** (ADR-0021 D3) | **API in WSL, field sidecar on Windows** | `cc.db` is at `/home/nick/.agentmux/cc.db` on ext4; `restart.sh:2` launches the server *inside WSL*; `server.py:907` shells `tmux -L agentmux` as a local binary. A Windows API means SQLite over 9p — measured to throw transient EIO under load — and breaks `taskmgmt/coordination.py:51`. Meanwhile **no field module uses raw sockets**; only serial Modbus RTU and plant-NIC proximity want Windows, and `modbus_rtu.py:97-98` says so itself. |
+| Node API + Python sidecar both on **Windows** (ADR-0021 D3) | **API in WSL, field sidecar on Windows** | `cc.db` is at `/home/nick/.agentmux/cc.db` on ext4; `restart.sh:2` launches the server *inside WSL*; `server.py:907` shells `tmux -L agentmux` as a **local binary** — a Windows API would need `wsl.exe` interop for every one of those calls; and `taskmgmt/coordination.py:51` POSTs to `127.0.0.1:8787` from WSL, which only reaches a WSL-side listener under NAT. Meanwhile **no field module uses raw sockets**; only serial Modbus RTU and plant-NIC proximity want Windows, and `modbus_rtu.py:97-98` says so itself. |
 | `cc.db` canonical; migrating the board to `.bytedesk` explicitly rejected (ADR-0001) | **`.bytedesk/task-management/` canonical for board entities; `cc.db` keeps runs, claims, journal, auth, devices, terminals, roster, chatter** | ADR-0001's objection was that CCC concepts have no schema upstream. The split answers it: only epics, tasks, acceptance, evidence and ADRs move. The no-pip rule that forced `ccboard.py` to reimplement the plugin dies with `server.py` anyway. |
 | "Node observes" (ADR-0022 D2), blade runtime unspecified | **The API embeds the Claude Agent SDK** with its own MCP clients and key, **and may dispatch orchestrator jobs** — through the same `agentmux.sh` / `taskmgmt` entry points an operator types, never by writing coordination state | There is no agent runtime in this repo. The agents are `codex`/`claude` CLIs in tmux panes and MCP servers are per-CLI, so `mcp: [codesys_rt, modbus, drawio]` in a mode file means nothing without a runtime. ADR-0022 D2 is **refined, not reversed**: WSL still owns execution. |
 
@@ -73,7 +73,7 @@ These change the design, not just the sizing.
 2. **Every MCP server on this machine is a Windows process** (`~/.claude.json`: `modbus` is `npx modbus-mcp`, `word` is an `.exe`, `codesys_rt` must sit beside the IDE). The API is in WSL. `mcp:` in a mode file **cannot** resolve to a WSL stdio spawn — a Linux `modbus-mcp` sees different NICs and no COM ports, and there is no Linux `codesys_rt`. This is the largest gap in the blade spec.
 3. **`agentmux.sh` grants orchestrator authority by omission.** `${AGENTMUX_AGENT:-orchestrator}` at `:1194,1320,1329,1356,1465,1516,1541,1552`, and `cmd_dispatch|collect|pool` (`:1296,1301,1306`) refuse when it *is* set. **A Node process shelling `agentmux.sh` with an inherited environment IS the orchestrator**, with `run complete --force` and `claim --for <agent>` live.
 4. **The plugin store breaks live locks across the WSL/Windows boundary.** `store.mjs staleLock()` decides liveness with `process.kill(pid, 0)`; a WSL Node reading a lock written by a Windows Node gets `ESRCH` and breaks it. The plugin's own comment records the cost: *"8 concurrent creates produced 8 files with 7 distinct ids."*
-5. **Renaming the GitHub repo would brick the task store.** `store.mjs write()` refuses any doc whose `board` ≠ the git-remote-derived identity, and **`config.json` has no `boardId`**. Pin it before anything else.
+5. **Renaming the GitHub repo would brick the task store**, and pinning `boardId` does **not** prevent it. `store.mjs write()` refuses any doc whose `board` ≠ the store identity, and `boardIdentity()` at `:753-757` returns **git first** — `gitBoardId()` reads `git remote get-url origin`, lowercases `owner/repo`, and the config `boardId` is consulted only when git yields nothing. So a rename changes the identity regardless of the pin. What the pin buys is **detection**: with `stored` set, a mismatch is reported as `drifted: true` instead of surfacing as an unexplained refusal. The actual mitigations are (a) don't rename the GitHub repo — the rebrand is scoped to live surfaces and does not require it, or (b) if it is renamed, rewrite `board:` in every doc in the same change.
 6. **`/mnt/c` is 9p — inotify never fires.** `fs.watch` on `modes/`, `events.jsonl` or the repo silently does nothing. `$AGENTMUX_HOME` is ext4, where it works. The two halves need different watch strategies.
 7. **`~/.agentmux/env` is sourced into every agent pane** (`agentmux.sh:669`). The blade's API key must not go there — that hands it to every worker.
 8. **There are already two write journals**, not one: `enip.py:213` and `logix.py:99`. Neither file exists yet, so no live industrial write has ever been performed.
@@ -189,6 +189,31 @@ failure. If that path is taken, **stop calling it loopback-only in the docs** �
 "loopback plus the WSL adapter", or someone will later rely on a property the system
 does not have.
 
+### 3.2a What 9p does and does not do — measured, not assumed
+
+An earlier draft of this plan justified the host split partly on "SQLite over the 9p
+boundary is a corruption hazard". **That claim is not supported by measurement and has
+been removed.** Tested 2026-09-25, four concurrent writers × 300 committed inserts each,
+WAL + `foreign_keys=ON` + `timeout=5` — the settings `ccstore.connection()` uses:
+
+| Scenario | Result |
+|---|---|
+| 4 WSL processes, database on **ext4** | 1200/1200 rows, 0 busy/locked, `integrity_check: ok` |
+| 4 WSL processes, database on **`/mnt/c` (9p)** | 1200/1200 rows, 0 busy/locked, `integrity_check: ok`, same wall-clock |
+| **2 Windows + 2 WSL processes, same file on 9p** | **1200/1200 rows, all four writers present, `integrity_check: ok`** |
+
+So cross-OS concurrent SQLite writing did not lose a row or corrupt anything here. The
+host split still stands — on `tmux` locality, the inbound `coordination.py` POST path,
+and COM ports for the field half — **none of which depend on the SQLite claim.** Phase
+1.2's guidance is unchanged and now has evidence behind it: WAL plus `busy_timeout`
+genuinely does absorb the overlap.
+
+Stated honestly, because one probe is not a proof: this covers short transactions on a
+small database with no crash injection. It does **not** clear long transactions, WAL
+checkpoint contention, or a process killed mid-write. And it is a different thing from
+the 9p failure this repo *has* measured — **transient EIO under gate load**, which is
+real, is why the gate runs from an ext4 clone, and is what `netscan.py` was killed by.
+
 ### 3.3 The task store sits across the mount
 
 `.bytedesk/task-management/` is canonical but lives on 9p at `/mnt/c/Dev/agentmux/…`,
@@ -298,8 +323,23 @@ Two consequences the draft missed:
 **3. Web → API.** SSE for anything live on **one multiplexed connection per tab**, REST
 for mutations, session cookie plus CSRF. Be clear what this is: the codebase says in
 three places — `boardteams.py:141`, `server.py:1380`, and two earlier plans — **"Port 8787
-is unauthenticated; the Origin allowlist only stops a browser."** Phase 1.4 is not
-hardening an auth model; it is the first one.
+is unauthenticated; the Origin allowlist only stops a browser."**
+
+**Verified against the live dashboard, 2026-09-25**, rather than taken from the comment:
+
+```
+GET  /api/agents        no auth, no origin           -> 200
+GET  /api/board/board   no auth, no origin           -> 200
+POST /api/board/create  Origin: https://evil.example -> 403   (the guard works...)
+POST /api/board/create  no Origin header at all      -> 400 {"error": "missing kind"}
+```
+
+That last line is the point. With **no `Origin` header** a mutating request passes the
+guard completely and reaches payload validation — it failed on the body, not on
+authorization. Any local process can write to the board with no credential at all.
+
+That is acceptable *only* because the bind is loopback. Phase 1.4 is not hardening an
+auth model; it is the first one, and Phase 6 must not widen the bind until it lands.
 
 **4. Blade → everything.** Two keys, and neither alone moves anything. **`PreToolUse` is
 enforcement; `canUseTool` is the UI.** The SDK documents that an allow rule or a
@@ -340,7 +380,7 @@ one commit, always.**
 
 | # | Task | Acceptance |
 |---|---|---|
-| **0.0** | **Pin `boardId`** in `.bytedesk/task-management/config.json` → `"controllogix/ccontrolcenter"` | `boardIdentity().stored` non-null; an existing epic still writes. **Blocks everything** — without it, renaming the GitHub repo makes every epic and ADR unwritable (§1.3.5) |
+| **0.0** | **Pin `boardId`** in `.bytedesk/task-management/config.json` → `"controllogix/ccontrolcenter"`, and **decide the repo-rename question** | `boardIdentity().stored` non-null; an existing epic still writes. Note the pin makes a rename **detectable** (`drifted: true`), not survivable — git wins at `:753-757`. So either record that the GitHub repo is *not* renamed, or plan the `board:` rewrite across every doc as part of that rename (§1.3.5) |
 | 0.1 | Hygiene: `rmdir` the two empty junk dirs; `git rm` `app.js.prerebrand.bak` and two other `.bak`s; gitignore and delete `tmp/` (681 MB, untracked Linux Chromium) | `du -sh tmp` < 10 MB; gate green |
 | 0.2a | `window.CCC` → `window.AGENTMUX`, `ccc:ready` → `agentmux:ready`, `window.CCCOpenCard` — 11 source + 6 test files, one commit | gate + e2e green. A miss here means **every view module fails to register and panels render blank** |
 | 0.2b | `CCC_SCRIPT_ERRORS` → `AGENTMUX_SCRIPT_ERRORS` — `index.html:20,24`, `app.js:3883-3884`, `test_frontend_tabs.sh:555,561` | The load-failure banner still fires on a deliberately broken script. `:555` asserts listener-before-scripts ordering — keep it |
@@ -381,11 +421,24 @@ The riskiest phase. Ordered so the gate is green at every commit.
 **1.0 Node in WSL.** Pin `AGENTMUX_NODE` to the absolute nvm path; `prestart` refuses a
 `/mnt/c` node. *AC:* `$AGENTMUX_NODE -v` → v24.x from a non-interactive shell.
 
-**1.1 Extract the field library — move, do not copy.** `git mv` the 11 protocol modules
-into `field/protocols/` and add **one line** to `server.py`:
-`sys.path.insert(0, str(ROOT.parent / "field" / "protocols"))`. Two copies drift within a
-week and the differ then compares a module against its own stale twin. One copy, two
-importers.
+**1.1 Extract the field library — one copy, two importers.** The invariant is that
+there is never a second copy: two copies drift within a week and the differ then compares
+a module against its own stale twin.
+
+**Sequenced in two steps, and the order was changed after starting it (2026-09-25).**
+
+- **1.1a — stand the shell up where the modules already are.** `field/app.py` imports
+  the protocol modules from `dashboard/` via one `sys.path` line, and `server.py` keeps
+  importing them exactly as today. This is the plan's own "two consumers, one library"
+  with no move at all. **Done** — see TM-018.
+- **1.1b — then `git mv` into `field/protocols/`**, at which point that same single
+  `sys.path` line is the only thing that follows them.
+
+The move was originally written as step one. Doing it first churns ~13 test files —
+`test_enip.py:16` is a bare `import enip` relying on Python putting the script's own
+directory on `sys.path` — for no functional gain while the sidecar does not yet exist.
+Standing the shell up first makes the sidecar real, testable and committable on its own,
+and leaves the reorganisation as a pure rename with a green gate either side of it.
 
 - **`codesys_panel.py` splits** (473 lines; it imports `ccboard` + `ccstore`, so it is not
   a field module and cannot move whole). Client half → `field/protocols/codesys_client.py`;
@@ -476,6 +529,25 @@ importing `TM-001..093` makes the next key `TM-094` automatically.
 | Tasks | `TM-001..093` keep their keys — bytedesk has zero tasks |
 | cc.db `ADR-0001` | → `ADR-0024`. bytedesk `ADR-0001` gets a **supersede** pointing at ADR-0023 |
 | **`activeEpic` disagrees today** — cc.db says `EP-023`, `config.json` says `EP-001` | Resolve explicitly to the mapped key; do not let one silently win |
+
+**Census verified directly against `cc.db`, 2026-09-25** — the migration is sized on
+these, so they were worth checking rather than inheriting: 21 tables, `user_version=2`,
+WAL. 93 tasks (84 done, 2 open, **7 deleted**), 23 epics (9 done, 6 open, 3 in_progress,
+1 blocked, **4 deleted**), 254 acceptance, 130 comments, 111 touches, 77 evidence, 874
+history, 61 labels, 33 deps, 14 commits, 6 roster, 4 devices, 1 ADR, 2,283 journal.
+
+Two things that check surfaced, which this plan did not address:
+
+- **Eleven soft-deleted entities** — 4 epics and 7 tasks with `status: deleted`. The
+  migration says "23 epics → 22 + 1 merge" and silently assumes they all travel. Decide
+  explicitly: the plugin *has* a deleted concept (`tm_task_update` carries `delete` and
+  `restore`), so they *can* migrate as tombstones. Recommendation: **migrate them**.
+  Keys are never reused, so dropping them leaves holes that look like data loss to
+  anyone auditing the sequence later, and a tombstone is cheaper than that question.
+- **`board_counters` has 3 rows** and does not travel. The plugin derives `nextId` from
+  filenames (`store.mjs:716-730`), so nothing needs syncing — but cc.db must stop minting
+  once the migration lands, or the two stores start issuing the same key. That is the
+  one-writer rule ADR-0001 was right about, and it survives ADR-0001's reversal.
 
 **874 history rows:** do **not** inject into `events.jsonl` — it is a live log,
 `rotateEvents` keeps one generation, and 874 synthetic rows are ~15% of it. Instead
@@ -799,11 +871,43 @@ proves it); pycomm3 in the sidecar reaches the wire only through an audited wrap
 
 **4.1 Unify the write journal** — prerequisite, because there are two today (§1.3.8).
 `field/writejournal.py` with `intent(record) -> Handle` / `Handle.settle(outcome)`, one
-`field-writes.jsonl` carrying `transport`, **fsync before returning**, and **fail-closed**:
-if the intent cannot be durably written the exception propagates *before* the wire call.
-That behaviour exists today (`enip.py:262` precedes `:265`) but is nowhere tested; it
-becomes an explicit contract. A one-shot migrator merges the legacy files in timestamp
-order; a test asserts nothing writes the old paths afterwards.
+`field-writes.jsonl` carrying `transport`, **fsync before returning**, and
+**fail-closed**.
+
+**Correction, checked 2026-09-25:** an earlier draft of this plan said that posture
+"exists but is nowhere tested". That is **wrong**, and the existing tests are the
+specification to preserve rather than duplicate:
+
+- `enip.py:230-236` already does `flush()` + `os.fsync()`, so the intent is genuinely
+  durable, not merely written.
+- `test_enip.py:196` `test_intent_is_durable_before_send_and_timeout_closes` patches
+  `request` with a side effect that **reads the journal off disk at the moment of
+  transmission** and asserts the `intent` row is already there with the right value.
+  That is a direct proof of both ordering and durability.
+- `test_enip.py:177` `test_write_guards_prevent_network` sets
+  `journal.side_effect = OSError` and then asserts `request.assert_not_called()` — the
+  fail-closed invariant, tested.
+- `test_enip.py:217` `test_failure_audit` covers CIP error → `rejected` and disconnect →
+  `unknown`.
+
+`logix.py` — the *second* journal — is covered even harder, and it is the stronger
+specification of the two:
+
+- `test_logix.py:288` patches `connect` with `side_effect=AssertionError('network
+  used')`, so a guard failure that reached the wire fails the test by construction.
+- `:302-303` patches `_journal` with `OSError('disk full')` and requires the write to
+  raise — fail-closed, again.
+- `:314` patches `logix.os.fsync` with `wraps=` and asserts it was **actually called**.
+  That is durability checked at the syscall, not inferred from the code.
+
+So 4.1 is a **refactor that must not lose these**, not a gap to fill. Port all of them
+onto the unified journal and keep them passing — including the fsync-was-called
+assertion, which is the one most easily dropped in a rewrite because it looks like an
+implementation detail and is in fact the whole guarantee. If any of these can be made to
+pass against a journal that writes after transmission, the refactor is wrong.
+
+A one-shot migrator merges the two legacy files in timestamp order; a test asserts
+nothing writes the old paths afterwards.
 
 **4.2 Vendor pycomm3** under ADR-0024 (§3.4).
 
@@ -1074,7 +1178,7 @@ at boot and any handler targeting 8788, 8789 or 8790 is a **boot failure**, not 
 | # | Risk | Mitigation | Phase |
 |---|---|---|---|
 | R1 | **WSL→Windows unreachable** — no `.wslconfig`, NAT mode | Mirrored networking as a startup-asserted prerequisite; pre-designed fallback, honestly labelled | 1 |
-| R2 | **Repo rename bricks every task-store entity** | Pin `boardId` — task 0.0, first thing | 0 |
+| R2 | **Repo rename bricks every task-store entity** — and the `boardId` pin does not stop it, since git wins at `store.mjs:753-757` | Don't rename the GitHub repo (the rebrand doesn't need it); if it is renamed, rewrite `board:` across every doc in the same change. The pin makes the mismatch *detectable* (`drifted: true`) rather than an unexplained refusal | 0 |
 | R3 | **`ccc.*` storage rename wipes operator state** | Read-through migration; theme *values* untouched | 0 |
 | R4 | **Agent-file rename breaks orchestration silently** | `ORCH_DEFAULT_AGENT` in the same commit as the `git mv` | 0 |
 | R5 | **Cross-namespace lock breaking corrupts the store** — `process.kill(pid,0)` across the boundary | All writes through `agentmux-board` on Windows; the API reads only | 1 |
@@ -1101,7 +1205,7 @@ at boot and any handler targeting 8788, 8789 or 8790 is a **boot failure**, not 
 | R26 | Funnel enabled after boot | Policy-file prevention **plus** a 60 s re-check that exits | 6 |
 | R27 | `Tailscale-User-*` forged over loopback | Stripped unconditionally; never used for authorization | 6 |
 | R28 | Mirrored mode breaks VPN or Docker Desktop | Timeboxed spike first; documented, exercised rollback | 1 |
-| R29 | 9p EIO under gate load | Gate runs from an ext4 clone; the CI doc says so explicitly | all |
+| R29 | **9p EIO under gate load — confirmed live, not theoretical.** `netscan.py:257` called `Path(candidate).exists()` on `/mnt/c/Windows/System32/ARP.EXE`; `Path.exists()` re-raises any errno that is not ENOENT/ENOTDIR/EBADF/ELOOP, so a 9p stat under load raised `OSError: [Errno 5]` out of a function documented "Never fatal" and killed whole scans — 3 of 6 e2e runs. Fixed, 0 of 6 after | Gate runs from an ext4 clone. **And: never call `Path.exists()` on a `/mnt/c` path without a try/except** — treat every 9p filesystem call as able to raise | all |
 
 ---
 
@@ -1236,7 +1340,49 @@ curl -sv --max-time 5 https://agentmux.<tailnet>.ts.net/ ; nmap -Pn -p 8787-8790
 
 ---
 
-## 9. How this gets executed
+## 9. What has actually been built — session of 2026-09-25
+
+Branch `phase-0-rebrand`. Gate: **all suites passed**, 2,055 assertions across 55
+suites, from an ext4 clone. Baseline before any of this was **2 suites failing**.
+
+### Bugs found and fixed
+
+All pre-existing. Listed because the pattern matters more than the individual fixes:
+**every one of them made the gate say something untrue**, which is the failure mode that
+compounds as features land on top.
+
+| | Bug | Why it mattered |
+|---|---|---|
+| **TM-012** | `test_frontend_post.sh` had no nvm discovery (exit 127, zero assertions); `test_frontend.sh` **silently skipped** its `node --check app.js` and still reported "passed 12, failed 0" | A green gate while a real check never ran — during a phase that rewrites `app.js` heavily. 12 → 13 assertions is the proof it runs |
+| **TM-013** | The e2e scanner failed **3 of 6 runs** with a bare `OSError` | A ~60% flake makes "all suites passed" a matter of luck. Root cause: `Path.exists()` re-raises EIO, out of a function documented "Never fatal". **0 of 6** after |
+| **TM-014** | Seven python suites counted a skip as a pass — and so did the **gate**, via `0:OK *` matching `OK (skipped=1)` | Three instances of one defect family. Latent, but four sibling suites already had it right |
+| **TM-015** | `test_launch.sh` failed its *teardown*, not its assertions, only under load | The shape that teaches people to re-run the gate until it goes green |
+| **TM-016** | The failability meta-gate **could not accept a python suite at all** | It covered 5 of 54 suites. Both Phase 0 regression tests are now standing guarantees rather than one-off manual proofs |
+| **TM-017** | The SSE slot-exhaustion guard has no automated test | Filed, not fixed — it belongs in Phase 3's Playwright work (R13) |
+| **TM-019** | The 9p SQLite justification did not survive measurement | See §3.2a. The decision stands on other grounds; the reason was wrong |
+
+### Built beyond the task list
+
+- `scripts/node-env.sh` — resolves nvm's Node, refuses the `/mnt/c` one, discovers
+  `TM_PLUGIN_ROOT`. `bin/tm` now runs from WSL, which it could not at all.
+- `field/app.py` + 13 tests — the sidecar shell, verified on **both** hosts.
+- `dashboard/capture_docs.{sh,mjs}` — repeatable doc screenshots via the existing e2e
+  harness, deliberately out of `run_tests.sh`.
+- `docs/wsl-networking.md` — the measured NAT facts, the procedure, the rollback.
+
+### Corrections to this plan, made while doing the work
+
+Four claims in this document turned out to be wrong and are fixed in place: the
+`boardId` pin does not survive a repo rename; `mqtt_monitor.py` vendors paho rather
+than pip-installing it; the `enip`/`logix` write posture is *thoroughly* tested already;
+and SQLite over 9p is not the hazard the host split was justified with.
+
+---
+
+
+---
+
+## 10. How this gets executed
 
 Three pieces of bookkeeping first, or the board will lie about what is happening.
 
