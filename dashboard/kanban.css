@@ -29,3 +29,28 @@
 .kanban-notice { overflow-wrap: anywhere; }
 .kanban-notice pre { white-space: pre-wrap; }
 .kanban-more { width: 100%; }
+.kanban-open { border: 0; padding: 0; background: transparent; color: var(--text); font: inherit; font-weight: bold; cursor: pointer; text-decoration: underline; }
+.board-key[role="button"] { cursor: pointer; text-decoration: underline; }
+.card-drawer {
+  position: fixed;
+  top: 70px;
+  right: 0;
+  bottom: 0;
+  width: min(480px, 85vw);
+  overflow-y: auto;
+  z-index: 30;
+  padding: 18px;
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: -8px 0 24px var(--panel-2);
+  overflow-wrap: anywhere;
+}
+.card-drawer[hidden] { display: none; }
+.drawer-editor, .drawer-acceptance, .drawer-secondary, .drawer-values { margin: 16px 0; padding-top: 10px; border-top: 1px solid var(--line); }
+.drawer-field { display: block; margin-bottom: 8px; }
+.drawer-field input, .drawer-field textarea { display: block; width: 100%; box-sizing: border-box; margin-top: 4px; }
+.drawer-field textarea { min-height: 120px; resize: vertical; }
+.drawer-criterion { display: flex; align-items: start; justify-content: space-between; gap: 12px; margin: 10px 0; }
+.drawer-notice pre { white-space: pre-wrap; }
+.drawer-meta { color: var(--muted); }

@@ -3092,7 +3092,17 @@ async function loadBoard() {
         const handle = el('span', 'grip', '∷');
         handle.setAttribute('aria-hidden', 'true');
         r.appendChild(handle);
-        r.appendChild(el('span', 'board-key', t.key));
+        const keyLink = el('span', 'board-key', t.key);
+        keyLink.setAttribute('role', 'button');
+        keyLink.setAttribute('tabindex', '0');
+        keyLink.setAttribute('aria-label', `Open ${t.key} details`);
+        keyLink.addEventListener('click', () => window.CCCOpenCard?.(t.key, loadBoard));
+        keyLink.addEventListener('keydown', ev => {
+          if (ev.key === 'Enter' || ev.key === ' ') {
+            ev.preventDefault(); window.CCCOpenCard?.(t.key, loadBoard);
+          }
+        });
+        r.appendChild(keyLink);
         r.appendChild(statusSelect('task', t.key, t.status, TASK_STATUSES,
                                    loadBoard, els.boardStamp));
         r.appendChild(el('span', 't-title', String(t.title || '')));

@@ -97,6 +97,56 @@ test('kanban writes exclusively through api.post',async()=>{
   const col=all(p.root).find(n=>n.dataset.status==='blocked'&&n.className==='kanban-column');
   await col.events.drop({preventDefault(){},dataTransfer:{getData:()=> 'TM-1'}});assert.equal(called,true);
 });
+test('both entry points are accessible without shifting task row nodes',async()=>{
+  const p=setup();await p.load();await p.find('kanban-open').events.click();assert.equal(p.drawer().hidden,false);
+  let opened; const r=new Node('div'),t=fresh();
+  const start=shell.indexOf("const keyLink = el('span', 'board-key', t.key);");const end=shell.indexOf('r.appendChild(keyLink);',start)+'r.appendChild(keyLink);'.length;
+  assert.ok(start>=0);vm.runInNewContext(shell.slice(start,end),{r,t,el:(...args)=>new Node(...args),loadBoard:()=>{},window:{CCCOpenCard:(key)=>{opened=key;}}});
+  assert.equal(r.children.length,1);assert.equal(r.children[0].tag,'span');assert.equal(r.children[0].attrs.role,'button');
+  r.children[0].events.click();assert.equal(opened,'TM-1');opened=null;
+  r.children[0].events.keydown({key:'Enter',preventDefault(){}});assert.equal(opened,'TM-1');
+});
+test('entity renders before secondary reads and all sections load independently',async()=>{
+  let resolve;const p=setup(fresh(),{read:path=>path.includes('/history?')?new Promise(r=>{resolve=r;}):undefined});
+  await p.open();await settled();
+  assert.equal(all(p.form('body')).find(n=>n.tag==='textarea').value,'<b>full body</b>');
+  assert.ok(text(p.section('why')).includes('Waiting for proof'));assert.ok(text(p.section('roster')).includes('worker'));
+  assert.deepEqual(p.requests,['api/board/entity?id=TM-1','api/board/history?id=TM-1&limit=200','api/board/why?id=TM-1','api/board/roster?id=TM-1']);
+  resolve({events:[{ts:'today',actor:'me',event:'edit',detail:{fields:['body']}}]});await settled();assert.ok(text(p.section('history')).includes('body'));
+});
+for (const broken of ['history','why','roster']) test('secondary failure isolated: '+broken,async()=>{
+  const p=setup(fresh(),{read:path=>path.includes('/'+broken+'?')?Promise.reject(Error('offline '+broken)):undefined});await p.open();await settled();
+  assert.ok(text(p.section(broken)).includes('Could not load '+broken));assert.ok(p.form('title'));
+  for(const name of ['history','why','roster'].filter(x=>x!==broken))assert.doesNotMatch(text(p.section(name)),/Could not load/);
+});
+test('epics skip task-only reads and fields',async()=>{
+  const p=setup(fresh({key:'EP-1',kind:'epic'}));await p.open();await settled();
+  assert.deepEqual(p.requests,['api/board/entity?id=EP-1','api/board/history?id=EP-1&limit=200']);
+  assert.equal(p.form('deps'),undefined);assert.equal(p.form('assignee'),undefined);
+});
+test('drawer emits no data-agent because test_e2e.mjs page.$ is first-match',async()=>{
+  const p=setup();await p.open();await settled();
+  assert.equal(all(p.drawer()).some(n=>'agent' in n.dataset||'data-agent' in n.attrs),false,'test_e2e.mjs page.$ is first-match; a hidden drawer must not shadow live agent nodes');
+  for(const s of ['proof','abc123','detail comment','2026-09-25','related: TM-4','main','/work'])assert.ok(text(p.drawer()).includes(s),s);
+});
+test('Jira link uses only validated HTTPS origin and key',async()=>{
+  const p=setup();await p.open();const link=p.find('drawer-jira');assert.equal(link.href,'https://example.atlassian.net/browse/DEMO-1');assert.equal(link.rel,'noopener noreferrer');assert.equal(link.target,'_blank');
+  for(const base of ['javascript:alert(1)','http://insecure.test','https://user:pass@example.com','https://example.com/path','https://example.com?next=x','https://example.com/#x']){
+    const bad=setup(fresh(),{base});await bad.open();assert.equal(bad.find('drawer-jira'),undefined,base);
+  }
+  const bad=setup(fresh({jira_key:'../evil'}));await bad.open();assert.equal(bad.find('drawer-jira'),undefined);
+});
+test('late entity responses and close cannot reopen or replace the current card',async()=>{
+  let resolve;const p=setup(fresh(),{read:path=>path==='api/board/entity?id=TM-1'?new Promise(r=>{resolve=r;}):undefined});
+  const slow=p.open();p.entity(fresh({key:'TM-2',title:'Second'}));await p.open('TM-2');resolve(fresh());await slow;assert.ok(text(p.drawer()).includes('Second'));
+  p.ctx.window.events.keydown({key:'Escape',preventDefault(){}});assert.equal(p.drawer().hidden,true);
+  assert.equal(p.ctx.document.activeElement.focused,true);
+});
+test('entity load failure is visible and can be retried',async()=>{
+  const p=setup(fresh(),{read:path=>path.includes('/entity?')?Promise.reject(Error('entity offline')):undefined});
+  await p.open();assert.ok(text(p.drawer()).includes('Could not load TM-1: entity offline'));assert.equal(p.form('title'),undefined);
+  p.read(()=>undefined);await p.open();assert.ok(p.form('title'));
+});
 test('kanban bypass is announced through shared post',async()=>{
   const p=setup();await p.load();p.respond(()=>response({entity:fresh({status:'done'}),bypassed:{reason:'enforcement disabled'}}));
   const col=all(p.root).find(n=>n.dataset.status==='done'&&n.className==='kanban-column');
