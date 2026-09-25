@@ -63,11 +63,13 @@ test_frontend_storage.sh     6afd65b    8
 # The equipment-write gate. Against the commit before it, iiot.js still used a
 # one-click window.confirm and four of the five properties do not hold.
 test_frontend_iiot_write.sh  00912ba    4
-# TM-025, the two-clock age. Against the commit before the fix the panel renders
-# a CLOCK READING ("last good 6:26:40 AM") instead of an age, and decides
-# staleness with Date.now()/1000 - last_good - so a fresh feed reads STALE the
-# moment the browser's clock is ten minutes fast. 4 of 6 fail there.
-test_frontend_iiot_age.sh    6b2d581    4
+# TM-025, the two-clock age, and the feed-level banner that came with it.
+# Against the commit before the fix the panel renders a CLOCK READING ("last
+# good 6:26:40 AM") instead of an age, decides staleness with
+# Date.now()/1000 - last_good so a fresh feed reads STALE the moment the
+# browser's clock is ten minutes fast, and prints one word for four different
+# faults. 7 of 8 fail there.
+test_frontend_iiot_age.sh    6b2d581    7
 # The unified write journal. Against the commit before it, enip/logix/ads each
 # kept their own file and writejournal.py does not exist - so all 22 fail, via
 # the suite's guarded import rather than an ImportError that would crash it and

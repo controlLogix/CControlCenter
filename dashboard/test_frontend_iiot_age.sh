@@ -130,11 +130,27 @@ await check('a ten-minute browser clock skew changes no verdict and no age', asy
 
   assert.deepEqual(skewed.read(), honest,
     'a browser clock ten minutes out changed what the panel says');
-  // One stale tag currently disconnects the whole feed, so every chip greys
-  // together. That is the panel's existing behaviour and not what this is
-  // about - the point is only that the browser's clock did not decide it.
+  // A live feed carrying one old value: the old tag greys, the fresh one does
+  // not, and the banner says which. The browser's clock decided none of it.
+  assert.equal(honest.rows[0].chip, 'live');
   assert.equal(honest.rows[1].chip, 'STALE');
-  assert.match(honest.status, /^DISCONNECTED/);
+  assert.match(honest.status, /^CONNECTED/);
+});
+
+await check('one stale tag greys one chip, not the whole table', async () => {
+  // The bug this replaces: `connected` ANDed in `tags.every(t => !t.stale)`, so
+  // a single old value reported the feed as DISCONNECTED and greyed every chip.
+  // Forty chips greying at once is one connectivity fact rendered forty times,
+  // and it teaches the operator that the chips do not mean anything.
+  const h = harness();
+  h.serve(snap());
+  await h.refresh();
+  const view = h.read();
+  assert.deepEqual(view.rows.map(r => r.chip), ['live', 'STALE'],
+    'a stale tag changed the verdict on a fresh one');
+  assert.deepEqual(view.rows.map(r => r.stale), ['false', 'true']);
+  // And the banner carries the feed-level fact, once, where it belongs.
+  assert.equal(view.status, 'CONNECTED — 1 of 2 tags stale');
 });
 
 await check('a fresh feed still reads live under the same ten-minute skew', async () => {
@@ -202,9 +218,41 @@ await check('when the poll stops answering the age keeps growing, on the monoton
   h.clock.mono += 30000;
   h.clock.wall -= 30000;
   await h.refresh();
-  const row = h.read().rows[0];
-  assert.equal(row.age, '31s ago', 'the age did not follow the monotonic clock');
-  assert.equal(row.chip, 'STALE', 'a dead feed still read as live');
+  const view = h.read();
+  assert.equal(view.rows[0].age, '31s ago', 'the age did not follow the monotonic clock');
+  // A dead feed DOES say something about every tag: those verdicts were the
+  // server's, computed at a moment that has passed, and they get less true
+  // every second. A chip reading "live" off a reading nobody has confirmed
+  // since the link dropped is the lie iiot.js:11-14 is about.
+  assert.equal(view.rows[0].chip, 'STALE', 'a dead feed still read as live');
+  assert.match(view.status, /^NO UPDATE/,
+    'the banner did not say which link was the problem');
+});
+
+await check('a page that has stopped hearing says so, rather than blaming the device', async () => {
+  // Three different faults used to print the same word. "The dashboard cannot
+  // reach the PLC" and "this browser tab has not heard from the dashboard" send
+  // somebody to opposite ends of the building.
+  const h = harness();
+  h.serve(snap({tags: [{name: 'P', unit: 1, address: 0, value: 1, engineering_unit: '',
+                        last_good: SERVER_EPOCH, stale: false, age_ms: 100}]}));
+  await h.refresh();
+  assert.match(h.read().status, /^CONNECTED/);
+
+  // The snapshot ages past one poll interval without a new one arriving. Both
+  // clocks move together, because this comparison is browser-to-browser.
+  h.clock.wall += 30000;
+  h.clock.mono += 30000;
+  h.goOffline();
+  await h.refresh();
+  const view = h.read();
+  assert.match(view.status, /^NO UPDATE/,
+    'a page that stopped hearing reported it as a device fault');
+  assert.match(view.status, /cannot reach the dashboard/,
+    'the banner does not say WHICH link is down');
+  assert.match(view.status, /30s/, 'the banner does not say how long it has been');
+  // And the device is not blamed for it: nothing here claims the PLC is at fault.
+  assert.ok(!/^DISCONNECTED/.test(view.status));
 });
 
 await check('nothing in the panel subtracts a browser clock from a server one', async () => {

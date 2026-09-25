@@ -105,6 +105,27 @@
     return `${Math.round(s / 3600)}h ago`;
   }
 
+  // One line that says which of the three things is wrong, because "DISCONNECTED"
+  // for all of them sent the operator to look at the wrong end of the wire.
+  function feedText(linkUp, expired, staleCount, snap) {
+    const total = snap.tags.length;
+    if (expired) {
+      // The dashboard may be perfectly fine; it is this PAGE that has stopped
+      // hearing from it. Sending someone to the panel for that is a wasted trip.
+      const since = Math.round(Math.max(0, performance.now() - arrivedMono) / 1000);
+      return `NO UPDATE — nothing from the dashboard for ${since}s`;
+    }
+    if (!snap.connected) {
+      return `DISCONNECTED${snap.error ? ': ' + snap.error : ''}`;
+    }
+    if (staleCount) {
+      // The feed is alive and some values on it are not. Saying so is the whole
+      // point: it is a different fault, at a different place.
+      return `CONNECTED — ${staleCount} of ${total} tag${total === 1 ? '' : 's'} stale`;
+    }
+    return `CONNECTED${snap.error ? ': ' + snap.error : ''}`;
+  }
+
   function render() {
     if (!snapshot || !status) return;
     // `expired` compares two BROWSER timestamps - how long since this snapshot
@@ -114,13 +135,31 @@
     // as `Date.now()/1000 - t.last_good`, which subtracts the browser's clock from
     // the server's; those agree only by luck, and WSL2 drifts against its host
     // after sleep. modbus_poll.py:245 already decides this correctly.
-    const connected = snapshot.connected && !expired
-      && snapshot.tags.every(t => !t.stale);
-    status.textContent = `${connected ? 'CONNECTED' : 'DISCONNECTED'}${snapshot.error ? ': ' + snapshot.error : ''}`;
-    status.dataset.state = connected ? 'ok' : 'bad';
+    //
+    // THREE DIFFERENT FACTS, and they used to be collapsed into one word.
+    //   - the browser has not heard from the dashboard   -> `expired`
+    //   - the dashboard cannot reach the device          -> `snapshot.connected`
+    //   - one particular value is old                    -> `tag.stale`
+    // The old code ANDed all three, so a single stale tag reported the whole
+    // feed as DISCONNECTED and greyed every chip. Forty chips greying at once
+    // is one connectivity fact rendered forty times, and it teaches the
+    // operator that the chips do not mean anything.
+    const linkUp = snapshot.connected && !expired;
+    const staleCount = snapshot.tags.filter(t => t.stale).length;
+    status.textContent = feedText(linkUp, expired, staleCount, snapshot);
+    // Amber, not red, for a live feed carrying some old values: it is a real
+    // problem and it is not the same problem as a dead link.
+    status.dataset.state = !linkUp ? 'bad' : (staleCount ? 'warn' : 'ok');
     rows.replaceChildren();
     for (const tag of snapshot.tags) {
-      const stale = !connected || tag.stale;
+      // The asymmetry is deliberate and is the whole fix. A stale TAG no longer
+      // says anything about the feed - that was the bug, and it greyed forty
+      // chips over one old value. But a dead FEED does say something about every
+      // tag: these verdicts were computed by the server at a moment that has
+      // passed, and they get less true every second. A chip reading "live"
+      // because of a reading nobody has confirmed since the link dropped is
+      // exactly the lie iiot.js:11-14 is about.
+      const stale = !linkUp || tag.stale;
       const row = document.createElement('div');
       row.className = 'tag-row';
       row.dataset.stale = String(stale);
@@ -271,7 +310,14 @@
       if (snapshot) snapshot.connected = false;
       render();
       if (status) {
-        status.textContent = `DISCONNECTED: ${err.message}`;
+        // A FOURTH distinct fault, and it used to print the same word as the
+        // other three. This page could not reach the DASHBOARD - which says
+        // nothing at all about whether the dashboard can reach the device, and
+        // sends you to a different end of the building.
+        const since = Math.round(Math.max(0, performance.now() - arrivedMono) / 1000);
+        status.textContent = arrivedMono
+          ? `NO UPDATE — this page cannot reach the dashboard (${since}s): ${err.message}`
+          : `NO UPDATE — this page cannot reach the dashboard: ${err.message}`;
         status.dataset.state = 'bad';
       }
     }
