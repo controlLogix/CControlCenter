@@ -2613,7 +2613,12 @@ async function post(path, body) {
   });
   let payload = {};
   try { payload = await res.json(); } catch (_) {}
-  if (!res.ok) throw new Error(payload.error || `HTTP ${res.status}`);
+  if (!res.ok) {
+    const error = new Error(payload.error || `HTTP ${res.status}`);
+    error.status = res.status;
+    error.payload = payload;
+    throw error;
+  }
   return payload;
 }
 
