@@ -5,12 +5,12 @@ status: "open"
 created: "2026-09-23T17:36:14.317Z"
 board: "controllogix/ccontrolcenter"
 title: "Configurable agents, teams, and an orchestration plugin"
-plan: ".bytedesk\\task-management\\plans\\2026-09-24-orchestration-you-can-start-from-either-side.md"
+plan: ".bytedesk\\task-management\\plans\\2026-09-25-a-kanban-board-a-ticket-you-can-actually-read-an.md"
 actor: "main"
 session: "28339abd-a8f6-4e02-88e0-033eec825fc3"
 branch: "main"
 worktree: "C:/Dev/agentmux"
-updated: "2026-09-24T18:54:41.933Z"
+updated: "2026-09-25T01:25:59.191Z"
 ---
 
 Plan: .bytedesk\task-management\plans\2026-09-23-configurable-agents-teams-and-an-orchestration-p.md
