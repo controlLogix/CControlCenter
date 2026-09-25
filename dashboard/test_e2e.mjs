@@ -577,7 +577,17 @@ await test('epics are collapsible cards and the choice survives a reload', async
 });
 
 await test('dragging a task onto another epic refiles it for real', async () => {
+  // Clicking even the active view reloads the board. Wait for its response AND
+  // replacement render before filling a form that the reload would otherwise detach.
+  const previousBoardCard = await page.$('#boardList details.epic');
+  assert.ok(previousBoardCard);
+  const boardResponse = page.waitForResponse(r => new URL(r.url()).pathname === '/api/board/board' && r.request().method() === 'GET');
   await show('board');
+  await (await boardResponse).finished();
+  await page.waitForFunction(node => !node.isConnected, previousBoardCard);
+  assert.equal(await previousBoardCard.evaluate(node => node.isConnected), false,
+    'the board refresh must replace the old form before the test fills it');
+  await previousBoardCard.dispose();
   const epics = await page.$$eval('#boardList details.epic', ns => ns.map(n => n.dataset.epic));
   const [from, to] = epics.filter(Boolean);
   assert.ok(from && to, 'need two epics with keys');
