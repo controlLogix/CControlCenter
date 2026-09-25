@@ -302,6 +302,10 @@ run test_rockwell.py python3 dashboard/test_rockwell.py
 # and cannot say what to write; the ticket carries that, fixed when it was
 # minted. This is the gate that had to exist before the route did.
 run test_field_tickets.py python3 dashboard/test_field_tickets.py
+# TM-020: a dashboard left behind by a gate run must SAY so. The failure it
+# covers is the one nobody reports - the page looked entirely normal and
+# simply served different files than the ones on disk.
+run test_serving.py python3 dashboard/test_serving.py
 run test_pn_dcp.py python3 dashboard/test_pn_dcp.py
 run test_ecat_diag.py python3 dashboard/test_ecat_diag.py
 run test_snapshot.py python3 dashboard/test_snapshot.py

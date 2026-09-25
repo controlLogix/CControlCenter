@@ -1,21 +1,23 @@
 ---
 id: "TM-027"
 kind: "task"
-status: "open"
+status: "done"
 created: "2026-09-25T21:04:00.854Z"
 board: "controllogix/ccontrolcenter"
 title: "BUG: three suites read /mnt/c and fail with 9p EIO under gate load"
 epic: "EP-002"
-acceptance: [{"text":"Every filesystem call against a /mnt/c path in these three suites is guarded, so an EIO cannot escape as a bare OSError","done":true,"at":"2026-09-25T21:38:59.890Z"},{"text":"A suite whose subject is unreachable SKIPs with a stated reason instead of ERRORing","done":true,"at":"2026-09-25T21:39:00.122Z"},{"text":"run_tests.sh can never report a negative passed count; a suite that produced no summary is reported as not having run","done":true,"at":"2026-09-25T21:39:00.342Z"},{"text":"test_agentdefs.py does not depend on the operator's real ~/.claude/agents directory","done":true,"at":"2026-09-25T21:41:29.716Z"},{"text":"The gate gives the same verdict on two consecutive runs of an unchanged tree","done":false}]
-evidence: [".bytedesk\\task-management\\evidence\\TM-027-1790372463168.log"]
+acceptance: [{"text":"Every filesystem call against a /mnt/c path in these three suites is guarded, so an EIO cannot escape as a bare OSError","done":true,"at":"2026-09-25T21:38:59.890Z"},{"text":"A suite whose subject is unreachable SKIPs with a stated reason instead of ERRORing","done":true,"at":"2026-09-25T21:39:00.122Z"},{"text":"run_tests.sh can never report a negative passed count; a suite that produced no summary is reported as not having run","done":true,"at":"2026-09-25T21:39:00.342Z"},{"text":"test_agentdefs.py does not depend on the operator's real ~/.claude/agents directory","done":true,"at":"2026-09-25T21:41:29.716Z"},{"text":"The gate gives the same verdict on two consecutive runs of an unchanged tree","done":true,"at":"2026-09-25T21:57:06.288Z"}]
+evidence: [".bytedesk\\task-management\\evidence\\TM-027-1790372463168.log",".bytedesk\\task-management\\evidence\\TM-027-1790373420051.log"]
 commits: []
 blockedBy: []
 blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T21:41:29.736Z"
-evidenceSources: {".bytedesk\\task-management\\evidence\\TM-027-1790372463168.log":{"source":null,"sha256":"d3ea9cce95ba212703e627eb846459170b905becab85c782815bf3798791a713","bytes":3609,"at":"2026-09-25T21:41:03.169Z"}}
+updated: "2026-09-25T21:57:06.710Z"
+evidenceSources: {".bytedesk\\task-management\\evidence\\TM-027-1790372463168.log":{"source":null,"sha256":"d3ea9cce95ba212703e627eb846459170b905becab85c782815bf3798791a713","bytes":3609,"at":"2026-09-25T21:41:03.169Z"},".bytedesk\\task-management\\evidence\\TM-027-1790373420051.log":{"source":null,"sha256":"558d1b9cb89f7c5bd9877b661c0b39acf85d662a3266c2c9017e56be71dc112a","bytes":946,"at":"2026-09-25T21:57:00.052Z"}}
+assignee: "claude"
+closed: "2026-09-25T21:57:06.692Z"
 ---
 
 Found 2026-09-25 by running the gate twice on two adjacent commits. **The same gate, on trees differing only in the write-journal refactor, gave "all suites passed" and then "4 suite(s) failed".** Three of those four failures had nothing to do with the change.

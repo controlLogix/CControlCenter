@@ -3888,6 +3888,33 @@ if (Array.isArray(window.AGENTMUX_SCRIPT_ERRORS) && window.AGENTMUX_SCRIPT_ERROR
   console.error('agentmux: view scripts failed to load:', missing.join(', '));
 }
 
+// TM-020: a gate run displaces this dashboard onto a throwaway home and restores
+// it afterwards. When the restore went wrong the page looked ENTIRELY NORMAL -
+// it answered, every panel rendered, and it simply served different files than
+// the ones on disk. Nothing warned, because by the takeover marker's own
+// definition the restore had succeeded, and an operator editing app.js saw no
+// effect and no reason to suspect the server.
+//
+// The server cannot tell the wrong checkout from the right one. What it can say
+// is which one, and whether a gate left this dashboard behind - so ask.
+fetch('/api/serving').then(r => r.ok ? r.json() : null).then(info => {
+  if (!info) return;
+  const where = `Serving ${info.root} (home ${info.home}, pid ${info.pid}).`;
+  const takeover = info.takeover;
+  if (takeover && takeover.state === 'stranded') {
+    holdBanner(`This dashboard was left behind by a gate run that did not finish. `
+      + `${where} Put it back with:  cd ${takeover.repo} && `
+      + `AGENTMUX_HOME=${takeover.operator_home} bash dashboard/restart.sh`);
+  } else if (takeover && takeover.state === 'in_progress') {
+    // Not an error: a gate run is meant to do this, and it restores on exit.
+    holdBanner(`A test run is using this port, so this is a temporary dashboard `
+      + `on a throwaway home. ${where} It will be restored when the run finishes.`);
+  }
+  // Always available for a human to check, even when nothing is wrong: "which
+  // checkout am I looking at" should never require reading /proc.
+  console.info('agentmux: ' + where);
+}).catch(() => {});
+
 if (!window.Terminal) {
   // Sticky: a missing xterm does not become present because the backend answered.
   holdBanner('xterm.js failed to load from vendor/ — terminals cannot render.');

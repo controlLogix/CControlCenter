@@ -479,6 +479,49 @@ def auth_validators():
 _auth_validators = None
 
 
+def serving_snapshot():
+    """Where this dashboard is serving from, and whether a gate left it there.
+
+    Read-only, and never raises: it is rendered on every page load, and a status
+    endpoint that can 500 is worse than one that reports what it could not
+    determine. Paths only - no secrets, nothing from a request.
+    """
+    root = Path(__file__).resolve().parent.parent
+    try:
+        cwd = str(Path.cwd().resolve())
+    except OSError as err:                      # a deleted cwd is exactly the symptom
+        cwd = f"<unavailable: {type(err).__name__}>"
+
+    snapshot = {
+        # The checkout whose files this process is serving. server.py resolves
+        # app.js, index.html, style.css and assets/ relative to itself, so this
+        # is the answer to "which code am I looking at".
+        "root": str(root),
+        "cwd": cwd,
+        "home": str(HOME_DIR),
+        "pid": os.getpid(),
+        "takeover": None,
+    }
+
+    # A takeover marker in THIS dashboard's home, whose gate is no longer
+    # running, means a gate run displaced this dashboard and never put it back.
+    # That is the stranded case, and it is otherwise invisible.
+    try:
+        import suite_server
+        record = suite_server.read_marker(str(HOME_DIR))
+        if record is not None:
+            alive = suite_server.gate_alive(record["gate_pid"])
+            snapshot["takeover"] = {
+                "state": "in_progress" if alive else "stranded",
+                "operator_home": record["operator_home"],
+                "repo": record["repo"],
+                "gate_pid": record["gate_pid"],
+            }
+    except Exception as err:                    # noqa: BLE001 - report, never fail
+        snapshot["takeover_error"] = f"{type(err).__name__}: {err}"
+    return snapshot
+
+
 def auth_snapshot():
     """Grouped by PROVIDER, because that is where shared attributes live.
 
@@ -2426,6 +2469,12 @@ class Handler(BaseHTTPRequestHandler):
                  "name": _clean(str(t.get("name", "")), 60)}
                 for t in (raw.get("transitions") or [])[:30]
             ]})
+            return
+        if path == "/api/serving":
+            # Read-only. Says which checkout is being served and whether a gate
+            # run left this dashboard behind - the failure that otherwise looks
+            # exactly like everything working. TM-020.
+            self.send_json(200, serving_snapshot())
             return
         if path == "/api/auth":
             # Read-only. Reports declared methods, their non-secret settings, and

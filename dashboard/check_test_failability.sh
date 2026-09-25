@@ -85,6 +85,11 @@ test_rockwell.py             9855905    20
 # exist and all 14 fail through the guarded import. A floor: the count only
 # grows, since a tree without the module fails every test by construction.
 test_field_tickets.py        838c5f9    14
+# The serving/takeover status. Against the commit before it, serving_snapshot()
+# does not exist and all 8 fail through the guarded import. Measured in WSL,
+# where the gate runs: on a platform with no os.getuid the marker cases skip
+# and only 3 fail, which is why the number is measured rather than counted.
+test_serving.py              bb0ae43    8
 BASELINES
   SELF_TEST=1
 else
