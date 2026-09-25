@@ -28,6 +28,7 @@
 <link rel="stylesheet" href="vendor/xterm.css">
 <link rel="stylesheet" href="agents.css">
 <link rel="stylesheet" href="teams.css">
+<link rel="stylesheet" href="kanban.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -299,6 +300,7 @@
       <div class="subtabs" role="tablist" data-tabs="board" aria-label="Board sections">
         <button class="subtab active" role="tab" data-panel="boardtasks" aria-selected="true">Tasks</button>
         <button class="subtab" role="tab" data-panel="tickets" aria-selected="false">Atlassian</button>
+        <button class="subtab" role="tab" data-panel="kanban" aria-selected="false">Kanban</button>
       </div>
 
       <div class="panels">
@@ -325,6 +327,8 @@
             <code>~/.agentmux/cc.db</code> (SQLite, WAL).
           </p>
         </div>
+
+        <div id="viewKanban" class="panel" role="tabpanel" aria-label="Kanban" hidden></div>
 
         <div id="viewTickets" class="panel" role="tabpanel" aria-label="Atlassian" hidden>
           <div class="phead">
@@ -545,6 +549,7 @@
 <script src="github.js"></script>
 <script src="codesys.js"></script>
 <script src="chatter.js"></script>
+<script src="kanban.js"></script>
 <script src="iiot.js"></script>
 <script src="mqtt.js"></script>
 <script src="netscan.js"></script><script src="runs.js"></script>

@@ -496,12 +496,30 @@ await test('the export button names the active tab, not the last one to load', a
 
 // ── Board ───────────────────────────────────────────────────────────────────
 
-await test('Board carries Tasks and Atlassian, and Atlassian says how to set it up',
+await test('Board carries Tasks, Atlassian and Kanban, with all six drop columns',
   async () => {
     await show('board');
     assert.deepEqual(
       await page.$$eval('[data-tabs="board"] .subtab', ns => ns.map(n => n.textContent)),
-      ['Tasks', 'Atlassian']);
+      ['Tasks', 'Atlassian', 'Kanban']);
+    await tab('board', 'kanban');
+    await page.waitForSelector('#viewKanban .kanban-column');
+    assert.deepEqual(await page.$$eval('#viewKanban .kanban-column', ns => ns.map(n => n.dataset.status)),
+      ['backlog', 'open', 'in_progress', 'blocked', 'parked', 'done']);
+    // Chrome is zoomed by --ui-scale; compare layout and viewport sizes in their own units.
+    const columnHeights = await page.$$eval('#viewKanban .kanban-column', ns => ns.map(n => ({
+      height: n.getBoundingClientRect().height, layoutHeight: n.offsetHeight,
+      minHeight: getComputedStyle(n).minHeight,
+      scale: Number(getComputedStyle(document.documentElement).getPropertyValue('--ui-scale')),
+    })));
+    for (const column of columnHeights) {
+      assert.equal(column.minHeight, '220px');
+      assert.ok(column.layoutHeight >= 220);
+      assert.ok(column.scale > 0);
+      assert.ok(column.height >= 220 * column.scale - 1, JSON.stringify(column));
+    }
+    assert.equal(await page.locator('#viewBoardtasks').isVisible(), false);
+    assert.equal(await page.locator('#viewTickets').isVisible(), false);
     await tab('board', 'tickets');
     // WAIT for the panel rather than reading it the instant the tab is clicked. The
     // loader is a fetch, so asserting immediately was a race this test happened to

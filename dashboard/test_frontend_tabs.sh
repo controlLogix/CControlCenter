@@ -151,7 +151,7 @@ test('every tabbed view in the markup is collected', () => {
 
 test('Status carries all four consolidated streams and Board carries Atlassian', () => {
   assert.deepEqual(MARKUP.status, ['feed', 'queue', 'journal', 'chatter']);
-  assert.deepEqual(MARKUP.board, ['boardtasks', 'tickets']);
+  assert.deepEqual(MARKUP.board, ['boardtasks', 'tickets', 'kanban']);
   assert.deepEqual(MARKUP.organization, ['agents', 'teams']);
 });
 
@@ -504,8 +504,8 @@ test('every view script registers itself without throwing', () => {
                `only ${ready.length} scripts subscribed to ccc:ready`);
 
   assert.deepEqual(registered.panels.sort(), [
-    ['organization', 'agents'], ['organization', 'teams'], ['status', 'chatter'],
-  ].sort(), 'Agents, Teams and Chatter must land as tabs');
+    ['board', 'kanban'], ['organization', 'agents'], ['organization', 'teams'], ['status', 'chatter'],
+  ].sort(), 'Kanban, Agents, Teams and Chatter must land as tabs');
   // Runs is a VIEW rather than a fifth Status tab, and that was a real choice: a tab
   // would have to share the Status column with the feed and cramp the per-run job
   // table, which is the thing you go there to read. The cost is one more rail entry.
@@ -522,6 +522,8 @@ test('every view script registers itself without throwing', () => {
 
   // And the registries actually took them.
   const registry = vm.runInContext('VIEW_TABS', ctx);
+  assert.ok(registry.board.panels.kanban.loader, 'kanban has a loader');
+  assert.equal(registry.board.panels.kanban.pollMs, 0, 'kanban never polls mid-drag');
   assert.ok(registry.status.panels.chatter.loader, 'chatter has a loader');
   assert.equal(registry.status.panels.chatter.pollMs, 5000);
   assert.ok(registry.organization.panels.agents.loader);

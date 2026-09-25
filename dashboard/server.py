@@ -2373,13 +2373,13 @@ class Handler(BaseHTTPRequestHandler):
             content_type = "text/html; charset=utf-8"
         elif path in ("/app.js", "/fitmatrix.js", "/agents.js", "/teams.js", "/iiot.js",
                       "/github.js", "/codesys.js", "/chatter.js", "/mqtt.js",
-                      "/netscan.js", "/runs.js"):
+                      "/netscan.js", "/runs.js", "/kanban.js"):
             # fitmatrix.js is the readability test harness. index.html loads it only
             # when the URL carries ?fit=1, so it is inert on the normal page but can
             # be run against the REAL page rather than a mock.
             content_type = "text/javascript; charset=utf-8"
         elif path in ("/style.css", "/agents.css", "/teams.css",
-                      "/codesys.css", "/chatter.css"):
+                      "/codesys.css", "/chatter.css", "/kanban.css"):
             content_type = "text/css; charset=utf-8"
         elif path == "/themes.json":
             content_type = "application/json"

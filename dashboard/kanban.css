@@ -1,0 +1,31 @@
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(190px, 1fr));
+  gap: 12px;
+  overflow-x: auto;
+  align-items: start;
+  padding: 12px 0;
+}
+.kanban-column {
+  min-height: 220px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+.kanban-column h3 { margin: 0 0 12px; font-size: 14px; }
+.kanban-card {
+  margin: 0 0 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  cursor: grab;
+  overflow-wrap: anywhere;
+}
+.kanban-card:active { cursor: grabbing; }
+.kanban-card p { margin: 8px 0; }
+.kanban-meta { color: var(--muted); font-size: 12px; }
+.kanban-notice { overflow-wrap: anywhere; }
+.kanban-notice pre { white-space: pre-wrap; }
+.kanban-more { width: 100%; }
