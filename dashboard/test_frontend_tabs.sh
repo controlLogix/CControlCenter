@@ -511,11 +511,15 @@ test('every view script registers itself without throwing', () => {
   // table, which is the thing you go there to read. The cost is one more rail entry.
   assert.deepEqual(registered.views.sort(), ['github', 'runs'],
                    'GitHub and Runs are the views registered by their own scripts');
-  // Five IIOT field cards plus the Settings > Orchestration card, which runs.js
+  // SIX IIOT field cards plus the Settings > Orchestration card, which runs.js
   // registers so that app.js and teams.js do not have to change to gain it.
+  // The sixth is the device tree, which merges the Ethernet scan and CIP
+  // discovery. Spelled out one per entry rather than counted, deliberately:
+  // this failing when a card is added is the check doing its job, and a bare
+  // count would pass while a card registered itself on the wrong view.
   assert.deepEqual(registered.cards.slice().sort(),
-                   ['iiot', 'iiot', 'iiot', 'iiot', 'iiot', 'settings'],
-                   'five IIOT cards and one Settings card');
+                   ['iiot', 'iiot', 'iiot', 'iiot', 'iiot', 'iiot', 'settings'],
+                   'six IIOT cards and one Settings card');
   // Superseded by the deepEqual above, which names every card and its view - a
   // strictly stronger check than 'they are all iiot', and one that does not have
   // to be relaxed each time a card lands on another view.
@@ -528,7 +532,9 @@ test('every view script registers itself without throwing', () => {
   assert.equal(registry.status.panels.chatter.pollMs, 5000);
   assert.ok(registry.organization.panels.agents.loader);
   assert.ok(registry.organization.panels.teams.loader);
-  assert.equal(vm.runInContext('VIEW_CARDS', ctx).iiot.length, 5);
+  // Six: modbus, profinet, codesys, mqtt, the Ethernet scanner, and the device
+  // tree that merges the last two into one view.
+  assert.equal(vm.runInContext('VIEW_CARDS', ctx).iiot.length, 6);
 });
 
 test('server.py serves every script and stylesheet the page asks for', () => {

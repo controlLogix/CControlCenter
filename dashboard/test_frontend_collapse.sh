@@ -14,36 +14,67 @@ const app = fs.readFileSync('dashboard/app.js', 'utf8');
 const html = fs.readFileSync('dashboard/index.html', 'utf8');
 const css = fs.readFileSync('dashboard/style.css', 'utf8');
 const code = app.slice(app.indexOf('const OPEN_KEY ='), app.indexOf('function stateChip('));
-assert.ok(code.includes('function initCollapsibles('));
-assert.doesNotMatch(code, /innerHTML/);
-assert.equal((app.match(/^initCollapsibles\(\);/gm) || []).length, 1);
-assert.ok(app.indexOf('\ninitCollapsibles();') < app.indexOf('if (!window.Terminal)'));
-// The IIOT panels are packed into COLUMNS, not laid out in grid rows. A grid row
-// is as tall as its tallest card, so short cards left a band of dead space across
-// the middle of the page - measured at 307px wasted and a 255px hole under the
-// PROFINET card. `align-items: start` used to be asserted here; it stopped cards
-// STRETCHING into that space but could not stop the space existing.
-assert.match(css, /\.iiot-grid\s*\{[^}]*column-width/);
-assert.match(css, /\.iiot-grid > \.card\s*\{[^}]*break-inside: avoid/);
-// .board keeps its grid, and keeps the no-stretch rule that goes with one.
-assert.match(css, /\.board\s*\{[^}]*align-items: start/);
-assert.match(css, /\.card > summary:focus-visible/);
-// Five IIOT field cards and six Settings cards. The count is asserted so that a
-// card added without a collapse key - which is how one ends up permanently open -
-// fails here rather than being noticed by an operator.
-const CARD_COUNT = 11;
+let passed = 0, failed = 0;
+// CATCHES, deliberately. Without this a failed assertion threw out of the
+// harness and out of the async IIFE below, so the suite never printed a summary
+// at all - and run_tests.sh reports a suite by its FINAL LINE, which was then
+// Node's version banner. A real failure showed up in the gate as
+// "test_frontend_collapse.sh Node.js v24.21.0" and said nothing else.
+function test(name, fn) {
+  try { fn(); passed++; console.log('PASS: ' + name); }
+  catch (err) { failed++; console.log('FAIL ' + name + ' - ' + (err && err.message)); }
+}
+
+// THESE USED TO RUN AT MODULE SCOPE, before test() was defined - so a failure
+// threw out of the script and the gate reported Node's version banner as the
+// result. Same assertions, now reportable.
+test('the collapse module is self-contained and initialises exactly once', () => {
+  assert.ok(code.includes('function initCollapsibles('));
+  assert.doesNotMatch(code, /innerHTML/);
+  assert.equal((app.match(/^initCollapsibles\(\);/gm) || []).length, 1);
+  assert.ok(app.indexOf('\ninitCollapsibles();') < app.indexOf('if (!window.Terminal)'));
+});
+
+test('the IIOT cards pack into columns with no dead space between them', () => {
+  // The IIOT panels are packed into COLUMNS, not laid out in grid rows. A grid row
+  // is as tall as its tallest card, so short cards left a band of dead space across
+  // the middle of the page - measured at 307px wasted and a 255px hole under the
+  // PROFINET card. `align-items: start` used to be asserted here; it stopped cards
+  // STRETCHING into that space but could not stop the space existing.
+  assert.match(css, /\.iiot-grid\s*\{[^}]*column-width/);
+  assert.match(css, /\.iiot-grid > \.card\s*\{[^}]*break-inside: avoid/);
+  // .board keeps its grid, and keeps the no-stretch rule that goes with one.
+  assert.match(css, /\.board\s*\{[^}]*align-items: start/);
+  assert.match(css, /\.card > summary:focus-visible/);
+});
+
+// The DATA is module scope because several tests read it; every ASSERTION about
+// it lives in a test, so a failure is reported rather than thrown out of the
+// script. That split is the whole point - the data cannot fail, the claims can.
+const CARD_COUNT = 12;
 const cards = [...html.matchAll(/<details class="card" data-collapse-key="([^"]+)"( open)?>([\s\S]*?)<\/details>/g)];
-assert.equal(cards.length, CARD_COUNT);
-assert.equal(new Set(cards.map(m => m[1])).size, CARD_COUNT);
-// Every IIOT panel is a card, and they all carry the same bold <h3> summary. The
-// PROFINET panel used to build its own <details> in JS with a bare-text summary,
-// so it alone rendered unbold and out of line with the rest.
-const iiot = cards.filter(m => m[1].startsWith('iiot:')).map(m => m[1]);
-assert.deepEqual(iiot, ['iiot:modbus', 'iiot:dcp', 'iiot:mqtt', 'iiot:scan', 'iiot:codesys']);
-assert.doesNotMatch(html, /<section class="card">/);
-for (const card of cards) assert.match(card[3], /^\s*<summary><h3>[^<]+<\/h3><\/summary>/);
-let passed = 0;
-function test(name, fn) { fn(); passed++; console.log('PASS: ' + name); }
+
+test('every card has a unique collapse key and the IIOT cards are in order', () => {
+  // Six IIOT field cards and six Settings cards. The count is asserted so that a
+  // card added without a collapse key - which is how one ends up permanently open -
+  // fails here rather than being noticed by an operator.
+  assert.equal(cards.length, CARD_COUNT);
+  assert.equal(new Set(cards.map(m => m[1])).size, CARD_COUNT);
+  // Every IIOT panel is a card, and they all carry the same bold <h3> summary. The
+  // PROFINET panel used to build its own <details> in JS with a bare-text summary,
+  // so it alone rendered unbold and out of line with the rest.
+  const iiot = cards.filter(m => m[1].startsWith('iiot:')).map(m => m[1]);
+  // In document order, so this also pins WHERE a card sits. The device tree comes
+  // after the scanner because it merges what the scanner found.
+  assert.deepEqual(iiot, ['iiot:modbus', 'iiot:dcp', 'iiot:mqtt', 'iiot:scan',
+                          'iiot:devices', 'iiot:codesys']);
+  assert.doesNotMatch(html, /<section class="card">/);
+  // Every card carries the same bold <h3> summary. The PROFINET panel used to
+  // build its own <details> in JS with a bare-text summary, so it alone
+  // rendered unbold and out of line with the rest.
+  for (const card of cards) assert.match(card[3], /^\s*<summary><h3>[^<]+<\/h3><\/summary>/);
+});
+
 class Details {
   constructor(key, open = true) {
     this.dataset = {collapseKey: key}; this.open = open; this.events = [];
@@ -230,7 +261,17 @@ function renderer(store, rows) {
     }
   }
   passed++; console.log('PASS: all four list renderers survive blocked/malformed storage and failed writes');
-  console.log(`passed ${passed}, failed 0`);
-})().catch(err => { console.error(err); process.exitCode = 1; });
+  // The REAL count. This said `failed 0` unconditionally, so the suite could
+  // not report a failure even in the runs where it noticed one.
+  console.log(`passed ${passed}, failed ${failed}`);
+  if (failed) process.exitCode = 1;
+})().catch(err => {
+  // Anything that escaped the per-test catch - a throw at module scope, before
+  // any test ran. Still has to end with a summary, or the gate reports the
+  // stack trace's last line as though it were the result.
+  console.error(err);
+  console.log(`passed ${passed}, failed ${failed + 1}`);
+  process.exitCode = 1;
+});
 
 JS

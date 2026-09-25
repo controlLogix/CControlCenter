@@ -146,4 +146,35 @@ else
   bad 'an unparsed summary would not be counted as a failure'
 fi
 
+# ── no suite may hardcode a failure count it cannot reach ────────────────────
+#
+# test_frontend_collapse.sh printed `passed ${passed}, failed 0` - a literal
+# zero, so it could not report a failure even in the runs where it noticed one.
+# Its assertions also ran at module scope, outside any harness, so a failure
+# threw out of the script and the gate reported Node's version banner as the
+# result. Both halves of that were invisible until a card was added.
+#
+# A variable count beside a literal zero is the smell: it means someone wired up
+# a pass counter and never a failure one.
+hardcoded=""
+while IFS= read -r -d '' file; do
+  case "$file" in *dashboard/test_gate_reporting.sh) continue ;; esac
+  # A literal zero is fine when the line ALSO branches on a real failure count -
+  # test_idle.sh prints "failed 0" only inside `if [ "$failed" = 0 ]`, which is
+  # correct and was the first thing this check flagged. A check that cries wolf
+  # on the correct case is worse than no check, so the exemption is precise:
+  # the line must nowhere else interpolate a failure variable.
+  hits=$(grep -nE 'passed [^,]*\$[A-Za-z_{][^,]*, *failed 0' "$file" 2>/dev/null |
+         grep -vE 'failed \$[A-Za-z_{]' || true)
+  [ -z "$hits" ] || hardcoded="$hardcoded$file: $hits"$'
+'
+done < <(git ls-files -z -- 'dashboard/test_*.sh' 'dashboard/check_*.sh' 2>/dev/null)
+
+if [ -z "$hardcoded" ]; then
+  ok 'no suite reports a counted pass beside a hardcoded zero failure'
+else
+  bad 'a suite counts its passes and hardcodes "failed 0", so it cannot report a failure'
+  printf '%s' "$hardcoded" | sed 's/^/          /'
+fi
+
 finish
