@@ -299,31 +299,42 @@ class DashboardTests(unittest.TestCase):
             self.skipTest('required node location unavailable')
         script = r'''
 const fs = require('fs'), vm = require('vm'), assert = require('assert');
-const all = [];
+const all = []; let loader, posts=[];
 class Element {
-  constructor(tag) {this.tag = tag; this.children = []; this.dataset = {}; this.style = {}; this.handlers = {}; this.textContent = ''; all.push(this);}
-  appendChild(e) {this.children.push(e); return e;}
+  constructor(tag, cls='', text='') {this.tag=tag;this.children=[];this.dataset={};this.style={};this.handlers={};this.textContent=text;this.value='';all.push(this);}
+  appendChild(e) {this.children.push(e);return e;}
+  append(...nodes) {this.children.push(...nodes);}
   setAttribute() {}
-  replaceChildren() {this.children = [];}
-  addEventListener(k, fn) {this.handlers[k] = fn;}
+  replaceChildren(...nodes) {this.children=nodes;}
+  addEventListener(k,fn) {this.handlers[k]=fn;}
 }
-const root = new Element('div');
-const document = {getElementById: () => null, querySelector: () => root, createElement: tag => new Element(tag)};
-vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), {document});
-assert(all.some(e => e.textContent.includes('sudo python3 taskmgmt/pn_dcp.py')));
-const input = all.find(e => e.tag === 'textarea'), button = all.find(e => e.tag === 'button'), body = all.find(e => e.tag === 'tbody');
-input.value = JSON.stringify({kind:'dcp-identify', mac:'00:11:22:33:44:55', name:'<img src=x onerror=alert(1)>', vendor_id:0});
-button.handlers.click();
-assert.equal(body.children.length, 1);
-assert.equal(body.children[0].children[1].textContent, '<img src=x onerror=alert(1)>');
-assert.equal(body.children[0].children[6].textContent, '0');
-assert.equal(body.children[0].children[1].children.length, 0);
-input.value = '{invalid'; button.handlers.click();
-assert(all.some(e => e.textContent.startsWith('Import failed:')));
-assert.equal(body.children.length, 1);
-input.value = JSON.stringify({kind:'dcp-set',mac:'00:11:22:33:44:55'}); button.handlers.click();
-assert.equal(body.children.length, 1);
-console.log('DCP DOM import checks passed');
+const root=new Element('div');
+let state={schema:{stations:[]},snapshot:[],reconciliation:{counts:{match:0,mismatch:0,missing:0,unexpected:0},rows:[]}};
+const document={getElementById:id=>id==='profinetPanel'?root:null,activeElement:null};
+const window={addEventListener:(name,fn)=>{assert.equal(name,'ccc:ready');fn();},CCC:{
+ el:(...args)=>new Element(...args),registerCard:(view,fn,poll)=>{assert.equal(view,'iiot');assert.equal(poll,0);loader=fn;},
+ getJSON:async path=>{assert.equal(path,'api/profinet');return state;},
+ post:async(path,body)=>{assert.equal(path,'api/profinet/snapshot');posts.push(body);const record=body.records[0];
+   if(record.kind!=='dcp-identify')throw Error('Identify records required');
+   state={...state,snapshot:[record],reconciliation:{counts:{match:0,mismatch:0,missing:0,unexpected:1},rows:[{status:'unexpected',mac:record.mac,actual:{...record,vendor:String(record.vendor_id)},differences:[]}]}};return state;}
+}};
+vm.runInNewContext(fs.readFileSync(process.argv[1],'utf8'),{document,window});
+(async()=>{
+ await loader();
+ assert(all.some(e=>e.textContent.includes('sudo python3 taskmgmt/pn_dcp.py')));
+ const input=all.find(e=>e.placeholder==='Paste the JSON lines from dcp.jsonl'),button=all.find(e=>e.textContent==='Import snapshot'),body=all.find(e=>e.tag==='tbody');
+ input.value=JSON.stringify({kind:'dcp-identify',mac:'00:11:22:33:44:55',name:'<img src=x onerror=alert(1)>',vendor_id:0});
+ await button.handlers.click();
+ assert.equal(posts.length,1);assert.equal(posts[0].records[0].vendor_id,0);
+ assert.equal(body.children.length,1);assert.equal(body.children[0].children[2].textContent,'<img src=x onerror=alert(1)>');
+ assert.equal(body.children[0].children[6].textContent,'0');assert.equal(body.children[0].children[2].children.length,0);
+ input.value='{invalid';await button.handlers.click();assert.equal(posts.length,1);
+ assert(all.some(e=>e.textContent.startsWith('Import failed:')));assert.equal(body.children.length,1);
+ input.value=JSON.stringify({kind:'dcp-set',mac:'00:11:22:33:44:55'});await button.handlers.click();
+ assert.equal(posts.length,2);assert.equal(body.children.length,1);
+ assert.equal(body.children[0].children[2].textContent,'<img src=x onerror=alert(1)>');
+ console.log('DCP DOM import checks passed');
+})().catch(e=>{console.error(e);process.exitCode=1;});
 '''
         result = subprocess.run([str(candidates[-1]), '-e', script, str(ROOT / 'dashboard/iiot.js')], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
