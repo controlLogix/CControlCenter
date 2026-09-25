@@ -17,6 +17,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import agentdefs as ad
 import ninep
 
+# Captured at import, BEFORE setUp relocates HOME into a fixture directory.
+# Path.home() inside a test resolves to that fixture, so reading it there would
+# quietly turn "check this machine's real definitions" into "check the ones this
+# test just wrote" - a test that passes while checking nothing.
+REAL_HOME = Path.home()
+
 
 class AgentDefinitions(unittest.TestCase):
     def setUp(self):
@@ -265,31 +271,53 @@ class AgentDefinitions(unittest.TestCase):
         self.assertEqual([(s.name, s.cli) for s in fallback], [("lead", "claude")])
         self.assertTrue(fallback.gaps)
 
-    def test_existing_claude_definitions_unchanged(self):
-        # Portable CI uses representative names; on the dispatched machine, copy
-        # the actual five bytes-for-byte into the isolated fixture and test them.
-        # Path.home(), not a hardcoded /home/nick: the hardcode made this test
-        # about one account rather than about the machine it runs on.
-        source = Path.home() / ".claude/agents"
-        names = ("hr-recruiter", "plc-dev", "plc-test-engineer", "scheduler", "senior-reviewer")
-        for name in names:
-            p = source / (name + ".md")
-            # Three outcomes, not two. ~/.claude can be a link onto /mnt/c, where
-            # is_file() raises EIO instead of answering - and "we could not read
-            # it" is neither "it is absent" (use the representative name) nor a
-            # defect in the definitions this test exists to check.
-            reason = ninep.unreachable_reason(p, "file")
-            if reason is None:
-                self.write(name, 3, raw=ninep.guard(p.read_bytes, p))
-            elif reason.endswith("is absent"):
-                self.write(name, 3)
-            else:
-                self.skipTest(reason)
+    # The five this project ships as user-scope definitions.
+    SHIPPED = ("hr-recruiter", "plc-dev", "plc-test-engineer", "scheduler", "senior-reviewer")
+
+    def assert_worker_set(self, names):
         specs, problems = self.load()
         self.assertEqual(problems, [])
         self.assertEqual(set(specs), set(names))
         self.assertTrue(all(s.role == "worker" and s.posture == "workspace-write"
                             and s.max_instances == 1 for s in specs.values()))
+
+    def test_representative_definitions_load_as_workers(self):
+        # Repo-only, so this one always runs. It used to be entangled with the
+        # check below, which meant the whole property depended on a directory
+        # outside the repo that the gate does not control.
+        for name in self.SHIPPED:
+            self.write(name, 3)
+        self.assert_worker_set(self.SHIPPED)
+
+    def test_this_machines_own_definitions_still_load(self):
+        """The real files, byte-for-byte - and a SKIP that says so when they are
+        not readable, rather than a pass that quietly checked something else.
+
+        REAL_HOME, not a hardcoded /home/nick and not Path.home(): the hardcode
+        made this a test about one account rather than about the machine it runs
+        on, and Path.home() here resolves to the fixture setUp created - which
+        would have made it check the files it had just written itself.
+        """
+        source = REAL_HOME / ".claude/agents"
+        copied = []
+        for name in self.SHIPPED:
+            p = source / (name + ".md")
+            # Three outcomes, not two. ~/.claude can be a link onto /mnt/c, where
+            # is_file() raises EIO instead of answering - and "we could not read
+            # it" is neither "it is absent" nor a defect in the definitions.
+            reason = ninep.unreachable_reason(p, "file")
+            if reason is None:
+                self.write(name, 3, raw=ninep.guard(p.read_bytes, p))
+                copied.append(name)
+            elif not reason.endswith("is absent"):
+                self.skipTest(reason)
+        if len(copied) != len(self.SHIPPED):
+            # Portable CI has none of these. Say which were missing rather than
+            # silently testing the representative ones and reporting a pass.
+            missing = sorted(set(self.SHIPPED) - set(copied))
+            self.skipTest(f"{source} does not carry {missing}; "
+                          f"the representative definitions are covered separately")
+        self.assert_worker_set(self.SHIPPED)
 
 
 if __name__ == "__main__":

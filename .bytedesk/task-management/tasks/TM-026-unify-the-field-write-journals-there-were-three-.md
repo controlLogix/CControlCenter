@@ -6,7 +6,7 @@ created: "2026-09-25T20:57:22.804Z"
 board: "controllogix/ccontrolcenter"
 title: "Unify the field write journals — there were three, not two"
 epic: "EP-002"
-acceptance: [{"text":"One module owns every write to field equipment: enip, logix and ads all journal through writejournal.py and none keeps a private _journal","done":true,"at":"2026-09-25T20:57:27.326Z"},{"text":"The intent is fsync'd before transmission and a journal failure prevents the write, proven for all three transports","done":true,"at":"2026-09-25T20:57:27.533Z"},{"text":"Every row names its transport and carries an id pairing its outcome back to its intent","done":true,"at":"2026-09-25T20:57:27.753Z"},{"text":"The legacy files migrate in timestamp order, are renamed rather than deleted, and a second run is a no-op","done":true,"at":"2026-09-25T20:57:27.974Z"},{"text":"A census test fails when a client that writes to equipment does not journal through this module","done":true,"at":"2026-09-25T20:57:28.178Z"},{"text":"Decide whether Modbus equipment writes join field-writes.jsonl or stay in the dashboard journal, and record which","done":false}]
+acceptance: [{"text":"One module owns every write to field equipment: enip, logix and ads all journal through writejournal.py and none keeps a private _journal","done":true,"at":"2026-09-25T20:57:27.326Z"},{"text":"The intent is fsync'd before transmission and a journal failure prevents the write, proven for all three transports","done":true,"at":"2026-09-25T20:57:27.533Z"},{"text":"Every row names its transport and carries an id pairing its outcome back to its intent","done":true,"at":"2026-09-25T20:57:27.753Z"},{"text":"The legacy files migrate in timestamp order, are renamed rather than deleted, and a second run is a no-op","done":true,"at":"2026-09-25T20:57:27.974Z"},{"text":"A census test fails when a client that writes to equipment does not journal through this module","done":true,"at":"2026-09-25T20:57:28.178Z"},{"text":"Decide whether Modbus equipment writes join field-writes.jsonl or stay in the dashboard journal, and record which","done":true,"at":"2026-09-25T21:38:13.613Z"}]
 evidence: []
 commits: []
 blockedBy: []
@@ -14,7 +14,7 @@ blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T20:57:28.194Z"
+updated: "2026-09-25T21:38:13.631Z"
 ---
 
 Done, 2026-09-25. Filed as a record because the *finding* matters more than the refactor.
