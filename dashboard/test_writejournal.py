@@ -148,9 +148,25 @@ class JournalTests(_NeedsJournal):
         # Resolved per call, not captured at import: the tests and the sidecar
         # both relocate HOME, and a module constant would freeze whichever home
         # happened to be set first.
-        with patch.object(Path, 'home', return_value=Path(self.temp.name) / 'elsewhere'):
-            self.assertEqual(writejournal.default_path(),
-                             Path(self.temp.name) / 'elsewhere' / '.agentmux' / 'field-writes.jsonl')
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop('AGENTMUX_HOME', None)
+            with patch.object(Path, 'home', return_value=Path(self.temp.name) / 'elsewhere'):
+                self.assertEqual(writejournal.default_path(),
+                                 Path(self.temp.name) / 'elsewhere' / '.agentmux' / 'field-writes.jsonl')
+
+    def test_agentmux_home_wins_because_that_is_what_every_suite_relocates(self):
+        # The residue bug ccstore.py:17-21 already records once: two files
+        # hardcoded ~/.agentmux, and the moment AGENTMUX_HOME was set - which
+        # every suite does - they wrote to the operator's real directory. For an
+        # audit trail that is worse than untidy: a test run leaves rows in the
+        # record of what was actually sent to equipment. Found again here when a
+        # suite run created ~/.agentmux/field-writes.jsonl with 'test-operator'
+        # rows in it.
+        elsewhere = Path(self.temp.name) / 'relocated'
+        with patch.dict(os.environ, {'AGENTMUX_HOME': str(elsewhere)}):
+            self.assertEqual(writejournal.default_path(), elsewhere / 'field-writes.jsonl')
+            self.assertTrue(all(p.parent == elsewhere for p in writejournal.legacy_paths()),
+                            'the legacy journals do not follow AGENTMUX_HOME either')
 
 
 class MigrationTests(_NeedsJournal):

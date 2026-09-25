@@ -45,11 +45,18 @@ OUTCOMES = ('success', 'rejected', 'unknown', 'partial')
 def default_path():
     """Where the journal lives unless a caller says otherwise.
 
-    Resolved on each call rather than at import: the tests and the sidecar both
-    relocate HOME, and a module-level constant would capture whichever home
-    happened to be set when the module was first imported.
+    AGENTMUX_HOME first, as everything else in this repo already honours it.
+    ccstore.py:17-21 records what happens otherwise: two files hardcoded
+    ~/.agentmux, and the moment AGENTMUX_HOME was set - which every test suite
+    does - they wrote to the operator's real directory instead of the temporary
+    one. For an audit trail that is worse than untidy: a suite run leaves rows
+    in the record of what was actually sent to equipment.
+
+    Resolved on each call rather than at import, so a module-level constant
+    cannot capture whichever home happened to be set when it was first imported.
     """
-    return Path.home() / '.agentmux' / 'field-writes.jsonl'
+    root = os.environ.get('AGENTMUX_HOME')
+    return (Path(root) if root else Path.home() / '.agentmux') / 'field-writes.jsonl'
 
 
 def legacy_paths():
@@ -58,7 +65,7 @@ def legacy_paths():
     The transport each row gets during migration is inferred from the filename
     stem, so a name here must keep the '<transport>-writes.jsonl' shape.
     """
-    root = Path.home() / '.agentmux'
+    root = Path(os.environ.get('AGENTMUX_HOME') or Path.home() / '.agentmux')
     return (root / 'enip-writes.jsonl',
             root / 'logix-writes.jsonl',
             root / 'ads-writes.jsonl')

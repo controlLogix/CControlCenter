@@ -100,11 +100,17 @@ class ModbusTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.slave = Slave()
         self.events = []
-        self.client = mb.Client('127.0.0.1', self.slave.server_address[1], .15)
+        # The SHARED field journal, pointed at the temp dir. Without this a suite
+        # run appends to the operator's real ~/.agentmux/field-writes.jsonl -
+        # residue, and a polluted audit trail, which is worse.
+        self.audit = Path(self.tmp.name) / 'field-writes.jsonl'
+        self.client = mb.Client('127.0.0.1', self.slave.server_address[1], .15,
+                                journal_path=self.audit)
         self.config = dict(host='127.0.0.1', port=self.slave.server_address[1], interval=.2,
                            tags=[dict(name='temperature', address=0, type='uint16', scale=.1,
                                       engineering_unit='C')])
-        self.poller = mb.Poller(Path(self.tmp.name)/'tags.json', self.events.append, autostart=False)
+        self.poller = mb.Poller(Path(self.tmp.name)/'tags.json', self.events.append,
+                                autostart=False, journal_path=self.audit)
 
     def tearDown(self):
         self.poller.close()
@@ -124,8 +130,53 @@ class ModbusTests(unittest.TestCase):
             self.client.write(1, fc, 3, values, confirm=True, actor='operator', journal=self.events.append)
             read_fc = 1 if fc in (5, 15) else 3
             self.assertEqual(self.client.read(1, read_fc, 3, len(values)), values)
-        self.assertEqual([e['outcome'] for e in self.events], ['intent', 'acknowledged']*4)
+        # 'success', not 'acknowledged'. It was a fourth word for the thing the
+        # other three transports call success, and in a shared journal a synonym
+        # means anyone grepping for successful writes misses every Modbus one.
+        self.assertEqual([e['outcome'] for e in self.events], ['intent', 'success']*4)
         self.assertTrue(all(e['actor'] == 'operator' and 'value' in e for e in self.events))
+
+    def audit_rows(self):
+        if not self.audit.exists():
+            return []
+        return [json.loads(line) for line in
+                self.audit.read_text(encoding='utf-8').splitlines() if line.strip()]
+
+    def test_the_write_lands_in_the_journal_shared_with_every_transport(self):
+        # A Modbus write is a write to field equipment, so it belongs in the one
+        # audit file with enip, logix and ads - not only in the dashboard's own
+        # journal, which is a display mirror and lives in cc.db.
+        self.client.write(1, 6, 3, [42], confirm=True, actor='operator',
+                          journal=self.events.append)
+        rows = self.audit_rows()
+        self.assertEqual([r['outcome'] for r in rows], ['intent', 'success'])
+        self.assertEqual({r['transport'] for r in rows}, {'modbus'})
+        self.assertEqual(len({r['id'] for r in rows}), 1, 'the outcome does not pair to its intent')
+        self.assertEqual(rows[0]['actor'], 'operator')
+
+    def test_a_device_exception_is_a_refusal_not_an_unknown(self):
+        # The device said no, in so many words, and changed nothing. Recording
+        # that as 'unknown' sends somebody out to the panel for nothing - and
+        # every time it happens, 'unknown' means a little less.
+        self.slave.mode = 'exception'
+        with self.assertRaises(mb.ModbusException) as caught:
+            self.client.write(1, 6, 3, [42], confirm=True, actor='operator',
+                              journal=self.events.append)
+        self.assertEqual(caught.exception.code, 2)
+        self.assertEqual([e['outcome'] for e in self.events], ['intent', 'rejected'])
+        self.assertEqual(self.events[-1]['exception_code'], 2)
+        rows = self.audit_rows()
+        self.assertEqual([r['outcome'] for r in rows], ['intent', 'rejected'])
+
+    def test_anything_other_than_a_refusal_is_still_unknown(self):
+        # A dropped connection tells us nothing about whether it applied, and
+        # that distinction is the only reason to record an outcome at all.
+        self.slave.mode = 'hang'
+        with self.assertRaises(Exception):
+            self.client.write(1, 6, 3, [42], confirm=True, actor='operator',
+                              journal=self.events.append)
+        self.assertEqual([e['outcome'] for e in self.events], ['intent', 'unknown'])
+        self.assertEqual([r['outcome'] for r in self.audit_rows()], ['intent', 'unknown'])
 
     def test_confirmation_actor_and_journal_required_before_network(self):
         for kwargs in [dict(confirm=False, actor='x', journal=self.events.append),

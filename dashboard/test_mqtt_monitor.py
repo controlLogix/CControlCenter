@@ -127,7 +127,13 @@ class _NeedsMonitor(unittest.TestCase):
         auth_path = self.root / f'auth-{self._seq}.json'
         if auth is not None:
             import json
+            import os
             auth_path.write_text(json.dumps(auth), encoding='utf-8')
+            # 0600, because AuthStore refuses a world-readable credentials file
+            # and says so rather than using it. Windows does not enforce modes,
+            # so a test written there passes without this and fails on the box
+            # the gate actually runs on.
+            os.chmod(auth_path, 0o600)
         m = mqtt_monitor.Monitor(self.root / f'mqtt-{self._seq}.json', autostart=False,
                                  auth_path=auth_path)
         self.addCleanup(m.close)

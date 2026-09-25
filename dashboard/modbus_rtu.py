@@ -11,7 +11,8 @@ import struct
 import threading
 import time
 
-from modbus_poll import Client as ProtocolClient, ModbusError, finite, integer
+from modbus_poll import (Client as ProtocolClient, ModbusError, ModbusException,
+                         finite, integer)
 
 
 def crc16(data):
@@ -53,8 +54,15 @@ _locks_guard = threading.Lock()
 
 
 class Client(ProtocolClient):
-    def __init__(self, device, *, baud=9600, parity='E', stopbits=1, timeout=1):
+    def __init__(self, device, *, baud=9600, parity='E', stopbits=1, timeout=1,
+                 journal_path=None):
         self.config = serial_config(dict(device=device, baud=baud, parity=parity, stopbits=stopbits))
+        # This does not call super().__init__ - it has no host or port - so the
+        # journal attributes the inherited write() needs are set here. Missing
+        # them would fail at the moment of a write to equipment, which is the
+        # worst possible time to discover an attribute is not there.
+        self._journal_path = journal_path
+        self._journal = None
         self.timeout = finite(timeout)
         if self.timeout <= 0:
             raise ValueError('timeout must be positive')
@@ -136,7 +144,7 @@ class Client(ProtocolClient):
                     raise ModbusError('wrong RTU response unit')
                 pdu = response[1:-2]
                 if pdu[0] == function | 128 and len(pdu) == 2:
-                    raise ModbusError(f'device exception {pdu[1]}')
+                    raise ModbusException(pdu[1])
                 if pdu[0] != function:
                     raise ModbusError('wrong response function')
                 return bytes(pdu[1:])

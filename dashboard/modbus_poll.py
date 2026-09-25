@@ -16,9 +16,26 @@ import threading
 import time
 import uuid
 
+import writejournal
+
 
 class ModbusError(Exception):
     pass
+
+
+class ModbusException(ModbusError):
+    """The DEVICE refused, and said so with an exception response.
+
+    Its own class because the difference is the whole point of recording an
+    outcome. A refusal means nothing changed. Every other failure here - a
+    dropped connection, a bad CRC, a deadline - means we do not know whether it
+    changed, which is what sends somebody to look at the equipment. Collapsing
+    them made that instruction fire for writes the device had visibly rejected.
+    """
+
+    def __init__(self, code, detail=None):
+        self.code = code
+        super().__init__(detail or f'device exception {code}')
 
 
 def integer(value, low, high):
@@ -34,9 +51,19 @@ def finite(value):
 
 
 class Client:
-    def __init__(self, host, port=502, timeout=1):
+    def __init__(self, host, port=502, timeout=1, *, journal_path=None):
         self.host, self.port, self.timeout = host, port, timeout
         self.transaction = 0
+        self._journal_path = journal_path
+        self._journal = None
+
+    @property
+    def journal(self):
+        # Built on first use, so constructing a client that then refuses to
+        # write leaves no trace at all.
+        if self._journal is None:
+            self._journal = writejournal.WriteJournal(self._journal_path, transport='modbus')
+        return self._journal
 
     def target(self):
         return dict(host=self.host, port=self.port)
@@ -66,7 +93,7 @@ class Client:
                 raise ModbusError('invalid MBAP header')
             response = exact(length-1)
             if response[0] == function | 128 and len(response) == 2:
-                raise ModbusError(f'device exception {response[1]}')
+                raise ModbusException(response[1])
             if response[0] != function:
                 raise ModbusError('wrong response function')
             return response[1:]
@@ -117,14 +144,29 @@ class Client:
             data = expected + bytes([len(packed)]) + packed
         event = dict(id=uuid.uuid4().hex, actor=actor, **self.target(),
                      unit=unit, function=function, address=address, value=values)
+        # Two journals, both durable before transmission, and either failing
+        # stops the write. The file is the audit shared with every other
+        # transport (writejournal.py); the callback is the dashboard's own
+        # journal in cc.db, which is what the page reads.
+        handle = self.journal.intent(dict(event))
         journal(dict(event, outcome='intent'))  # Failure here prevents transmission.
         try:
             if self.exchange(unit, function, data) != expected:
                 raise ModbusError('write acknowledgement mismatch')
-        except Exception:
+        except ModbusException as exc:
+            # The device said no. Nothing changed, so nobody needs to walk out
+            # to the panel - and `unknown` stays meaning what it says.
+            handle.settle('rejected', error=str(exc), exception_code=exc.code)
+            journal(dict(event, outcome='rejected', exception_code=exc.code))
+            raise
+        except Exception as exc:
+            handle.settle('unknown', error=f'{type(exc).__name__}: {exc}')
             journal(dict(event, outcome='unknown'))
             raise
-        journal(dict(event, outcome='acknowledged'))
+        handle.settle('success')
+        # Was 'acknowledged'. One word for one outcome: in a shared journal a
+        # synonym means anyone grepping for successful writes misses these.
+        journal(dict(event, outcome='success'))
 
 
 FORMATS = {'int16': 'h', 'uint16': 'H', 'int32': 'i', 'uint32': 'I', 'float32': 'f'}
@@ -193,17 +235,24 @@ def target(config):
     return {key: config[key] for key in keys}
 
 
-def client_for(config, timeout=1):
+def client_for(config, timeout=1, journal_path=None):
+    # journal_path travels through, so a test can point the shared audit file at
+    # a temporary directory. Without it a test run appends to the operator's
+    # real field-writes.jsonl, which is both residue and a polluted audit trail.
     if config.get('transport') == 'rtu':
         from modbus_rtu import Client as RTUClient
         return RTUClient(config['device'], baud=config['baud'], parity=config['parity'],
-                         stopbits=config['stopbits'], timeout=timeout)
-    return Client(config['host'], config['port'], timeout)
+                         stopbits=config['stopbits'], timeout=timeout,
+                         journal_path=journal_path)
+    return Client(config['host'], config['port'], timeout, journal_path=journal_path)
 
 
 class Poller:
-    def __init__(self, path, journal, autostart=True):
+    def __init__(self, path, journal, autostart=True, journal_path=None):
         self.path, self.journal = Path(path), journal
+        # Where the SHARED field journal goes. None means the default; the tests
+        # set it so a suite run never touches the real audit trail.
+        self.journal_path = journal_path
         self.lock = threading.RLock()
         self.stop_event = threading.Event()
         self.config = validate(json.loads(self.path.read_text())) if self.path.exists() else None
@@ -291,7 +340,7 @@ class Poller:
                 raise ValueError('configure a device first')
             if body.get('target') != target(self.config):
                 raise ValueError('target changed; review and confirm again')
-            client_for(self.config).write(
+            client_for(self.config, journal_path=self.journal_path).write(
                 body.get('unit'), body.get('function'), body.get('address'), body.get('values', []),
                 confirm=body.get('confirm'), actor=body.get('actor'), journal=self.journal)
         return {'ok': True}

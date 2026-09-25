@@ -154,7 +154,7 @@ class RTUTests(unittest.TestCase):
         for fc, values in [(5, [True]), (6, [65535]), (15, [True, False]*5), (16, [12, 34])]:
             self.client.write(1, fc, 3, values, confirm=True, actor='test-operator', journal=journal)
             self.assertEqual(self.client.read(1, 1 if fc in (5, 15) else 3, 3, len(values)), values)
-        self.assertEqual([e['outcome'] for e in self.events], ['intent', 'acknowledged']*4)
+        self.assertEqual([e['outcome'] for e in self.events], ['intent', 'success']*4)
         self.assertTrue(all(e['device'] == self.slave.device and e['transport'] == 'rtu' for e in self.events))
 
     def test_write_guards_and_failed_journal_prevent_open(self):
@@ -326,7 +326,7 @@ class RTUHttpTests(tcp_tests.HttpTests):
             with self.server.ccstore.connection() as db:
                 rows = list(db.execute("SELECT body FROM journal WHERE agent = 'rtu-api-operator' ORDER BY id"))
             events = [json.loads(row['body']) for row in rows]
-            self.assertEqual([e['outcome'] for e in events], ['intent', 'acknowledged'])
+            self.assertEqual([e['outcome'] for e in events], ['intent', 'success'])
             self.assertTrue(all(e['device'] == slave.device for e in events))
         finally:
             slave.close()
