@@ -290,6 +290,10 @@ run test_pn_dcp.py python3 dashboard/test_pn_dcp.py
 run test_ecat_diag.py python3 dashboard/test_ecat_diag.py
 run test_snapshot.py python3 dashboard/test_snapshot.py
 run test_mqtt.py  python3 dashboard/test_mqtt.py
+# The monitor's session handling: TLS, reconnect and the missing-vendor path.
+# Scoped to what test_field_panels.py does NOT already cover, and proved by
+# mutation rather than by check_test_failability - see its docstring for why.
+run test_mqtt_monitor.py python3 dashboard/test_mqtt_monitor.py
 # netscan internals test_field_panels.py does not reach: the ARP parsers, the
 # WSL fallback, and the never-fatal contract. Added after a 9p EIO stat inside
 # neighbour_table killed whole scans on ~60% of e2e runs.
