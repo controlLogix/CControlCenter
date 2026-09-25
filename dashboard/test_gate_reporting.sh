@@ -97,7 +97,7 @@ fi
 # of failed names AFTER the counts, so even with the shell fixed the gate read a
 # list of names where the summary should have been. The summary is the last
 # thing the reporter prints, full stop.
-MJS="$(tr -d '' < dashboard/test_e2e.mjs)"
+MJS="$(tr -d '\r' < dashboard/test_e2e.mjs)"
 roll="$(printf '%s
 ' "$MJS" | grep -n "console.log('failed: '" | cut -d: -f1 | head -1)"
 counts="$(printf '%s

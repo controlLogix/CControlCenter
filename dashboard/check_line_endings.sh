@@ -36,10 +36,36 @@ if ! command -v git >/dev/null 2>&1 || ! git rev-parse --is-inside-work-tree >/d
 fi
 
 crlf_in() {
-  # Print every tracked path matching $1 whose working-tree copy contains CR.
+  # Every tracked path matching $1 whose working-tree copy contains a CR, with
+  # WHICH KIND and where. The two are different problems with different fixes:
+  #
+  #   CRLF endings     .gitattributes `text eol=lf` prevents them; a checkout on
+  #                    a machine with core.autocrlf is the usual cause
+  #   a lone CR        `eol=lf` does NOT touch it. It normalises line ENDINGS,
+  #                    and a CR not followed by LF is not one - it is a content
+  #                    bug, it survives every checkout, and it comes straight
+  #                    back unless the source is fixed
+  #
+  # Reported as "CRLF found" once, on a file that had a single stray CR in the
+  # middle of one line where a literal backslash-r had been mangled in an edit.
+  # The message sent the reader looking for the wrong thing entirely.
   git ls-files -z -- "$1" | while IFS= read -r -d '' f; do
     [ -f "$f" ] || continue
-    if LC_ALL=C grep -qU $'\r' "$f" 2>/dev/null; then printf '%s\n' "$f"; fi
+    LC_ALL=C grep -qU $'\r' "$f" 2>/dev/null || continue
+    python3 - "$f" <<'PY'
+import sys
+data = open(sys.argv[1], 'rb').read()
+crlf = data.count(b'\r\n')
+lone = data.count(b'\r') - crlf
+bits = []
+if crlf:
+    bits.append(f'{crlf} CRLF line ending(s)')
+if lone:
+    where = [str(i) for i, line in enumerate(data.split(b'\n'), 1)
+             if b'\r' in line.rstrip(b'\r')][:4]
+    bits.append(f'{lone} lone CR(s) mid-line, line(s) ' + (', '.join(where) or '?'))
+print(f"{sys.argv[1]}  -  " + '; '.join(bits))
+PY
   done
 }
 
@@ -49,8 +75,17 @@ report() {
   if [ -z "$offenders" ]; then
     ok "$label: every tracked file is LF"
   else
-    bad "$label: CRLF found - $why"
+    bad "$label: carriage returns found - $why"
     printf '%s\n' "$offenders" | sed 's/^/          /'
+    # Only the advice that applies. The two causes need different fixes, and
+    # printing the wrong one is how a message stops being read at all.
+    case "$offenders" in
+      *'lone CR'*)
+        echo '          a lone CR is NOT prevented by the eol=lf pin - it is a' >&2
+        echo '          content bug that survives every checkout; fix the source' >&2 ;;
+      *)
+        echo '          re-check out with the eol=lf pin in place' >&2 ;;
+    esac
   fi
 }
 
