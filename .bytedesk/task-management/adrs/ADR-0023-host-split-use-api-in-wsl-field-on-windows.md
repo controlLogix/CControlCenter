@@ -48,4 +48,46 @@ Rejected:
 
 ## Consequences
 
-_TODO: what this makes easy, what it makes hard, and what would have to be true to revisit it._
+**What this makes easy.** `tmux -L agentmux` stays a local binary call rather than
+`wsl.exe` interop on every read; `cc.db` stays on ext4 where it already is;
+`taskmgmt/coordination.py:51`'s POST to `127.0.0.1:8787` keeps working unchanged,
+which it would not if the API moved to Windows under NAT; and `dashboard/restart.sh`
+already launches the server inside WSL, so nothing about how it runs has to change.
+
+**What this makes hard.** The API and the field sidecar are on different hosts, and
+under default NAT they cannot reach each other at all — `127.0.0.1` from WSL does
+not reach a Windows loopback listener, and neither does the gateway address, because
+that listener is loopback-bound. That is `docs/wsl-networking.md`, and it makes
+mirrored networking a prerequisite rather than a nicety. The task store also sits on
+the other side of the mount, where inotify does not fire and `store.mjs` can break a
+live lock across the boundary.
+
+**One stated justification did not survive measurement, and the decision does not
+rest on it.** This ADR's question said a Windows-hosted API would mean "SQLite over
+the 9p WSL/Windows boundary (a real corruption hazard)". Tested on 2026-09-25 with
+the settings `ccstore.connection()` uses (WAL, `foreign_keys=ON`, `timeout=5`), four
+concurrent writers at 300 committed inserts each:
+
+| Scenario | Result |
+|---|---|
+| 4 WSL processes, ext4 | 1200/1200 rows, 0 busy/locked, `integrity_check: ok` |
+| 4 WSL processes, `/mnt/c` (9p) | 1200/1200 rows, 0 busy/locked, `integrity_check: ok` |
+| **2 Windows + 2 WSL, one file on 9p** | **1200/1200 rows, all four writers present, `integrity_check: ok`** |
+
+The third row is the one that would have shown the hazard, since WSL and Windows take
+different locking primitives. It did not. The decision stands on the three reasons in
+"what this makes easy", none of which depend on the SQLite claim.
+
+Recorded rather than quietly dropped: a reason nobody checks gets cited later to
+force a decision it never supported. Note this is a *different* failure from the 9p
+behaviour this repo has genuinely measured — transient **EIO under gate load**, which
+is why `run_tests.sh` runs from an ext4 clone and is what killed whole scans in
+`netscan.py` (TM-013). That one is real. And one probe is not a proof: it covers
+short transactions on a small database with no crash injection.
+
+**What would have to be true to revisit it.** If mirrored networking proves
+unworkable on this host — the VMware VMnet adapters are the open question — the
+cross-host hop becomes a firewall-scoped bind to the WSL adapter rather than
+loopback, and at that point putting both halves on one host again is worth
+re-costing. Equally, if the field work stops needing COM ports, the split loses its
+other leg.

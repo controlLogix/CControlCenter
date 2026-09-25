@@ -1,0 +1,41 @@
+Measured 2026-09-25. The decision stands; one of its stated reasons does not.
+
+SETUP: four concurrent writers, 300 committed inserts each, using exactly the
+settings ccstore.connection() uses - WAL, foreign_keys=ON, timeout=5. Throwaway
+databases; the operator's cc.db was never touched.
+
+  4 WSL processes, ext4            1200/1200 rows, 0 busy/locked, integrity ok, 3.9s
+  4 WSL processes, /mnt/c (9p)     1200/1200 rows, 0 busy/locked, integrity ok, 3.7s
+  2 Windows + 2 WSL, one file, 9p  1200/1200 rows, integrity ok
+       rows per writer: {win-a: 300, win-b: 300, wsl-a: 300, wsl-b: 300}
+
+The third is the decisive one. WSL and Windows take different locking primitives,
+and that is where SQLite can quietly lose writes. Every writer reported 300
+committed AND all 1200 rows were present afterwards - which is the check that
+matters, because silent loss is exactly how cross-OS lock failure presents.
+
+So "SQLite over the 9p boundary is a corruption hazard" is not supported here.
+
+WHAT CHANGED: the plan's §3.2a now carries the measurement instead of the claim,
+the host-split row in §1.1 was rewritten to the reasons that actually hold, and
+ADR-0023's Consequences records the failed justification rather than quietly
+dropping it. The decision itself is untouched.
+
+WHAT THE SPLIT ACTUALLY RESTS ON, all independent of SQLite:
+  * server.py:907 shells `tmux -L agentmux` as a LOCAL binary; a Windows API needs
+    wsl.exe interop for every read - the quoting minefield the wsl-cli skill exists
+    for.
+  * taskmgmt/coordination.py:51 POSTs to 127.0.0.1:8787 FROM WSL, which under NAT
+    reaches only a WSL-side listener.
+  * restart.sh:2 already runs the server in WSL and cc.db is already on ext4.
+  * COM ports and plant-NIC proximity pull the FIELD half to Windows
+    (modbus_rtu.py:97-98).
+
+LIMITS, stated because one probe is not a proof: short transactions, a small
+database, no crash injection. It does not clear long transactions, WAL checkpoint
+contention, or a process killed mid-write.
+
+NOT TO BE CONFUSED WITH the 9p failure this repo has genuinely measured: transient
+EIO under gate load. That one is real, it is why run_tests.sh runs from an ext4
+clone, and it is what killed whole scans in netscan.py (TM-013). Discarding the
+false claim must not take the true one with it.
