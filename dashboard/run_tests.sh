@@ -279,6 +279,9 @@ run test_ads.py python3 dashboard/test_ads.py
 # than aspirational, and the census test is what keeps a fourth client from
 # quietly starting a fourth file the way ads.py did.
 run test_writejournal.py python3 dashboard/test_writejournal.py
+# The audited pycomm3 wrapper: tag browsing and UDT decoding on the read side,
+# and on the write side a path that cannot be taken without leaving a record.
+run test_rockwell.py python3 dashboard/test_rockwell.py
 run test_pn_dcp.py python3 dashboard/test_pn_dcp.py
 run test_ecat_diag.py python3 dashboard/test_ecat_diag.py
 run test_snapshot.py python3 dashboard/test_snapshot.py
@@ -299,6 +302,10 @@ run check_line_endings.sh bash /dev/fd/22 22< <(tr -d '\r' < dashboard/check_lin
 # offline by hash, because the whole point of vendoring is the boxes that cannot
 # reach PyPI - and a check that needed PyPI would not run on them.
 run check_vendor.sh bash /dev/fd/25 25< <(tr -d '\r' < dashboard/check_vendor.sh)
+# pycomm3 has exactly one importer and the sidecar has no raw-CIP route. Both
+# are properties of what is ABSENT, which is the kind that gets deleted by
+# accident because nothing visibly depends on it.
+run check_field_writes.sh bash /dev/fd/26 26< <(tr -d '\r' < dashboard/check_field_writes.sh)
 # The gate in front of a write to PHYSICAL EQUIPMENT. Until 2026-09-25 that was a
 # one-click window.confirm and nothing tested it at all.
 run test_frontend_iiot_write.sh bash /dev/fd/23 23< <(tr -d '\r' < dashboard/test_frontend_iiot_write.sh)

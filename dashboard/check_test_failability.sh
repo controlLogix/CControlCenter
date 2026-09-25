@@ -74,6 +74,11 @@ test_frontend_iiot_age.sh    6b2d581    4
 # prove nothing. A floor rather than an equality: the count only grows, since a
 # tree without the module fails every test in the suite by construction.
 test_writejournal.py         aaa5cae    22
+# The audited pycomm3 wrapper. Against the commit before it, field/rockwell.py
+# does not exist - so all 20 fail through the suite's guarded import rather than
+# an ImportError that would crash it. A floor, like the row above: the count
+# only grows, since a tree without the module fails every test by construction.
+test_rockwell.py             9855905    20
 BASELINES
   SELF_TEST=1
 else

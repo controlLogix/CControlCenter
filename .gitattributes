@@ -36,18 +36,27 @@ taskmgmt/recovered/*.bin binary
 # Recovery is `tm reindex` once the endings are right.
 .bytedesk/task-management/** text eol=lf
 
-# Vendored third-party code MUST check out with LF, on every platform.
+# Vendored third-party code is NEVER converted, in either direction.
 #
-# field/vendor/MANIFEST.sha256 records a hash per vendored file, and
-# dashboard/check_vendor.sh verifies them - that is how "these are the bytes
-# that were reviewed" stays checkable offline, on the plant-side boxes where
-# nothing can re-download from PyPI.
+# Note this is `-text`, not `text eol=lf` like the two pins above, and the
+# difference is the point. Those pins exist to make a file PARSEABLE: bash
+# cannot source a CRLF script, and the plugin's frontmatter fence stops matching
+# CRLF. This one exists to make a file IDENTICAL, which is a stronger and
+# incompatible requirement.
 #
-# Under core.autocrlf those .py files check out with CRLF, every hash changes,
-# and the vendor gate fails on a fresh Windows clone while nothing is actually
-# wrong. Same failure family as the two pins above: a line-ending rewrite that
-# looks cosmetic breaks a file that is verified rather than merely read.
+# field/vendor/MANIFEST.sha256 records a hash per vendored file and
+# dashboard/check_vendor.sh verifies them, which is how "these are the bytes
+# that were reviewed" stays checkable offline - on exactly the plant-side boxes
+# that cannot re-download from PyPI. Any conversion breaks that pin.
 #
-# It would also silently unpin the dependency, which is the part that matters.
-dashboard/vendor/** text eol=lf
-field/vendor/**     text eol=lf
+# Measured 2026-09-25, and it is why this says -text: pycomm3 1.2.16 ships
+# slc_driver.py with CRLF and every other file with LF. `text eol=lf` normalised
+# that one file on commit, so the checked-out bytes no longer matched the wheel
+# and the vendor gate failed on a tree where nothing was wrong. Upstream's CRLF
+# IS the reviewed byte sequence; rewriting it quietly changes the dependency,
+# which is the thing the hash exists to prevent.
+#
+# Same reasoning as taskmgmt/recovered/*.bin at the top of this file: some files
+# are content to preserve, not text to tidy.
+dashboard/vendor/** -text
+field/vendor/**     -text

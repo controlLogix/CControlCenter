@@ -65,6 +65,18 @@ stronger evidence than either alone.
 
 A hash per vendored file, checked by `dashboard/check_vendor.sh`.
 
+**These files are `-text` in `.gitattributes`, so git never converts them.**
+That is not the same pin the shell scripts and the task store get. Those are
+`text eol=lf`, to make them *parseable*; this is `-text`, to make them
+*identical*, and the two are incompatible.
+
+It matters here concretely: pycomm3 1.2.16 ships **`slc_driver.py` with CRLF**
+and every other file with LF. Under `text eol=lf` git normalised that one file
+on commit, the checked-out bytes stopped matching the wheel, and the vendor gate
+failed on a tree where nothing was wrong. Upstream's CRLF *is* the reviewed byte
+sequence — rewriting it quietly changes the dependency, which is the exact thing
+the hash exists to prevent.
+
 The wheel hashes above are **provenance** — they let anyone re-derive these
 files from PyPI. They are deliberately not what the gate verifies, because
 verifying them needs the network, and a check that only works where PyPI is
