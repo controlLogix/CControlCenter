@@ -1391,8 +1391,9 @@ and SQLite over 9p is not the hazard the host split was justified with.
 ### Phase 4 — later the same day
 
 Gate: **all suites passed**, 2,176 assertions across 64 suites, from the ext4 clone.
-Phases 4.1 through 4.4 are done; 4.5 (node-opcua) waits on Phases 1-3, and 4.7 (the
-merged device tree) is not started.
+Phases 4.1 through 4.4 and 4.7 are done. 4.5 (node-opcua) waits on Phases 1-3;
+the device tree already merges OPC UA endpoints when something supplies them, and
+its tests cover the empty case ADR-0019 says is normal.
 
 | | What | Why it mattered |
 |---|---|---|
@@ -1402,6 +1403,7 @@ merged device tree) is not started.
 | **TM-028** | pycomm3 vendored and wrapped | Closes exactly the gaps `logix.py` names in its own docstring. `check_vendor.sh` verifies the bytes **offline**, because the boxes this policy exists for cannot reach PyPI |
 | **TM-029** | The sidecar's first write route, and the ticket that had to exist first | The route cannot say *what* to write. A replayed request can only redo a write that was already authorised, once |
 | **TM-030** | Four different faults printed the same word, and one stale tag greyed forty chips | Forty chips greying at once is one connectivity fact rendered forty times, which teaches the operator that the chips mean nothing |
+| **TM-033** | The device tree (§4.7): the segment scan and CIP discovery merged, with the origin surviving the merge | A port sweep is an *inference*; a device that answered ListIdentity made a *statement*. Rendering both with equal confidence is the un-aged-value lie in another place, so every row says which it stands on and disagreement is shown rather than resolved |
 | **TM-031** | `test_e2e.sh` flakes, and a failing e2e run reported **nothing at all** | Three layers of the same bug: the shell, the reporter and the runner's grep each hid the failure. Fixed and proved by causing one; the flake itself is not fixed and the task says so |
 | **TM-020** | The gate put the operator's dashboard back in the **wrong checkout**, and the page looked entirely normal | This is what "I don't see it locally, in the interface itself" was. `restart.sh` kills any `dashboard/serv*` process from any checkout; discovery recognised only *this* checkout's. Discovery has to cover what the kill covers, or the restore is a guess |
 
