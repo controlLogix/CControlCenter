@@ -1,0 +1,54 @@
+Fixed, 2026-09-25.
+
+THE LIMIT. check_test_failability.sh:64 rejected any row not matching
+^test_[A-Za-z0-9_]+\.sh$, so no python suite could ever be registered - which is
+most of the gate, including every protocol suite. And :98 counted only testlib's
+two-space '  FAIL', so a shell suite asserting through node exited non-zero with
+zero FAIL lines and was correctly refused by :107 as a crashed suite.
+
+THE FIX. Three things now branch on suite type, and nothing else changed:
+  1. the row regex accepts .sh or .py
+  2. a .py suite runs as `python3 dashboard/<suite>` rather than through process
+     substitution, which cannot work for python
+  3. failures are counted with '^(FAIL|ERROR):' for python - unittest prints at
+     column zero - and '^  FAIL' for shell
+
+run_tests.sh:186-192 had already learned this exact distinction; its comment
+records that matching only one shape meant you could see THAT a suite broke and
+never WHAT broke. Same reasoning, same two shapes.
+
+Deliberately untouched: the HEAD-base refusal, the non-ancestor refusal, the
+summary/exit cross-check that rejects a crashed suite as proof, and the ten
+self-tests that point the real checker at known-broken fixtures.
+
+BOTH PHASE 0 REGRESSION TESTS ARE NOW STANDING GUARANTEES rather than one-time
+manual proofs:
+
+  ok  failability: test_netscan.py base=6afd65b expected=5 actual=5
+  ok  failability: test_frontend_storage.sh base=6afd65b expected=8 actual=8
+
+test_frontend_storage.sh was converted to catch each check individually and emit
+testlib's shape. That was not cosmetic: against a base with no migration block the
+old version THREW on the first assertion and crashed, and a crashed suite is not
+proof of discrimination. Now the block's absence FAILS all eight properties
+cleanly, which is what the checker can actually use.
+
+FULL RUN, all rows and all self-tests:
+  ok  failability self-test: unrelated (exit=1)
+  ok  failability self-test: missing (exit=0)
+  ok  failability self-test: invalid-minimum (exit=1)
+  ok  failability self-test: outside (exit=0)
+  ok  failability: test_argguard.sh      base=753d791 expected=11 actual=11
+  ok  failability: test_run.sh           base=753d791 expected=9  actual=17
+  ok  failability: test_lifecycle.sh     base=753d791 expected=15 actual=15
+  ok  failability: test_coordination.sh  base=a2258a8 expected=12 actual=12
+  ok  failability: test_lifecycle.sh     base=a2258a8 expected=6  actual=6
+  ok  failability: test_residue.sh       base=b64cef1 expected=26 actual=28
+  ok  failability: test_netscan.py       base=6afd65b expected=5  actual=5
+  ok  failability: test_frontend_storage.sh base=6afd65b expected=8 actual=8
+  passed 18, failed 0      (was 16)
+
+COVERAGE, recorded so the gap stays visible rather than assumed: 7 registered rows
+covering 7 distinct suites, against 54 suites running in the gate. Python suites
+are now REGISTERABLE, which was the structural blocker; registering the rest is
+ordinary work, and each needs a base where its bug was still present.

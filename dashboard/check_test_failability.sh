@@ -52,6 +52,14 @@ test_coordination.sh        a2258a8    12
 test_lifecycle.sh            a2258a8    6
 # Residue gate and temporary dashboard lifecycle, including signal restoration.
 test_residue.sh              b64cef1    26
+# The 9p EIO that killed whole scans: Path.exists() on /mnt/c re-raises anything
+# that is not ENOENT/ENOTDIR/EBADF/ELOOP, and neighbour_table() - documented
+# "Never fatal" - let it out. 5 of 13 fail against the pre-fix module.
+test_netscan.py              6afd65b    5
+# The localStorage migration. Against a base with no migration block every
+# property fails cleanly rather than crashing - which is the point: a crashed
+# suite is not proof, so the block's absence must FAIL, not throw.
+test_frontend_storage.sh     6afd65b    8
 BASELINES
   SELF_TEST=1
 else
@@ -61,7 +69,7 @@ fi
 check_row() {
   local suite="$1" ref="$2" expected="$3" extra="$4"
   local base head tree output actual rc summary reported
-  if [[ ! "$suite" =~ ^test_[A-Za-z0-9_]+\.sh$ ]] ||
+  if [[ ! "$suite" =~ ^test_[A-Za-z0-9_]+\.(sh|py)$ ]] ||
      [[ ! "$expected" =~ ^[1-9][0-9]*$ ]] || [ -n "$extra" ]; then
     bad "failability: invalid row ($suite $ref $expected); expected a suite, explicit base, positive minimum"
     return
@@ -85,6 +93,8 @@ check_row() {
     bad "failability: could not archive $suite base=$ref"
     return
   fi
+  # testlib goes in for a shell suite; harmless for a python one, and copying it
+  # unconditionally keeps the .sh path byte-identical to what it was.
   if ! mkdir -p "$tree/dashboard" ||
      ! cp dashboard/testlib.sh "dashboard/$suite" "$tree/dashboard/"; then
     bad "failability: cannot copy current $suite and testlib into base=$ref"
@@ -93,9 +103,20 @@ check_row() {
   output="$tree/output.log"
   # The suites supply their own homes and identities. The invoking worker's pane
   # identity must not interfere with test_run's synthetic workers and reviewers.
-  (cd "$tree" || exit 2; unset AGENTMUX_AGENT; bash <(tr -d '\r' < "dashboard/$suite")) > "$output" 2>&1
-  rc=$?
-  actual=$(grep -cE '^  FAIL([[:space:]]|$)' "$output" || true)
+  # Two kinds of suite, so two invocations and two failure shapes. A python suite
+  # cannot be run through process substitution, and it prints unittest's
+  # 'FAIL:'/'ERROR:' at column zero rather than testlib's two-space '  FAIL'.
+  # run_tests.sh:186-192 documents the same distinction and why matching only one
+  # shape meant you could see THAT a suite broke and never WHAT broke.
+  if [[ "$suite" == *.py ]]; then
+    (cd "$tree" || exit 2; unset AGENTMUX_AGENT; python3 "dashboard/$suite") > "$output" 2>&1
+    rc=$?
+    actual=$(grep -cE '^(FAIL|ERROR):' "$output" || true)
+  else
+    (cd "$tree" || exit 2; unset AGENTMUX_AGENT; bash <(tr -d '\r' < "dashboard/$suite")) > "$output" 2>&1
+    rc=$?
+    actual=$(grep -cE '^  FAIL([[:space:]]|$)' "$output" || true)
+  fi
   summary=$(tail -1 "$output")
   reported=""
   if [[ "$summary" =~ ^passed\ ([0-9]+),\ failed\ ([0-9]+)$ ]]; then
