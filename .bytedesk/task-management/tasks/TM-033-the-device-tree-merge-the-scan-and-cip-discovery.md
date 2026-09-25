@@ -1,20 +1,23 @@
 ---
 id: "TM-033"
 kind: "task"
-status: "open"
+status: "done"
 created: "2026-09-25T22:56:41.997Z"
 board: "controllogix/ccontrolcenter"
 title: "The device tree — merge the scan and CIP discovery without flattening them"
 epic: "EP-002"
 acceptance: [{"text":"Every row records which sources reported it, and a device known only from a port sweep never acquires an identity it did not report","done":true,"at":"2026-09-25T22:56:49.751Z"},{"text":"Two sources disagreeing are both kept with their origins and the row is flagged, rather than one winning silently","done":true,"at":"2026-09-25T22:56:49.998Z"},{"text":"\"Nothing has looked yet\" and \"nothing answered\" render as different answers","done":true,"at":"2026-09-25T22:56:50.225Z"},{"text":"GET /api/devices/tree touches no network; discovery is an explicit POST","done":true,"at":"2026-09-25T22:56:50.437Z"},{"text":"Promotion writes the existing cc.db devices table with no new schema, and a bare address with no protocol is not promotable","done":true,"at":"2026-09-25T22:56:50.658Z"},{"text":"Both suites fail cleanly against the commit before the feature rather than crashing","done":true,"at":"2026-09-25T22:56:50.861Z"}]
-evidence: []
+evidence: [".bytedesk\\task-management\\evidence\\TM-033-1790378554349.log"]
 commits: []
 blockedBy: []
 blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T22:56:50.878Z"
+updated: "2026-09-25T23:22:42.608Z"
+evidenceSources: {".bytedesk\\task-management\\evidence\\TM-033-1790378554349.log":{"source":null,"sha256":"7b89f61816fe7294ffb2f7a8906f580c302208ad2d815ccdfa8bc4ae693de48d","bytes":2980,"at":"2026-09-25T23:22:34.350Z"}}
+assignee: "claude"
+closed: "2026-09-25T23:22:42.592Z"
 ---
 
 Done 2026-09-25, plan §4.7. Commit `cbf9811`.
