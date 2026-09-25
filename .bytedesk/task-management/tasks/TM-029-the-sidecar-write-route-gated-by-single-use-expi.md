@@ -1,20 +1,23 @@
 ---
 id: "TM-029"
 kind: "task"
-status: "open"
+status: "done"
 created: "2026-09-25T21:38:27.964Z"
 board: "controllogix/ccontrolcenter"
 title: "The sidecar write route, gated by single-use expiring tickets"
 epic: "EP-002"
 acceptance: [{"text":"The write route cannot specify a target or a value, and a request that tries is refused with the field named","done":true,"at":"2026-09-25T21:38:46.390Z"},{"text":"A ticket is single-use and expiring, and survives eight concurrent redemptions with exactly one winner","done":true,"at":"2026-09-25T21:38:46.632Z"},{"text":"Tickets are never persisted, asserted by a test over the module's imports and calls","done":true,"at":"2026-09-25T21:38:46.865Z"},{"text":"A flood is refused rather than evicting a ticket somebody is about to confirm","done":true,"at":"2026-09-25T21:38:47.128Z"},{"text":"An unknown outcome says investigate at the equipment and exposes no retry","done":true,"at":"2026-09-25T21:38:47.353Z"}]
-evidence: []
+evidence: [".bytedesk\\task-management\\evidence\\TM-029-1790372709704.log"]
 commits: []
 blockedBy: []
 blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T21:38:47.370Z"
+updated: "2026-09-25T21:45:30.242Z"
+assignee: "claude"
+evidenceSources: {".bytedesk\\task-management\\evidence\\TM-029-1790372709704.log":{"source":null,"sha256":"02bd6a85dcd0d925e855f0e23230f7a6128a48d1c0deb151a5b263d2a9442095","bytes":2433,"at":"2026-09-25T21:45:09.705Z"}}
+closed: "2026-09-25T21:45:30.225Z"
 ---
 
 Done 2026-09-25, plan §4.4 layer 4. Commit `c932e46`.

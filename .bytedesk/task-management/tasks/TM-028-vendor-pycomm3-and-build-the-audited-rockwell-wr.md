@@ -1,20 +1,23 @@
 ---
 id: "TM-028"
 kind: "task"
-status: "open"
+status: "done"
 created: "2026-09-25T21:16:53.690Z"
 board: "controllogix/ccontrolcenter"
 title: "Vendor pycomm3 and build the audited Rockwell wrapper"
 epic: "EP-002"
 acceptance: [{"text":"pycomm3 is vendored py3-none-any with a recorded URL, sha256, version and licence, and has no runtime dependencies","done":true,"at":"2026-09-25T21:16:58.642Z"},{"text":"check_vendor.sh verifies the vendored bytes offline, refuses compiled extensions and committed bytecode, and proves the import comes from field/vendor with site-packages stripped","done":true,"at":"2026-09-25T21:16:58.903Z"},{"text":"field/rockwell.py is the only importer of pycomm3, asserted by a check that parses rather than greps","done":true,"at":"2026-09-25T21:16:59.112Z"},{"text":"Tag browsing reports controller-sourced instance ids, and UDT templates and members decode with offsets and bit positions","done":true,"at":"2026-09-25T21:16:59.327Z"},{"text":"Every write journals an intent before transmission, fails closed, and maps a controller refusal to rejected and a transport failure to unknown with no retry path exposed","done":true,"at":"2026-09-25T21:16:59.553Z"},{"text":"A write-capable method that is not declared in WRITE_CAPABLE fails the gate","done":true,"at":"2026-09-25T21:16:59.780Z"},{"text":"Vendored files are -text so git never rewrites the bytes the manifest pins","done":true,"at":"2026-09-25T21:17:00.001Z"}]
-evidence: []
+evidence: [".bytedesk\\task-management\\evidence\\TM-028-1790372695747.log"]
 commits: []
 blockedBy: []
 blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T21:17:00.019Z"
+updated: "2026-09-25T21:45:30.030Z"
+assignee: "claude"
+evidenceSources: {".bytedesk\\task-management\\evidence\\TM-028-1790372695747.log":{"source":null,"sha256":"75631623fa4d80fb3b565e473fd532e8785a2648550e32e6bfe8448cba573e87","bytes":3340,"at":"2026-09-25T21:44:55.748Z"}}
+closed: "2026-09-25T21:45:30.014Z"
 ---
 
 Done 2026-09-25, plan §4.2–§4.4. Commits `9855905` and `838c5f9`.

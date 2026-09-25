@@ -1,7 +1,7 @@
 ---
 id: "TM-025"
 kind: "task"
-status: "open"
+status: "done"
 created: "2026-09-25T20:10:11.564Z"
 board: "controllogix/ccontrolcenter"
 title: "BUG: the IIOT panel computes value age by subtracting two different clocks"
@@ -14,8 +14,10 @@ blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T20:46:29.399Z"
+updated: "2026-09-25T21:44:09.027Z"
 evidenceSources: {".bytedesk\\task-management\\evidence\\TM-025-1790369189374.log":{"source":null,"sha256":"22366002caf9cdefd1c41ce1fae4f0bc07e7c01732d3a8c178c822a4fa3614e2","bytes":2602,"at":"2026-09-25T20:46:29.375Z"}}
+assignee: "claude"
+closed: "2026-09-25T21:44:09.008Z"
 ---
 
 Found while wiring the equipment-write confirmation, 2026-09-25. Not fixed — the confirmation card deliberately avoids it, but the panel itself still does it.

@@ -1,20 +1,23 @@
 ---
 id: "TM-030"
 kind: "task"
-status: "open"
+status: "done"
 created: "2026-09-25T21:38:41.366Z"
 board: "controllogix/ccontrolcenter"
 title: "BUG: the IIOT panel printed one word for four different faults"
 epic: "EP-002"
 acceptance: [{"text":"Each of the four faults renders a distinct banner naming which link is at fault","done":true,"at":"2026-09-25T21:38:47.572Z"},{"text":"One stale tag greys its own chip and no others","done":true,"at":"2026-09-25T21:38:47.785Z"},{"text":"A dead feed still greys every chip, because the per-tag verdicts are frozen and ageing","done":true,"at":"2026-09-25T21:38:47.994Z"},{"text":"A live feed carrying old values is amber, not red","done":true,"at":"2026-09-25T21:38:48.210Z"},{"text":"The suite covers a page that has stopped hearing, and fails against the pre-fix commit","done":true,"at":"2026-09-25T21:38:48.409Z"}]
-evidence: []
+evidence: [".bytedesk\\task-management\\evidence\\TM-030-1790372723834.log"]
 commits: []
 blockedBy: []
 blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T21:38:48.425Z"
+updated: "2026-09-25T21:45:30.457Z"
+assignee: "claude"
+evidenceSources: {".bytedesk\\task-management\\evidence\\TM-030-1790372723834.log":{"source":null,"sha256":"202477a661b8278dce8db8b8c069be6b29f4975fa12c359905e6f7ec666a71e1","bytes":2678,"at":"2026-09-25T21:45:23.835Z"}}
+closed: "2026-09-25T21:45:30.439Z"
 ---
 
 Found and fixed 2026-09-25 while writing the TM-025 regression tests. Commit `213f555`.

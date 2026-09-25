@@ -76,7 +76,7 @@ These change the design, not just the sizing.
 5. **Renaming the GitHub repo would brick the task store**, and pinning `boardId` does **not** prevent it. `store.mjs write()` refuses any doc whose `board` ≠ the store identity, and `boardIdentity()` at `:753-757` returns **git first** — `gitBoardId()` reads `git remote get-url origin`, lowercases `owner/repo`, and the config `boardId` is consulted only when git yields nothing. So a rename changes the identity regardless of the pin. What the pin buys is **detection**: with `stored` set, a mismatch is reported as `drifted: true` instead of surfacing as an unexplained refusal. The actual mitigations are (a) don't rename the GitHub repo — the rebrand is scoped to live surfaces and does not require it, or (b) if it is renamed, rewrite `board:` in every doc in the same change.
 6. **`/mnt/c` is 9p — inotify never fires.** `fs.watch` on `modes/`, `events.jsonl` or the repo silently does nothing. `$AGENTMUX_HOME` is ext4, where it works. The two halves need different watch strategies.
 7. **`~/.agentmux/env` is sourced into every agent pane** (`agentmux.sh:669`). The blade's API key must not go there — that hands it to every worker.
-8. **There are already two write journals**, not one: `enip.py:213` and `logix.py:99`. Neither file exists yet, so no live industrial write has ever been performed.
+8. **There were three write journals, not two** — and this plan said two. `enip.py:213`, `logix.py:99` and **`ads.py:85`**, which kept `~/.agentmux/ads-writes.jsonl` with the same shape and the same guarantees and which nothing outside that module pointed at. That is exactly the failure a shared journal exists to prevent: a survey careful enough to be written into a plan still missed one of three. **Done** — see TM-026. None of the three files had ever existed, so no live industrial write has been performed from this repo.
 9. **`events.jsonl` is mostly hook telemetry** — 226 `subagent_stop`, 115 `notification`, 51 `git_link_unattributed` versus 24 `create` / 4 `update`. A naive event-sourced board projection over it is a trap.
 10. **There are two spec files**, neither mentioned by the draft: `dashboard/SPEC.md` (endpoints, port, the 403 rule) and `dashboard/SPEC_CC.md` (product, brand, constraints).
 
@@ -293,10 +293,16 @@ retried**. This is enforced in code, not documented: `enip.py:240-243` raises be
 anything reaches the wire.
 
 Two consequences the draft missed:
-- **Two journals exist** (`enip.py:213`, `logix.py:99`) and **neither file exists on
-  disk** — no live industrial write has ever happened. Phase 4.1 unifies them into
-  `field-writes.jsonl` with a `transport` field. "Every write is audited" is currently
-  aspirational.
+- **Three journals existed** (`enip.py:213`, `logix.py:99`, `ads.py:85` — this plan
+  said two) and **none of the files existed on disk** — no live industrial write has
+  ever happened. **Done (TM-026):** `dashboard/writejournal.py` unifies them into
+  `field-writes.jsonl` with a `transport` field, `intent()` fsync'd before
+  transmission, one `classify()` for the rejected/unknown/partial decision, and a
+  census test that fails when a client that writes to equipment does not journal
+  through it. **Modbus joined too (TM-026 AC 6)** — and answering that question turned
+  up a defect: a Modbus device exception response is the device *refusing*, and it was
+  being recorded as `unknown`, which sends somebody out to the panel for nothing and
+  dilutes `unknown` until the real ones stop getting attention.
 - **The journal follows the sidecar to Windows.** Keep it there: the record must be
   durable at the instant of the write, and routing that one append across 9p puts the
   audit trail on the least reliable path in the system. The API drains
@@ -1381,6 +1387,56 @@ and SQLite over 9p is not the hazard the host split was justified with.
 
 
 ---
+
+### Phase 4 — later the same day
+
+Gate: **all suites passed**, 2,176 assertions across 64 suites, from the ext4 clone.
+Phases 4.1 through 4.4 are done; 4.5 (node-opcua) waits on Phases 1-3, and 4.7 (the
+merged device tree) is not started.
+
+| | What | Why it mattered |
+|---|---|---|
+| **TM-025** | The panel computed value age as `Date.now()/1000 - last_good` — a browser clock minus a server one — and rendered a *clock reading* rather than an age | The age is the one number on this panel that must not be wrong, and one computed across two clocks is worse than none: it still looks authoritative. `age_ms` is now measured at the source; the client adds only monotonic elapsed time |
+| **TM-026** | **Three** write journals, not the two this plan surveyed. `ads.py` kept its own, and nothing pointed at it | Unified into `writejournal.py`. A census test now fails when a client that writes to equipment does not journal through it — so a fourth cannot start quietly the way the third did |
+| **TM-027** | The gate gave two different verdicts on two adjacent commits. Three suites read `/mnt/c` and hit 9p EIO; one reported `passed -1` | A gate that flakes is a gate that gets re-run until it goes green. `ninep.py` keeps "not there" and "could not find out" apart, and the runner no longer prints a count that cannot be true |
+| **TM-028** | pycomm3 vendored and wrapped | Closes exactly the gaps `logix.py` names in its own docstring. `check_vendor.sh` verifies the bytes **offline**, because the boxes this policy exists for cannot reach PyPI |
+| **TM-029** | The sidecar's first write route, and the ticket that had to exist first | The route cannot say *what* to write. A replayed request can only redo a write that was already authorised, once |
+| **TM-030** | Four different faults printed the same word, and one stale tag greyed forty chips | Forty chips greying at once is one connectivity fact rendered forty times, which teaches the operator that the chips mean nothing |
+
+Also: `test_mqtt_monitor.py` for the largest protocol module — scoped to what
+`test_field_panels.py` does **not** already cover, and proved by **mutation** rather
+than by `check_test_failability`, because it passes against every version of that
+module in the repo's history and inventing a base would make the gate say something
+untrue.
+
+### Four more corrections to this plan, from doing the work
+
+1. **Three write journals, not two** (§1.3.8). `ads.py:85` was missed.
+2. **`text eol=lf` was the wrong pin for vendored code.** pycomm3 ships one file with
+   CRLF; normalising it broke the hash that pins the dependency. Vendored bytes are
+   `-text`. The repo now has both forms, and the distinction is written down: one makes
+   a file *parseable*, the other makes it *identical*.
+3. **The audit journal must honour `AGENTMUX_HOME`.** It did not, so a suite run left
+   21 rows in the operator's real `field-writes.jsonl`. `ccstore.py:17-21` records this
+   exact bug being found once already.
+4. **A Modbus device exception was being recorded as `unknown`.** It is a refusal: the
+   device said so and nothing changed. Every time `unknown` is used for something known,
+   it means less.
+
+### Three of my own mistakes, recorded because the shape repeats
+
+Each one made a test pass while checking less, which is the failure mode this project
+is least able to detect:
+
+- A check for `generic_message` **grepped** the source, and every file that matters
+  mentions it in prose — explaining why the escape hatch is closed is what those
+  docstrings are for. Rewritten to parse.
+- `Path.home()` replacing a hardcoded `/home/nick` looked like a plain improvement, but
+  `setUp` relocates `HOME` into a fixture — so the check would have validated the files
+  it had just written itself, and passed.
+- `field/vendor/** text eol=lf`, added to protect the manifest, was the thing that broke
+  it.
+
 
 ## 10. How this gets executed
 
