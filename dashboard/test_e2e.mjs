@@ -101,20 +101,23 @@ await test('every rail button reveals its view and hides the others', async () =
 
 // ── IIOT: the regression this file was written for ─────────────────────────
 
-await test('all five IIOT cards render content, not just CODESYS', async () => {
+await test('all six IIOT cards render content, not just CODESYS', async () => {
   await show('iiot');
   const cards = await page.$$eval('#viewIiot details.card', (ns) => ns.map(n => ({
     key: n.dataset.collapseKey,
     title: n.querySelector('summary h3')?.textContent,
     open: n.open,
   })));
+  // In document order, so this pins WHERE each card sits as well as that it is
+  // there. The device tree follows the scanner because it merges what the
+  // scanner found.
   assert.deepEqual(cards.map(c => c.key),
-    ['iiot:modbus', 'iiot:dcp', 'iiot:mqtt', 'iiot:scan', 'iiot:codesys']);
+    ['iiot:modbus', 'iiot:dcp', 'iiot:mqtt', 'iiot:scan', 'iiot:devices', 'iiot:codesys']);
   assert.deepEqual(cards.map(c => c.title),
-    ['Modbus', 'PROFINET DCP', 'MQTT', 'Ethernet scanner', 'CODESYS targets']);
+    ['Modbus', 'PROFINET DCP', 'MQTT', 'Ethernet scanner', 'Device tree', 'CODESYS targets']);
 
   // The bug: the body element existed but nothing ever filled it.
-  for (const id of ['modbusHint', 'profinetPanel', 'mqttPanel', 'scanPanel']) {
+  for (const id of ['modbusHint', 'profinetPanel', 'mqttPanel', 'scanPanel', 'devicePanel']) {
     await page.waitForFunction(
       (elementId) => {
         const node = document.getElementById(elementId);
@@ -159,7 +162,7 @@ await test('the cards pack into columns with no dead space between them', async 
     });
     return { height: Math.round(box.height), cards };
   });
-  assert.equal(layout.cards.length, 5);
+  assert.equal(layout.cards.length, 6);
 
   // THE ACTUAL COMPLAINT, stated as a measurement. Group the cards into columns by
   // their left edge; inside a column, the space between one card's bottom and the
@@ -187,16 +190,16 @@ await test('the cards pack into columns with no dead space between them', async 
 await test('expand all and collapse all drive every card', async () => {
   await page.click('#iiotCollapse');
   assert.deepEqual(await page.$$eval('#viewIiot details.card', ns => ns.map(n => n.open)),
-                   [false, false, false, false, false]);
+                   [false, false, false, false, false, false]);
   await page.click('#iiotExpand');
   assert.deepEqual(await page.$$eval('#viewIiot details.card', ns => ns.map(n => n.open)),
-                   [true, true, true, true, true]);
+                   [true, true, true, true, true, true]);
   // The choice has to survive a reload, which is the whole point of the key.
   await page.reload({ waitUntil: 'load' });
   await page.waitForFunction(() => !!window.AGENTMUX);
   await show('iiot');
   assert.deepEqual(await page.$$eval('#viewIiot details.card', ns => ns.map(n => n.open)),
-                   [true, true, true, true, true]);
+                   [true, true, true, true, true, true]);
   await page.click('#iiotCollapse');
   await page.click('#iiotExpand');
 });
