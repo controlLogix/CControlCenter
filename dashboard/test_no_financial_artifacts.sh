@@ -35,7 +35,13 @@ trap 'rm -rf "$FIX"' EXIT
 # A fixture clone: the real check and the real .gitignore, over a tiny tree.
 mkdir -p "$FIX/dashboard" "$FIX/docs"
 cp dashboard/check_no_financial_artifacts.sh dashboard/testlib.sh "$FIX/dashboard/"
-cp .gitignore "$FIX/.gitignore"
+# NORMALISED TO LF on the way in, so the cases below each test one thing. The
+# repo's own copy is CRLF wherever core.autocrlf checked it out - including the
+# gate clone - and an LF-anchored removal silently fails to remove anything
+# there, which is how the "pin removed" case passed in the gate while claiming
+# to have tested a removal. The CRLF behaviour has its own cases further down,
+# where it is the subject rather than an accident of the fixture.
+tr -d '\r' < .gitignore > "$FIX/.gitignore"
 cp docs/investing-boundary.md "$FIX/docs/" 2>/dev/null || true
 git -C "$FIX" init -q
 git -C "$FIX" config user.email 'guard@example.invalid'
@@ -159,7 +165,7 @@ p.write_bytes(crlf.join(kept))
 CRLFGONE
 git -C "$FIX" add -A >/dev/null 2>&1
 expect_caught 'a pin removed from a CRLF .gitignore' 'investing/'
-cp "$REPO/.gitignore" "$FIX/.gitignore"
+tr -d '\r' < "$REPO/.gitignore" > "$FIX/.gitignore"
 git -C "$FIX" add -A >/dev/null 2>&1
 
 # ── and it must NOT fire on ordinary code ────────────────────────────────────
