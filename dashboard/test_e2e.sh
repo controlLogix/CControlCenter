@@ -153,7 +153,11 @@ fi
 
 node dashboard/test_e2e.mjs "http://127.0.0.1:$PORT" "$PW" "$BROKER_PORT" 2>&1 | tee "$TEST_HOME/e2e.out"
 status=${PIPESTATUS[0]}
-summary="$(tail -1 "$TEST_HOME/e2e.out")"
+# Found by pattern, not by position. tail -1 assumed the summary was last, and
+# it was not - test_e2e.mjs printed its roll-call of failed names after it. An
+# anchor that depends on nothing else being printed afterwards is an anchor that
+# breaks the next time anything is.
+summary="$(grep -E '^passed [0-9]+, failed [0-9]+$' "$TEST_HOME/e2e.out" | tail -1)"
 
 if [ "$status" != 0 ]; then
   echo '--- test server log ---' >&2

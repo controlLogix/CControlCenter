@@ -1093,7 +1093,12 @@ await test('the page logged no errors while all of that happened', () => {
 });
 
 await browser.close();
-console.log(`\npassed ${passed}, failed ${failed}`);
+// The roll-call goes BEFORE the summary, and the summary is the last thing this
+// prints. run_tests.sh reads a suite by its final line, so anything printed
+// after the counts displaces them - which is how a failing run reported a list
+// of names where the gate expected 'passed N, failed M'. Same shape as the bug
+// one level up in test_e2e.sh, and the same rule fixes both.
 if (failures.length) console.log('failed: ' + failures.join('; '));
+console.log(`\npassed ${passed}, failed ${failed}`);
 suiteFinished = true;
 process.exit(failed ? 1 : 0);

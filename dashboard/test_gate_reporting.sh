@@ -93,6 +93,29 @@ elif [ -z "$summary_line" ]; then
 else
   bad 'test_e2e.sh prints the summary before the diagnostic, which displaces it'
 fi
+# One level further down, and the same rule. test_e2e.mjs printed its roll-call
+# of failed names AFTER the counts, so even with the shell fixed the gate read a
+# list of names where the summary should have been. The summary is the last
+# thing the reporter prints, full stop.
+MJS="$(tr -d '' < dashboard/test_e2e.mjs)"
+roll="$(printf '%s
+' "$MJS" | grep -n "console.log('failed: '" | cut -d: -f1 | head -1)"
+counts="$(printf '%s
+' "$MJS" | grep -n 'passed \${passed}, failed \${failed}' | cut -d: -f1 | head -1)"
+if [ -n "$roll" ] && [ -n "$counts" ] && [ "$roll" -lt "$counts" ]; then
+  ok 'test_e2e.mjs prints its roll-call before the counts, so the counts are last'
+else
+  bad 'test_e2e.mjs prints something after the counts, which displaces them'
+fi
+# And the shell finds the summary by PATTERN, not by position - an anchor that
+# assumes nothing follows it breaks the next time something does.
+if printf '%s
+' "$E2E" | grep -q "grep -E '\^passed"; then
+  ok 'test_e2e.sh finds the summary by pattern rather than by tail -1'
+else
+  bad 'test_e2e.sh assumes the summary is the last line of the reporter output'
+fi
+
 # And when node dies before counting anything, say THAT rather than letting the
 # last line be whatever happened to be on stdout.
 if printf '%s\n' "$E2E" | grep -q 'without reporting counts'; then
