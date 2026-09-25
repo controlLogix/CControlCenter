@@ -1,0 +1,36 @@
+Built and verified, 2026-09-25. Gate: all suites passed, 2057 assertions, 55 suites.
+
+MEASURED END TO END against a real server, not asserted:
+  all views  : terminals status board runs organization iiot github settings
+  plc        : terminals board runs organization iiot settings  theme cc-dark    chip PLC
+  investing  : status board runs settings                       theme abyss      chip Investing
+  research   : status board runs github settings                theme parchment  chip Research
+  cleared    : back to all eight
+The rail narrows, the theme follows, and the narrowing is reversible.
+
+AN INVALID FILE IS NEVER FATAL, proven by injecting two bad files beside the
+three good ones:
+  broken.yaml:4:1  expected ',' or ']', but got '<stream end>'
+  wrongid.yaml     [id] id "mismatch" does not match the filename "wrongid"
+  wrongid.yaml     [views] unknown view(s): nosuchview
+  wrongid.yaml     [default_view] default_view "nosuchview" is not in views
+  wrongid.yaml     [blade.default_state] must be one of: hidden, overlay, pinned
+  wrongid.yaml     [blade.width] must be an integer between 320 and 900
+All three good modes still loaded. A file that fails to parse keeps its LAST GOOD
+COMPILE, so an editor save mid-keystroke does not blank the rail, and the
+switcher marks it "(last good)". Diagnostics surface as a hoverable chip in the
+titlebar rather than in a console nobody opens.
+
+TWO THINGS STATED RATHER THAN ASSUMED:
+  * Hiding a view is NOT security. A mode narrows the rail to match the work in
+    front of you. Every endpoint is exactly as reachable as it was and the server
+    does not know which mode is selected.
+  * No watcher. modes/ is on /mnt/c, a 9p mount, where inotify does not fire for
+    Windows-side writes. It restats on read and /api/modes reports watch:"poll",
+    so the UI knows the freshness it is getting.
+
+PyYAML IS OPTIONAL, DELIBERATELY. SPEC_agentmux.md's rule is install-from-a-clone
+with no network and no pip. PyYAML is a system package here, not vendored, so a
+plant box may not have it: missing PyYAML disables modes and names the fix, the
+same posture modbus_rtu.py:86-88 takes for pyserial. Vendoring it is the proper
+fix and deserves its own task.

@@ -1,20 +1,23 @@
 ---
 id: "TM-022"
 kind: "task"
-status: "open"
+status: "done"
 created: "2026-09-25T19:14:44.047Z"
 board: "controllogix/ccontrolcenter"
 title: "Build YAML mode profiles, with diagnostics instead of a blank rail"
 epic: "EP-002"
-acceptance: [{"text":"Three modes load and each narrows the rail to its own view set, verified against a real server","done":false},{"text":"Selecting a mode applies its theme, and clearing the selection restores every view","done":false},{"text":"A YAML syntax error yields a diagnostic carrying file, line and column, and the other modes still load","done":false},{"text":"An invalid field yields a field-level diagnostic and a safe default rather than a crash","done":false},{"text":"A file that fails to parse keeps its last good compile so the rail is never blanked","done":false},{"text":"Missing PyYAML disables modes with a message naming the fix, rather than failing the dashboard's boot","done":false},{"text":"modes.js does not throw against the DOM stub and the full gate is green","done":false}]
-evidence: []
+acceptance: [{"text":"Three modes load and each narrows the rail to its own view set, verified against a real server","done":true,"at":"2026-09-25T19:32:29.552Z"},{"text":"Selecting a mode applies its theme, and clearing the selection restores every view","done":true,"at":"2026-09-25T19:32:30.556Z"},{"text":"A YAML syntax error yields a diagnostic carrying file, line and column, and the other modes still load","done":true,"at":"2026-09-25T19:32:31.930Z"},{"text":"An invalid field yields a field-level diagnostic and a safe default rather than a crash","done":true,"at":"2026-09-25T19:32:33.733Z"},{"text":"A file that fails to parse keeps its last good compile so the rail is never blanked","done":true,"at":"2026-09-25T19:32:35.169Z"},{"text":"Missing PyYAML disables modes with a message naming the fix, rather than failing the dashboard's boot","done":true,"at":"2026-09-25T19:32:36.637Z"},{"text":"modes.js does not throw against the DOM stub and the full gate is green","done":true,"at":"2026-09-25T19:32:38.385Z"}]
+evidence: [".bytedesk/task-management/evidence/TM-022-tm022.txt"]
 commits: []
 blockedBy: []
 blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T19:14:44.146Z"
+updated: "2026-09-25T19:32:39.557Z"
+assignee: "claude"
+evidenceSources: {".bytedesk/task-management/evidence/TM-022-tm022.txt":{"source":"/mnt/c/Users/Nick/AppData/Local/Temp/claude/C--Dev-agentmux/5748a917-ba3c-4a23-9c48-424b6c04104f/scratchpad/tm022.txt","sha256":"cb9439566c7ed0b4e8384227e494c3dd14cc351d69d5cc5db19f303ff194a859","bytes":2215,"at":"2026-09-25T19:32:13.686Z"}}
+closed: "2026-09-25T19:32:39.525Z"
 ---
 
 `modes/*.yaml` compiled by `dashboard/modes.py`, served at `GET /api/modes`, applied by `dashboard/modes.js`. Three shipped: **research**, **plc**, **investing**. Adding a mode is adding a file; no code changes.

@@ -8,14 +8,30 @@ taskmgmt/recovered/*.bin binary
 
 # Shell scripts MUST check out with LF, on every platform.
 #
-# core.autocrlf=true on this machine gives them CRLF, and bash cannot source a
-# CRLF file: `. dashboard/testlib.sh` then fails with `$'': command not found`
-# and every helper it defines is missing. That is why the suites are invoked as
-# `bash <(tr -d '' < script)` - but that only strips the script being RUN, not
-# a sibling it sources. test_frontend.sh, check_test_failability.sh and
-# demo_protocol.sh all source testlib.sh directly, so on a fresh Windows clone
-# they break before their first assertion.
+# core.autocrlf is true on this machine, which gives them CRLF - and bash cannot
+# source a CRLF file. Sourcing testlib.sh then fails with a carriage-return
+# "command not found" on every line, and every helper it defines goes missing.
+#
+# That is why the suites are invoked as `bash <(tr -d ...)`: it strips carriage
+# returns from the script being RUN. It does NOT strip them from a sibling that
+# script SOURCES. test_frontend.sh, check_test_failability.sh and demo_protocol.sh
+# all source testlib.sh directly, so on a fresh Windows clone they break before
+# their first assertion. Observed 2026-09-25.
 #
 # Same reasoning as the pinned .pyc above: a line-ending rewrite that looks
 # cosmetic silently breaks a file that is executed rather than read.
 *.sh text eol=lf
+
+# The task store MUST check out with LF, on every platform.
+#
+# The task-management plugin writes these documents with newline endings and
+# parses them by splitting on the frontmatter fence. Under core.autocrlf they
+# check out with CRLF, the fence no longer matches, and every document parses to
+# an EMPTY object - so `tm board` renders "undefined undefined" and the board
+# looks lost. The .md files are perfectly intact; only the reader breaks.
+#
+# So a plain `git clone`, a branch switch, or a `git checkout -- .` on a Windows
+# machine silently blanks the board. Observed 2026-09-25: EP-002 was CRLF and
+# parsed to {}, while a task the plugin had just written was LF and parsed fine.
+# Recovery is `tm reindex` once the endings are right.
+.bytedesk/task-management/** text eol=lf

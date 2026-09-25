@@ -1,0 +1,36 @@
+Built and verified, 2026-09-25. Gate: all suites passed, 2057 assertions, 55 suites.
+
+REFLOW, MEASURED ON THE LIVE PAGE rather than asserted:
+  pinned : blade 420px, .views 923px, blade right edge 1400 (923 + 57 rail + 420)
+  hidden : .views 1343px
+The main content narrows and gives the width back. A third flex child of .shell,
+not an overlay - which matters because a terminal grid and a chart each measure
+their own container, so a panel on top of either is useless.
+
+NO CSS TRANSFORM. fitmatrix.js records that a transform resamples terminal glyphs
+into mush. Width is animated and the re-fit fires on transitionend, not per
+frame; four earlier fitting attempts oscillated because a measurement at the
+current size fed the choice of the next size. agentmux:blade-resize is dispatched
+once the width settles.
+
+THREE STATES, persisted: hidden / overlay / pinned. Drag-resize snapped to 20px
+and clamped 320-900, keyboard-reachable. Ctrl+` toggles, Ctrl+Shift+` swaps
+pinned and overlay. Below 900px pinned overlays instead, because it cannot reflow
+to a useful width.
+
+ENDPOINT GUARDS, verified by curl:
+  cross-origin POST   -> 403
+  GET                 -> 405
+  wrong content-type  -> 415
+  empty text          -> 400 {"error": "text is required"}
+
+A BUG IN MY OWN CODE, caught by the suite: blade.js assumed .style existed and
+threw against the DOM stub that test_frontend_tabs.sh runs every view script
+against - and a script that throws at registration takes the page's boot with it.
+Guarded; that suite went 26/1 -> 27/0.
+
+THE CONSOLE RUNTIME IS INTERIM AND SAYS SO IN THE SOURCE. ADR-0023 chose the
+Agent SDK inside the Node API, which does not exist yet, so /api/blade/send
+shells `claude -p`: no continuity between turns, no tool use, no streaming. It is
+NOT send-keys into a pane - a fresh headless process cannot reach an existing
+agent's session, so SPEC_agentmux.md's "terminals stay read-only" is untouched.
