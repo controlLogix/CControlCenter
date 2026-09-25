@@ -1290,12 +1290,30 @@ cmd_run() {
   local action="${1:-status}"; shift || true
   local me="${AGENTMUX_AGENT:-orchestrator}"
   case "$action" in
-    start)    python3 "$(run_py)" start "${1:?a one-line description of the request}" --by "$me" ;;
+    # START AND COMPLETE TAKE NO --by, and that is the fix for a bug that made the
+    # warrant useless through this wrapper.
+    #
+    # Both verbs are ALWAYS attributed to the virtual "orchestrator" identity:
+    # orchestrator_identity() refuses any claimed name that is not literally
+    # "orchestrator", because a real name in that field would be a name nobody could
+    # have been. Passing --by "$me" therefore worked only when $AGENTMUX_AGENT was
+    # unset - a person at a terminal, where "$me" fell back to "orchestrator".
+    #
+    # Inside the warranted pane, which is the entire point of the warrant, "$me" is the
+    # pane's own name, so every call was refused with "Drop --by" - and start and
+    # complete are two of the exactly four verbs the warrant buys. Found live: the
+    # orchestrator hit it on its first `run start` and routed around this wrapper by
+    # calling run.py directly, which is the shape of a CLI nobody can use.
+    #
+    # Identity still comes from the environment - orchestrator_identity() reads
+    # $AGENTMUX_AGENT itself and checks it against the warrant. Dropping --by removes a
+    # claim that was never honoured; it grants nothing.
+    start)    python3 "$(run_py)" start "${1:?a one-line description of the request}" ;;
     assign)   python3 "$(run_py)" assign "$@" ;;
     submit)   python3 "$(run_py)" submit "${1:-${AGENTMUX_JOB:-}}" --by "$me" "${@:2}" ;;
     verdict)  python3 "$(run_py)" verdict "$@" --by "$me" ;;
     status)   python3 "$(run_py)" status "$@" ;;
-    complete) python3 "$(run_py)" complete "$@" --by "$me" ;;
+    complete) python3 "$(run_py)" complete "$@" ;;
     teardown) cmd_run_teardown "$@" ;;
     *) die "run: start|assign|submit|verdict|status|complete|teardown" ;;
   esac

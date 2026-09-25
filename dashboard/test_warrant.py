@@ -345,5 +345,91 @@ class TestItBuysExactlyFourVerbs(WarrantBase):
         self.assertTrue((self.home / "runs" / rid / "COMPLETE").exists())
 
 
+class TestTheCliCanUseTheWarrant(WarrantBase):
+    """THE GAP THIS FILLS. Every test above drives taskmgmt/run.py directly, so the
+    backend was proved correct while `agentmux run start` - the only form anybody
+    actually types, and the form the orchestrator's own persona tells it to use - was
+    refused for its entire existence.
+
+    cmd_run passed `--by "$me"`, and inside the warranted pane "$me" is that pane's
+    name. orchestrator_identity refuses any claimed name but "orchestrator", so two of
+    the exactly four verbs the warrant buys were unreachable through the CLI. It only
+    ever worked when $AGENTMUX_AGENT was unset - a person at a terminal, where "$me"
+    fell back to "orchestrator".
+
+    Found live: the orchestrator hit it on its first `run start` and routed around this
+    wrapper by calling run.py itself, which is the shape of a CLI nobody can use.
+
+    So these drive the SHELL. A wrapper is part of the interface.
+    """
+
+    def setUp(self):
+        super().setUp()
+        # CRLF, stripped the way every other suite here does it. This repo checks out
+        # with CRLF on Windows, and bash refuses agentmux.sh read directly: it dies on
+        # a stray carriage return at line 8, before reaching anything this class is
+        # about. A test that fails for THAT reason looks exactly like a test that
+        # caught the defect - which is the first thing this check did when written.
+        self.script = self.home / "agentmux.sh"
+        self.script.write_bytes(
+            (REPO / "agentmux.sh").read_bytes().replace(b"\r\n", b"\n"))
+        self.script.chmod(0o700)
+
+    def sh(self, *args, env=None):
+        # A None value UNSETS, for the same reason run_cli says so above: popping from
+        # a copy of os.environ leaves the inherited variable in place, so a test that
+        # meant "outside a pane" would quietly run inside one.
+        environ = dict(os.environ)
+        environ["AGENTMUX_REPO"] = str(REPO)
+        environ["AGENTMUX_HOME"] = str(self.home)
+        for key, value in (env or {}).items():
+            if value is None:
+                environ.pop(key, None)
+            else:
+                environ[key] = value
+        return subprocess.run(["bash", str(self.script)] + list(args),
+                              capture_output=True, text=True, env=environ, timeout=60)
+
+    def test_the_warranted_pane_can_start_a_run_through_the_cli(self):
+        self.issue()
+        out = self.sh("run", "start", "a run from the warranted pane")
+        self.assertEqual(out.returncode, 0,
+                         f"the CLI refused a warranted `run start`: {out.stderr}")
+        self.assertRegex(out.stdout.strip(), r"^[0-9a-f]{6}$",
+                         f"expected a run id, got {out.stdout!r}")
+
+    def test_the_cli_sends_no_by_on_the_verbs_that_always_refuse_one(self):
+        # The defect named directly, so a reintroduction says what it was rather than
+        # only that a run id failed to appear.
+        source = (REPO / "agentmux.sh").read_text(encoding="utf-8", errors="replace")
+        body = source.split("cmd_run()", 1)[1].split("cmd_run_teardown", 1)[0]
+        for verb in ("start)", "complete)"):
+            line = next(l for l in body.splitlines() if l.strip().startswith(verb))
+            self.assertNotIn("--by", line,
+                             f"cmd_run {verb[:-1]} sends --by again; "
+                             "orchestrator_identity refuses every name but "
+                             "'orchestrator', so this makes the verb unreachable "
+                             "from the warranted pane")
+
+    def test_an_unwarranted_pane_is_still_refused_through_the_cli(self):
+        # The pair. Without it, "it worked" is indistinguishable from "the wrapper
+        # stopped checking".
+        self.issue()
+        out = self.sh("run", "start", "from some other pane",
+                      env={"AGENTMUX_AGENT": "some-worker",
+                           "AGENTMUX_ORCHESTRATOR_WARRANT": None})
+        self.assertNotEqual(out.returncode, 0,
+                            "an unwarranted pane started a run through the CLI")
+        self.assertIn("orchestrator's to call", out.stderr + out.stdout)
+
+    def test_a_person_outside_a_pane_can_still_start_one(self):
+        out = self.sh("run", "start", "from a terminal",
+                      env={"AGENTMUX_AGENT": None,
+                           "AGENTMUX_ORCHESTRATOR_WARRANT": None})
+        self.assertEqual(out.returncode, 0,
+                         f"a person at a terminal was refused: {out.stderr}")
+        self.assertRegex(out.stdout.strip(), r"^[0-9a-f]{6}$")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
