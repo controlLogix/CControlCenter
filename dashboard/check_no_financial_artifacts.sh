@@ -109,7 +109,10 @@ fi
 # is the thing worth failing on - exactly as check_line_endings.sh treats the
 # eol pins.
 missing=""
-for pin in 'investing/' 'broker/' 'agentmux-broker/' 'research/sessions/'; do
+# agentmux-broker/ is deliberately NOT here: it holds the broker's SOURCE, and
+# pinning the whole directory blocked the code this boundary exists to guard.
+# Only the paths an artifact could land in are pinned.
+for pin in 'investing/' 'broker/' 'research/sessions/'            'agentmux-broker/profile/' 'agentmux-broker/captures/'; do
   # ANCHORED to a whole line, so it matches the RULE and not a mention of the
   # path in a comment. The first version used grep -qF, and .gitignore's own
   # comment block names "$AGENTMUX_HOME/investing/" - so deleting the actual

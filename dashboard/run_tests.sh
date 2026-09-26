@@ -352,6 +352,11 @@ run test_gate_reporting.sh bash /dev/fd/27 27< <(tr -d '\r' < dashboard/test_gat
 # counted as coverage - smoke.sh:181 is the recorded precedent here.
 run check_no_financial_artifacts.sh bash /dev/fd/29 29< <(tr -d '\r' < dashboard/check_no_financial_artifacts.sh)
 run test_no_financial_artifacts.sh bash /dev/fd/30 30< <(tr -d '\r' < dashboard/test_no_financial_artifacts.sh)
+# The two interlocks in front of an order, built before the order pipeline for
+# the same reason the ticket came before the write route. Pure logic and file
+# state: no broker, no browser, no money.
+run test_killswitch.py python3 agentmux-broker/test_killswitch.py
+run test_guardrails.py python3 agentmux-broker/test_guardrails.py
 # The gate in front of a write to PHYSICAL EQUIPMENT. Until 2026-09-25 that was a
 # one-click window.confirm and nothing tested it at all.
 run test_frontend_iiot_write.sh bash /dev/fd/23 23< <(tr -d '\r' < dashboard/test_frontend_iiot_write.sh)

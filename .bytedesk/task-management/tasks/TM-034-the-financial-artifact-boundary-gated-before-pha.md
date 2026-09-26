@@ -8,13 +8,13 @@ title: "The financial artifact boundary, gated before Phase 5 exists"
 epic: "EP-002"
 acceptance: [{"text":"Nothing financial can be committed: tracked artifacts, brokerage filenames, labelled account numbers and missing .gitignore pins all fail the gate","done":true,"at":"2026-09-25T23:50:23.917Z"},{"text":"Where artifacts DO go is written down, and the check verifies that document exists","done":true,"at":"2026-09-25T23:50:24.114Z"},{"text":"The guard does not fire on ordinary code containing bare digits or the word account","done":true,"at":"2026-09-25T23:50:24.318Z"},{"text":"The guard reads a CRLF .gitignore correctly, and a rule genuinely removed from one still fails","done":true,"at":"2026-09-25T23:50:24.511Z"},{"text":"Every case is proved by construction in a throwaway clone, since no commit exists where the bug was present","done":true,"at":"2026-09-25T23:50:24.703Z"}]
 evidence: [".bytedesk\\task-management\\evidence\\TM-034-1790380243306.log"]
-commits: []
+commits: ["b8041df"]
 blockedBy: []
 blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T23:50:51.169Z"
+updated: "2026-09-25T23:50:52.084Z"
 assignee: "claude"
 evidenceSources: {".bytedesk\\task-management\\evidence\\TM-034-1790380243306.log":{"source":null,"sha256":"7cfce707bf03d78ecd4dbd6ff18925d12e054a571eebc9b54a2148610ccc270c","bytes":3633,"at":"2026-09-25T23:50:43.307Z"}}
 closed: "2026-09-25T23:50:51.153Z"

@@ -100,6 +100,10 @@ test_gate_reporting.sh       77696cb    5
 # rather than crashing - which is what makes the proof mean anything.
 test_devicetree.py           85e6ddb    18
 test_frontend_devicetree.sh  85e6ddb    1
+# The order interlocks. Against the commit before them neither module exists,
+# and both suites fail cleanly through their guarded imports.
+test_killswitch.py           b8041df    24
+test_guardrails.py           b8041df    25
 BASELINES
   SELF_TEST=1
 else

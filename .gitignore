@@ -95,5 +95,13 @@ docs/vendor/*.pdf
 # Both are outside the repo on purpose. See docs/investing-boundary.md.
 investing/
 broker/
-agentmux-broker/
 research/sessions/
+# NOT agentmux-broker/ itself - that is SOURCE, and the plan runs
+# `pytest agentmux-broker/test_killswitch.py`. Ignoring the whole directory
+# would have blocked the very code this boundary exists to guard, which is what
+# the first version of this did. Only the places an artifact could land inside
+# it are ignored; artifacts are supposed to live outside the repo entirely, and
+# check_no_financial_artifacts.sh catches them by filename wherever they land.
+agentmux-broker/profile/
+agentmux-broker/captures/
+agentmux-broker/*.jsonl
