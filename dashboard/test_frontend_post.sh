@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# nvm keeps node off a NON-INTERACTIVE PATH, so `node` is missing here while it works
+# fine in a terminal. Nine of the eleven node-using suites already do this; the two
+# that did not were the two that broke. Same shape as test_frontend_board.sh:4-6.
+if ! command -v node >/dev/null 2>&1; then
+  node_dir=$(ls -d "$HOME"/.nvm/versions/node/*/bin 2>/dev/null | sort -V | tail -1 || true)
+  [ -z "$node_dir" ] || export PATH="$node_dir:$PATH"
+fi
 node <<'JS'
 const assert = require('node:assert/strict'), fs = require('node:fs'), vm = require('node:vm');
 const source = fs.readFileSync('dashboard/app.js', 'utf8');

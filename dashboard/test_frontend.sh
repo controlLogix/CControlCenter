@@ -126,10 +126,22 @@ else
 fi
 
 echo '--- app.js still parses ---'
+# THIS BRANCH USED TO PASS WITHOUT CHECKING ANYTHING. When node was absent it printed
+# a note and called neither ok nor bad, so the suite reported "failed 0" while the
+# only JavaScript parse check in it never ran - a green gate on a check that did not
+# happen, which is the failure mode this repo keeps deciding it will not ship.
+#
+# So: find node the way the other suites do, and if it still is not there say SKIP at
+# column zero, which run_tests.sh greps for and surfaces. Absent stays visible instead
+# of counting as a pass.
+if ! command -v node >/dev/null 2>&1; then
+  node_dir=$(ls -d "$HOME"/.nvm/versions/node/*/bin 2>/dev/null | sort -V | tail -1 || true)
+  [ -z "$node_dir" ] || export PATH="$node_dir:$PATH"
+fi
 if command -v node >/dev/null 2>&1; then
   if node --check "$APP" 2>/dev/null; then ok 'node --check passes'; else bad 'app.js is not valid JavaScript'; fi
 else
-  echo '  (node not on PATH; run under bash -ic for nvm to parse-check app.js)'
+  echo 'SKIP node not found (nvm not installed?); app.js was NOT parse-checked'
 fi
 
 finish
