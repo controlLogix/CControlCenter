@@ -64,11 +64,24 @@ const consoleErrors = [];
 page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()); });
 page.on('pageerror', (e) => consoleErrors.push('pageerror: ' + e.message));
 
-// SIZED FOR A LOADED MACHINE, not an idle one. The gate runs this suite after
-// ~55 others, and measurement puts it at 4x slower under contention (32s idle,
-// 130s saturated) - at which point a 25-second wait for a UI round trip is not
-// generous, it is a coin flip. Still well under the 120s per-test ceiling, so a
-// genuine hang is still reported promptly rather than sat on.
+// SIZED FOR A LOADED MACHINE, not an idle one - but read the correction below
+// before trusting the number, because the first version of this comment was
+// defending it with a measurement of a bug.
+//
+// Measured on a 32-core box: 32s idle, 51s under full load with the tree
+// healthy. So contention alone costs about 1.6x, and 60s leaves real headroom
+// over the worst HEALTHY case for a single UI round trip while staying well
+// under the 120s per-test ceiling, so a genuine hang is still reported.
+//
+// THE CORRECTION. This was first raised from 25s to 60s on the theory that the
+// suite ran 4x slower under load (32s to 130s). It does not. Those 130s runs
+// were a server bug: a transient 9p read failure came back as a 404 whose body
+// was JSON, so kanban.js was refused under nosniff and the board never
+// rendered. Raising the budget changed nothing, which is the tell - a wait that
+// still times out at 60s is not waiting for something slow. See TM-031 and
+// dashboard/test_static_serving.py. A timeout here means something is broken,
+// not that the machine is busy; do not raise this number again to make a
+// failure go away.
 const UI_BUDGET_MS = 60000;
 
 await page.goto(baseURL, { waitUntil: 'load' });
@@ -77,11 +90,12 @@ await page.waitForFunction(() => !!window.AGENTMUX, null, { timeout: 15000 });
 
 // A wait that reports what the page ACTUALLY had when it gave up.
 //
-// "Timeout 25000ms exceeded" is true and useless: it cannot tell a slow render
-// from an add that silently failed, and those are opposite problems. Under gate
-// load this suite runs about 4x slower than idle (measured: 32s to 130s), so
-// the interesting question on a timeout is always "did it never happen, or had
-// it not happened YET" - and only the page can answer that.
+// "Timeout 60000ms exceeded" is true and useless: it cannot tell a slow render
+// from a render that was never going to happen, and those are opposite
+// problems. In TM-031 it was the second - kanban.js had been refused by the
+// browser, so no amount of waiting would ever have produced the element - and
+// the timeout message pointed at the clock instead. Only the page can say
+// which; this makes it say so.
 async function waitFor(page, fn, arg, { timeout = UI_BUDGET_MS, describe } = {}) {
   try {
     return await page.waitForFunction(fn, arg, { timeout });

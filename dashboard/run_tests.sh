@@ -319,6 +319,12 @@ run test_devicetree.py python3 dashboard/test_devicetree.py
 # browser needed; proved by mutation, since the guard predates the repo's
 # first commit and has no failability base.
 run test_stream_slots.py python3 dashboard/test_stream_slots.py
+# TM-031: a 9p read that failed transiently was answered as 404, so the browser
+# was told kanban.js does not exist - and, because the body was JSON under the
+# nosniff header, it refused to run the script and the board never rendered.
+# The e2e suite saw only a timeout. This asserts the distinction the handler now
+# keeps: absent is 404, unreadable is 503 and is retried first.
+run test_static_serving.py python3 dashboard/test_static_serving.py
 run test_pn_dcp.py python3 dashboard/test_pn_dcp.py
 run test_ecat_diag.py python3 dashboard/test_ecat_diag.py
 run test_snapshot.py python3 dashboard/test_snapshot.py

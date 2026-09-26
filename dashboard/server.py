@@ -18,6 +18,7 @@ import mqtt_monitor
 import modbus_poll
 import devicetree
 import netscan
+import ninep
 import os
 from pathlib import Path
 import profinet
@@ -1185,6 +1186,35 @@ class Handler(BaseHTTPRequestHandler):
 
     def send_json(self, status, data):
         self.send_body(status, json.dumps(data).encode("utf-8"), "application/json")
+
+    def send_transient(self):
+        """503 for a request we could not answer, as distinct from one we refused.
+
+        The tree is on 9p and a stat or a read under it raises EIO under load
+        (R29, TM-013, TM-027). Both static-file failure paths below used to fold
+        that into "forbidden" or "not found" - answers about the REQUEST, when
+        what failed was the filesystem. TM-031 is what that costs: a 404 whose
+        body was JSON went back for kanban.js, Firefox declined to execute JSON
+        as a script under the nosniff header this very class sets, the board
+        never rendered, and the e2e suite reported a timeout three layers away.
+
+        503 is the honest code, and it is also the VISIBLE one: a script that
+        503s trips the load-failure banner index.html installs, where a 404
+        rendered as a MIME-type warning in a console nobody was reading. The
+        path is deliberately not echoed back, for the same reason log_message
+        logs nothing.
+        """
+        self.send_response(503)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Retry-After", "1")
+        body = json.dumps({"error": "temporarily unreadable",
+                           "retry": True}).encode("utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        if self.command != "HEAD":
+            self.wfile.write(body)
 
     def do_GET(self):
         try:
@@ -2547,7 +2577,14 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError("unsafe path")
             file_path = (ROOT / path.lstrip("/")).resolve()
             file_path.relative_to(ROOT)
-        except (ValueError, OSError, RuntimeError, UnicodeError):
+        except (ValueError, OSError, RuntimeError, UnicodeError) as exc:
+            # resolve() walks the filesystem, so it can fail transiently on 9p.
+            # That is not a forbidden path: we never got far enough to judge the
+            # path at all, and saying "forbidden" sends the caller looking for a
+            # permissions problem that does not exist.
+            if isinstance(exc, OSError) and exc.errno in ninep.TRANSIENT:
+                self.send_transient()
+                return
             self.send_json(403, {"error": "forbidden"})
             return
 
@@ -2634,11 +2671,15 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(403, {"error": "forbidden"})
             return
         try:
-            if not file_path.is_file():
-                raise FileNotFoundError
-            body = file_path.read_bytes()
-        except OSError:
+            # Retries a transient 9p failure before deciding anything. Three
+            # attempts over ~30ms is invisible to a caller and is the difference
+            # between the board rendering and not.
+            body = ninep.read_retrying(file_path)
+        except FileNotFoundError:
             self.send_json(404, {"error": "not found"})
+            return
+        except OSError:
+            self.send_transient()
             return
         self.send_body(200, body, content_type)
 

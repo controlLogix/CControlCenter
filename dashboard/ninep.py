@@ -26,6 +26,7 @@ path is information; an EIO traceback out of setUpClass is noise.
 
 import errno
 import os
+import time
 from pathlib import Path
 
 # The errnos Path.exists()/is_file() already treat as "no, it is not there".
@@ -33,6 +34,12 @@ from pathlib import Path
 ABSENT = {errno.ENOENT, errno.ENOTDIR, errno.EBADF, errno.ELOOP}
 if hasattr(errno, 'EINVAL'):
     ABSENT.add(errno.EINVAL)   # what Windows raises for a malformed name
+
+# Failures worth trying again. A 9p EIO is transient by nature - the same read a
+# few milliseconds later normally succeeds - so the right response to one is to
+# retry, not to report it. Anything NOT listed here is reported immediately: a
+# persistent EACCES retried three times is 30ms wasted and the same wrong answer.
+TRANSIENT = {errno.EIO, errno.EAGAIN, errno.EBUSY, errno.EINTR}
 
 
 def crosses_9p(path):
@@ -71,6 +78,58 @@ def unreachable_reason(path, kind='dir'):
 def reachable(path, kind='dir'):
     """True only when `path` is a usable <kind>. Never raises."""
     return unreachable_reason(path, kind) is None
+
+
+def read_retrying(path, attempts=3, delay=0.01, _sleep=time.sleep):
+    """Read a file that may live across 9p, retrying a transient failure.
+
+    THE BUG THIS EXISTS FOR. A server that catches OSError around a static-file
+    read and answers 404 is telling the client the file does not exist, when
+    what happened is that the filesystem would not say. TM-031: under gate load
+    `kanban.js` came back as a 404 whose body was JSON, Firefox refused to
+    execute JSON as a script under `nosniff`, the board never rendered, and the
+    e2e suite reported a *timeout* - three layers away from the cause. Raising
+    the timeout, which is what a reading of the symptom suggests, changed
+    nothing, because no budget is long enough for a script that never loads.
+
+    So this keeps the two answers apart the way the rest of this module does,
+    and adds the one thing a server can do that a test cannot: try again. Three
+    attempts over ~30ms covers a transient EIO without anybody noticing.
+
+    Raises FileNotFoundError when the path is genuinely absent or is not a
+    regular file. Raises the last OSError when the question could not be
+    answered - and the caller must NOT render that as absence.
+    """
+    subject = Path(path)
+    last = None
+    for attempt in range(attempts):
+        try:
+            if not subject.is_file():
+                # Covers absence AND a directory, both of which are honest 404s.
+                raise FileNotFoundError(errno.ENOENT, 'not a regular file', str(subject))
+            return subject.read_bytes()
+        except FileNotFoundError:
+            raise
+        except IsADirectoryError as exc:
+            raise FileNotFoundError(errno.ENOENT, 'not a regular file', str(subject)) from exc
+        except OSError as exc:
+            if exc.errno in ABSENT:
+                raise FileNotFoundError(errno.ENOENT, 'not a regular file', str(subject)) from exc
+            if exc.errno not in TRANSIENT:
+                raise
+            last = exc
+            if attempt + 1 < attempts:
+                _sleep(delay * (attempt + 1))
+    raise last
+
+
+def transient_reason(exc, path):
+    """A sentence for a failure that is NOT absence, worded for an operator.
+
+    Kept next to the read so the wording and the decision cannot drift apart.
+    """
+    where = ' (9p mount)' if crosses_9p(path) else ''
+    return f'{path} could not be read{where}: {exc.strerror or exc}'
 
 
 def skip_if_unreadable(case, path, kind='dir'):
