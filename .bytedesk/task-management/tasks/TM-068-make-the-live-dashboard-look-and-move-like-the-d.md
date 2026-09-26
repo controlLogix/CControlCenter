@@ -11,12 +11,13 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:27:02.015Z"
+updated: "2026-09-26T03:12:32.326Z"
+session: "pool-tm-068"
 ---
 
 The React rewrite is months of work. This is the visible win on the product

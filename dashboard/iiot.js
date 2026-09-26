@@ -167,13 +167,13 @@
       name.className = 'tag-name';
       name.textContent = tag.name;
       const value = document.createElement('span');
-      value.className = 'tag-value';
+      value.className = 'tag-value is-value';
       value.textContent = `${tag.value === null ? '—' : tag.value} ${tag.engineering_unit || ''}`.trim();
       const state = document.createElement('span');
-      state.className = `status-chip ${stale ? 'bad' : 'ok'}`;
+      state.className = `status-chip is-value ${stale ? 'bad' : 'ok'}`;
       state.textContent = stale ? 'STALE' : 'live';
       const seen = document.createElement('span');
-      seen.className = 'tag-seen';
+      seen.className = 'tag-seen is-value';
       // An AGE, not a clock reading. `age_ms` was measured on the server; the
       // only thing added here is monotonic elapsed time since the snapshot
       // arrived, so the number ticks smoothly and never crosses two wall clocks.

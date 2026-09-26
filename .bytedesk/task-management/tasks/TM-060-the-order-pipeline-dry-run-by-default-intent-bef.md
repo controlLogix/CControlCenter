@@ -11,12 +11,13 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:06:22.241Z"
+updated: "2026-09-26T03:13:23.617Z"
+session: "pool-tm-060"
 ---
 
 Phase 5.4. research, OrderTicket, guardrails, DRY RUN, typed confirmation, kill

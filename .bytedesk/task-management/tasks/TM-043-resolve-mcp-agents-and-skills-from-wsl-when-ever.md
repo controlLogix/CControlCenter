@@ -11,12 +11,13 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:03:34.210Z"
+updated: "2026-09-26T03:13:16.408Z"
+session: "pool-tm-043"
 ---
 
 Phase 2.4, and the largest gap in the blade spec. Every MCP server on this

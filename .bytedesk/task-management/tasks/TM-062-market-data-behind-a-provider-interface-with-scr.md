@@ -11,12 +11,13 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:06:26.195Z"
+updated: "2026-09-26T03:12:27.603Z"
+session: "pool-tm-062"
 ---
 
 Open question 1. A MarketDataProvider interface with two adapters and one named

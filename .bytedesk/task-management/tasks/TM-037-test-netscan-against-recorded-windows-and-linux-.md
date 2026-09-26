@@ -1,7 +1,7 @@
 ---
 id: "TM-037"
 kind: "task"
-status: "open"
+status: "in_progress"
 created: "2026-09-26T02:03:23.290Z"
 board: "controllogix/ccontrolcenter"
 title: "Test netscan against recorded Windows and Linux output before it changes hosts"
@@ -11,12 +11,14 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
-branch: "main"
-worktree: "/mnt/c/Dev/agentmux"
+actor: "pool"
+branch: "tm/TM-037-test-netscan-against-recorded-windows-and-linux-"
+worktree: "/mnt/c/Dev/agentmux/.bytedesk/worktrees/TM-037-test-netscan-against-recorded-windows-and-linux-"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:03:23.331Z"
+updated: "2026-09-26T03:08:37.832Z"
+session: "pool-tm-037"
+dispatched: {"backend":"tmux","run":"tmux:tm-TM-037","session":"pool-tm-037","at":"2026-09-26T03:08:37.756Z"}
 ---
 
 Phase 1.1. running_under_wsl() at netscan.py:202 INVERTS once the module runs on

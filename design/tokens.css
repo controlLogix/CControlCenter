@@ -225,7 +225,16 @@
  * Kept because the product already ships cc-light and operators use it in lit
  * rooms. The ACCENT RAMP DOES NOT INVERT - orange on white at the hot end is
  * illegible, so the hot steps are darkened rather than flipped.              */
-:root[data-theme="light"] {
+/* [data-scheme] is the same statement, made by a host application that stores
+ * something OTHER than "light" in [data-theme]. agentmux's dashboard puts a real
+ * theme ID there - cc-light, parchment, glacier - persisted per operator under
+ * agentmux.theme, and renaming those to suit a stylesheet silently resets every
+ * saved theme on the next load. So the page mirrors the ACTIVE theme's declared
+ * color-scheme onto [data-scheme] instead. That is a statement the theme author
+ * made, not a list of IDs hardcoded in a stylesheet, so a theme an operator
+ * imported tomorrow is handled by the same rule.                             */
+:root[data-theme="light"],
+:root[data-scheme="light"] {
   --surface-void:      #e8e8e4;
   --surface-base:      #eff1ec;
   --surface-raised:    #f7f8f5;

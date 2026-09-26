@@ -375,7 +375,16 @@
 
       const detail = details.get(run.run);
       if (detail) card.appendChild(jobTable(detail));
-      else card.appendChild(el('div', 'run-loading', 'Loading jobs…'));
+      // 'dots' and 'sweep' are design/motion.css primitives: an animated ellipsis
+      // and an indeterminate gradient. Both are allowed here because this state
+      // genuinely IS indeterminate - the jobs have been asked for and have not
+      // answered. The sweep is a sibling rather than a ::after on the text,
+      // because .dots already owns that pseudo-element. Neither is ever left on a
+      // container that has finished: this whole branch is the not-yet-loaded one.
+      else {
+        card.appendChild(el('div', 'run-loading dots', 'Loading jobs'));
+        card.appendChild(el('div', 'sweep run-sweep'));
+      }
 
       // Only an OPEN card costs a detail request. The summary above is already drawn
       // from the list payload, so a collapsed run is free.

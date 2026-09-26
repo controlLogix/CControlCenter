@@ -11,12 +11,13 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:27:05.783Z"
+updated: "2026-09-26T03:12:33.903Z"
+session: "pool-tm-070"
 ---
 
 packages/scene - standalone three.js, framework-agnostic, mounted by the

@@ -11,12 +11,13 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:06:28.536Z"
+updated: "2026-09-26T03:12:28.370Z"
+session: "pool-tm-063"
 ---
 
 Phase 6.1 and 6.2. tailscaled with --tun=userspace-networking, then tailscale

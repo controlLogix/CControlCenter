@@ -54,6 +54,46 @@
     }
   })();
 </script>
+<!-- THE DESIGN SYSTEM, FIRST AND DELIBERATELY SO. design/tokens.css decides
+     every colour, curve, duration and radius; design/motion.css is the motion
+     vocabulary built on it. style.css comes LAST of all of these, which is what
+     lets the dashboard keep its own --space-1..5 ramp where the two files spell
+     the same names with half the step - density is the identity here, and the
+     cascade is how that is expressed rather than by renaming anything.
+     Served from /design/ by server.py's DESIGN_FILES allowlist. They live
+     beside dashboard/ rather than inside it because packages/web consumes the
+     same four files, and a design system with two copies has stopped being one. -->
+<link rel="stylesheet" href="design/tokens.css">
+<link rel="stylesheet" href="design/motion.css">
+<!-- THESE TWO TAGS EXIST TO BE SEEN FAILING, and that is their whole job.
+     Both files only EXPORT, so loading them like this evaluates code that does
+     nothing; the inline module at the foot of the page imports the same two URLs
+     and does the calling, and the module map means each file is still fetched and
+     evaluated exactly once.
+     What they buy is the RECORD. A module reached by an import statement is not a
+     <script> element, so a 404 on one fires nothing the capture-phase listener at
+     the top of this file can see. As real elements these do fire it, and
+     window.AGENTMUX_SCRIPT_ERRORS then names the two files.
+
+     MEASURED, NOT ASSUMED, because the first version of this comment claimed more
+     than was true. Blocking all four /design/ responses in Firefox populates that
+     list with ["motion.js","field.js"] - and the banner still does not appear,
+     because a module script's error event is dispatched after the parser has
+     finished, while app.js reads the list once and synchronously from the body.
+     The race is not close; it is structural, and this loses it every time.
+
+     IT IS STILL WORTH HAVING, and it is deliberately not wired up any harder than
+     this. app.js's message for that list opens "Some panels will be empty", which
+     is FALSE for this failure - nothing is empty, the page renders correctly with
+     no motion and default radii. Forcing that banner to fire would trade silence
+     for a product that says something untrue, which is the trade this codebase is
+     organised against. What is left is an accurate record any console or future
+     check can read. A correct signal needs its own message, and that is an app.js
+     change rather than a markup one.
+     The CSS side cannot be detected at all - a stylesheet is not a script - so it
+     degrades instead; style.css's header says how and why it stays readable. -->
+<script type="module" src="design/motion.js"></script>
+<script type="module" src="design/field.js"></script>
 <link rel="stylesheet" href="vendor/xterm.css">
 <link rel="stylesheet" href="agents.css">
 <link rel="stylesheet" href="teams.css">
@@ -87,7 +127,7 @@
   <span id="modeSwitch" class="mode-switch"></span>
   <button id="bladeToggle" class="btn btn-blade" title="Agent console (Ctrl+`)"
           aria-label="Toggle the agent console" aria-expanded="false">console</button>
-  <span class="count" id="count"></span>
+  <span class="count is-value" id="count"></span>
   <!-- WHICH CHECKOUT IS BEING SERVED. Always on screen, never a banner.
        TM-020: a gate run put this dashboard back in the wrong checkout and the
        page looked entirely normal - it answered, every panel rendered, and it
@@ -107,8 +147,8 @@
   <label class="toggle"><input type="checkbox" id="followToggle" checked> follow</label>
   <button id="ribbonToggle" class="btn" aria-expanded="true" aria-controls="ribbon"
           title="Show or hide the terminal configuration ribbon">ribbon</button>
-  <span id="tmux" class="pill">&nbsp;</span>
-  <span id="stamp" class="stamp" aria-live="polite">connecting…</span>
+  <span id="tmux" class="pill is-value">&nbsp;</span>
+  <span id="stamp" class="stamp is-value" aria-live="polite">connecting…</span>
 </header>
 
 <div class="shell">
@@ -242,7 +282,7 @@
     <section id="viewStatus" class="view pad" role="tabpanel" aria-label="Status" hidden>
       <div class="vhead">
         <h2>Status</h2>
-        <span id="statusStamp" class="stamp" aria-live="polite"></span>
+        <span id="statusStamp" class="stamp is-value" aria-live="polite"></span>
         <span class="spacer"></span>
         <select id="statusExportAs" aria-label="Export format" title="Export format">
           <option value="json" selected>JSON</option>
@@ -263,7 +303,7 @@
         <!-- Feed -->
         <div id="viewFeed" class="panel" role="tabpanel" aria-label="Feed">
           <div class="phead">
-            <span id="feedStamp" class="stamp" aria-live="polite"></span>
+            <span id="feedStamp" class="stamp is-value" aria-live="polite"></span>
             <span class="spacer"></span>
             <label class="toggle"><input type="checkbox" id="feedFollow" checked> follow</label>
             <input id="feedSearch" class="rin" type="search" size="18" placeholder="filter text…">
@@ -279,7 +319,7 @@
         <!-- Queue -->
         <div id="viewQueue" class="panel" role="tabpanel" aria-label="Message Queue" hidden>
           <div class="phead">
-            <span id="queueStamp" class="stamp" aria-live="polite"></span>
+            <span id="queueStamp" class="stamp is-value" aria-live="polite"></span>
             <span class="spacer"></span>
             <label class="toggle"><input type="checkbox" id="queueFollow" checked> follow</label>
             <input id="queueSearch" class="rin" type="search" size="16" placeholder="filter text…">
@@ -302,7 +342,7 @@
         <!-- Journal -->
         <div id="viewJournal" class="panel" role="tabpanel" aria-label="Journal" hidden>
           <div class="phead">
-            <span id="journalStamp" class="stamp" aria-live="polite"></span>
+            <span id="journalStamp" class="stamp is-value" aria-live="polite"></span>
             <span class="spacer"></span>
             <input id="journalSearch" class="rin" type="search" size="16" placeholder="filter text…">
             <select id="journalFilterKind" title="Filter by entry kind">
@@ -338,7 +378,7 @@
     <section id="viewBoard" class="view pad" role="tabpanel" aria-label="Task Board" hidden>
       <div class="vhead">
         <h2>Board</h2>
-        <span id="boardStamp" class="stamp" aria-live="polite"></span>
+        <span id="boardStamp" class="stamp is-value" aria-live="polite"></span>
         <span class="spacer"></span>
       </div>
 
@@ -377,7 +417,7 @@
 
         <div id="viewTickets" class="panel" role="tabpanel" aria-label="Atlassian" hidden>
           <div class="phead">
-            <span id="ticketStamp" class="stamp" aria-live="polite"></span>
+            <span id="ticketStamp" class="stamp is-value" aria-live="polite"></span>
             <span class="spacer"></span>
             <input id="ticketSearch" class="rin" type="search" size="16" placeholder="filter text…">
             <button id="ticketRefresh" class="btn">refresh</button>
@@ -417,13 +457,18 @@
     <section id="viewIiot" class="view pad" role="tabpanel" aria-label="IIOT Field" hidden>
       <div class="vhead">
         <h2>IIOT Field</h2>
-        <span id="iiotStamp" class="stamp" aria-live="polite"></span>
+        <span id="iiotStamp" class="stamp is-value" aria-live="polite"></span>
         <span class="spacer"></span>
         <button id="iiotExpand" class="btn">expand all</button>
         <button id="iiotCollapse" class="btn">collapse all</button>
       </div>
 
-      <div class="iiot-grid">
+      <!-- data-stagger releases the six cards in sequence; the reveal ATTRIBUTE on
+           each card is set by initCollapsibles rather than written here, because
+           test_frontend_collapse.sh matches this markup with a regex that pins the
+           exact attribute order on a <details class="card"> tag. A decoration does
+           not get to reshape the contract a test is reading. -->
+      <div class="iiot-grid" data-stagger>
         <details class="card" data-collapse-key="iiot:modbus" open>
           <summary><h3>Modbus</h3></summary>
           <div id="modbusHint" class="cardbody"></div>
@@ -531,7 +576,7 @@
           credential is written by a setup script into a 0600 file and is never entered
           here — this panel reports whether it is configured and what it is pointed at.</p>
         <div class="res-head">
-          <span id="atlStamp" class="stamp" aria-live="polite">not loaded</span>
+          <span id="atlStamp" class="stamp is-value" aria-live="polite">not loaded</span>
           <button id="atlRefresh" class="btn">refresh</button>
         </div>
         <div id="atlState" class="auth-list"></div>
@@ -546,7 +591,7 @@
       <details class="card" data-collapse-key="settings:auth" open>
         <summary><h3>Authentication</h3></summary>
         <div class="res-head">
-          <span id="authStamp" class="stamp" aria-live="polite">not loaded</span>
+          <span id="authStamp" class="stamp is-value" aria-live="polite">not loaded</span>
           <button id="authRefresh" class="btn">refresh</button>
           <span class="note">
             Selecting a method is safe from here. <strong>Entering a credential is not</strong> —
@@ -575,7 +620,7 @@
       <details class="card" data-collapse-key="settings:resources" open>
         <summary><h3>Resources</h3></summary>
         <div class="res-head">
-          <span id="resStamp" class="stamp" aria-live="polite">not loaded</span>
+          <span id="resStamp" class="stamp is-value" aria-live="polite">not loaded</span>
           <button id="resRefresh" class="btn" title="Re-run every probe (bypasses the 12s cache)">refresh</button>
           <span class="note">Commands are shown, never run. Nothing here accepts a secret.</span>
         </div>
@@ -612,6 +657,125 @@
   <span id="footNote">Read-only terminals. Streams <code>~/.agentmux/logs/&lt;name&gt;.log</code> over SSE; no keystrokes are sent to an agent.</span>
 </footer>
 
+<!-- THE DESIGN SYSTEM'S RUNTIME. An inline module rather than two src tags,
+     because design/motion.js and design/field.js only EXPORT - loading either as
+     a bare <script type="module" src> evaluates a file that does nothing. The
+     work is in calling startMotion() and startField(), so something has to do
+     the calling, and this is it.
+
+     IT IS DEFERRED, WHICH IS WHY NOTHING DEPENDS ON IT. Every module script runs
+     after the classic ones, and app.js dispatches agentmux:ready synchronously
+     on its last line - so this has not executed yet at the moment the views
+     render their first nodes. app.js's observeReveals() helper is guarded for
+     exactly that: an early call is a no-op, and startMotion() below sweeps the
+     whole document once it does arrive. A decoration that loaded late must not
+     be able to leave a hole.
+
+     IT ADDS NO src, so it cannot move the boundary that test_frontend_tabs.sh
+     asserts: the AGENTMUX_SCRIPT_ERRORS listener at the top of this file has to
+     be installed before the first <script src=, and it still is.
+
+     WHICH IS ALSO WHY IT CANNOT REPORT ITS OWN FAILURE. A module reached by an
+     import statement is not a <script> element, so a 404 on either of these
+     fires nothing the listener can see, and the page would come up correct but
+     motionless with no explanation. The two <script type="module" src> tags in
+     <head> exist for that and nothing else - same URLs, same module-map entry,
+     fetched once, and they ARE elements. -->
+<script type="module">
+import { startMotion, observeReveals, revealEverything } from './design/motion.js';
+import { startField } from './design/field.js';
+
+/* ── the theme bridge ───────────────────────────────────────────────────
+   design/tokens.css keys its light palette on [data-theme="light"] OR
+   [data-scheme="light"]. This product puts a real theme ID in the first of
+   those - cc-light, parchment, glacier - persisted per operator under
+   agentmux.theme, and renaming those to suit a stylesheet would silently reset
+   every saved theme on the next load, which is the one thing the key-migration
+   block at the top of this file exists to prevent.
+
+   So nothing is renamed. applyTheme() already writes the selected theme's
+   declared color-scheme onto the root element, and that is a statement the
+   theme author made rather than a list of IDs hardcoded here - which means a
+   theme an operator imports tomorrow is handled by the same rule. This reads it
+   back and mirrors it onto [data-scheme]. No app.js logic is touched.
+
+   THE FIELD IS RETHEMED WITH IT. Its colours are read from the tokens, so a
+   theme change that did not re-read them would leave a dark-palette shader
+   under a light product. */
+let fieldHandle = null;
+
+function syncScheme() {
+  const root = document.documentElement;
+  let declared = '';
+  try { declared = String(getComputedStyle(root).colorScheme || ''); } catch (e) {}
+  // "light dark" means the page has not chosen; this product's :root says
+  // color-scheme: dark, so only an explicit, unambiguous light wins.
+  const light = /\blight\b/.test(declared) && !/\bdark\b/.test(declared);
+  const next = light ? 'light' : 'dark';
+  if (root.getAttribute('data-scheme') === next) return;
+  root.setAttribute('data-scheme', next);
+  if (fieldHandle && fieldHandle.syncColours) {
+    try { fieldHandle.syncColours(); } catch (e) {}
+  }
+}
+
+/* ── the reveal targets that markup cannot carry ───────────────────────────
+   data-reveal is set here rather than written onto the <details> tags, and
+   rather than into initCollapsibles, for two separate reasons that both come
+   down to not reshaping something a test is already reading:
+     - test_frontend_collapse.sh matches those tags with a regex that pins their
+       exact attribute order, so an extra attribute in the markup is a card the
+       suite stops counting.
+     - initCollapsibles is executed by that same suite against a DOM stub with
+       no setAttribute and no parentElement, so arming them there throws.
+   A decoration does not get to do either. */
+function armCards() {
+  for (const card of document.querySelectorAll('details[data-collapse-key]')) {
+    if (card.hasAttribute('data-reveal')) continue;
+    // "none" is a fade with no travel. test_e2e measures the vertical gap
+    // between the six IIOT cards - inside a column it must be the gutter and
+    // nothing more - and a reveal that lifts them 8px is an 8px lie in that
+    // measurement for as long as it runs. They fade; they do not move.
+    const grid = card.parentElement
+      && card.parentElement.classList
+      && card.parentElement.classList.contains('iiot-grid');
+    card.setAttribute('data-reveal', grid ? 'none' : 'up');
+  }
+}
+
+syncScheme();
+try {
+  // Attributes only, on one element. applyTheme writes the palette as an
+  // inline style on the root, so style is the attribute that moves.
+  new MutationObserver(syncScheme).observe(document.documentElement, {
+    attributes: true, attributeFilter: ['style', 'data-theme'],
+  });
+} catch (e) { /* no observer: the theme still applies, the field keeps its colours */ }
+
+try { armCards(); } catch (e) { /* no reveals is a fully visible page */ }
+
+try {
+  startMotion();
+} catch (e) {
+  // THE ONE CATCH HERE THAT HAS TO DO MORE THAN SWALLOW. startMotion sets
+  // data-motion-ready before it observes anything, and motion.css only hides a
+  // [data-reveal] once that attribute exists - so a throw AFTER that line
+  // leaves every reveal target hidden with nothing left to reveal it, and the
+  // safety timeout it would have scheduled never gets scheduled. Now that
+  // /design/ is fetched over the network rather than inlined, this is a real
+  // state and not a theoretical one.
+  try { revealEverything(document); } catch (_) { /* nothing further to try */ }
+}
+// Decoration, and it gets no error surface - startField already returns a
+// no-op handle when there is no WebGL, when the context is lost, or when
+// reduced motion is set.
+try { fieldHandle = startField(); } catch (e) { fieldHandle = null; }
+
+// app.js calls through this on every render and on every view change. It is set
+// AFTER startMotion so a caller can never reach a runtime that has not booted.
+window.AgentmuxMotion = { startMotion, observeReveals, revealEverything,
+                          startField, syncScheme };
+</script>
 <script src="vendor/xterm.js"></script>
 <script src="vendor/addon-fit.js"></script>
 <!-- EVERY view script goes ABOVE app.js. app.js dispatches `agentmux:ready` synchronously

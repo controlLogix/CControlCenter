@@ -11,12 +11,13 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:27:07.594Z"
+updated: "2026-09-26T03:12:34.709Z"
+session: "pool-tm-071"
 ---
 
 Plan Phase 1.0 and 1.2. The skeleton only - no handler is ported until the

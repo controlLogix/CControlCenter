@@ -1,7 +1,7 @@
 ---
 id: "TM-039"
 kind: "task"
-status: "open"
+status: "parked"
 created: "2026-09-26T02:03:26.436Z"
 board: "controllogix/ccontrolcenter"
 title: "Build the differ, and record the corpus before the second handler moves"
@@ -11,12 +11,14 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
-labels: ["ready-for-agent"]
+labels: ["ready-for-agent","human-only"]
 triagedBy: "auto"
-updated: "2026-09-26T02:03:26.479Z"
+updated: "2026-09-26T03:12:31.406Z"
+session: "pool-tm-039"
+parkedReason: "The differ decides whether a ported handler is byte-identical to the one it replaces. A worker closing this card removes the only check on the entire strangler. Phase 1.3 wants a human reading its output - unpark when one is."
 ---
 
 Phase 1.3. The strangler only works if the two servers can be proved identical.

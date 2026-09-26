@@ -11,12 +11,13 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:03:28.656Z"
+updated: "2026-09-26T03:13:14.875Z"
+session: "pool-tm-040"
 ---
 
 Phase 1.4. Verified against the live dashboard: GET /api/agents with no auth and

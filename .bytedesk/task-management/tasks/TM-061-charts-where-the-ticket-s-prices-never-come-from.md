@@ -11,12 +11,13 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:06:24.135Z"
+updated: "2026-09-26T03:13:24.402Z"
+session: "pool-tm-061"
 ---
 
 Phase 5.7. TradingView Advanced Chart widget, overlaid with entry markers, a

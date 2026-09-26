@@ -371,7 +371,7 @@ function buildCell(agent) {
   name.className = 'cell-name'; name.textContent = orDash(agent.name);
   const cli = document.createElement('span'); cli.className = 'cell-cli';
   const spacer = document.createElement('span'); spacer.className = 'spacer';
-  const up = document.createElement('span'); up.className = 'cell-up';
+  const up = document.createElement('span'); up.className = 'cell-up is-value';
   const perm = document.createElement('span');
   const taskEl = document.createElement('span');   // filled by applyTaskBadge
 
@@ -404,7 +404,7 @@ function buildCell(agent) {
   // is actually on screen. Without this the operator cannot tell "the agent printed
   // nothing" from "the text is scrolled out of view".
   const fit = document.createElement('span');
-  fit.className = 'cell-fit';
+  fit.className = 'cell-fit is-value';
 
   head.append(st, name, cli, taskEl, spacer, fit, up, perm, reBtn, mBtn, xBtn, zBtn);
 
@@ -412,7 +412,7 @@ function buildCell(agent) {
   const scaleEl = document.createElement('div'); scaleEl.className = 'term-scale';
   termHost.appendChild(scaleEl);
   const status = document.createElement('div');
-  status.className = 'cell-status'; status.textContent = 'connecting…';
+  status.className = 'cell-status is-value'; status.textContent = 'connecting…';
 
   // Bottom-right size grip. Only visible in free mode (CSS), because in a grid mode the
   // track sizes own the geometry and a grip there would fight them.
@@ -1739,6 +1739,15 @@ function el(tag, cls, text) {
   return n;
 }
 
+// The design system's reveal observer, if the runtime inlined in index.html got
+// as far as defining it. Guarded rather than assumed: it is a decoration, and a
+// decoration that can throw is a decoration that can stop a render.
+function observeReveals(root) {
+  try {
+    if (window.AgentmuxMotion && root) window.AgentmuxMotion.observeReveals(root);
+  } catch (_) { /* a reveal that does not fire is a visible element */ }
+}
+
 function renderResources(data) {
   els.resList.replaceChildren();
   const list = Array.isArray(data && data.resources) ? data.resources : [];
@@ -1755,11 +1764,15 @@ function renderResources(data) {
   for (const r of list) {
     const state = ['ok', 'partial', 'missing'].includes(r.state) ? r.state : 'missing';
     const card = el('article', `res ${state}`);
+    // Presentation only. design/motion.css hides a [data-reveal] solely while
+    // design/motion.js has the document claimed, and forces everything visible
+    // after its own budget - so a card can never be left invisible by this.
+    card.dataset.reveal = 'up';
 
     const title = el('div', 'res-title');
     title.appendChild(el('h3', null, r.name || r.id || '?'));
     if (r.kind) title.appendChild(el('span', 'res-kind', r.kind));
-    title.appendChild(el('span', `res-state ${state}`, state));
+    title.appendChild(el('span', `res-state is-value ${state}`, state));
     card.appendChild(title);
 
     if (r.summary) card.appendChild(el('p', 'res-summary', r.summary));
@@ -1769,7 +1782,7 @@ function renderResources(data) {
       for (const c of r.checks) {
         const li = el('li');
         const mark = c.ok ? 'ok' : (c.optional ? 'opt' : 'bad');
-        li.appendChild(el('span', `chk ${mark}`, c.ok ? '✓' : (c.optional ? '–' : '✗')));
+        li.appendChild(el('span', `chk is-value ${mark}`, c.ok ? '✓' : (c.optional ? '–' : '✗')));
         li.appendChild(el('span', 'chk-label', c.label || c.id || ''));
         if (c.detail) {
           const d = el('span', 'chk-detail', c.detail);
@@ -1826,6 +1839,8 @@ ${a.note}` : a.command;
 
     els.resList.appendChild(card);
   }
+  els.resList.setAttribute('data-stagger', '');
+  observeReveals(els.resList);
 }
 
 async function loadResources(force) {
@@ -2003,7 +2018,7 @@ function drawFeed() {
     const row = collapsible(`feed:${JSON.stringify([e.at, e.source, e.who, e.ref, e.text])}`,
       `feed-row ${e.severity}`, false);
     const head = el('summary', 'item-summary');
-    head.appendChild(el('span', 'f-at', (e.at || '').slice(11, 19)));
+    head.appendChild(el('span', 'f-at is-value', (e.at || '').slice(11, 19)));
     head.appendChild(el('span', `f-src ${e.source}`, e.source));
     head.appendChild(markAgent(el('span', 'f-who', e.who || '—'), e.who));
     head.appendChild(el('span', 'f-text item-preview', e.text));
@@ -2275,6 +2290,10 @@ function showView(which) {
   for (const [id, node] of Object.entries(els.views)) {
     if (node) node.hidden = id !== which;
   }
+  // The view that just came back from display:none may hold nodes rendered while
+  // it was hidden, which no IntersectionObserver could have seen. Presentation
+  // only - nothing above or below this depends on it.
+  observeReveals(els.views[which]);
 
   // Restore after layout. The element was display:none a moment ago, so it has no
   // scrollHeight yet and assigning scrollTop now would silently clamp to 0.

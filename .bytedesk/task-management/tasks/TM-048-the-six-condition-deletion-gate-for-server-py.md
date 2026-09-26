@@ -1,7 +1,7 @@
 ---
 id: "TM-048"
 kind: "task"
-status: "open"
+status: "parked"
 created: "2026-09-26T02:04:39.948Z"
 board: "controllogix/ccontrolcenter"
 title: "The six-condition deletion gate for server.py"
@@ -11,12 +11,14 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
-labels: ["ready-for-agent"]
+labels: ["ready-for-agent","human-only"]
 triagedBy: "auto"
-updated: "2026-09-26T02:04:39.992Z"
+updated: "2026-09-26T03:12:34.717Z"
+session: "pool-tm-048"
+parkedReason: "Deleting server.py is a six-condition gate ending in one commit and one PR. Unpark when all six are demonstrably met."
 ---
 
 Phase 3. All six, not 'when the last view is migrated'. A half-deleted dispatcher

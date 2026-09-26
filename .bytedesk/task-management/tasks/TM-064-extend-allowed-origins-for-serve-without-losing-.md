@@ -11,12 +11,13 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:06:30.671Z"
+updated: "2026-09-26T03:12:29.211Z"
+session: "pool-tm-064"
 ---
 
 Phase 6.3, and the thing most likely to go wrong in this epic.

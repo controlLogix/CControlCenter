@@ -1,7 +1,7 @@
 ---
 id: "TM-035"
 kind: "task"
-status: "open"
+status: "in_progress"
 created: "2026-09-26T02:03:19.745Z"
 board: "controllogix/ccontrolcenter"
 title: "Move the field protocol modules into field/protocols/"
@@ -11,12 +11,13 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:03:19.807Z"
+updated: "2026-09-26T03:07:08.094Z"
+session: "pool-tm-035"
 ---
 
 Phase 1.1b. The shell already imports them from dashboard/ via one sys.path line

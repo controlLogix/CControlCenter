@@ -11,12 +11,13 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:03:32.460Z"
+updated: "2026-09-26T03:13:15.636Z"
+session: "pool-tm-042"
 ---
 
 Open question 4, answered yes - but the DATA FILE ONLY, not the modules. 'cc' is

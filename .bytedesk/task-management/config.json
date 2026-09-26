@@ -56,7 +56,7 @@
   "plugin": {},
   "labels": {},
   "dispatch": {
-    "enabled": false
+    "enabled": true
   },
   "activeEpic": "EP-005"
 }

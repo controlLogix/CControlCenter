@@ -1,7 +1,7 @@
 ---
 id: "TM-038"
 kind: "task"
-status: "open"
+status: "parked"
 created: "2026-09-26T02:03:24.803Z"
 board: "controllogix/ccontrolcenter"
 title: "Scaffold the Node API, and never let it run DDL"
@@ -11,12 +11,16 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
-branch: "main"
-worktree: "/mnt/c/Dev/agentmux"
+actor: "pool"
+branch: "tm/TM-038-scaffold-the-node-api-and-never-let-it-run-ddl"
+worktree: "/mnt/c/Dev/agentmux/.bytedesk/worktrees/TM-038-scaffold-the-node-api-and-never-let-it-run-ddl"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:03:24.849Z"
+updated: "2026-09-26T03:08:29.990Z"
+session: "pool-tm-038"
+dispatched: {"backend":"tmux","run":"tmux:tm-TM-038","session":"pool-tm-038","at":"2026-09-26T03:07:57.522Z"}
+parkedReason: "worker exited without closing"
+comments: [{"author":"worker:tmux","ts":"2026-09-26T03:08:29.929Z","text":"worker exited without closing"}]
 ---
 
 Phase 1.2. Fastify 5, Zod, TS strict, npm workspaces. SQLite via node:sqlite

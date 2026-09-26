@@ -1,7 +1,7 @@
 ---
 id: "TM-047"
 kind: "task"
-status: "open"
+status: "parked"
 created: "2026-09-26T02:04:38.410Z"
 board: "controllogix/ccontrolcenter"
 title: "Terminals in React: an unmounted island, and the fit matrix that proves it"
@@ -11,12 +11,14 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:04:38.454Z"
+updated: "2026-09-26T03:13:03.305Z"
+session: "pool-tm-047"
+parkedReason: "Superseded by TM-079, which ports the terminals view whole and carries the fit-matrix and never-unmounted requirements in its acceptance."
 ---
 
 Phase 3, and the single thing most likely to be got wrong. xterm is a useRef

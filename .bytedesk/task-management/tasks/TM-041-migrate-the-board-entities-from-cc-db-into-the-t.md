@@ -1,7 +1,7 @@
 ---
 id: "TM-041"
 kind: "task"
-status: "open"
+status: "parked"
 created: "2026-09-26T02:03:30.422Z"
 board: "controllogix/ccontrolcenter"
 title: "Migrate the board entities from cc.db into the task store"
@@ -14,9 +14,10 @@ blocks: []
 actor: "main"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
-labels: ["ready-for-agent"]
+labels: ["ready-for-agent","human-only"]
 triagedBy: "auto"
-updated: "2026-09-26T02:03:30.538Z"
+updated: "2026-09-26T03:12:33.000Z"
+parkedReason: "The cc.db store migration is one-shot and irreversible in practice. Unpark when a person is watching the dry run."
 ---
 
 Phase 1.5. Writes go through the plugin's own store.mjs create(), which accepts

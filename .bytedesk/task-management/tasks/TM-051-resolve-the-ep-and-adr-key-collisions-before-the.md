@@ -11,12 +11,13 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:04:46.340Z"
+updated: "2026-09-26T03:13:20.265Z"
+session: "pool-tm-051"
 ---
 
 Section 10, item 2. Migration without re-keying silently merges unrelated work,

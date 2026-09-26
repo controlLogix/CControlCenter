@@ -1,7 +1,7 @@
 ---
 id: "TM-036"
 kind: "task"
-status: "open"
+status: "parked"
 created: "2026-09-26T02:03:21.164Z"
 board: "controllogix/ccontrolcenter"
 title: "Split codesys_panel.py - the client half is a field module, the rest is not"
@@ -11,12 +11,16 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
-branch: "main"
-worktree: "/mnt/c/Dev/agentmux"
+actor: "pool"
+branch: "tm/TM-036-split-codesys-panel-py-the-client-half-is-a-fiel"
+worktree: "/mnt/c/Dev/agentmux/.bytedesk/worktrees/TM-036-split-codesys-panel-py-the-client-half-is-a-fiel"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:03:21.210Z"
+updated: "2026-09-26T03:08:29.350Z"
+session: "pool-tm-036"
+dispatched: {"backend":"tmux","run":"tmux:tm-TM-036","session":"pool-tm-036","at":"2026-09-26T03:07:45.720Z"}
+parkedReason: "worker exited without closing"
+comments: [{"author":"worker:tmux","ts":"2026-09-26T03:08:29.267Z","text":"worker exited without closing"}]
 ---
 
 Phase 1.1. It is 473 lines and imports ccboard and ccstore, so it cannot move

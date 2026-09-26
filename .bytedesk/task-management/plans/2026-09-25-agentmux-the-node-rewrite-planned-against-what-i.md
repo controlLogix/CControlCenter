@@ -1458,3 +1458,178 @@ Three pieces of bookkeeping first, or the board will lie about what is happening
 `wipLimit` is 3 and `dispatch.enabled` is `false`. Turning the pool on is a separate
 decision — the phases are written to work either way, but **Phase 1.3 wants a human
 reading differ output**, not a worker closing cards on it.
+
+---
+
+## 11. Session of 2026-09-26 — what shipped, what did not, and the handoff
+
+Written for the team that picks this up. **Read §11.3 first if you are about to
+start work**: it is the list of things this session was asked for and did not
+finish, and four of them are larger than anything in §11.1.
+
+### 11.1 What shipped
+
+Gate: **75 suites**, all green, from the ext4 clone. Started the session at 57
+suites / 2,068 assertions.
+
+| | What | Why it mattered |
+|---|---|---|
+| **TM-031** | The e2e flake, and it had **two independent causes** | The first fix was aimed at the wrong one — see §11.4 |
+| **TM-017** | The SSE slot guard, tested live against a real ephemeral-port dashboard over raw undrained sockets | The in-process suite can be wholly green while the running server still wedges. The catch it alone makes: a refused reload must free its own predecessor |
+| **TM-032** | `git_link_unattributed` journalled but never surfaced — 90 rows, 6.73% of the log, against 13 useful `git_link` | A 7:1 noise ratio. The emission is kept because the count is the only measure of how much work lands off the board, and deleting it destroys the evidence for its own fix |
+| **TM-053/054** | Kill switch and guardrails, back-filled as tasks | `allowed()` has no override parameter, deliberately: an override argument is a thing a caller can pass |
+| **TM-055** | The selector registry | "Never a fallback locator" is enforced four ways, including refusing a locator that is a **list** and refusing two logical names that share one locator — map Preview and Place to the same node and the dry run places the order |
+| **TM-056** | `ExecutionVenue` + Alpaca paper | `submit()` is a concrete template method, so an adapter cannot reorder the intent-before-transmit sequence. The base URL is a **whitelist**: a live endpoint added tomorrow is refused by a whitelist and permitted by a blacklist, and only one of those costs money |
+| **TM-057** | Credential store | Presence-not-value made **structural**: `get()` returns a `Credential`, never a `str`, and the fingerprint field is validated to 16 hex characters so the one field derived from the value cannot hold it |
+| **TM-067** | The design system — `design/{tokens,motion}.css`, `motion.js`, `field.js` | See §11.2 |
+| **TM-068** | The live dashboard on the design system | 157/0 frontend and 52/0 e2e, unchanged. Layout, density and structure untouched |
+| **TM-070** | `packages/scene` — the 3D plant topology, 90 tests | Origin carried by **geometry**, not colour: solid for a device that answered, wireframe for one a port sweep inferred. Survives a retheme, a projector and colour vision deficiency, none of which a hue does |
+| **TM-071** | `packages/api` — 48 tests | The bind is asserted three ways with a positive control, because each alone is satisfiable by a server listening everywhere |
+
+Two new gates, and they are the ones worth keeping:
+
+- **`test_port_parity.py`** — the 1:1 requirement, enforced. The surface is
+  **derived from source on every run** (8 views, 9 panels, 13 modules, 11 stored
+  preferences, 50 routes, 40 board ops = **131 items**) and every one must be
+  accounted for in `docs/port-parity.json`. The derived board-op count is 40,
+  matching this plan's independent hand survey exactly — and that agreement is
+  now asserted, so a drift in either method is visible.
+- **`test_design_tokens.py`** — 21 assertions that motion cannot make the
+  product lie. See §11.2.
+
+`/design/*` is now **served** by `server.py` from an exact-name allowlist
+against its own root. Before that the only way to get tokens onto the page was
+to paste 741 lines into `style.css`, which is the "two copies drift within a
+week" failure this plan already records about the field modules.
+
+### 11.2 The design decision, and the one rule under it
+
+The brief was omen.ai — "these animations and sleekness". **Measuring it rather
+than looking at it changed the shape of the work**: it is the same design
+language this product already speaks. Near-black surfaces (`#1a1a1a` /
+`#252525`), a hot orange accent (`#ff5202`), a cool blue-grey complement
+(`#6a819b`), radii of 1–6px. Not rounded, not pastel, no gradient cards.
+
+So `SPEC_CC.md:26-33` is **kept, not replaced**, and 72 KB of `style.css` did
+not have to be re-decided. What was added is what it lacked: a warm ramp so
+orange can express **magnitude** rather than only presence; motion specified as
+tokens; and depth at a strength that never competes with a number.
+
+It also settled the 3D question rather than leaving it a taste call: the
+reference ships three.js (its bundles carry three's own shader chunks verbatim
+— `skinIndex`, `linearToOutputTexel`, `fogColor`), and its custom shaders are
+**DOM-registered** rather than decorative (`u_domBase`, `u_maskSize`,
+`u_glowRadius`, `u_borderColor` draw glow behind real HTML).
+
+**The rule that outranks every aesthetic decision here**, because this
+project's whole argument is that it does not lie to the operator:
+
+- A value that animates between two numbers **displays numbers that were never
+  true** for the length of the tween. On a live tag table that is a false
+  reading, not a polish detail.
+- A pulse meaning "live" is a freshness claim made by CSS rather than by
+  measurement — TM-025's bug in another costume.
+- A reveal that has not finished is indistinguishable from data that has not
+  arrived, and one that never fires is a blank product.
+
+Each has a mechanical guard. `.is-value` must opt out with `!important` or a
+more specific component rule silently wins; the pulse selector must carry
+`data-live="true"`; the hiding is gated on the script having claimed the
+document.
+
+### 11.3 What was asked for and NOT finished — read this first
+
+1. **The React port is 0 of 131.** Two views exist against **mock data**, which
+   is not a port. `docs/port-parity.json` says `vanilla` for everything and
+   that is the honest number. The operator's instruction is **1:1, nothing
+   lost, parity first per view** — a view is marked `ported` only when every
+   panel, preference and endpoint it owns works, and new features land only on
+   views already at parity.
+2. **No handler has been ported to Node, and the differ does not exist.**
+   `packages/api` is a skeleton with `/health`. TM-039 (differ), TM-040 (the
+   first-ever auth on 8787) and TM-041 (store migration) are untouched, and
+   Phase 3 and Phase 6 are both blocked behind them.
+3. **PLC/IIOT depth was not reached.** 4.5 (node-opcua) not started, TM-050
+   (`test_netscan.py`) not written, the IIOT view not ported.
+4. **The 3D scene has never been rendered on real hardware.** 90 tests pass,
+   and every one of them is arithmetic, lifecycle or teardown. Headless
+   Chromium falls back to SwiftShader, which the scene correctly refuses. It
+   has not been seen.
+5. **`--field-opacity` was set to 0.28 by palette arithmetic, not by looking**,
+   because headless Firefox declines the WebGL context. It needs one pass on a
+   real GPU.
+6. **TM-011 was deferred all session** and is the oldest open bug. It needs two
+   `wsl --shutdown` cycles — one to apply mirrored networking, one to exercise
+   the rollback its AC requires.
+
+### 11.4 Corrections to this plan and to the work, from doing it
+
+- **The e2e flake had TWO causes, and the first fix was aimed at the wrong
+  one.** Six runs showed 32s idle vs 130s loaded, which read as "the UI budget
+  is too small under contention". It was not. Raising 25s → 60s changed
+  nothing: still failing, now at 60s, with an *earlier* test failing too. **A
+  wait that still times out after you double it is not waiting for something
+  slow.** The real cause was a transient 9p read answered as `404` with a JSON
+  body, which Firefox refuses to execute as a script under `nosniff` — so
+  `kanban.js` never loaded and the board never rendered. R29, in the request
+  path. The budget comment now says not to raise it again to make a failure go
+  away.
+- **The second cause was the board eating what you were typing.** `loadBoard()`
+  rebuilds with `replaceChildren()`, destroying the add-task inputs, and
+  `submit()` then hit `if (!title.value.trim()) return;` — **a silent no-op**.
+  Under load the async refresh lands between typing and clicking. That is not a
+  flaky test; it is a person losing what they typed, with nothing said. Swept
+  all 16 `replaceChildren()` sites: `boardList` is the only one that rebuilds
+  free-text fields, so the class is closed rather than patched.
+- **A transient filesystem failure was being reported as an answer about the
+  request** in three places, not one: `403 forbidden` around `resolve()`, `404
+  not found` around `read_bytes()`, and `"absent"` in the resource panel.
+  `ninep.read_retrying()` now retries before deciding anything, and "could not
+  tell" is `503`, which is also the more *visible* answer.
+- **A run that is approved and verified can sit open forever.** `8bd2ab` was
+  3/3 verified with the operator's own approval on it and `blocking: []`, and
+  `complete: false` — because `dispatch.enabled` was false and no pane existed
+  to complete it. The UI cannot distinguish "waiting for you" from "waiting for
+  a worker that is not running", so it reads as a fresh ask every time the page
+  is opened. **This is still unfixed in `runs.js`** and is the smallest
+  high-value card on the board.
+- **`node_modules/` was untracked and NOT ignored in a public repo** — 121 MB,
+  239 packages hoisted to the workspace root. Untracked is not ignored.
+
+### 11.5 Three of my own mistakes, recorded because the shape repeats
+
+Consistent with the three in §9, and the shape is the same one every time: **a
+check that reports something untrue**.
+
+- **The design-token suite found two defects in itself on its first run.** Its
+  block parser could not see inside an `@media`, so it reported "there is no
+  prefers-reduced-motion block" about a file that has one; and it matched
+  `--text-` as a colour prefix, flagging the *type scale* as missing from the
+  light theme. A check that cries wolf gets deleted rather than fixed.
+- **A pre-push credential scan reported "clean" because it was broken.** The
+  pattern began with `-----BEGIN`, `grep` parsed it as options and errored, and
+  the empty result read as no hits — on the scan guarding a push to a **public**
+  remote. Rewritten to pass every pattern with `-e`, and it now **plants a
+  secret and requires a hit** before it will trust its own verdict.
+- **I contaminated my own verification run** by committing to the working tree
+  while a loaded e2e measurement was still running against it, so its later
+  rounds used different code than its earlier ones. Re-run clean afterwards.
+
+### 11.6 The operator's decisions, 2026-09-26
+
+Recorded because the team will need them and they are not inferable:
+
+| Decision | Answer |
+|---|---|
+| The pool | **On, `wipLimit` 3.** Differ cards stay out of it — Phase 1.3 wants a human reading the output |
+| Priority | **All four**: UI fidelity, PLC/IIOT depth, finishing the Node port, and polish |
+| Parity bar | **Parity first, per view.** Port a view whole or not at all; new features only on views already at parity |
+| Autonomy | May **commit and push** to the public remote; may run **`wsl --shutdown`** for TM-011; may **edit files outside the repo** |
+
+The out-of-repo permission covers the TM-032 fix, which lives in the
+marketplace-installed plugin at
+`~/.claude/plugins/marketplaces/bytedesk/task-management/lib/render.mjs`. **A
+marketplace refresh silently reverts it.** `dashboard/test_hook_noise.py` is
+what catches that — it is written and green but deliberately **not registered
+in the gate**, because registering it makes the gate depend on an edit outside
+this repo. Register it only alongside an upstream PR.

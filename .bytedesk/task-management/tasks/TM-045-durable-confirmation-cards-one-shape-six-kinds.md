@@ -11,12 +11,13 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:03:37.542Z"
+updated: "2026-09-26T03:13:17.964Z"
+session: "pool-tm-045"
 ---
 
 Phase 2.7. One shape because the audit, expiry, dry-run and did-the-params-change

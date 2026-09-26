@@ -1,7 +1,7 @@
 ---
 id: "TM-011"
 kind: "task"
-status: "open"
+status: "parked"
 created: "2026-09-25T15:20:33.454Z"
 board: "controllogix/ccontrolcenter"
 title: "Spike WSL mirrored networking, with a documented rollback"
@@ -11,12 +11,17 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
+session: "pool-tm-011"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-25T16:25:32.219Z"
-comments: [{"author":"main","ts":"2026-09-25T16:25:31.274Z","text":"Half done, and deliberately stopped short. The BEFORE state is measured and written up in docs/wsl-networking.md: WSL eth0 172.30.116.31/20, gateway 172.30.112.1, and both failing directions proven by curl - 127.0.0.1:9999 from WSL is unreachable, and so is the gateway address, because the Windows listener is loopback-bound. That second result is the one that matters: reaching Windows from WSL under NAT is not just using the gateway, the Windows service must also bind the vEthernet address. So loopback-only and API-in-WSL cannot both hold. The flip itself is NOT applied. Mirrored networking is a machine-wide change that brings WSL traffic under Windows Firewall and has known interactions with other hypervisors virtual adapters - and this host has VMware VMnet1 and VMnet8 up right now. It also needs wsl --shutdown, restarting every distro. Nothing in Phase 1 exists yet that needs the hop, so flipping it while the operator is away buys nothing and risks disturbing VMware networking nobody can observe. Apply it when Phase 1.1 stands the sidecar up, with the operator present. The procedure, both-direction verification, the VMware/Docker/VPN checks and the one-line rollback are all in the doc."}]
+updated: "2026-09-26T03:08:28.801Z"
+comments: [{"author":"main","ts":"2026-09-25T16:25:31.274Z","text":"Half done, and deliberately stopped short. The BEFORE state is measured and written up in docs/wsl-networking.md: WSL eth0 172.30.116.31/20, gateway 172.30.112.1, and both failing directions proven by curl - 127.0.0.1:9999 from WSL is unreachable, and so is the gateway address, because the Windows listener is loopback-bound. That second result is the one that matters: reaching Windows from WSL under NAT is not just using the gateway, the Windows service must also bind the vEthernet address. So loopback-only and API-in-WSL cannot both hold. The flip itself is NOT applied. Mirrored networking is a machine-wide change that brings WSL traffic under Windows Firewall and has known interactions with other hypervisors virtual adapters - and this host has VMware VMnet1 and VMnet8 up right now. It also needs wsl --shutdown, restarting every distro. Nothing in Phase 1 exists yet that needs the hop, so flipping it while the operator is away buys nothing and risks disturbing VMware networking nobody can observe. Apply it when Phase 1.1 stands the sidecar up, with the operator present. The procedure, both-direction verification, the VMware/Docker/VPN checks and the one-line rollback are all in the doc."},{"author":"worker:tmux","ts":"2026-09-26T03:08:28.714Z","text":"worker exited without closing"}]
 assignee: "claude"
+actor: "pool"
+worktree: "/mnt/c/Dev/agentmux/.bytedesk/worktrees/TM-011-spike-wsl-mirrored-networking-with-a-documented-"
+branch: "tm/TM-011-spike-wsl-mirrored-networking-with-a-documented-"
+dispatched: {"backend":"tmux","run":"tmux:tm-TM-011","session":"pool-tm-011","at":"2026-09-26T03:07:06.389Z"}
+parkedReason: "worker exited without closing"
 ---
 
 The other Phase 1 prerequisite, and the one with blast radius outside this repo.

@@ -11,12 +11,13 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:04:41.907Z"
+updated: "2026-09-26T03:13:18.730Z"
+session: "pool-tm-049"
 ---
 
 Phase 4.5. Rockwell's embedded OPC UA server is firmware- and SKU-dependent, and

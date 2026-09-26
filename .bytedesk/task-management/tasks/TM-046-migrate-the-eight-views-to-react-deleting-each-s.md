@@ -1,7 +1,7 @@
 ---
 id: "TM-046"
 kind: "task"
-status: "open"
+status: "parked"
 created: "2026-09-26T02:04:36.589Z"
 board: "controllogix/ccontrolcenter"
 title: "Migrate the eight views to React, deleting each shell test with its replacement"
@@ -11,12 +11,14 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:04:36.913Z"
+updated: "2026-09-26T03:13:02.634Z"
+session: "pool-tm-046"
+parkedReason: "Superseded by the per-view cards TM-072 and TM-074 through TM-080, which carry the parity-first requirement in their acceptance. Do not work this card; it would duplicate one of them."
 ---
 
 Phase 3. Order: Settings, Organization, Board, Runs, Status, GitHub, Terminals,

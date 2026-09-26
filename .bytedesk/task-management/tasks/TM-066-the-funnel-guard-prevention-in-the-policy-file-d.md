@@ -11,12 +11,13 @@ evidence: []
 commits: []
 blockedBy: []
 blocks: []
-actor: "main"
+actor: "pool"
 branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T02:06:34.240Z"
+updated: "2026-09-26T03:12:30.751Z"
+session: "pool-tm-066"
 ---
 
 Phase 6.5 and 6.6. Two controls, and only one of them is a control.
