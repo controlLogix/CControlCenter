@@ -265,8 +265,14 @@ print("yes" if d.get("missing") and all(m.get("hint") for m in d["missing"]) els
   check 'journal cannot be deleted' 400 \
     "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' \
         --data '{"kind":"journal","id":1}' "$BASE/api/delete")"
-  # The epic still has its original smoke task, so this proves the cascade runs.
-  check 'deleting the epic cascades its tasks' 1 \
+  # TWO cards now, and the count is the point rather than an incidental.
+  #
+  # This asserted 1 because the smoke epic used to hold one task. Closing the
+  # /api/status hole added a second - the fully specified "vocab task", which has to
+  # exist because that surface is gated now and a bare-title card cannot walk the
+  # status vocabulary. So the epic holds the vocab card AND the thin card, and a
+  # cascade that reported 1 would mean it had missed one of them.
+  check 'deleting the epic cascades its tasks' 2 \
     "$(jpost api/delete "{\"kind\":\"epic\",\"id\":$eid}" \
        | python3 -c 'import json,sys; print(json.load(sys.stdin).get("cascaded_tasks",""))')"
   check 'the epic is gone' 0 \
