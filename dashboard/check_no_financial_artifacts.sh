@@ -61,10 +61,14 @@ else
 fi
 
 # ── 2. nothing tracked under a financial path ────────────────────────────────
+# agentmux-broker/ is NOT listed: it holds the broker's SOURCE, and the plan
+# runs pytest against it. Artifacts that land inside it are caught by the
+# filename rules below and pinned by agentmux-broker/profile|captures. Listing
+# the directory flagged the code this guard exists to protect - the same mistake
+# the .gitignore pin made an hour earlier.
 tracked_under=$(git ls-files -- \
   'investing/*' '*/investing/*' \
   'broker/*' '*/broker/*' \
-  'agentmux-broker/*' \
   '*/research/sessions/*' 2>/dev/null | grep -vE "^($EXEMPT)$" || true)
 if [ -z "$tracked_under" ]; then
   ok 'financial artifacts: no tracked file under an investing or broker path'

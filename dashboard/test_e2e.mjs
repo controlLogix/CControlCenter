@@ -64,8 +64,35 @@ const consoleErrors = [];
 page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()); });
 page.on('pageerror', (e) => consoleErrors.push('pageerror: ' + e.message));
 
+// SIZED FOR A LOADED MACHINE, not an idle one. The gate runs this suite after
+// ~55 others, and measurement puts it at 4x slower under contention (32s idle,
+// 130s saturated) - at which point a 25-second wait for a UI round trip is not
+// generous, it is a coin flip. Still well under the 120s per-test ceiling, so a
+// genuine hang is still reported promptly rather than sat on.
+const UI_BUDGET_MS = 60000;
+
 await page.goto(baseURL, { waitUntil: 'load' });
 await page.waitForFunction(() => !!window.AGENTMUX, null, { timeout: 15000 });
+
+
+// A wait that reports what the page ACTUALLY had when it gave up.
+//
+// "Timeout 25000ms exceeded" is true and useless: it cannot tell a slow render
+// from an add that silently failed, and those are opposite problems. Under gate
+// load this suite runs about 4x slower than idle (measured: 32s to 130s), so
+// the interesting question on a timeout is always "did it never happen, or had
+// it not happened YET" - and only the page can answer that.
+async function waitFor(page, fn, arg, { timeout = UI_BUDGET_MS, describe } = {}) {
+  try {
+    return await page.waitForFunction(fn, arg, { timeout });
+  } catch (err) {
+    let seen = '<could not read the page>';
+    if (describe) {
+      try { seen = await page.evaluate(describe, arg); } catch (_) {}
+    }
+    throw new Error(`${err.message}\n      the page had: ${String(seen).slice(0, 400)}`);
+  }
+}
 
 const show = async (view) => {
   await page.click(`.nav-item[data-view="${view}"]`);
@@ -843,22 +870,36 @@ await test('a running agent is marked and a finished one is not', async () => {
                     `task for ${who}`);
     await page.fill(`#boardList details.epic[data-epic="${epic}"] input[placeholder="agent"]`, who);
     await page.click(`#boardList details.epic[data-epic="${epic}"] button:has-text("add task")`);
-    await page.waitForFunction(
+    await waitFor(page,
       ([key, n]) => {
         const card = document.querySelector(`#boardList details.epic[data-epic="${key}"]`);
         if (card && !card.open) card.open = true;   // a redraw can re-collapse it
         return card?.textContent.includes(n);
-      }, [epic, who], { timeout: 25000 });
+      }, [epic, who], {
+        // THE wait that failed under load on 2026-09-25, and the three after it
+        // only failed because this one left the element absent.
+        describe: ([key]) => {
+          const card = document.querySelector(`#boardList details.epic[data-epic="${key}"]`);
+          if (!card) return 'no epic card at all';
+          return `epic open=${card.open}, rows: ` +
+                 [...card.querySelectorAll('[data-task]')]
+                   .map(n => n.dataset.task).join(', ');
+        },
+      });
   }
   await withRoster(page, [LIVE]);
   // Force the poll that owns the roster, then let the board redraw.
   await page.reload({ waitUntil: 'load' });
   await page.waitForFunction(() => !!window.AGENTMUX);
   await show('board');
-  await page.waitForFunction((n) => {
+  await waitFor(page, (n) => {
     const node = [...document.querySelectorAll('[data-agent]')].find(e => e.dataset.agent === n);
     return node && node.classList.contains('is-live');
-  }, LIVE, { timeout: 20000 });
+  }, LIVE, {
+    describe: () => [...document.querySelectorAll('[data-agent]')]
+      .map(n => `${n.dataset.agent}${n.classList.contains('is-live') ? ' (live)' : ''}`)
+      .join(', ') || 'no [data-agent] elements rendered',
+  });
 
   const marked = await page.$$eval('#viewBoard [data-agent]', (ns) => ns.map(n => ({
     name: n.dataset.agent, live: n.classList.contains('is-live') })));

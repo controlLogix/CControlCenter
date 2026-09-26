@@ -8,13 +8,13 @@ title: "Raise the bar on Windows toasts to \"only when I must act\""
 epic: "EP-002"
 acceptance: [{"text":"Every call site of notify.deliver is checked against the bar its own docstring states, and any that fires for progress rather than for a decision is changed or removed","done":true,"at":"2026-09-26T01:03:23.672Z"},{"text":"A toast fires only when a person must act: a run waiting on a human, a review gate, a dead worker, a finished orchestration","done":true,"at":"2026-09-26T01:03:23.877Z"},{"text":"Claude Code's own desktop notifications are separated from this repo's in the write-up, so the operator knows which setting governs which","done":true,"at":"2026-09-26T01:03:24.094Z"},{"text":"The volume is measured before and after, from events.jsonl, rather than asserted","done":true,"at":"2026-09-26T01:03:24.300Z"},{"text":"git_link_unattributed stops firing for every git command that names no task, or stops being surfaced at all","done":false}]
 evidence: [".bytedesk\\task-management\\evidence\\TM-032-1790384581409.log"]
-commits: ["85e6ddb"]
+commits: ["85e6ddb","7726d71"]
 blockedBy: []
 blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-26T01:03:24.331Z"
+updated: "2026-09-26T01:09:14.210Z"
 evidenceSources: {".bytedesk\\task-management\\evidence\\TM-032-1790384581409.log":{"source":null,"sha256":"a5f06f7ad2da44ebe715a6db7bc56ed83418f1d1a9ba70fcda2f3fecc2d2a19e","bytes":3175,"at":"2026-09-26T01:03:01.410Z"}}
 ---
 

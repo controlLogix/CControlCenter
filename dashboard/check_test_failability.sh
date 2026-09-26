@@ -102,8 +102,8 @@ test_devicetree.py           85e6ddb    18
 test_frontend_devicetree.sh  85e6ddb    1
 # The order interlocks. Against the commit before them neither module exists,
 # and both suites fail cleanly through their guarded imports.
-test_killswitch.py           b8041df    24
-test_guardrails.py           b8041df    25
+agentmux-broker/test_killswitch.py  b8041df    24
+agentmux-broker/test_guardrails.py  b8041df    25
 BASELINES
   SELF_TEST=1
 else
@@ -113,7 +113,9 @@ fi
 check_row() {
   local suite="$1" ref="$2" expected="$3" extra="$4"
   local base head tree output actual rc summary reported
-  if [[ ! "$suite" =~ ^test_[A-Za-z0-9_]+\.(sh|py)$ ]] ||
+  # A suite may name its directory: agentmux-broker/test_killswitch.py. The
+  # bare form still means dashboard/, so every existing row is unchanged.
+  if [[ ! "$suite" =~ ^([A-Za-z0-9_-]+/)?test_[A-Za-z0-9_]+\.(sh|py)$ ]] ||
      [[ ! "$expected" =~ ^[1-9][0-9]*$ ]] || [ -n "$extra" ]; then
     bad "failability: invalid row ($suite $ref $expected); expected a suite, explicit base, positive minimum"
     return
@@ -139,8 +141,17 @@ check_row() {
   fi
   # testlib goes in for a shell suite; harmless for a python one, and copying it
   # unconditionally keeps the .sh path byte-identical to what it was.
-  if ! mkdir -p "$tree/dashboard" ||
-     ! cp dashboard/testlib.sh "dashboard/$suite" "$tree/dashboard/"; then
+  # Where the suite lives, and where it is run from. A bare name means
+  # dashboard/; a name carrying a directory keeps it. testlib always goes into
+  # dashboard/, because that is where every suite sources it from.
+  local suite_dir suite_file
+  case "$suite" in
+    */*) suite_dir="${suite%/*}"; suite_file="${suite##*/}" ;;
+    *)   suite_dir="dashboard";  suite_file="$suite" ;;
+  esac
+  if ! mkdir -p "$tree/dashboard" "$tree/$suite_dir" ||
+     ! cp dashboard/testlib.sh "$tree/dashboard/" ||
+     ! cp "$suite_dir/$suite_file" "$tree/$suite_dir/"; then
     bad "failability: cannot copy current $suite and testlib into base=$ref"
     return
   fi
@@ -153,11 +164,11 @@ check_row() {
   # run_tests.sh:186-192 documents the same distinction and why matching only one
   # shape meant you could see THAT a suite broke and never WHAT broke.
   if [[ "$suite" == *.py ]]; then
-    (cd "$tree" || exit 2; unset AGENTMUX_AGENT; python3 "dashboard/$suite") > "$output" 2>&1
+    (cd "$tree" || exit 2; unset AGENTMUX_AGENT; python3 "$suite_dir/$suite_file") > "$output" 2>&1
     rc=$?
     actual=$(grep -cE '^(FAIL|ERROR):' "$output" || true)
   else
-    (cd "$tree" || exit 2; unset AGENTMUX_AGENT; bash <(tr -d '\r' < "dashboard/$suite")) > "$output" 2>&1
+    (cd "$tree" || exit 2; unset AGENTMUX_AGENT; bash <(tr -d '\r' < "$suite_dir/$suite_file")) > "$output" 2>&1
     rc=$?
     actual=$(grep -cE '^  FAIL([[:space:]]|$)' "$output" || true)
   fi

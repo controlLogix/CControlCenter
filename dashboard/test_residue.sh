@@ -139,6 +139,11 @@ print('passed 1, failed 0')
             put(fixture / 'dashboard' / source.name, first + 'python3 subject.py\n')
         for source in (repo / 'dashboard').glob('test_*.py'):
             put(fixture / 'dashboard' / source.name, subject)
+        # Not every suite lives in dashboard/ any more. run_tests.sh names these
+        # by path, and the fixture fails on a missing script rather than on the
+        # thing the case is testing.
+        for source in (repo / 'agentmux-broker').glob('test_*.py'):
+            put(fixture / 'agentmux-broker' / source.name, subject)
         # Every non-test_* suite run_tests.sh invokes. A new one added there and
         # not here leaves the fixture without the file, and the runner fails on a
         # missing script rather than on the thing this case is testing.
