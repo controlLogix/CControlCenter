@@ -1215,8 +1215,37 @@ def cmd_agentdef(args):
 
 def cmd_agentdrop(args):
     body = {"scope": args.scope, "name": args.name}
-    if args.checksum is not None:
-        body["checksum"] = args.checksum
+    checksum = args.checksum
+    if checksum is None:
+        # READ IT FIRST, which is what the guard is actually asking for.
+        #
+        # agentdrop ends in a real unlink and a definition is not recoverable, so
+        # boardagents checks the caller is deleting the bytes it last saw - the same
+        # check agentdef makes before a save. The browser already satisfies it:
+        # agents.js reads agent.checksum from the roster and sends it back on drop.
+        #
+        # This CLI never learned to, so the only way it could delete was by omitting
+        # the key - which is exactly the stale-state deletion the check exists to
+        # stop. Fetch the current definition and echo its checksum: the drop still
+        # fails if the file changes between this read and the unlink, which is the
+        # window that matters. --checksum stays for a caller that already holds one
+        # and wants the earlier, stricter snapshot.
+        # board/agents, not agents: /api/agents is the live tmux roster, a different
+        # thing entirely. This is the path agents.js:35 reads for the same purpose.
+        #
+        # A failed lookup is deliberately NOT fatal here. The name may simply not
+        # exist, and the server already has the canonical answer for that - a 404
+        # saying "agent not found". Returning early would replace it with a worse
+        # message invented by the client, so fall through with no checksum and let
+        # the POST produce it.
+        try:
+            current = api("GET", f"board/agents?name={args.name}")
+        except Exception:                            # noqa: BLE001 - see above
+            current = None
+        if isinstance(current, dict) and current.get("scope") == args.scope:
+            checksum = current.get("checksum")
+    if checksum is not None:
+        body["checksum"] = checksum
     result = board_call("POST", "board/agentdrop", body)
     if result is None:
         return 1

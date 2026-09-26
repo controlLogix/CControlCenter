@@ -342,7 +342,23 @@ check("names the privilege it needs", True, "needs root" in source)
 result = subprocess.run([sys.executable, "taskmgmt/bootp_probe.py", "--timeout", "1"],
                         capture_output=True, text=True, timeout=30)
 check("unprivileged bind exits non-zero", True, result.returncode != 0)
-check("says what privilege is missing", True, "needs root" in result.stderr)
+# TWO WAYS THAT BIND FAILS, AND WHICH ONE YOU GET IS A PROPERTY OF THE MACHINE.
+#
+# EACCES when the port is free and we are not root - that is the path the "needs
+# root" message serves. EADDRINUSE when something already holds UDP 67, which a DHCP
+# client on the Windows host is enough to cause; inside WSL `ss -lunp` cannot even
+# see the holder, so it looks like nothing is there.
+#
+# Asserting the privilege wording unconditionally made this suite pass or fail on the
+# environment rather than on the probe: measured here as
+# "cannot bind UDP 67: [Errno 98] Address already in use", failing identically on the
+# pre-reset commit. What the probe owes the operator in EITHER case is the port and a
+# reason, so that is what is checked. The privilege wording itself is already pinned
+# by the source check above, which covers the EACCES branch without needing a machine
+# that can reach it.
+check("says which port it could not bind", True, "cannot bind UDP 67" in result.stderr)
+check("and gives a reason for it", True,
+      "needs root" in result.stderr or "[Errno" in result.stderr)
 
 print("--- concurrency cap (grok finding 3) ---")
 

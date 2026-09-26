@@ -163,7 +163,15 @@ class AgentsHTTP(unittest.TestCase):
         self.assertEqual(self.drop({"name": "unknown", "scope": "repo"})[0], 404)
         for scope in ("repo", "global"):
             _, saved = self.save(self.definition(scope=scope))
-            self.assertEqual(self.drop({"name": "writer", "scope": scope})[0], 200)
+            # A drop must name the bytes it is deleting, exactly as a save must.
+            # agents.js already sends agent.checksum; omitting it used to delete
+            # whatever the file had become since the caller last read it.
+            self.assertEqual(self.drop({"name": "writer", "scope": scope})[0], 409,
+                             "a drop with no checksum must be refused")
+            self.assertTrue(Path(saved["path"]).exists(),
+                            "the refused drop must not have deleted anything")
+            self.assertEqual(self.drop({"name": "writer", "scope": scope,
+                                        "checksum": saved["checksum"]})[0], 200)
             self.assertFalse(Path(saved["path"]).exists())
             self.assertEqual(self.call("?name=writer")[0], 404)
 
