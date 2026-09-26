@@ -1472,7 +1472,7 @@ class Handler(BaseHTTPRequestHandler):
                     value, name, "epic" if name == "activeEpic" else "sprint")
             elif value is not None:
                 raise ccboard.Invalid("override is set through /api/board/override")
-            return ccboard.set_state(db, name, value)
+            return ccboard.set_state(db, name, value, actor)
         if op == "config":
             return ccboard.set_config(db, ccboard.text(body.get("name"), "name", 32,
                                                        required=True), body.get("value"))

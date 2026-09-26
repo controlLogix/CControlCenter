@@ -496,6 +496,46 @@ with ccstore.connection() as db:
        sorted({event["event"] for event in history}))
 
 
+section("board state: the active epic is a real epic, and someone set it")
+with ccstore.connection() as db:
+    real = ccboard.create(db, "epic", {"title": "A destination that exists"})
+
+    # IT NEVER CHECKED THE DESTINATION EXISTED. A well-formed key for an epic that is
+    # not there was stored happily, and then every `task new` without an explicit
+    # --epic hit _resolve_epic, raised NotFound and returned 404 - card creation
+    # wedged board-wide, with nothing in the history to say who had done it.
+    rejects("activeEpic refuses an epic that does not exist",
+            lambda: ccboard.set_state(db, "activeEpic", "EP-999"),
+            kind=ccboard.NotFound)
+    ok("and the state is unchanged after the refusal",
+       ccboard.state(db)["activeEpic"] != "EP-999", ccboard.state(db)["activeEpic"])
+
+    rejects("activeSprint refuses a sprint that does not exist",
+            lambda: ccboard.set_state(db, "activeSprint", "SP-999"),
+            kind=ccboard.NotFound)
+
+    # IT WROTE NO HISTORY ROW AND TOOK NO ACTOR - the only board write in the module
+    # that left no trace, while set_config, the same shape, has always recorded one.
+    before = db.execute("SELECT COUNT(*) FROM board_history WHERE event='state'").fetchone()[0]
+    ccboard.set_state(db, "activeEpic", real["id"], "tester")
+    after = db.execute("SELECT COUNT(*) FROM board_history WHERE event='state'").fetchone()[0]
+    ok("setting the active epic records one history row", after == before + 1,
+       f"{before} -> {after}")
+
+    row = db.execute("SELECT actor,detail FROM board_history WHERE event='state'"
+                     " ORDER BY id DESC LIMIT 1").fetchone()
+    ok("and the row names who did it", row["actor"] == "tester", row["actor"])
+    ok("and what they set", real["id"] in (row["detail"] or ""), row["detail"])
+    ok("and the state actually moved", ccboard.state(db)["activeEpic"] == real["id"],
+       ccboard.state(db)["activeEpic"])
+
+    # Clearing it is still allowed - None means "no active epic", not a missing one.
+    ccboard.set_state(db, "activeEpic", None, "tester")
+    ok("clearing the active epic is still allowed",
+       ccboard.state(db)["activeEpic"] is None, ccboard.state(db)["activeEpic"])
+    ccboard.set_state(db, "activeEpic", real["id"], "tester")
+
+
 section("doctor")
 with ccstore.connection() as db:
     report = ccboard.doctor(db)

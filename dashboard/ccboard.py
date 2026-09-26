@@ -556,12 +556,32 @@ def state(db):
     return out
 
 
-def set_state(db, name, value):
+def set_state(db, name, value, actor=None):
+    """Board-wide state: the active epic, the active sprint, the armed override.
+
+    TWO THINGS THIS DID NOT DO, AND BOTH MATTER MORE HERE THAN ALMOST ANYWHERE.
+
+    It took no actor and wrote no history row - the only board write of the twenty-odd
+    in this module that left no trace at all. set_config, which is the same shape, has
+    always recorded one. So `activeEpic` could be repointed, changing the epic every
+    later `task new` files into, and nothing anywhere said who did it or when.
+
+    And it never checked the destination existed. A well-formed key for an epic that
+    is not there is accepted, and then every `task new` without an explicit --epic
+    hits _resolve_epic, raises NotFound and returns 404 - card creation wedged
+    board-wide, with no history to explain it. move_task and _resolve_epic both
+    already refuse an absent key; this is the same check, taken before the write.
+    """
     if name not in STATE_NAMES:
         raise Invalid("unknown state: " + str(name)[:40])
+    if value is not None and name in ("activeEpic", "activeSprint"):
+        table = "epics" if name == "activeEpic" else "sprints"
+        if db.execute(f"SELECT 1 FROM {table} WHERE key=?", (value,)).fetchone() is None:
+            raise NotFound("not found: " + str(value)[:40])
     db.execute("INSERT INTO board_state (name,value,at) VALUES (?,?,?)"
                " ON CONFLICT(name) DO UPDATE SET value=excluded.value,at=excluded.at",
                (name, json.dumps(value), now()))
+    _record(db, None, "state", actor, None, {"name": name, "value": value})
     return {name: value}
 
 
