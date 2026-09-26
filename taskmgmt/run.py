@@ -761,6 +761,12 @@ def cmd_start(args):
     except coordination.IdentityError as err:
         print(err, file=sys.stderr)
         return 2
+    # A run is identified on the board by its request line. An empty one produces a
+    # blank row that nobody can match to anything, and the reviewer of every job in it
+    # has no statement of what was wanted to check against.
+    if not (args.request or "").strip():
+        print("run: a run needs a request - say what it is for", file=sys.stderr)
+        return 2
     for _ in range(8):
         run_id = secrets.token_hex(3)
         directory = run_dir(run_id)
@@ -798,6 +804,15 @@ def cmd_assign(args):
         return 2
     if not run_dir(args.run).is_dir():
         print(f"run: no such run {args.run}", file=sys.stderr)
+        return 2
+    # A COMPLETE run takes no new work. submit and verdict have always refused once
+    # the marker exists; assign did not, so a job could be added to a run that had
+    # already passed the gate - leaving a run that reads COMPLETE and "1/2 verified"
+    # at the same time. That is the exact contradiction the gate exists to prevent,
+    # arrived at from the other side.
+    if complete_path(args.run).exists():
+        print(f"run: {args.run} is already complete; no job can be assigned to it now",
+              file=sys.stderr)
         return 2
     for label, value in (("worker", args.worker), ("reviewer", args.reviewer)):
         if not NAME_PATTERN.fullmatch(value or ""):
@@ -853,6 +868,24 @@ def cmd_submit(args):
         return 2
     if complete_path(run_id).exists():
         print(f"run: {run_id} is already complete; {args.job} cannot be submitted now",
+              file=sys.stderr)
+        return 2
+    # ONLY AN OPEN JOB TAKES A SUBMISSION, and the two states this excludes are the
+    # two that matter.
+    #
+    # `verified` - a worker resubmitting onto its own passed job silently un-verified
+    # it. Measured: verified -> submitted, and one `verdict --fail` later the run that
+    # was ready to complete is blocked again. Review is meant to be a ratchet.
+    #
+    # `escalated` - three failed reviews park a job for a person. A fourth submission
+    # moved it back to `submitted`, so the worker could hand itself a fourth review
+    # and the MAX_ATTEMPTS bound meant nothing. Worse, it cleared the one state the
+    # human was told to come and look at.
+    if row["state"] not in OPEN_STATES:
+        extra = ("\n  It is parked for the operator after "
+                 f"{MAX_ATTEMPTS} failed reviews; only they can restart it."
+                 if row["state"] == "escalated" else "")
+        print(f"run: {args.job} is {row['state']}; it cannot be submitted now.{extra}",
               file=sys.stderr)
         return 2
 
@@ -1008,6 +1041,13 @@ def cmd_status(args):
         print_unread()
     if not valid_run(args.run):
         print(f"run: invalid run id {args.run!r}", file=sys.stderr)
+        return 2
+    # A well-formed id for a run that was never started folded to an empty state and
+    # printed "open / no jobs assigned" with exit 0, so a mistyped id polls as a live
+    # run forever. assign, complete and write_approval all check the directory; the
+    # dashboard checks it too (runsview.detail). status was the one that did not.
+    if not run_dir(args.run).is_dir():
+        print(f"run: no such run {args.run}", file=sys.stderr)
         return 2
     state = fold(load_events(args.run))
     stale = derive_stale(state)

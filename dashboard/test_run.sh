@@ -410,4 +410,84 @@ else
   ok 'approval is refused while a job is still unverified'
 fi
 
+echo '--- once a run is closed, it stays closed ---'
+# THE GATE HAS TWO SIDES AND ONLY ONE WAS GUARDED.
+#
+# submit and verdict have always refused after the COMPLETE marker exists. assign did
+# not. So a job could be added to a run that had already passed the gate, and status
+# then reported "COMPLETE" and "1/2 verified" about the same run - the contradiction
+# this whole file exists to prevent, reached from the other direction. Measured before
+# the fix: assign returned a new job id with rc 0 on a completed run.
+rclosed=$($RUN start 'closed run takes no new work' 2>/dev/null)
+jclosed=$($RUN assign "$rclosed" --worker cw --reviewer cr 2>/dev/null)
+$RUN submit "$jclosed" --by cw --summary done >/dev/null 2>&1
+$RUN verdict "$jclosed" --by cr --pass --reason fine >/dev/null 2>&1
+$RUN complete "$rclosed" >/dev/null 2>&1
+out=$($RUN assign "$rclosed" --worker cw2 --reviewer cr2 2>&1); rc=$?
+if [ $rc -ne 0 ] && [[ "$out" == *"already complete"* ]]; then
+  ok 'a COMPLETE run takes no new work'
+else
+  bad "assign onto a completed run succeeded (rc=$rc): $out"
+fi
+$RUN status "$rclosed" 2>/dev/null | grep -q '1/1 verified' \
+  && ok 'and the completed run still reports every job verified' \
+  || bad 'the completed run no longer reads 1/1 verified'
+
+echo '--- review is a ratchet: only an OPEN job takes a submission ---'
+# A worker could resubmit onto its OWN verified job. Measured: verified -> submitted,
+# and one `verdict --fail` later a run that was ready to complete was blocked again.
+rver=$($RUN start 'verified work cannot be reopened by its author' 2>/dev/null)
+jver=$($RUN assign "$rver" --worker vw --reviewer vr 2>/dev/null)
+$RUN submit "$jver" --by vw --summary done >/dev/null 2>&1
+$RUN verdict "$jver" --by vr --pass --reason fine >/dev/null 2>&1
+out=$($RUN submit "$jver" --by vw --summary 'sneak it back open' 2>&1); rc=$?
+if [ $rc -ne 0 ] && [[ "$out" == *"is verified"* ]]; then
+  ok 'a verified job refuses a further submission'
+else
+  bad "a verified job accepted a resubmission (rc=$rc): $out"
+fi
+$RUN status "$rver" 2>/dev/null | grep -q 'verified' \
+  && ok 'and it is still verified afterwards' \
+  || bad 'the verified job was reopened'
+
+# Three failed reviews park a job for a person. A fourth submission used to move it
+# back to `submitted`, handing the worker a fourth review and clearing the one state
+# the human had been told to come and look at. MAX_ATTEMPTS meant nothing.
+resc=$($RUN start 'an escalated job stays parked' 2>/dev/null)
+jesc=$($RUN assign "$resc" --worker ew --reviewer er 2>/dev/null)
+for _ in 1 2 3; do
+  $RUN submit "$jesc" --by ew --summary try >/dev/null 2>&1
+  $RUN verdict "$jesc" --by er --fail --reason 'not this time' >/dev/null 2>&1
+done
+out=$($RUN submit "$jesc" --by ew --summary 'fourth go' 2>&1); rc=$?
+if [ $rc -ne 0 ] && [[ "$out" == *"escalated"* ]]; then
+  ok 'an escalated job refuses a fourth submission'
+else
+  bad "escalation was cleared by resubmitting (rc=$rc): $out"
+fi
+
+# AND THE NORMAL FLOW MUST SURVIVE ALL OF THAT. A guard that also blocks rework has
+# replaced one bug with a worse one, so both open states are exercised here.
+rflow=$($RUN start 'rework after a rejection still works' 2>/dev/null)
+jflow=$($RUN assign "$rflow" --worker fw --reviewer fr 2>/dev/null)
+$RUN submit "$jflow" --by fw --summary first >/dev/null 2>&1
+$RUN verdict "$jflow" --by fr --fail --reason 'go again' >/dev/null 2>&1
+$RUN submit "$jflow" --by fw --summary second >/dev/null 2>&1
+rc_is 'a rejected job still takes a new submission' 0 $?
+$RUN submit "$jflow" --by fw --summary 'correction before review' >/dev/null 2>&1
+rc_is 'and a submitted job still takes a correction' 0 $?
+$RUN verdict "$jflow" --by fr --pass --reason 'better' >/dev/null 2>&1
+$RUN complete "$rflow" >/dev/null 2>&1
+rc_is 'and the reworked run completes' 0 $?
+
+echo '--- a run says what it is for ---'
+# The board identifies a run by its request line. An empty one produced a blank row
+# nobody could match to anything, and gave every reviewer in it nothing to check
+# the work against.
+$RUN start '' >/dev/null 2>&1
+rc_is 'an empty request is refused' 2 $?
+$RUN start '   ' >/dev/null 2>&1
+rc_is 'and so is a whitespace-only one' 2 $?
+
+
 finish

@@ -629,6 +629,16 @@ def release_still_ours(path, holder, observed_ino, force):
 
 
 def cmd_release(args):
+    # THE SAME VALIDATION cmd_claim DOES FOUR LINES IN, and for the same reason.
+    # release ended in path.unlink() having checked nothing about the name, while the
+    # verb that CREATES the claim rejected both a bad shape and any "..". flatten()
+    # only neutralises "/", so on Windows pathlib still reads "\" as a separator and
+    # a crafted resource resolves outside CLAIMS_DIR - where release_still_ours()
+    # returns True under --force for anything that parses as a JSON object. A run's
+    # APPROVAL.json and the orchestrator warrant are both JSON objects.
+    if not RESOURCE_PATTERN.fullmatch(args.resource) or ".." in args.resource:
+        print(f"coordination: invalid resource name {args.resource!r}", file=sys.stderr)
+        return 2
     path = CLAIMS_DIR / flatten(args.resource)
     existing = read_claim(path)
     if existing is None:

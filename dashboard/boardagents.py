@@ -177,7 +177,11 @@ def agentdrop(db, body):
         path, _ = _target(body)
         if not path.exists():
             raise ccboard.NotFound("agent not found: " + body["name"])
-        if "checksum" in body:
-            _check_checksum(path, body)
+        # UNCONDITIONAL, exactly as agentdef does it. Making the checksum optional
+        # here meant a caller could delete a definition simply by omitting the key -
+        # so a stale tab could destroy a file that a SAVE from that same stale state
+        # would have been refused. And unlike ccboard.delete, which is a soft delete
+        # precisely so nothing is lost, this is a real unlink with no way back.
+        _check_checksum(path, body)
         path.unlink()
         return {"ok": True, "scope": body["scope"], "name": body["name"]}
