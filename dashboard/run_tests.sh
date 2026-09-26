@@ -221,6 +221,7 @@ run test_notify.py python3 dashboard/test_notify.py
 run test_no_inherited_stdin.py python3 dashboard/test_no_inherited_stdin.py
 # The wire between a completed run and the board cards it was assigned.
 run test_runcards.py python3 dashboard/test_runcards.py
+run test_runlock.py python3 dashboard/test_runlock.py
 # The orchestrator warrant: what it permits, and everything it must still refuse.
 run test_warrant.py python3 dashboard/test_warrant.py
 # EP-015 suites are registered at the scaffold seam before their owning tasks land.

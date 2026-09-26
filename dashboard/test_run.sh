@@ -46,6 +46,18 @@ $RUN assign "$r" --worker 'bad name' --reviewer rev >/dev/null 2>&1
 rc_is 'invalid agent names are refused' 2 $?
 $RUN assign zzzzzz --worker w1 --reviewer rev >/dev/null 2>&1
 rc_is 'assigning to a nonexistent run is refused' 2 $?
+# A SEPARATE RUN. The accepted halves below really do create jobs, and adding two
+# unverified jobs to $r would make the completion gate three sections down refuse
+# for a reason that has nothing to do with what it is testing.
+tkr=$($RUN start "task argument validation" --by orchestrator 2>/dev/null)
+$RUN assign "$tkr" --worker tw --reviewer tr --task 'the login thing' >/dev/null 2>&1
+rc_is 'a task that is not a key is refused' 2 $?
+$RUN assign "$tkr" --worker tw --reviewer tr --task '' >/dev/null 2>&1
+rc_is 'an empty task is refused rather than recorded as none' 2 $?
+jt=$($RUN assign "$tkr" --worker tw --reviewer tr --task TM-123 2>/dev/null)
+if [ -n "$jt" ]; then ok 'a board key is accepted'; else bad 'a board key was refused'; fi
+jj=$($RUN assign "$tkr" --worker tw2 --reviewer tr --task CCC-42 2>/dev/null)
+if [ -n "$jj" ]; then ok 'a tracker key is accepted too'; else bad 'a tracker key was refused'; fi
 
 echo '--- THE GATE: completion refuses while any job is unverified ---'
 $RUN complete "$r" >/dev/null 2>&1

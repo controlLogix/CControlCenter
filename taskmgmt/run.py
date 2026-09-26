@@ -61,11 +61,18 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 RUN_PATTERN = re.compile(r"[0-9a-f]{6}")
 JOB_PATTERN = re.compile(r"([0-9a-f]{6})/([0-9]{1,4})")
 NAME_PATTERN = coordination.NAME_PATTERN
+# Deliberately wider than coordination.KEY_RE. `--task` binds the card a run is
+# for, and that is a board key (TM-123) from dispatch, or a tracker key (CCC-42)
+# when the operator binds an issue - agentmux.sh has always required exactly this
+# shape of the same flag. Narrowing it to EP|TM|ADR|SP|CAP here would refuse the
+# second use; leaving it unchecked, which is what it was, accepts anything at all.
+TASK_PATTERN = re.compile(r"[A-Z][A-Z0-9_]{1,15}-[0-9]{1,9}")
 
 EVENT_MAX = 1024            # keeps one append atomic; long text goes in a sidecar
 DETAIL_MAX = 200
 MAX_ATTEMPTS = 3            # third failure escalates to the human
-LOCK_WAIT_S = 10            # before a run lock is treated as abandoned
+LOCK_WAIT_S = 10            # before a lock that records no owner is broken
+LOCK_CEILING_S = 300        # before a lock held by a LIVE process is broken anyway
 
 
 # The states a job can be folded into. `verified` is terminal success; there is no
@@ -658,6 +665,40 @@ def cmd_notices(args):
 
 # ── serialising the gate ─────────────────────────────────────────────────────
 
+def lock_holder(lock):
+    """(pid, token) recorded in a run lock, or None while it does not say."""
+    try:
+        parts = (lock / "owner").read_text().split()
+    except OSError:
+        return None
+    if len(parts) != 2 or not parts[0].isdecimal():
+        return None
+    return int(parts[0]), parts[1]
+
+
+def pid_alive(pid):
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except OSError:
+        return True              # EPERM: running, and owned by someone else
+    return True
+
+
+def break_lock(lock, why):
+    if why:
+        print(why, file=sys.stderr)
+    try:
+        (lock / "owner").unlink()
+    except OSError:
+        pass
+    try:
+        lock.rmdir()
+    except OSError:
+        pass
+
+
 @contextlib.contextmanager
 def run_lock(run_id, what="operation"):
     """Serialise the read-decide-write windows that the append-only log cannot.
@@ -676,32 +717,73 @@ def run_lock(run_id, what="operation"):
 
     mkdir is atomic everywhere this runs. The stale-lock ceiling matters because an
     agent killed mid-verdict must not wedge every later completion.
+
+    WHO HOLDS IT, NOT HOW LONG IT HAS BEEN THERE.
+    ---------------------------------------------
+    The first version broke any lock older than ten seconds, unconditionally. Ten
+    seconds is not a long time: a verdict writing a long reason file over /mnt, or a
+    fold on a run with a few hundred events, can take longer. So the lock was taken
+    away from a LIVE holder and two writers ran the read-decide-write window
+    concurrently - precisely the race this exists to prevent, now arriving on a
+    schedule instead of by chance.
+
+    It was worse than a single overlap. The breaker took the lock for itself, and
+    when the original holder finished it removed the BREAKER's lock, letting a third
+    writer in behind it. One slow verdict could unlock the run for everyone.
+
+    So the question is whether the holder is still there. A lock naming a pid that no
+    longer exists is broken at once - an agent killed mid-verdict must not wedge every
+    later completion, which was the original and correct reason for a ceiling. A lock
+    naming a LIVE pid is waited for, up to LOCK_CEILING_S, because no healthy fold
+    takes five minutes and something has to give if one wedges; that break says so on
+    stderr rather than happening silently.
+
+    A lock that records no owner at all gets LOCK_WAIT_S. That window is real but
+    microscopic - between mkdir and the write of `owner` - and treating it as
+    abandoned is the mistake that made the dispatch pool's pidfile claim useless
+    (ten concurrent starts, eight winners). It is re-checked every tick, so a claim in
+    progress is seen as soon as it lands.
+
+    Release is conditional for the same reason: we remove the lock only if it is still
+    ours. Whoever broke it owns it now.
     """
     directory = run_dir(run_id)
     directory.mkdir(parents=True, exist_ok=True)
     lock = directory / ".lock"
-    deadline = time.time() + LOCK_WAIT_S
+    token = secrets.token_hex(8)
+    waiting_since = time.time()
+    nameless_since = None
     while True:
         try:
             lock.mkdir()
-            break
         except FileExistsError:
-            if time.time() > deadline:
-                # Break it rather than fail: the holder is gone, and refusing every
-                # future complete because one agent was killed is the worse outcome.
-                try:
-                    lock.rmdir()
-                except OSError:
-                    pass
-                deadline = time.time() + LOCK_WAIT_S
+            holder = lock_holder(lock)
+            if holder is None:
+                nameless_since = nameless_since or time.time()
+                if time.time() - nameless_since > LOCK_WAIT_S:
+                    break_lock(lock, f"{what}: breaking a run lock that records no owner")
+            else:
+                nameless_since = None
+                pid = holder[0]
+                if not pid_alive(pid):
+                    break_lock(lock, f"{what}: breaking a run lock held by pid {pid}, "
+                                     "which is no longer running")
+                elif time.time() - waiting_since > LOCK_CEILING_S:
+                    break_lock(lock, f"{what}: pid {pid} has held this run lock for over "
+                                     f"{LOCK_CEILING_S}s and is still alive; breaking it")
             time.sleep(0.05)
+            continue
+        try:
+            (lock / "owner").write_text(f"{os.getpid()} {token}\n")
+        except OSError:
+            break_lock(lock, None)
+            raise
+        break
     try:
         yield
     finally:
-        try:
-            lock.rmdir()
-        except OSError:
-            pass
+        if lock_holder(lock) == (os.getpid(), token):
+            break_lock(lock, None)
 
 
 # ── notification failures are never swallowed ────────────────────────────────
@@ -831,6 +913,16 @@ def cmd_assign(args):
         if not NAME_PATTERN.fullmatch(value or ""):
             print(f"run: invalid {label} {value!r}", file=sys.stderr)
             return 2
+    # THE THIRD ARGUMENT NOBODY CHECKED. worker and reviewer were validated from the
+    # start; --task was taken verbatim and written into the ledger, where `cards_of`
+    # later hands it to the board as a key. So `--task "the login thing"` produced a
+    # run whose completion report queried a card that cannot exist, and `--task ""`
+    # produced one that silently reported no cards at all - the same class of failure
+    # as run bdae05, where a completed run said nothing about the card it was for.
+    if args.task is not None and not TASK_PATTERN.fullmatch(args.task):
+        print(f"run: invalid task {args.task!r}; expected a key like TM-123 or CCC-42",
+              file=sys.stderr)
+        return 2
     # The operator's standing rule: a reviewer must not be the worker, and should be
     # a different CLI. The first half is enforceable here; the second is a spawn-time
     # choice the orchestrator makes.
