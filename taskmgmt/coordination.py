@@ -1123,7 +1123,8 @@ def cmd_epic_status(args):
 
 def cmd_active(args):
     result = board_call("POST", "board/state",
-                        {"name": "activeEpic", "value": args.epic})
+                        {"name": "activeEpic", "value": args.epic,
+                         "actor": args.agent or None})
     if result is None:
         return 1
     print(f"active epic: {result.get('activeEpic') or 'none'}")
@@ -1327,7 +1328,9 @@ def cmd_config(args):
             return 2
     else:
         value = raw
-    result = board_call("POST", "board/config", {"name": args.name, "value": value})
+    result = board_call("POST", "board/config",
+                        {"name": args.name, "value": value,
+                         "actor": args.agent or None})
     if result is None:
         return 1
     print(json.dumps(result))
@@ -1491,7 +1494,8 @@ def main(argv=None):
     epic_status.add_argument("id")
     epic_status.add_argument("status")
 
-    active = board_verb("board-active", cmd_active, agent=False)
+    # IDENTITY-BOUND, because this decides where every later card is filed.
+    active = board_verb("board-active", cmd_active)
     active.add_argument("epic", help="EP-002, or none")
 
     for name in ("adr-new", "sprint-new", "cap-new"):
@@ -1544,7 +1548,9 @@ def main(argv=None):
         elif name == "hire":
             team.add_argument("--name", required=True)
 
-    setting = board_verb("config", cmd_config, agent=False)
+    # IDENTITY-BOUND: `board config requireAcceptance false` turns off a gate for
+    # the whole board, which is not a thing that should happen anonymously.
+    setting = board_verb("config", cmd_config)
     setting.add_argument("name", nargs="?", default=None)
     setting.add_argument("value", nargs="?", default=None)
     setting.add_argument("--json", action="store_true")
@@ -1598,7 +1604,17 @@ def main(argv=None):
               "task-label", "task-dep", "task-evidence", "task-commit", "task-touch",
               "task-comment", "task-link", "task-assign", "task-move", "epic-new",
               "epic-status", "adr-new", "sprint-new", "cap-new", "sprint-commit",
-              "triage", "override", "recruit", "approve")
+              "triage", "override", "recruit", "approve",
+              # THE TWO GATE-AFFECTING WRITES THAT NOBODY HAD TO SIGN.
+              #
+              # `epic use` repoints activeEpic, which decides where every later
+              # `task new` is filed; `board config requireAcceptance false` disables
+              # the done-gate's tick requirement board-wide. Both were reachable from
+              # any pane with no live-agent check and no name attached, while their
+              # immediate neighbours - epic new, epic status, triage, override - have
+              # always been bound. The asymmetry was visible in the shell too:
+              # agentmux.sh stamped --agent on those four and not on these two.
+              "board-active", "config")
     field = {"claim": "holder", "release": "holder", "journal": "agent",
              "entry": "agent"}.get(args.command,
                                    "agent" if args.command in writes else None)

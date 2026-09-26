@@ -511,7 +511,7 @@ def config(db):
     return out
 
 
-def set_config(db, name, value):
+def set_config(db, name, value, actor=None):
     if name not in DEFAULT_CONFIG:
         raise Invalid("unknown setting: " + str(name)[:40])
     if name in CONFIG_BOOLS:
@@ -538,7 +538,7 @@ def set_config(db, name, value):
     db.execute("INSERT INTO board_config (name,value) VALUES (?,?)"
                " ON CONFLICT(name) DO UPDATE SET value=excluded.value",
                (name, json.dumps(value)))
-    _record(db, None, "config", None, None, {"name": name, "value": value})
+    _record(db, None, "config", actor, None, {"name": name, "value": value})
     return {name: value}
 
 

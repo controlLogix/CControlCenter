@@ -1460,7 +1460,7 @@ cmd_epic() {
   case "$action" in
     new)    python3 "$(coord_py)" epic-new "$@" --agent "$me" ;;
     status) python3 "$(coord_py)" epic-status "$@" --agent "$me" ;;
-    use)    python3 "$(coord_py)" board-active "$@" ;;
+    use)    python3 "$(coord_py)" board-active "$@" --agent "$me" ;;
     ""|list) python3 "$(coord_py)" tasks ;;
     *) die "epic: new \"<title>\" | status <id> <status> | use <id> | list" ;;
   esac
@@ -1472,7 +1472,7 @@ cmd_epic() {
 cmd_board() {
   local action="${1:-}"; shift || true
   case "$action" in
-    config) python3 "$(coord_py)" config "$@" ;;
+    config) python3 "$(coord_py)" config "$@" --agent "${AGENTMUX_AGENT:-orchestrator}" ;;
     doctor) python3 "$(coord_py)" doctor "$@" ;;
     history) python3 "$(coord_py)" history "$@" ;;
     find)   python3 "$(coord_py)" find "$@" ;;

@@ -1496,7 +1496,8 @@ class Handler(BaseHTTPRequestHandler):
             return ccboard.set_state(db, name, value, actor)
         if op == "config":
             return ccboard.set_config(db, ccboard.text(body.get("name"), "name", 32,
-                                                       required=True), body.get("value"))
+                                                       required=True),
+                                      body.get("value"), actor)
         return {"override": ccboard.set_override(db, body.get("reason"), actor)}
 
     def set_auth_setting(self):

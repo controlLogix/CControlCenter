@@ -320,7 +320,11 @@ for _ in $(seq 1 100); do
   sleep 0.02
 done
 identity_api="http://127.0.0.1:$(cat "$HOME_DIR/identity-port")"
-for verb in claim release journal entry task-add task-status; do
+# board-active and config are here because they were NOT bound: `epic use` repoints
+# the epic every later card is filed into, and `board config` turns board-wide gates on
+# and off, and both were reachable from any pane with no name attached while their
+# immediate neighbours (epic new, epic status, triage, override) were all bound.
+for verb in claim release journal entry task-add task-status board-active config; do
   case "$verb" in
     claim)       args=(claim identity/claim --holder victim) ;;
     release)
@@ -329,10 +333,12 @@ for verb in claim release journal entry task-add task-status; do
     journal|entry) args=("$verb" note identity-test --agent victim) ;;
     task-add)    args=(task-add 41 identity-test --agent victim) ;;
     task-status) args=(task-status 41 done --agent victim) ;;
+    board-active) args=(board-active EP-001 --agent victim) ;;
+    config)      args=(config dispatchWip 3 --agent victim) ;;
   esac
   out=$(AGENTMUX_DASHBOARD="$identity_api" AGENTMUX_AGENT=attacker $CO "${args[@]}" 2>&1); rc=$?
   matching_rc=0
-  if [[ "$verb" == entry || "$verb" == task-* ]]; then
+  if [[ "$verb" == entry || "$verb" == task-* || "$verb" == board-active || "$verb" == config ]]; then
     AGENTMUX_DASHBOARD="$identity_api" AGENTMUX_AGENT=victim $CO "${args[@]}" >/dev/null 2>&1
     matching_rc=$?
   fi
