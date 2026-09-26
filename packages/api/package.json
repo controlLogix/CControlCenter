@@ -1,0 +1,27 @@
+{
+  "name": "@agentmux/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The Node API that will strangle dashboard/server.py. Phase 1.0/1.2: skeleton only, no ported handlers.",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "guard:node": "node scripts/guard-node.mjs",
+    "prestart": "node scripts/guard-node.mjs",
+    "start": "node --disable-warning=ExperimentalWarning src/main.ts",
+    "pretest": "node scripts/guard-node.mjs",
+    "test": "node --test --disable-warning=ExperimentalWarning \"test/*.test.*\"",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "fastify": "^5.2.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2"
+  }
+}

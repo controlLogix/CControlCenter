@@ -1,0 +1,32 @@
+{
+  "//": [
+    "Node 24 strips types from .ts on import with no flag, which is what lets",
+    "`node --test` run the pure modules directly with nothing compiled and no",
+    "jest, vitest or ts-node in the tree. That mode has two rules and they are",
+    "both set below: imports must carry their real extension (./layout.ts, not",
+    "./layout), and nothing may need a type to emit — so no enum, no namespace,",
+    "no parameter properties. erasableSyntaxOnly makes the compiler enforce the",
+    "second rather than leaving it to review."
+  ],
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": false,
+    "exactOptionalPropertyTypes": false,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

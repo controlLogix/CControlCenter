@@ -1,0 +1,9 @@
+{
+  "name": "agentmux",
+  "version": "0.0.0",
+  "private": true,
+  "description": "agentmux workspace root. The product is dashboard/server.py; packages/* is the Node side being grown alongside it.",
+  "workspaces": [
+    "packages/*"
+  ]
+}

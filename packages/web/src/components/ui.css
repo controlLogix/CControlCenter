@@ -1,0 +1,139 @@
+/* ── card ───────────────────────────────────────────────────────────────────
+ * 1px hairline, near-black surface, 6px radius. Deliberately no shadow: in this
+ * identity separation is the border's job. */
+.card {
+  background: var(--surface-raised);
+  border: 1px solid var(--line-faint);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  min-width: 0;
+}
+
+.card-label {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 500;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── chip ───────────────────────────────────────────────────────────────────
+ * `position: relative` is load-bearing, not tidiness: motion.css draws the
+ * liveness pulse as an ::after with `inset: 0`, which needs a positioned
+ * ancestor or the glow lands on the viewport. */
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface-input);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-tight);
+  cursor: pointer;
+  text-align: left;
+}
+
+.chip:hover { background: var(--surface-hover); border-color: var(--line-strong); }
+
+.chip-dot {
+  width: var(--space-3);
+  height: var(--space-3);
+  border-radius: 50%;
+  flex: none;
+  background: var(--unknown);
+}
+.chip-true  .chip-dot { background: var(--accent-hot); }
+.chip-false .chip-dot { background: var(--text-faint); }
+
+.chip-name   { color: var(--text-primary); }
+.chip-detail { color: var(--text-muted); }
+
+/* The age is rendered in every state, including the live one. A pulse claims
+ * "now"; this says when "now" was measured, and only one of the two is
+ * checkable by the person reading it. */
+.chip-age {
+  margin-inline-start: auto;
+  padding-inline-start: var(--space-4);
+  color: var(--text-faint);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-label);
+}
+
+/* Not running is stated in text, not only in colour - a dot alone is invisible
+ * to anyone who cannot separate these two hues. */
+.chip-false .chip-name { color: var(--text-muted); text-decoration: line-through; }
+
+/* ── status pill ────────────────────────────────────────────────────────────
+ * Tinted with a 1px border and a plain surface rather than a filled block.
+ * A filled orange pill would be the exact misuse the accent ramp note warns
+ * about: an orange surface when nothing is urgent. */
+.pill {
+  display: inline-block;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-hair);
+  background: var(--surface-base);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  line-height: calc(var(--space-6) - 2px);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.pill-backlog     { color: var(--text-faint); }
+.pill-open        { color: var(--cool); border-color: var(--cool-deep); }
+.pill-in_progress { color: var(--accent-hot); border-color: var(--accent); }
+.pill-blocked     { color: var(--bad); border-color: var(--bad); }
+.pill-parked      { color: var(--unknown); border-color: var(--unknown); }
+.pill-done        { color: var(--ok); border-color: var(--ok); }
+
+/* ── severity ───────────────────────────────────────────────────────────────*/
+.sev {
+  display: inline-block;
+  width: var(--space-2);
+  height: var(--space-6);
+  border-radius: var(--radius-hair);
+  flex: none;
+  background: var(--line-strong);
+}
+.sev-info  { background: var(--line-strong); }
+.sev-warn  { background: var(--warn); }
+.sev-error { background: var(--bad); }
+
+/* ── view header ────────────────────────────────────────────────────────────*/
+.vhead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-5);
+  padding-block-end: var(--space-5);
+  border-block-end: 1px solid var(--line-faint);
+  margin-block-end: var(--space-6);
+}
+
+.vhead-title {
+  margin: 0;
+  font-size: var(--text-2xl);
+  font-weight: 500;
+  letter-spacing: var(--track-display);
+  line-height: var(--leading-tight);
+  color: var(--text-primary);
+}
+
+.vhead-stamp {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.vhead-spacer { flex: 1 1 auto; }

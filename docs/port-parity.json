@@ -1,0 +1,407 @@
+{
+  "board_ops": {
+    "acceptance": {
+      "status": "vanilla"
+    },
+    "agentdef": {
+      "status": "vanilla"
+    },
+    "agentdrop": {
+      "status": "vanilla"
+    },
+    "agents": {
+      "status": "vanilla"
+    },
+    "approve": {
+      "status": "vanilla"
+    },
+    "board": {
+      "status": "vanilla"
+    },
+    "bootapp": {
+      "status": "vanilla"
+    },
+    "chatsend": {
+      "status": "vanilla"
+    },
+    "chatter": {
+      "status": "vanilla"
+    },
+    "comment": {
+      "status": "vanilla"
+    },
+    "commit": {
+      "status": "vanilla"
+    },
+    "config": {
+      "status": "vanilla"
+    },
+    "create": {
+      "status": "vanilla"
+    },
+    "delete": {
+      "status": "vanilla"
+    },
+    "dep": {
+      "status": "vanilla"
+    },
+    "dispatchable": {
+      "status": "vanilla"
+    },
+    "doctor": {
+      "status": "vanilla"
+    },
+    "entity": {
+      "status": "vanilla"
+    },
+    "evidence": {
+      "status": "vanilla"
+    },
+    "find": {
+      "status": "vanilla"
+    },
+    "graph": {
+      "status": "vanilla"
+    },
+    "hire": {
+      "status": "vanilla"
+    },
+    "history": {
+      "status": "vanilla"
+    },
+    "label": {
+      "status": "vanilla"
+    },
+    "link": {
+      "status": "vanilla"
+    },
+    "meta": {
+      "status": "vanilla"
+    },
+    "move": {
+      "status": "vanilla"
+    },
+    "next": {
+      "status": "vanilla"
+    },
+    "override": {
+      "status": "vanilla"
+    },
+    "plcstate": {
+      "status": "vanilla"
+    },
+    "recruit": {
+      "status": "vanilla"
+    },
+    "roster": {
+      "status": "vanilla"
+    },
+    "sprint": {
+      "status": "vanilla"
+    },
+    "state": {
+      "status": "vanilla"
+    },
+    "status": {
+      "status": "vanilla"
+    },
+    "targets": {
+      "status": "vanilla"
+    },
+    "touch": {
+      "status": "vanilla"
+    },
+    "triage": {
+      "status": "vanilla"
+    },
+    "update": {
+      "status": "vanilla"
+    },
+    "why": {
+      "status": "vanilla"
+    }
+  },
+  "modules": {
+    "agents.js": {
+      "status": "vanilla"
+    },
+    "blade.js": {
+      "status": "vanilla"
+    },
+    "chatter.js": {
+      "status": "vanilla"
+    },
+    "codesys.js": {
+      "status": "vanilla"
+    },
+    "devicetree.js": {
+      "status": "vanilla"
+    },
+    "github.js": {
+      "status": "vanilla"
+    },
+    "iiot.js": {
+      "status": "vanilla"
+    },
+    "kanban.js": {
+      "status": "vanilla"
+    },
+    "modes.js": {
+      "status": "vanilla"
+    },
+    "mqtt.js": {
+      "status": "vanilla"
+    },
+    "netscan.js": {
+      "status": "vanilla"
+    },
+    "runs.js": {
+      "status": "vanilla"
+    },
+    "teams.js": {
+      "status": "vanilla"
+    }
+  },
+  "panels": {
+    "agents": {
+      "status": "vanilla"
+    },
+    "boardtasks": {
+      "status": "vanilla"
+    },
+    "chatter": {
+      "status": "vanilla"
+    },
+    "feed": {
+      "status": "vanilla"
+    },
+    "journal": {
+      "status": "vanilla"
+    },
+    "kanban": {
+      "status": "vanilla"
+    },
+    "queue": {
+      "status": "vanilla"
+    },
+    "teams": {
+      "status": "vanilla"
+    },
+    "tickets": {
+      "status": "vanilla"
+    }
+  },
+  "routes": {
+    "/api/agents": {
+      "status": "vanilla"
+    },
+    "/api/auth": {
+      "status": "vanilla"
+    },
+    "/api/auth/select": {
+      "status": "vanilla"
+    },
+    "/api/auth/setting": {
+      "status": "vanilla"
+    },
+    "/api/blade/send": {
+      "status": "vanilla"
+    },
+    "/api/board": {
+      "status": "vanilla"
+    },
+    "/api/board/": {
+      "status": "vanilla"
+    },
+    "/api/delete": {
+      "status": "vanilla"
+    },
+    "/api/devices": {
+      "status": "vanilla"
+    },
+    "/api/devices/discover": {
+      "status": "vanilla"
+    },
+    "/api/devices/tree": {
+      "status": "vanilla"
+    },
+    "/api/epics": {
+      "status": "vanilla"
+    },
+    "/api/feed": {
+      "status": "vanilla"
+    },
+    "/api/github": {
+      "status": "vanilla"
+    },
+    "/api/github/auth": {
+      "status": "vanilla"
+    },
+    "/api/github/cancel": {
+      "status": "vanilla"
+    },
+    "/api/github/issue": {
+      "status": "vanilla"
+    },
+    "/api/github/login": {
+      "status": "vanilla"
+    },
+    "/api/github/logout": {
+      "status": "vanilla"
+    },
+    "/api/github/repo": {
+      "status": "vanilla"
+    },
+    "/api/journal": {
+      "status": "vanilla"
+    },
+    "/api/messages": {
+      "status": "vanilla"
+    },
+    "/api/modbus/tags": {
+      "status": "vanilla"
+    },
+    "/api/modbus/write": {
+      "status": "vanilla"
+    },
+    "/api/modes": {
+      "status": "vanilla"
+    },
+    "/api/mqtt/monitor": {
+      "status": "vanilla"
+    },
+    "/api/mqtt/monitor/clear": {
+      "status": "vanilla"
+    },
+    "/api/mqtt/monitor/publish": {
+      "status": "vanilla"
+    },
+    "/api/mqtt/monitor/stop": {
+      "status": "vanilla"
+    },
+    "/api/mqtt/publish": {
+      "status": "vanilla"
+    },
+    "/api/mqtt/subscribe": {
+      "status": "vanilla"
+    },
+    "/api/netscan": {
+      "status": "vanilla"
+    },
+    "/api/netscan/start": {
+      "status": "vanilla"
+    },
+    "/api/netscan/stop": {
+      "status": "vanilla"
+    },
+    "/api/profinet": {
+      "status": "vanilla"
+    },
+    "/api/profinet/schema": {
+      "status": "vanilla"
+    },
+    "/api/profinet/snapshot": {
+      "status": "vanilla"
+    },
+    "/api/resize/": {
+      "status": "vanilla"
+    },
+    "/api/resources": {
+      "status": "vanilla"
+    },
+    "/api/runs": {
+      "status": "vanilla"
+    },
+    "/api/runs/": {
+      "status": "vanilla"
+    },
+    "/api/serving": {
+      "status": "vanilla"
+    },
+    "/api/status": {
+      "status": "vanilla"
+    },
+    "/api/stream-all": {
+      "status": "vanilla"
+    },
+    "/api/stream/": {
+      "status": "vanilla"
+    },
+    "/api/tasks": {
+      "status": "vanilla"
+    },
+    "/api/tickets": {
+      "status": "vanilla"
+    },
+    "/api/tickets/comment": {
+      "status": "vanilla"
+    },
+    "/api/tickets/transition": {
+      "status": "vanilla"
+    },
+    "/api/tickets/transitions": {
+      "status": "vanilla"
+    }
+  },
+  "storage": {
+    "agentmux.authOpen": {
+      "status": "vanilla"
+    },
+    "agentmux.boardFree": {
+      "status": "vanilla"
+    },
+    "agentmux.boardPlacements.v1": {
+      "status": "vanilla"
+    },
+    "agentmux.dashboard.prefs": {
+      "status": "vanilla"
+    },
+    "agentmux.feed.v1": {
+      "status": "vanilla"
+    },
+    "agentmux.importedThemes": {
+      "status": "vanilla"
+    },
+    "agentmux.panePlacement": {
+      "status": "vanilla"
+    },
+    "agentmux.queueSeenAt": {
+      "status": "vanilla"
+    },
+    "agentmux.tab.v1": {
+      "status": "vanilla"
+    },
+    "agentmux.theme": {
+      "status": "vanilla"
+    },
+    "agentmux.view": {
+      "status": "vanilla"
+    }
+  },
+  "views": {
+    "board": {
+      "status": "vanilla"
+    },
+    "github": {
+      "status": "vanilla"
+    },
+    "iiot": {
+      "status": "vanilla"
+    },
+    "organization": {
+      "status": "vanilla"
+    },
+    "runs": {
+      "status": "vanilla"
+    },
+    "settings": {
+      "status": "vanilla"
+    },
+    "status": {
+      "status": "vanilla"
+    },
+    "terminals": {
+      "status": "vanilla"
+    }
+  }
+}

@@ -1,0 +1,55 @@
+/* The only global rules this app adds on top of the design system.
+ *
+ * design/tokens.css and design/motion.css are imported first, in main.tsx, and
+ * nothing here re-decides anything they decide. Every value below is a var().
+ */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--surface-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  letter-spacing: var(--track-normal);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;      /* the shell owns scrolling, per region */
+}
+
+/* The field canvas is fixed at --z-field, behind everything. The body must not
+ * paint an opaque surface over it, so the shell is transparent and the void
+ * colour sits underneath as the page background. */
+html { background: var(--surface-void); }
+
+h1, h2, h3, h4 {
+  font-weight: 500;
+  letter-spacing: var(--track-display);
+  line-height: var(--leading-tight);
+}
+
+button { font: inherit; color: inherit; }
+
+a { color: var(--accent-soft); }
+a:hover { color: var(--accent-hot); }
+
+/* Scrollbars, sized down to match the hairline language. A 16px chrome
+ * scrollbar next to a 1px border is the loudest thing on the screen. */
+* { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+
+*::-webkit-scrollbar { width: var(--space-3); height: var(--space-3); }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: var(--radius-hair);
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }

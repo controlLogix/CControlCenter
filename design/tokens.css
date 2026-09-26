@@ -92,6 +92,16 @@
   --bad:      #d4553c;
   --unknown:  #7a7a94;   /* deliberately colourless-ish: "we could not tell" is
                           * not a shade of bad, and must never read as one.   */
+  /* A fifth, and it earns its hue. BLOCKED is not a warning and not a failure:
+   * nothing is wrong, the work simply cannot start until something else
+   * finishes. Rendering it amber puts it in the queue of things to go and look
+   * at, which is precisely wrong - there is nothing to look at.              */
+  --state-blocked: #c8a4f4;
+
+  /* Text ON a status fill. NOT --text-on-accent, which is near-black in dark
+   * and white in light - exactly inverted from what these need, because the
+   * status colours are mid-dark in both themes and do not flip.             */
+  --text-on-status: #ffffff;
 
   /* ── typography ──────────────────────────────────────────────────────────
    * The reference uses ppNeueMontreal + ppSupplyMono, which are commercial and
@@ -132,6 +142,10 @@
    * no pill and no 16px card. Keep it that way - a large radius is the single
    * fastest way to make an instrument look like a consumer app.              */
   --radius-hair: 1px;
+  --radius-xs:   3px;   /* the dominant radius in the shipping dashboard - 29
+                         * uses. Added after measuring rather than rounding
+                         * them all up to 4, because "close enough" applied 29
+                         * times is a visible change nobody asked for.        */
   --radius-sm:   4px;
   --radius:      5px;
   --radius-md:   6px;
@@ -245,6 +259,8 @@
   --warn:    #9a7318;
   --bad:     #a63823;
   --unknown: #6a6a80;
+  --state-blocked: #7138aa;
+  --text-on-status: #ffffff;   /* still white: these darken rather than flip */
 
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.08);
   --shadow:    0 4px 14px -4px rgb(0 0 0 / 0.12);

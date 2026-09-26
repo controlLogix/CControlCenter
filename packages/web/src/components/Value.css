@@ -1,0 +1,50 @@
+/* The wrapper is where colour and the flash live; the inner .is-value carries
+ * text only. design/motion.css cancels every transition and animation inside
+ * .is-value, so anything declared on .value-text below would be dead CSS. */
+
+.value-cell {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  border-radius: var(--radius-hair);
+  padding-inline: var(--space-1);
+  margin-inline: calc(var(--space-1) * -1);
+  color: var(--text-primary);
+}
+
+.value-text {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  /* Tabular figures are not cosmetic here. Proportional digits reflow a column
+   * of readings every time a 1 becomes a 7, and a column that shifts sideways
+   * as it updates is a column nobody can scan. */
+  letter-spacing: var(--track-tight);
+  line-height: var(--leading-tight);
+  color: inherit;
+}
+
+.value-sm { font-size: var(--text-sm); }
+.value-md { font-size: var(--text-md); }
+.value-lg { font-size: var(--text-xl); }
+.value-xl {
+  font-size: var(--text-3xl);
+  letter-spacing: var(--track-display);
+}
+
+.value-unit {
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-inline-start: var(--space-2);
+}
+
+/* Tone. The accent ramp is for MAGNITUDE; the status four are a VERDICT. They
+ * are not interchangeable, which is why they are separate tones rather than one
+ * scale - see the accent-ramp note in design/tokens.css. */
+.value-default { color: var(--text-primary); }
+.value-accent  { color: var(--accent-hot); }
+.value-ok      { color: var(--ok); }
+.value-warn    { color: var(--warn); }
+.value-bad     { color: var(--bad); }
+.value-unknown { color: var(--unknown); }

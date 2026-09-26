@@ -105,3 +105,11 @@ research/sessions/
 agentmux-broker/profile/
 agentmux-broker/captures/
 agentmux-broker/*.jsonl
+
+# Node. The workspace root hoists every package here - 121 MB, 239 packages -
+# and this repo is PUBLIC. Untracked is not the same as ignored: one `git add -A`
+# commits all of it, and it is not removable from history afterwards.
+node_modules/
+packages/*/dist/
+*.tsbuildinfo
+.playwright-mcp/

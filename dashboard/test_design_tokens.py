@@ -228,9 +228,9 @@ class BothThemesDefineTheSameTokens(unittest.TestCase):
         # the size scale as missing, which is a check that would have been
         # deleted for crying wolf rather than fixed.
         colourish = re.compile(
-            r'^--(surface|line|cool|ok|warn|bad|unknown)'
+            r'^--(surface|line|cool|ok|warn|bad|unknown|state-)'
             r'|^--accent(-|$)'
-            r'|^--text-(primary|secondary|muted|faint|on-accent)$')
+            r'|^--text-(primary|secondary|muted|faint|on-accent|on-status)$')
         missing = sorted(n for n in root if colourish.match(n) and n not in light)
         self.assertEqual(missing, [],
                          f'defined for dark but not for light: {missing}')

@@ -1,0 +1,11 @@
+# Build and install output for this package only.
+#
+# The repo is public and the root .gitignore does not yet cover node_modules or
+# dist, so this covers what belongs to packages/web. The root-level gap is
+# reported rather than patched here: the workspace root is another package's to
+# change, and a second agent editing the same .gitignore is how one of the two
+# edits quietly disappears.
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo

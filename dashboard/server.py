@@ -37,6 +37,18 @@ from urllib.parse import parse_qs, unquote, urlsplit
 
 
 ROOT = Path(__file__).resolve().parent
+
+# The design system: tokens, the motion vocabulary, and the two runtimes. It
+# lives beside dashboard/ rather than inside it because packages/web consumes
+# the same four files, and a design system with two copies has already stopped
+# being one. Served from /design/<name>, allowlisted by exact name.
+DESIGN_ROOT = ROOT.parent / "design"
+DESIGN_FILES = {
+    "/design/tokens.css": "text/css; charset=utf-8",
+    "/design/motion.css": "text/css; charset=utf-8",
+    "/design/motion.js": "text/javascript; charset=utf-8",
+    "/design/field.js": "text/javascript; charset=utf-8",
+}
 # AGENTMUX_HOME, as everything else in this repo already honours it.
 #
 # #25, found while testing #21. agentmux.sh, courier.py, coordination.py and run.py all
@@ -2651,6 +2663,9 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/agents":
             self.send_json(200, agents_snapshot())
             return
+        # Which directory this file must prove it lives under. Everything is
+        # rooted at dashboard/ except the design system, which sits beside it.
+        base = ROOT
         if path == "/":
             file_path = (ROOT / "index.html").resolve()
             content_type = "text/html; charset=utf-8"
@@ -2670,6 +2685,24 @@ class Handler(BaseHTTPRequestHandler):
         elif path in ("/vendor/xterm.js", "/vendor/addon-fit.js", "/vendor/xterm.css"):
             content_type = ("text/css; charset=utf-8" if path.endswith(".css")
                             else "text/javascript; charset=utf-8")
+        elif path in DESIGN_FILES:
+            # design/ is the ONE place a colour, a curve or a duration is decided,
+            # and it sits beside dashboard/ rather than inside it because the
+            # React app in packages/web consumes the same four files. Serving it
+            # is what stops there being a second copy.
+            #
+            # Until this existed, the only way to get the tokens into this page
+            # was to paste them into style.css - 741 duplicated lines of a design
+            # system, which is the "two copies drift within a week" failure this
+            # repo has already written down about the field modules.
+            #
+            # Resolved against DESIGN_ROOT, not ROOT, and checked against it
+            # below. An explicit dict rather than a prefix match, for the same
+            # reason every branch above is explicit: a prefix match plus a
+            # traversal bug serves the repository.
+            file_path = (DESIGN_ROOT / path.rsplit("/", 1)[1]).resolve()
+            content_type = DESIGN_FILES[path]
+            base = DESIGN_ROOT
         elif (len(parts) == 3 and parts[1] == "assets"
               and parts[2].endswith(".svg")):
             content_type = "image/svg+xml"
@@ -2677,7 +2710,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(404, {"error": "not found"})
             return
         try:
-            file_path.relative_to(ROOT)
+            file_path.relative_to(base)
         except ValueError:
             self.send_json(403, {"error": "forbidden"})
             return

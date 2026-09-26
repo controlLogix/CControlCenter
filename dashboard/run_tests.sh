@@ -343,6 +343,22 @@ run test_static_serving.py python3 dashboard/test_static_serving.py
 # surgical mutations each redden exactly ONE test, and that asymmetry is the
 # proof. Recorded in the suite's docstring.
 run test_design_tokens.py python3 dashboard/test_design_tokens.py
+# NOTHING IS LOST IN THE PORT, enforced rather than promised. The surface is
+# DERIVED from the source on every run - 8 views, 9 panels, 13 modules, 11
+# stored preferences, 50 routes, 40 board ops - and every item must be
+# accounted for in docs/port-parity.json as vanilla, ported or dropped-with-a-
+# reason. An item in the source and absent from the manifest fails, which also
+# catches a feature added to the OLD dashboard mid-migration that then quietly
+# never ports. A manifest claiming `ported` for a React file that is not on
+# disk fails too: a manifest that can claim work nobody did is worse than none,
+# because it reads as evidence.
+run test_port_parity.py python3 dashboard/test_port_parity.py
+# The Node workspaces. Each wrapper translates `node --test` into the shape
+# run() reads - its TAP trailer ends `# duration_ms ...`, which matches neither
+# success shape, so a green suite would be reported as a failed one. Both skip
+# LOUDLY when Node or the dependencies are absent rather than passing quietly.
+run test_api.sh bash /dev/fd/31 31< <(tr -d '\r' < packages/api/test_api.sh)
+run test_scene.sh bash /dev/fd/32 32< <(tr -d '\r' < packages/scene/test_scene.sh)
 run test_pn_dcp.py python3 dashboard/test_pn_dcp.py
 run test_ecat_diag.py python3 dashboard/test_ecat_diag.py
 run test_snapshot.py python3 dashboard/test_snapshot.py

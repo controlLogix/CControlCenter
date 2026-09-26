@@ -1,0 +1,8 @@
+# three.js is a real dependency here and is installed, not vendored: this half
+# of the repo is governed by `npm ci` against package-lock.json, which pins the
+# exact bytes. The vendored-and-committed policy belongs to the Python sidecar
+# (dashboard/vendor, field/vendor) and to check_vendor.sh, which does not look
+# in here. package-lock.json IS committed — it is the pin.
+node_modules/
+dist/
+*.tsbuildinfo

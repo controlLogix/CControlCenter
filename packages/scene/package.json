@@ -1,0 +1,29 @@
+{
+  "name": "@agentmux/scene",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A framework-agnostic three.js view of the merged device tree, in which a guess and a statement never look alike.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "test": "node --test",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "dependencies": {
+    "three": "^0.182.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.182.0",
+    "typescript": "^5.9.3"
+  }
+}

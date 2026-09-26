@@ -1,0 +1,148 @@
+.status {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 88rem;
+}
+
+.sev-filter { display: flex; gap: var(--space-2); }
+
+.sev-filter .btn[data-active='true'] {
+  color: var(--accent-hot);
+  border-color: var(--accent);
+}
+
+/* ── counters ───────────────────────────────────────────────────────────────
+ * auto-fit rather than a fixed count, so the row reflows when the blade is
+ * pinned and the main track narrows - which is the point of pinned being a
+ * real grid track rather than an overlay. */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-5);
+}
+
+.stat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  background: var(--surface-raised);
+  border: 1px solid var(--line-faint);
+  border-radius: var(--radius-md);
+}
+
+.stat-label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 500;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* The age is not optional chrome. A counter with no age is a number nobody can
+ * act on: 3 panes observed four seconds ago and 3 panes observed this morning
+ * are different facts. */
+.stat-age {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-label);
+  color: var(--text-faint);
+}
+
+/* ── agents ─────────────────────────────────────────────────────────────────*/
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.agents-card .hint { margin-block-end: 0; }
+
+/* ── feed ───────────────────────────────────────────────────────────────────*/
+.feed {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 26rem;
+  overflow-y: auto;
+}
+
+.feed-row {
+  display: grid;
+  grid-template-columns:
+    var(--space-2)            /* severity bar */
+    max-content               /* clock */
+    5.5rem                    /* source */
+    6rem                      /* who */
+    minmax(0, 1fr)            /* text */
+    max-content;              /* age */
+  align-items: center;
+  gap: var(--space-4);
+  padding-block: var(--space-3);
+  border-block-end: 1px solid var(--line-faint);
+  font-size: var(--text-sm);
+}
+
+.feed-row:hover { background: var(--surface-hover); }
+.feed-row:last-child { border-block-end: 0; }
+
+.feed-source,
+.feed-who,
+.feed-age {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feed-source { color: var(--cool-deep); }
+.feed-who    { color: var(--text-secondary); }
+.feed-age    { color: var(--text-faint); }
+
+.feed-text {
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Severity is carried by the bar AND by the text weight, not by colour alone.
+ * An error row that is only distinguishable by hue is invisible to a chunk of
+ * the people this product is for. */
+.feed-row[data-severity='warn']  .feed-text { color: var(--text-primary); }
+.feed-row[data-severity='error'] .feed-text { color: var(--text-primary); font-weight: 500; }
+
+/* ── odds and ends ──────────────────────────────────────────────────────────*/
+.glance { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+
+.hint {
+  margin-block: var(--space-5) 0;
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+  color: var(--text-muted);
+  max-width: 58ch;
+}
+
+.empty {
+  padding-block: var(--space-5);
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+  list-style: none;
+}
+
+/* Narrow: the mono columns go, the message stays. Truncating the TEXT to keep
+ * a source label would be the wrong thing to drop. */
+@media (max-width: 68rem) {
+  .feed-row {
+    grid-template-columns: var(--space-2) max-content minmax(0, 1fr) max-content;
+  }
+  .feed-source,
+  .feed-who { display: none; }
+}

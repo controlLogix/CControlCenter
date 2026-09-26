@@ -1,0 +1,215 @@
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 88rem;
+}
+
+.board-totals {
+  display: flex;
+  gap: var(--space-6);
+  align-items: baseline;
+}
+
+.total {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.total-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* ── epic cards ─────────────────────────────────────────────────────────────
+ * One column, not a masonry grid. These are read top to bottom in priority
+ * order; a two-column board puts the second-most-urgent thing where the eye
+ * goes last. */
+.epic-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.epic {
+  background: var(--surface-raised);
+  border: 1px solid var(--line-faint);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* The one structural use of the accent on this view: a 1px left edge on an
+ * epic that is running. Not a fill - see the ramp note in tokens.css. */
+.epic[data-status='in_progress'] { border-inline-start: 1px solid var(--accent); }
+.epic[data-status='blocked']     { border-inline-start: 1px solid var(--bad); }
+.epic[data-status='done']        { border-inline-start: 1px solid var(--ok); }
+
+.epic-head { margin: 0; }
+
+.epic-toggle {
+  display: grid;
+  grid-template-columns: var(--space-6) max-content minmax(0, 1fr) max-content max-content;
+  align-items: center;
+  gap: var(--space-5);
+  width: 100%;
+  padding: var(--space-5);
+  background: transparent;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.epic-toggle:hover { background: var(--surface-hover); }
+
+.epic-chevron {
+  color: var(--text-muted);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.epic[data-open='true'] .epic-chevron { transform: rotate(90deg); }
+
+.epic-title {
+  font-size: var(--text-lg);
+  font-weight: 500;
+  letter-spacing: var(--track-tight);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── the collapse ───────────────────────────────────────────────────────────
+ * grid-template-rows 0fr -> 1fr. This animates the CONTAINER's height; the
+ * counts, keys and statuses inside swap in a single frame, which is the split
+ * the whole motion vocabulary rests on.
+ *
+ * Both halves are required. The outer grid does the animating; the inner div
+ * carries overflow: hidden, because a 0fr track does not clip its own content. */
+.epic-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur) var(--ease-out);
+}
+
+.epic[data-open='true'] .epic-collapse { grid-template-rows: 1fr; }
+
+.epic-collapse-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── tasks ──────────────────────────────────────────────────────────────────*/
+.task-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-block-start: 1px solid var(--line-faint);
+}
+
+.task {
+  display: grid;
+  grid-template-columns:
+    var(--space-1)          /* status bar */
+    max-content             /* id */
+    minmax(0, 1fr)          /* title */
+    6rem                    /* agent */
+    max-content             /* pill */
+    2.5rem;                 /* age */
+  align-items: center;
+  gap: var(--space-5);
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  background: transparent;
+  border: 0;
+  border-block-end: 1px solid var(--line-faint);
+  text-align: left;
+  cursor: pointer;
+}
+
+.task:hover { background: var(--surface-hover); }
+
+.task-bar {
+  align-self: stretch;
+  border-radius: var(--radius-hair);
+  background: var(--line);
+}
+
+.task[data-status='in_progress'] .task-bar { background: var(--accent-hot); }
+.task[data-status='blocked']     .task-bar { background: var(--bad); }
+.task[data-status='parked']      .task-bar { background: var(--unknown); }
+.task[data-status='done']        .task-bar { background: var(--ok); }
+.task[data-status='open']        .task-bar { background: var(--cool-deep); }
+.task[data-status='backlog']     .task-bar { background: var(--line); }
+
+.task-title {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Done is struck through as well as coloured. Colour alone is not a state
+ * change anyone can rely on reading. */
+.task[data-status='done'] .task-title {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.task-agent,
+.task-age {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-agent { color: var(--text-muted); }
+.task-age { text-align: right; }
+
+/* ── epic footer ────────────────────────────────────────────────────────────*/
+.epic-notes {
+  margin: 0;
+  padding: var(--space-5);
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+  color: var(--text-secondary);
+  max-width: 70ch;
+}
+
+.epic-foot {
+  display: flex;
+  gap: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  border-block-start: 1px solid var(--line-faint);
+  background: var(--surface-base);
+}
+
+.epic-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+@media (max-width: 68rem) {
+  .task {
+    grid-template-columns: var(--space-1) max-content minmax(0, 1fr) max-content;
+  }
+  .task-agent,
+  .task-age { display: none; }
+
+  .epic-toggle {
+    grid-template-columns: var(--space-6) minmax(0, 1fr) max-content max-content;
+  }
+  .epic-key { display: none; }
+}

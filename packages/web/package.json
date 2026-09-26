@@ -1,0 +1,32 @@
+{
+  "name": "@agentmux/web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "agentmux operations console - the React shell, Status and Board. A member of the root workspace; install from the repo root.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "check:literals": "node scripts/check-literals.mjs",
+    "check": "npm run typecheck && npm run lint && npm run check:literals"
+  },
+  "dependencies": {
+    "@tanstack/react-router": "^1.114.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@types/node": "^22.13.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.20.0",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.24.0",
+    "vite": "^6.1.0"
+  }
+}
