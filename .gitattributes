@@ -1,3 +1,25 @@
+# EVERYTHING IN THIS REPO RUNS UNDER LINUX, so everything in it is checked out LF.
+#
+# This catch-all is FIRST on purpose: later rules win in .gitattributes, so the
+# binary pins below still override it.
+#
+# core.autocrlf is `true` on this Windows checkout. Without this line git rewrites
+# every tracked text file to CRLF on checkout, and bash cannot read a CRLF script.
+# The failure is not loud - it is worse than loud. `. dashboard/testlib.sh` dies with
+#
+#     syntax error near unexpected token `$'{\r''
+#
+# which means ok(), bad(), check() and finish() never get defined; every assertion in
+# every suite that sources it then evaporates as "command not found", the pass and
+# fail counters stay at zero, and the suite runs to the end and exits 127 having
+# verified nothing. A harness that cannot fail is the one thing this repo keeps
+# deciding it will not ship.
+#
+# run_tests.sh already works around this per-suite (`bash <(tr -d '\r' < ...)`), which
+# is why it went unnoticed: the workaround covers the file being INVOKED and not the
+# files it sources. Fix the bytes instead of adding a second workaround.
+* text=auto eol=lf
+
 # The preserved gateway bytecode is the ONLY surviving copy of a lost source file
 # (see taskmgmt/recovered/README.md). Git's auto-detection gets this right today,
 # but this checkout is on a Windows drive and a core.autocrlf setting on some other
@@ -5,3 +27,19 @@
 # corrupt .pyc cannot be recompiled, because there is no source. Pin it explicitly.
 taskmgmt/recovered/*.bin binary
 *.pyc                    binary
+*.png                    binary
+*.gz                     binary
+
+# Every other binary shape that lives in this tree. A packet capture is the reason
+# this list is explicit rather than left to auto-detection: a CR-stripping pass over
+# the working tree silently removed 22 bytes from nettraffic/fixtures/sample.pcap,
+# because a .pcap looks enough like text to be mangled and nothing like text once it
+# has been. text=auto guesses; these do not.
+*.pcap                   binary
+*.jpg                    binary
+*.jpeg                   binary
+*.ico                    binary
+*.woff                   binary
+*.woff2                  binary
+*.zip                    binary
+*.db                     binary
