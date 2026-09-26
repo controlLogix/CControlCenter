@@ -155,7 +155,7 @@ print('passed 1, failed 0')
     put(fixture / 'dashboard/server.py', '# never imported\n')
     put(fixture / 'bin/pgrep', '#!/bin/sh\nexit 1\n', True)
     put(fixture / 'bin/sleep', '#!/bin/sh\nexit 0\n', True)
-    put(fixture / 'bin/python3', '#!' + sys.executable + "\nimport os, pathlib, time\npathlib.Path(os.environ['SERVER_PID_FILE']).write_text(str(os.getpid()))\ntime.sleep(30)\n", True)
+    put(fixture / 'bin/python3', '#!' + sys.executable + "\nimport os, pathlib, sys, time\nif any('suite_server.py' in a for a in sys.argv):\n raise SystemExit(0)\npathlib.Path(os.environ['SERVER_PID_FILE']).write_text(str(os.getpid()))\ntime.sleep(30)\n", True)
     put(fixture / 'bin/curl', '#!' + sys.executable + "\nimport os, pathlib, time\np=pathlib.Path(os.environ['SERVER_PID_FILE'])\nfor _ in range(100):\n if p.exists(): break\n time.sleep(.01)\nraise SystemExit(0 if p.exists() else 1)\n", True)
     marker = fixture / 'server-pid'
     env = dict(os.environ, SERVER_PID_FILE=str(marker), AGENTMUX_HOME=str(fixture / 'home'),
@@ -179,6 +179,28 @@ print('passed 1, failed 0')
             os.kill(pid, signal.SIGTERM)
         except ProcessLookupError:
             pass
+    # A server that cannot bind, with something already answering on 8787: the bare
+    # reachability check calls that success. Nothing real is touched - pgrep never
+    # returns, curl is a stub, and the "server" only ever prints a bind error.
+    fixture = work / 'foreign-port'
+    fixture.mkdir()
+    copy('dashboard/restart.sh', fixture)
+    launcher = fixture / 'dashboard/restart.sh'
+    launcher.write_text(launcher.read_text().replace('/tmp/ccc-server.log', str(fixture / 'server.log')))
+    put(fixture / 'dashboard/server.py', '# never starts\n')
+    put(fixture / 'bin/pgrep', '#!/bin/sh\nexit 1\n', True)
+    put(fixture / 'bin/sleep', '#!/bin/sh\nexit 0\n', True)
+    put(fixture / 'bin/curl', '#!/bin/sh\nexit 0\n', True)
+    put(fixture / 'bin/python3',
+        '#!/bin/sh\ncase "$*" in *suite_server.py*) exit 1;; esac\n'
+        'echo "OSError: [Errno 98] Address already in use" >&2\nexit 1\n', True)
+    env = dict(os.environ, AGENTMUX_HOME=str(fixture / 'home'),
+               PATH=str(fixture / 'bin') + os.pathsep + os.environ['PATH'])
+    proc = subprocess.run(['bash', 'dashboard/restart.sh'], cwd=fixture, env=env,
+                          stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=60)
+    check('a restart whose server never bound is not reported as up',
+          proc.returncode != 0 and 'up: http' not in proc.stdout,
+          f'(rc={proc.returncode}, out={proc.stdout.strip()!r})')
 except Exception as error:
     check('fixture completed', False, repr(error))
     raise

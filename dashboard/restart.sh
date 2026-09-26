@@ -18,7 +18,12 @@ fi
 for pid in $(pgrep -f 'dashboard/serv' 2>/dev/null); do
   [ "$pid" = "$$" ] || kill "$pid" 2>/dev/null
 done
-sleep 1
+# Wait for them to actually go. `sleep 1` was a guess, and a previous server still
+# holding 8787 when the replacement binds is the whole of the failure below.
+for _ in $(seq 1 50); do
+  pgrep -f 'dashboard/serv' >/dev/null 2>&1 || break
+  sleep 0.1
+done
 
 if [ "${1:-}" = '--fresh-db' ]; then
   rm -f "$ROOT/cc.db" "$ROOT/cc.db-wal" "$ROOT/cc.db-shm"
@@ -28,10 +33,31 @@ fi
 # The restored dashboard must outlive the suite process group.
 nohup setsid python3 dashboard/server.py > /tmp/ccc-server.log 2>&1 &
 sleep 3
-if curl -s -o /dev/null "http://127.0.0.1:8787/"; then
-  echo "up: http://127.0.0.1:8787  (pid $!)"
-else
+if ! curl -s -o /dev/null "http://127.0.0.1:8787/"; then
   echo 'FAILED to come up:'
   cat /tmp/ccc-server.log
   exit 1
 fi
+
+# ANSWERING IS NOT THE SAME AS BEING OURS.
+#
+# If the bind failed - because the old server had not released the port yet, or
+# because it serves a different home and the kill above never found it - then the
+# PREVIOUS server answers that curl and the check passes. Measured: with a server
+# that dies instantly on "Address already in use", the old script printed
+# "up: http://127.0.0.1:8787 (pid ...)" and exited 0, naming a pid that was
+# already gone.
+#
+# That is not a cosmetic lie. A suite restarts the dashboard onto a throwaway home
+# to isolate itself; if the restart silently leaves the operator's server holding
+# the port, every write in that suite lands on the operator's real board while the
+# run believes it is isolated. run_tests.sh already re-checks this after each of
+# its own restarts - the verification belongs here, where the restart is.
+if ! python3 dashboard/suite_server.py --expect "$ROOT" 2>/dev/null; then
+  echo "FAILED: 8787 answers, but not from a dashboard serving $ROOT" >&2
+  serving=$(python3 dashboard/suite_server.py --fallback '' 2>/dev/null)
+  [ -n "$serving" ] && echo "  it is serving: $serving" >&2
+  tail -5 /tmp/ccc-server.log >&2
+  exit 1
+fi
+echo "up: http://127.0.0.1:8787  (home $ROOT)"
