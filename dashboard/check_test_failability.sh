@@ -52,6 +52,8 @@ test_coordination.sh        a2258a8    12
 test_lifecycle.sh            a2258a8    6
 # Residue gate and temporary dashboard lifecycle, including signal restoration.
 test_residue.sh              b64cef1    26
+# The mistyped-key refusal: at this base need_key still raised out of sixteen verbs.
+test_coordination.sh         514bd33    3
 BASELINES
   SELF_TEST=1
 else
@@ -61,7 +63,13 @@ fi
 check_row() {
   local suite="$1" ref="$2" expected="$3" extra="$4"
   local base head tree output actual rc summary reported
-  if [[ ! "$suite" =~ ^test_[A-Za-z0-9_]+\.sh$ ]] ||
+  # .sh and .py both, because the extension was the only reason a python suite
+  # could not be pinned. A suite still has to print the standard summary to be
+  # accepted, which is the real bar - a unittest-style suite prints "OK"/"FAILED"
+  # and is rejected below by the summary check, visibly, rather than by its name
+  # here. smoke.sh stays out: it drives a LIVE dashboard on 8787, so running it
+  # from a disposable base tree would write to whichever board answers.
+  if [[ ! "$suite" =~ ^test_[A-Za-z0-9_]+\.(sh|py)$ ]] ||
      [[ ! "$expected" =~ ^[1-9][0-9]*$ ]] || [ -n "$extra" ]; then
     bad "failability: invalid row ($suite $ref $expected); expected a suite, explicit base, positive minimum"
     return
@@ -93,7 +101,11 @@ check_row() {
   output="$tree/output.log"
   # The suites supply their own homes and identities. The invoking worker's pane
   # identity must not interfere with test_run's synthetic workers and reviewers.
-  (cd "$tree" || exit 2; unset AGENTMUX_AGENT; bash <(tr -d '\r' < "dashboard/$suite")) > "$output" 2>&1
+  if [[ "$suite" == *.py ]]; then
+    (cd "$tree" || exit 2; unset AGENTMUX_AGENT; python3 "dashboard/$suite") > "$output" 2>&1
+  else
+    (cd "$tree" || exit 2; unset AGENTMUX_AGENT; bash <(tr -d '\r' < "dashboard/$suite")) > "$output" 2>&1
+  fi
   rc=$?
   actual=$(grep -cE '^  FAIL([[:space:]]|$)' "$output" || true)
   summary=$(tail -1 "$output")
@@ -133,7 +145,7 @@ self_test() {
 
   # Every probe invokes the REAL checker in a disposable git repository. A stub
   # suite that always passes is deliberately useless at detecting its base's bugs.
-  for label in nondiscriminating below-threshold discriminating crashed head head-alias unrelated missing invalid-minimum outside; do
+  for label in nondiscriminating below-threshold discriminating crashed head head-alias unrelated missing invalid-minimum live-suite outside; do
     printf '. dashboard/testlib.sh\nok "always green"\nfinish\n' > "$fixture/dashboard/test_fixture.sh"
     printf 'test_fixture.sh %s 1\n' "$old" > "$fixture/table"
     expected=1; needle='actual=0; too few failures'
@@ -156,6 +168,9 @@ self_test() {
       unrelated) printf 'test_fixture.sh %s 1\n' "$unrelated" > "$fixture/table"; needle='not an ancestor' ;;
       missing) printf 'test_fixture.sh no-such-base 1\n' > "$fixture/table"; expected=0; needle='SKIP failability:' ;;
       invalid-minimum) printf 'test_fixture.sh %s 0\n' "$old" > "$fixture/table"; needle='positive minimum' ;;
+      # smoke.sh drives the live dashboard; a base-tree run of it would write to
+      # whichever board is answering. It must stay unpinnable BY NAME.
+      live-suite) printf 'smoke.sh %s 1\n' "$old" > "$fixture/table"; needle='invalid row' ;;
       outside) expected=0; needle='SKIP failability: not in a git checkout' ;;
     esac
     if [ "$label" = outside ]; then
@@ -184,4 +199,26 @@ while read -r suite ref minimum extra; do
 done < "$TABLE"
 [ "$rows" -gt 0 ] || bad 'failability: empty baseline table checks nothing'
 echo "failability: $skipped baseline(s) skipped"
+
+# HOW MANY SUITES ARE PINNED AT ALL.
+#
+# This gate proves that the suites IN ITS TABLE can fail on pre-fix code. It has
+# never said anything about the ones that are not, and there are far more of those
+# - which reads exactly like full coverage to anyone watching it go green. That is
+# the same shape as the bugs it exists to catch: a mechanism that appears to work
+# and quietly covers less than it looks like it does.
+#
+# So the number is printed. It is deliberately NOT a failure: each row costs a full
+# suite run at a historical base, and a gate that demanded all of them would take
+# long enough that people would stop running it. Stating the sample size is the
+# honest middle.
+if [ "$SELF_TEST" = 1 ] && [ -f dashboard/run_tests.sh ]; then
+  registered=$(grep -oE '^run [A-Za-z0-9_.]+' dashboard/run_tests.sh | awk '{print $2}' | sort -u)
+  pinned=$(awk '!/^#/ && NF {print $1}' "$TABLE" | sort -u)
+  missing=$(comm -23 <(printf '%s\n' "$registered") <(printf '%s\n' "$pinned"))
+  echo "failability: $(printf '%s\n' "$pinned" | grep -c .) of" \
+       "$(printf '%s\n' "$registered" | grep -c .) registered suites have a pinned baseline"
+  printf '%s\n' "$missing" | grep -c . >/dev/null && \
+    printf '  unpinned: %s\n' "$(printf '%s ' $missing)" | fold -s -w 100 | sed '2,$s/^/            /'
+fi
 finish
