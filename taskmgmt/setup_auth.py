@@ -19,9 +19,10 @@ wrote a bare `model` key and each silently clobbered the other.
 
 WHERE THINGS GO
 ---------------
-  ~/.agentmux/auth.json   0600   non-secret settings and the active method per CLI:
-                                 { active: {}, providers: {}, methods: {} }
-  ~/.agentmux/env         0600   secret environment exports only.
+  $AGENTMUX_HOME/auth.json  0600  non-secret settings and the active method per CLI:
+                                  { active: {}, providers: {}, methods: {} }
+  $AGENTMUX_HOME/env        0600  secret environment exports only.
+                                  ($AGENTMUX_HOME defaults to ~/.agentmux.)
 
 Separate files because the dashboard may READ and display the first and must never
 touch the second. agentmux SOURCES the env file into each pane rather than
@@ -45,7 +46,9 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 MANIFEST = REPO / "dashboard" / "auth.json"
-ROOT = Path.home() / ".agentmux"
+# AGENTMUX_HOME, like every sibling module. This file resolved the home directly
+# from $HOME, so an isolated run still read and wrote the operator's real one.
+ROOT = Path(os.environ.get("AGENTMUX_HOME") or Path.home() / ".agentmux")
 SETTINGS = ROOT / "auth.json"
 ENV_FILE = ROOT / "env"
 

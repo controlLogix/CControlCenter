@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Seed ~/.agentmux/queue/*.jsonl with this session's real orchestration traffic.
+"""Seed $AGENTMUX_HOME/queue/*.jsonl with this session's real orchestration traffic.
 
 Not filler: these are the actual plan, hand-offs and findings from the CCC pass,
 written in the format agents use so the Message Queue view is exercised against
@@ -12,7 +12,11 @@ import json
 import os
 import pathlib
 
-QUEUE = pathlib.Path(os.path.expanduser("~/.agentmux/queue"))
+# AGENTMUX_HOME, like every sibling module. This file resolved the home directly
+# from $HOME, so an isolated run still read and wrote the operator's real one.
+QUEUE = pathlib.Path(
+    os.environ.get("AGENTMUX_HOME") or os.path.expanduser("~/.agentmux")
+) / "queue"
 DAY = "2026-09-19T"
 
 

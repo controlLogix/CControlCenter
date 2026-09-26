@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import os
 import pathlib
 import re
 import sys
@@ -28,7 +29,11 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import atlassian as atl  # noqa: E402
 
-LOG_DIR = pathlib.Path.home() / ".agentmux" / "logs"
+# AGENTMUX_HOME, like every sibling module. This file resolved the home directly
+# from $HOME, so an isolated run still read and wrote the operator's real one.
+LOG_DIR = pathlib.Path(
+    os.environ.get("AGENTMUX_HOME") or pathlib.Path.home() / ".agentmux"
+) / "logs"
 NAME_RE = re.compile(r"^[A-Za-z0-9_.-]{1,64}$")
 KEY_RE = re.compile(r"^[A-Z][A-Z0-9_]+-[0-9]+$")
 

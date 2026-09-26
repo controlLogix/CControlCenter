@@ -23,7 +23,11 @@ import re
 import stat
 import sys
 
-CONFIG = pathlib.Path.home() / ".agentmux" / "atlassian.json"
+# AGENTMUX_HOME, like every sibling module. This file resolved the home directly
+# from $HOME, so an isolated run still read and wrote the operator's real one.
+CONFIG = pathlib.Path(
+    os.environ.get("AGENTMUX_HOME") or pathlib.Path.home() / ".agentmux"
+) / "atlassian.json"
 
 
 def ask(label: str, default: str = "", required: bool = True) -> str:

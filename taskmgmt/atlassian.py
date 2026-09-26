@@ -4,8 +4,9 @@
 Jira for task management, Confluence for documentation. Python 3 stdlib only -
 no pip install, same constraint as the dashboard backend.
 
-Config: ~/.agentmux/atlassian.json, mode 0600, on the Linux filesystem (NOT
-/mnt/c, where POSIX modes are meaningless). Never printed, never logged.
+Config: $AGENTMUX_HOME/atlassian.json (default ~/.agentmux), mode 0600, on the
+Linux filesystem (NOT /mnt/c, where POSIX modes are meaningless). Never printed,
+never logged.
 
     {
       "deployment": "cloud",                     // or "server"
@@ -35,7 +36,11 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-CONFIG_PATH = pathlib.Path.home() / ".agentmux" / "atlassian.json"
+# AGENTMUX_HOME, like every sibling module. This file resolved the home directly
+# from $HOME, so an isolated run still read and wrote the operator's real one.
+CONFIG_PATH = pathlib.Path(
+    os.environ.get("AGENTMUX_HOME") or pathlib.Path.home() / ".agentmux"
+) / "atlassian.json"
 TIMEOUT = 30
 
 REQUIRED = ("deployment", "base_url", "api_token")
