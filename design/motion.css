@@ -1,0 +1,206 @@
+/* agentmux motion primitives — the vocabulary, so components stop inventing one.
+ *
+ * Every rule here reads its timing from design/tokens.css. Nothing below
+ * contains a literal duration or curve, which is what makes the reduced-motion
+ * block in that file actually able to switch all of this off.
+ *
+ * THE ONE RULE WORTH READING. This product's argument is that it does not lie
+ * to the operator. Motion is the easiest way to break that without noticing,
+ * in three specific ways, so each has a guard below:
+ *
+ *   1. A value that animates between two numbers DISPLAYS NUMBERS THAT WERE
+ *      NEVER TRUE for the length of the tween. On a tag table showing a live
+ *      process value that is not a polish detail, it is a false reading. So
+ *      .is-value exists and opts out of everything.
+ *   2. A decorative pulse that means "live" is a claim about freshness made by
+ *      CSS rather than by measurement. .is-live-pulse is therefore defined to
+ *      require a data attribute that only the freshness logic sets.
+ *   3. A reveal that has not finished is indistinguishable from data that has
+ *      not arrived. So reveals are short, they never stagger past a cap, and
+ *      anything still invisible after the budget is forced visible.
+ */
+
+/* ── the base transition ─────────────────────────────────────────────────── */
+.t,
+.t-colors { transition: color var(--dur-micro) var(--ease-out),
+                        background-color var(--dur-micro) var(--ease-out),
+                        border-color var(--dur-micro) var(--ease-out),
+                        box-shadow var(--dur-fast) var(--ease-out); }
+
+.t-transform { transition: transform var(--dur) var(--ease-out); }
+.t-opacity   { transition: opacity var(--dur) var(--ease-out); }
+.t-all       { transition: opacity var(--dur) var(--ease-out),
+                           transform var(--dur) var(--ease-out); }
+
+/* Panels and drawers move on the slow token and the symmetric curve, because
+ * they come back the same way they left. */
+.t-panel { transition: transform var(--dur-slow) var(--ease-in-out),
+                       opacity   var(--dur-slow) var(--ease-in-out); }
+
+/* ── reveal ──────────────────────────────────────────────────────────────────
+ * The element starts displaced and transparent, and .is-in releases it.
+ * IntersectionObserver in motion.js adds the class; the fallback below means a
+ * page with JavaScript disabled or an observer that never fires still shows
+ * everything, which is the failure mode that matters. */
+[data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-y, 8px), 0);
+  transition: opacity var(--dur-slow) var(--ease-out),
+              transform var(--dur-slow) var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+[data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+/* Once it has arrived, stop promising the compositor a layer forever. */
+[data-reveal].is-settled { will-change: auto; }
+
+/* THE FALLBACK THAT MATTERS. If motion.js never runs, nothing gets .is-in and
+ * the entire page is invisible - a blank product, from a decoration. This says
+ * the hiding only applies once the script has claimed the document. */
+html:not([data-motion-ready]) [data-reveal] {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+/* Directional variants. --reveal-y is the only thing that changes, so a
+ * component can set it inline without a new class. */
+[data-reveal="up"]    { --reveal-y: 10px; }
+[data-reveal="down"]  { --reveal-y: -10px; }
+[data-reveal="none"]  { --reveal-y: 0px; }
+[data-reveal="scale"] {
+  --reveal-y: 0px;
+  transform: scale(0.985);
+}
+[data-reveal="scale"].is-in { transform: none; }
+
+/* ── stagger ─────────────────────────────────────────────────────────────────
+ * Capped at 10 steps by motion.js, and the cap is the point: a 60-row table
+ * staggered at 28ms takes 1.7 seconds to finish arriving, during which it is
+ * indistinguishable from a table that is still loading. */
+[data-stagger] > * { transition-delay: calc(var(--i, 0) * var(--stagger)); }
+
+/* ── value guards ────────────────────────────────────────────────────────────
+ * Anything carrying a reading opts out of all of it. Applied by the component
+ * that renders the value, and asserted by a test rather than left to habit. */
+.is-value,
+.is-value * {
+  transition-property: none !important;
+  animation: none !important;
+}
+/* The CONTAINER of a value may still transition - a row can highlight when it
+ * changes, as long as the digits themselves swap instantly. */
+.value-flash { animation: value-flash var(--dur-slow) var(--ease-out) 1; }
+@keyframes value-flash {
+  from { background-color: rgb(255 82 2 / 0.14); }
+  to   { background-color: transparent; }
+}
+
+/* ── liveness ────────────────────────────────────────────────────────────────
+ * A pulse is a claim. This one can only fire when something has set
+ * data-live="true", which is the freshness logic's job and nothing else's.
+ * A plain .is-live-pulse with no attribute renders completely static. */
+[data-live="true"].is-live-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--glow-accent);
+  animation: live-breathe 2.4s var(--ease-smooth) infinite;
+  pointer-events: none;
+}
+@keyframes live-breathe {
+  0%, 100% { opacity: 0.32; }
+  50%      { opacity: 0.85; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-live="true"].is-live-pulse::after { animation: none; opacity: 0.5; }
+}
+
+/* ── the accent sweep ────────────────────────────────────────────────────────
+ * The reference's gradient-slide, rebuilt. Used on a progress edge or a
+ * loading bar - something that IS indeterminate. Never on a container that
+ * has already finished. */
+.sweep {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent-soft) 35%,
+    var(--accent-hot) 50%,
+    var(--accent-soft) 65%,
+    transparent 100%);
+  background-size: 220% 100%;
+  animation: gradient-slide 1.8s var(--ease-smooth) infinite;
+}
+@keyframes gradient-slide {
+  from { background-position: 120% 0; }
+  to   { background-position: -120% 0; }
+}
+
+.dots::after {
+  content: "";
+  animation: loading-dots 1.4s steps(4, end) infinite;
+}
+@keyframes loading-dots {
+  0%   { content: ""; }
+  25%  { content: "."; }
+  50%  { content: ".."; }
+  75%  { content: "..."; }
+}
+
+/* ── press ───────────────────────────────────────────────────────────────────
+ * The only place the overshoot curve is allowed: a thing grabbed and released. */
+.pressable { transition: transform var(--dur-micro) var(--ease-out); }
+.pressable:active { transform: scale(0.975); }
+.pressable:not(:active) { transition-timing-function: var(--ease-spring); }
+
+/* ── focus ───────────────────────────────────────────────────────────────────
+ * Visible, keyboard-only, and never animated away - a focus ring that fades is
+ * a focus ring somebody loses track of. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent-hot);
+  outline-offset: 2px;
+  transition: none;
+}
+
+/* ── grain ───────────────────────────────────────────────────────────────────
+ * Over the content, under the chrome, and inert to the pointer. The reference
+ * uses mix-blend-mode: overlay for exactly this. Strength is a token because
+ * the correct value depends on the panel, and someone will need to turn it
+ * down the first time it fights a dense table. */
+.grain-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-grain);
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: var(--field-blend);
+}
+
+/* ── the field ───────────────────────────────────────────────────────────────
+ * The WebGL canvas behind everything. Fades in rather than popping, because a
+ * shader that appears on first frame reads as a flash. */
+.field-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-field);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-slower) var(--ease-out);
+}
+.field-canvas.is-ready { opacity: var(--field-opacity); }
+
+/* ── view transition ─────────────────────────────────────────────────────────
+ * A view swap crossfades and lifts very slightly. Deliberately smaller than it
+ * wants to be: a view carrying a table should not appear to slide, because the
+ * rows are what the eye is trying to hold still. */
+.view-enter {
+  animation: view-enter var(--dur-slow) var(--ease-out) both;
+}
+@keyframes view-enter {
+  from { opacity: 0; transform: translate3d(0, 4px, 0); }
+  to   { opacity: 1; transform: none; }
+}

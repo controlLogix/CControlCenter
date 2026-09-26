@@ -1,0 +1,291 @@
+/* agentmux design tokens — the one place a colour, a curve or a duration is decided.
+ *
+ * WHY THIS FILE EXISTS. style.css is 72 KB of a deliberate identity that
+ * SPEC_CC.md:26-33 specifies in words: Valve-era Steam, flat dark slate, tight
+ * 1px borders, dense information, no gradients, a thin light orange accent used
+ * sparingly and never as a fill. The React migration would have re-decided all
+ * of that by accident, one component at a time, which is how a design system
+ * becomes a pile of hex literals nobody can change.
+ *
+ * WHAT CHANGED, AND WHY IT IS NOT A REPAINT. The modernisation reference is
+ * omen.ai, and the useful discovery from measuring it rather than looking at it
+ * is that it is the SAME language this product already speaks: near-black
+ * surfaces (#1a1a1a / #252525), a hot orange accent (#ff5202), a cool blue-grey
+ * complement (#6a819b), and radii of 1 to 6px. Not a rounded, pastel, gradient
+ * product at all.
+ *
+ * So the identity is kept and three things are added:
+ *   1. A WARM RAMP behind the single accent, so orange can express magnitude
+ *      (how hot, how urgent, how recent) instead of only presence.
+ *   2. MOTION, specified here as tokens so it is consistent and so it has
+ *      exactly one place to be switched off.
+ *   3. DEPTH - grain, glow and elevation - at a strength that never competes
+ *      with a number on screen.
+ *
+ * THE RULE THAT OUTRANKS EVERY OTHER TOKEN IN THIS FILE. This product's whole
+ * argument is that it does not lie to the operator: an age is measured at the
+ * source, an unknown outcome is never retried, a port sweep is not a statement.
+ * Motion must not undermine that. So:
+ *
+ *   - Nothing that conveys DATA may animate its value. A number changes
+ *     instantly; only its container may transition.
+ *   - Nothing may pulse, glow or shimmer to mean "live" unless the liveness is
+ *     measured. A decorative pulse on a dead feed is the un-aged-value lie in
+ *     another costume.
+ *   - Every motion token collapses to 0ms under prefers-reduced-motion, and the
+ *     layout must be correct with every duration at zero.
+ */
+
+:root {
+  /* ── surfaces ────────────────────────────────────────────────────────────
+   * Five steps, near-black through to the raised edge of a card. Measured off
+   * the reference: #1a1a1a and #252525 are its two real surface values, and
+   * everything between them here is interpolated rather than invented.       */
+  --surface-void:      #0d0d0f;   /* behind everything; the shader canvas sits here */
+  --surface-base:      #141416;   /* app background */
+  --surface-raised:    #1a1a1c;   /* panels, cards */
+  --surface-overlay:   #202024;   /* drawers, menus, the blade */
+  --surface-input:     #252528;   /* inputs, wells - the reference's #252525 */
+  --surface-hover:     #2b2b30;
+
+  /* ── hairlines ───────────────────────────────────────────────────────────
+   * 1px borders are load-bearing in this identity. Three weights only.       */
+  --line-faint:   #232327;
+  --line:         #303036;
+  --line-strong:  #45454e;
+
+  /* ── text ────────────────────────────────────────────────────────────────*/
+  --text-primary:   #eff1ec;   /* the reference's warm off-white, not pure #fff */
+  --text-secondary: #a8a8b0;
+  --text-muted:     #71717a;
+  --text-faint:     #55555e;
+  --text-on-accent: #140b06;   /* near-black ON orange; orange is never a light bg */
+
+  /* ── the accent ramp ─────────────────────────────────────────────────────
+   * Taken from the reference's own stack: #ff5202 at the hot end through
+   * #f6623e, #f67246, #f8a06f, #fab98a, #fac191 to #f9dca9.
+   *
+   * USE IT FOR MAGNITUDE, NOT DECORATION. --accent-hot is for a thing that
+   * needs a person NOW; the cooler steps are for older, weaker or ambient
+   * versions of the same idea. If a surface is orange and nothing is urgent,
+   * that is the bug this ramp exists to prevent.                             */
+  --accent-hot:    #ff5202;
+  --accent:        #f6623e;
+  --accent-warm:   #f67246;
+  --accent-soft:   #f8a06f;
+  --accent-sand:   #fab98a;
+  --accent-pale:   #fac191;
+  --accent-faint:  #f9dca9;
+
+  /* ── the cool complement ─────────────────────────────────────────────────
+   * The reference pairs its orange with a desaturated blue-grey rather than a
+   * second saturated hue. It reads as instrumentation.                       */
+  --cool-deep:  #6a819b;
+  --cool:       #a6b5cd;
+  --cool-pale:  #adbcce;
+
+  /* ── status ──────────────────────────────────────────────────────────────
+   * Four, and they are NOT interchangeable with the accent ramp. Orange means
+   * attention; these mean a verdict.                                         */
+  --ok:       #5fb37a;
+  --warn:     #d4a33c;
+  --bad:      #d4553c;
+  --unknown:  #7a7a94;   /* deliberately colourless-ish: "we could not tell" is
+                          * not a shade of bad, and must never read as one.   */
+
+  /* ── typography ──────────────────────────────────────────────────────────
+   * The reference uses ppNeueMontreal + ppSupplyMono, which are commercial and
+   * are NOT copied here. These are the free equivalents in the same genre: a
+   * neutral grotesque with tight apertures, and a technical mono.
+   *
+   * Loaded with a system stack in front so the product renders correctly with
+   * no network and no webfont - a plant-side box may have neither.           */
+  --font-sans: "Inter var", "Inter", -apple-system, BlinkMacSystemFont,
+               "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, "SF Mono",
+               Menlo, Consolas, monospace;
+
+  /* Tracking. Measured off the reference: display type is tightened, and small
+   * mono labels are opened up to ~1.5px. That pairing is most of why technical
+   * layouts read as deliberate rather than cramped.                          */
+  --track-display: -0.02em;
+  --track-tight:   -0.01em;
+  --track-normal:  0;
+  --track-label:   0.094rem;   /* the reference's exact value, for mono caps */
+
+  /* A 7-step scale. Dense by intent: this product shows tables, not slides.  */
+  --text-2xs: 10px;
+  --text-xs:  11px;
+  --text-sm:  12px;
+  --text-md:  13px;   /* body default - the existing dashboard's size */
+  --text-lg:  15px;
+  --text-xl:  19px;
+  --text-2xl: 25px;
+  --text-3xl: 33px;
+
+  --leading-tight: 1.15;
+  --leading-snug:  1.35;
+  --leading-body:  1.55;
+
+  /* ── radii ───────────────────────────────────────────────────────────────
+   * Measured: the reference's radii are 1px, 4px, 5px, 6px and 10px. There is
+   * no pill and no 16px card. Keep it that way - a large radius is the single
+   * fastest way to make an instrument look like a consumer app.              */
+  --radius-hair: 1px;
+  --radius-sm:   4px;
+  --radius:      5px;
+  --radius-md:   6px;
+  --radius-lg:   10px;
+
+  /* ── spacing ─────────────────────────────────────────────────────────────*/
+  --space-0:  0;
+  --space-1:  2px;
+  --space-2:  4px;
+  --space-3:  6px;
+  --space-4:  8px;
+  --space-5:  12px;
+  --space-6:  16px;
+  --space-7:  24px;
+  --space-8:  32px;
+  --space-9:  48px;
+  --space-10: 64px;
+
+  /* ── easing ──────────────────────────────────────────────────────────────
+   * The four curves measured on the reference, named for what they are for.
+   * Do not add a fifth without deleting one.                                 */
+  --ease-out:     cubic-bezier(0, 0, 0.2, 1);          /* the default. Most motion. */
+  --ease-in-out:  cubic-bezier(0.4, 0, 0.2, 1);        /* things that return */
+  --ease-smooth:  cubic-bezier(0.455, 0.03, 0.515, 0.955); /* long, symmetric */
+  --ease-soft:    cubic-bezier(0.4, 0, 0.6, 1);
+  /* An overshoot, used ONLY where a thing is grabbed and released. Never on
+   * anything showing a value: a number that springs past itself and settles
+   * has, for two frames, displayed a reading that was never true.            */
+  --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── duration ────────────────────────────────────────────────────────────
+   * Measured: .1s for micro, .5s for the standard transition.                */
+  --dur-instant: 0ms;
+  --dur-micro:   100ms;   /* hover, focus, press */
+  --dur-fast:    180ms;   /* a chip, a badge, a tooltip */
+  --dur:         280ms;   /* the default */
+  --dur-slow:    500ms;   /* a panel, a crossfade, a view change */
+  --dur-slower:  800ms;   /* a first-paint reveal, once */
+
+  /* Stagger for a list that reveals. Capped deliberately - see motion.css.   */
+  --stagger: 28ms;
+
+  /* ── elevation ───────────────────────────────────────────────────────────
+   * Shadow is nearly absent in this identity; separation is done with a
+   * hairline. These exist for things that genuinely float.                   */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.35);
+  --shadow:    0 4px 14px -4px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 18px 48px -12px rgb(0 0 0 / 0.65);
+  /* A glow, for the ONE element that currently wants a person. Never ambient. */
+  --glow-accent: 0 0 0 1px rgb(255 82 2 / 0.35), 0 0 18px -2px rgb(255 82 2 / 0.28);
+
+  /* ── the atmosphere layer ────────────────────────────────────────────────
+   * Strengths for the WebGL field and the grain, kept here so they can be
+   * turned down in one place when they start competing with the data. They
+   * are low on purpose. If you can read the background, it is too strong.    */
+  --grain-opacity:   0.035;
+  --field-opacity:   0.5;
+  --field-blend:     overlay;
+
+  /* ── layout ──────────────────────────────────────────────────────────────*/
+  --rail-width:      52px;
+  --blade-width:     420px;
+  --blade-min:       320px;
+  --blade-max:       720px;
+  --header-height:   44px;
+
+  --z-field:    0;
+  --z-content:  10;
+  --z-grain:    20;   /* over content, under chrome - the reference does this */
+  --z-sticky:   30;
+  --z-blade:    40;
+  --z-overlay:  50;
+  --z-toast:    60;
+}
+
+/* ── the light theme ───────────────────────────────────────────────────────
+ * Kept because the product already ships cc-light and operators use it in lit
+ * rooms. The ACCENT RAMP DOES NOT INVERT - orange on white at the hot end is
+ * illegible, so the hot steps are darkened rather than flipped.              */
+:root[data-theme="light"] {
+  --surface-void:      #e8e8e4;
+  --surface-base:      #eff1ec;
+  --surface-raised:    #f7f8f5;
+  --surface-overlay:   #ffffff;
+  --surface-input:     #ffffff;
+  --surface-hover:     #e4e6e0;
+
+  --line-faint:  #dcded7;
+  --line:        #c7c9c2;
+  --line-strong: #a9aba4;
+
+  --text-primary:   #1a1a1a;
+  --text-secondary: #46464c;
+  --text-muted:     #71717a;
+  --text-faint:     #9a9aa2;
+  --text-on-accent: #ffffff;
+
+  --accent-hot:   #d63d00;
+  --accent:       #c8482b;
+  --accent-warm:  #bd5533;
+  --accent-soft:  #a96a44;
+  --accent-sand:  #9c7455;
+  --accent-pale:  #8f7a63;
+  --accent-faint: #847d6e;
+
+  --cool-deep: #4a6180;
+  --cool:      #5f7590;
+  --cool-pale: #74889f;
+
+  --ok:      #2f7d4c;
+  --warn:    #9a7318;
+  --bad:     #a63823;
+  --unknown: #6a6a80;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.08);
+  --shadow:    0 4px 14px -4px rgb(0 0 0 / 0.12);
+  --shadow-lg: 0 18px 48px -12px rgb(0 0 0 / 0.18);
+  --glow-accent: 0 0 0 1px rgb(214 61 0 / 0.30), 0 0 18px -2px rgb(214 61 0 / 0.18);
+
+  --grain-opacity: 0.02;
+  --field-opacity: 0.28;
+  --field-blend:   multiply;
+}
+
+/* ── reduced motion ────────────────────────────────────────────────────────
+ * EVERY duration goes to zero, in one place. This is why durations are tokens
+ * rather than literals: a literal in a component is a duration that cannot be
+ * switched off, and some people are made ill by the ones above.
+ *
+ * Stagger goes to zero too. A staggered reveal with zero duration still
+ * arrives in sequence, which is the same problem more slowly.                */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-micro:  0ms;
+    --dur-fast:   0ms;
+    --dur:        0ms;
+    --dur-slow:   0ms;
+    --dur-slower: 0ms;
+    --stagger:    0ms;
+    /* The animated field is motion too. Hold it at a still frame rather than
+     * removing it, so the layout and contrast are unchanged.                 */
+    --field-opacity: 0;
+  }
+}
+
+/* An explicit operator switch, independent of the OS setting. Someone running
+ * this on a plant floor machine may want it off without changing Windows. */
+:root[data-motion="off"] {
+  --dur-micro:  0ms;
+  --dur-fast:   0ms;
+  --dur:        0ms;
+  --dur-slow:   0ms;
+  --dur-slower: 0ms;
+  --stagger:    0ms;
+  --field-opacity: 0;
+  --grain-opacity: 0;
+}

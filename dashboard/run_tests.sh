@@ -331,6 +331,18 @@ run test_stream_slots_live.py python3 dashboard/test_stream_slots_live.py
 # The e2e suite saw only a timeout. This asserts the distinction the handler now
 # keeps: absent is 404, unreadable is 503 and is retried first.
 run test_static_serving.py python3 dashboard/test_static_serving.py
+# The design system's invariants. Tokens claim that every colour and duration is
+# decided in one place and that all motion switches off from one block; both
+# claims are worth what the check is worth, and the failure mode is silent - one
+# hex literal and the light theme has a label nobody can read. Also the three
+# ways motion can make this product lie: a value that tweens shows numbers that
+# were never true, a pulse meaning "live" is a freshness claim made by CSS, and
+# a reveal that never fires is a blank page. Parsed, not grepped.
+# No failability row: design/ is new, so at any base ALL of it fails on the
+# missing files, which proves nothing. Proved by mutation instead - six
+# surgical mutations each redden exactly ONE test, and that asymmetry is the
+# proof. Recorded in the suite's docstring.
+run test_design_tokens.py python3 dashboard/test_design_tokens.py
 run test_pn_dcp.py python3 dashboard/test_pn_dcp.py
 run test_ecat_diag.py python3 dashboard/test_ecat_diag.py
 run test_snapshot.py python3 dashboard/test_snapshot.py
