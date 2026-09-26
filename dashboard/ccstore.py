@@ -161,7 +161,7 @@ def validate_write(resource, body):
         "tasks": {"epic_id", "epic", "title", "agent", "jira_key", "body"},
         "journal": {"kind", "subject", "body", "agent"},
         "devices": {"name", "kind", "address", "port", "protocol", "meta"},
-        "status": {"kind", "id", "key", "status"},
+        "status": {"kind", "id", "key", "status", "actor"},
         "delete": {"kind", "id", "key"},
     }
     if not isinstance(body, dict) or body.keys() - fields[resource]:
@@ -233,7 +233,14 @@ def validate_write(resource, body):
     status_value = ccboard.STATUS_MIGRATION.get(status_value, status_value)
     if status_value not in allowed:
         raise Invalid("invalid status")
-    return dict(kind=kind, status=status_value, **_addressed(body, kind))
+    # `actor` is accepted here, and it is not decoration. This surface now runs
+    # the same gates /api/board/status runs, and `requireOnDone` lists "actor" - a
+    # close that cannot say who closed it is one of the things that gate is for.
+    # It is also what the history row is attributed to, so a change made through
+    # the compatibility endpoint is as traceable as one made through the board.
+    return dict(kind=kind, status=status_value,
+                actor=text_field(body, "actor", 64, pattern=NAME_PATTERN),
+                **_addressed(body, kind))
 
 
 def _addressed(body, kind):
@@ -357,13 +364,21 @@ def write(db, resource, values):
         return {"ok": True, "kind": values["kind"], "key": key,
                 "id": _row_id(db, values["kind"], key),
                 "cascaded_tasks": len(result["cascaded"])}
-    # A status change on the compatibility surface runs as a mirror too, so the
-    # old board UI and `agentmux task done` keep working exactly as they did. The
-    # epic auto-close and the triage resync still happen - those are bookkeeping,
-    # not gates, and skipping them would leave the board inconsistent rather than
-    # merely permissive. The gated path is /api/board/status.
+    # A status change on the compatibility surface RUNS THE GATES, like every
+    # other status change on this board. It used to run as a mirror, and that made
+    # this endpoint a complete, unlogged way around gate_start and gate_done:
+    # `agentmux task done 7` closed a card that `agentmux task done TM-007`
+    # refused, and a bare POST of {"kind":"task","key":"TM-083","status":"done"}
+    # closed any card at all, with no criterion ticked and no evidence. AN ADDRESS
+    # FORMAT IS NOT A PERMISSION LEVEL - the row id and the minted key name the
+    # same card, so they answer to the same rules.
+    #
+    # What stays a mirror is CREATE (/api/epics, /api/tasks), where the exemption
+    # has a reason: a bare title genuinely cannot carry a body or criteria, and
+    # `doctor` reports the thin card instead. A status change carries no fields,
+    # so it never had that excuse. The bypass with a reason is /api/board/override.
     key = _resolve_key(db, values["kind"], values)
-    ccboard.set_status(db, key, values["status"], mirror=True)
+    ccboard.set_status(db, key, values["status"], actor=values.get("actor"))
     table = "epics" if values["kind"] == "epic" else "tasks"
     return dict(db.execute("SELECT * FROM " + table + " WHERE key=?", (key,)).fetchone())
 

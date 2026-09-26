@@ -1191,6 +1191,14 @@ class Handler(BaseHTTPRequestHandler):
             with ccstore.connection() as db:
                 result = ccstore.read(db, resource, int(raw_limit), since)
             self.send_json(200, {resource: result})
+        except ccboard.Refused as err:
+            # /api/status runs the board's gates now, so this surface can be told
+            # no. Refused subclasses Exception, not ValueError, so without this arm
+            # a gated refusal falls past the whole ladder below and answers 500 -
+            # "the server broke" instead of "that card has no evidence yet". The
+            # 409 and the `missing` list match board_endpoint exactly, so one
+            # client-side handler prints the remedy for either surface.
+            self.send_json(409, {"error": str(err), "missing": err.missing})
         except ccstore.Invalid as err:
             # Invalid subclasses ValueError, so it MUST be caught first or the
             # generic handler below swallows the reason and every rejection reads
@@ -1390,6 +1398,20 @@ class Handler(BaseHTTPRequestHandler):
         return {"hits": ccboard.find(db, one("q"), bounded("limit", 50, 1, 200))}
 
     def board_write(self, db, op, body):
+        # `mirror` IS NOT A WIRE FLAG, and must not become one again. It used to be
+        # read straight off the request body into ccboard.create and
+        # ccboard.set_status, which made it an unlimited, reason-free, unlogged
+        # gate bypass available to anything that could reach this port: the same
+        # power as `override` with none of its four properties - a required
+        # reason, a stamped actor, an audit row, and a single use. The board's
+        # designed bypass is POST /api/board/override, and a thin card is still
+        # creatable through /api/tasks. It is refused by name rather than ignored,
+        # so a caller that still sends it is told what to use instead of silently
+        # getting the gates it was trying to skip.
+        if "mirror" in body:
+            raise ccboard.Invalid(
+                "mirror is not accepted over HTTP: arm an audited bypass with"
+                " /api/board/override, or use /api/tasks for a thin card")
         if op == "plcstate":
             return codesys_panel.plcstate(db, body)
         if op == "bootapp":
@@ -1423,9 +1445,8 @@ class Handler(BaseHTTPRequestHandler):
             kind = ccboard.text(body.get("kind"), "kind", 16, required=True,
                                 choices=tuple(ccboard.KINDS))
             fields = {k: v for k, v in body.items()
-                      if k not in ("kind", "actor", "session", "mirror")}
-            return ccboard.create(db, kind, fields, actor, session,
-                                  mirror=bool(body.get("mirror")))
+                      if k not in ("kind", "actor", "session")}
+            return ccboard.create(db, kind, fields, actor, session)
         if op == "update":
             patch = body.get("patch")
             if not isinstance(patch, dict):
@@ -1433,7 +1454,7 @@ class Handler(BaseHTTPRequestHandler):
             return ccboard.update(db, target(), patch, actor, session)
         if op == "status":
             return ccboard.set_status(db, target(), body.get("status"), actor, session,
-                                      body.get("reason"), mirror=bool(body.get("mirror")))
+                                      body.get("reason"))
         if op == "move":
             return ccboard.move_task(db, target("task"), body.get("epic"), actor, session)
         if op == "delete":

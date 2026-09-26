@@ -1233,12 +1233,27 @@ def reopen_epic(db, epic_key, actor=None):
     return True
 
 
-def set_status(db, key, status, actor=None, session=None, reason=None, mirror=False):
+def set_status(db, key, status, actor=None, session=None, reason=None):
     """Move an entity, through whichever gate the destination owns.
 
-    `mirror=True` is for a write replayed from a harness's own todo list, which
-    cannot carry a body or criteria; those are recorded and reported by `doctor`
-    rather than refused, exactly as upstream treats them."""
+    THERE IS NO BYPASS PARAMETER HERE, DELIBERATELY. There used to be one -
+    `mirror=True` - borrowed from the create path, where it IS justified: a
+    harness's own todo list cannot carry a body or acceptance criteria, so a thin
+    CREATE is recorded and reported by `doctor` rather than refused, exactly as
+    upstream treats them.
+
+    That rationale never transferred. A status change carries no fields, so there
+    is nothing a mirror "cannot carry"; what the flag actually did was skip
+    gate_start and gate_done against the STORED record, which is the one thing
+    those gates exist to read. And it was reachable from outside: any request body
+    could set it (server.py board_write), and /api/status hard-wired it
+    (ccstore.write). So the board ran a second bypass beside its designed one,
+    with none of that one's four properties.
+
+    The designed bypass is `set_override`: it demands a reason, stamps the actor,
+    writes an audit row, and is consumed once, by one gate. Anything that must
+    move a card past a gate arms that, and is answerable for it.
+    """
     kind, row = row_for(db, key)
     vocabulary = ADR_STATUSES if kind == "adr" else STATUSES
     status = text(status, "status", 16, required=True, choices=vocabulary)
@@ -1247,7 +1262,7 @@ def set_status(db, key, status, actor=None, session=None, reason=None, mirror=Fa
     was = row["status"]
     result = {"id": key, "from": was, "to": status}
 
-    if kind == "task" and not mirror:
+    if kind == "task":
         task = entity(db, key)
         if status == "in_progress" and was != "in_progress":
             bypass = gate_start(db, task, cfg, actor)
@@ -1275,7 +1290,7 @@ def set_status(db, key, status, actor=None, session=None, reason=None, mirror=Fa
         elif was in ("blocked", "parked"):
             db.execute("UPDATE tasks SET blocked_reason=NULL,parked_reason=NULL WHERE key=?", (key,))
     _record(db, key, "status", actor, session,
-            {"from": was, "to": status, "reason": reason, "mirror": bool(mirror)})
+            {"from": was, "to": status, "reason": reason})
 
     if kind == "task":
         epic_key = entity(db, key).get("epic")

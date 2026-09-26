@@ -78,6 +78,25 @@ def ids(rows):
     return [row["id"] for row in rows]
 
 
+def force_status(db, key, status, actor="suite"):
+    """Move a fixture card without re-testing the gates on the way past.
+
+    `ccboard.set_status` used to take `mirror=True`, which skipped gate_start and
+    gate_done outright. That parameter is gone: it was also reachable from the
+    wire and hard-wired into /api/status, which made it an unlogged bypass of the
+    whole model. This suite is about `dispatchable`, not about the gates, so it
+    uses the switch `enforcing()` already reads - for the one call, and puts it
+    back immediately. A fixture that arms a real override instead would leave one
+    armed whenever the transition happened not to be refused, and it would fire
+    on whatever gate came next.
+    """
+    os.environ["CC_ENFORCE"] = "off"
+    try:
+        return ccboard.set_status(db, key, status, actor=actor)
+    finally:
+        os.environ.pop("CC_ENFORCE", None)
+
+
 # ── a board with one epic and a spread of cards ───────────────────────────────
 
 def ready_card(db, epic, title, touches=(), labels=(), priority=None):
@@ -168,12 +187,12 @@ with ccstore.connection() as db:
     ccboard.set_dep(db, waiter, blocker, True, actor="suite")
     ok("a card whose blocker is open is not offered",
        waiter not in ids(ccboard.dispatchable(db, 50)))
-    ccboard.set_status(db, blocker, "done", actor="suite", mirror=True)
+    force_status(db, blocker, "done")
     ok("the same card is offered once the blocker is done",
        waiter in ids(ccboard.dispatchable(db, 50)))
 
     section("dispatchable: a card already in flight is not offered twice")
-    ccboard.set_status(db, good, "in_progress", actor="tm-worker", mirror=True)
+    force_status(db, good, "in_progress", actor="tm-worker")
     ok("an in_progress card is not offered",
        good not in ids(ccboard.dispatchable(db, 50)))
     flight = ccboard.in_flight(db)

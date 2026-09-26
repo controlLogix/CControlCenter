@@ -147,8 +147,14 @@ else
 fi
 
 echo '--- DB round-trip (statuses must match ccstore vocabularies) ---'
-eid="$(jpost api/epics '{"title":"smoke epic","jira_key":"SMOKE-1"}' \
+epic_json="$(jpost api/epics '{"title":"smoke epic","jira_key":"SMOKE-1"}')"
+eid="$(printf '%s' "$epic_json" \
        | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')"
+# The minted key as well as the row id. /api/board/create addresses its epic by
+# key, and the vocabulary card below has to be created there rather than through
+# /api/tasks, which cannot carry acceptance criteria.
+ekey="$(printf '%s' "$epic_json" \
+       | python3 -c 'import json,sys; print(json.load(sys.stdin).get("key",""))')"
 if [ -z "$eid" ]; then
   printf '  FAIL  epic create returned no id\n'; fail=$((fail + 1))
 else
@@ -205,13 +211,49 @@ print(' '.join(re.findall(r\"'([a-z_]+)'\", m.group(1))) if m else '')
     "$(jpost api/status "{\"kind\":\"epic\",\"id\":$eid,\"status\":\"doing\"}" \
        | python3 -c 'import json,sys; print(json.load(sys.stdin).get("error",""))')"
 
-  tid="$(jpost api/tasks "{\"epic_id\":$eid,\"title\":\"vocab task\"}" \
-         | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')"
+  # The vocabulary card is FULLY SPECIFIED, and that is not incidental.
+  # /api/status runs the same gates /api/board/status runs - it is a
+  # compatibility ADDRESS, not a way past the model - so a bare-title card is
+  # refused at in_progress and again at done. This loop exists to prove the words
+  # match app.js, not to prove the gates are off, so it gives the card what the
+  # gates ask for and then walks the whole vocabulary through the old endpoint.
+  tkey="$(jpost api/board/create "{\"kind\":\"task\",\"title\":\"vocab task\",\
+\"epic\":\"$ekey\",\"body\":\"exercises every status word app.js offers\",\
+\"acceptance\":[\"every status word round-trips\"],\"actor\":\"smoke\"}" \
+          | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')"
+  check 'vocabulary card created' 'yes' \
+    "$([ -n "$tkey" ] && echo yes || echo no)"
+  jpost api/board/acceptance "{\"id\":\"$tkey\",\"index\":1,\"done\":true}" > /dev/null
+  jpost api/board/evidence "{\"id\":\"$tkey\",\"ref\":\"smoke.sh\"}" > /dev/null
   for s in $task_vocab; do
     check "task status $s accepted" "$s" \
-      "$(jpost api/status "{\"kind\":\"task\",\"id\":$tid,\"status\":\"$s\"}" \
+      "$(jpost api/status \
+          "{\"kind\":\"task\",\"key\":\"$tkey\",\"status\":\"$s\",\"actor\":\"smoke\"}" \
          | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status",""))')"
   done
+
+  # The hole this surface used to be: an unspecified card closed outright by row
+  # id, no criterion ticked, no evidence, no actor - and `mirror` on the wire
+  # doing the same thing to either endpoint. $tid is the thin card, and the
+  # delete section below reuses it.
+  tid="$(jpost api/tasks "{\"epic_id\":$eid,\"title\":\"thin card\"}" \
+         | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')"
+  check 'ungated close by row id -> 409' 409 \
+    "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' \
+        --data "{\"kind\":\"task\",\"id\":$tid,\"status\":\"done\"}" "$BASE/api/status")"
+  check 'the refusal names a remedy' 'yes' \
+    "$(jpost api/status "{\"kind\":\"task\",\"id\":$tid,\"status\":\"done\"}" \
+       | python3 -c 'import json,sys
+d = json.load(sys.stdin)
+print("yes" if d.get("missing") and all(m.get("hint") for m in d["missing"]) else "no")')"
+  check 'mirror rejected by /api/status' 400 \
+    "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' \
+        --data "{\"kind\":\"task\",\"id\":$tid,\"status\":\"done\",\"mirror\":true}" \
+        "$BASE/api/status")"
+  check 'mirror rejected by /api/board/create' 400 \
+    "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' \
+        --data "{\"kind\":\"task\",\"title\":\"x\",\"mirror\":true}" \
+        "$BASE/api/board/create")"
 
   echo '--- delete, and the cascade ---'
   check 'delete a task' 'True' \

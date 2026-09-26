@@ -30,6 +30,7 @@ Four properties are worth more than the rest, and each has a named check below:
     verb that fills it, or it is not a gate, it is an obstacle.
 """
 
+import inspect
 import json
 import os
 import sqlite3
@@ -288,6 +289,16 @@ with ccstore.connection() as db:
        err is not None and all("task new" in m["hint"] for m in err.missing))
     ok("a mirror create is exempt",
        ccboard.create(db, "task", {"title": "mirrored"}, mirror=True)["title"] == "mirrored")
+    # AND THE EXEMPTION STOPS AT CREATE. `mirror` is a create-time concession - a
+    # harness's todo list cannot carry a body or criteria - and it used to be a
+    # parameter of set_status too, where it skipped gate_start and gate_done
+    # against the stored record. A status change carries no fields, so it never
+    # had that excuse. This check is the tombstone: without it, the next reader
+    # who copies the pattern out of create() reopens a hole that was reachable
+    # from the wire and from /api/status.
+    ok("set_status has no bypass parameter at all",
+       "mirror" not in inspect.signature(ccboard.set_status).parameters,
+       sorted(inspect.signature(ccboard.set_status).parameters))
 
     work = ccboard.create(db, "task", {"title": "Add cursor pagination",
                                        "body": "what and why",
@@ -567,13 +578,59 @@ with ccstore.connection() as db:
        legacy_task["title"] == "Via the old endpoint")
     rejects("a key cannot be supplied by a request",
             lambda: ccstore.validate_write("epics", {"title": "x", "key": "EP-001"}))
+    # THE COMPATIBILITY SURFACE IS NOT A WAY PAST THE GATES. It still CREATES
+    # thin cards - that exemption is real, and upstream's - but a status change
+    # made here runs gate_start and gate_done exactly as /api/board/status does.
+    # The legacy task was created from a bare title, so it cannot start yet, and
+    # the refusal must arrive for the row-id form and the key form alike: an
+    # address format is not a permission level. The key form mattered most - it
+    # was a complete, one-request close of any card on the board.
+    err = refuses("the old endpoint cannot start a thin card by row id",
+                  lambda: ccstore.write(db, "status", ccstore.validate_write(
+                      "status", {"kind": "task", "id": legacy_task["row"],
+                                 "status": "in_progress"})),
+                  expect="not specified well enough")
+    ok("and the refusal names the remedy, as the gated path does",
+       err is not None and all(item.get("hint") for item in err.missing),
+       err.missing if err else None)
+    refuses("nor close one by key, which used to be the ungated door",
+            lambda: ccstore.write(db, "status", ccstore.validate_write(
+                "status", {"kind": "task", "key": legacy_task["key"],
+                           "status": "done"})),
+            expect="cannot close")
+    ok("and the refusals left the card where it was",
+       ccboard.entity(db, legacy_task["key"])["status"] == "open",
+       ccboard.entity(db, legacy_task["key"])["status"])
     row = ccstore.write(db, "status", ccstore.validate_write(
-        "status", {"kind": "task", "id": legacy_task["row"], "status": "in_progress"}))
-    ok("a status change by row id still works", row["status"] == "in_progress")
+        "status", {"kind": "task", "id": legacy_task["row"], "status": "blocked"}))
+    ok("an ungated transition still works by row id", row["status"] == "blocked")
     ok("and the response carries the key", row["key"] == legacy_task["key"])
+
+    # Fill the record the way the remedy said to, and the SAME endpoint moves it.
+    # A gate that cannot be satisfied through the surface that hit it is a wall.
+    ccboard.update(db, legacy_task["key"], {"body": "what and why"})
+    ccboard.add_acceptance(db, legacy_task["key"], "the check that closes it")
     row = ccstore.write(db, "status", ccstore.validate_write(
-        "status", {"kind": "task", "key": legacy_task["key"], "status": "blocked"}))
-    ok("a status change by key works too", row["status"] == "blocked")
+        "status", {"kind": "task", "id": legacy_task["row"],
+                   "status": "in_progress", "actor": "suite"}))
+    ok("a status change by row id works once the card is specified",
+       row["status"] == "in_progress")
+    ok("the legacy endpoint carries the actor through to the row",
+       row["actor"] == "suite", row["actor"])
+    ok("and the history attributes the change rather than dropping it",
+       any(event["event"] == "status" and event.get("actor") == "suite"
+           for event in ccboard.history(db, legacy_task["key"])))
+    ccboard.tick_acceptance(db, legacy_task["key"], 1)
+    ccboard.add_evidence(db, legacy_task["key"], "suite.log")
+    row = ccstore.write(db, "status", ccstore.validate_write(
+        "status", {"kind": "task", "key": legacy_task["key"], "status": "done"}))
+    ok("a status change by key closes it once the gate is satisfied",
+       row["status"] == "done")
+    rejects("mirror is not a field the compatibility surface accepts",
+            lambda: ccstore.validate_write("status", {"kind": "task",
+                                                      "key": legacy_task["key"],
+                                                      "status": "done",
+                                                      "mirror": True}))
     rejects("an epic key is refused where a task key is required",
             lambda: ccstore.validate_write("status", {"kind": "task",
                                                       "key": legacy_epic["key"],
@@ -661,6 +718,49 @@ ok("POST /api/board/evidence attaches proof", status == 200)
 status, done = call("/api/board/status", {"id": HTTP_TASK, "status": "done",
                                           "actor": "suite"})
 ok("the task closes once the record is complete", status == 200 and done["to"] == "done")
+
+# ── the two bypasses that were not bypasses ──────────────────────────────────
+#
+# `mirror` used to be read straight off the request body, so ONE POST closed any
+# card with no criterion ticked and no evidence, leaving `{"mirror": true}` in the
+# history as the only trace. /api/status hard-wired the same skip and dropped the
+# actor besides, so `agentmux task done 7` beat the gate that `agentmux task done
+# TM-007` enforced. Both are checked over the wire, not only in Python, because
+# the wire is where the hole was.
+status, refused = call("/api/board/create", {"kind": "task", "title": "mirror over http",
+                                             "epic": epic["id"], "mirror": True})
+ok("POST /api/board/create refuses a wire `mirror`", status == 400, (status, refused))
+ok("and the refusal names the audited bypass to use instead",
+   "override" in str(refused.get("error", "")), refused)
+
+status, guarded = call("/api/board/create", {"kind": "task", "title": "guarded over http",
+                                             "body": "why", "acceptance": ["a check"],
+                                             "epic": epic["id"], "actor": "suite"})
+GUARDED = guarded.get("id")
+ok("a guarded card exists to try the bypasses against", status == 200 and GUARDED, guarded)
+
+status, refused = call("/api/board/status", {"id": GUARDED, "status": "done",
+                                             "actor": "suite", "mirror": True})
+ok("POST /api/board/status refuses a wire `mirror`", status == 400, (status, refused))
+status, detail = call("/api/board/entity?id=" + GUARDED)
+ok("and the card did not close behind the refusal", detail["status"] != "done",
+   detail.get("status"))
+
+status, refusal = call("/api/status", {"kind": "task", "key": GUARDED, "status": "done"})
+ok("the legacy /api/status answers 409 to an ungated close, not 200",
+   status == 409, (status, refusal))
+ok("and it carries the same remedy the board endpoint carries",
+   refusal.get("missing") and all(item.get("hint") for item in refusal["missing"]),
+   refusal)
+status, detail = call("/api/board/entity?id=" + GUARDED)
+ok("the legacy surface did not close it either", detail["status"] != "done",
+   detail.get("status"))
+status, _ = call("/api/status", {"kind": "task", "key": GUARDED,
+                                 "status": "in_progress", "actor": "suite"})
+ok("the legacy surface still makes the moves it is allowed to make", status == 200, status)
+status, rejected = call("/api/status", {"kind": "task", "key": GUARDED,
+                                        "status": "done", "mirror": True})
+ok("`mirror` is not a field /api/status accepts", status == 400, (status, rejected))
 
 status, answer = call("/api/board/why?id=" + HTTP_TASK)
 ok("GET /api/board/why answers", status == 200 and answer["id"] == HTTP_TASK)

@@ -914,10 +914,14 @@ def cmd_task_status(args):
         print(f"coordination: {err}", file=sys.stderr)
         return 2
     if isinstance(target, int):
-        # The row-id form predates keys and has no gated endpoint; it stays on
-        # the compatibility surface so `agentmux task done 7` keeps working.
+        # The row-id form predates keys and stays on the compatibility surface so
+        # `agentmux task done 7` keeps working - but that surface is GATED now,
+        # and it carries the actor. The two forms used to disagree: this one
+        # closed a card that `agentmux task done TM-007` refused, which made the
+        # gate a function of how the caller happened to spell the address.
         row = board_call("POST", "status", {"kind": "task", "id": target,
-                                            "status": args.status})
+                                            "status": args.status,
+                                            "actor": args.agent or None})
         if row is None:
             return 1
         key, title = row["key"], row.get("title", "")
