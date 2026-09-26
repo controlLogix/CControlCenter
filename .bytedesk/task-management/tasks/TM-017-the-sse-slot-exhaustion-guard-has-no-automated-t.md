@@ -1,12 +1,12 @@
 ---
 id: "TM-017"
 kind: "task"
-status: "open"
+status: "done"
 created: "2026-09-25T16:34:45.378Z"
 board: "controllogix/ccontrolcenter"
 title: "The SSE slot-exhaustion guard has no automated test"
 epic: "EP-002"
-acceptance: [{"text":"run_tests.sh or the docs state explicitly that test_stream_slots.sh is an operator command and why it cannot run in the gate, so its absence is not read as an oversight","done":true,"at":"2026-09-26T01:08:47.714Z"},{"text":"An automated test exercises the one-stream-per-agent rule against the e2e harness's ephemeral-port dashboard","done":false},{"text":"The test fails if STREAM_SLOTS or stream_superseded is reverted, proven against a base where the bug was present","done":true,"at":"2026-09-26T01:08:47.923Z"},{"text":"Repeated page loads across several agents leave every stream available, which is the property the manual suite asserts today","done":true,"at":"2026-09-26T01:08:48.173Z"}]
+acceptance: [{"text":"run_tests.sh or the docs state explicitly that test_stream_slots.sh is an operator command and why it cannot run in the gate, so its absence is not read as an oversight","done":true,"at":"2026-09-26T01:08:47.714Z"},{"text":"An automated test exercises the one-stream-per-agent rule against the e2e harness's ephemeral-port dashboard","done":true,"at":"2026-09-26T02:10:31.962Z"},{"text":"The test fails if STREAM_SLOTS or stream_superseded is reverted, proven against a base where the bug was present","done":true,"at":"2026-09-26T01:08:47.923Z"},{"text":"Repeated page loads across several agents leave every stream available, which is the property the manual suite asserts today","done":true,"at":"2026-09-26T01:08:48.173Z"}]
 evidence: [".bytedesk\\task-management\\evidence\\TM-017-1790384840099.log"]
 commits: ["7726d71"]
 blockedBy: []
@@ -14,8 +14,10 @@ blocks: []
 session: "5748a917-ba3c-4a23-9c48-424b6c04104f"
 labels: ["ready-for-agent"]
 triagedBy: "human"
-updated: "2026-09-26T01:09:14.184Z"
+updated: "2026-09-26T02:12:07.028Z"
 evidenceSources: {".bytedesk\\task-management\\evidence\\TM-017-1790384840099.log":{"source":null,"sha256":"539c3f1c462e2b22fd80e48a9df0db48a872b510d65269ea0fc3aa3ffe01638c","bytes":3317,"at":"2026-09-26T01:07:20.100Z"}}
+assignee: "main"
+closed: "2026-09-26T02:12:06.927Z"
 ---
 
 Found 2026-09-25 by cross-checking which suites the gate registers against which exist on disk.
