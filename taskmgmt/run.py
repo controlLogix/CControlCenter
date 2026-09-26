@@ -354,8 +354,18 @@ def approval_drift(run_id, repo=None):
         return None
     pinned = record.get("files") or {}
     current = digest(str(repo or REPO_ROOT), sorted(pinned))
+    # "missing" IS NOT A HASH, so it must never compare equal to one.
+    #
+    # digest() records the string "missing" when it cannot read a file. When the
+    # approval was written from one directory and this check runs from another - a
+    # submit whose --repo was not set, so the worker hashed relative to its own pane
+    # while the dashboard hashes relative to REPO_ROOT - both sides produce "missing",
+    # "missing" == "missing", and the guard reports no drift. Measured on run 2abade:
+    # the approval pinned {"test_animate.py": "missing"} for a file that existed the
+    # whole time, and the file could then have been rewritten wholesale without this
+    # ever firing. A guard that cannot see the bytes must say so, not pass.
     return tuple(sorted(name for name, was in pinned.items()
-                        if current.get(name) != was))
+                        if was == "missing" or current.get(name) != was))
 
 
 def approval_blocks_completion(run_id, repo=None, agent=None):
@@ -391,6 +401,17 @@ def approval_blocks_completion(run_id, repo=None, agent=None):
                   " decision.")
     drift = approval_drift(run_id, repo)
     if drift:
+        # Two different failures wear the same word, and conflating them sends the
+        # operator looking for an edit that never happened.
+        blind = sorted(n for n in drift if (record.get("files") or {}).get(n) == "missing")
+        if blind:
+            return (f"the approval could not read {len(blind)} of the file(s) it "
+                    f"covers: {', '.join(blind[:6])}"
+                    + ("" if len(blind) <= 6 else f" (+{len(blind) - 6} more)")
+                    + f"\n  Looked under {repo or REPO_ROOT}. If the work is outside "
+                      "that tree, submit it with --repo pointing at the tree it\n  "
+                      "actually lives in, so the approval pins real bytes rather than "
+                      "the absence of them.")
         return (f"{len(drift)} file(s) changed after the operator approved this run: "
                 f"{', '.join(drift[:6])}"
                 + ("" if len(drift) <= 6 else f" (+{len(drift) - 6} more)")
@@ -1257,8 +1278,20 @@ def cmd_complete(args):
         print(line)
     if report:
         print(f"  forced report: {report}")
-    print("  agents are still running - tear them down with: "
-          f"agentmux run teardown {args.run}")
+    # SAY THIS ONLY WHEN IT IS BOTH TRUE AND USEFUL.
+    #
+    # It was printed unconditionally, so a run whose agents were never live - or had
+    # already died - still told you to go and kill them. And now that agentmux.sh runs
+    # the teardown itself immediately after this returns, telling the operator to do
+    # the thing that is about to happen is noise, which is how a message stops being
+    # read. The shell sets AGENTMUX_WILL_TEARDOWN when it is handling it.
+    mine = {row[role] for row in state["jobs"].values()
+            for role in ("worker", "reviewer") if row.get(role)}
+    live = sorted(mine & set(coordination.live_agents()))
+    if live and os.environ.get("AGENTMUX_WILL_TEARDOWN") != "1":
+        print(f"  {len(live)} agent(s) from this run still running "
+              f"({', '.join(live)}) - close them with: "
+              f"agentmux run teardown {args.run}")
     return 0
 
 

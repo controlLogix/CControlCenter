@@ -390,6 +390,42 @@ else
   bad "drifted approval still completed (rc=$rc): $out"
 fi
 
+# AN APPROVAL THAT COULD NOT READ THE BYTES IT COVERS MUST SAY SO.
+#
+# digest() writes the string "missing" when it cannot open a file, and the drift check
+# compared that string like a hash - so "missing" == "missing" and the guard reported
+# no drift at all. Measured on a real run: the approval pinned
+# {"test_animate.py": "missing"} for a file that existed the whole time, because the
+# worker submitted without --repo (hashing relative to its own pane) while the
+# dashboard hashed relative to REPO_ROOT. The file could then have been rewritten
+# wholesale and completion would still have been allowed. A guard that cannot see the
+# bytes has to refuse, not pass.
+rblind=$($RUN start 'approval that cannot read its files' 2>/dev/null)
+jblind=$($RUN assign "$rblind" --worker blind-w --reviewer blind-r 2>/dev/null)
+$RUN submit "$jblind" --by blind-w --files 'nowhere-near-this-repo.py' --summary done >/dev/null 2>&1
+$RUN verdict "$jblind" --by blind-r --pass --reason fine >/dev/null 2>&1
+python3 - "$rblind" <<'PYBLIND'
+import sys
+sys.path.insert(0, 'taskmgmt')
+import run
+run.write_approval(sys.argv[1], 'operator', 'looks right', 'approved')
+PYBLIND
+grep -q '"nowhere-near-this-repo.py": "missing"' "$HOME_DIR/runs/$rblind/APPROVAL.json" \
+  && ok 'an unreadable file is pinned as "missing"' \
+  || bad 'expected the approval to pin "missing" for an unreadable file'
+out=$($RUN complete "$rblind" 2>&1); rc=$?
+if [ $rc -ne 0 ] && [[ "$out" == *"could not read"* ]]; then
+  ok 'an approval that cannot read its files refuses to complete'
+else
+  bad "unreadable approval completed anyway (rc=$rc): $out"
+fi
+# and it must name the real problem, not invent an edit that never happened
+if [[ "$out" == *"changed after the operator approved"* ]]; then
+  bad 'reported an unreadable file as a changed one'
+else
+  ok 'and does not report it as a change that never happened'
+fi
+
 # A run nobody reviewed by hand still completes. This gate refuses a decision that was
 # MADE and defied; it does not demand a browser click from someone completing their
 # own run at a terminal - they are the approval.

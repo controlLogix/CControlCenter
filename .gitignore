@@ -75,3 +75,8 @@ docs/vendor/*.pdf
 # image one day, and a rule that silently swallows it is worse than this one.
 .playwright-mcp/
 /*.png
+
+# Per-machine Claude Code permission state, written when an approval is granted here.
+# It is local config, not repo content, and committing it pushes one machine's
+# allowlist onto everyone who clones.
+.claude/settings.local.json

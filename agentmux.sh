@@ -1295,7 +1295,28 @@ cmd_run() {
     submit)   python3 "$(run_py)" submit "${1:-${AGENTMUX_JOB:-}}" --by "$me" "${@:2}" ;;
     verdict)  python3 "$(run_py)" verdict "$@" --by "$me" ;;
     status)   python3 "$(run_py)" status "$@" ;;
-    complete) python3 "$(run_py)" complete "$@" --by "$me" ;;
+    complete)
+      # CLOSE THE AGENTS THE RUN JUST FINISHED WITH.
+      #
+      # complete already detects them and prints "agents are still running - tear them
+      # down with: agentmux run teardown <run>" - and then nothing did it, so a pair of
+      # agents whose every job was verified sat at their prompts for the full 60-minute
+      # idle watchdog. Do the thing it recommends.
+      #
+      # Safe to do automatically because cmd_run_teardown takes the agent names from
+      # THIS run's ledger, so no other run's agent and none of the operator's own is
+      # touched. AGENTMUX_KEEP_AGENTS=1 keeps them when you want to read the panes.
+      local run_id="${1:-}"
+      # Tell run.py to skip its "close them yourself" line: we are about to.
+      local will=""
+      [ "${AGENTMUX_KEEP_AGENTS:-}" = "1" ] || will=1
+      AGENTMUX_WILL_TEARDOWN="$will" python3 "$(run_py)" complete "$@" --by "$me" || return $?
+      if [ "${AGENTMUX_KEEP_AGENTS:-}" = "1" ]; then
+        printf '  agents kept (AGENTMUX_KEEP_AGENTS=1); close them with: agentmux run teardown %s\n' "$run_id"
+      else
+        cmd_run_teardown "$run_id"
+      fi
+      ;;
     teardown) cmd_run_teardown "$@" ;;
     *) die "run: start|assign|submit|verdict|status|complete|teardown" ;;
   esac
