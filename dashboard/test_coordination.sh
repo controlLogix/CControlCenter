@@ -393,5 +393,41 @@ else
   bad "identity: liveness guard failed (rc=$rc: $out)"
 fi
 
+echo '--- a mistyped key is a refusal, not a traceback ---'
+# need_key() raises BoardError for anything that is neither a board key nor a row
+# id, and it is called INSIDE the argument list of sixteen verbs. Exactly one of
+# them, cmd_task_status, wrapped it. Everywhere else a typo ended in a Python
+# traceback and exit 1 - a stack trace is not a message to a person, and exit 1 is
+# the code a refusal shares with a genuine failure.
+#
+# These run against the unreachable dashboard above on purpose: need_key refuses
+# before any request, so the check is about the refusal and nothing else.
+for verb in task-show task-why; do
+  out=$($CO "$verb" notakey 2>&1); rc=$?
+  if [ "$rc" = 2 ] && [[ "$out" == *'not a board key: notakey'* ]] && [[ "$out" != *Traceback* ]]; then
+    ok "keys: $verb says what is wrong with a mistyped key"
+  else
+    bad "keys: $verb (rc=$rc) $(printf '%s' "$out" | tail -1)"
+  fi
+done
+
+out=$($CO task-why EP-001 2>&1); rc=$?
+if [ "$rc" = 2 ] && [[ "$out" == *'EP-001 is not a TM key'* ]] && [[ "$out" != *Traceback* ]]; then
+  ok 'keys: a real key of the wrong kind is named as such'
+else
+  bad "keys: wrong-kind key (rc=$rc) $(printf '%s' "$out" | tail -1)"
+fi
+
+# The handler must not turn every failure into a refusal. A WELL-FORMED key still
+# reaches the board, and the board being unreachable is a different answer.
+out=$($CO task-show TM-001 2>&1); rc=$?
+if [ "$rc" = 2 ] && [[ "$out" == *'not a board key'* ]]; then
+  bad "keys: a valid key was refused instead of attempted (rc=$rc: $(printf '%s' "$out" | tail -1))"
+elif [[ "$out" == *Traceback* ]]; then
+  bad 'keys: a valid key against an unreachable board produced a traceback'
+else
+  ok 'keys: a well-formed key is still taken to the board'
+fi
+
 finish
 [ "$fail" -eq 0 ] || exit 1

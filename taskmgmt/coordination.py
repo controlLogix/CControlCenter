@@ -1675,6 +1675,24 @@ def main(argv=None):
     except TmuxUnavailable as err:
         print(str(err), file=sys.stderr)
         return 2
+    except BoardError as err:
+        # ONE HANDLER RATHER THAN SEVENTEEN.
+        #
+        # need_key raises BoardError for anything that is neither a board key nor a
+        # row id, and it is called inside the argument list of most task verbs -
+        # task-show, task-edit, task-ac, task-label, task-dep, task-attach,
+        # task-comment, task-link, task-assign, task-move, history and the rest.
+        # Exactly one of them, cmd_task_status, wrapped it. Everywhere else a typo
+        # printed a Python traceback: `agentmux task label wrongkey x` ended in
+        # BoardError rather than "not a board key: wrongkey".
+        #
+        # Catching it per-verb would be seventeen copies of the same four lines and a
+        # standing invitation to forget the eighteenth. The verbs all reach the board
+        # through the same call, so the refusal belongs at the same call.
+        print(f"coordination: {err}", file=sys.stderr)
+        for item in getattr(err, "missing", None) or []:
+            print(f"  fix: {item.get('hint', '')}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":
