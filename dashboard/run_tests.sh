@@ -171,8 +171,28 @@ run() {
        # first meant a failing .py suite reported the bare word FAILED and nothing
        # else - you could see THAT it broke and never WHAT broke, which is how the
        # last person to hit this ended up bisecting by hand.
-       if printf '%s\n' "$out" | grep -E '^[[:space:]]+FAIL'; then :; else
-         printf '%s\n' "$out" | grep -E '^(FAIL|ERROR):' -A 12 | head -40
+       local detail kept
+       detail="$(printf '%s\n' "$out" | grep -E '^[[:space:]]+FAIL' || true)"
+       [ -n "$detail" ] || detail="$(printf '%s\n' "$out" | grep -E '^(FAIL|ERROR):' -A 12 | head -40 || true)"
+       if [ -n "$detail" ]; then
+         printf '%s\n' "$detail"
+       else
+         # NEITHER MARKER, which is a real and worse case. A suite can die without
+         # ever printing an assertion failure. test_e2e.sh did exactly that: the
+         # gate reported
+         #     test_e2e.sh      agentmux dashboard: http://127.0.0.1:38590
+         # as the entire diagnosis, because that URL was simply the last line the
+         # suite managed to print. Neither pattern matched, so nothing else was
+         # shown - and cleanup then removed $TEST_ROOT, taking suite.out, the only
+         # copy of the output, with it. One line and no evidence.
+         printf '  no FAIL line; last 30 lines of the output:\n'
+         printf '%s\n' "$out" | tail -30 | sed 's/^/  | /'
+       fi
+       # And keep the whole thing somewhere cleanup does not reach, because the
+       # tail above is a guess about where the interesting part was.
+       kept="${TMPDIR:-/tmp}/agentmux-gate-fail-$$-$label.out"
+       if printf '%s\n' "$out" > "$kept" 2>/dev/null; then
+         printf '  full output: %s\n' "$kept"
        fi ;;
 
   esac
