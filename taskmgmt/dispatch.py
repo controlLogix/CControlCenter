@@ -877,8 +877,13 @@ def pool_loop():
     pool off should not require finding and killing a process."""
     write_state({"startedAt": now(), "failures": 0, "paused": False})
     idle_since = time.time()
+    # ONCE, BEFORE THE LOOP, not on every tick. Rewriting it each pass was the second
+    # half of the start race: two loops took turns owning the file, so pool_alive()
+    # reported whichever had written most recently and pool_stop killed that one,
+    # leaving the other dispatching with no pid naming it. Writing once keeps a
+    # directly-invoked `dispatch.py pool run-loop` discoverable without the fight.
+    POOL_PID.write_text(str(os.getpid()), encoding="utf-8")
     while True:
-        POOL_PID.write_text(str(os.getpid()), encoding="utf-8")
         state = read_state()
         result = pool_once()
         if result.get("error"):
@@ -905,18 +910,78 @@ def pool_loop():
 
 
 def pool_start():
-    existing = pool_alive()
-    if existing:
-        return "pool already running (pid %d)" % existing
-    DISPATCH_DIR.mkdir(parents=True, exist_ok=True)
-    handle = POOL_LOG.open("a", encoding="utf-8")
-    process = subprocess.Popen(
-        [sys.executable, str(Path(__file__).resolve()), "pool", "run-loop"],
-        stdout=handle, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
-        start_new_session=True)
-    POOL_PID.write_text(str(process.pid), encoding="utf-8")
-    return "pool started (pid %d), log %s" % (process.pid, POOL_LOG)
+    """Start the detached loop, exactly once.
 
+    THIS WAS CHECK-THEN-ACT, AND courier.py ALREADY CARRIED THE FIX FOR IT.
+
+    pool_alive() was consulted, then Popen ran, then the pid was written - seconds
+    apart. Two `pool start` calls, or an auto-start racing a manual one, both saw no
+    pool, both spawned, and the second write clobbered the first. The courier's own
+    pidfile comment describes the identical race: "two parallel spawns both see 'not
+    running' and both launch one... EVERY MESSAGE IS DELIVERED TWICE."
+
+    Here it is worse than duplicate delivery: both loops call pool_once ->
+    dispatch_one on the same ready card, so one card gets two worktrees and two
+    agents, and pool_stop kills only whichever pid the file happens to hold.
+
+    THE FIRST ATTEMPT AT THIS FIX WAS ALSO WRONG, AND TEN CONCURRENT STARTS SAID SO.
+    Claiming with O_CREAT|O_EXCL and writing the child pid AFTER Popen leaves the
+    file briefly EMPTY. pool_alive() cannot parse an empty file, returns None, and
+    every loser reads that as a stale pidfile, unlinks it and claims again - eight of
+    ten starts won. The window shrank from seconds to microseconds and the bug
+    survived, which is the whole reason the concurrent case gets a test.
+
+    So the pidfile is never empty while claimed: our own pid goes in the instant the
+    claim succeeds, and it stays there until the child's pid replaces it. A loser
+    then reads a live pid and stands down. And the takeover path distinguishes the
+    two reasons pool_alive() says None - an unreadable file is a claim in progress
+    and must be respected; only a parseable pid that is genuinely gone is stale.
+    """
+    DISPATCH_DIR.mkdir(parents=True, exist_ok=True)
+
+    def claim():
+        fd = os.open(POOL_PID, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+        # Ours immediately, so the file is never a readable-but-empty invitation.
+        os.write(fd, str(os.getpid()).encode())
+        return fd
+
+    try:
+        fd = claim()
+    except FileExistsError:
+        existing = pool_alive()
+        if existing:
+            return "pool already running (pid %d)" % existing
+        try:
+            held = POOL_PID.read_text(encoding="utf-8").strip()
+        except OSError:
+            held = ""
+        if not held.isdigit():
+            # Empty or half-written: another starter is claiming right now. Taking it
+            # over is exactly the bug above.
+            return "another pool start is claiming the pidfile"
+        POOL_PID.unlink(missing_ok=True)
+        try:
+            fd = claim()
+        except (OSError, FileExistsError):
+            return "another pool start won the race"
+
+    try:
+        handle = POOL_LOG.open("a", encoding="utf-8")
+        process = subprocess.Popen(
+            [sys.executable, str(Path(__file__).resolve()), "pool", "run-loop"],
+            stdout=handle, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+            start_new_session=True)
+    except BaseException:
+        # Never leave a claimed pidfile behind for a pool that did not start.
+        os.close(fd)
+        POOL_PID.unlink(missing_ok=True)
+        raise
+
+    os.ftruncate(fd, 0)
+    os.lseek(fd, 0, os.SEEK_SET)
+    os.write(fd, str(process.pid).encode())
+    os.close(fd)
+    return "pool started (pid %d), log %s" % (process.pid, POOL_LOG)
 
 def pool_stop():
     pid = pool_alive()
