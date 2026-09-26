@@ -865,6 +865,66 @@ async function withRoster(target, names) {
   });
 }
 
+await test('a board refresh does not eat a half-typed task', async () => {
+  // TM-031's root cause, made deterministic.
+  //
+  // loadBoard() rebuilds the list with replaceChildren(), which used to destroy
+  // the add-task inputs along with everything else. The add-task title is the
+  // only uncommitted free text on this board, so dropping it loses the only
+  // copy - and submit() then returned SILENTLY on the empty title, so the click
+  // that followed did nothing and said nothing.
+  //
+  // Under gate load that refresh landed between typing and clicking often
+  // enough to look like a flaky test. It is not flaky; it is a person losing
+  // what they typed. Forcing the refresh turns a race into an assertion.
+  await show('board');
+  await tab('board', 'boardtasks');
+  const epic = await page.$eval('#boardList details.epic[data-epic]', (n) => n.dataset.epic);
+  await page.$eval(`#boardList details.epic[data-epic="${epic}"]`, (n) => { n.open = true; });
+  const titleSel = `#boardList details.epic[data-epic="${epic}"] input[placeholder="new task"]`;
+  const agentSel = `#boardList details.epic[data-epic="${epic}"] input[placeholder="agent"]`;
+  const half = 'half typed, do not eat me';
+  await page.fill(titleSel, half);
+  await page.fill(agentSel, 'someone');
+
+  // Leaving and returning to the panel re-runs loadBoard - the same rebuild.
+  await tab('board', 'tickets');
+  await tab('board', 'boardtasks');
+  await waitFor(page, ([key]) => {
+    const card = document.querySelector(`#boardList details.epic[data-epic="${key}"]`);
+    if (card && !card.open) card.open = true;
+    return !!card?.querySelector('input[placeholder="new task"]');
+  }, [epic], {
+    describe: ([key]) => {
+      const card = document.querySelector(`#boardList details.epic[data-epic="${key}"]`);
+      return card ? `card present, inputs=${card.querySelectorAll('input').length}`
+                  : 'the epic card did not come back';
+    },
+  });
+
+  assert.equal(await page.inputValue(titleSel), half,
+               'the half-typed title survived a board refresh');
+  assert.equal(await page.inputValue(agentSel), 'someone',
+               'and so did the agent beside it');
+});
+
+await test('an add with no title says so rather than doing nothing', async () => {
+  // The second half of the same bug. A button that does nothing and says
+  // nothing is indistinguishable from a broken one - which is exactly how the
+  // refresh above stayed invisible for a day.
+  await show('board');
+  await tab('board', 'boardtasks');
+  const epic = await page.$eval('#boardList details.epic[data-epic]', (n) => n.dataset.epic);
+  await page.$eval(`#boardList details.epic[data-epic="${epic}"]`, (n) => { n.open = true; });
+  await page.fill(`#boardList details.epic[data-epic="${epic}"] input[placeholder="new task"]`, '');
+  await page.click(`#boardList details.epic[data-epic="${epic}"] button:has-text("add task")`);
+  await waitFor(page, () => (document.getElementById('boardStamp')?.textContent || '')
+                              .toLowerCase().includes('title'), null, {
+    timeout: 10000,
+    describe: () => `boardStamp said: ${document.getElementById('boardStamp')?.textContent}`,
+  });
+});
+
 await test('a running agent is marked and a finished one is not', async () => {
   // Two tasks on the board, one assigned to each name.
   await show('board');

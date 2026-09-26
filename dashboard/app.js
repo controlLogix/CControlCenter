@@ -3036,6 +3036,37 @@ async function loadBoard() {
     const epicKeys = new Set(epics.map((e) => e.key));
     const ungrouped = allTasks.filter((t) => !epicKeys.has(t.epic));
     const groups = ungrouped.length ? [...epics, { title: 'Tasks without an epic' }] : epics;
+
+    // A refresh must not discard what someone is in the middle of typing.
+    //
+    // The add-task inputs are the only free text on this board that is not
+    // committed anywhere yet, so a rebuild that drops them loses the only copy
+    // - and because submit() used to return silently on an empty title, the
+    // click that followed did nothing and said nothing. That is the whole of
+    // TM-031: under load this refresh lands between typing the title and
+    // pressing the button often enough to look like a flaky test, and for a
+    // person it looks like the button not working.
+    //
+    // kanban.js:197 already records the same rule for the detail drawer: "A
+    // slow board refresh must not silently discard the next edit made to the
+    // newly rendered entity." Same rule, different surface.
+    const pendingAdds = new Map();
+    const focused = document.activeElement;
+    let refocus = null;
+    for (const card of els.boardList.querySelectorAll('details.epic[data-epic]')) {
+      const titleInput = card.querySelector('input[placeholder="new task"]');
+      const agentInput = card.querySelector('input[placeholder="agent"]');
+      if (!titleInput && !agentInput) continue;
+      const held = { title: titleInput?.value || '', agent: agentInput?.value || '' };
+      if (held.title || held.agent) pendingAdds.set(card.dataset.epic, held);
+      // Keep the caret where the person left it, or restoring the text just
+      // moves the annoyance rather than removing it.
+      if (focused === titleInput) refocus = { epic: card.dataset.epic, field: 'title' };
+      else if (focused === agentInput) refocus = { epic: card.dataset.epic, field: 'agent' };
+    }
+    const selection = (refocus && typeof focused.selectionStart === 'number')
+      ? [focused.selectionStart, focused.selectionEnd] : null;
+
     els.boardList.replaceChildren();
     if (!groups.length) els.boardList.appendChild(el('p', 'empty', 'No epics yet. Add one above.'));
 
@@ -3156,8 +3187,19 @@ async function loadBoard() {
       agent.size = 7;
       const btn = el('button', 'btn', 'add task');
       btn.type = 'button';
+      // Whatever was being typed here before the last refresh, put it back.
+      const held = pendingAdds.get(e.key || '');
+      if (held) { title.value = held.title; agent.value = held.agent; }
       const submit = async () => {
-        if (!title.value.trim()) return;
+        if (!title.value.trim()) {
+          // This used to `return` with no word to anybody. A button that does
+          // nothing and says nothing is indistinguishable from a broken one,
+          // and it is how a refresh that ate the title looked like a flake for
+          // a day. TM-031.
+          say(els.boardStamp, 'A task needs a title.');
+          title.focus();
+          return;
+        }
         btn.disabled = true;
         try {
           await post('api/tasks', {
@@ -3175,6 +3217,18 @@ async function loadBoard() {
       els.boardList.appendChild(card);
     }
     applyBoardFree();
+    // Put the caret back where it was, after the whole list exists - doing it
+    // per card would focus an element that a later appendChild then replaces.
+    if (refocus) {
+      const placeholder = refocus.field === 'title' ? 'new task' : 'agent';
+      const card = els.boardList.querySelector(
+        `details.epic[data-epic="${CSS.escape(refocus.epic)}"]`);
+      const input = card?.querySelector(`input[placeholder="${placeholder}"]`);
+      if (input) {
+        input.focus();
+        if (selection) { try { input.setSelectionRange(selection[0], selection[1]); } catch (_) {} }
+      }
+    }
     refreshLiveMarks(els.boardList);
     say(els.boardStamp, `${epics.length} epic${epics.length === 1 ? '' : 's'}`
       + `, ${allTasks.length} task${allTasks.length === 1 ? '' : 's'}`);
