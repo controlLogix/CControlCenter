@@ -26,6 +26,20 @@ person, a card that has been parked after three failed reviews, an agent that di
 mid-job, and a whole orchestration finishing. Not per-job progress, not spawns, not
 passing verdicts. A notification you did not need is annoying in a way that accumulates,
 and the cost of that is the ones you do need being ignored.
+
+NO CHILD SPAWNED HERE MAY INHERIT STDIN. Every subprocess below passes stdin= - either
+DEVNULL or a pipe via input= - and none may be written without it. subprocess gives a
+child the PARENT's stdin when the argument is omitted, and capture_output=True does not
+change that: it redirects 1 and 2 only. That default ate a caller alive. Scripts here
+are fed to bash on stdin (`bash -s`, and `wsl.py run`, which is the mandated way to
+reach WSL from Windows); bash reading a non-seekable stdin consumes one line at a time
+precisely so a child CAN read the rest, so powershell.exe drew its toast and then read
+the remainder of the script to EOF. Bash saw end-of-input and exited 0 with half the
+script never run - a run-lifecycle script died immediately after the verdict that fires
+the "waiting on your review" notice, twice, and looked like a clean success both times.
+A notification that silently truncates the work that triggered it is the exact inversion
+of this module's one rule: the notification is never the record, and it is never the
+event either.
 """
 import json
 import os
@@ -114,6 +128,9 @@ def toast(subject, body, urgency="info"):
         proc = subprocess.run(
             [shell, "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
              "-Command", TOAST_SCRIPT],
+            # DEVNULL, never inherited - see "NO CHILD SPAWNED HERE MAY INHERIT STDIN".
+            # This call site is the one that was measured eating a caller's script.
+            stdin=subprocess.DEVNULL,
             capture_output=True, text=True, timeout=TOAST_TIMEOUT_S, errors="replace",
             env=env)
     except subprocess.TimeoutExpired:
@@ -229,6 +246,9 @@ def tmux_status(target, subject, socket="agentmux"):
     try:
         check = subprocess.run(
             ["tmux", "-L", socket, "list-panes", "-t", target, "-F", "#{pane_id}"],
+            # Same rule as the toast: tmux has not been caught reading stdin, but the
+            # defect is the missing argument, not the program that exploits it.
+            stdin=subprocess.DEVNULL,
             capture_output=True, text=True, timeout=10, errors="replace")
     except (OSError, subprocess.SubprocessError) as err:
         return False, f"tmux could not be reached ({type(err).__name__})"
@@ -239,6 +259,7 @@ def tmux_status(target, subject, socket="agentmux"):
         proc = subprocess.run(
             ["tmux", "-L", socket, "display-message", "-t", target, "--",
              one_line(f"agentmux: {subject}", 160)],
+            stdin=subprocess.DEVNULL,
             capture_output=True, text=True, timeout=10, errors="replace")
     except (OSError, subprocess.SubprocessError) as err:
         return False, f"tmux could not be reached ({type(err).__name__})"

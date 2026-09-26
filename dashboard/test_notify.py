@@ -16,6 +16,7 @@ import json
 import os
 import shutil
 import stat
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -263,6 +264,131 @@ class TestTerminalChannelIsNeverInput(NotifyBase):
         source = Path(notify.__file__).read_text(encoding="utf-8")
         self.assertIn("list-panes", source,
                       "resolution must not rest on display-message's exit code")
+
+
+# ── no channel may eat the caller's stdin ────────────────────────────────────
+
+class TestNoChannelEatsTheCallersStdin(NotifyBase):
+    """THE BUG THESE CAUGHT, AND WHY IT IS ASSERTED BEHAVIOURALLY.
+
+    subprocess hands a child the PARENT's stdin when stdin= is omitted, and
+    capture_output=True does not change that - it redirects 1 and 2 only. Scripts here
+    are fed to bash on stdin (`bash -s`, and the wsl.py path that is the mandated way to
+    reach WSL from Windows), and bash reading a non-seekable stdin consumes one line at a
+    time precisely so a child CAN read the rest. So powershell.exe drew its toast and
+    then read the remainder of the script to EOF; bash saw end-of-input and exited 0 with
+    half the script never run. Measured twice: a run-lifecycle script died immediately
+    after the verdict that fires the "waiting on your review" notice, and looked like a
+    clean success both times.
+
+    Asserting the kwarg is present is the weak version and it is the last test here.
+    These three build the real shape - a script on a pipe, bash reading it, a notify call
+    in the middle, and a line AFTER the call that must still run - because that is the
+    property, and because a future channel could reintroduce the fault by some other
+    route than a missing keyword.
+    """
+
+    MARKER = "REST-OF-THE-SCRIPT-STILL-RAN"
+
+    def executable(self, name, body):
+        path = self.tmp / name
+        path.write_text("#!/usr/bin/env bash\n" + body, encoding="utf-8")
+        path.chmod(path.stat().st_mode | stat.S_IEXEC)
+        return path
+
+    def greedy_powershell(self):
+        """A stand-in for powershell.exe that reads stdin to EOF, exactly as the real
+        one does. `echo ok` because toast() requires that word to report success, so a
+        channel that did not actually fire cannot pass this quietly."""
+        return self.executable(
+            "fake-powershell.sh",
+            'printf "" >> "$FAKE_RAN.powershell"\n'
+            "cat > /dev/null\n"
+            "echo ok\n")
+
+    def greedy_tmux(self):
+        """A stand-in for tmux. FAKE_TMUX_DRAIN picks WHICH subcommand is greedy, so
+        the two tmux call sites are proven one at a time rather than together - with
+        both greedy, fixing either one alone would look like fixing both."""
+        return self.executable(
+            "tmux",
+            'verb=""\n'
+            'for a in "$@"; do\n'
+            '  case "$a" in list-panes|display-message) verb="$a"; break;; esac\n'
+            "done\n"
+            'printf "" >> "$FAKE_RAN.$verb"\n'
+            'if [ "${FAKE_TMUX_DRAIN:-none}" = "$verb" ]; then cat > /dev/null; fi\n'
+            'if [ "$verb" = list-panes ]; then echo "%1"; fi\n'
+            "exit 0\n")
+
+    def bash_reading_a_script_on_stdin(self, call, **env_extra):
+        """Run `call` (a line of python) from inside a script bash is reading on stdin.
+
+        The line after it prints MARKER. If a child of the notify call inherits stdin,
+        that line is consumed before bash can read it and never runs - and bash still
+        exits 0, which is the half of this bug that makes it invisible.
+        """
+        driver = self.tmp / "driver.py"
+        driver.write_text(
+            "import sys\n"
+            f"sys.path.insert(0, {str(HERE.parent / 'taskmgmt')!r})\n"
+            "import notify\n"
+            f"sys.stderr.write(repr({call}) + '\\n')\n", encoding="utf-8")
+        env = dict(os.environ)
+        env.pop("AGENTMUX_NO_TOAST", None)      # this class is the one that wants them
+        env["FAKE_RAN"] = str(self.tmp / "ran")
+        env["PATH"] = f"{self.tmp}{os.pathsep}{env['PATH']}"
+        env.update(env_extra)
+        script = (f'"{sys.executable}" "{driver}"\n'
+                  f"echo {self.MARKER}\n")
+        return subprocess.run(["bash", "-s"], input=script, env=env, cwd=str(self.tmp),
+                              capture_output=True, text=True, timeout=120)
+
+    def assert_the_script_survived(self, proc, fired):
+        # The channel must actually have fired, or this passes for the wrong reason -
+        # a toast that decided this box has no desktop swallows nothing either.
+        self.assertTrue((self.tmp / f"ran.{fired}").exists(),
+                        f"{fired} never ran; the channel was not exercised at all")
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn(self.MARKER, proc.stdout,
+                      "the notification ate the rest of the caller's script "
+                      f"(stderr: {proc.stderr.strip()})")
+
+    def test_the_toast_does_not_eat_the_script_that_triggered_it(self):
+        proc = self.bash_reading_a_script_on_stdin(
+            'notify.toast("subject", "body")',
+            AGENTMUX_POWERSHELL=str(self.greedy_powershell()))
+        self.assert_the_script_survived(proc, "powershell")
+
+    def test_the_tmux_target_check_does_not_eat_the_script(self):
+        self.greedy_tmux()
+        proc = self.bash_reading_a_script_on_stdin(
+            'notify.tmux_status("%1", "subject")', FAKE_TMUX_DRAIN="list-panes")
+        self.assert_the_script_survived(proc, "list-panes")
+
+    def test_the_tmux_status_draw_does_not_eat_the_script(self):
+        self.greedy_tmux()
+        proc = self.bash_reading_a_script_on_stdin(
+            'notify.tmux_status("%1", "subject")', FAKE_TMUX_DRAIN="display-message")
+        self.assert_the_script_survived(proc, "display-message")
+
+    def test_every_child_here_is_handed_its_own_stdin(self):
+        # The weak form of the three above, kept because it names the fix and catches a
+        # fourth channel added later that no behavioural test covers yet. `input=` is
+        # equally correct: it makes subprocess create the pipe.
+        import ast
+        tree = ast.parse(Path(notify.__file__).read_text(encoding="utf-8"))
+        calls = [node for node in ast.walk(tree)
+                 if isinstance(node, ast.Call)
+                 and isinstance(node.func, ast.Attribute) and node.func.attr == "run"
+                 and isinstance(node.func.value, ast.Name)
+                 and node.func.value.id == "subprocess"]
+        self.assertTrue(calls, "found no subprocess.run calls; the check went blind")
+        for call in calls:
+            given = {kw.arg for kw in call.keywords}
+            self.assertTrue(
+                given & {"stdin", "input"},
+                f"subprocess.run at line {call.lineno} inherits the caller's stdin")
 
 
 # ── the routing: who hears about what ────────────────────────────────────────
