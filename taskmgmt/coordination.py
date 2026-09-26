@@ -1206,8 +1206,12 @@ def cmd_agents(args):
 
 
 def cmd_agentdef(args):
+    # `agent` is this caller's resolved identity, not a field of the definition, so
+    # it goes over as `actor`. _encode reads only agentdefs.KEYS, so a stray key
+    # would have been silently dropped instead of recorded.
     body = {key: value for key, value in vars(args).items()
-            if key not in ("command", "func", "json") and value is not None}
+            if key not in ("command", "func", "json", "agent") and value is not None}
+    body["actor"] = args.agent
     result = board_call("POST", "board/agentdef", body)
     if result is None:
         return 1
@@ -1220,7 +1224,7 @@ def cmd_agentdef(args):
 
 
 def cmd_agentdrop(args):
-    body = {"scope": args.scope, "name": args.name}
+    body = {"scope": args.scope, "name": args.name, "actor": args.agent}
     checksum = args.checksum
     if checksum is None:
         # READ IT FIRST, which is what the guard is actually asking for.
@@ -1519,7 +1523,14 @@ def main(argv=None):
     definitions.add_argument("name", nargs="?")
     definitions.add_argument("--json", action="store_true")
 
-    definition = board_verb("agentdef", cmd_agentdef, agent=False,
+    # THE OTHER TWO agent=False WRITES. The previous pass said epic use and board
+    # config were "the only board verbs declared agent=False that still write". They
+    # were not: agentdef replaces a whole definition - its cli, model, auth, posture
+    # and tool allowances - and agentdrop is a real unlink with no soft-delete behind
+    # it. Both were reachable from any pane with no live-agent check and no name
+    # attached, which is the same asymmetry, found by listing the verbs against the
+    # tuple rather than by reading around the ones already fixed.
+    definition = board_verb("agentdef", cmd_agentdef,
                             help="create or replace a full agent definition")
     definition.add_argument("scope")
     definition.add_argument("name")
@@ -1532,7 +1543,7 @@ def main(argv=None):
     definition.add_argument("--max-instances", type=int)
     definition.add_argument("--json", action="store_true")
 
-    drop = board_verb("agentdrop", cmd_agentdrop, agent=False)
+    drop = board_verb("agentdrop", cmd_agentdrop)
     drop.add_argument("scope")
     drop.add_argument("name")
     drop.add_argument("--checksum")
@@ -1614,7 +1625,10 @@ def main(argv=None):
               # immediate neighbours - epic new, epic status, triage, override - have
               # always been bound. The asymmetry was visible in the shell too:
               # agentmux.sh stamped --agent on those four and not on these two.
-              "board-active", "config")
+              "board-active", "config",
+              # And the two definition writes, missed by that same pass: see
+              # the board_verb call above for why they belong here.
+              "agentdef", "agentdrop")
     field = {"claim": "holder", "release": "holder", "journal": "agent",
              "entry": "agent"}.get(args.command,
                                    "agent" if args.command in writes else None)

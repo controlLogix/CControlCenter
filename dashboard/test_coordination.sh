@@ -324,7 +324,7 @@ identity_api="http://127.0.0.1:$(cat "$HOME_DIR/identity-port")"
 # the epic every later card is filed into, and `board config` turns board-wide gates on
 # and off, and both were reachable from any pane with no name attached while their
 # immediate neighbours (epic new, epic status, triage, override) were all bound.
-for verb in claim release journal entry task-add task-status board-active config; do
+for verb in claim release journal entry task-add task-status board-active config agentdef agentdrop; do
   case "$verb" in
     claim)       args=(claim identity/claim --holder victim) ;;
     release)
@@ -335,10 +335,20 @@ for verb in claim release journal entry task-add task-status board-active config
     task-status) args=(task-status 41 done --agent victim) ;;
     board-active) args=(board-active EP-001 --agent victim) ;;
     config)      args=(config dispatchWip 3 --agent victim) ;;
+    # agentdef replaces a whole definition - cli, model, auth, posture, tool
+    # allowances - and agentdrop is a real unlink with no soft delete behind it.
+    # The previous pass called epic use and board config "the only board verbs
+    # declared agent=False that still write"; these two were the counterexample,
+    # found by listing the verbs against the tuple rather than reading around it.
+    # --json so the legitimate half prints the fixture's row instead of walking a
+    # definition it does not have; --checksum so drop never needs a GET.
+    agentdef)    args=(agentdef repo identity-test --description d --agent victim --json) ;;
+    agentdrop)   args=(agentdrop repo identity-test --checksum x --agent victim --json) ;;
   esac
   out=$(AGENTMUX_DASHBOARD="$identity_api" AGENTMUX_AGENT=attacker $CO "${args[@]}" 2>&1); rc=$?
   matching_rc=0
-  if [[ "$verb" == entry || "$verb" == task-* || "$verb" == board-active || "$verb" == config ]]; then
+  if [[ "$verb" == entry || "$verb" == task-* || "$verb" == board-active \
+        || "$verb" == config || "$verb" == agentdef || "$verb" == agentdrop ]]; then
     AGENTMUX_DASHBOARD="$identity_api" AGENTMUX_AGENT=victim $CO "${args[@]}" >/dev/null 2>&1
     matching_rc=$?
   fi

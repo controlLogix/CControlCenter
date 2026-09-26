@@ -166,6 +166,12 @@ def agentdef(db, body):
         finally:
             if os.path.exists(temporary):
                 os.unlink(temporary)
+        # An agent definition is not a board row, so it has no history of its own -
+        # which meant replacing one left no trace anywhere. entity_key NULL is
+        # already how set_state records a board-wide change, and history(db) with no
+        # key returns those rows, so this lands in the same feed as every other write.
+        ccboard._record(db, None, "agentdef", body.get("actor"), None,
+                        {"scope": scope, "name": spec.name})
         row = asdict(spec)
         for field in ("tools", "tools_deny", "capabilities"):
             row[field] = list(row[field])
@@ -184,4 +190,6 @@ def agentdrop(db, body):
         # precisely so nothing is lost, this is a real unlink with no way back.
         _check_checksum(path, body)
         path.unlink()
+        ccboard._record(db, None, "agentdrop", body.get("actor"), None,
+                        {"scope": body["scope"], "name": body["name"]})
         return {"ok": True, "scope": body["scope"], "name": body["name"]}
