@@ -1,7 +1,7 @@
 ---
 id: "TM-040"
 kind: "task"
-status: "open"
+status: "in_progress"
 created: "2026-09-26T02:03:28.555Z"
 board: "controllogix/ccontrolcenter"
 title: "The first authentication port 8787 has ever had"
@@ -16,7 +16,7 @@ branch: "main"
 worktree: "/mnt/c/Dev/agentmux"
 labels: ["ready-for-agent"]
 triagedBy: "auto"
-updated: "2026-09-26T03:13:14.875Z"
+updated: "2026-09-26T03:16:28.829Z"
 session: "pool-tm-040"
 ---
 
