@@ -154,6 +154,8 @@ def live_agents():
     try:
         done = subprocess.run(["tmux", "-L", SOCKET, "list-sessions", "-F",
                                "#{session_name}"],
+                              # NO CHILD MAY INHERIT STDIN - the rule in notify.py.
+                              stdin=subprocess.DEVNULL,
                               capture_output=True, text=True, timeout=10)
     except (OSError, subprocess.SubprocessError):
         return set()
@@ -481,6 +483,10 @@ def deliver(message, running):
         return False, "cannot locate the agentmux launcher"
     try:
         done = subprocess.run(binary + ["send", recipient, render(message)],
+                              # THE HOT ONE. This fires on every courier tick and runs
+                              # `agentmux send` -> bash -> tmux. Inheriting stdin here
+                              # eats the caller's script, exactly as the toast did.
+                              stdin=subprocess.DEVNULL,
                               capture_output=True, text=True, timeout=60)
     except (OSError, subprocess.SubprocessError) as err:
         return False, f"send failed: {err.__class__.__name__}"

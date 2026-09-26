@@ -224,7 +224,8 @@ def _parse_arp(text):
 
 def _run_table(argv, timeout=8):
     try:
-        done = subprocess.run(argv, capture_output=True, text=True,
+        done = subprocess.run(argv, stdin=subprocess.DEVNULL,
+                              capture_output=True, text=True,
                               encoding="utf-8", errors="replace", timeout=timeout)
     except (OSError, subprocess.SubprocessError):
         return {}

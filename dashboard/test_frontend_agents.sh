@@ -9,9 +9,14 @@ if ! command -v node >/dev/null 2>&1; then
   fi
 fi
 if ! command -v node >/dev/null 2>&1; then
-  echo '  (node not on PATH; skipping Agents frontend checks)'
-  echo 'passed 0, failed 0'
-  exit 0
+  # NOT A PASS. This printed "passed 0, failed 0" and exited 0, which run_tests.sh
+  # matches as success - so on a box without node the gate went green having checked
+  # nothing. The skip line did not start with SKIP at column zero either, so the
+  # runner's `grep '^SKIP '` never surfaced it. test_frontend_teams.sh, the sibling
+  # doing the same job on the same dependency, has always failed loudly here.
+  echo 'FAIL: node is required for Agents frontend checks'
+  echo 'passed 0, failed 1'
+  exit 1
 fi
 if node <<'JS'
 const assert = require('node:assert/strict');

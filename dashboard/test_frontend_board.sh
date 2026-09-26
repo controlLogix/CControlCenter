@@ -257,6 +257,9 @@ await test('the stamp counts both epics and tasks',async()=>{
   const s=setup(); await s.ctx.loadBoard();
   assert.equal(s.ctx.els.boardStamp.textContent,'1 epic, 2 tasks');
 });
-console.log(`passed ${passed}, failed ${failed}`); process.exitCode=failed ? 1 : 0;
+// `|| !passed` because zero tests is not a pass: these suites extract the code under
+// test with source.indexOf(marker), and a moved marker yields an empty slice, no
+// registered tests, and "passed 0, failed 0" - which the gate reads as green.
+console.log(`passed ${passed}, failed ${failed}`); process.exitCode=failed || !passed ? 1 : 0;
 })().catch(e=>{console.error(e); console.log(`passed ${passed}, failed ${failed+1}`); process.exitCode=1;});
 JS

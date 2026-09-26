@@ -47,9 +47,22 @@ check_rc() {
 }
 rc_is() { check_rc "$@"; }
 
-# Count JSON lines in a file that may not exist. `grep -c` on a missing file both
-# prints 0 AND returns non-zero, so a naive `|| echo 0` yields "0\n0".
-count_msgs() { [ -f "$1" ] && grep -c . "$1" 2>/dev/null || printf '0'; }
+# Count JSON lines in a file that may not exist.
+#
+# `grep -c` prints a count AND returns non-zero when that count is zero, so a naive
+# `|| printf 0` appends a second zero. The `[ -f ]` guard only covered the MISSING
+# file; for a file that exists and is empty - which is what `: >` and mktemp produce,
+# i.e. the common case - grep printed 0, exited 1, the `||` fired, and this returned
+# the two-line string "0\n0".
+#
+# Measured: `[ "$n" = "0" ]` was then FALSE, `[ "$n" -eq 0 ]` and `$(( n + 1 ))` were
+# syntax errors. assert_no_loss sums two of these, so it died on any empty artifact.
+# Take grep's output, drop its exit status, and default only when there is no output.
+count_msgs() {
+  local n
+  n=$(grep -c . "$1" 2>/dev/null) || n=""
+  printf '%s' "${n:-0}"
+}
 
 finish() {
   echo

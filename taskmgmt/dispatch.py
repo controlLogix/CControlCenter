@@ -198,7 +198,10 @@ def agentmux(*args, timeout=180):
     """Run one agentmux verb. Returns (rc, stdout, stderr)."""
     cmd = agentmux_bin() + list(args)
     try:
-        done = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        # Every dispatch verb goes through here, spawn included, so one missing
+        # argument would drain the stdin of anything driving dispatch from a script.
+        done = subprocess.run(cmd, stdin=subprocess.DEVNULL,
+                              capture_output=True, text=True, timeout=timeout)
     except (OSError, subprocess.TimeoutExpired) as err:
         return 1, "", str(err)
     return done.returncode, done.stdout or "", done.stderr or ""
@@ -365,6 +368,9 @@ def release_all(worker, paths, namespace=None):
 def _git(*args):
     try:
         done = subprocess.run(["git", "-C", str(REPO), *args],
+                              # git reads stdin for some subcommands and will happily
+                              # consume a script it was never meant to see.
+                              stdin=subprocess.DEVNULL,
                               capture_output=True, text=True, timeout=180)
     except (OSError, subprocess.TimeoutExpired) as err:
         raise RuntimeError("worktree git failed: %s" % err) from err

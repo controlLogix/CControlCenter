@@ -123,6 +123,9 @@ def _reap_worker(name, key):
         for args in (["done", key, "--from-log", name],
                      ["report", name, "--title", f"agentmux run - {name} - {key}"]):
             subprocess.run(["python3", str(TASK_CLI), *args],
+                           # stdout and stderr were already silenced here; stdin was
+                           # not, which is the half of the problem that eats scripts.
+                           stdin=subprocess.DEVNULL,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                            timeout=90, check=False)
     except Exception:
@@ -909,6 +912,7 @@ def tmux(*args):
     try:
         result = subprocess.run(
             ["tmux", "-L", "agentmux", *args],
+            stdin=subprocess.DEVNULL,
             capture_output=True, text=True, timeout=3, check=False,
         )
         return result.stdout if result.returncode == 0 else None

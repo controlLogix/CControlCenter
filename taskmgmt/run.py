@@ -241,6 +241,7 @@ def repo_head(repo=None):
     """
     try:
         proc = subprocess.run(["git", "-C", str(repo or Path.cwd()), "rev-parse", "HEAD"],
+                              stdin=subprocess.DEVNULL,
                               capture_output=True, text=True, timeout=10)
     except (OSError, subprocess.SubprocessError):
         return None
@@ -1151,6 +1152,7 @@ def capture_forced(run_id, state, blocking):
                 pane = subprocess.run(
                     ["tmux", "-L", coordination.SOCKET, "capture-pane", "-p", "-J",
                      "-S", "-40", "-t", who],
+                    stdin=subprocess.DEVNULL,
                     capture_output=True, text=True, timeout=10).stdout
             except (OSError, subprocess.SubprocessError):
                 pane = ""

@@ -134,6 +134,14 @@ check 'check compares equal values' 5 5
 check_rc 'check_rc compares return codes' 0 0
 rm -f "$WORK/missing.txt"
 check 'count_msgs on a missing file is 0' 0 "$(count_msgs "$WORK/missing.txt")"
+# THE CASE THAT WAS NOT COVERED, and the one that actually occurs: mktemp and `: >`
+# both produce a file that exists and is empty. grep -c prints 0 and exits 1 there, so
+# the old `[ -f ] && grep -c || printf 0` returned the two-line string "0\n0" - which
+# is not equal to "0" as a string and is a syntax error in arithmetic.
+: > "$WORK/empty.txt"
+check 'count_msgs on an existing EMPTY file is a single 0' 0 "$(count_msgs "$WORK/empty.txt")"
+empty_n=$(count_msgs "$WORK/empty.txt")
+check 'and it survives arithmetic' 1 "$(( empty_n + 1 ))"
 printf 'a\nb\nc\n' > "$WORK/three.txt"
 check 'count_msgs counts lines' 3 "$(count_msgs "$WORK/three.txt")"
 

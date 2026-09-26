@@ -585,5 +585,6 @@ test('the CODESYS card does not reach a controller until it is opened', () => {
 });
 
 console.log(`passed ${passed}, failed ${failed}`);
-process.exitCode = failed ? 1 : 0;
+// zero tests is not a pass - see the note in test_frontend_board.sh
+process.exitCode = failed || !passed ? 1 : 0;
 JS

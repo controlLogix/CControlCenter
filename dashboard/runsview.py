@@ -147,6 +147,7 @@ def review_diff(run_id):
         try:
             proc = subprocess.run(
                 ["git", "-C", str(REPO), "diff", against, "--"] + safe,
+                stdin=subprocess.DEVNULL,
                 capture_output=True, text=True, timeout=25, errors="replace")
             out = proc.stdout or ""
             if proc.returncode != 0 and not out:
@@ -180,6 +181,7 @@ def untracked(names):
         proc = subprocess.run(
             ["git", "-C", str(REPO), "ls-files", "--others", "--exclude-standard",
              "--"] + list(names),
+            stdin=subprocess.DEVNULL,
             capture_output=True, text=True, timeout=20, errors="replace")
     except (OSError, subprocess.SubprocessError):
         return []
@@ -195,6 +197,7 @@ def new_file_diff(name):
     try:
         proc = subprocess.run(
             ["git", "-C", str(REPO), "diff", "--no-index", "--", os.devnull, name],
+            stdin=subprocess.DEVNULL,
             capture_output=True, text=True, timeout=20, errors="replace")
     except (OSError, subprocess.SubprocessError) as err:
         return f"\n(new file {name}: unreadable, {type(err).__name__})\n"
@@ -209,6 +212,7 @@ def new_file_diff(name):
 def _have_commit(sha):
     try:
         proc = subprocess.run(["git", "-C", str(REPO), "cat-file", "-e", sha + "^{commit}"],
+                              stdin=subprocess.DEVNULL,
                               capture_output=True, timeout=10)
         return proc.returncode == 0
     except (OSError, subprocess.SubprocessError):

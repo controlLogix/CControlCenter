@@ -102,6 +102,7 @@ def message(value, source, state, reason='', **extra):
 def live_agents():
     try:
         result = subprocess.run(['tmux', '-L', 'agentmux', 'list-sessions', '-F', '#{session_name}'],
+                                stdin=subprocess.DEVNULL,
                                 capture_output=True, text=True, timeout=3)
         if result.returncode and not ('no server running' in result.stderr or 'No such file' in result.stderr):
             return None
@@ -219,6 +220,10 @@ def chatsend(db, body):
     try:
         script = 'exec bash <(tr -d "\\r" < "$0") "$@"'
         result = subprocess.run(['bash', '-c', script, str(REPO / 'agentmux.sh'), 'send', recipient, payload],
+                                # Runs on an HTTP thread, so without this it inherits
+                                # the SERVER's stdin - and it is a bash -c that then
+                                # execs another bash reading a process substitution.
+                                stdin=subprocess.DEVNULL,
                                 capture_output=True, text=True, timeout=15)
     except (OSError, subprocess.SubprocessError) as err:
         return dict(ok=False, error=f'Send did not confirm completion: {type(err).__name__}. Inspect the pane before retrying.',

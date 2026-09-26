@@ -215,6 +215,10 @@ run test_runsview.py python3 dashboard/test_runsview.py
 # desktop channel out of it - a suite that pops toasts is a suite people stop
 # running - so the real toast is exercised by hand via taskmgmt/notify.py.
 run test_notify.py python3 dashboard/test_notify.py
+# Repo-wide: every spawned child must be handed its own stdin. notify.py proved what
+# happens otherwise (a toast ate the rest of a piped script, exit 0); the sweep then
+# found sixteen more call sites carrying the same omission.
+run test_no_inherited_stdin.py python3 dashboard/test_no_inherited_stdin.py
 # The wire between a completed run and the board cards it was assigned.
 run test_runcards.py python3 dashboard/test_runcards.py
 # The orchestrator warrant: what it permits, and everything it must still refuse.

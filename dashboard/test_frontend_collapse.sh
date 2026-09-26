@@ -230,7 +230,11 @@ function renderer(store, rows) {
     }
   }
   passed++; console.log('PASS: all four list renderers survive blocked/malformed storage and failed writes');
+  // "failed 0" is honest here only because test() has no catch - a throwing check
+  // aborts before this line and the runner sees no summary at all. What was missing is
+  // the zero-test guard: with nothing registered this printed passed 0, failed 0.
   console.log(`passed ${passed}, failed 0`);
+  if (!passed) process.exitCode = 1;
 })().catch(err => { console.error(err); process.exitCode = 1; });
 
 JS

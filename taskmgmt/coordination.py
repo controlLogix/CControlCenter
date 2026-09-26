@@ -97,6 +97,7 @@ def live_agents():
     try:
         done = subprocess.run(["tmux", "-L", SOCKET, "list-sessions", "-F",
                                "#{session_name}"],
+                              stdin=subprocess.DEVNULL,
                               capture_output=True, text=True, timeout=10)
     except (OSError, subprocess.SubprocessError) as err:
         raise TmuxUnavailable(
