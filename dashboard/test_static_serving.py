@@ -204,6 +204,32 @@ class StaticResponseTests(unittest.TestCase):
         self.assertIn(status, (403, 404),
                       'path traversal must not become a retryable error')
 
+    def test_an_unreadable_agent_log_is_503_not_404(self):
+        # The stream handler had the identical defect. A 404 there says the
+        # agent has produced no output, which is exactly what a dead pane looks
+        # like - so the operator goes and stares at tmux instead of at the
+        # filesystem that actually failed.
+        with mock.patch.object(server, 'tmux', return_value='alpha\n'), \
+             mock.patch.object(server, 'open_log', side_effect=eio()):
+            status, _, _ = self.get('/api/stream/alpha')
+        self.assertEqual(status, 503)
+
+    def test_a_missing_agent_log_is_still_404(self):
+        with mock.patch.object(server, 'tmux', return_value='alpha\n'), \
+             mock.patch.object(server, 'open_log',
+                               side_effect=FileNotFoundError(errno.ENOENT, 'gone')):
+            status, _, _ = self.get('/api/stream/alpha')
+        self.assertEqual(status, 404)
+
+    def test_an_unsafe_agent_log_is_still_forbidden(self):
+        # open_log raises PermissionError by design for a hard-linked or
+        # symlinked log. That must stay a 403 and must not become retryable.
+        with mock.patch.object(server, 'tmux', return_value='alpha\n'), \
+             mock.patch.object(server, 'open_log',
+                               side_effect=PermissionError('unsafe log file')):
+            status, _, _ = self.get('/api/stream/alpha')
+        self.assertEqual(status, 403)
+
     def test_no_failure_answers_a_script_request_with_a_json_body(self):
         # Phrased as the browser experienced it. Under nosniff - which this
         # handler sets on every response - a JSON body for a <script src> is
@@ -223,6 +249,28 @@ class StaticResponseTests(unittest.TestCase):
                 else:
                     self.assertGreaterEqual(status, 400,
                                             f'{label}: a JSON body must carry an error status')
+
+
+class ResourceCheckTests(unittest.TestCase):
+    """The reporting surface had it too, where it is quieter and no less wrong."""
+
+    def check(self, path):
+        return server._run_check({'id': 'x', 'label': 'x', 'type': 'file', 'path': str(path)})
+
+    def test_a_missing_file_reads_as_absent(self):
+        out = self.check('/definitely/not/here/at/all')
+        self.assertFalse(out['ok'])
+        self.assertEqual(out['detail'], 'absent')
+
+    def test_an_unreadable_file_does_not_read_as_absent(self):
+        # A panel whose job is to say whether a thing is configured must not
+        # answer "no" when what happened is that it could not look. The operator
+        # would go and re-create a file that is already there.
+        with mock.patch.object(Path, 'lstat', side_effect=eio()):
+            out = self.check('/mnt/c/Dev/agentmux/dashboard/server.py')
+        self.assertFalse(out['ok'])
+        self.assertNotEqual(out['detail'], 'absent')
+        self.assertIn('unreadable', out['detail'])
 
 
 def main():

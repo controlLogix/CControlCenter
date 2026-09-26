@@ -253,8 +253,14 @@ def _run_check(check):
         path = Path(os.path.expanduser(raw))
         try:
             info = path.lstat()
-        except OSError:
-            out["detail"] = "absent"
+        except OSError as exc:
+            # "It is not there" and "I could not find out" are different answers,
+            # and this panel exists to be trusted about which. Most of these
+            # paths are under /mnt, where a stat raises EIO under load; reporting
+            # that as absence tells the operator a file they are looking at does
+            # not exist. Same bug as TM-031, in a place that only reports.
+            out["detail"] = ("absent" if exc.errno in ninep.ABSENT
+                             else f"unreadable: {exc.strerror or exc}")
             return out
         out["ok"] = True
         # POSIX mode is meaningless on drvfs (/mnt/...), where everything reports
@@ -2338,7 +2344,16 @@ class Handler(BaseHTTPRequestHandler):
         except PermissionError:
             self.send_json(403, {"error": "forbidden"})
             return
-        except OSError:
+        except OSError as exc:
+            # The same distinction the static handler keeps, and for the same
+            # reason: a log we could not read is not a log that is not there.
+            # Under 9p this is EIO under load, and 404 here tells the UI the
+            # agent has produced no output - which is indistinguishable from a
+            # dead pane, so the operator goes looking at tmux instead of at the
+            # filesystem. TM-031.
+            if exc.errno in ninep.TRANSIENT:
+                self.send_transient()
+                return
             self.send_json(404, {"error": "not found"})
             return
         # Claim this agent BEFORE taking a slot, so the previous holder starts exiting

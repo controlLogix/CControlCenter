@@ -105,13 +105,14 @@ test_frontend_devicetree.sh  85e6ddb    1
 agentmux-broker/test_killswitch.py  b8041df    24
 agentmux-broker/test_guardrails.py  b8041df    25
 # A transient 9p failure rendered as an answer about the request. Against the
-# commit before the fix, 13 of 16 fail - and the three that PASS there are what
-# make this row worth reading: they assert the behaviour that did not change (a
-# real script is served, an unserved path is 404, traversal is still refused).
-# A suite where every case failed at the base would be consistent with the whole
-# module failing to import, which proves nothing. One of the 13 is a plain
-# behavioural failure, 403 != 503, not an import artefact.
-test_static_serving.py       9ac33cc   13
+# commit before the fix, 15 of 21 fail - and the six that PASS there are what
+# make this row worth reading: they assert the behaviour that did NOT change (a
+# real script is served, an unserved path is 404, traversal is still refused, an
+# unsafe log is still 403, a missing file still reads as absent). A suite where
+# every case failed at the base would be consistent with the whole module
+# failing to import, which proves nothing. Three of the 15 are plain behavioural
+# failures rather than import artefacts, 403 != 503 among them.
+test_static_serving.py       9ac33cc   15
 BASELINES
   SELF_TEST=1
 else
