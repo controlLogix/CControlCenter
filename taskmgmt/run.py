@@ -805,15 +805,6 @@ def cmd_assign(args):
     if not run_dir(args.run).is_dir():
         print(f"run: no such run {args.run}", file=sys.stderr)
         return 2
-    # A COMPLETE run takes no new work. submit and verdict have always refused once
-    # the marker exists; assign did not, so a job could be added to a run that had
-    # already passed the gate - leaving a run that reads COMPLETE and "1/2 verified"
-    # at the same time. That is the exact contradiction the gate exists to prevent,
-    # arrived at from the other side.
-    if complete_path(args.run).exists():
-        print(f"run: {args.run} is already complete; no job can be assigned to it now",
-              file=sys.stderr)
-        return 2
     for label, value in (("worker", args.worker), ("reviewer", args.reviewer)):
         if not NAME_PATTERN.fullmatch(value or ""):
             print(f"run: invalid {label} {value!r}", file=sys.stderr)
@@ -825,24 +816,42 @@ def cmd_assign(args):
         print("run: the reviewer must not be the worker", file=sys.stderr)
         return 2
 
-    jobs_root = run_dir(args.run) / "jobs"
-    jobs_root.mkdir(parents=True, exist_ok=True)
-    for index in range(1, 10000):
-        directory = jobs_root / str(index)
-        try:
-            directory.mkdir()                      # atomic id allocation
-        except FileExistsError:
-            continue
-        job = f"{args.run}/{index}"
-        if args.brief:
-            (directory / "brief.md").write_text(args.brief, encoding="utf-8")
-        append_event(args.run, {"event": "assign", "job": job, "by": by,
-                                "via": coordination.orchestrator_pane(),
-                                "worker": args.worker,
-                                "reviewer": args.reviewer, "task": args.task,
-                                "detail": (args.brief or "")[:DETAIL_MAX]})
-        print(job)
-        return 0
+    # A COMPLETE RUN TAKES NO NEW WORK, AND THE CHECK IS TAKEN UNDER THE SAME LOCK
+    # cmd_complete HOLDS.
+    #
+    # submit and verdict have always refused once the marker exists; assign did not,
+    # so a job could be added to a run that had already passed the gate - leaving a
+    # run that reads COMPLETE and "1/2 verified" at the same time. That is the exact
+    # contradiction the gate exists to prevent, arrived at from the other side.
+    #
+    # Checking it outside the lock only narrows the window rather than closing it:
+    # assign reads the marker as absent, complete then takes the lock, folds, writes
+    # COMPLETE and releases, and assign's append lands afterwards - producing the same
+    # contradiction concurrently instead of sequentially. cmd_verdict already takes
+    # its marker check inside run_lock for precisely this reason; assign now matches.
+    with run_lock(args.run, "assign"):
+        if complete_path(args.run).exists():
+            print(f"run: {args.run} is already complete; no job can be assigned to it "
+                  f"now", file=sys.stderr)
+            return 2
+        jobs_root = run_dir(args.run) / "jobs"
+        jobs_root.mkdir(parents=True, exist_ok=True)
+        for index in range(1, 10000):
+            directory = jobs_root / str(index)
+            try:
+                directory.mkdir()                  # atomic id allocation
+            except FileExistsError:
+                continue
+            job = f"{args.run}/{index}"
+            if args.brief:
+                (directory / "brief.md").write_text(args.brief, encoding="utf-8")
+            append_event(args.run, {"event": "assign", "job": job, "by": by,
+                                    "via": coordination.orchestrator_pane(),
+                                    "worker": args.worker,
+                                    "reviewer": args.reviewer, "task": args.task,
+                                    "detail": (args.brief or "")[:DETAIL_MAX]})
+            print(job)
+            return 0
     print("run: too many jobs", file=sys.stderr)
     return 1
 
@@ -858,6 +867,14 @@ def cmd_submit(args):
         print(err, file=sys.stderr)
         return 2
 
+    # UNDER THE LOCK, for the same reason assign is: the fold, the marker check and
+    # the append are a read-decide-write across a file that cmd_complete also writes.
+    # Outside it, a submission can land after COMPLETE was taken.
+    with run_lock(run_id, "submit"):
+        return _submit_locked(args, run_id, index, by)
+
+
+def _submit_locked(args, run_id, index, by):
     state = fold(load_events(run_id))
     row = state["jobs"].get(args.job)
     if row is None:
