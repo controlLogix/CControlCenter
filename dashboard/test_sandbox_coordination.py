@@ -58,7 +58,11 @@ class SandboxCoordination(unittest.TestCase):
             for dry in [False, True]:
                 spec = replace(fallback, posture=posture)
                 task = {'id': 'TM-068', 'title': 'sandbox test'}
-                with patch.dict(os.environ, {'AGENTMUX_NO_BYPASS': brake}), patch.object(dispatch, 'dispatch_view', return_value={'tasks': [task]}), patch.object(dispatch, 'entity', return_value=task), patch.object(dispatch, 'live_agents', return_value=set()), patch.object(agentdefs, 'load_all', return_value=({}, [])), patch.object(agentdefs, 'choose_roster', return_value=[spec]), patch.object(dispatch, 'agentmux') as spawn, patch.object(dispatch, 'claim_for') as claim, patch.object(dispatch, 'set_status') as status, patch.object(dispatch, 'log') as log:
+                # The board is entirely mocked here, so the foreign-board guard has
+                # nothing real to protect - and it fires FIRST, before the posture
+                # refusal this case is about. Saying so explicitly is the point of the
+                # guard having an override: this suite means it.
+                with patch.dict(os.environ, {'AGENTMUX_NO_BYPASS': brake}), patch.object(dispatch, 'foreign_board', return_value=''), patch.object(dispatch, 'dispatch_view', return_value={'tasks': [task]}), patch.object(dispatch, 'entity', return_value=task), patch.object(dispatch, 'live_agents', return_value=set()), patch.object(agentdefs, 'load_all', return_value=({}, [])), patch.object(agentdefs, 'choose_roster', return_value=[spec]), patch.object(dispatch, 'agentmux') as spawn, patch.object(dispatch, 'claim_for') as claim, patch.object(dispatch, 'set_status') as status, patch.object(dispatch, 'log') as log:
                     self.assertIsNone(dispatch.dispatch_one('TM-068', dry_run=dry))
                     spawn.assert_not_called()
                     claim.assert_not_called()
