@@ -1347,6 +1347,32 @@ except coordination.IdentityError as err:
 PYIDENTITY
   local run_id="${1:-}"
   [ -n "$run_id" ] || die "teardown needs a run id"
+  # A NON-EMPTY STRING WAS THE ONLY CHECK. Every Python run verb validates the id
+  # shape, and assign/complete also require the directory to exist - teardown, which
+  # KILLS PANES and force-releases their claims, required neither. A typo silently
+  # tore down nothing and reported success; worse, teardown on a live run kills a
+  # worker and a reviewer mid-job, and cmd_complete deliberately writes FORCED.md
+  # BEFORE teardown precisely because "a pane dies with its tmux session" - an
+  # unguarded teardown ahead of completion destroys the evidence completion captures.
+  #
+  # So: the run must exist, and an OPEN run needs --force to be torn down.
+  python3 - "$(run_py)" "$run_id" "${2:-}" <<'PYGUARD' || return $?
+import pathlib, sys
+sys.path.insert(0, str(pathlib.Path(sys.argv[1]).parent))
+import run as runmod
+run_id, flag = sys.argv[2], sys.argv[3]
+if not runmod.valid_run(run_id):
+    print(f"teardown: invalid run id {run_id!r}", file=sys.stderr); sys.exit(2)
+if not runmod.run_dir(run_id).is_dir():
+    print(f"teardown: no such run {run_id}", file=sys.stderr); sys.exit(2)
+if not runmod.complete_path(run_id).exists() and flag != "--force":
+    print(f"teardown: {run_id} is still open - completing it captures what its agents",
+          file=sys.stderr)
+    print("  did before their panes die. Close it with `agentmux run complete`, or pass",
+          file=sys.stderr)
+    print("  --force if you have decided the run is abandoned.", file=sys.stderr)
+    sys.exit(2)
+PYGUARD
   local names
   names="$(python3 "$(run_py)" status "$run_id" --json 2>/dev/null | python3 -c '
 import json, sys

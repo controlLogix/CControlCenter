@@ -308,8 +308,14 @@ survived=no
 [ -f "$HOME_DIR/run/$teardown_worker.cli" ] && survived=yes
 # Also prove the guard does not disable legitimate teardown. The synthetic names
 # need the normal test-only liveness bypass for coordination, never real sessions.
+#
+# --force because this run is deliberately left OPEN: what is under test here is the
+# OWNERSHIP boundary - a pane is refused, the orchestrator is not - and teardown now
+# separately refuses an open run, because killing a live run's panes destroys the
+# evidence `run complete` captures before they die. Without the flag this assertion
+# would be measuring the open-run guard instead of the one it is named for.
 env -u AGENTMUX_AGENT AGENTMUX_REPO="$PWD" bash "$HOME_DIR/harness.sh" \
-  run teardown "$teardown_run" >/dev/null 2>&1; owner_rc=$?
+  run teardown "$teardown_run" --force >/dev/null 2>&1; owner_rc=$?
 if [ "$pane_rc/$owner_rc/$survived" = 2/0/yes ] && \
    [[ "$out" == *"orchestrator's to call"* ]] && [ ! -f "$HOME_DIR/run/$teardown_worker.cli" ]; then
   ok 'ownership: pane teardown is refused before side effects; orchestrator teardown works'
@@ -515,6 +521,62 @@ rc_is 'and a submitted job still takes a correction' 0 $?
 $RUN verdict "$jflow" --by fr --pass --reason 'better' >/dev/null 2>&1
 $RUN complete "$rflow" >/dev/null 2>&1
 rc_is 'and the reworked run completes' 0 $?
+
+# THE OPEN-RUN GUARD ITSELF. teardown kills panes and force-releases their claims,
+# and cmd_complete writes FORCED.md BEFORE teardown precisely because "a pane dies
+# with its tmux session" - so tearing down ahead of completion destroys the evidence
+# completion exists to capture. Before this, a non-empty string was the only check.
+tdguard=$(env -u AGENTMUX_AGENT $RUN start 'teardown open-run guard' 2>/dev/null)
+env -u AGENTMUX_AGENT $RUN assign "$tdguard" --worker td-w --reviewer td-r >/dev/null 2>&1
+out=$(env -u AGENTMUX_AGENT AGENTMUX_REPO="$PWD" bash "$HOME_DIR/harness.sh" \
+  run teardown "$tdguard" 2>&1); rc=$?
+if [ $rc -ne 0 ] && [[ "$out" == *"still open"* ]]; then
+  ok 'teardown refuses an open run without --force'
+else
+  bad "teardown tore down an open run (rc=$rc): $out"
+fi
+out=$(env -u AGENTMUX_AGENT AGENTMUX_REPO="$PWD" bash "$HOME_DIR/harness.sh" \
+  run teardown zzzzzz 2>&1); rc=$?
+if [ $rc -ne 0 ] && [[ "$out" == *"invalid run id"* ]]; then
+  ok 'and refuses a malformed run id'
+else
+  bad "teardown accepted a malformed run id (rc=$rc): $out"
+fi
+out=$(env -u AGENTMUX_AGENT AGENTMUX_REPO="$PWD" bash "$HOME_DIR/harness.sh" \
+  run teardown ffffff 2>&1); rc=$?
+if [ $rc -ne 0 ] && [[ "$out" == *"no such run"* ]]; then
+  ok 'and refuses a run that does not exist'
+else
+  bad "teardown accepted a nonexistent run (rc=$rc): $out"
+fi
+
+echo '--- every submission survives its own rework ---'
+# submission.md was an unconditional write_text, so the NORMAL rejected -> resubmit
+# path - the documented flow, up to MAX_ATTEMPTS times - destroyed attempt one's text.
+# verdict-1.md survived, written with O_CREAT|O_EXCL precisely so no reviewer's
+# reasoning is lost, and went on referring to a submission that no longer existed.
+rsub=$($RUN start 'submissions are not overwritten by their own rework' 2>/dev/null)
+jsub=$($RUN assign "$rsub" --worker sub-w --reviewer sub-r 2>/dev/null)
+$RUN submit "$jsub" --by sub-w --summary 'FIRST ATTEMPT TEXT' >/dev/null 2>&1
+$RUN verdict "$jsub" --by sub-r --fail --reason 'go again' >/dev/null 2>&1
+$RUN submit "$jsub" --by sub-w --summary 'SECOND ATTEMPT TEXT' >/dev/null 2>&1
+
+jobdir="$HOME_DIR/runs/$rsub/jobs/1"
+grep -q 'SECOND ATTEMPT TEXT' "$jobdir/submission.md" 2>/dev/null \
+  && ok 'submission.md holds the latest attempt' \
+  || bad 'submission.md does not hold the latest attempt'
+if grep -rq 'FIRST ATTEMPT TEXT' "$jobdir" 2>/dev/null; then
+  ok 'and the first attempt is still on disk'
+else
+  bad 'the first submission was destroyed by the resubmit'
+fi
+[ -f "$jobdir/submission-1.md" ] \
+  && ok 'the earlier attempt is archived under its own name' \
+  || bad 'no submission-1.md was kept'
+# And the verdict that reviewed it is still there to be read alongside it.
+[ -f "$jobdir/verdict-1.md" ] \
+  && ok "and the verdict that referred to it is still beside it" \
+  || bad 'verdict-1.md missing'
 
 echo '--- a run says what it is for ---'
 # The board identifies a run by its request line. An empty one produced a blank row

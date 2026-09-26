@@ -1499,10 +1499,25 @@ def add_commit(db, key, ref, actor=None):
 
 
 def add_touch(db, key, path, actor=None):
+    """Claim a path for a card, so dispatch can keep two workers off one file.
+
+    This was the only list-append that wrote no history row and did not bump the
+    card's updated_at - every sibling goes through _append, which does both. It also
+    ACCEPTED an actor and threw it away, so the one write that decides whether two
+    agents can run in parallel was anonymous, and a card could acquire touches without
+    ever looking touched to a staleness view.
+
+    Only a real insert is an event: INSERT OR IGNORE makes a repeated touch a no-op,
+    and a history row for a no-op is noise in the log that matters most here.
+    """
     row_for(db, key)
     path = text(path, "path", MAX_REF, required=True, pattern=PATH_RE)
-    db.execute("INSERT OR IGNORE INTO board_touches (entity_key,path,at) VALUES (?,?,?)",
-               (key, path, now()))
+    cursor = db.execute(
+        "INSERT OR IGNORE INTO board_touches (entity_key,path,at) VALUES (?,?,?)",
+        (key, path, now()))
+    if cursor.rowcount:
+        _record(db, key, "touch", actor, None, {"path": path[:200]})
+        _touch(db, key)
     return entity(db, key)
 
 

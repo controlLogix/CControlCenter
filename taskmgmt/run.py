@@ -932,10 +932,30 @@ def _submit_locked(args, run_id, index, by):
     hashes = digest(args.repo, files)
     directory = job_dir(run_id, index)
     directory.mkdir(parents=True, exist_ok=True)
-    (directory / "submission.md").write_text(
-        (args.summary or "") + "\n\n## files\n"
-        + "\n".join(f"- {name}  sha256:{h}" for name, h in hashes.items()) + "\n",
-        encoding="utf-8")
+    body = ((args.summary or "") + "\n\n## files\n"
+            + "\n".join(f"- {name}  sha256:{h}" for name, h in hashes.items()) + "\n")
+
+    # KEEP THE EARLIER SUBMISSIONS, for the same reason verdict-N.md is written with
+    # O_CREAT|O_EXCL and a bump rather than a plain write.
+    #
+    # This was an unconditional write_text, so the normal rejected -> resubmit path -
+    # not a race, the documented flow, up to MAX_ATTEMPTS times - destroyed attempt
+    # one's text. verdict-1.md survived and went on referring to a submission that no
+    # longer existed, which is the worst shape for a record: a review whose subject
+    # has been overwritten by the thing it was reviewing.
+    #
+    # The events ledger keeps the file list and hashes either way; what was being lost
+    # was the human half, the summary the worker wrote. Rename rather than copy so the
+    # bytes are never duplicated or half-written, and this whole function already runs
+    # under run_lock, so the search for a free name cannot race another submit.
+    current = directory / "submission.md"
+    if current.exists():
+        for bump in range(1, 10000):
+            archived = directory / f"submission-{bump}.md"
+            if not archived.exists():
+                current.rename(archived)
+                break
+    current.write_text(body, encoding="utf-8")
     append_event(run_id, {"event": "submit", "job": args.job,
                           "by": row["worker"] or by, "files": files,
                           "hashes": hashes, "detail": (args.summary or "")[:DETAIL_MAX]})
