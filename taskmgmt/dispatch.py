@@ -534,6 +534,70 @@ def pick(view, wanted=None):
     return tasks[0], ""
 
 
+def served_home():
+    """The home of the dashboard process this checkout would talk to, or None.
+
+    Separate from foreign_board so the decision can be tested without a running
+    server: a check whose verdict depends on what happens to be listening on the
+    machine is one that passes or fails for reasons the suite cannot state.
+    """
+    try:
+        sys.path.insert(0, str(REPO / "dashboard"))
+        import suite_server           # noqa: PLC0415 - lazy, and optional
+        return suite_server.server_home()
+    except Exception:                 # noqa: BLE001 - see FAIL OPEN in foreign_board
+        return None
+
+
+def foreign_board():
+    """Why this process must not dispatch, or "" when it may.
+
+    AGENTMUX_HOME AND AGENTMUX_DASHBOARD ARE RESOLVED INDEPENDENTLY.
+    coordination.py reads the home at :46 and the dashboard at :51, with no relation
+    between them - so relocating the home does NOT relocate the board. A test with a
+    throwaway AGENTMUX_HOME still POSTs to whatever answers on 8787, which is normally
+    the operator's live dashboard.
+
+    That is not hypothetical. A pool test running against a mktemp home dispatched two
+    real cards off the operator's board, moved them to in_progress and spawned two real
+    codex agents for them. AGENTMUX_HOME looked like isolation and was not, and nothing
+    anywhere said so.
+
+    Dispatch is the right place for the check because it is the destructive one: it
+    claims a card, creates a worktree and starts an agent. A read against the wrong
+    board is confusing; a dispatch against the wrong board is someone else's work.
+
+    FAIL OPEN, DELIBERATELY. This refuses only when the two are positively known to
+    disagree. If the server is not running, or /proc cannot be read, or this is not
+    Linux, it returns "" and the dispatch proceeds - a guard that blocks on a guess
+    would break every legitimate setup it cannot introspect, and run_tests.sh's
+    pattern (relocate the SERVER's home to the same temp dir, keep port 8787) is
+    exactly such a setup and must keep working.
+    """
+    if os.environ.get("AGENTMUX_ALLOW_FOREIGN_BOARD") == "1":
+        return ""
+    if "AGENTMUX_HOME" not in os.environ:
+        return ""                    # not relocated: the default pairing is correct
+    served = served_home()
+    if not served:
+        return ""
+    try:
+        ours = Path(ROOT).resolve()
+        theirs = Path(served).resolve()
+    except OSError:
+        return ""
+    if ours == theirs:
+        return ""
+    return ("refusing to dispatch: AGENTMUX_HOME is %s but the dashboard at %s is "
+            "serving %s.\n"
+            "  Relocating the home does not relocate the board, so this would claim "
+            "cards and spawn agents\n"
+            "  on someone else's store. Point AGENTMUX_DASHBOARD at a server for this "
+            "home, or set\n"
+            "  AGENTMUX_ALLOW_FOREIGN_BOARD=1 if you meant it."
+            % (ours, coordination.DASHBOARD, theirs))
+
+
 def dispatch_one(key=None, cli=None, dry_run=False, limit=10, quiet=False):
     """Hand one card to a fresh agent. Returns the worker name, or None.
 
@@ -543,6 +607,11 @@ def dispatch_one(key=None, cli=None, dry_run=False, limit=10, quiet=False):
     one nobody reads, which defeats having one. A person who typed `dispatch` is
     owed the answer, so the default stays loud.
     """
+    refusal = foreign_board()
+    if refusal:
+        log(refusal)
+        return None
+
     view = dispatch_view(limit)
     if view is None:
         return None

@@ -326,6 +326,41 @@ except ValueError:
 else:
     ok("oversized required content is refused without overwriting the brief", False)
 
+section("dispatch refuses a board that is not backed by its own home")
+# AGENTMUX_HOME AND THE DASHBOARD ARE RESOLVED INDEPENDENTLY, so a throwaway home
+# is not isolation: the POSTs still go to whatever answers on 8787. A pool test run
+# that way dispatched two of the operator's real cards and spawned two real agents
+# for them. served_home() is patched here so the verdict does not depend on what
+# happens to be listening on the machine running the suite.
+def foreign_case(home, served, hatch=False):
+    env = {k: v for k, v in os.environ.items() if k != "AGENTMUX_ALLOW_FOREIGN_BOARD"}
+    if home is None:
+        env.pop("AGENTMUX_HOME", None)
+    else:
+        env["AGENTMUX_HOME"] = home
+    if hatch:
+        env["AGENTMUX_ALLOW_FOREIGN_BOARD"] = "1"
+    with patch.dict(os.environ, env, clear=True), \
+         patch.object(dispatch, "served_home", return_value=served):
+        return dispatch.foreign_board()
+
+mine, theirs = str(dispatch.ROOT), str(HOME / "somebody-else")
+ok("a dashboard serving another home is refused", bool(foreign_case(mine, theirs)))
+ok("the refusal names both homes and the way out",
+   all(part in foreign_case(mine, theirs)
+       for part in (mine, theirs, "AGENTMUX_ALLOW_FOREIGN_BOARD")))
+ok("a dashboard serving this home is allowed", foreign_case(mine, mine) == "")
+ok("an undiscoverable dashboard fails open", foreign_case(mine, None) == "")
+ok("the default pairing is not second-guessed", foreign_case(None, theirs) == "")
+ok("the escape hatch is honoured", foreign_case(mine, theirs, hatch=True) == "")
+with patch.object(dispatch, "foreign_board", return_value="nope"), \
+     patch.object(dispatch, "dispatch_view", return_value=None) as view:
+    # return_value=None so that WITHOUT the guard this still returns None and the
+    # case fails on the half that matters - "was the board read" - rather than
+    # crashing on a MagicMock and proving nothing.
+    ok("a refused board is never even read",
+       dispatch.dispatch_one() is None and not view.called)
+
 section("dispatch: selected spec reaches spawn and brief")
 def dispatch_case(specs, cfg=None, override=None, task=None, dry_run=False):
     task = task or card
@@ -341,6 +376,7 @@ def dispatch_case(specs, cfg=None, override=None, task=None, dry_run=False):
          patch.object(agentdefs, "choose_roster", wraps=agentdefs.choose_roster) as choose, \
          patch.object(dispatch, "agentmux", side_effect=fake_agentmux), \
          patch.object(dispatch, "set_status", return_value={}), \
+         patch.object(dispatch, "foreign_board", return_value=""), \
          patch.object(dispatch, "board", return_value={}):
         result = dispatch.dispatch_one(cli=override, dry_run=dry_run)
         ok("definitions are loaded for the dispatch repository",
