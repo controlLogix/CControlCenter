@@ -10,7 +10,7 @@
 # Pre-change snapshots. The grok-*.tar.gz archives in here are copies of the
 # xAI CLI's entire state directory and each one contains .grok/auth.json, i.e.
 # live credentials, plus session transcripts. Never publish.
-.backup-2026-09-18/
+.backup-*/
 
 # Agent audit and hardening journals. Full of machine-local paths and
 # credential-shaped strings that cannot be classified automatically.

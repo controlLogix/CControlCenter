@@ -1,6 +1,0 @@
-# Written by `tm init`.
-#
-# events.jsonl is ignored. If someone force-adds it, it is still append-only, so two
-# branches that both did work produce two sets of added lines at the end of one file.
-# Union keeps both sides in time order rather than asking a human to resolve noise.
-events.jsonl merge=union

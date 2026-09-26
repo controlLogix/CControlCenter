@@ -930,10 +930,8 @@ agentmux board    config [<name> [<value>]]          the dispatch policy lives h
 
 **One store.** `~/.agentmux/cc.db` is canonical. The board, `agentmux tasks`, the
 Control Center's Task Board view and the dispatcher all read and write that one
-database through `/api/board`. The `.bytedesk/task-management/` directory is the
-upstream plugin whose identifier and record model this board mirrors — it is not a
-second place work is tracked, and its own dispatch loop stays off. A card lives in
-one place or it will eventually say two things.
+database through `/api/board`. There is no second store: a card lives in one place
+or it will eventually say two things.
 
 **The sequence, and why it is that order.**
 
@@ -1130,8 +1128,6 @@ are point-in-time notes, useful for why rather than what.
 - `STATUS_CCC_2026-09-19.md` — the rebrand phase (theme system, the view split, store)
 - `PENDING_USER_ACTION.md` — everything that needs the operator, urgency-ordered
 - `RESUME.md` — the harness as of 2026-09-18; superseded for the dashboard
-- `.bytedesk/task-management/` — epics, ADRs and plans, including the orchestration
-  design and the two decisions it turned on
 
 Commit messages here carry the reasoning, deliberately. A change that only says *what*
 it did leaves the next person to rediscover *why* — which is how most of the defects
