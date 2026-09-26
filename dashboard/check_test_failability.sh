@@ -104,6 +104,17 @@ test_frontend_devicetree.sh  85e6ddb    1
 # and both suites fail cleanly through their guarded imports.
 agentmux-broker/test_killswitch.py  b8041df    24
 agentmux-broker/test_guardrails.py  b8041df    25
+# The selector registry, the execution venue and the credential store. Against
+# cff7911 none of the three modules exists and every case fails through the
+# suite's guarded import rather than an ImportError that would crash the run and
+# prove nothing. These are FLOORS, like the writejournal and rockwell rows: the
+# count only grows, because a tree without the module fails every test by
+# construction. Stated plainly - this proves each suite RUNS and FAILS CLEANLY
+# against a tree without its subject, not that it discriminates behaviour. The
+# behavioural proofs are the ordering and fail-closed tests inside each suite.
+agentmux-broker/test_selectormap.py cff7911    54
+agentmux-broker/test_venue.py       cff7911    39
+agentmux-broker/test_creds.py       cff7911    38
 # A transient 9p failure rendered as an answer about the request. Against the
 # commit before the fix, 15 of 21 fail - and the six that PASS there are what
 # make this row worth reading: they assert the behaviour that did NOT change (a

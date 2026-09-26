@@ -319,6 +319,12 @@ run test_devicetree.py python3 dashboard/test_devicetree.py
 # browser needed; proved by mutation, since the guard predates the repo's
 # first commit and has no failability base.
 run test_stream_slots.py python3 dashboard/test_stream_slots.py
+# TM-017 AC 2: the same guard, LIVE. A real dashboard on an ephemeral port with a
+# throwaway AGENTMUX_HOME and a stub tmux, driven over raw sockets left undrained
+# - because a drained socket is not an abandoned EventSource, and the in-process
+# suite can be wholly green while the running server still wedges. The catch it
+# alone makes: a refused reload must free its own predecessor. ~7s.
+run test_stream_slots_live.py python3 dashboard/test_stream_slots_live.py
 # TM-031: a 9p read that failed transiently was answered as 404, so the browser
 # was told kanban.js does not exist - and, because the body was JSON under the
 # nosniff header, it refused to run the script and the board never rendered.
@@ -368,6 +374,25 @@ run test_no_financial_artifacts.sh bash /dev/fd/30 30< <(tr -d '\r' < dashboard/
 # state: no broker, no browser, no money.
 run test_killswitch.py python3 agentmux-broker/test_killswitch.py
 run test_guardrails.py python3 agentmux-broker/test_guardrails.py
+# Selector drift: alert, never retry. The registry refuses to guess which button
+# is Place Order, and a drift arms the switch even when the screenshot fails.
+# NOT named selectors.py: `selectors` is stdlib and `subprocess` imports it, so
+# a file by that name in this directory shadows it for the whole process - which
+# broke test_killswitch.py with an AttributeError pointing nowhere near the
+# cause. The map file on disk is still selectors.json.
+run test_selectormap.py python3 agentmux-broker/test_selectormap.py
+# The venue end of that pipeline: the thing that actually submits and reads back.
+# Paper only, and the Alpaca adapter is driven against a loopback stub - no
+# network reaches Alpaca, paper or otherwise.
+run test_venue.py python3 agentmux-broker/test_venue.py
+# Credential storage. Credential Manager via ctypes (preferred: the OS gives a UI
+# to inspect and revoke), DPAPI as the documented fallback, and an in-memory
+# backend so the module is testable where this gate runs. The sentinel suite
+# drives every route out of the module - repr, describe, json, the CLI's stdout,
+# every log record, every exception AND its traceback - asserting the value
+# appears only where reveal() returns it. The Windows backends SKIP by name here
+# rather than passing quietly.
+run test_creds.py python3 agentmux-broker/test_creds.py
 # The gate in front of a write to PHYSICAL EQUIPMENT. Until 2026-09-25 that was a
 # one-click window.confirm and nothing tested it at all.
 run test_frontend_iiot_write.sh bash /dev/fd/23 23< <(tr -d '\r' < dashboard/test_frontend_iiot_write.sh)

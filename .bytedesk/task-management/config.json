@@ -58,5 +58,5 @@
   "dispatch": {
     "enabled": false
   },
-  "activeEpic": "EP-002"
+  "activeEpic": "EP-004"
 }
