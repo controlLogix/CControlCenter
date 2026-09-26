@@ -8,6 +8,16 @@
 # and three panes then sat at HTTP 503 rendering nothing — which looks exactly like a
 # dead agent. Each agent now holds at most one stream, so the ceiling is the agent count
 # rather than the reload count.
+#
+# NOT IN THE GATE, deliberately rather than by omission. This needs /api/agents
+# to return REAL agents; the gate's dashboard runs on a throwaway AGENTMUX_HOME
+# with none, so it would exit 1 with "no agents to test" for a reason that has
+# nothing to do with the guard. It also talks to 8787 directly, which the gate
+# has leased for itself.
+#
+# The MECHANISM is gated, in test_stream_slots.py: generations, supersession,
+# the claim-before-acquire ordering and slot release, with no server needed.
+# This file is the end-to-end proof, for a dashboard that has something on it.
 set -u
 ROUNDS="${1:-4}"
 BASE='http://127.0.0.1:8787'

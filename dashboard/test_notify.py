@@ -545,5 +545,66 @@ class TestRunNoticesReachTheFeed(unittest.TestCase):
         self.assertFalse((self.tmp / "inbox" / "orchestrator.read").exists())
 
 
+class TheBarForInterruptingSomeone(unittest.TestCase):
+    """What is worth a desktop toast, and what is merely true.
+
+    notify.py states the bar once in its docstring and then leaves the decision
+    to callers - which is right, but it means nothing was checking that any
+    caller held to it. A bar nobody checks is a default.
+
+    This asserts the SET, not the behaviour, because the property under test is
+    which kinds are in it; reaching that through a real run would need an
+    orchestration to exist.
+    """
+
+    def setUp(self):
+        self.source = (Path(__file__).resolve().parents[1]
+                       / "taskmgmt" / "run.py").read_text(encoding="utf-8")
+
+    def kinds(self):
+        import ast
+        tree = ast.parse(self.source)
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Assign):
+                continue
+            target = node.targets[0]
+            if getattr(target, "id", None) != "interrupts":
+                continue
+            # `kind in ("a", "b", ...)`
+            if isinstance(node.value, ast.Compare) and node.value.comparators:
+                right = node.value.comparators[0]
+                if isinstance(right, (ast.Tuple, ast.List, ast.Set)):
+                    return {e.value for e in right.elts
+                            if isinstance(e, ast.Constant)}
+        self.fail("run.py no longer decides `interrupts` from a set of kinds; "
+                  "the bar has moved and this test cannot see it")
+
+    def test_only_a_decision_or_an_ending_interrupts(self):
+        # Each of these is a person being needed, or the work being over.
+        self.assertEqual(self.kinds(), {"blocked", "conflict", "waiting", "done"})
+
+    def test_progress_never_interrupts(self):
+        # The list notify.py names explicitly. A toast you did not need is
+        # annoying in a way that accumulates, and the cost of that is the ones
+        # you did need being ignored.
+        kinds = self.kinds()
+        for noise in ("started", "progress", "spawned", "claimed", "assigned",
+                      "verdict", "passed", "submitted", "heartbeat", "note"):
+            self.assertNotIn(noise, kinds,
+                             f"{noise!r} raises a desktop toast; it is progress, "
+                             f"not a decision")
+
+    def test_the_toast_channel_can_be_switched_off_without_touching_code(self):
+        # An operator who wants none of it must not have to edit a source file,
+        # or they will edit the wrong one.
+        self.assertIn("AGENTMUX_NOTIFY_TOAST", self.source)
+
+    def test_a_channel_that_fails_never_stops_the_run(self):
+        # notify.py's first rule. A toast that could not be drawn must not be
+        # able to hold up an orchestration that has finished.
+        self.assertIn("except Exception", self.source)
+        self.assertIn("notification failed", self.source)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

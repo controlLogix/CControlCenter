@@ -437,7 +437,7 @@ eight new files of one run would have been reviewed blind.
 | `syntax_check.sh` | Parses every shell and Python file in the repo. |
 | `start_gateway.sh` / `setup_bedrock_codex.sh` | Bring up the Bedrock gateway; configure `codex-bedrock`. |
 | `check_key_exposure.sh` | Reports every location holding a Bedrock key, by fingerprint — never the value. |
-| `test_stream_slots.sh` | Proves the SSE slot pool cannot be exhausted by repeated page loads. |
+| `test_stream_slots.sh` | Proves the SSE slot pool cannot be exhausted by repeated page loads, end to end against the live dashboard. **Operator command, not in the gate** — it needs real agents, and the gate's dashboard runs on a throwaway home with none. The mechanism is gated in `test_stream_slots.py`. |
 | `verify_model_switch.sh` | Proves the model chosen in Settings reaches a newly spawned agent. |
 | `purge_test_rows.py` | Removes rows the suites leave in `cc.db`. Exact-name matches only; never touches the journal. |
 

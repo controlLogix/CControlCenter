@@ -314,6 +314,11 @@ run test_serving.py python3 dashboard/test_serving.py
 # The device tree: the segment scan and CIP discovery merged without pretending
 # they are equal kinds of knowing. Pure logic, no network.
 run test_devicetree.py python3 dashboard/test_devicetree.py
+# TM-017: the SSE slot guard. A page reload must not cost a slot - seven panes
+# over a couple of reloads once exhausted all sixteen. Server-side, so no
+# browser needed; proved by mutation, since the guard predates the repo's
+# first commit and has no failability base.
+run test_stream_slots.py python3 dashboard/test_stream_slots.py
 run test_pn_dcp.py python3 dashboard/test_pn_dcp.py
 run test_ecat_diag.py python3 dashboard/test_ecat_diag.py
 run test_snapshot.py python3 dashboard/test_snapshot.py
