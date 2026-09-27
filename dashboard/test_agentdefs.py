@@ -242,6 +242,37 @@ class AgentDefinitions(unittest.TestCase):
         self.assertEqual([s.name for s in roster], ["lead", "senior-dev"])
         self.assertTrue(roster.gaps)
 
+    def test_a_well_matched_lead_does_not_hand_the_card_to_the_alphabet(self):
+        """Workers were ranked only by what the LEAD lacks, so a lead that already
+        covered the card left every candidate tied and `spec.name` decided.
+
+        Found on a real card: TM-100, labelled inventory/catalog/filesystem, whose
+        lead covered all three. It recruited hr-recruiter, plc-dev and
+        plc-test-engineer - the first three worker definitions in the alphabet - to
+        scan a filesystem, while the three scanners written for that exact card sat
+        unproposed because "scan-" sorts after "plc-".
+        """
+        for name, extra in (
+            ("aardvark", "capabilities: unrelated\n"),
+            ("beetle", "capabilities: unrelated\n"),
+            ("zebra-scanner", "capabilities: inventory, filesystem\n"),
+        ):
+            self.write(name, extra=extra)
+        self.write("catalog-lead", extra="role: lead\ncapabilities: inventory, filesystem\n")
+        specs = self.load()[0]
+        task = {"labels": ["inventory", "filesystem"]}
+
+        roster = ad.choose_roster(task, specs, {"teamMaxWorkers": 1})
+        self.assertEqual(roster[0].name, "catalog-lead")
+        self.assertEqual([s.name for s in roster[1:]], ["zebra-scanner"],
+                         "the worker matching the card lost to the alphabet")
+        # Still deterministic, and still independent of how the specs are ordered.
+        self.assertEqual(roster, ad.choose_roster(
+            task, dict(reversed(list(specs.items()))), {"teamMaxWorkers": 1}))
+        # With nothing to match on, alphabetical order is still the answer.
+        plain = ad.choose_roster({}, specs, {"teamMaxWorkers": 1})
+        self.assertEqual([s.name for s in plain[1:]], ["aardvark"])
+
     def test_labels_gaps_types_and_depth(self):
         specs = self.roster_specs()
         roster = ad.choose_roster({"labels": ["backend", "missing"]}, specs, {})

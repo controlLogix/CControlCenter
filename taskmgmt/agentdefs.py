@@ -318,9 +318,27 @@ def choose_roster(task, specs, cfg, cli_override=None, *, dependencies=None):
     missing = labels - set(lead.capabilities)
 
     def rank(spec):
+        # THE CARD'S OWN LABELS ARE THE TIEBREAK, and without them selection fell
+        # through to alphabetical order.
+        #
+        # `missing` is what the LEAD does not cover, which is the right primary
+        # signal - the point of a worker is to bring something the lead has not got.
+        # But when the lead already matches the card well, `missing` is empty or
+        # irrelevant, every candidate scores zero, and `spec.name` decides. A card
+        # labelled inventory/catalog/filesystem, whose lead covered all three,
+        # recruited hr-recruiter, plc-dev and plc-test-engineer - the first three
+        # worker definitions in the alphabet - while the three scanners written for
+        # exactly that card sat unproposed, because "scan-" sorts after "plc-".
+        #
+        # So: fill the lead's gaps first, and where that cannot separate them, prefer
+        # the definitions that match what the card is ABOUT. Alphabetical order stays
+        # as the final key, so selection is still deterministic and independent of
+        # dict ordering.
+        covered = set(spec.capabilities)
         senior = bool({"senior", "expert", "principal"} &
-                      (set(spec.capabilities) | set(spec.name.split("-"))))
-        return (-int(deep and senior), -len(missing & set(spec.capabilities)), spec.name)
+                      (covered | set(spec.name.split("-"))))
+        return (-int(deep and senior), -len(missing & covered),
+                -len(labels & covered), spec.name)
 
     # Reserve the second slot for a bug reviewer, if the configured cap allows it.
     requests = ["worker"] + (["reviewer"] if kind == "bug" else []) + ["worker"] * (workers - 1)
