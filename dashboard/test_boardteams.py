@@ -279,6 +279,48 @@ class TeamsHTTP(unittest.TestCase):
         self.assertEqual(self.call("hire", {"id": self.key, "name": "lead"})[0], 409)
         spawn.assert_called_once()
 
+    def test_team_require_approval_off_actually_turns_approval_off(self):
+        """A setting that was wired to nothing.
+
+        teamRequireApproval is defaulted, validated as a bool, listed in the Teams
+        settings panel as "Require roster approval", and documented in
+        CONTRACTS_agents.md - and no code path read it. hire() requires
+        status='approved' unconditionally, so an operator could turn roster approval
+        OFF, recruit, and still be told "hire requires an approved roster row on an
+        open card". The switch moved and nothing happened.
+
+        Honoured in recruit() rather than by relaxing hire(): "only an approved row
+        may be hired" keeps exactly one meaning, and what the setting really says is
+        whether approval is a separate human step or implied by recruiting.
+        """
+        with ccstore.connection() as db:
+            ccboard.set_config(db, "teamRequireApproval", True)
+        status, proposed = self.write("recruit")
+        self.assertEqual(status, 200)
+        self.assertTrue(all(r["status"] == "proposed" for r in proposed["members"]),
+                        proposed["members"])
+
+        with ccstore.connection() as db:
+            other = ccboard.create(db, "task", {"title": "No-approval card",
+                                                "epic": self.epic}, mirror=True)["id"]
+        with ccstore.connection() as db:
+            ccboard.set_config(db, "teamRequireApproval", False)
+        status, payload = self.call("recruit", {"id": other, "actor": "suite"})
+        self.assertEqual(status, 200)
+        self.assertTrue(payload["members"], "recruit proposed nobody")
+        for row in payload["members"]:
+            self.assertEqual(row["status"], "approved", row)
+            # Approved by SOMEBODY: an implied approval still has an owner, or the
+            # audit row goes quiet exactly where it matters.
+            self.assertEqual(row["approved_by"], "suite", row)
+            self.assertTrue(row["approved_at"], row)
+        events = [e for e in self.call("history", query="?id=" + other)[1]["events"]
+                  if e["event"] == "approve"]
+        self.assertEqual(len(events), 1, events)
+        self.assertEqual(events[0]["detail"]["via"], "teamRequireApproval is off")
+        with ccstore.connection() as db:
+            ccboard.set_config(db, "teamRequireApproval", True)
+
     def test_retire_takes_members_off_and_is_the_only_write_a_closed_card_allows(self):
         """The transition the model named and nothing ever performed.
 

@@ -87,8 +87,8 @@ def recruit(db, body):
     dependencies = {}
     for row in db.execute("SELECT entity_key,blocked_by FROM board_deps"):
         dependencies.setdefault(row["entity_key"], []).append(row["blocked_by"])
-    selected = agentdefs.choose_roster(task, specs, ccboard.config(db),
-                                       dependencies=dependencies)
+    cfg = ccboard.config(db)
+    selected = agentdefs.choose_roster(task, specs, cfg, dependencies=dependencies)
     gaps = getattr(selected, "gaps", [])
     existing = _rows(db, key)
     hired = {row["agent_name"] for row in existing if row["status"] == "hired"}
@@ -102,11 +102,33 @@ def recruit(db, body):
         return _payload(db, key)
     db.execute("DELETE FROM board_roster WHERE entity_key=? AND status!='hired'", (key,))
     stamp = ccboard.now()
+    # teamRequireApproval IS A SETTING THAT DID NOTHING.
+    #
+    # It is defaulted, validated as a bool, listed in the Teams settings panel as
+    # "Require roster approval", and documented in CONTRACTS_agents.md - and no code
+    # path read it. hire() requires status='approved' unconditionally, so an operator
+    # could turn roster approval OFF, recruit, and still be told "hire requires an
+    # approved roster row". The switch was connected to nothing.
+    #
+    # Honoured HERE rather than by relaxing hire(), on purpose. "Only an approved row
+    # may be hired" is an invariant worth keeping exactly one meaning; what the
+    # setting actually says is whether approval is a SEPARATE HUMAN STEP or implied by
+    # recruiting. So with it off, recruitment approves as it proposes - and records
+    # who, so the audit row still names somebody rather than going quiet.
+    approved_on_recruit = not cfg.get("teamRequireApproval", True)
     for name, role, position in desired:
-        db.execute("INSERT INTO board_roster "
-                   "(entity_key,agent_name,role,position,proposed_by,at,updated_at) "
-                   "VALUES (?,?,?,?,?,?,?)", (key, name, role, position, actor, stamp, stamp))
+        db.execute(
+            "INSERT INTO board_roster (entity_key,agent_name,role,position,proposed_by,"
+            "status,approved_by,approved_at,at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)",
+            (key, name, role, position, actor,
+             "approved" if approved_on_recruit else "proposed",
+             actor if approved_on_recruit else None,
+             stamp if approved_on_recruit else None, stamp, stamp))
     ccboard._record(db, key, "recruit", actor, detail={"members": [r[0] for r in desired], "gaps": gaps})
+    if approved_on_recruit:
+        ccboard._record(db, key, "approve", actor,
+                        detail={"members": [r[0] for r in desired],
+                                "via": "teamRequireApproval is off"})
     return _payload(db, key)
 
 
