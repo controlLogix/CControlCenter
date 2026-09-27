@@ -144,7 +144,26 @@ else
   bad 'a record was torn'
 fi
 
+echo '--- a rejection without a reason is not a review ---'
+# --fail accepted an empty reason and wrote an EMPTY verdict-N.md. The worker was
+# told only that it was rejected, resubmitted a guess, and burned an attempt against
+# MAX_ATTEMPTS - the loop the review exists to close could not close. This file is
+# the one the code below protects with O_EXCL and a name bump, because two reviewers
+# on one attempt number once destroyed "the only copy of why a job was rejected";
+# guarding the bytes of a file allowed to be empty guards a container, not a record.
+rno=$($RUN start "reasonless" 2>/dev/null)
+jno=$($RUN assign "$rno" --worker w1 --reviewer rev 2>/dev/null)
+$RUN submit "$jno" --by w1 >/dev/null 2>&1
+$RUN verdict "$jno" --by rev --fail >/dev/null 2>&1
+rc_is 'a fail with no reason is refused' 2 $?
+$RUN verdict "$jno" --by rev --fail --reason '   ' >/dev/null 2>&1
+rc_is 'and a whitespace-only reason is refused too' 2 $?
+[ -f "$HOME_DIR/runs/$rno/jobs/1/verdict-1.md" ]   && bad 'an empty verdict file was written anyway'   || ok 'and no empty verdict file was left behind'
+$RUN verdict "$jno" --by rev --pass >/dev/null 2>&1
+rc_is 'a PASS still needs no reason - "it does what was asked" carries itself' 0 $?
+
 echo '--- a long verdict goes in a file, not in the event log ---'
+
 r4=$($RUN start "size" 2>/dev/null)
 j4=$($RUN assign "$r4" --worker w1 --reviewer rev 2>/dev/null)
 $RUN submit "$j4" --by w1 >/dev/null 2>&1

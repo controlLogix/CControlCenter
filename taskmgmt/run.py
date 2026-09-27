@@ -1091,6 +1091,29 @@ def cmd_verdict(args):
             print(f"run: cannot read {args.reason_file}: {err}", file=sys.stderr)
             return 2
 
+    # A REJECTION WITHOUT A REASON IS NOT A REVIEW.
+    #
+    # --fail used to accept an empty reason and write an empty verdict-N.md. The
+    # worker is then told only that it was rejected, resubmits a guess, and burns an
+    # attempt against MAX_ATTEMPTS - the loop the review exists to close cannot close,
+    # because nothing said what was wrong.
+    #
+    # This file is the one thing the code below goes out of its way to protect: it is
+    # created O_EXCL and the name is bumped rather than overwritten, because two
+    # reviewers landing on the same attempt number once destroyed "the only copy of
+    # why a job was rejected". Guarding the bytes of a file we allowed to be empty was
+    # protecting a container, not a record.
+    #
+    # A PASS needs no such thing. "It does what the brief asked" carries its meaning;
+    # "no" does not.
+    if not args.passed and not reason.strip():
+        print(f"run: rejecting {args.job} needs a reason - the worker has nothing to "
+              f"act on without one.", file=sys.stderr)
+        print(f"  run verdict {args.job} --by {by} --fail --reason '<what is wrong>'",
+              file=sys.stderr)
+        print(f"  or --reason-file <path> for anything longer.", file=sys.stderr)
+        return 2
+
     # Everything from here is read-decide-write, so it happens under the run lock.
     # The state is re-folded inside it: the checks above used a snapshot taken before
     # we held anything, and a rival verdict on the same job could have landed since.
