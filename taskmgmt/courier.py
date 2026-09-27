@@ -110,13 +110,27 @@ SOCKET = os.environ.get("AGENTMUX_SOCKET", "agentmux")
 COURIER = "courier"
 
 
+class HomeGone(Exception):
+    """AGENTMUX_HOME no longer exists, so there is nothing left to deliver.
+
+    Raised instead of rebuilding it. See watch() for why that distinction earns an
+    exception of its own.
+    """
+
+
 # ─────────────────────────────────────────────────────────────────── plumbing ──
 
 def log(message):
     stamp = time.strftime("%Y-%m-%dT%H:%M:%S%z")
     line = f"{stamp}  {message}\n"
     try:
-        STATE_DIR.mkdir(parents=True, exist_ok=True)
+        # parents=False: writing a log line must never be the thing that creates a
+        # directory tree. With parents=True the last line a stopping courier writes -
+        # "your home is gone, stopping" - rebuilt the very home it was reporting
+        # missing, which is how deleted test homes under /tmp kept reappearing with a
+        # courier/ directory and nothing else in them. An existing home still gets its
+        # courier/ directory here; a missing one falls through to stdout.
+        STATE_DIR.mkdir(parents=False, exist_ok=True)
         with LOG.open("a", encoding="utf-8") as handle:
             handle.write(line)
         os.chmod(LOG, 0o600)
@@ -544,10 +558,24 @@ _UNKNOWN_KINDS_SEEN = set()
 _CURSOR_CACHE = {}
 
 
-def tick(from_start=False, dry_run=False):
-    """One pass: retry what is pending, then drain each outbox. Returns a summary."""
-    QUEUE_DIR.mkdir(parents=True, exist_ok=True)
-    STATE_DIR.mkdir(parents=True, exist_ok=True)
+def tick(from_start=False, dry_run=False, require_home=False):
+    """One pass: retry what is pending, then drain each outbox. Returns a summary.
+
+    `require_home` refuses to CREATE AGENTMUX_HOME, and that is the whole guard --
+    the kernel's answer rather than ours. A long-running courier whose home has been
+    deleted otherwise rebuilds the tree here and carries on delivering nothing
+    forever; watch() has the full account. Asking ROOT.is_dir() first and then calling
+    mkdir(parents=True) leaves the same window open, only narrower, because they are
+    two syscalls with a scheduler between them. parents=False makes it one.
+
+    Left off by default so `--once` and `--status` keep working on a home that has
+    never existed, which is a first run rather than an orphan.
+    """
+    try:
+        QUEUE_DIR.mkdir(parents=not require_home, exist_ok=True)
+        STATE_DIR.mkdir(parents=not require_home, exist_ok=True)
+    except FileNotFoundError:
+        raise HomeGone(str(ROOT)) from None
     os.chmod(STATE_DIR, 0o700)
     running = live_agents()
     pending = load_pending()
@@ -711,6 +739,24 @@ def watch(interval, from_start):
 
     signal.signal(signal.SIGTERM, on_term)
 
+    # THE PIDFILE LIVES IN A DIRECTORY NOTHING HAS NECESSARILY CREATED. The
+    # `agentmux courier start` wrapper does `mkdir -p "$ROOT/courier"` first, so this
+    # never showed there - but the invocation this file's own docstring documents,
+    #     python3 taskmgmt/courier.py --watch
+    # went straight to the os.open below and died with a FileNotFoundError traceback
+    # against any home that had not had a courier before. A documented entry point
+    # should not depend on a shell wrapper having been run first.
+    #
+    # parents=False for the same reason log() uses it: create the courier's own
+    # directory inside a home that exists, never the home itself. No home is an error
+    # for a watcher - there is nothing to watch and nothing will appear - whereas for
+    # `--once` it is simply a first run, which is why only this path refuses.
+    try:
+        STATE_DIR.mkdir(parents=False, exist_ok=True)
+    except FileNotFoundError:
+        log(f"{ROOT} does not exist - nothing to watch")
+        return 1
+
     # TAKE THE PIDFILE EXCLUSIVELY. running_pid() above is a CHECK; this is the ACT,
     # and another courier can start between them. Not hypothetical: `spawn` auto-starts
     # a courier, so two parallel spawns both see "not running" and both launch one.
@@ -744,14 +790,42 @@ def watch(interval, from_start):
         summary = tick(from_start=first)
         first = False
         while True:
+            # THE HOME IS THE COURIER'S REASON TO EXIST, AND IT CAN BE TAKEN AWAY.
+            #
+            # `agentmux.sh` starts a courier with the first agent, and only
+            # `agentmux kill` runs stop_courier_if_idle - so killing the tmux server
+            # directly, or removing a throwaway AGENTMUX_HOME, leaves this loop
+            # running with nothing to serve. That is not a slow leak: tick() opens
+            # with QUEUE_DIR.mkdir(parents=True, exist_ok=True), so a courier whose
+            # home has been deleted RECREATES the directory tree under it and carries
+            # on delivering nothing, forever. One was found 81 minutes old against a
+            # /tmp home its own test had removed an hour before, quietly rebuilding
+            # that home ten times a second.
+            #
+            # A missing home is the one unambiguous "nothing left to do" signal there
+            # is. Deliberately NOT keyed on tmux: an orchestrator has no pane, and
+            # delivery to a pane-less recipient is exactly what a courier still has to
+            # do when no tmux session exists at all. A home that is gone is gone for
+            # everyone, panes and virtual recipients alike.
+            #
+            # Checked HERE, before work_waiting() and tick(), and tick is additionally
+            # told to refuse to create the home - because this check and that mkdir
+            # are two syscalls, and a deletion landing between them would be rebuilt
+            # by the very tick this check just cleared.
+            if not ROOT.is_dir():
+                log(f"{ROOT} is gone - nothing left to deliver, stopping")
+                return 0
             # The fast path: no subprocess, no tmux, just a scandir. A full tick only
             # happens when there is something to deliver or retry.
             if work_waiting():
-                summary = tick()
+                summary = tick(require_home=True)
                 if summary["delivered"] or summary["dropped"]:
                     log(f"tick    delivered {summary['delivered']}  "
                         f"pending {summary['pending']}  dropped {summary['dropped']}")
             time.sleep(interval)
+    except HomeGone as gone:
+        log(f"{gone} went away mid-tick - nothing left to deliver, stopping")
+        return 0
     except KeyboardInterrupt:
         log("courier stopped")
         return 0

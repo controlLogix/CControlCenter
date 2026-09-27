@@ -27,6 +27,7 @@ import json
 import os
 import shutil
 import stat
+import subprocess
 import sys
 import tempfile
 import time
@@ -543,6 +544,50 @@ check("the monster line is stepped over, not parsed", 0, summary["delivered"])
 summary = courier.tick()
 check("the record behind it still arrives", 1, summary["delivered"])
 check("intact", True, "after the monster" in sent()[0][2])
+
+print("--- a courier whose home is deleted stops instead of rebuilding it ---")
+# The real entry point in a real process, because the bug is a lifecycle bug: the
+# courier is started with the first agent and only `agentmux kill` ever stops it, so
+# killing tmux directly - or removing a throwaway AGENTMUX_HOME, which is what every
+# suite in this repo does on its way out - left one looping against nothing. It did
+# not even idle quietly: tick() and log() both used mkdir(parents=True), so it rebuilt
+# the deleted home ten times a second. One was found 81 minutes old doing exactly that.
+orphan = Path(tempfile.mkdtemp(prefix="courier-orphan-"))
+(orphan / "queue").mkdir()
+watcher = subprocess.Popen(
+    [sys.executable, str(REPO / "taskmgmt" / "courier.py"), "--watch", "--interval", "0.05"],
+    env=dict(os.environ, AGENTMUX_HOME=str(orphan)),
+    stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+pidfile = orphan / "courier" / "courier.pid"
+deadline = time.time() + 30
+while time.time() < deadline and not pidfile.exists():
+    time.sleep(0.05)
+check("the watcher came up", True, pidfile.exists())
+
+shutil.rmtree(orphan, ignore_errors=True)
+try:
+    watcher.wait(timeout=30)
+    stopped = watcher.returncode
+except subprocess.TimeoutExpired:
+    watcher.kill()
+    watcher.wait(timeout=10)
+    stopped = "still running"
+check("it exits when its home is removed", 0, stopped)
+# The second half, and the one that made these survivable enough to go unnoticed: a
+# courier that stops but recreates the directory on its way out leaves the same
+# litter behind as one that never stopped.
+check("and it did not rebuild the home it was told to forget", False, orphan.exists())
+shutil.rmtree(orphan, ignore_errors=True)
+
+print("--- but a missing home is a first run, not an orphan, for the one-shot modes ---")
+fresh = Path(tempfile.mkdtemp(prefix="courier-fresh-")) / "never-existed"
+once = subprocess.run(
+    [sys.executable, str(REPO / "taskmgmt" / "courier.py"), "--once"],
+    env=dict(os.environ, AGENTMUX_HOME=str(fresh)),
+    stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=60)
+check("--once still creates a home that has never existed", 0, once.returncode)
+check("and it is there afterwards", True, (fresh / "queue").is_dir())
+shutil.rmtree(fresh.parent, ignore_errors=True)
 
 shutil.rmtree(HOME, ignore_errors=True)
 print()
