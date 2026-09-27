@@ -156,14 +156,27 @@ run() {
   printf '%s\n' "$line"
   # Keep unavailable-history skips visible even when a meta-check exits cleanly.
   printf '%s\n' "$out" | grep '^SKIP ' || true
-  case "$rc:$line" in
+  # A suite that DECLINED to run is not a suite that failed, and the last line is the
+  # wrong place to look for that: a skip explains itself, so the SKIP marker is
+  # followed by the instructions for making it stop skipping. test_e2e.sh has printed
+  # such a block since it was written, and its last line is
+  #     PLAYWRIGHT_DIR=/path/to/node_modules/playwright bash dashboard/test_e2e.sh
+  # which matches neither success shape below - so the one machine without Playwright
+  # would have gone red on a suite that was working exactly as designed. Nobody had
+  # hit it yet. test_stream_slots.sh, registered below, skips without live agents and
+  # would have hit it on any box with no tmux.
+  local skipped=0
+  printf '%s\n' "$out" | grep -q '^SKIP ' && skipped=1
+  case "$rc:$skipped:$line" in
     # Two success shapes, because there are two kinds of suite. The shell suites and
     # the older python ones print "passed N, failed 0" via their own harness; a suite
     # using raw unittest prints "OK" and exits 0. Matching only the first counted four
     # passing suites as failures - the gate said "5 suite(s) failed" while every line
     # above it said OK, which is the kind of noise that gets a gate ignored.
-    0:*"failed 0") ;;
-    0:OK|0:OK\ *) ;;
+    0:*:*"failed 0") ;;
+    0:*:OK|0:*:OK\ *) ;;
+    # Clean exit, and it said why it did nothing.
+    0:1:*) ;;
     *) total_fail=$((total_fail + 1))
        # Two failure shapes, because there are two kinds of suite here. The shell
        # suites print '  FAIL  <what>' via testlib; a python unittest suite prints
@@ -264,6 +277,10 @@ run test_ads.py python3 dashboard/test_ads.py
 run test_pn_dcp.py python3 dashboard/test_pn_dcp.py
 run test_ecat_diag.py python3 dashboard/test_ecat_diag.py
 run test_snapshot.py python3 dashboard/test_snapshot.py
+# The SSE slot pool, against the live server and the agents spawned above - which is
+# why it sits here, after the other two suites that need healthy streams rather than
+# before them. It SKIPs if there is no dashboard or no agent to open a stream for.
+run test_stream_slots.sh bash /dev/fd/21 21< <(tr -d '\r' < dashboard/test_stream_slots.sh)
 run test_mqtt.py  python3 dashboard/test_mqtt.py
 # The IIOT field services. Self-contained: its own HTTP server on an ephemeral port
 # and its own throwaway AGENTMUX_HOME, so it neither needs nor disturbs the shared
