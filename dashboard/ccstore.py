@@ -161,7 +161,7 @@ def validate_write(resource, body):
         "tasks": {"epic_id", "epic", "title", "agent", "jira_key", "body"},
         "journal": {"kind", "subject", "body", "agent"},
         "devices": {"name", "kind", "address", "port", "protocol", "meta"},
-        "status": {"kind", "id", "key", "status", "actor"},
+        "status": {"kind", "id", "key", "status", "actor", "reason"},
         "delete": {"kind", "id", "key"},
     }
     if not isinstance(body, dict) or body.keys() - fields[resource]:
@@ -238,8 +238,13 @@ def validate_write(resource, body):
     # close that cannot say who closed it is one of the things that gate is for.
     # It is also what the history row is attributed to, so a change made through
     # the compatibility endpoint is as traceable as one made through the board.
+    # `reason` for the same reason `actor` is here: this surface runs the same gates
+    # /api/board/status runs, and blocked and parked now require one. Without it the
+    # compatibility endpoint could still MOVE a card to blocked but had no way to say
+    # why - the very hole the gate closes, reachable through the older door.
     return dict(kind=kind, status=status_value,
                 actor=text_field(body, "actor", 64, pattern=NAME_PATTERN),
+                reason=text_field(body, "reason", 512),
                 **_addressed(body, kind))
 
 
@@ -378,7 +383,8 @@ def write(db, resource, values):
     # `doctor` reports the thin card instead. A status change carries no fields,
     # so it never had that excuse. The bypass with a reason is /api/board/override.
     key = _resolve_key(db, values["kind"], values)
-    ccboard.set_status(db, key, values["status"], actor=values.get("actor"))
+    ccboard.set_status(db, key, values["status"], actor=values.get("actor"),
+                       reason=values.get("reason"))
     table = "epics" if values["kind"] == "epic" else "tasks"
     return dict(db.execute("SELECT * FROM " + table + " WHERE key=?", (key,)).fetchone())
 

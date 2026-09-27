@@ -225,10 +225,14 @@ print(' '.join(re.findall(r\"'([a-z_]+)'\", m.group(1))) if m else '')
     "$([ -n "$tkey" ] && echo yes || echo no)"
   jpost api/board/acceptance "{\"id\":\"$tkey\",\"index\":1,\"done\":true}" > /dev/null
   jpost api/board/evidence "{\"id\":\"$tkey\",\"ref\":\"smoke.sh\"}" > /dev/null
+  # A reason rides along: blocked and parked require one now, and this loop is
+  # about the VOCABULARY rather than the gates - the same reasoning as the
+  # acceptance tick and the evidence supplied just above it. Every other word
+  # ignores it.
   for s in $task_vocab; do
     check "task status $s accepted" "$s" \
       "$(jpost api/status \
-          "{\"kind\":\"task\",\"key\":\"$tkey\",\"status\":\"$s\",\"actor\":\"smoke\"}" \
+          "{\"kind\":\"task\",\"key\":\"$tkey\",\"status\":\"$s\",\"actor\":\"smoke\",\"reason\":\"walking the vocabulary\"}" \
          | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status",""))')"
   done
 

@@ -326,6 +326,34 @@ with ccstore.connection() as db:
     refuses("start refuses a task whose blocker is open",
             lambda: ccboard.set_status(db, blocked["id"], "in_progress", actor="x"),
             expect="blocked by")
+    # BLOCKED AND PARKED CARRY A REASON, because "stopped" is not information.
+    # Both were optional: `task-status TM-014 blocked` succeeded and wrote
+    # blocked_reason = NULL, so a card sat on the board saying blocked with nothing
+    # anywhere saying what would unblock it - while the CLI's own help called the
+    # flag "required reading for blocked/parked".
+    stopper = ccboard.create(db, "task", {"title": "stops", "body": "b",
+                                          "acceptance": ["a"]})
+    for state in ("blocked", "parked"):
+        refuses(f"{state} refuses a card with no reason",
+                lambda state=state: ccboard.set_status(db, stopper["id"], state, actor="x"),
+                expect="needs a reason")
+        refuses(f"{state} refuses a reason of only whitespace",
+                lambda state=state: ccboard.set_status(db, stopper["id"], state,
+                                                       actor="x", reason="   "),
+                expect="needs a reason")
+    ok("the card never moved while the reason was missing",
+       ccboard.entity(db, stopper["id"])["status"] == "open",
+       ccboard.entity(db, stopper["id"])["status"])
+    ccboard.set_status(db, stopper["id"], "blocked", actor="x",
+                       reason="waiting on the licence server")
+    ok("with a reason it moves, and the reason is on the card",
+       ccboard.entity(db, stopper["id"])["blockedReason"] == "waiting on the licence server",
+       ccboard.entity(db, stopper["id"])["blockedReason"])
+    # Leaving blocked is not a decision that needs its own reason.
+    ccboard.set_status(db, stopper["id"], "open", actor="x")
+    ok("and leaving blocked clears it",
+       not ccboard.entity(db, stopper["id"])["blockedReason"])
+
     rejects("a task cannot block itself",
             lambda: ccboard.set_dep(db, blocked["id"], blocked["id"]))
     rejects("a dependency cycle is refused",
@@ -601,9 +629,16 @@ with ccstore.connection() as db:
     ok("and the refusals left the card where it was",
        ccboard.entity(db, legacy_task["key"])["status"] == "open",
        ccboard.entity(db, legacy_task["key"])["status"])
+    # blocked carries a reason now - it is the one status whose whole content is the
+    # reason - so this supplies one. What the assertion is about is unchanged: the
+    # ROW ID still addresses the card through the compatibility endpoint.
     row = ccstore.write(db, "status", ccstore.validate_write(
-        "status", {"kind": "task", "id": legacy_task["row"], "status": "blocked"}))
-    ok("an ungated transition still works by row id", row["status"] == "blocked")
+        "status", {"kind": "task", "id": legacy_task["row"], "status": "blocked",
+                   "reason": "waiting on the upstream card"}))
+    ok("a transition still works by row id", row["status"] == "blocked")
+    ok("and the reason reached the row through the compatibility endpoint",
+       ccboard.entity(db, legacy_task["key"])["blockedReason"] == "waiting on the upstream card",
+       ccboard.entity(db, legacy_task["key"])["blockedReason"])
     ok("and the response carries the key", row["key"] == legacy_task["key"])
 
     # Fill the record the way the remedy said to, and the SAME endpoint moves it.

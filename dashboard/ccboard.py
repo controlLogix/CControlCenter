@@ -1262,6 +1262,31 @@ def set_status(db, key, status, actor=None, session=None, reason=None):
     was = row["status"]
     result = {"id": key, "from": was, "to": status}
 
+    # A CARD STOPS, AND NOBODY IS TOLD WHY.
+    #
+    # blocked and parked are the two statuses whose entire content is the reason -
+    # "stopped" is not information, "stopped waiting on the licence server" is - and
+    # the reason was optional. `task-status TM-014 blocked` succeeded and wrote
+    # blocked_reason = NULL, so the card sat on the board saying blocked with nothing
+    # anywhere saying what would unblock it. The CLI's own help has always called the
+    # flag "required reading for blocked/parked"; nothing enforced it.
+    #
+    # Gated here rather than in the CLI because the HTTP endpoint is the other caller
+    # and the dashboard reaches it directly. Refused rather than defaulted: inventing
+    # "no reason given" would satisfy the field and lose the point.
+    #
+    # TASKS ONLY, and that is a limit rather than an oversight. blocked_reason and
+    # parked_reason are columns on `tasks`; an epic has neither, so demanding a reason
+    # for a blocked EPIC would refuse the caller and then throw the reason away -
+    # asking for something the board has nowhere to keep. The first draft of this gate
+    # did exactly that, and smoke.sh caught it on the next full run. If epics ever
+    # want the same guard they need the same two columns first.
+    if (kind == "task" and status in ("blocked", "parked") and status != was
+            and not (reason or "").strip()):
+        raise Refused(f"{status} needs a reason", [
+            {"field": "reason",
+             "hint": f"agentmux task {status} {key} --reason '<what would unblock it>'"}])
+
     if kind == "task":
         task = entity(db, key)
         if status == "in_progress" and was != "in_progress":
