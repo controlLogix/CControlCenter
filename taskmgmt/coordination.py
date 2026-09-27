@@ -29,6 +29,7 @@ catches the common case, which is two agents unknowingly pulling in opposite dir
     python3 taskmgmt/coordination.py journal <kind> <subject> [--body B] [--agent A]
 """
 import argparse
+import fcntl
 import json
 import os
 import re
@@ -485,16 +486,26 @@ def take_generation(resource, path):
                               nothing to serialise on; the caller proceeds as it did
                               before this mechanism existed rather than refusing.
 
-    O_CREAT|O_EXCL rather than a link from the caller's staging file: it is the same
-    atomic exclusive create, it needs nothing from the caller, and release has no
-    staging file to offer.
+    AN flock, NOT AN O_EXCL CREATE, and that is the difference between a lock and a
+    booby trap. Exclusive creation makes the FILE the lock, so a process SIGKILLed
+    between taking the token and dropping it leaves the file behind - and since inode
+    numbers are recycled, that leftover name refuses a future generation of an
+    unrelated claim, permanently, until somebody notices a `.steal.` file in
+    CLAIMS_DIR and deletes it. The obvious repair is worse than the disease: deciding
+    that a lock file is stale is exactly the check-then-act race this whole mechanism
+    exists to remove.
 
-    KNOWN LIMIT, unchanged by this and worth writing down: a process SIGKILLed between
-    taking the token and dropping it leaves the token behind, and inode numbers are
-    recycled, so that name could refuse a future generation. The window is a handful
-    of syscalls and the `finally` covers everything short of SIGKILL. Reaping stale
-    tokens means deciding one is stale, which is the same class of race this exists to
-    remove - so it is documented rather than guessed at.
+    An advisory lock has no such question in it. The kernel releases it when the fd
+    closes, including when the process dies for any reason, SIGKILL included, so
+    there is no staleness to adjudicate. The token returned is the open FD; dropping
+    it is a close.
+
+    The empty lock FILES do survive, one per generation that was ever contended, and
+    they are deliberately not unlinked: removing a lock file while holding its lock is
+    the classic way to end up with two holders, because a process that opened the old
+    path before the unlink locks an inode nobody else can reach. They are zero bytes,
+    they are named `.steal.*` so `all_claims()`'s `*.json` glob never sees them, and
+    an unlocked one blocks nothing.
     """
     try:
         observed = os.stat(path).st_ino
@@ -502,19 +513,23 @@ def take_generation(resource, path):
         return None, None
     token = CLAIMS_DIR / f".steal.{flatten(resource)}.{observed}"
     try:
-        os.close(os.open(token, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600))
-    except FileExistsError:
-        return GENERATION_LOST, observed
+        handle = os.open(token, os.O_CREAT | os.O_WRONLY, 0o600)
     except OSError:
         return None, observed
-    return token, observed
+    try:
+        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        os.close(handle)
+        return GENERATION_LOST, observed
+    return handle, observed
 
 
 def drop_generation(token):
+    """Release a generation token. The close IS the release; see take_generation."""
     if token is None or token is GENERATION_LOST:
         return
     try:
-        token.unlink()
+        os.close(token)
     except OSError:
         pass
 

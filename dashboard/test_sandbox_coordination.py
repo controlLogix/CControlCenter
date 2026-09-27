@@ -112,6 +112,63 @@ class SandboxCoordination(unittest.TestCase):
             status.assert_not_called()
             release.assert_not_called()
 
+    def generation_is_free(self, resource, path):
+        """Can the generation at `path` still be taken? The lock FILE is expected to
+        survive a race - see take_generation - so the question is never whether it is
+        there, only whether anybody is still holding it."""
+        token, _observed = co.take_generation(resource, path)
+        if token is co.GENERATION_LOST:
+            return False
+        co.drop_generation(token)
+        return True
+
+    def test_a_killed_process_does_not_wedge_a_generation_forever(self):
+        """The reason the token is an flock and not an exclusive create.
+
+        With the file itself as the lock, a process killed between taking a token and
+        dropping it leaves the file behind. Inode numbers are recycled, so that
+        leftover name then refuses a future generation of an unrelated claim - for
+        good, until somebody spots a `.steal.` file in CLAIMS_DIR and deletes it. And
+        the repair is worse than the fault: judging a lock file stale is the same
+        check-then-act race the token exists to remove.
+
+        An advisory lock has no staleness question in it. SIGKILL - which no `finally`
+        can catch - is the case that proves it.
+        """
+        resource = 'taskmgmt/killed-holder.py'
+        co.CLAIMS_DIR.mkdir(parents=True, exist_ok=True)
+        path = co.CLAIMS_DIR / co.flatten(resource)
+        path.write_text(json.dumps({
+            'resource': resource, 'holder': 'holder-a', 'at': 'earlier', 'ttl': 60,
+            'expires_at': time.time() + 60, 'note': '', 'task': None, 'depends_on': [],
+        }), encoding='utf-8')
+
+        # A real process, killed without warning while holding the token.
+        holder = subprocess.Popen(
+            [sys.executable, '-c',
+             'import os, sys, time\n'
+             'sys.path.insert(0, sys.argv[1])\n'
+             'import coordination as co\n'
+             'token, _ = co.take_generation(sys.argv[2], co.CLAIMS_DIR / co.flatten(sys.argv[2]))\n'
+             'assert token not in (None, co.GENERATION_LOST), token\n'
+             'print("held", flush=True)\n'
+             'time.sleep(300)\n',
+             str(REPO / 'taskmgmt'), resource],
+            env=dict(os.environ, AGENTMUX_HOME=TEMP.name),
+            stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, text=True)
+        self.assertEqual(holder.stdout.readline().strip(), 'held',
+                         'the child never took the token')
+        self.assertFalse(self.generation_is_free(resource, path),
+                         'the token was not exclusive while the child held it')
+
+        holder.kill()                     # SIGKILL: no finally, no cleanup, no chance
+        holder.wait(timeout=30)
+        holder.stdout.close()
+
+        self.assertTrue(self.generation_is_free(resource, path),
+                        'a SIGKILLed holder wedged this generation permanently')
+        path.unlink(missing_ok=True)
+
     def test_a_renewal_cannot_be_unlinked_by_a_concurrent_steal(self):
         """The last hole in the claim-steal serialisation, driven deterministically.
 
@@ -185,8 +242,8 @@ class SandboxCoordination(unittest.TestCase):
         winner = 'holder-b' if outcome['steal'] == 0 else 'holder-a'
         self.assertEqual(survivor['holder'], winner,
                          'the surviving claim belongs to neither reported winner')
-        self.assertEqual(sorted(p.name for p in co.CLAIMS_DIR.glob('.steal.*')), [],
-                         'a generation token outlived the race that took it')
+        self.assertTrue(self.generation_is_free(resource, path),
+                        'a generation token was still held after the race that took it')
         path.unlink(missing_ok=True)
 
     def test_a_forced_release_cannot_unlink_the_claim_that_replaced_it(self):
@@ -260,8 +317,8 @@ class SandboxCoordination(unittest.TestCase):
         else:
             self.assertFalse(path.exists(),
                              'nobody holds it, yet the claim file is still there')
-        self.assertEqual(sorted(p.name for p in co.CLAIMS_DIR.glob('.steal.*')), [],
-                         'a generation token outlived the race that took it')
+        self.assertTrue(self.generation_is_free(resource, path),
+                        'a generation token was still held after the race that took it')
         path.unlink(missing_ok=True)
 
 
