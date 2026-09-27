@@ -6,10 +6,20 @@
   let loading = false;
 
   // The shared post helper drops structured conflict hints, including file paths.
+  //
+  // WHO DID IT, recorded here rather than at either call site. agentdef and agentdrop
+  // both land in the board's history through ccboard._record(..., body.get("actor"),
+  // ...), and neither of them sent one - so a definition saved or DELETED from this
+  // panel wrote `actor = NULL`, and agentdrop is a real unlink with no way back. The
+  // CLI half has been bound since 44010b0; this was the other half. 'dashboard' is
+  // the identity every other browser write already uses (app.js: board status, move
+  // and delete all send it), so the two halves agree rather than inventing a third
+  // name. Forced after the spread on purpose: a caller must not be able to attribute
+  // its write to somebody else.
   async function writeDefinition(op, body) {
     const response = await fetch(`api/board/${op}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify({ ...body, actor: 'dashboard' })
     });
     let data = {};
     try { data = await response.json(); } catch (_) {}

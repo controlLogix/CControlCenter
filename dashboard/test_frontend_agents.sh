@@ -128,6 +128,11 @@ vm.runInNewContext(source, {
     await submit(form);
     const saved = mutations.at(-1);
     assert.equal(saved.url, 'api/board/agentdef');
+    // WHO SAVED IT. Without this the endpoint recorded actor = NULL for every
+    // definition written from the panel, so the board history said a definition had
+    // changed and could not say by whom. 'dashboard' is what every other browser
+    // write sends.
+    assert.equal(saved.body.actor, 'dashboard');
     assert.equal(saved.body.scope, scope);
     assert.equal(saved.body.checksum, 'sha256:original');
     assert.equal(saved.body.persona, 'Full persona\nsecond line');
@@ -149,6 +154,10 @@ vm.runInNewContext(source, {
     await remove.events.click();
     assert.equal(remove.disabled, true);
     assert.equal(mutations.at(-1).url, 'api/board/agentdrop');
+    // And who deleted it. This one matters more than the save: agentdrop is a real
+    // unlink, not ccboard's soft delete, so an unattributed row is the only record
+    // that a file ever existed.
+    assert.equal(mutations.at(-1).body.actor, 'dashboard');
     assert.equal(mutations.at(-1).body.scope, scope);
     assert.equal(mutations.at(-1).body.checksum, 'sha256:original');
   }
