@@ -26,6 +26,8 @@ trap 'rm -f "$GUARD"' EXIT
 tr -d '\r' < agentmux.sh > "$GUARD"
 # Pull in just the function; the script's dispatch runs on source otherwise.
 eval "$(sed -n '/^modal_text() {/,/^}/p' "$GUARD")"
+eval "$(sed -n '/^modal_answer() {/,/^}/p' "$GUARD")"
+eval "$(sed -n '/^modal_decision() {/,/^}/p' "$GUARD")"
 
 # shellcheck source=/dev/null
 . dashboard/testlib.sh          # ok/bad/check/check_rc/rc_is/count_msgs, one copy
@@ -98,6 +100,73 @@ normal 'shell output'           'total 20
 drwxr-xr-x 2 nick nick 4096 Sep 22 09:38 .'
 normal 'a diff'                 '+  if not logged in:
 -      continue'
+
+echo '--- unblock: what may be answered, and what may NOT ---'
+# `send` refusing is only half an answer: nothing ANSWERS, so a pane parked on a
+# first-run dialog waits for a human. `unblock` closes that - but only for prompts it
+# can positively identify, and only with the option that declines or keeps the current
+# state. The defaults here are hostile, which is the whole reason there is no generic
+# "press Enter": codex preselects "Update now (runs npm install -g)" and claude
+# preselects "No, exit", which kills the agent.
+
+answers() {   # answers <label> <expected-keys> <text>
+  local got
+  if got="$(modal_answer "$3")"; then
+    if [ "${got%%|*}" = "$2" ]; then
+      printf '  ok    %-56s answers %s\n' "$1" "$2"; pass=$((pass + 1))
+    else
+      printf '  FAIL  %-56s pressed %s, wanted %s\n' "$1" "${got%%|*}" "$2"; fail=$((fail + 1))
+    fi
+  else
+    printf '  FAIL  %-56s no answer offered\n' "$1"; fail=$((fail + 1))
+  fi
+}
+
+leaves() {    # leaves <label> <text>  - must be left for a person
+  if modal_answer "$2" >/dev/null; then
+    printf '  FAIL  %-56s ANSWERED - this is a decision\n' "$1"; fail=$((fail + 1))
+  else
+    printf '  ok    %-56s left for a person\n' "$1"; pass=$((pass + 1))
+  fi
+}
+
+names() {     # names <label> <needle> <text> - the refusal says WHAT the decision is
+  local why
+  if why="$(modal_decision "$3")" && printf '%s' "$why" | grep -qiF -- "$2"; then
+    printf '  ok    %-56s named: %s\n' "$1" "$why"; pass=$((pass + 1))
+  else
+    printf '  FAIL  %-56s not named (%s)\n' "$1" "${why:-no classification}"; fail=$((fail + 1))
+  fi
+}
+
+answers 'the codex update nag is a nuisance, not a decision' 2 '  Update available
+  1. Update now (runs npm install)
+  Press enter to continue'
+
+# EVERY ONE OF THESE MUST BE LEFT ALONE. A harness that clicks through a trust
+# dialog, a consent dialog or an account chooser has removed the point of the guard.
+leaves 'folder trust'            '  Do you trust the files in this folder?
+  ❯ No, exit
+    Yes, I trust this folder'
+leaves 'claude bypass consent'   '  By proceeding, you accept all responsibility.
+  ❯ No, exit
+    Yes, I accept'
+leaves 'codex directory trust'   '  Do you trust the contents of this directory?
+  › 1. Yes, continue
+    2. No, quit'
+leaves 'account chooser'         '  ❯ 1. Claude account with subscription
+    2. Anthropic Console account'
+leaves 'a destructive y/n'       '  Overwrite the file? [y/n]'
+leaves 'an unrecognised prompt'  '  Frobnicate the widget? [a/b/c]'
+
+names 'trust is named as a trust decision' 'trust' '  Do you trust the files in this folder?
+  ❯ No, exit'
+names 'consent is named, and so is its lethal default' 'No, exit' \
+  '  By proceeding, you accept all responsibility.
+  ❯ No, exit
+    Yes, I accept'
+names 'an account chooser is named' 'account' '  ❯ 1. Claude account with subscription
+    2. Anthropic Console account'
 
 finish
 [ "$fail" -eq 0 ] || exit 1

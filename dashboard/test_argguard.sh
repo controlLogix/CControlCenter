@@ -35,6 +35,7 @@ export AGENTMUX_NO_COURIER=1
 trap 'rm -rf "$AGENTMUX_HOME" "$HARNESS"' EXIT
 
 am() { bash "$HARNESS" "$@" >/dev/null 2>&1; }
+am_out() { bash "$HARNESS" "$@" 2>&1; }
 refuses() { am "$@"; check_rc "refuses: agentmux $*" 1 "$?"; }
 
 mkdir -p "$AGENTMUX_HOME/inbox"
@@ -133,12 +134,45 @@ for single in 2 y n q 3; do
   check_rc "key answers a numbered menu: $single" 0 "$?"
 done
 
+echo '--- the team verbs are reachable through agentmux, not only through python ---'
+# roster, recruit, approve, retire and hire lived in coordination.py and were wired
+# into nothing, so `agentmux recruit TM-100` answered "unknown command" and staffing a
+# card meant invoking python3 by hand. That is the same gap cmd_task was written to
+# close - "reachable only by invoking python3 by hand ... the same reason the board
+# went unused before `agentmux tasks` existed" - and every document that said
+# `agentmux recruit` was wrong. A refusal FROM the board is the proof: it means the
+# verb was dispatched and reached it.
+for verb in roster recruit approve retire hire; do
+  out="$(am_out "$verb" NOT-A-KEY 2>&1)"
+  case "$out" in
+    *"unknown command"*) bad "agentmux $verb reaches the board (got: unknown command)" ;;
+    *) ok "agentmux $verb reaches the board" ;;
+  esac
+done
+# Identity stays un-spoofable on the three that sign a decision.
+refuses 'approve --agent is refused' approve TM-1 --member x --agent someone-else
+refuses 'recruit --agent is refused' recruit TM-1 --agent someone-else
+refuses 'retire  --agent is refused' retire TM-1 --member x --agent someone-else
+
 echo '--- identity flags cannot be overridden from the command line ---'
+
 # `claim x --holder victim` used to claim in someone else's name, which made the
 # comment two lines above it ("cannot claim on someone else's behalf") false.
 AGENTMUX_AGENT=attacker am claim res-1 --holder victim
 check_rc 'claim --holder is refused' 1 "$?"
 AGENTMUX_AGENT=attacker am release res-1 --holder victim
 check_rc 'release --holder is refused' 1 "$?"
+
+# THE THIRD APPEARANCE OF THE SAME BUG. --agent and --holder are refused above; --by
+# was not, and cmd_run's verbs disagreed with each other by accident of argument
+# order - verdict put the wrapper's --by last and won, submit put the caller's args
+# last and lost. Measured before the fix: as `orchestrator`,
+# `agentmux run submit <job> --by dev` wrote a submit event recorded by "dev".
+# "A worker cannot mark its own homework" is checked against `by`, so a `by` the
+# caller sets is that mechanism with its one input handed to the person it binds.
+for verb in start submit verdict complete; do
+  AGENTMUX_AGENT=attacker am run "$verb" X --by victim
+  check_rc "run $verb --by is refused" 1 "$?"
+done
 
 finish

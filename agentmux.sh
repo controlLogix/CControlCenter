@@ -862,6 +862,105 @@ modal_prompt() {
   modal_text "$tail_text"
 }
 
+# ── unblock ──────────────────────────────────────────────────────────────────
+#
+# THE PROMPTS THAT ANSWER THEMSELVES, AND THE ONES THAT MUST NOT.
+#
+# `send` refuses while a pane shows a modal and the courier retries without ever
+# forcing, so nothing is lost - but nothing ANSWERS either, and a pane parked on a
+# first-run dialog waits for a human who may be hours away. Four panes sat on the
+# same codex update prompt this week.
+#
+# The reason there is no generic "just press Enter" is in the samples
+# dashboard/test_modal_guard.sh pins. The defaults are hostile:
+#
+#     codex   1. Update now (runs npm install -g)   <- preselected
+#     claude  > No, exit / Yes, I accept            <- default KILLS the agent
+#
+# So this answers only prompts it can positively identify, and always with the
+# option that DECLINES or keeps the current state - never the highlighted default.
+# Everything else is reported and left alone, because a folder-trust dialog, a
+# bypass-permissions consent and an account chooser are decisions, not nuisances,
+# and a harness that clicks through those has removed the point of the guard.
+#
+# modal_answer prints "<keys>|<what it is>|<why this answer>" for a prompt it knows,
+# and nothing at all for one it does not.
+modal_answer() {
+  local text="$1"
+  # codex's update nag. VERIFIED on four live panes 2026-09-27: "2" selects Skip.
+  # Never 1 - that is the one that runs npm install -g inside the agent's pane.
+  if printf '%s' "$text" | grep -Eqi 'update available' &&
+     printf '%s' "$text" | grep -Eqi 'update now \(runs'; then
+    printf '2|codex update nag|Skip; option 1 runs npm install -g in the pane'
+    return 0
+  fi
+  return 1
+}
+
+# Why a known prompt is still NOT ours to answer. Printed so the refusal names the
+# decision rather than just declining to act.
+modal_decision() {
+  local text="$1"
+  printf '%s' "$text" | grep -Eqi 'do you trust|trust this folder|trust the contents' \
+    && { printf 'a trust decision about this directory'; return 0; }
+  printf '%s' "$text" | grep -Eqi 'accept all responsibility|yes, i accept' \
+    && { printf 'a consent decision, and its default is "No, exit"'; return 0; }
+  printf '%s' "$text" | grep -Eqi 'account with subscription|sign in with|console account' \
+    && { printf 'an account choice'; return 0; }
+  printf '%s' "$text" | grep -Eqi '\[y/n\]|\(y/n\)|overwrite' \
+    && { printf 'a yes/no whose consequence this cannot see'; return 0; }
+  return 1
+}
+
+cmd_unblock() {
+  local dry=0 targets=""
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --dry-run) dry=1; shift ;;
+      --all)     shift ;;
+      -*)        die "unblock: unknown flag '$1' (valid: --all, --dry-run)" ;;
+      *)         targets="$targets $1"; shift ;;
+    esac
+  done
+  if [ -z "${targets// /}" ]; then
+    targets="$(tm list-sessions -F '#{session_name}' 2>/dev/null)"
+  fi
+  [ -n "${targets// /}" ] || { printf 'no agents\n'; return 0; }
+
+  local name pane text answer keys what why decision stuck=0 freed=0
+  for name in $targets; do
+    pane="$(pane_of "$name" 2>/dev/null)"
+    if [ -z "$pane" ]; then
+      printf '  %-22s no pane\n' "$name"; continue
+    fi
+    text="$(tm capture-pane -p -t "$pane" 2>/dev/null | grep -v '^[[:space:]]*$' | tail -8)"
+    if ! modal_text "$text"; then
+      printf '  %-22s working\n' "$name"; continue
+    fi
+    if answer="$(modal_answer "$text")"; then
+      keys="${answer%%|*}"; what="${answer#*|}"; why="${what#*|}"; what="${what%%|*}"
+      if [ "$dry" = 1 ]; then
+        printf '  %-22s WOULD press %-6s %s (%s)\n' "$name" "$keys" "$what" "$why"
+      else
+        tm send-keys -t "$pane" -- "$keys"
+        printf '  %-22s pressed %-6s %s (%s)\n' "$name" "$keys" "$what" "$why"
+        freed=$((freed + 1))
+      fi
+      continue
+    fi
+    stuck=$((stuck + 1))
+    if decision="$(modal_decision "$text")"; then
+      printf '  %-22s NEEDS A PERSON - %s\n' "$name" "$decision"
+    else
+      printf '  %-22s NEEDS A PERSON - an unrecognised prompt\n' "$name"
+    fi
+    printf '                         look:   agentmux read %s --lines 12\n' "$name"
+    printf '                         answer: agentmux key %s <Escape|Down|Enter|2>\n' "$name"
+  done
+  [ "$dry" = 1 ] || printf '\n%s answered, %s left for a person\n' "$freed" "$stuck"
+  return 0
+}
+
 cmd_send() {
   local name="${1:-}"; shift || true
   [ -n "$name" ] || die "send needs a name"
@@ -1332,6 +1431,32 @@ run_py() {
 cmd_run() {
   local action="${1:-status}"; shift || true
   local me="${AGENTMUX_AGENT:-orchestrator}"
+
+  # --by IS NOT THE CALLER'S TO CHOOSE, and until now half of these verbs let it be.
+  #
+  # This is the third appearance of one bug. cmd_task refuses --agent and cmd_claim
+  # refuses --holder, both with the same note: argparse takes the LAST occurrence, so
+  # appending user arguments after ours signs the record in somebody else's name.
+  # cmd_run never got the guard, and its verbs disagreed with each other by accident
+  # of argument order:
+  #
+  #     verdict)  run.py verdict "$@" --by "$me"          <- ours last, ours wins
+  #     submit)   run.py submit "$1" --by "$me" "${@:2}"  <- theirs last, THEIRS wins
+  #
+  # Measured: as `orchestrator`, `agentmux run submit <job> --by dev` wrote a submit
+  # event recorded `by: "dev"`. The verdict half refused the identical trick. That a
+  # worker cannot mark its own homework is the whole mechanism runs exist for, and it
+  # is checked against `by` - so a `by` the caller can set is the mechanism with its
+  # one input handed to the person it constrains.
+  #
+  # Refused rather than reordered. Reordering would make submit behave like verdict
+  # and leave the next verb to get it right by luck; refusing says so.
+  for arg in "$@"; do
+    case "$arg" in --by|--by=*)
+      die "run: --by is set from \$AGENTMUX_AGENT and cannot be overridden" ;;
+    esac
+  done
+
   case "$action" in
     start)    python3 "$(run_py)" start "${1:?a one-line description of the request}" --by "$me" ;;
     assign)   python3 "$(run_py)" assign "$@" ;;
@@ -1549,6 +1674,38 @@ cmd_board() {
     override) python3 "$(coord_py)" override "$@" --agent "${AGENTMUX_AGENT:-orchestrator}" ;;
     ""|-h|--help) python3 "$(coord_py)" config ;;
     *) die "board: config|doctor|history|find|triage|override" ;;
+  esac
+}
+
+# THE TEAM VERBS, WHICH WERE REACHABLE ONLY BY INVOKING PYTHON BY HAND.
+#
+# roster, recruit, approve, retire and hire have existed in coordination.py since
+# rosters landed, and none of them was wired into this script - so `agentmux recruit
+# TM-100` answered "unknown command" and the only way to staff a card was
+# `python3 taskmgmt/coordination.py recruit TM-100`.
+#
+# That is the same gap, with the same consequence, that cmd_task was written to
+# close: the comment there says the task verbs "were reachable only by invoking
+# python3 by hand - which is the same reason the board went unused before
+# `agentmux tasks` existed". A capability nobody can find is a capability nobody
+# uses, and every piece of documentation that said `agentmux recruit` was wrong.
+#
+# --agent is refused for the same reason cmd_task refuses it: argparse takes the
+# LAST occurrence, so appending user arguments after ours would let
+# `approve TM-100 --member x --agent someone-else` sign another agent's name to a
+# decision. recruit, approve and retire are identity-bound; roster and hire are not
+# (roster reads nothing, and hire is attributed to the dashboard).
+cmd_team() {
+  local action="$1"; shift || true
+  local me="${AGENTMUX_AGENT:-orchestrator}"
+  for arg in "$@"; do
+    case "$arg" in --agent|--agent=*)
+      die "$action: --agent is set from \$AGENTMUX_AGENT and cannot be overridden" ;;
+    esac
+  done
+  case "$action" in
+    roster|hire) python3 "$(coord_py)" "$action" "$@" ;;
+    *)           python3 "$(coord_py)" "$action" "$@" --agent "$me" ;;
   esac
 }
 
@@ -2380,6 +2537,7 @@ case "${1:-}" in
   orchestrator) shift; cmd_orchestrator "$@" ;;
   send)   shift; cmd_send   "$@" ;;
   key)    shift; cmd_key    "$@" ;;
+  unblock) shift; cmd_unblock "$@" ;;
   read)   shift; cmd_read   "$@" ;;
   tail)   shift; cmd_tail   "$@" ;;
   wait)   shift; cmd_wait   "$@" ;;
@@ -2398,6 +2556,7 @@ case "${1:-}" in
   pool)     shift; cmd_pool     "$@" ;;
   board)    shift; cmd_board    "$@" ;;
   epic)     shift; cmd_epic     "$@" ;;
+  roster|recruit|approve|retire|hire) cmd_team "$@" ;;
   journal) shift; cmd_journal "$@" ;;
   list)   shift; cmd_list   "$@" ;;
   kill)   shift; cmd_kill   "$@" ;;
