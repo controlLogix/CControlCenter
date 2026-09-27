@@ -30,12 +30,16 @@ const { firefox } = createRequire(import.meta.url)(playwrightDir);
 
 let passed = 0, failed = 0;
 const failures = [];
+// '  FAIL  <what>' - the same shape testlib.sh prints, and deliberately so. The gate
+// pulls a failing suite's detail out with `grep -E '^[[:space:]]+FAIL'`; at column
+// zero that matched nothing, so a real assertion failure here reached the gate as a
+// suite that broke with no statement of what broke.
 async function test(name, fn) {
   try { await fn(); passed++; console.log('PASS ' + name); }
   catch (err) {
     failed++;
     failures.push(name);
-    console.error('FAIL ' + name + '\n      ' + (err && err.message || err).split('\n')[0]);
+    console.error('  FAIL  ' + name + '\n        ' + (err && err.message || err).split('\n')[0]);
   }
 }
 
@@ -561,8 +565,48 @@ await test('epics are collapsible cards and the choice survives a reload', async
   await page.click('#boardExpand');
 });
 
+// The board renders ASYNCHRONOUSLY, and nothing about that is visible from outside:
+// entering the view kicks off a loadBoard() whose replaceChildren() throws away every
+// card. Typing into a card before that fetch lands types into an element which is
+// about to be discarded - and the discard is SILENT, because the click that follows
+// re-resolves its own selector, finds a fresh "add task" button whose input is empty,
+// and submit() returns early without posting anything. The test then waits its full
+// timeout for a row nobody ever created.
+//
+// That is the failure this suite showed in three consecutive gate runs and never
+// standalone: the window between fill and click is microseconds on an idle machine
+// and wide open when fifty other suites, a dashboard, a stub broker and two agents
+// are sharing the box. Waiting for a longer timeout would not have helped - there
+// was nothing on the way. Wait for the board to stop being rebuilt instead.
+//
+// Polled from NODE rather than through page.waitForFunction, because a predicate
+// handed to that runs in the page and an async one there returns a promise - which
+// is truthy the instant it is created, so the wait can be satisfied by a check that
+// has not finished. Sampling from here keeps the sleep on this side of the bridge,
+// where it is an ordinary await.
+const boardSettled = async () => {
+  // Identity, not count: a re-render puts equal-looking cards in place of the old
+  // ones, so tag the card seen this time round and look for that same tag next time.
+  const sample = () => page.evaluate(() => {
+    const first = document.querySelector('#boardList details.epic');
+    if (!first) return null;
+    if (!first.dataset.settle) first.dataset.settle = String(Math.random());
+    return first.dataset.settle;
+  });
+  const deadline = Date.now() + 30000;
+  let last = null;
+  while (Date.now() < deadline) {
+    const seen = await sample();
+    if (seen && seen === last) return;
+    last = seen;
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  throw new Error('#boardList never stopped being rebuilt');
+};
+
 await test('dragging a task onto another epic refiles it for real', async () => {
   await show('board');
+  await boardSettled();
   const epics = await page.$$eval('#boardList details.epic', ns => ns.map(n => n.dataset.epic));
   const [from, to] = epics.filter(Boolean);
   assert.ok(from && to, 'need two epics with keys');
@@ -571,10 +615,26 @@ await test('dragging a task onto another epic refiles it for real', async () => 
   // Which epics are open is remembered in localStorage and driven by the collapse-all
   // test above - a sibling's UI state, which no test should depend on.
   await page.$$eval('#boardList details.epic', ns => ns.forEach(n => { n.open = true; }));
-  await page.fill(`#boardList details.epic[data-epic="${from}"] input[placeholder="new task"]`,
-                  'E2E draggable task');
+  const newTask = `#boardList details.epic[data-epic="${from}"] input[placeholder="new task"]`;
+  await page.fill(newTask, 'E2E draggable task');
+  // A tripwire for the race above: if the board does rebuild between the fill and the
+  // click, say so here rather than letting it become an unexplained wait below.
+  assert.equal(await page.$eval(newTask, (n) => n.value), 'E2E draggable task',
+               'the new-task input was re-rendered away between typing and clicking');
   await page.click(`#boardList details.epic[data-epic="${from}"] button:has-text("add task")`);
-  await page.waitForSelector(`#boardList details.epic[data-epic="${from}"] .task-row`);
+  // 45s, not the 30s default: generous enough that if this still fires, "the box was
+  // busy" is off the table and the message below is the diagnosis.
+  await page.waitForSelector(`#boardList details.epic[data-epic="${from}"] .task-row`,
+                             { timeout: 45000 })
+    .catch(async () => {
+      // Say what was ON SCREEN. A bare selector timeout reports the timeout and not
+      // one thing about the page it gave up on, which is how this cost three runs.
+      const stamp = await text('#boardStamp').catch(() => '(unreadable)');
+      const open = await page
+        .$eval(`#boardList details.epic[data-epic="${from}"]`, (n) => n.open)
+        .catch(() => '(gone)');
+      throw new Error(`no task row appeared in ${from}: open=${open}, board says "${stamp}"`);
+    });
 
   const row = await page.$(`#boardList details.epic[data-epic="${from}"] .task-row`);
   const key = await row.evaluate(n => n.dataset.task);
@@ -594,7 +654,7 @@ await test('dragging a task onto another epic refiles it for real', async () => 
       const moved = document.querySelector(
         `#boardList details.epic[data-epic="${args.to}"] .task-row[data-task="${args.key}"]`);
       return !!moved;
-    }, { to, key }, { timeout: 20000 }).catch(() => {});
+    }, { to, key }, { timeout: 30000 }).catch(() => {});
 
   // The drop is only real if the STORE moved it, so ask the API, not the DOM.
   const server = await page.evaluate(async () => {

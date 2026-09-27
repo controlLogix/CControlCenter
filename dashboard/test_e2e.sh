@@ -151,11 +151,19 @@ if ! curl -fsS -o /dev/null "http://127.0.0.1:$PORT/"; then
   exit 1
 fi
 
-node dashboard/test_e2e.mjs "http://127.0.0.1:$PORT" "$PW" "$BROKER_PORT"
-status=$?
+# Tee'd, because the SUMMARY HAS TO BE THE LAST LINE. run_tests.sh reports a suite by
+# its last line, and this script printed the server log after node had finished - so
+# for three gate runs the line the gate showed was that log's first entry,
+# "agentmux dashboard: http://127.0.0.1:NNNNN", and neither of the gate's FAIL greps
+# matched. A real failure was on screen the whole time and read as a passing suite.
+node dashboard/test_e2e.mjs "http://127.0.0.1:$PORT" "$PW" "$BROKER_PORT" 2>&1 |
+  tee "$TEST_HOME/node.out"
+status=${PIPESTATUS[0]}
 
 if [ "$status" != 0 ]; then
   echo '--- test server log ---' >&2
   tail -40 "$TEST_HOME/server.log" >&2
+  echo '--- summary ---' >&2
+  grep -E '^([[:space:]]+FAIL|passed [0-9]+, failed [0-9]+)' "$TEST_HOME/node.out" || true
 fi
 exit "$status"
