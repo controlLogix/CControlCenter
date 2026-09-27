@@ -1089,13 +1089,81 @@ class Handler(BaseHTTPRequestHandler):
     def send_json(self, status, data):
         self.send_body(status, json.dumps(data).encode("utf-8"), "application/json")
 
+    # How much of a REFUSED body is worth reading. Comfortably above every request
+    # this server accepts - the largest cap is MQTT publish at 4096 - and small
+    # enough that the drain itself cannot be turned into the denial of service.
+    DRAIN_LIMIT = 16384
+    # Class-level default so no path can reach the drain before do_GET has set it.
+    body_consumed = False
+
+    def drain_request_body(self):
+        """Consume a refused request's body so the close is a FIN and not an RST.
+
+        CLOSING A SOCKET THAT STILL HAS UNREAD DATA MAKES THE KERNEL SEND RST RATHER
+        THAN FIN, and an RST can discard a response that already reached the client's
+        receive buffer but has not been read out of it yet. Every refusal here -
+        403 forbidden origin, 415, 405 read-only, 400 - answers and returns without
+        touching the body, so a perfectly correct refusal arrives at the caller as
+        ConnectionResetError instead of as the status it was sent.
+
+        Measured against this server, POST /api/netscan/start with a foreign Origin:
+
+            2-byte body, 500 serial              500 x 403
+            2-byte body, 500 over 20 threads     497 x 403,  3 x ConnectionResetError
+            64 KiB body, 200 serial              198 x 403,  2 x ConnectionResetError
+            1 MiB body, 100 over 10 threads      100 x BrokenPipeError
+
+        The more unread body, the likelier the reset - which is why this read as a
+        rare flake rather than a bug: the bodies this server refuses are usually two
+        bytes, and two bytes almost always fit in the receive queue quietly. It cost
+        a gate run as `test_field_panels.py ConnectionResetError` with no failing
+        assertion anywhere in the suite.
+
+        Nothing is drained for a body too large to be worth reading or a request too
+        malformed to have a length: those are refused precisely so they are not read,
+        and a caller sending one has already left the protocol.
+        """
+        if self.headers.get("Transfer-Encoding") is not None:
+            return
+        lengths = self.headers.get_all("Content-Length", [])
+        if len(lengths) != 1 or not re.fullmatch(r"[0-9]{1,5}", lengths[0]):
+            return
+        remaining = int(lengths[0])
+        if remaining > self.DRAIN_LIMIT:
+            return
+        previous_timeout = self.connection.gettimeout()
+        try:
+            self.connection.settimeout(5)
+            while remaining > 0:
+                chunk = self.rfile.read(min(remaining, 4096))
+                if not chunk:
+                    break
+                remaining -= len(chunk)
+        except OSError:
+            pass
+        finally:
+            try:
+                self.connection.settimeout(previous_timeout)
+            except OSError:
+                pass
+
     def do_GET(self):
+        # Per REQUEST, not per connection: one Handler instance serves every request
+        # on a kept-alive connection.
+        self.body_consumed = False
         try:
             self.route()
         except (BrokenPipeError, ConnectionResetError):
             pass
         except Exception:
             self.send_json(500, {"error": "internal server error"})
+        finally:
+            # HERE, and only here, because every refusal in this file is a `send_json`
+            # followed by a bare return - and there are a dozen of them, in two guard
+            # chains and every read-only endpoint. Draining at each site would mean
+            # getting all twelve right and every future one as well.
+            if not self.body_consumed:
+                self.drain_request_body()
 
     do_HEAD = do_GET
     do_POST = do_GET
@@ -1146,7 +1214,12 @@ class Handler(BaseHTTPRequestHandler):
         try:
             self.connection.settimeout(5)
             raw = self.rfile.read(length)
+            self.body_consumed = True
         except OSError:
+            # Consumed as far as this request is concerned: we have already waited
+            # the five seconds this body was worth, and do_GET must not spend another
+            # five draining what never arrived.
+            self.body_consumed = True
             self.send_json(408, {"error": "request body timeout"})
             return None
         finally:
@@ -1938,7 +2011,9 @@ class Handler(BaseHTTPRequestHandler):
         try:
             self.connection.settimeout(5)
             raw = self.rfile.read(length)
+            self.body_consumed = True
         except OSError:
+            self.body_consumed = True      # see read_cc_body: already waited for it
             self.send_json(408, {"error": "request body timeout"})
             return
         finally:

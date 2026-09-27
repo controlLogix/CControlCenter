@@ -19,6 +19,7 @@ influenced by the request.
 """
 
 import http.client
+import io
 import json
 import os
 import shutil
@@ -584,6 +585,78 @@ status, _ = post("/api/profinet/schema", {"stations": []}, origin=f"http://local
 check("but localhost on the same port is the same origin", 200, status)
 status, _ = post("/api/profinet/schema", {"stations": []}, origin=None)
 check("and a request with no Origin at all is allowed", 200, status)
+
+print("--- a refused write still reads the body it refused ---")
+# WHY THIS EXISTS. Every refusal above - 403, 415, 405, 400 - answers and returns
+# without touching the request body. Closing a socket that still holds unread data
+# makes the kernel send RST rather than FIN, and an RST can discard a response that
+# reached the client's receive buffer but has not been read out of it yet. The caller
+# then sees ConnectionResetError instead of the status it was correctly sent.
+#
+# Not hypothetical, and not theory: it took a full gate run down as
+#     test_field_panels.py    ConnectionResetError: [Errno 104] Connection reset by peer
+# with no failing assertion anywhere in this suite - the traceback landed on exactly
+# the loop above. Measured against this server, POST with a foreign Origin and an
+# 8 KiB body, 200 serial requests: 198 x 403 and 2 x ConnectionResetError before the
+# drain, 200 x 403 after it.
+#
+# ASSERTED HERE AS A MECHANISM RATHER THAN AS AN OUTCOME. The reset is a race between
+# the server's close and the client's read, so asserting "no reset" is a coin weighted
+# to whatever the box is doing; and this server speaks HTTP/1.0, so the connection
+# closes after every response and the drain cannot be observed by reusing it either.
+# What CAN be pinned exactly is that the bytes get consumed.
+drain = server.Handler.__new__(server.Handler)
+
+
+class _Socket:
+    def gettimeout(self):
+        return None
+
+    def settimeout(self, _value):
+        pass
+
+
+def drained(headers, body):
+    """How many bytes drain_request_body() takes off the wire. Pairs, not a dict,
+    because duplicate Content-Length headers are one of the cases under test."""
+    drain.headers = http.client.HTTPMessage()
+    for key, value in headers:
+        drain.headers[key] = value
+    drain.rfile = io.BytesIO(body)
+    drain.connection = _Socket()
+    drain.drain_request_body()
+    return drain.rfile.tell()
+
+
+check("a refused body is consumed to its declared length", 9,
+      drained([("Content-Length", "9")], b"123456789trailing"))
+check("a body shorter than it claims does not hang the handler", 4,
+      drained([("Content-Length", "9")], b"1234"))
+check("no Content-Length, nothing to drain", 0, drained([], b"stray bytes"))
+check("a chunked body is never drained", 0,
+      drained([("Content-Length", "9"), ("Transfer-Encoding", "chunked")], b"123456789"))
+check("two Content-Lengths are too malformed to drain", 0,
+      drained([("Content-Length", "9"), ("Content-Length", "9")], b"123456789"))
+check("a non-numeric Content-Length is not drained", 0,
+      drained([("Content-Length", "nine")], b"123456789"))
+# Over the cap is refused precisely so it is NOT read; draining it would hand a
+# hostile Content-Length the very read the 413 exists to avoid.
+check("a body past the drain cap is left alone", 0,
+      drained([("Content-Length", str(server.Handler.DRAIN_LIMIT + 1))],
+              b"x" * (server.Handler.DRAIN_LIMIT + 1)))
+check("a body at the cap is still drained", server.Handler.DRAIN_LIMIT,
+      drained([("Content-Length", str(server.Handler.DRAIN_LIMIT))],
+              b"x" * server.Handler.DRAIN_LIMIT))
+# And the other half. A body that WAS read must not be read again: do_GET drains in a
+# finally, so an accepted write whose body_consumed flag never got set would sit out
+# the drain's whole five-second timeout waiting for bytes already consumed. Timed
+# rather than asserted on the status, because the response goes out before the drain
+# and the caller would get its 200 either way - slowly.
+accepted_at = time.monotonic()
+status, _ = post("/api/profinet/schema", {"stations": []})
+accepted_in = time.monotonic() - accepted_at
+check("an accepted write still succeeds", 200, status)
+ok(f"and does not wait out the drain timeout ({accepted_in:.2f}s)", accepted_in < 2)
 
 httpd.shutdown()
 httpd.server_close()
