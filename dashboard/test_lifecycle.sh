@@ -206,10 +206,16 @@ else
 fi
 
 # Execute just ROOT and the --fresh-db branch, never pgrep/kill/nohup/curl.
-# The rm shim maps any attempted deletion in the REAL default directory to a
-# disposable mirror. Even the broken base cannot delete the operator's files.
+# The rm and mv shims map any attempted write in the REAL default directory to a
+# disposable mirror. Even the broken base cannot touch the operator's files.
 # Its selected-home files remain, and its default-home mirror is destroyed, so
 # each assertion below fails on the original destructive path.
+#
+# BOTH SHIMS, because the two things being checked are from different eras. The old
+# bases this suite is pinned against (check_test_failability.sh) call `rm`; the
+# current branch calls `mv`, because --fresh-db moves the database aside instead of
+# deleting it. A shim that only knew `rm` would let the current code write straight
+# into $HOME/.agentmux while proving nothing about it.
 RESTART_PATHS="$AGENTMUX_HOME/restart-paths.sh"
 tr -d '\r' < dashboard/restart.sh | sed -n '/^ROOT=/p; /^if .*--fresh-db/,/^fi$/p' > "$RESTART_PATHS"
 OPERATOR_MIRROR="$AGENTMUX_HOME/operator-mirror"
@@ -223,15 +229,35 @@ export PATH_HOME OPERATOR_MIRROR
 real_db_before=$(sha256sum "$HOME/.agentmux/cc.db" 2>/dev/null || printf 'ABSENT')
 AGENTMUX_HOME="$PATH_HOME" bash -s -- "$RESTART_PATHS" <<'RESTART' >/dev/null
 set -eu
+# Any path in the real default home is answered with its disposable mirror; any path
+# in the selected home is itself; anything else is a bug worth failing on.
+safe_path() {
+  case "$1" in
+    "$HOME/.agentmux/"*) printf '%s' "$OPERATOR_MIRROR/${1##*/}" ;;
+    "$PATH_HOME/"*)      printf '%s' "$1" ;;
+    *) echo "unexpected target outside both homes: $1" >&2; return 1 ;;
+  esac
+}
 rm() {
-  local arg
+  local arg target
   for arg in "$@"; do
-    case "$arg" in
-      -f) ;;
-      "$HOME/.agentmux/"*) command rm -f "$OPERATOR_MIRROR/${arg##*/}" ;;
-      "$PATH_HOME/"*) command rm -f "$arg" ;;
-      *) echo "unexpected deletion target: $arg" >&2; return 1 ;;
-    esac
+    [ "$arg" = -f ] && continue
+    target="$(safe_path "$arg")" || return 1
+    command rm -f "$target"
+  done
+}
+mv() {
+  local source target
+  source="$(safe_path "$1")" || return 1
+  target="$(safe_path "$2")" || return 1
+  command mv "$source" "$target"
+}
+mkdir() {
+  local arg target
+  for arg in "$@"; do
+    [ "$arg" = -p ] && continue
+    target="$(safe_path "$arg")" || return 1
+    command mkdir -p "$target"
   done
 }
 script="$1"
@@ -240,13 +266,23 @@ set -- --fresh-db
 RESTART
 restart_rc=$?
 real_db_after=$(sha256sum "$HOME/.agentmux/cc.db" 2>/dev/null || printf 'ABSENT')
+# One aside directory, in the SELECTED home, holding what the flag took away.
+aside_dir="$(command ls -d "$PATH_HOME"/cc.db.aside-* 2>/dev/null | head -1 || true)"
 for file in cc.db cc.db-wal cc.db-shm; do
   if [ "$restart_rc" = 0 ] && [ "$real_db_before" = "$real_db_after" ] && \
      [ ! -e "$PATH_HOME/$file" ] && \
      cmp -s "$OPERATOR_MIRROR/$file" <(printf 'operator %s\n' "$file"); then
-    ok "home: fresh-db removes selected $file and preserves default-home bytes"
+    ok "home: fresh-db clears selected $file and preserves default-home bytes"
   else
     bad "home: fresh-db targeted the wrong $file (or the deletion block failed)"
+  fi
+  # AND THE BYTES STILL EXIST. cc.db is not in git, so before this the flag was the
+  # only copy of the board going away on a typo - no undo, nothing to restore from.
+  # The flag still means "come up empty"; it no longer means "and it is gone".
+  if [ -n "$aside_dir" ] && cmp -s "$aside_dir/$file" <(printf 'selected %s\n' "$file"); then
+    ok "home: fresh-db moved selected $file aside intact rather than deleting it"
+  else
+    bad "home: fresh-db destroyed selected $file (no recoverable copy in $PATH_HOME/cc.db.aside-*)"
   fi
 done
 

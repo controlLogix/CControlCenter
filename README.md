@@ -426,7 +426,7 @@ eight new files of one run would have been reviewed blind.
 | `test_snapshot.py` | 18 checks: the SSE snapshot is CRLF-framed with autowrap disabled, asserted on the bytes the server sends. Guards the staircase bug. |
 | `test_tickets.py` | 48 checks: Jira request shaping via `atlassian.py`'s dry-run (Cloud v3 vs Server v2, ADF bodies), the not-configured path, and the write-endpoint guards. **No live Jira call.** |
 | `test_auth.py` | 54 checks: provider/method configuration in an isolated HOME, codex accepting the generated profile, and that no secret reaches the API. |
-| `restart.sh` | Restart the server; `--fresh-db` drops `cc.db` first. |
+| `restart.sh` | Restart the server; `--fresh-db` comes up empty, moving `cc.db` aside into `cc.db.aside-<stamp>/` rather than deleting it. |
 | `test_dispatch.py` | 39 checks: what `dispatchable` will and will not offer an agent - unready cards, cards reserved for a person, blocked dependencies, work already in flight - plus touches-disjoint ordering and the dispatch config bounds. No tmux, no network, no spawned process. |
 | `seed_queue.py` | Writes sample agent traffic into `~/.agentmux/queue/` for exercising the Message Queue view. |
 | `show_auth.py` | Prints `/api/auth` as a tree. Debugging aid for the auth grouping. |

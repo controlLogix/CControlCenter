@@ -26,8 +26,34 @@ for _ in $(seq 1 50); do
 done
 
 if [ "${1:-}" = '--fresh-db' ]; then
-  rm -f "$ROOT/cc.db" "$ROOT/cc.db-wal" "$ROOT/cc.db-shm"
-  echo 'cc.db removed'
+  # MOVED ASIDE, NOT DELETED - and the flag still means exactly what it says: the
+  # server comes up on an empty database.
+  #
+  # What changed is what happens to the old one. cc.db has never been in git, so
+  # `rm -f` here was the only copy of every epic, task, acceptance row and history
+  # entry in the selected home ceasing to exist, with no undo and nothing to restore
+  # from. Typing a destructive flag should be destructive; it should not be
+  # IRREVERSIBLE when making it reversible costs a rename. 81 tasks and 880 history
+  # rows is what was on the board the day this was written.
+  #
+  # test_lifecycle.sh already proves this only ever touches the SELECTED home, which
+  # is the part that would actually be dangerous. This is the other half: it also
+  # proves the bytes survive the flag.
+  aside="$ROOT/cc.db.aside-$(date +%Y%m%d-%H%M%S)"
+  moved=''
+  for db_file in cc.db cc.db-wal cc.db-shm; do
+    if [ -e "$ROOT/$db_file" ]; then
+      mkdir -p "$aside"
+      mv "$ROOT/$db_file" "$aside/$db_file"
+      moved="$moved $db_file"
+    fi
+  done
+  if [ -n "$moved" ]; then
+    echo "cc.db moved aside (${moved# }) -> $aside"
+    echo "  to undo:  mv $aside/* $ROOT/  &&  bash <(tr -d '\\r' < dashboard/restart.sh)"
+  else
+    echo 'cc.db: nothing to move aside; starting empty'
+  fi
 fi
 
 # The restored dashboard must outlive the suite process group.
