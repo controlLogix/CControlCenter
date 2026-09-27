@@ -457,6 +457,57 @@ def journal(kind, subject, body="", agent=None):
 
 # ── claim / release ──────────────────────────────────────────────────────────
 
+# Returned when another process already owns the right to replace this generation of
+# the claim file. A sentinel rather than an exception because both call sites answer
+# it the same way - re-read and retry - and neither wants a second try/except around
+# code that already has one.
+GENERATION_LOST = object()
+
+
+def take_generation(resource, path, staging):
+    """Take the exclusive right to replace the file CURRENTLY at `path`.
+
+    A claim file is replaced by two different code paths - a steal of an expired
+    claim, and a renewal by its holder - and BOTH have to be serialised against each
+    other, not just against themselves. The name of the token is the inode that was
+    observed, so it is per GENERATION of the file: whoever is working from a stale
+    read loses and re-reads, and two processes that observed different generations
+    never contend at all.
+
+    Returns (token, observed_inode):
+      - (Path, ino)           you own this generation; call drop_generation(token)
+      - (GENERATION_LOST, x)  somebody else owns it; re-read and retry
+      - (None, x | None)      the inode could not be read or linked, so there is
+                              nothing to serialise on; the caller proceeds as it did
+                              before this mechanism existed rather than refusing.
+
+    `staging` is linked rather than a fresh file being created: it already exists, it
+    is already private, and os.link is the same atomic exclusive create used to
+    publish the claim itself.
+    """
+    try:
+        observed = os.stat(path).st_ino
+    except OSError:
+        return None, None
+    token = CLAIMS_DIR / f".steal.{flatten(resource)}.{observed}"
+    try:
+        os.link(staging, token)
+    except FileExistsError:
+        return GENERATION_LOST, observed
+    except OSError:
+        return None, observed
+    return token, observed
+
+
+def drop_generation(token):
+    if token is None or token is GENERATION_LOST:
+        return
+    try:
+        token.unlink()
+    except OSError:
+        pass
+
+
 def cmd_claim(args):
     if not RESOURCE_PATTERN.fullmatch(args.resource) or ".." in args.resource:
         print(f"coordination: invalid resource name {args.resource!r}", file=sys.stderr)
@@ -514,21 +565,16 @@ def cmd_claim(args):
                 # Taking an exclusive token named for the inode we observed means only
                 # one stealer proceeds per generation of the file; anyone working from
                 # a stale read loses the token and retries against the new reality.
-                token = None
-                try:
-                    observed = os.stat(path).st_ino
-                    token = CLAIMS_DIR / f".steal.{flatten(args.resource)}.{observed}"
-                    os.link(staging, token)          # exclusive: one stealer per inode
-                except FileExistsError:
-                    # Someone else is stealing this same generation. Re-read and retry.
+                token, observed = take_generation(args.resource, path, staging)
+                if token is GENERATION_LOST:
+                    # Someone else is already replacing this same generation - stealing
+                    # it, or renewing it. Re-read and retry against the new reality.
                     if attempt == 1:
                         continue
                     staging.unlink(missing_ok=True)
                     print("coordination: lost the race to take an expired claim",
                           file=sys.stderr)
                     return 1
-                except OSError:
-                    pass
                 try:
                     # Only remove the file if it is still the one we decided about.
                     if token is None or os.stat(path).st_ino == observed:
@@ -536,11 +582,7 @@ def cmd_claim(args):
                 except OSError:
                     pass
                 finally:
-                    if token is not None:
-                        try:
-                            token.unlink()
-                        except OSError:
-                            pass
+                    drop_generation(token)
                 if attempt == 1:
                     continue
                 staging.unlink(missing_ok=True)
@@ -560,7 +602,35 @@ def cmd_claim(args):
                 # os.replace rather than os.link here: the holder check has already
                 # passed, so we are deliberately replacing our own claim, and replace
                 # is atomic - the file is never empty and never absent.
-                os.replace(staging, path)
+                #
+                # AND IT TAKES THE GENERATION TOKEN FIRST, for the same reason the
+                # steal above does, against the same file. This is the last hole in
+                # that mechanism and it is only visible when both halves are read
+                # together: whether a claim is expired is a question about the CLOCK,
+                # so two readers of the same bytes can legitimately disagree. H reads
+                # a microsecond before the lease runs out and comes here to renew; B
+                # reads a microsecond after and goes to the steal branch. B takes the
+                # token, sees the inode it decided about, and is about to unlink -
+                # then H, holding no token at all, lands its os.replace. B unlinks
+                # H'S BRAND NEW CLAIM and links its own. H is told "renewed", B is
+                # told "claimed", and two agents hold a mutual exclusion primitive.
+                #
+                # Serialising both paths on the observed inode means one of them
+                # loses the token and re-reads instead. The loser here is the holder
+                # of a lease that had in fact expired, which is exactly who should
+                # lose it.
+                token, _observed = take_generation(args.resource, path, staging)
+                if token is GENERATION_LOST:
+                    if attempt == 1:
+                        continue
+                    staging.unlink(missing_ok=True)
+                    print("coordination: lost the race to renew; the claim was taken "
+                          "while it was expired", file=sys.stderr)
+                    return 1
+                try:
+                    os.replace(staging, path)
+                finally:
+                    drop_generation(token)
                 print(f"renewed claim on {args.resource} "
                       f"({ttl}s, expires {time.strftime('%H:%M:%S', time.localtime(record['expires_at']))})")
                 return 0

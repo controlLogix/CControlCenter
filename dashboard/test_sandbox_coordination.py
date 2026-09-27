@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """TM-068 offline regressions: no live server, socket or operator state."""
+import argparse
 import contextlib
 from dataclasses import replace
 import io
+import json
 import os
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import threading
+import time
 import unittest
 from unittest.mock import patch
 
@@ -107,6 +111,83 @@ class SandboxCoordination(unittest.TestCase):
                 dispatch.collect_one('TM-068', {'id': 'TM-068'})
             status.assert_not_called()
             release.assert_not_called()
+
+    def test_a_renewal_cannot_be_unlinked_by_a_concurrent_steal(self):
+        """The last hole in the claim-steal serialisation, driven deterministically.
+
+        WHETHER A CLAIM HAS EXPIRED IS A QUESTION ABOUT THE CLOCK, so two processes
+        reading the same bytes can legitimately disagree: the holder reads a
+        microsecond before the lease runs out and goes to renew, a rival reads a
+        microsecond after and goes to steal. The steal took a token named for the
+        inode it observed and rechecked that inode before unlinking; the renewal took
+        nothing at all. So the rival could check the inode, the holder's os.replace
+        could land, and the rival would then unlink THE HOLDER'S BRAND NEW CLAIM and
+        link its own - leaving one told "renewed", the other told "claimed", and two
+        agents holding a mutual exclusion primitive.
+
+        Brute force will not find this: the window is between two adjacent syscalls.
+        So the interleave is built rather than waited for - the rival is stopped
+        exactly inside it, the renewal is run to completion, and only then is the
+        rival let go. Both halves are real cmd_claim() calls on a real file.
+        """
+        resource = 'taskmgmt/steal-race.py'
+        co.CLAIMS_DIR.mkdir(parents=True, exist_ok=True)
+        path = co.CLAIMS_DIR / co.flatten(resource)
+        path.write_text(json.dumps({
+            'resource': resource, 'holder': 'holder-a', 'at': 'earlier',
+            'ttl': 60, 'expires_at': time.time() - 1,
+            'note': '', 'task': None, 'depends_on': [],
+        }), encoding='utf-8')
+
+        def claim_args(holder):
+            return argparse.Namespace(resource=resource, holder=holder, ttl=60,
+                                      note=None, task=None, depends_on=[])
+
+        at_the_window = threading.Event()
+        renewal_finished = threading.Event()
+        real_unlink = Path.unlink
+
+        def unlink_at_the_window(target, *args, **kwargs):
+            # Only the claim file itself; staging files and tokens pass straight
+            # through, or the stealer would deadlock on its own cleanup.
+            if os.fspath(target) == os.fspath(path):
+                at_the_window.set()
+                renewal_finished.wait(30)
+            return real_unlink(target, *args, **kwargs)
+
+        def expired_per_thread(_claim):
+            return threading.current_thread().name == 'stealer'
+
+        outcome = {}
+        quiet = {'journal': lambda *a, **k: 'journal', 'broadcast': lambda *a, **k: 0,
+                 'post': lambda *a, **k: None, 'all_claims': lambda *a, **k: [],
+                 'expired': expired_per_thread}
+        with contextlib.ExitStack() as stack:
+            for name, value in quiet.items():
+                stack.enter_context(patch.object(co, name, value))
+            stack.enter_context(patch.object(Path, 'unlink', unlink_at_the_window))
+            stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            stack.enter_context(contextlib.redirect_stderr(io.StringIO()))
+            thief = threading.Thread(
+                target=lambda: outcome.setdefault('steal', co.cmd_claim(claim_args('holder-b'))),
+                name='stealer')
+            thief.start()
+            self.assertTrue(at_the_window.wait(30), 'the stealer never reached the unlink')
+            outcome['renew'] = co.cmd_claim(claim_args('holder-a'))
+            renewal_finished.set()
+            thief.join(30)
+            self.assertFalse(thief.is_alive(), 'the stealer never finished')
+
+        # EXACTLY ONE WINNER. Which one is not the point - the rival is entitled to
+        # take a lease that had in fact run out - but they cannot both be told yes.
+        self.assertEqual(sorted(outcome.values()), [0, 1], outcome)
+        survivor = json.loads(path.read_text(encoding='utf-8'))
+        winner = 'holder-b' if outcome['steal'] == 0 else 'holder-a'
+        self.assertEqual(survivor['holder'], winner,
+                         'the surviving claim belongs to neither reported winner')
+        self.assertEqual(sorted(p.name for p in co.CLAIMS_DIR.glob('.steal.*')), [],
+                         'a generation token outlived the race that took it')
+        path.unlink(missing_ok=True)
 
 
 if __name__ == '__main__':
