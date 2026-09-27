@@ -111,6 +111,28 @@ fi
 am inbox a b
 check_rc 'two names are refused rather than one silently ignored' 1 "$?"
 
+echo '--- key: a typo is still refused, and a numbered menu can still be answered ---'
+# `key` rejects anything that is not recognisably a tmux key name, because tmux
+# treats an unknown NAME as literal text and exits 0 - so `key rev Dowm Enter` would
+# type the word "Dowm" at the agent and submit it. That guard has to stay.
+refuses key "$TARGET" Dowm
+refuses key "$TARGET" Entr
+refuses key "$TARGET" "Down Enter"
+refuses key "$TARGET" ""
+# But it also has to be able to answer the modal it EXISTS for. Every fresh codex
+# pane opens on a numbered menu whose first option runs `npm install -g`:
+#     1. Update now   <- preselected
+#     2. Skip
+# and the documented answer is `key`, precisely so nothing appends Enter and
+# actuates the highlight. `key <pane> 2` was refused as "not a recognised tmux key
+# name", which left the modal unanswerable - `send` would type 2 AND Enter. Four
+# panes sat on it. A single character cannot be a mistyped key name, because every
+# name is two characters or more, so exactly one printable character is allowed.
+for single in 2 y n q 3; do
+  am key "$TARGET" "$single"
+  check_rc "key answers a numbered menu: $single" 0 "$?"
+done
+
 echo '--- identity flags cannot be overridden from the command line ---'
 # `claim x --holder victim` used to claim in someone else's name, which made the
 # comment two lines above it ("cannot claim on someone else's behalf") false.

@@ -894,10 +894,23 @@ cmd_send() {
   # on every single delivery; at a 100ms courier interval it became the largest
   # remaining cost. Tunable, and lower for a single line, which no TUI needs time to
   # reassemble.
+  # LENGTH MATTERS AS MUCH AS NEWLINES, and only newlines were being counted.
+  #
+  # The gap below exists because a TUI reading a bracketed paste has to consume it
+  # before Enter arrives. But a TUI decides what a paste IS by the size of the burst,
+  # not by whether it contains a newline: codex turns any large single line into a
+  # "[Pasted Content NNNN chars]" placeholder in its composer. At the single-line gap
+  # of 0.08s the Enter arrived mid-assembly and did nothing, so the brief sat in the
+  # composer unsent, looking exactly like an agent that had ignored it. Measured on
+  # tm-100-worker3: a 1024-character single-line send, still in the composer minutes
+  # later, submitted by one further Enter.
   local gap
   if [ "${text#*$'\n'}" != "$text" ]; then
     # multi-line: bracketed paste, else each newline submits the prompt early
     tm send-keys -t "$pane" -l -- "${ESC}[200~${text}${ESC}[201~"
+    gap="${AGENTMUX_SEND_DELAY_MULTILINE:-0.25}"
+  elif [ "${#text}" -ge "${AGENTMUX_SEND_PASTE_CHARS:-512}" ]; then
+    tm send-keys -t "$pane" -l -- "$text"
     gap="${AGENTMUX_SEND_DELAY_MULTILINE:-0.25}"
   else
     tm send-keys -t "$pane" -l -- "$text"
@@ -905,6 +918,20 @@ cmd_send() {
   fi
   sleep "$gap"
   tm send-keys -t "$pane" Enter
+  # AND CONFIRM IT WENT. The gap is a guess about how long a TUI needs, and a guess
+  # that is wrong costs a silently unsent instruction - the failure this whole verb
+  # is supposed to make impossible. A composer still holding a paste placeholder
+  # after the Enter has not submitted, so send one more. Bounded at two extra tries,
+  # and skipped entirely for short text, which no TUI defers.
+  if [ "${#text}" -ge "${AGENTMUX_SEND_PASTE_CHARS:-512}" ]; then
+    local try
+    for try in 1 2; do
+      sleep 0.4
+      tm capture-pane -p -t "$pane" 2>/dev/null \
+        | grep -qiE '\[pasted content|\[[0-9]+ lines pasted' || break
+      tm send-keys -t "$pane" Enter
+    done
+  fi
 }
 
 # Forward tmux key names with NO text and NO implicit Enter. This is the only
@@ -932,9 +959,25 @@ cmd_key() {
       F1|F2|F3|F4|F5|F6|F7|F8|F9|F10|F11|F12) ;;
       [CMS]-[!-~]|[CMS]-[CMS]-[!-~]) ;;                   # C-c, M-x, C-M-a
       [CMS]-Enter|[CMS]-Tab|[CMS]-Up|[CMS]-Down|[CMS]-Left|[CMS]-Right) ;;
+      # ONE PRINTABLE CHARACTER, because the modal this verb exists for is a
+      # NUMBERED MENU. codex greets a fresh pane with
+      #     1. Update now (runs `npm install -g @openai/codex`)   <- preselected
+      #     2. Skip
+      # and the documented answer is `key`, precisely so nothing appends Enter and
+      # actuates the highlighted option. But `key <pane> 2` was refused, leaving no
+      # way to answer it at all: `send` would type 2 AND Enter, and Enter on a menu
+      # whose first option is an npm install is the accident the whole verb is here
+      # to prevent. Four panes sat on that modal, unanswerable, until this.
+      #
+      # It does not weaken the guard above. That guard exists because tmux treats an
+      # unrecognised key NAME as literal text and still exits 0, so `Dowm` silently
+      # types itself - and every tmux key name is two characters or more. A single
+      # character cannot be a mistyped name, so admitting exactly one is unambiguous.
+      [!-~]) ;;
       *) die "not a recognised tmux key name: '$k'
        (valid: Enter Escape Tab BTab Space BSpace Up Down Left Right Home End
-        PageUp PageDown Insert Delete F1-F12, or a modifier form like C-c, M-x)
+        PageUp PageDown Insert Delete F1-F12, a modifier form like C-c or M-x,
+        or a single printable character such as 2 or y for a numbered menu)
        To type literal TEXT, use 'send' instead - but note send appends Enter." ;;
     esac
   done
