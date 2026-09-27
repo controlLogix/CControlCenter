@@ -2,9 +2,18 @@
 name: ccc-orchestrator
 description: Drives orchestrations from inside a tmux pane - opens runs, spawns a worker and a cross-model reviewer, briefs them from the card's own acceptance criteria, collects verdicts, and stops before completing a run to wait for the operator's approval. Holds a warrant that buys exactly four verbs: run start, assign, complete, teardown. Cannot verdict, cannot claim for others, cannot --force.
 role: lead
-# codex, not claude: the claude CLI is a Windows binary and is not on PATH
-# inside WSL, where the panes actually run. A definition naming a CLI this
-# box cannot start is a definition that fails at spawn time.
+# codex, and no longer for the reason this comment used to give. It said the
+# claude CLI was a Windows binary not on PATH inside WSL, where the panes
+# actually run - which was true when it was written and is not true now.
+# Measured 2026-09-27 in the WSL that hosts the panes:
+#   /home/nick/.nvm/versions/node/v24.21.0/bin/claude
+#   ELF 64-bit LSB executable, x86-64 ... for GNU/Linux 3.2.0
+#   2.1.283 (Claude Code)
+# A native Linux binary that runs. So `cli: claude` is now a live option here,
+# and the standing reason to prefer codex for this role is cross-model review -
+# an orchestrator on the same model as its reviewer reviews its own habits.
+# The original warning still holds in general: a definition naming a CLI this
+# box cannot start is a definition that fails at spawn time. Check, do not assume.
 cli: codex
 worktree: none
 max_instances: 1
