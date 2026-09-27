@@ -1311,7 +1311,7 @@ class Handler(BaseHTTPRequestHandler):
     BOARD_WRITES = ("create", "update", "status", "move", "delete", "acceptance",
                     "label", "dep", "evidence", "commit", "touch", "comment",
                     "link", "triage", "state", "config", "override",
-                    "agentdef", "agentdrop", "recruit", "approve", "hire",
+                    "agentdef", "agentdrop", "recruit", "approve", "retire", "hire",
                     "plcstate", "bootapp", "chatsend")
 
     def runs_endpoint(self, rest, query):
@@ -1403,6 +1403,13 @@ class Handler(BaseHTTPRequestHandler):
         except boardteams.HireForbidden as err:
             self.send_json(403, {"error": str(err)})
         except boardteams.HireUnavailable as err:
+            self.send_json(503, {"error": str(err)})
+        except boardteams.dispatch.coordination.TmuxUnavailable as err:
+            # 503, alongside the other "cannot answer right now" cases. retire() asks
+            # whether a hired member's pane is still up, and tmux being unreachable is
+            # not the same answer as "it stopped" - without this it fell through to the
+            # bare ValueError handler and came back 400 "invalid fields", which blames
+            # the caller for the machine's problem.
             self.send_json(503, {"error": str(err)})
         except ccboard.Refused as err:
             # 409, not 400: the request was well formed and the board said no. The
@@ -1499,6 +1506,8 @@ class Handler(BaseHTTPRequestHandler):
             return boardteams.recruit(db, body)
         if op == "approve":
             return boardteams.approve(db, body)
+        if op == "retire":
+            return boardteams.retire(db, body)
         if op == "hire":
             return boardteams.hire(db, body, bind_host=self.server.server_address[0])
 

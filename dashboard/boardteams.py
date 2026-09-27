@@ -56,6 +56,23 @@ def _write_target(db, body):
     return key, task, actor
 
 
+def _retire_target(db, body):
+    """Like _write_target, except A CLOSED CARD IS ALLOWED - and that is the point.
+
+    Every other roster write refuses once the card is done or deleted, which is right
+    for recruiting and approving onto finished work and exactly backwards for taking a
+    team OFF it. Because the guard covered all of them equally, the roster of a
+    completed card could never be changed again: the two agents on TM-083 had been
+    welded to a card that went done on 2026-09-24, and the only way to remove them was
+    to edit cc.db by hand. A card being finished is precisely when its roster should be
+    clearable.
+    """
+    actor = ccboard.text(body.get("actor"), "actor", 64, required=True,
+                         pattern=ccboard.NAME_RE)
+    key, task = _target(db, body.get("id"))
+    return key, task, actor
+
+
 def roster(db, params):
     values = params.get("id", [])
     if not isinstance(values, list) or len(values) != 1:
@@ -134,6 +151,58 @@ def approve(db, body):
         ccboard._record(db, key, "approve", actor, detail={"members": approved})
     if rejected:
         ccboard._record(db, key, "reject", actor, detail={"members": rejected})
+    return _payload(db, key)
+
+
+def retire(db, body):
+    """Take members off a roster: proposed/approved/hired -> finished.
+
+    THE ONE TRANSITION THE MODEL NAMED AND NEVER IMPLEMENTED. `finished` is already
+    recognised by approve()'s already-decided guard and by the Teams panel's `decided`
+    check, and nothing anywhere ever set it - so a member could be proposed, approved,
+    rejected and hired, and never leave. Combined with the closed-card guard above
+    (see _retire_target) a finished card kept its team on the board for good.
+
+    A HIRED MEMBER WITH A PANE STILL UP IS NOT RETIRED, it is abandoned. Taking it off
+    the roster while it is still running is how an agent ends up editing a card nobody
+    believes it owns - so that is refused, and the fix is to kill the pane first. If
+    tmux cannot be reached we cannot show the pane is gone, and "cannot prove it is
+    stopped" is treated as "do not proceed", the same way collect_one does.
+    """
+    key, _task, actor = _retire_target(db, body)
+    members = body.get("members")
+    if not isinstance(members, list) or not 1 <= len(members) <= 32:
+        raise ccboard.Invalid("members must be a list of 1 to 32 agent names")
+    for name in members:
+        ccboard.text(name, "member", 64, required=True, pattern=agentdefs.NAME_RE)
+    if len(set(members)) != len(members):
+        raise ccboard.Invalid("members must be unique")
+
+    rows = _rows(db, key)
+    on_roster = {row["agent_name"]: row for row in rows
+                 if row["status"] in ("proposed", "approved", "hired")}
+    unknown = sorted(set(members) - set(on_roster))
+    if unknown:
+        raise ccboard.Refused("not on this roster: " + ", ".join(unknown), [
+            {"field": "members", "hint": f"GET /api/board/roster?id={key} lists who is"}])
+
+    panes = {row["member_name"] for row in on_roster.values()
+             if row["status"] == "hired" and row["member_name"]}
+    if panes:
+        running = dispatch.live_agents()        # TmuxUnavailable propagates on purpose
+        busy = sorted(name for name in members
+                      if on_roster[name]["member_name"] in running)
+        if busy:
+            raise ccboard.Refused(
+                "still running: " + ", ".join(busy), [
+                    {"field": "members",
+                     "hint": "agentmux kill " + on_roster[busy[0]]["member_name"]}])
+
+    stamp = ccboard.now()
+    for name in members:
+        db.execute("UPDATE board_roster SET status='finished',updated_at=? WHERE id=?",
+                   (stamp, on_roster[name]["id"]))
+    ccboard._record(db, key, "retire", actor, detail={"members": sorted(members)})
     return _payload(db, key)
 
 

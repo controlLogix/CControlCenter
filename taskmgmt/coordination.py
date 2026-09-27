@@ -1395,7 +1395,7 @@ def cmd_team(args):
             body["name"] = args.name
         else:
             body["actor"] = args.agent
-            if args.command == "approve":
+            if args.command in ("approve", "retire"):
                 body["members"] = args.member
         result = board_call("POST", "board/" + args.command, body)
     if result is None:
@@ -1668,11 +1668,12 @@ def main(argv=None):
     drop.add_argument("--checksum")
     drop.add_argument("--json", action="store_true")
 
-    for name in ("roster", "recruit", "approve", "hire"):
-        team = board_verb(name, cmd_team, agent=name in ("recruit", "approve"))
+    for name in ("roster", "recruit", "approve", "retire", "hire"):
+        team = board_verb(name, cmd_team,
+                          agent=name in ("recruit", "approve", "retire"))
         team.add_argument("id", help="board key, e.g. TM-042")
         team.add_argument("--json", action="store_true")
-        if name == "approve":
+        if name in ("approve", "retire"):
             team.add_argument("--member", action="append", required=True,
                               help="agent definition name; repeat for each member")
         elif name == "hire":
@@ -1734,7 +1735,9 @@ def main(argv=None):
               "task-label", "task-dep", "task-evidence", "task-commit", "task-touch",
               "task-comment", "task-link", "task-assign", "task-move", "epic-new",
               "epic-status", "adr-new", "sprint-new", "cap-new", "sprint-commit",
-              "triage", "override", "recruit", "approve",
+              # `retire` sits with recruit and approve for the same reason: taking a
+              # team off a card is a decision, and a decision has an owner.
+              "triage", "override", "recruit", "approve", "retire",
               # THE TWO GATE-AFFECTING WRITES THAT NOBODY HAD TO SIGN.
               #
               # `epic use` repoints activeEpic, which decides where every later

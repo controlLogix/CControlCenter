@@ -99,8 +99,27 @@ class TeamCLI(unittest.TestCase):
         self.cli("hire", "--name", "lead", code=2)
         self.cli("approve", self.key, code=2)
 
+    def test_retire_reaches_the_board_and_needs_members(self):
+        """The CLI half of the transition nothing could perform.
+
+        `retire` carries --member the way `approve` does, and is identity-bound the
+        same way: taking a team off a card is a decision with an owner.
+        """
+        self.cli("recruit", self.key)
+        self.cli("approve", self.key, "--member", "lead")
+        self.cli("retire", self.key, code=2)                      # --member required
+        retired = json.loads(self.cli("retire", self.key, "--member", "lead",
+                                      "--json").stdout)
+        by_name = {row["agent_name"]: row for row in retired["members"]}
+        self.assertEqual(by_name["lead"]["status"], "finished")
+        self.assertIn("lead [lead] finished",
+                      self.cli("roster", self.key).stdout)
+        result = self.cli("retire", self.key, "--member", "lead", code=1)
+        self.assertIn("not on this roster", result.stderr)
+
     def test_actor_cannot_be_overridden(self):
-        for command, extra in (("recruit", []), ("approve", ["--member", "lead"])):
+        for command, extra in (("recruit", []), ("approve", ["--member", "lead"]),
+                               ("retire", ["--member", "lead"])):
             result = self.cli(command, self.key, *extra, "--agent", "someone-else", code=2)
             self.assertIn("cannot " + command + " as", result.stderr)
         self.assertEqual(json.loads(self.cli("roster", self.key, "--json").stdout)["count"], 0)

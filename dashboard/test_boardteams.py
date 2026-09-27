@@ -279,6 +279,86 @@ class TeamsHTTP(unittest.TestCase):
         self.assertEqual(self.call("hire", {"id": self.key, "name": "lead"})[0], 409)
         spawn.assert_called_once()
 
+    def test_retire_takes_members_off_and_is_the_only_write_a_closed_card_allows(self):
+        """The transition the model named and nothing ever performed.
+
+        `finished` was already recognised by approve()'s already-decided guard and by
+        the Teams panel's `decided` check, and no code path set it: a member could be
+        proposed, approved, rejected and hired, and never leave. Worse, every roster
+        write refused once the card was done - right for recruiting onto finished work,
+        exactly backwards for taking a team off it - so the roster of a completed card
+        could not be changed at all. The two agents on TM-083 had been stuck to a card
+        that closed on 2026-09-24, and the only way off was editing cc.db by hand.
+        """
+        self.write("recruit")
+        self.write("approve", members=["lead"])
+
+        status, error = self.write("retire", members=["nobody"])
+        self.assertEqual(status, 409)
+        self.assertIn("not on this roster", error["error"])
+        self.assertTrue(error["missing"][0]["hint"])
+        for bad in ([], ["lead", "lead"], "lead", ["a" * 65]):
+            self.assertEqual(self.write("retire", members=bad)[0], 400, bad)
+
+        status, payload = self.write("retire", members=["lead"])
+        self.assertEqual(status, 200)
+        by_name = {row["agent_name"]: row for row in payload["members"]}
+        self.assertEqual(by_name["lead"]["status"], "finished")
+        # A rejected row is already off; retiring does not resurrect or rewrite it.
+        self.assertEqual(by_name["reviewer"]["status"], "rejected")
+        self.assertEqual(self.read(), (200, payload))
+        retired = [e for e in self.events() if e["event"] == "retire"]
+        self.assertEqual(len(retired), 1)
+        self.assertEqual(retired[0]["actor"], "suite")
+        self.assertEqual(retired[0]["detail"]["members"], ["lead"])
+
+        # Already finished: no longer on the roster, so it is refused rather than
+        # silently re-stamped with a second history row.
+        self.assertEqual(self.write("retire", members=["lead"])[0], 409)
+        self.assertEqual(len([e for e in self.events() if e["event"] == "retire"]), 1)
+
+        # AND ON A CLOSED CARD. Every other roster verb refuses here; this one must not.
+        self.write("recruit")
+        self.write("approve", members=["lead"])
+        with ccstore.connection() as db:
+            db.execute("UPDATE tasks SET status='done' WHERE key=?", (self.key,))
+        self.assertEqual(self.write("recruit")[0], 409, "recruit should still refuse")
+        self.assertEqual(self.write("approve", members=["lead"])[0], 409,
+                         "approve should still refuse")
+        status, payload = self.write("retire", members=["lead"])
+        self.assertEqual(status, 200, "a finished card is when a roster most needs clearing")
+        self.assertEqual({row["agent_name"]: row["status"]
+                          for row in payload["members"]}["lead"], "finished")
+
+    def test_retire_refuses_a_member_whose_pane_is_still_running(self):
+        """Off the roster but still running is not retired, it is abandoned."""
+        spawn = self.prepare_hire()
+        status, hired = self.call("hire", {"id": self.key, "name": "lead"})
+        self.assertEqual(status, 200)
+        spawn.assert_called_once()
+        member = {row["agent_name"]: row for row in hired["members"]}["lead"]["member_name"]
+        self.assertTrue(member)
+
+        with patch.object(boardteams.dispatch, "live_agents", return_value={member}):
+            status, error = self.write("retire", members=["lead"])
+            self.assertEqual(status, 409)
+            self.assertIn("still running", error["error"])
+            self.assertIn(member, error["missing"][0]["hint"])
+
+        # Liveness that cannot be established is not "it stopped".
+        with patch.object(boardteams.dispatch, "live_agents",
+                          side_effect=boardteams.dispatch.coordination.TmuxUnavailable("tmux unreachable")):
+            self.assertEqual(self.write("retire", members=["lead"])[0], 503)
+
+        with patch.object(boardteams.dispatch, "live_agents", return_value=set()):
+            status, payload = self.write("retire", members=["lead"])
+        self.assertEqual(status, 200)
+        row = {r["agent_name"]: r for r in payload["members"]}["lead"]
+        self.assertEqual(row["status"], "finished")
+        # The pane it was served by stays on the row: which agent did the work is
+        # worth keeping, and the row no longer claims to be live.
+        self.assertEqual(row["member_name"], member)
+
     def test_hire_requires_approval_on_this_card(self):
         spawn = self.prepare_hire()
         for state in ("proposed", "rejected", "hired", "finished"):
