@@ -189,6 +189,81 @@ class SandboxCoordination(unittest.TestCase):
                          'a generation token outlived the race that took it')
         path.unlink(missing_ok=True)
 
+    def test_a_forced_release_cannot_unlink_the_claim_that_replaced_it(self):
+        """The same window, one function along, and wider because of --force.
+
+        cmd_release re-reads through release_still_ours() and then unlinks, which is
+        the two-syscall gap that function's own docstring is about - closed for the
+        case it describes and left open underneath it.
+
+        WITHOUT --force the claim has to still be ours and unexpired, so a rival can
+        only act in the microseconds between the check and the unlink. WITH it,
+        release_still_ours() returns True for a claim that has ALREADY EXPIRED, and an
+        expired claim is exactly what a stealer is entitled to take. So the rival is
+        not racing a microsecond; it takes the claim legitimately, links its own, and
+        our unlink deletes THEIRS. The rival is told "claimed", `agentmux claims`
+        shows the resource free, and the next agent along takes it too.
+        """
+        resource = 'taskmgmt/release-race.py'
+        co.CLAIMS_DIR.mkdir(parents=True, exist_ok=True)
+        path = co.CLAIMS_DIR / co.flatten(resource)
+        path.write_text(json.dumps({
+            'resource': resource, 'holder': 'holder-a', 'at': 'earlier',
+            'ttl': 60, 'expires_at': time.time() - 1,
+            'note': '', 'task': None, 'depends_on': [],
+        }), encoding='utf-8')
+
+        at_the_window = threading.Event()
+        steal_finished = threading.Event()
+        real_unlink = Path.unlink
+
+        def unlink_at_the_window(target, *args, **kwargs):
+            # The releasing thread only. The stealer unlinks this same path on its way
+            # through, and blocking that too would just deadlock the pair.
+            if (os.fspath(target) == os.fspath(path)
+                    and threading.current_thread().name == 'releaser'):
+                at_the_window.set()
+                steal_finished.wait(30)
+            return real_unlink(target, *args, **kwargs)
+
+        outcome = {}
+        quiet = {'journal': lambda *a, **k: 'journal', 'broadcast': lambda *a, **k: 0,
+                 'post': lambda *a, **k: None, 'all_claims': lambda *a, **k: []}
+        with contextlib.ExitStack() as stack:
+            for name, value in quiet.items():
+                stack.enter_context(patch.object(co, name, value))
+            stack.enter_context(patch.object(Path, 'unlink', unlink_at_the_window))
+            stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            stack.enter_context(contextlib.redirect_stderr(io.StringIO()))
+            releaser = threading.Thread(
+                target=lambda: outcome.setdefault('release', co.cmd_release(
+                    argparse.Namespace(resource=resource, holder='holder-a', force=True))),
+                name='releaser')
+            releaser.start()
+            self.assertTrue(at_the_window.wait(30), 'the releaser never reached the unlink')
+            outcome['steal'] = co.cmd_claim(argparse.Namespace(
+                resource=resource, holder='holder-b', ttl=60,
+                note=None, task=None, depends_on=[]))
+            steal_finished.set()
+            releaser.join(30)
+            self.assertFalse(releaser.is_alive(), 'the releaser never finished')
+
+        # WHOEVER WAS TOLD THEY HOLD IT, HOLDS IT. Either outcome is defensible on its
+        # own - the release was forced, and the lease had expired - but a rival told
+        # "claimed" while the resource sits free is the one that puts two agents on
+        # the same file.
+        if outcome['steal'] == 0:
+            self.assertTrue(path.exists(),
+                            'the stealer was told it claimed a resource that is now free')
+            self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['holder'],
+                             'holder-b')
+        else:
+            self.assertFalse(path.exists(),
+                             'nobody holds it, yet the claim file is still there')
+        self.assertEqual(sorted(p.name for p in co.CLAIMS_DIR.glob('.steal.*')), [],
+                         'a generation token outlived the race that took it')
+        path.unlink(missing_ok=True)
+
 
 if __name__ == '__main__':
     result = unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(SandboxCoordination))

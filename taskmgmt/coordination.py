@@ -464,26 +464,37 @@ def journal(kind, subject, body="", agent=None):
 GENERATION_LOST = object()
 
 
-def take_generation(resource, path, staging):
-    """Take the exclusive right to replace the file CURRENTLY at `path`.
+def take_generation(resource, path):
+    """Take the exclusive right to REMOVE OR REPLACE the file currently at `path`.
 
-    A claim file is replaced by two different code paths - a steal of an expired
-    claim, and a renewal by its holder - and BOTH have to be serialised against each
-    other, not just against themselves. The name of the token is the inode that was
-    observed, so it is per GENERATION of the file: whoever is working from a stale
-    read loses and re-reads, and two processes that observed different generations
-    never contend at all.
+    Three code paths end in the same claim file being unlinked or replaced - a steal
+    of an expired claim, a renewal by its holder, and a release - and every one of
+    them has to be serialised against the other two, not merely against itself. Each
+    on its own re-reads and compares before acting, and a comparison followed by an
+    unlink is two syscalls with a scheduler in between.
+
+    The name of the token is the INODE that was observed, so it is per GENERATION of
+    the file: whoever is working from a stale read loses the token and re-reads, and
+    two processes that observed different generations never contend at all.
 
     Returns (token, observed_inode):
       - (Path, ino)           you own this generation; call drop_generation(token)
       - (GENERATION_LOST, x)  somebody else owns it; re-read and retry
-      - (None, x | None)      the inode could not be read or linked, so there is
+      - (None, x | None)      the inode could not be read, or the token could not be
+                              created for a reason other than contention, so there is
                               nothing to serialise on; the caller proceeds as it did
                               before this mechanism existed rather than refusing.
 
-    `staging` is linked rather than a fresh file being created: it already exists, it
-    is already private, and os.link is the same atomic exclusive create used to
-    publish the claim itself.
+    O_CREAT|O_EXCL rather than a link from the caller's staging file: it is the same
+    atomic exclusive create, it needs nothing from the caller, and release has no
+    staging file to offer.
+
+    KNOWN LIMIT, unchanged by this and worth writing down: a process SIGKILLed between
+    taking the token and dropping it leaves the token behind, and inode numbers are
+    recycled, so that name could refuse a future generation. The window is a handful
+    of syscalls and the `finally` covers everything short of SIGKILL. Reaping stale
+    tokens means deciding one is stale, which is the same class of race this exists to
+    remove - so it is documented rather than guessed at.
     """
     try:
         observed = os.stat(path).st_ino
@@ -491,7 +502,7 @@ def take_generation(resource, path, staging):
         return None, None
     token = CLAIMS_DIR / f".steal.{flatten(resource)}.{observed}"
     try:
-        os.link(staging, token)
+        os.close(os.open(token, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600))
     except FileExistsError:
         return GENERATION_LOST, observed
     except OSError:
@@ -565,7 +576,7 @@ def cmd_claim(args):
                 # Taking an exclusive token named for the inode we observed means only
                 # one stealer proceeds per generation of the file; anyone working from
                 # a stale read loses the token and retries against the new reality.
-                token, observed = take_generation(args.resource, path, staging)
+                token, observed = take_generation(args.resource, path)
                 if token is GENERATION_LOST:
                     # Someone else is already replacing this same generation - stealing
                     # it, or renewing it. Re-read and retry against the new reality.
@@ -619,7 +630,7 @@ def cmd_claim(args):
                 # loses the token and re-reads instead. The loser here is the holder
                 # of a lease that had in fact expired, which is exactly who should
                 # lose it.
-                token, _observed = take_generation(args.resource, path, staging)
+                token, _observed = take_generation(args.resource, path)
                 if token is GENERATION_LOST:
                     if attempt == 1:
                         continue
@@ -726,17 +737,40 @@ def cmd_release(args):
               file=sys.stderr)
         return 1
 
-    # Re-check immediately before the destructive act. See release_still_ours.
-    if not release_still_ours(path, args.holder, observed_ino, args.force):
-        print(f"REFUSED: {args.resource} changed hands since it was read - not "
-              f"releasing someone else's claim.", file=sys.stderr)
+    # THE SAME GENERATION TOKEN THE STEAL AND THE RENEWAL TAKE, and for the third
+    # time the same reason: release_still_ours() is a re-read, and a re-read followed
+    # by an unlink is two syscalls with a scheduler between them. The docstring on
+    # that function describes the gap it closes and then leaves this one open.
+    #
+    # --force is where it actually bites. Without it the claim has to still be ours
+    # and unexpired, so a rival could only steal in the microseconds between the
+    # check and the unlink. WITH it, release_still_ours returns True for a claim that
+    # has ALREADY EXPIRED - which is precisely the state a stealer is entitled to act
+    # on - so the rival is not racing a microsecond, it is racing whatever the
+    # scheduler gives us. It takes the expired claim legitimately, links its own, and
+    # our unlink then deletes THEIR live claim. `agentmux claims` shows the resource
+    # free, a third agent takes it, and two agents edit the same file: the exact
+    # outcome release_still_ours exists to prevent, one layer further down.
+    token, _observed = take_generation(args.resource, path)
+    if token is GENERATION_LOST:
+        print(f"REFUSED: {args.resource} is being taken or renewed right now - not "
+              f"releasing underneath that.", file=sys.stderr)
         print("  Run `agentmux claims` to see who holds it now.", file=sys.stderr)
         return 1
     try:
-        path.unlink()
-    except OSError as err:
-        print(f"coordination: could not release: {err}", file=sys.stderr)
-        return 1
+        # Re-check immediately before the destructive act. See release_still_ours.
+        if not release_still_ours(path, args.holder, observed_ino, args.force):
+            print(f"REFUSED: {args.resource} changed hands since it was read - not "
+                  f"releasing someone else's claim.", file=sys.stderr)
+            print("  Run `agentmux claims` to see who holds it now.", file=sys.stderr)
+            return 1
+        try:
+            path.unlink()
+        except OSError as err:
+            print(f"coordination: could not release: {err}", file=sys.stderr)
+            return 1
+    finally:
+        drop_generation(token)
     journal("release", f"{args.holder} released {args.resource}", "", args.holder)
     broadcast(args.holder, "release", f"RELEASE {args.resource} by {args.holder}",
               resource=args.resource)
