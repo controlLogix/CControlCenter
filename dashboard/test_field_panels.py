@@ -19,10 +19,12 @@ influenced by the request.
 """
 
 import http.client
+import inspect
 import io
 import json
 import os
 import shutil
+import socketserver
 import socket
 import struct
 import sys
@@ -657,6 +659,48 @@ status, _ = post("/api/profinet/schema", {"stations": []})
 accepted_in = time.monotonic() - accepted_at
 check("an accepted write still succeeds", 200, status)
 ok(f"and does not wait out the drain timeout ({accepted_in:.2f}s)", accepted_in < 2)
+
+print("--- the listen queue is bigger than one browser ---")
+# socketserver.TCPServer sets request_queue_size = 5 and http.server inherits it, so
+# five connections may wait to be accepted. This page opens far more than five at
+# once - an SSE stream per pane, plus the polls behind Status, Board, Runs and the
+# field panels - and a reload asks for all of them again before the old ones are
+# reaped. An overflowing accept queue does NOT look like a full queue: connect() and
+# send() both succeed, because the handshake completed in the kernel, and the reset
+# lands while the client is reading the response. Measured, 1000 refused writes over
+# 40 threads: 15 x response:ConnectionResetError at backlog 5, zero at 128.
+#
+# Asserted structurally rather than by hammering 40 threads at a server here. The
+# hammer is what proved it and the numbers are in the commit; what a suite should
+# hold is the shape - that the class exists, that it raises the ceiling, and that
+# main() is the one binding it.
+check("the inherited default this overrides", 5, socketserver.TCPServer.request_queue_size)
+ok("the dashboard's server class raises the listen backlog",
+   server.BacklogServer.request_queue_size >= 128,
+   server.BacklogServer.request_queue_size)
+ok("and it subclasses the threading server",
+   issubclass(server.BacklogServer, ThreadingHTTPServer))
+ok("and it is the class main() binds",
+   "BacklogServer((" in inspect.getsource(server.main))
+
+print("--- a home that has been deleted is not an empty home ---")
+# Every store under AGENTMUX_HOME opens with mkdir(parents=True, exist_ok=True),
+# which is right on a first run and wrong afterwards. Before this, deleting the home
+# under a running server and asking for the board returned 200 with zero epics and
+# zero tasks, having rebuilt the tree and created a fresh cc.db - a clean empty board
+# rendered over a database that is not there any more, with nothing to say it was
+# lost. It is also where the deleted /tmp homes that keep reappearing came from: a
+# suite removes its throwaway home and one late request puts it back.
+#
+# LAST, because it takes this suite's own home away.
+shutil.rmtree(HOME, ignore_errors=True)
+check("the home is gone", False, os.path.isdir(HOME))
+for path in ("/api/board", "/api/dispatch", "/api/agents", "/api/journal", "/api/feed"):
+    check(f"{path} refuses rather than rebuilding", 503, get(path)[0])
+check("and the home is still gone", False, os.path.isdir(HOME))
+# Static assets still come out of the repo, so the page can load and show the error
+# instead of failing blank.
+check("the page itself still loads", 200, get("/")[0])
 
 httpd.shutdown()
 httpd.server_close()

@@ -2317,6 +2317,29 @@ class Handler(BaseHTTPRequestHandler):
             if (".." in parts or "\\" in path or "\x00" in path
                     or path.startswith("//")):
                 raise ValueError("unsafe path")
+            # A HOME THAT HAS BEEN DELETED IS NOT AN EMPTY HOME.
+            #
+            # Every store under here opens with mkdir(parents=True, exist_ok=True),
+            # which is right on a first run and wrong afterwards: point a running
+            # server at a home and delete it, and the next GET /api/board REBUILDS the
+            # tree and creates a brand new cc.db. Measured - the board comes back 200
+            # with zero epics and zero tasks, and the page renders a clean empty board
+            # over the top of a database that is not there any more. Nothing says the
+            # board was lost; it looks like a board nobody has used yet.
+            #
+            # It is also where the deleted /tmp homes that keep reappearing come from:
+            # a suite removes its throwaway home, one late request lands on the server
+            # still pointed at it, and the directory is back.
+            #
+            # Refused rather than recreated, and only for /api: static assets come out
+            # of the repo, so the page still loads and can show the error instead of
+            # failing blank. 503 is the shape the storage-unavailable path already
+            # uses. Creating the home at startup is still fine - that is a first run,
+            # and main() is where it belongs.
+            if path.startswith("/api/") and not HOME_DIR.is_dir():
+                self.send_json(503, {"error": f"Control Center storage unavailable: "
+                                              f"{HOME_DIR} does not exist"})
+                return
             if path in ("/api/epics", "/api/tasks", "/api/journal", "/api/messages",
                         "/api/devices", "/api/status", "/api/delete"):
                 self.cc_endpoint(path.rsplit("/", 1)[1], parsed.query)
@@ -2519,6 +2542,39 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
+class BacklogServer(ThreadingHTTPServer):
+    """ThreadingHTTPServer with a listen queue that fits this page.
+
+    socketserver.TCPServer sets request_queue_size = 5 and http.server inherits it,
+    so five connections may wait to be accepted. This dashboard opens far more than
+    five at once by design - an SSE stream per pane, plus the polls behind Status,
+    Board, Runs and the field panels - and a browser reload asks for all of them
+    again before the previous ones have been reaped.
+
+    WHEN THE ACCEPT QUEUE OVERFLOWS IT DOES NOT LOOK LIKE A FULL QUEUE. The client's
+    connect() succeeds and its send() succeeds, because the handshake completed in
+    the kernel; the reset arrives later, while it is reading the response. So it
+    surfaces as ConnectionResetError against an endpoint that was working perfectly,
+    which is how it was read for a long time as a flake in whatever suite happened to
+    catch it.
+
+    Measured, POST refused with a foreign Origin, 1000 requests, by phase:
+
+        backlog 5     20 threads  1000 x 403
+                      40 threads   985 x 403, 15 x response:ConnectionResetError
+                      serial      1000 x 403
+        backlog 128   20 threads  1000 x 403
+                      40 threads  1000 x 403
+                      serial      1000 x 403
+
+    128 rather than socket.SOMAXCONN: on this kernel the constant Python reports is
+    INT_MAX, the real ceiling is /proc/sys/net/core/somaxconn (4096 here), and the
+    number that matters is "comfortably more than one browser's worth", not "as many
+    as the kernel will take".
+    """
+    request_queue_size = 128
+
+
 def main():
     # --port exists so a test can bring up a REAL server without taking 8787 from
     # the operator's running dashboard. It changes nothing else: the bind stays on
@@ -2531,8 +2587,12 @@ def main():
         if not re.fullmatch(r"[0-9]{1,5}", raw) or not 1 <= int(raw) <= 65535:
             raise SystemExit("--port takes a number between 1 and 65535")
         port = int(raw)
+    # A first run legitimately has no home yet, and this is the one place allowed to
+    # make one: route() refuses every /api call once the server is up and the home has
+    # gone, rather than quietly rebuilding it around an empty database.
+    HOME_DIR.mkdir(parents=True, exist_ok=True)
     try:
-        with ThreadingHTTPServer(("127.0.0.1", port), Handler) as server:
+        with BacklogServer(("127.0.0.1", port), Handler) as server:
             # Resume the persisted field services without waiting for a browser
             # tab. An operator who left a line watched expects it still to be
             # watched after a restart, and a monitor that only runs while someone
