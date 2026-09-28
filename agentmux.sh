@@ -2190,9 +2190,27 @@ cmd_idle() {
 
   local now; now="$(date +%s)"
   local limit_s=$(( minutes * 60 ))
-  local name idle killed=0
+  local name idle killed=0 skipped=0
   while read -r name idle; do
     [ -n "$name" ] || continue
+    # ONLY THIS HOME'S AGENTS. The tmux socket is SHARED - every home talks to
+    # `-L agentmux` - so list-sessions returns agents belonging to other homes, and
+    # without this check an idle sweep run under one home closes another's agents.
+    #
+    # Measured: an idle watchdog belonging to /tmp/tmp.ozE3zbYxIr, a throwaway
+    # scenario home that had already been deleted, logged
+    #     closing tm-209-worker2 after 60m idle (limit 60m)  ... closed 6 idle agent(s)
+    # and decapitated a live eight-agent team on the operator's board. The two that
+    # survived did so only because someone happened to have them attached.
+    #
+    # $RUNDIR/<name>.cli is written by spawn for every agent this home owns, so its
+    # absence means the session is somebody else's business. Not fatal, not silent:
+    # counted and reported, because a sweep that quietly skips things is how you end
+    # up believing the timeout is armed when it is not.
+    if [ ! -f "$RUNDIR/$name.cli" ]; then
+      skipped=$((skipped + 1))
+      continue
+    fi
     if [ "$dry" = 1 ]; then
       printf 'would close %-14s (idle %sm, limit %sm)\n' "$name" "$(( idle / 60 ))" "$minutes"
       continue
@@ -2205,6 +2223,8 @@ cmd_idle() {
 $(printf '%s\n' "$listing" | idle_candidates "$limit_s" "$now")
 EOF
   [ "$dry" = 1 ] || [ "$killed" = 0 ] || printf 'closed %s idle agent(s)\n' "$killed"
+  [ "$skipped" = 0 ] || printf '%s idle session(s) left alone: not this home (%s)\n' \
+    "$skipped" "$ROOT"
   return 0
 }
 
@@ -2259,7 +2279,17 @@ for _fd in /proc/self/fd/*; do
 done
 unset _fd _n
 
+# STOP WHEN THIS HOME GOES, not only when the tmux server empties.
+#
+# The socket is shared, so \`list-sessions\` keeps succeeding as long as ANY home has
+# an agent up - which means a watchdog started by a throwaway test outlives that test
+# indefinitely and goes on sweeping. Three such orphans were found running against
+# deleted /tmp homes, and one of them had closed six live agents.
+#
+# Same rule the courier follows: a daemon whose home has been deleted has nothing
+# left to serve and should stop, rather than keep acting on shared state.
 while sleep "\${AGENTMUX_IDLE_TICK:-60}"; do
+  [ -d "$RUNDIR" ] || break
   tmux -L "$SOCKET" list-sessions >/dev/null 2>&1 || break
   bash <(tr -d '\r' < "$script") idle >> "$RUNDIR/.idle.log" 2>&1
 done

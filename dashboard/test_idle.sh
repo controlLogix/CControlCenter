@@ -25,7 +25,8 @@ check() {
 # Load the script's functions without running its dispatch. `return` at the top
 # level of a sourced file stops sourcing, which is how the command table at the
 # bottom is skipped.
-SRC="$(mktemp)"; trap 'rm -f "$SRC"' EXIT
+SRC="$(mktemp)"; FDPASS="$(mktemp)"
+trap 'rm -f "$SRC" "$FDPASS"' EXIT
 tr -d '\r' < agentmux.sh | sed 's/^case "\${1:-}" in$/return 0 \# test harness stops here/' > "$SRC"
 # shellcheck source=/dev/null
 AGENTMUX_IDLE_MINUTES=60 . "$SRC" 2>/dev/null || true
@@ -181,6 +182,95 @@ else
   bad "the watchdog script is generated" "start_idle_watchdog wrote nothing"
 fi
 rm -rf "$FDHOME"
+
+echo '--- the sweep only touches agents THIS home owns ---'
+# THE BUG THIS CAUGHT, and it is the worst one this file has had to hold.
+#
+# The tmux socket is SHARED: every home, including a throwaway one a test made
+# under /tmp, talks to `-L agentmux`. So list-sessions returns EVERY agent on the
+# box, and the first version of cmd_idle closed whatever it was handed.
+#
+# A scenario sweep left a watchdog belonging to /tmp/tmp.ozE3zbYxIr - a home that
+# had since been deleted - ticking every 60s. Its log:
+#     closing tm-209-worker2 after 60m idle (limit 60m)
+#     ... closed 6 idle agent(s)
+# Six of an eight-agent team, mid-run, on the operator's real board. The two that
+# lived were attached at the time, which is luck and not a safeguard.
+#
+# $RUNDIR/<name>.cli is spawn's ownership marker, so it is the discriminator. This
+# is posed against a fixture rather than a live server because the interesting case
+# - two homes on one socket - cannot be set up honestly any other way.
+(
+  SCOPE="$(mktemp -d)"
+  ROOT="$SCOPE"; RUNDIR="$SCOPE/run"; mkdir -p "$RUNDIR"
+  : > "$RUNDIR/mine.cli"          # this home spawned it
+  # theirs.cli deliberately absent: another home's agent, same socket.
+
+  # `command -v` finds functions, so this satisfies cmd_idle's tmux check without
+  # needing a server; `tm` is the only way it reaches tmux.
+  tmux() { :; }
+  tm() {
+    case "$1" in
+      list-sessions) printf '%s 1 0\n%s 1 0\n' mine theirs ;;
+      *) return 0 ;;
+    esac
+  }
+  KILLED="$SCOPE/killed"; : > "$KILLED"
+  cmd_kill() { printf '%s\n' "$1" >> "$KILLED"; }
+  # session_activity 1 is 1970, so both are idle by any limit.
+  out="$(cmd_idle --minutes 60 2>&1)"
+
+  check "only this home's agent is closed" "mine" "$(tr -d '\r' < "$KILLED")"
+  case "$out" in
+    *"1 idle session(s) left alone: not this home"*)
+      ok "and the one left alone is reported, not silently dropped" ;;
+    *) bad "and the one left alone is reported" "$out" ;;
+  esac
+  case "$out" in
+    *"closing mine"*) ok "the owned one is still closed - the scope is not a blanket veto" ;;
+    *) bad "the owned one is still closed" "$out" ;;
+  esac
+  rm -rf "$SCOPE"
+  printf '%s %s\n' "$passed" "$failed" > "$FDPASS"
+)
+read -r passed failed < "$FDPASS"
+
+echo '--- the watchdog dies with its home ---'
+# Same family: `list-sessions` keeps succeeding as long as ANY home has an agent up,
+# so a watchdog started by a test outlived the test indefinitely. Three orphans were
+# found running against deleted /tmp homes. The loop must also check its own home.
+if grep -qF '[ -d "$RUNDIR" ] || break' agentmux.sh; then
+  ok "the generated loop checks its home is still there"
+else
+  bad "the generated loop checks its home is still there" \
+      "a deleted home leaves the watchdog sweeping a shared socket forever"
+fi
+# Behaviourally: generate the real watchdog, delete the home under it, and see it go.
+GHOME="$(mktemp -d)"
+(
+  ROOT="$GHOME"; RUNDIR="$GHOME/run"; LOGDIR="$GHOME/logs"; mkdir -p "$RUNDIR" "$LOGDIR"
+  AGENTMUX_IDLE_MINUTES=60 AGENTMUX_REPO="$PWD" start_idle_watchdog >/dev/null 2>&1
+  rm -f "$RUNDIR/.idle.pid"
+  if [ -f "$RUNDIR/.idle-watchdog.sh" ]; then
+    AGENTMUX_IDLE_TICK=1 setsid bash "$RUNDIR/.idle-watchdog.sh" >/dev/null 2>&1 &
+    wpid=$!
+    sleep 1
+    rm -rf "$GHOME"
+    gone=no
+    for _ in 1 2 3 4 5 6 7 8; do
+      kill -0 "$wpid" 2>/dev/null || { gone=yes; break; }
+      sleep 1
+    done
+    kill "$wpid" 2>/dev/null
+    if [ "$gone" = yes ]; then ok "it exits within a tick of its home being deleted"
+    else bad "it exits when its home is deleted" "still running as pid $wpid after 8s"; fi
+  else
+    bad "the watchdog script is generated" "start_idle_watchdog wrote nothing"
+  fi
+  printf '%s %s\n' "$passed" "$failed" > "$FDPASS"
+)
+read -r passed failed < "$FDPASS"
+rm -rf "$GHOME"
 
 echo '--- a timeout closes an agent the same way a person does ---'
 grep -q 'cmd_kill "\$name"' agentmux.sh \

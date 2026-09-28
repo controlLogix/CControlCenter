@@ -429,31 +429,57 @@ def broadcast(sender, kind, body, skip=(), resource=None, everyone=False):
     return sent
 
 
+# The board's own limits for a journal entry, from dashboard/ccstore.py: subject is
+# text_field's 256 default, body is 8192. They live here because a client that
+# truncates to a different number than the server accepts does not get a shorter
+# entry, it gets an HTTP 400 and no entry at all - which is exactly what happened
+# while this said 2000.
+JOURNAL_SUBJECT_MAX = 256
+JOURNAL_BODY_MAX = 8192
+
+
 def journal(kind, subject, body="", agent=None):
     """Write to the shared journal the dashboard renders.
 
     Falls back to a local file when the dashboard is down, because a coordination
     record that only exists when a web server happens to be running is not a record.
     """
-    payload = {"kind": kind, "subject": subject[:2000], "body": (body or "")[:8192]}
+    subject = subject or ""
+    body = body or ""
+    if len(subject) > JOURNAL_SUBJECT_MAX:
+        # A long note is the normal case for a review finding, so spill the tail
+        # into the body rather than losing it. Truncating to the limit would drop
+        # the finding; sending it whole would drop the entry.
+        head, tail = subject[:JOURNAL_SUBJECT_MAX - 1], subject[JOURNAL_SUBJECT_MAX - 1:]
+        subject = head + "\u2026"
+        body = tail + ("\n\n" + body if body else "")
+    payload = {"kind": kind, "subject": subject, "body": body[:JOURNAL_BODY_MAX]}
     if agent:
         payload["agent"] = agent
     data = json.dumps(payload).encode("utf-8")
     request = urllib.request.Request(f"{DASHBOARD}/api/journal", method="POST",
                                      data=data,
                                      headers={"Content-Type": "application/json"})
-    try:
-        with urllib.request.urlopen(request, timeout=5) as response:
-            json.loads(response.read())
-        return "dashboard"
-    except (urllib.error.URLError, OSError, ValueError, TimeoutError):
+
+    def fall_back(why):
         try:
             with JOURNAL_FALLBACK.open("a", encoding="utf-8") as handle:
                 handle.write(json.dumps({"at": now(), **payload}) + "\n")
             os.chmod(JOURNAL_FALLBACK, 0o600)
-            return "local file (dashboard unreachable)"
+            return f"local file ({why})"
         except OSError:
             return "NOWHERE - journal write failed"
+
+    try:
+        with urllib.request.urlopen(request, timeout=5) as response:
+            json.loads(response.read())
+        return "dashboard"
+    except urllib.error.HTTPError as err:
+        # A refusal is not an outage. Saying "unreachable" for a 400 sent two agents
+        # to check a port that was answering perfectly well; name what happened.
+        return fall_back(f"dashboard refused the entry: HTTP {err.code}")
+    except (urllib.error.URLError, OSError, ValueError, TimeoutError):
+        return fall_back("dashboard unreachable")
 
 
 # ── claim / release ──────────────────────────────────────────────────────────
