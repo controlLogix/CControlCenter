@@ -668,6 +668,13 @@ except Exception:
       # The bypass flag below cannot fix either half - it configures THIS client, while
       # the exec happens inside the daemon.
       launch="codex --no-daemon${auth_flags:+ $auth_flags}${model:+ -m $quoted_model}"
+      # Live web search is OPT-IN. codex does not search unless launched with
+      # --search, and 0.159 has no config.toml key that is confirmed to do the
+      # same (web_search_request is gone from `codex features list`). Research
+      # tasks that need current facts - schedules, prices, news - set
+      # AGENTMUX_CODEX_SEARCH=1 at spawn. Everything else keeps no network egress
+      # from the model.
+      [ "${AGENTMUX_CODEX_SEARCH:-0}" = 1 ] && launch="$launch --search"
       if [ "$bypass" = 1 ]; then
         launch="$launch --dangerously-bypass-approvals-and-sandbox"
       else
