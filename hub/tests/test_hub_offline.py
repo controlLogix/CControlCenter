@@ -316,6 +316,68 @@ class Deliver(unittest.TestCase):
         self.assertEqual(rc.outcome, "submitted", rc.as_dict())
 
 
+class ServerAPI(unittest.TestCase):
+    """The socket API end to end, against a real hub process on a throwaway home.
+    Added after `return r` in two verbs was silently truncated to `return` (a bad
+    sed): the store tests all passed while `repo_add` and `post` answered null."""
+
+    @classmethod
+    def setUpClass(cls):
+        import subprocess
+        cls.home = tempfile.mkdtemp(prefix="hubapi-", dir="/tmp")
+        os.makedirs(os.path.join(cls.home, "repoA"))
+        env = {**os.environ, "AGENTMUX_HOME": cls.home, "AGENTMUX_SOCKET": "hubapi-test-none"}
+        root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        cls.proc = subprocess.Popen([sys.executable, os.path.join(root, "hub", "server.py")], env=env,
+                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
+        cls.sock = os.path.join(cls.home, "hub", "hub.sock")
+        for _ in range(50):
+            if os.path.exists(cls.sock):
+                break
+            time.sleep(0.1)
+
+    @classmethod
+    def tearDownClass(cls):
+        try:
+            cls.call("shutdown", {})
+        except Exception:
+            pass
+        cls.proc.wait(timeout=10)
+
+    @classmethod
+    def call(cls, verb, args):
+        import socket
+        s = socket.socket(socket.AF_UNIX)
+        s.connect(cls.sock)
+        s.sendall((json.dumps({"verb": verb, "args": args}) + "\n").encode())
+        buf = b""
+        while not buf.endswith(b"\n"):
+            chunk = s.recv(65536)
+            if not chunk:
+                break
+            buf += chunk
+        s.close()
+        return json.loads(buf)
+
+    def test_every_write_verb_returns_a_result(self):
+        r = self.call("repo_add", {"repo": "repo_a", "paths": [os.path.join(self.home, "repoA")]})
+        self.assertTrue(r["ok"], r)
+        self.assertEqual(r["result"]["repo"], "repo_a")
+        p = self.call("post", {"to": "virtual:operator", "kind": "note", "body": "api check"})
+        self.assertTrue(p["ok"], p)
+        self.assertTrue(p["result"]["id"])
+        w = self.call("work_add", {"to": "role:repo_a/worker", "title": "api item"})
+        self.assertTrue(w["result"]["id"].startswith("W-"), w)
+        box = self.call("inbox", {"ack": True})
+        self.assertEqual(box["result"]["messages"][0]["body"], "api check")
+        self.assertEqual(self.call("work_cancel", {"work_id": w["result"]["id"]})["result"]["cancelled"],
+                         [w["result"]["id"]])
+
+    def test_unknown_verb_is_an_error_not_null(self):
+        r = self.call("no_such_verb", {})
+        self.assertFalse(r["ok"])
+
+
 class Profiles(unittest.TestCase):
     def test_claude_idle_prompt_is_not_a_modal(self):
         p = profiles.get("claude")

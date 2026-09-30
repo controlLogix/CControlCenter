@@ -223,7 +223,7 @@ class Hub:
             with open(os.path.join(ROOT, "repos", repo, "repo.toml"), "w") as f:
                 f.write(toml_dump({"repo": repo, "title": a.get("title") or repo, "paths": paths,
                                    "aliases": sorted(set(aliases)), "groups": a.get("groups", [])}))
-            return 
+            return r
         if verb == "team_add":
             if caller != "operator":
                 me = await self.db(s.agent, caller)
@@ -239,7 +239,7 @@ class Hub:
         if verb == "kill":
             self.need_operator(caller)
             sess = a["session"]
-            await asyncio.get_running_loop().run_in_executor(self.io, self.tp.kill, sess)
+            await asyncio.get_running_loop().run_in_executor(self.io, self.harness, "kill", sess)
             await self.db(s.set_state, sess, "dead", "killed by operator")
             await self.db(s.event, "agent", sess, "kill", "operator", {"reason": a.get("reason", "operator")})
             return {"killed": sess}
@@ -255,7 +255,7 @@ class Hub:
                 body_ref = self._write_brief(a["to"], body)
             r = await self.db(s.post, sender, a["to"], a.get("kind", "note"), body, a.get("ref"), a.get("work_id"),
                               a.get("idem_key"), body_ref)
-            return 
+            return r
         if verb == "inbox":
             who = a.get("session") if caller == "operator" and a.get("session") else caller
             if who == "operator":
@@ -359,6 +359,22 @@ class Hub:
         with open(p, "w") as f:
             f.write(body)
         return p
+
+    def harness(self, verb, *args):
+        """Tear down through `agentmux kill` / `agentmux reap`, never raw tmux: those
+        also remove the run/<name>.* sidecars, which is what the dashboard lists agents
+        from. A raw kill-session left 27 stale tiles after one evening of evals.
+        Falls back to the transport's kill if the harness is unavailable."""
+        cmd = [os.environ.get("AGENTMUX_BIN", os.path.expanduser("~/.local/bin/agentmux")), verb, *args]
+        env = {k: v for k, v in os.environ.items() if k != "AGENTMUX_AGENT"}
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True, env=env, stdin=subprocess.DEVNULL, timeout=120)
+            ok = r.returncode == 0
+        except (OSError, subprocess.TimeoutExpired):
+            ok = False
+        if not ok and verb == "kill" and args:
+            self.tp.kill(args[0])
+        return ok
 
     # -- spawn --------------------------------------------------------------------------
     async def spawn(self, a):
@@ -513,6 +529,7 @@ class Hub:
                     alive = await asyncio.get_running_loop().run_in_executor(self.io, self.tp.alive, sess)
                     if not alive:
                         await self.db(self.store.set_state, sess, "dead", "terminal gone")
+                        await asyncio.get_running_loop().run_in_executor(self.io, self.harness, "reap")
                         await self._tell_operator(f"{sess} died (terminal gone); its leases went back to the queue",
                                                   f"died:{sess}:{ag['created']}")
                         continue

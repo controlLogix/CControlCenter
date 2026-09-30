@@ -24,8 +24,11 @@ done
 echo "welcome acked by the pane itself"
 
 id=$(H post --to "agent:$S" --kind request --json "smoke ping" | python3 -c 'import sys,json;print(json.load(sys.stdin)["id"])')
+# An empty id would make the startswith() below match ANY acked delivery - a false pass.
+[ -n "$id" ] || fail "post returned no message id"
 for i in $(seq 1 20); do
-  n=$(H events --entity delivery --json | python3 -c "import sys,json;print(sum(1 for e in json.load(sys.stdin) if e['entity_id'].startswith('$id') and e['event']=='acked'))")
+  n=$(H events --entity delivery --json 2>/dev/null | python3 -c "import sys,json;print(sum(1 for e in json.load(sys.stdin) if e['entity_id'].startswith('$id>') and e['event']=='acked'))" 2>/dev/null)
+  n=${n:-0}
   [ "$n" -ge 1 ] && break; sleep 1
 done
 [ "$n" -ge 1 ] || fail "ping not acked"
@@ -40,4 +43,8 @@ echo "role claim + done ok"
 H kill "$S" >/dev/null
 sleep 4
 H agents | grep "$S" | grep -q dead || fail "agent not marked dead after kill"
+# The dashboard lists agents from run/<name>.* sidecars; a kill that leaves them
+# behind shows up as a stale tile forever (27 of them after one evening of evals).
+[ ! -e "${AGENTMUX_HOME:-$HOME/.agentmux}/run/$S.cli" ] || fail "kill left sidecars behind for $S"
+echo "sidecars cleaned"
 echo "SMOKE PASS"
