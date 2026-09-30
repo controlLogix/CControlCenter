@@ -279,6 +279,21 @@ class Deliver(unittest.TestCase):
         self.assertNotEqual(self.keys("a")[0], "Enter")
         self.assertEqual(rc.outcome, "submitted", rc.as_dict())
 
+    def test_update_banner_is_not_the_update_menu(self):
+        """codex 0.159.2 (2026-09-30): every pane shows this NON-modal banner. It must be
+        rung normally - no '2', no block."""
+        banner = ("╭─────────────────────────────────────────────────╮\n"
+                  "│ ✨ Update available! 0.159.0 -> 0.159.2         │\n"
+                  "│ Run npm install -g @openai/codex to update.     │\n"
+                  "│ See full release notes:                         │\n"
+                  "╰─────────────────────────────────────────────────╯\n"
+                  "  >_ OpenAI Codex (v0.159.0)\n     ~/hubdemo/calc\n")
+        self.t.add("a", banner + "› Ask Codex to do anything")
+        rc = self.run_line("a")
+        self.assertEqual(rc.outcome, "submitted", rc.as_dict())
+        self.assertNotIn("2", self.keys("a"))
+        self.assertEqual(rc.modal_answers, [])
+
     def test_login_modal_blocks_without_keys(self):  # C2
         self.t.add("a", "Welcome to Codex\nSign in with ChatGPT\n› 1. Sign in with ChatGPT\n")
         rc = self.run_line("a")

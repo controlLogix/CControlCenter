@@ -83,7 +83,11 @@ BUSY_COMMON = re.compile(r"esc to interrupt|ctrl\+c:cancel|ctrl-c to stop|to int
 GENERIC_MODAL = Modal("unknown", re.compile(
     r"press enter to continue|update now \(runs|\[y/n\]|\(y/n\)|do you (want|trust)|allow this|press any key|"
     r"select an option|continue\? *$|enter to confirm|esc to cancel|no, (exit|quit)|yes, i (accept|trust)|"
-    r"trust this folder|[❯›▶>]\s+([0-9]+\.|yes\b|no\b|switch\b|keep\b|continue\b|sign in\b|log ?in\b)", _I | re.M),
+    # The selected-option marker must START its line (after optional box drawing):
+    # unanchored, the version arrow in codex's "0.159.0 -> 0.159.2" banner matched as a
+    # "> 0." menu choice. agentmux.sh modal_text has the same unanchored group.
+    r"trust this folder|^\s*[│|]?\s*[❯›▶>]\s+([0-9]+\.|yes\b|no\b|switch\b|keep\b|continue\b|sign in\b|log ?in\b)",
+    _I | re.M),
     None, "unrecognized prompt: needs a person")
 
 # codex: "Update available" preselects "1. Update now (runs npm install -g)". Enter on it
@@ -95,7 +99,12 @@ CODEX = Profile(
     busy=BUSY_COMMON,
     placeholder=PLACEHOLDER,
     modals=[
-        Modal("update", re.compile(r"Update available.*|Update now \(runs", _I | re.S), ["2"],
+        # The MENU, not the words. Since codex 0.159.2 shipped (2026-09-30) every pane opens
+        # with a non-modal "✨ Update available! ... Run npm install -g @openai/codex to
+        # update." banner box in its header. Matching bare "Update available" took that
+        # banner for the menu, and no codex pane could be rung. agentmux.sh modal_answer
+        # always required BOTH halves; the menu is the line that offers "Update now (runs".
+        Modal("update", re.compile(r"Update now \(runs|[›>]\s*1\.\s*Update now", _I), ["2"],
               "never Enter: option 1 runs npm install -g and exits"),
         Modal("trust", re.compile(r"allow codex to work|trust (this|the) (directory|folder)|do you want to allow|Do you trust", _I),
               ["Enter"], "accept is preselected"),

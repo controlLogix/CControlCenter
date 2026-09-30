@@ -1112,7 +1112,7 @@ except Exception:
 # dashboard/test_modal_guard.sh exercises modal_text against captured samples.
 modal_text() {
   printf '%s' "$1" | grep -Eqi \
-    'press enter to continue|update now \(runs|\[y/n\]|\(y/n\)|do you (want|trust)|allow this|press any key|select an option|continue\? *$|enter to confirm|esc to cancel|no, (exit|quit)|yes, i (accept|trust)|trust this folder|[❯›▶>][[:space:]]+([0-9]+\.|yes\b|no\b|switch\b|keep\b|continue\b|sign in\b|log ?in\b)'
+    'press enter to continue|update now \(runs|\[y/n\]|\(y/n\)|do you (want|trust)|allow this|press any key|select an option|continue\? *$|enter to confirm|esc to cancel|no, (exit|quit)|yes, i (accept|trust)|trust this folder|^[[:space:]]*[│|]?[[:space:]]*[❯›▶>][[:space:]]+([0-9]+\.|yes\b|no\b|switch\b|keep\b|continue\b|sign in\b|log ?in\b)'
 }
 
 modal_prompt() {
