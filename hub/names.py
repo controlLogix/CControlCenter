@@ -106,8 +106,10 @@ def parse_address(a: str) -> Address:
 def nats_subject(addr: Address, node: str) -> str:
     """The subject this address maps to once a NATS bridge exists (PROTOCOL.md 11)."""
     if addr.kind == "agent":
+        # Node-agnostic: a sender cannot know which node hosts the recipient. Every hub
+        # subscribes to am.agent.> and only the one that has the agent ingests it.
         r, ro, ag = split_session(addr.name)
-        return f"am.{node}.{r}.{ro}.{ag}"
+        return f"am.agent.{r}.{ro}.{ag}"
     if addr.kind == "role":
         scope = addr.scope.replace("group:", "g_").replace("team:", "t_").replace("/", ".").replace("*", "all")
         return f"am.work.{scope}.{addr.name}"

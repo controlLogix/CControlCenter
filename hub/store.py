@@ -155,6 +155,19 @@ MIGRATIONS = [
     CREATE TABLE nats_outbox (seq INTEGER PRIMARY KEY, subject TEXT NOT NULL, payload TEXT NOT NULL,
       created TEXT NOT NULL, sent TEXT) STRICT;
     """,
+    # 2 (TM-214): retire the courier onto the hub. The courier's own kinds, so any
+    # `agentmux post --kind` still works; and term_name, the tmux session an ADOPTED
+    # legacy agent really lives in (its protocol name is only an alias for it).
+    """
+    INSERT OR IGNORE INTO message_kinds (kind) VALUES ('plan'),('status'),('finding'),('error');
+    ALTER TABLE agents ADD COLUMN term_name TEXT;
+    """,
+    # 3 (TM-218): federation over NATS. origin = "<node>:<work id>" for an item that
+    # arrived from another hub, so its result can be sent back there.
+    """
+    ALTER TABLE work_items ADD COLUMN origin TEXT;
+    CREATE INDEX outbox_unsent ON nats_outbox (seq) WHERE sent IS NULL;
+    """,
 ]
 
 
@@ -183,6 +196,9 @@ class Store:
         ver = self.db.execute("PRAGMA user_version").fetchone()[0]
         if aid not in (0, APP_ID):
             raise HubError(f"{self.path} is not a hub database (application_id {aid:#x})")
+        if 0 < ver < len(MIGRATIONS):
+            # Every schema change is preceded by a restorable copy (PROTOCOL 8.1).
+            self.backup_to(os.path.join(os.path.dirname(self.path), "backups"), keep=10, label=f"premigrate-v{ver}")
         for i, sql in enumerate(MIGRATIONS[ver:], start=ver + 1):
             self.db.execute("BEGIN IMMEDIATE")
             try:
@@ -220,6 +236,44 @@ class Store:
         with d:
             self.db.backup(d)
         d.close()
+
+    def backup_to(self, dest_dir: str, keep: int = 24, label: str = "hourly") -> str:
+        """Online backup (consistent under WAL, no long lock) into dest_dir, keeping the
+        newest `keep` per label. Written to a temp name and renamed, so a crash mid-copy
+        never leaves a truncated file that looks like a good backup."""
+        import glob
+        os.makedirs(dest_dir, mode=0o700, exist_ok=True)
+        os.chmod(dest_dir, 0o700)                       # backups hold every message body
+        stamp = time.strftime("%Y%m%dT%H%M%S", time.gmtime()) + f"{int(time.time() * 1000) % 1000:03d}Z"
+        final = os.path.join(dest_dir, f"hub-{label}-{stamp}.db")
+        tmp = final + ".tmp"
+        os.close(os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600))
+        self.backup(tmp)
+        os.chmod(tmp, 0o600)
+        os.replace(tmp, final)
+        for old in sorted(glob.glob(os.path.join(dest_dir, f"hub-{label}-*.db")))[:-max(1, int(keep))]:
+            os.remove(old)
+        return final
+
+    def prune(self, events_days: float = 14, messages_days: float = 30) -> dict:
+        """Retention. Removes only what is finished: events older than events_days, and
+        messages older than messages_days whose every delivery is terminal (acked/dead).
+        Undelivered mail is never pruned, however old - that is the at-least-once rule."""
+        ev_cut = f"-{float(events_days) * 86400:.0f} seconds"
+        msg_cut = f"-{float(messages_days) * 86400:.0f} seconds"
+        with self.tx():
+            n_ev = self.db.execute("DELETE FROM events WHERE at < strftime('%Y-%m-%dT%H:%M:%fZ','now',?)",
+                                   (ev_cut,)).rowcount
+            ids = [r[0] for r in self.db.execute(
+                "SELECT id FROM messages m WHERE created < strftime('%Y-%m-%dT%H:%M:%fZ','now',?) AND NOT EXISTS "
+                "(SELECT 1 FROM deliveries d WHERE d.message_id = m.id AND d.state NOT IN ('acked','dead'))",
+                (msg_cut,)).fetchall()]
+            for i in ids:
+                self.db.execute("DELETE FROM deliveries WHERE message_id=?", (i,))
+                self.db.execute("DELETE FROM messages WHERE id=?", (i,))
+            n_out = self.db.execute("DELETE FROM nats_outbox WHERE sent IS NOT NULL AND created < "
+                                    "strftime('%Y-%m-%dT%H:%M:%fZ','now',?)", (msg_cut,)).rowcount
+        return {"events": n_ev, "messages": len(ids), "outbox": n_out}
 
     # -- registry ---------------------------------------------------------------------
     def repo_add(self, repo, title=None, paths=(), aliases=(), groups=()):
@@ -337,6 +391,29 @@ class Store:
                 t.append(f"team:{m['repo']}/{m['team']}")
         return t
 
+    def canonical_target(self, to: str, virtual=("orchestrator",)):
+        """Accept what `agentmux post` users type. A full address passes through; a bare
+        name is a registered session, a legacy alias (legacy_names), or a virtual
+        recipient. Resolved ONCE, at post time, so the stored target is canonical."""
+        if ":" in to:
+            return to
+        a = self.agent(to)
+        if a:
+            return f"agent:{a['session']}"
+        if to in virtual:
+            return f"virtual:{names.normalize(to)}"
+        raise HubError(f"'{to}' is not a registered agent, a legacy alias or a virtual recipient")
+
+    def adopt(self, legacy, repo, role, agent, cli, role_snapshot, handle, pane_pid, token_sha=None):
+        """Bring a live pre-protocol agent under the hub WITHOUT renaming its tmux
+        session (PROTOCOL 10.3): a protocol session name, the old name as an alias,
+        and term_name so the transport still finds the real terminal."""
+        session = self.register(repo, role, agent, cli, role_snapshot, handle=handle, pane_pid=pane_pid,
+                                legacy=legacy, token_sha=token_sha)
+        with self.tx():
+            self.db.execute("UPDATE agents SET term_name=?, state='ready' WHERE session=?", (legacy, session))
+        return session
+
     def recipients(self, target: str):
         """Live sessions a MESSAGE to this address goes to. Direct -> one; role -> every
         live holder in scope (a broadcast; use work items for first-claim); team -> leads."""
@@ -358,7 +435,10 @@ class Store:
 
     # -- messages ---------------------------------------------------------------------
     def post(self, sender, target, kind, body, ref=None, work_id=None, idem_key=None, body_ref=None,
-             body_sha=None, meta=None):
+             body_sha=None, meta=None, remote_ok=False, node=None):
+        """remote_ok (TM-218): a direct message to an agent this hub does not have goes
+        out through the NATS outbox instead of being refused. It has no local delivery
+        rows - the hub that owns the recipient delivers and acks it."""
         import hashlib
         if not self.q1("SELECT 1 FROM message_kinds WHERE kind=?", (kind,)):
             kinds = [r["kind"] for r in self.q("SELECT kind FROM message_kinds ORDER BY kind")]
@@ -367,7 +447,14 @@ class Store:
             prev = self.q1("SELECT id FROM messages WHERE sender=? AND idem_key=?", (sender, idem_key))
             if prev:
                 return {"id": prev["id"], "duplicate": True, "recipients": self._recips_of(prev["id"])}
-        recips = self.recipients(target)
+        remote = False
+        try:
+            recips = self.recipients(target)
+        except HubError:
+            if not (remote_ok and target.startswith("agent:")):
+                raise
+            names.split_session(target[6:])            # only a well-formed protocol name may leave this node
+            recips, remote = [], True
         mid = ulid()
         sha = body_sha or hashlib.sha256((body or "").encode()).hexdigest()
         with self.tx():
@@ -379,21 +466,66 @@ class Store:
             for r in recips:
                 self.db.execute("INSERT INTO deliveries (message_id, recipient, state, updated) VALUES (?,?,?,?)",
                                 (mid, r, "queued", now()))
-            self._outbox(target, mid)
-        return {"id": mid, "duplicate": False, "recipients": recips}
+            if remote:
+                self._outbox(names.nats_subject(names.parse_address(target), node or "local"),
+                             {"type": "message", "id": mid, "sender": sender, "target": target, "kind": kind,
+                              "ref": ref, "body": body, "origin": node})
+        return {"id": mid, "duplicate": False, "recipients": recips, "remote": remote}
 
     def _recips_of(self, mid):
         return [r["recipient"] for r in self.q("SELECT recipient FROM deliveries WHERE message_id=?", (mid,))]
 
-    def _outbox(self, target, mid):
-        # Transactional outbox for the future NATS bridge. Written in the same
-        # transaction as the state change, so a bridge can never miss or invent one.
-        try:
-            subj = names.nats_subject(names.parse_address(target), "local")
-        except Exception:
-            subj = "am.local.unroutable"
+    def _outbox(self, subject, payload):
+        # Transactional outbox for the NATS bridge (TM-218). Written in the SAME
+        # transaction as the state change it announces, so a crash can never publish
+        # something that did not happen, or lose something that did.
         self.db.execute("INSERT INTO nats_outbox (subject, payload, created) VALUES (?,?,?)",
-                        (subj, json.dumps({"message_id": mid}), now()))
+                        (subject, json.dumps(payload, default=str), now()))
+
+    def outbox_pending(self, limit=200):
+        return self.q("SELECT seq, subject, payload FROM nats_outbox WHERE sent IS NULL ORDER BY seq LIMIT ?", (limit,))
+
+    def outbox_sent(self, seqs):
+        with self.tx():
+            for s in seqs:
+                self.db.execute("UPDATE nats_outbox SET sent=? WHERE seq=?", (now(), s))
+
+    # -- inbound from other nodes (TM-218) ------------------------------------------------
+    def ingest_message(self, env):
+        """A direct message another hub published. Delivered only if the recipient is
+        one of OURS; idempotent on the sender's message id (NATS may redeliver)."""
+        target = env.get("target", "")
+        a = self.agent(target[6:]) if target.startswith("agent:") else None
+        if not a or a["state"] == "dead":
+            return None
+        return self.post(env.get("sender") or "virtual:remote", f"agent:{a['session']}", env.get("kind") or "note",
+                         env.get("body") or "", env.get("ref"), idem_key=f"nats:{env.get('id')}",
+                         meta={"origin": env.get("origin")})
+
+    def ingest_work(self, env):
+        """A federated work item this hub won from its queue group: becomes a normal local
+        item (local first-claim follows), remembering where to send the result."""
+        w = env["work"]
+        dup = self.q1("SELECT id FROM work_items WHERE origin=?", (env["origin"],))
+        if dup:
+            return self.q1("SELECT * FROM work_items WHERE id=?", (dup["id"],))
+        item = self.work_create(w["created_by"], w["repo"], w["target"], w["title"], w.get("body"),
+                                w.get("task_key"), json.loads(w["requirements"]) if w.get("requirements") else None,
+                                int(w.get("priority") or 100))
+        with self.tx():
+            self.db.execute("UPDATE work_items SET origin=? WHERE id=?", (env["origin"], item["id"]))
+        return self.q1("SELECT * FROM work_items WHERE id=?", (item["id"],))
+
+    def ingest_result(self, env):
+        """The remote hub finished our federated item: close the local placeholder."""
+        wid = env["origin_id"]
+        w = self.q1("SELECT * FROM work_items WHERE id=?", (wid,))
+        if not w or w["state"] != "claimed" or not (w["claimed_by"] or "").startswith("nats:"):
+            return None
+        with self.tx():
+            self.db.execute("UPDATE work_items SET state=?, result=?, claimed_by=?, updated=? WHERE id=?",
+                            (env["state"], env.get("result"), f"nats:{env.get('node')}:{env.get('by')}", now(), wid))
+        return self.q1("SELECT * FROM work_items WHERE id=?", (wid,))
 
     def inbox(self, session, limit=20, mark=True):
         rows = self.q(
@@ -424,6 +556,17 @@ class Store:
                 "recipient=? AND state NOT IN ('acked','dead','received')",
                 (state, json.dumps(evidence) if evidence else None, error, now(), mid, recipient))
 
+    def mark_received(self, session, upto, evidence):
+        """The CLI's own log shows the bell as a user turn (TM-213): every delivery that
+        bell announced is received, whether or not the agent has run inbox yet."""
+        with self.tx():
+            rows = self.db.execute(
+                "UPDATE deliveries SET state='received', evidence=?, updated=? WHERE recipient=? AND message_id<=? "
+                "AND state IN ('queued','offered','typed','submitted') RETURNING message_id",
+                (json.dumps(evidence), now(), session, upto or "")).fetchall()
+            self.event("agent", session, "cli_receipt", "hub", evidence)
+        return [r[0] for r in rows]
+
     def pending_for(self, session):
         return self.q("SELECT d.*, m.kind, m.sender FROM deliveries d JOIN messages m ON m.id=d.message_id "
                       "WHERE d.recipient=? AND d.state NOT IN ('acked','dead') ORDER BY d.message_id", (session,))
@@ -440,8 +583,13 @@ class Store:
 
     # -- work -------------------------------------------------------------------------
     def work_create(self, created_by, repo, target, title, body=None, task_key=None, requirements=None,
-                    priority=100, parent_id=None, max_attempts=3):
-        names.parse_address(target)
+                    priority=100, parent_id=None, max_attempts=3, federate=False, node=None):
+        """federate (TM-218): offer a role item to EVERY hub on the NATS network, not
+        just this one. The local row becomes a placeholder, claimed by 'nats:federated',
+        until the hub that won the item's queue group reports the result back."""
+        addr = names.parse_address(target)
+        if federate and addr.kind != "role":
+            raise HubError("only role items can be federated (a direct or team item has one home)")
         if not self.q1("SELECT 1 FROM repos WHERE repo=?", (repo,)):
             raise HubError(f"unknown repo {repo!r}")
         if target.startswith("agent:"):
@@ -458,7 +606,13 @@ class Store:
             if parent_id:
                 self.db.execute("UPDATE work_items SET state='waiting_children', updated=? WHERE id=? AND "
                                 "state='claimed'", (now(), parent_id))
-            self._outbox(target, wid)
+            if federate:
+                self.db.execute("UPDATE work_items SET state='claimed', claimed_by='nats:federated' WHERE id=?", (wid,))
+                row = dict(self.db.execute("SELECT * FROM work_items WHERE id=?", (wid,)).fetchone())
+                self._outbox(names.nats_subject(addr, node or "local"),
+                             {"type": "work", "origin": f"{node}:{wid}", "origin_node": node, "origin_id": wid,
+                              "work": {k: row[k] for k in ("repo", "target", "title", "body", "task_key",
+                                                            "requirements", "priority", "created_by")}})
         return self.q1("SELECT * FROM work_items WHERE id=?", (wid,))
 
     def claimable(self, session):
@@ -504,7 +658,7 @@ class Store:
             self.db.execute("UPDATE agents SET last_seen=? WHERE session=?", (now(), session))
         return n
 
-    def release(self, session, work_id, outcome, result=None):
+    def release(self, session, work_id, outcome, result=None, node=None):
         if outcome not in ("done", "failed", "returned", "blocked"):
             raise HubError("outcome must be done|failed|returned|blocked")
         w = self.q1("SELECT * FROM work_items WHERE id=?", (work_id,))
@@ -526,6 +680,11 @@ class Store:
                             "blocked_reason=CASE WHEN ?='blocked' THEN ? ELSE blocked_reason END WHERE id=?",
                             (new, result, now(), new, new, result, work_id))
             self.db.execute("DELETE FROM claims WHERE work_id=?", (work_id,))
+            if w.get("origin") and new in ("done", "failed"):
+                # A federated item: report back to the hub that owns it (TM-218).
+                origin_node, _, origin_id = w["origin"].partition(":")
+                self._outbox(f"am.result.{origin_node}", {"type": "result", "origin_id": origin_id, "state": new,
+                                                         "result": result, "by": session, "node": node})
         return self.q1("SELECT * FROM work_items WHERE id=?", (work_id,))
 
     def cancel(self, work_id, reason):

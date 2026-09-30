@@ -53,7 +53,7 @@ class Names(unittest.TestCase):
     def test_addresses_and_subjects(self):
         a = names.parse_address("role:group:g1/reviewer")
         self.assertEqual(str(a), "role:group:g1/reviewer")
-        self.assertEqual(names.nats_subject(names.parse_address("agent:alpha/worker/w1"), "n1"), "am.n1.alpha.worker.w1")
+        self.assertEqual(names.nats_subject(names.parse_address("agent:alpha/worker/w1"), "n1"), "am.agent.alpha.worker.w1")
         self.assertEqual(names.nats_subject(a, "n1"), "am.work.g_g1.reviewer")
         with self.assertRaises(ValueError):
             names.parse_address("nobody")
@@ -69,6 +69,24 @@ class Messaging(unittest.TestCase):
     def test_duplicate_live_name_refused(self):  # R-NAME-2 / C8
         with self.assertRaises(HubError):
             self.s.register("alpha", "worker", "w1", "codex", ROLE)
+
+    def test_legacy_names_resolve(self):  # TM-214 AC2
+        leg = self.s.adopt("nfl-lead", "alpha", "lead", "nfl_lead", "claude", LEAD, "%9", 4242)
+        self.assertEqual(leg, "alpha-lead-nfl_lead")
+        self.assertEqual(self.s.agent("nfl-lead")["session"], leg)
+        self.assertEqual(self.s.agent(leg)["term_name"], "nfl-lead")
+        self.assertEqual(self.s.canonical_target("nfl-lead"), f"agent:{leg}")
+        self.assertEqual(self.s.canonical_target(self.w1), f"agent:{self.w1}")
+        self.assertEqual(self.s.canonical_target("orchestrator"), "virtual:orchestrator")
+        self.assertEqual(self.s.canonical_target("role:alpha/worker"), "role:alpha/worker")
+        with self.assertRaises(HubError):
+            self.s.canonical_target("nobody-here")
+        r = self.s.post("virtual:operator", self.s.canonical_target("nfl-lead"), "status", "to the legacy name")
+        self.assertEqual(r["recipients"], [leg])
+
+    def test_courier_kinds_accepted(self):  # TM-214: every `agentmux post --kind` still works
+        for k in ("plan", "status", "finding", "error", "request", "reply", "claim", "release"):
+            self.s.post("virtual:operator", f"agent:{self.w1}", k, k)
 
     def test_reregistered_name_does_not_inherit_mail(self):  # R-NAME-2
         self.s.post("virtual:operator", f"agent:{self.w1}", "request", "for the old one")
@@ -131,7 +149,14 @@ class Messaging(unittest.TestCase):
         hits = self.s.q("SELECT rowid FROM messages_fts WHERE messages_fts MATCH 'brown'")
         self.assertEqual(len(hits), 1)
         self.assertTrue(any(e["entity"] == "delivery" for e in self.s.events()))
-        self.assertEqual(len(self.s.q("SELECT * FROM nats_outbox")), 1)
+        # Local traffic never enters the NATS outbox; only remote-bound rows do (TM-218).
+        self.assertEqual(len(self.s.q("SELECT * FROM nats_outbox")), 0)
+        r = self.s.post("virtual:operator", "agent:beta-reviewer-elsewhere", "note", "x", remote_ok=True, node="n1")
+        self.assertTrue(r["remote"])
+        out = self.s.outbox_pending()
+        self.assertEqual([o["subject"] for o in out], ["am.agent.beta.reviewer.elsewhere"])
+        with self.assertRaises(HubError):                  # without the bridge it is still refused
+            self.s.post("virtual:operator", "agent:beta-reviewer-elsewhere", "note", "x")
 
 
 def _claimer(path, session, q):
@@ -316,6 +341,134 @@ class Deliver(unittest.TestCase):
         self.assertEqual(rc.outcome, "submitted", rc.as_dict())
 
 
+class CliReceipts(unittest.TestCase):  # TM-213 / C15
+    BELL = "[hub] 1 new message(s), 0 claimable work item(s) for calc-worker-codex_1. Run: agentmux hub inbox --ack"
+
+    def setUp(self):
+        from hub.receipts import ReceiptScanner
+        self.d = tempfile.mkdtemp(prefix="hubrcpt-", dir="/tmp")
+        self.files = {"codex": os.path.join(self.d, "codex", "sessions", "2026", "rollout-a.jsonl"),
+                      "claude": os.path.join(self.d, "claude", "projects", "p", "s.jsonl"),
+                      "grok": os.path.join(self.d, "grok", "sessions", "x", "y", "updates.jsonl")}
+        for f in self.files.values():
+            os.makedirs(os.path.dirname(f), exist_ok=True)
+            open(f, "w").write(json.dumps({"type": "old history, " + self.BELL}) + "\n")
+        self.sc = ReceiptScanner({
+            "codex": [os.path.join(self.d, "codex", "sessions", "**", "*.jsonl")],
+            "claude": [os.path.join(self.d, "claude", "projects", "*", "*.jsonl")],
+            "grok": [os.path.join(self.d, "grok", "sessions", "*", "*", "updates.jsonl")]})
+        self.assertEqual(self.sc.scan(), [])            # primes at EOF: history is not a receipt
+
+    def append(self, cli, obj):
+        with open(self.files[cli], "a") as f:
+            f.write(json.dumps(obj) + "\n")
+
+    def test_each_cli_format(self):
+        self.append("codex", {"type": "event_msg", "payload": {"type": "item_completed", "item": {
+            "type": "UserMessage", "content": [{"type": "input_text", "text": self.BELL}]}}})
+        self.append("claude", {"type": "user", "message": {"content": self.BELL.replace("codex_1", "claude_1")}})
+        self.append("grok", {"params": {"update": {"sessionUpdate": "user_message_chunk",
+                                                   "content": {"type": "text", "text": self.BELL.replace("codex_1", "grok_1")}}}})
+        got = sorted((s, c) for s, c, _ref in self.sc.scan())
+        self.assertEqual(got, [("calc-worker-claude_1", "claude"), ("calc-worker-codex_1", "codex"),
+                               ("calc-worker-grok_1", "grok")])
+        self.assertEqual(self.sc.scan(), [])            # incremental: nothing new, nothing reported
+
+    def test_assistant_text_and_partial_lines_are_not_receipts(self):
+        self.append("claude", {"type": "assistant", "message": {"content": self.BELL}})
+        with open(self.files["codex"], "a") as f:
+            f.write('{"type": "event_msg", "payload"')     # no newline yet: a write in progress
+        self.assertEqual(self.sc.scan(), [])
+
+    def test_grok_bell_split_across_chunks(self):
+        for part in (self.BELL[:20], self.BELL[20:]):
+            self.append("grok", {"params": {"update": {"sessionUpdate": "user_message_chunk",
+                                                       "content": {"type": "text", "text": part}}}})
+        self.assertEqual([s for s, _c, _r in self.sc.scan()], ["calc-worker-codex_1"])
+
+    def test_hold_alert_fires_once(self):
+        import asyncio
+        from hub import server as srv
+        s = fresh_store()
+        w = reg(s, "alpha", "worker", "g1", cli="grok")
+        mid = s.post("virtual:operator", f"agent:{w}", "request", "held")["id"]
+        notes = []
+
+        class Stub:
+            store, cfg = s, {"hold_alert_s": 300}
+            awaiting = {w: {"at": 1000.0, "upto": mid, "alerted": False}}
+
+            async def db(self, fn, *a, **kw):
+                return fn(*a, **kw)
+
+            async def _tell_operator(self, body, idem):
+                notes.append(body)
+        stub = Stub()
+        asyncio.run(srv.Hub.check_holds(stub, 1000.0 + 299))
+        self.assertEqual(notes, [])
+        asyncio.run(srv.Hub.check_holds(stub, 1000.0 + 301))
+        asyncio.run(srv.Hub.check_holds(stub, 1000.0 + 900))
+        self.assertEqual(len(notes), 1)
+        self.assertIn("holding input (C15)", notes[0])
+        s.inbox(w)
+        s.ack(w, [mid])
+        asyncio.run(srv.Hub.check_holds(stub, 1000.0 + 901))
+        self.assertNotIn(w, stub.awaiting)               # acked means received: stop watching
+
+    def test_mark_received(self):
+        s = fresh_store()
+        w = reg(s, "alpha", "worker", "c1")
+        a = s.post("virtual:operator", f"agent:{w}", "note", "one")["id"]
+        s.delivery_report(a, w, "submitted")
+        b = s.post("virtual:operator", f"agent:{w}", "note", "two")["id"]  # after the bell
+        self.assertEqual(s.mark_received(w, a, {"cli_receipt": "x"}), [a])
+        states = {p["message_id"]: p["state"] for p in s.pending_for(w)}
+        self.assertEqual(states, {a: "received", b: "queued"})
+
+
+class BackupsAndRetention(unittest.TestCase):  # TM-217
+    def setUp(self):
+        self.s = fresh_store()
+        self.w = reg(self.s, "alpha", "worker", "w1")
+
+    def test_rotation_keeps_newest_and_copy_restores(self):
+        d = tempfile.mkdtemp(prefix="hubbk-", dir="/tmp")
+        self.s.post("virtual:operator", f"agent:{self.w}", "note", "keep me")
+        paths = [self.s.backup_to(d, keep=3) for _ in range(5)]
+        left = sorted(os.listdir(d))
+        self.assertEqual(len(left), 3)
+        self.assertEqual(left[-1], os.path.basename(paths[-1]))
+        restored = Store(os.path.join(d, left[-1]))
+        self.assertEqual(restored.q1("SELECT body FROM messages")["body"], "keep me")
+
+    def test_prune_never_touches_undelivered_mail(self):
+        done = self.s.post("virtual:operator", f"agent:{self.w}", "note", "acked, old")["id"]
+        live = self.s.post("virtual:operator", f"agent:{self.w}", "note", "unacked, old")["id"]
+        self.s.ack(self.w, [done])
+        self.s.db.execute("UPDATE messages SET created='2020-01-01T00:00:00.000Z'")
+        self.s.db.execute("UPDATE events SET at='2020-01-01T00:00:00.000Z'")
+        n = self.s.prune(events_days=14, messages_days=30)
+        self.assertEqual(n["messages"], 1)
+        left = [m["id"] for m in self.s.q("SELECT id FROM messages")]
+        self.assertEqual(left, [live])
+        self.assertEqual([m["id"] for m in self.s.inbox(self.w)], [live])
+        self.assertGreater(n["events"], 0)
+
+    def test_migration_takes_a_backup_first(self):
+        from hub import store as store_mod
+        path = self.s.path
+        self.s.db.close()
+        current = len(store_mod.MIGRATIONS)
+        store_mod.MIGRATIONS.append("CREATE TABLE migration_probe (x INTEGER) STRICT;")
+        try:
+            s2 = Store(path)
+            self.assertEqual(s2.q1("PRAGMA user_version")["user_version"], len(store_mod.MIGRATIONS))
+            bk = os.listdir(os.path.join(os.path.dirname(path), "backups"))
+            self.assertTrue(any(b.startswith(f"hub-premigrate-v{current}-") for b in bk), bk)
+        finally:
+            store_mod.MIGRATIONS.pop()
+
+
 class ServerAPI(unittest.TestCase):
     """The socket API end to end, against a real hub process on a throwaway home.
     Added after `return r` in two verbs was silently truncated to `return` (a bad
@@ -326,7 +479,16 @@ class ServerAPI(unittest.TestCase):
         import subprocess
         cls.home = tempfile.mkdtemp(prefix="hubapi-", dir="/tmp")
         os.makedirs(os.path.join(cls.home, "repoA"))
-        env = {**os.environ, "AGENTMUX_HOME": cls.home, "AGENTMUX_SOCKET": "hubapi-test-none"}
+        import socket as _s
+        probe = _s.socket()
+        probe.bind(("127.0.0.1", 0))
+        cls.port = probe.getsockname()[1]
+        probe.close()
+        os.makedirs(os.path.join(cls.home, "hub"))
+        with open(os.path.join(cls.home, "hub", "config.toml"), "w") as f:
+            f.write(f"tcp_port = {cls.port}\n")
+        env = {**os.environ, "AGENTMUX_HOME": cls.home, "AGENTMUX_SOCKET": "hubapi-test-none",
+               "AGENTMUX_BIN": "/bin/true"}         # harness calls (courier stop) succeed, touch nothing
         root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         cls.proc = subprocess.Popen([sys.executable, os.path.join(root, "hub", "server.py")], env=env,
                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
@@ -376,6 +538,106 @@ class ServerAPI(unittest.TestCase):
     def test_unknown_verb_is_an_error_not_null(self):
         r = self.call("no_such_verb", {})
         self.assertFalse(r["ok"])
+
+    # -- TM-215: TCP + tokens + subscribe -------------------------------------------------
+    def tcp(self, req):
+        import socket
+        s = socket.create_connection(("127.0.0.1", self.port), timeout=5)
+        s.sendall((json.dumps(req) + "\n").encode())
+        buf = b""
+        while not buf.endswith(b"\n"):
+            chunk = s.recv(65536)
+            if not chunk:
+                break
+            buf += chunk
+        s.close()
+        return json.loads(buf)
+
+    def op_token(self):
+        with open(os.path.join(self.home, "hub", "operator.token")) as f:
+            return f.read().strip()
+
+    def test_tcp_requires_a_valid_token(self):
+        self.assertIn("token required", self.tcp({"verb": "ping"})["error"])
+        self.assertIn("invalid", self.tcp({"verb": "ping", "token": "nope"})["error"])
+        ok = self.tcp({"verb": "ping", "token": self.op_token()})
+        self.assertEqual(ok["caller"], "operator")
+
+    def test_tcp_ignores_as(self):  # nothing the caller claims is an identity over TCP
+        r = self.tcp({"verb": "whoami", "token": self.op_token(), "as": "alpha-worker-w1"})
+        self.assertEqual(r["caller"], "operator")
+
+    def test_tcp_post_and_read(self):
+        tok = self.op_token()
+        p = self.tcp({"verb": "post", "token": tok, "args": {"to": "virtual:operator", "body": "via tcp"}})
+        self.assertTrue(p["result"]["id"])
+        box = self.tcp({"verb": "inbox", "token": tok, "args": {"ack": True}})
+        self.assertIn("via tcp", [m["body"] for m in box["result"]["messages"]])
+
+    def test_retire_courier_imports_only_the_undelivered_backlog_once(self):  # TM-214 AC1
+        q, c = os.path.join(self.home, "queue"), os.path.join(self.home, "courier")
+        os.makedirs(q, exist_ok=True)
+        os.makedirs(c, exist_ok=True)
+        line1 = json.dumps({"sender": "bob", "recipient": "orchestrator", "kind": "status", "body": "already sent"}) + "\n"
+        line2 = json.dumps({"sender": "bob", "recipient": "orchestrator", "kind": "status", "body": "still queued"}) + "\n"
+        line3 = json.dumps({"sender": "bob", "recipient": "ghost", "kind": "status", "body": "nobody"}) + "\n"
+        with open(os.path.join(q, "bob.jsonl"), "w") as f:
+            f.write(line1 + line2 + line3)
+        st = os.stat(os.path.join(q, "bob.jsonl"))
+        with open(os.path.join(c, "bob.cursor"), "w") as f:
+            json.dump({"dev": st.st_dev, "ino": st.st_ino, "offset": len(line1)}, f)
+        r = self.call("retire_courier", {})["result"]
+        self.assertEqual((r["imported"], r["unresolved"]), (1, ["bob->ghost"]))
+        self.assertTrue(r["courier_stopped"])
+        self.assertTrue(os.path.exists(os.path.join(self.home, "hub", "courier-retired")))
+        again = self.call("retire_courier", {})["result"]
+        self.assertEqual((again["imported"], again["duplicate"]), (0, 1))
+        box = [m for m in self.call("inbox", {"session": "virtual:orchestrator"})["result"]["messages"]
+               if m["sender"] == "virtual:legacy_bob"]              # the inbox is shared with other tests
+        self.assertEqual([m["body"] for m in box], ["still queued"])  # once, and "already sent" not replayed
+
+    def test_agentmux_post_goes_through_the_hub(self):  # TM-214 AC1, from bash
+        import subprocess
+        root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        env = {k: v for k, v in os.environ.items() if k != "AGENTMUX_AGENT"}
+        env.update(AGENTMUX_HOME=self.home, AGENTMUX_REPO=root, AGENTMUX_SOCKET="hubapi-test-none")
+        cmd = f"bash <(tr -d '\\r' < '{root}/agentmux.sh') post orchestrator --kind finding via-bash-hub-path"
+        r = subprocess.run(["bash", "-c", cmd], capture_output=True, text=True, env=env, timeout=60)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("posted", r.stdout)
+        box = self.call("inbox", {"session": "virtual:orchestrator"})["result"]["messages"]
+        self.assertIn("via-bash-hub-path", [m["body"] for m in box])
+        self.assertFalse(os.path.exists(os.path.join(self.home, "queue", "orchestrator.jsonl")))
+
+    def test_token_file_is_private(self):
+        st = os.stat(os.path.join(self.home, "hub", "operator.token"))
+        self.assertEqual(st.st_mode & 0o077, 0)
+
+    def test_subscribe_streams_new_mail_and_events(self):
+        import socket
+        s = socket.socket(socket.AF_UNIX)
+        s.settimeout(10)
+        s.connect(self.sock)
+        s.sendall(b'{"verb": "subscribe", "args": {"stream": "mail"}}\n')
+        f = s.makefile("r")
+        self.assertEqual(json.loads(f.readline())["subscribed"], "mail")
+        self.call("post", {"to": "virtual:operator", "body": "pushed"})
+        got = None
+        for _ in range(20):
+            line = json.loads(f.readline())
+            if "message" in line and line["message"]["body"] == "pushed":
+                got = line
+                break
+        self.assertIsNotNone(got)
+        s.close()
+        e = socket.socket(socket.AF_UNIX)
+        e.settimeout(10)
+        e.connect(self.sock)
+        e.sendall(b'{"verb": "subscribe", "args": {"stream": "events", "since": 0}}\n')
+        ef = e.makefile("r")
+        self.assertEqual(json.loads(ef.readline())["subscribed"], "events")
+        self.assertIn("event", json.loads(ef.readline()))
+        e.close()
 
 
 class Profiles(unittest.TestCase):

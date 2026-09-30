@@ -1049,8 +1049,10 @@ except Exception:
   # up before we get here, so a concurrent `kill` either holds the lock and sees this
   # session on its re-check, or waits and sees it. Either way it does not stop a
   # courier this agent is about to depend on.
-  if [ "${AGENTMUX_NO_COURIER:-0}" != "1" ] && [ -n "${AGENTMUX_REPO:-}" ] \
-     && [ -f "$AGENTMUX_REPO/taskmgmt/courier.py" ]; then
+  # A retired courier stays retired (TM-214): the hub delivers now, and a courier
+  # restarted by the next spawn would race it for the same panes.
+  if [ "${AGENTMUX_NO_COURIER:-0}" != "1" ] && [ ! -e "$ROOT/hub/courier-retired" ] \
+     && [ -n "${AGENTMUX_REPO:-}" ] && [ -f "$AGENTMUX_REPO/taskmgmt/courier.py" ]; then
     local clock="$RUNDIR/.courier.lock" cwaited=0
     mkdir -p "$RUNDIR" 2>/dev/null
     until mkdir "$clock" 2>/dev/null; do
@@ -1551,6 +1553,31 @@ cmd_post() {
     plan|request|reply|status|finding|error|claim|release) ;;
     *) die "kind must be one of: plan request reply status finding error claim release (got '$kind')" ;;
   esac
+
+  # THE HUB FIRST (TM-214, docs/PROTOCOL.md section 10). When the hub is up and knows
+  # the recipient - a protocol session, an adopted legacy name, or a virtual address -
+  # the message goes into hub.db and is acked end to end, instead of into a queue
+  # file the courier types into a pane. AGENTMUX_POST_VIA=queue forces the old path;
+  # =hub refuses to fall back. Once the courier is retired there IS no fallback: a
+  # queued line would never be delivered, so a hub refusal is a hard error.
+  local via="${AGENTMUX_POST_VIA:-auto}"
+  [ -e "$ROOT/hub/courier-retired" ] && [ "$via" = auto ] && via=hub
+  if [ "$via" != queue ] && [ -S "$ROOT/hub/hub.sock" ]; then
+    local _self hub_out
+    _self="$(agentmux_self)" || die "post: cannot locate the agentmux checkout"
+    [ "$sender" = "${AGENTMUX_AGENT:-orchestrator}" ] \
+      || printf 'agentmux: note - --from is ignored by the hub; it identifies the sender itself\n' >&2
+    if hub_out="$(python3 "$(dirname "$_self")/hub/cli.py" post --to "$recipient" --kind "$kind" \
+                  ${ref:+--ref "$ref"} -- "$text" 2>&1)"; then
+      printf '%s\n' "$hub_out"
+      return 0
+    fi
+    [ "$via" = hub ] && die "post: the hub refused: $hub_out"
+    # auto: the hub does not know this recipient or this sender (an unadopted legacy
+    # pane). The courier still serves those - fall through to the queue.
+  elif [ "$via" = hub ]; then
+    die "post: the courier is retired but the hub is not running (agentmux hub start)"
+  fi
 
   # Tell the caller NOW if this address cannot receive, rather than letting the
   # courier discover it over several minutes of retries. A not-yet-spawned agent is

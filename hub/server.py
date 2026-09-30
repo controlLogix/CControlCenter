@@ -14,8 +14,11 @@ from __future__ import annotations
 
 import asyncio
 import concurrent.futures as cf
+import hashlib
+import hmac
 import json
 import os
+import secrets
 import signal
 import socket
 import struct
@@ -27,6 +30,8 @@ import tomllib
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from hub import deliver, names, profiles  # noqa: E402
 from hub.store import HubError, Store, now  # noqa: E402
+from hub.bridge import Bridge  # noqa: E402
+from hub.receipts import ReceiptScanner  # noqa: E402
 from hub.transport import TmuxTransport  # noqa: E402
 
 ROOT = os.environ.get("AGENTMUX_HOME") or os.path.expanduser("~/.agentmux")
@@ -54,7 +59,12 @@ DEFAULT_ROLES = {
 }
 
 DEFAULT_CONFIG = {"node": "local", "bell_every_s": 90, "poll_s": 1.5, "max_attempts": 12,
-                  "operator": "virtual:operator"}
+                  "operator": "virtual:operator",
+                  # TM-217: hourly online backups (24 kept), daily retention pass.
+                  "backup_every_s": 3600, "backup_keep": 24,
+                  "prune_every_s": 86400, "retention_events_days": 14, "retention_messages_days": 30,
+                  # TM-218: set nats_url (e.g. "nats://127.0.0.1:4222") to federate this hub.
+                  "nats_url": ""}
 
 
 def log(*a):
@@ -102,7 +112,20 @@ class Hub:
         self.marks: dict[str, int] = {}
         self.started: dict[str, float] = {}
         self.stop = asyncio.Event()
+        self.subscribers = 0
+        self.operator_sha = self._operator_token()
+        self.receipts = ReceiptScanner()
+        self.awaiting: dict[str, dict] = {}     # session -> first unreceived bell (TM-213)
+        self.bridge = Bridge(self, self.cfg["nats_url"], names.check_part(self.cfg["node"], "node"), log) \
+            if self.cfg.get("nats_url") else None
         self._seed_roles()
+
+    def _operator_token(self):
+        p = os.path.join(HUBDIR, "operator.token")
+        if not os.path.exists(p):
+            write_secret(p, secrets.token_urlsafe(32))
+        with open(p) as f:
+            return hashlib.sha256(f.read().strip().encode()).hexdigest()
 
     async def db(self, fn, *a, **kw):
         return await asyncio.get_running_loop().run_in_executor(self.dbx, lambda: fn(*a, **kw))
@@ -147,25 +170,40 @@ class Hub:
         return None, bool(chain & pane_pids)
 
     # -- socket server ------------------------------------------------------------------
-    async def handle_conn(self, reader, writer):
-        sock = writer.get_extra_info("socket")
+    async def caller_of(self, req, writer, tcp):
+        """Who is calling. Unix socket: the kernel vouches (process ancestry, R-ID-1).
+        TCP: nothing vouches, so a token is required and `as` is never honored."""
+        if tcp:
+            tok = req.get("token") or ""
+            if not tok:
+                raise HubError("token required on TCP (agentmux hub token shows where yours is)")
+            sha = hashlib.sha256(tok.encode()).hexdigest()
+            if hmac.compare_digest(sha, self.operator_sha):
+                return "operator"
+            row = await self.db(self.store.q1, "SELECT session FROM agents WHERE token_sha=? AND state<>'dead'", (sha,))
+            if not row:
+                raise HubError("invalid or revoked token")
+            return row["session"]
+        pid, uid = self.peer(writer.get_extra_info("socket"))
+        if uid != os.getuid():
+            raise HubError("wrong uid")
+        session, in_pane = await self.db(self.identify, pid)
+        if req.get("as"):
+            if in_pane:
+                raise HubError("--as is only for the operator, not from inside an agent pane (R-ID-1)")
+            return req["as"]
+        if session:
+            return session
+        return "unregistered" if in_pane else "operator"
+
+    async def handle_conn(self, reader, writer, tcp=False):
+        caller = None
         try:
             raw = await asyncio.wait_for(reader.readline(), 30)
             req = json.loads(raw or b"{}")
-            pid, uid = self.peer(sock)
-            if uid != os.getuid():
-                raise HubError("wrong uid")
-            session, in_pane = await self.db(self.identify, pid)
-            caller = session
-            if req.get("as"):
-                if in_pane:
-                    raise HubError("--as is only for the operator, not from inside an agent pane (R-ID-1)")
-                caller = req["as"]
-            elif not session:
-                if in_pane:
-                    caller = "unregistered"
-                else:
-                    caller = "operator"
+            caller = await self.caller_of(req, writer, tcp)
+            if req.get("verb") == "subscribe":
+                return await self.subscribe(writer, caller, req.get("args", {}))
             res = await self.dispatch(req.get("verb", ""), req.get("args", {}), caller)
             resp = {"ok": True, "caller": caller, "result": res}
         except HubError as e:
@@ -178,6 +216,58 @@ class Hub:
             await writer.drain()
         finally:
             writer.close()
+
+    async def subscribe(self, writer, caller, a):
+        """A long-lived stream: one JSON line per event, until the client hangs up.
+          mail   (default) new deliveries for the caller, plus claimable-work changes
+          events the audit trail (operator only) - what the dashboard follows
+        The first line acknowledges the subscription. Nothing is marked received by a
+        subscription: only `inbox` (the agent reading its mail) is evidence of that."""
+        stream = a.get("stream", "mail")
+        who = "virtual:operator" if caller == "operator" else caller
+        if caller == "unregistered":
+            raise HubError("unregistered pane")
+        if stream == "events" and caller != "operator":
+            raise HubError("the events stream is operator-only")
+        self.subscribers += 1
+
+        async def send(obj):
+            writer.write((json.dumps(obj, default=str) + "\n").encode())
+            await writer.drain()
+
+        try:
+            await send({"ok": True, "caller": caller, "subscribed": stream})
+            if stream == "events":
+                since = int(a.get("since", 0))
+                while not self.stop.is_set():
+                    for e in await self.db(self.store.events, since, 500):
+                        since = e["seq"]
+                        await send({"event": e})
+                    await asyncio.sleep(0.5)
+            else:
+                seen, claim_sig = set(), None
+                while not self.stop.is_set():
+                    for d in await self.db(self.store.pending_for, who):
+                        if d["message_id"] not in seen:
+                            seen.add(d["message_id"])
+                            m = await self.db(self.store.q1, "SELECT id, sender, kind, ref, body, body_ref, created "
+                                              "FROM messages WHERE id=?", (d["message_id"],))
+                            await send({"message": m})
+                    if not who.startswith("virtual:"):
+                        cl = await self.db(self.store.claimable, who)
+                        sig = tuple(c["id"] for c in cl)
+                        if sig != claim_sig:
+                            claim_sig = sig
+                            await send({"claimable": cl})
+                    await asyncio.sleep(0.5)
+        except (ConnectionError, BrokenPipeError):
+            pass
+        finally:
+            self.subscribers -= 1
+            try:
+                writer.close()
+            except Exception:
+                pass
 
     def need_agent(self, caller):
         if caller in ("operator", "unregistered") or caller.startswith("virtual:"):
@@ -199,10 +289,21 @@ class Hub:
         s = self.store
         if verb == "ping":
             return {"pong": now(), "caller": caller}
+        if verb == "token":
+            # Where the caller's own token lives - never the token itself over the wire.
+            if caller == "operator":
+                return {"path": os.path.join(HUBDIR, "operator.token")}
+            ag = await self.db(s.agent, self.need_agent(caller))
+            return {"path": os.path.join(ROOT, "repos", ag["repo"], "agents", f"{ag['role']}-{ag['agent']}", "run", "token")}
         if verb == "whoami":
             ag = await self.db(s.agent, caller) if caller not in ("operator", "unregistered") else None
             return {"caller": caller, "agent": ag,
                     "eligible": await self.db(s.eligible_targets, caller) if ag else []}
+        if verb == "status" and a.get("bridge"):
+            b = self.bridge
+            return {"node": self.cfg["node"], "nats_url": self.cfg.get("nats_url") or None,
+                    "connected": bool(b and b.connected), "stats": b.stats if b else {},
+                    "role_subjects": sorted(b.role_subs) if b else []}
         if verb == "status":
             return await self.db(s.status)
         if verb == "events":
@@ -238,8 +339,11 @@ class Hub:
             return await self.spawn(a)
         if verb == "kill":
             self.need_operator(caller)
-            sess = a["session"]
-            await asyncio.get_running_loop().run_in_executor(self.io, self.harness, "kill", sess)
+            ag = await self.db(s.agent, a["session"])
+            if not ag:
+                raise HubError(f"no such agent {a['session']}")
+            sess = ag["session"]
+            await asyncio.get_running_loop().run_in_executor(self.io, self.harness, "kill", term(ag))
             await self.db(s.set_state, sess, "dead", "killed by operator")
             await self.db(s.event, "agent", sess, "kill", "operator", {"reason": a.get("reason", "operator")})
             return {"killed": sess}
@@ -247,14 +351,22 @@ class Hub:
             return await self.db(s.agents, bool(a.get("live")))
         if verb == "resolve":
             return {"address": a["address"], "recipients": await self.db(s.recipients, a["address"])}
+        if verb == "adopt":
+            self.need_operator(caller)
+            return await self.adopt(a)
+        if verb == "retire_courier":
+            self.need_operator(caller)
+            return await self.retire_courier(bool(a.get("dry_run")))
         if verb == "post":
             sender = self.sender_of(caller)
+            a = {**a, "to": await self.db(s.canonical_target, a["to"], self.virtual_names())}
             body = a.get("body", "")
             body_ref = None
             if len(body.encode()) > int(self.cfg.get("inline_max", 4096)):
                 body_ref = self._write_brief(a["to"], body)
             r = await self.db(s.post, sender, a["to"], a.get("kind", "note"), body, a.get("ref"), a.get("work_id"),
-                              a.get("idem_key"), body_ref)
+                              a.get("idem_key"), body_ref, remote_ok=self.bridge is not None,
+                              node=self.cfg["node"])
             return r
         if verb == "inbox":
             who = a.get("session") if caller == "operator" and a.get("session") else caller
@@ -285,7 +397,8 @@ class Hub:
             repo = a.get("repo") or self._repo_of_target(a["to"], caller)
             return await self.db(s.work_create, sender, repo, a["to"], a["title"], a.get("body"), a.get("task_key"),
                                  a.get("requirements"), int(a.get("priority", 100)), a.get("parent"),
-                                 int(a.get("max_attempts", 3)))
+                                 int(a.get("max_attempts", 3)), federate=bool(a.get("federate")),
+                                 node=self.cfg["node"])
         if verb == "claim":
             me = self.need_agent(caller)
             return await self.db(s.claim, me, a.get("lease_s"), a.get("work_id"))
@@ -293,7 +406,7 @@ class Hub:
             return {"renewed": await self.db(s.heartbeat, self.need_agent(caller), a.get("lease_s"))}
         if verb == "release":
             me = self.need_agent(caller)
-            w = await self.db(s.release, me, a["work_id"], a["outcome"], a.get("result"))
+            w = await self.db(s.release, me, a["work_id"], a["outcome"], a.get("result"), self.cfg["node"])
             await self._notify_work_owner(w, me)
             return w
         if verb == "work_cancel":
@@ -376,6 +489,106 @@ class Hub:
             self.tp.kill(args[0])
         return ok
 
+    def virtual_names(self):
+        return tuple(x for x in os.environ.get("AGENTMUX_VIRTUAL_AGENTS", "orchestrator").split(",") if x)
+
+    # -- courier retirement (TM-214, PROTOCOL section 10) ---------------------------------
+    async def adopt(self, a):
+        legacy = a["legacy"]
+        h = await asyncio.get_running_loop().run_in_executor(self.io, self.tp.handle, legacy)
+        if not h:
+            raise HubError(f"no live tmux session named {legacy!r} to adopt")
+        repo = names.check_part(a["repo"], "repo")
+        role = names.check_part(a["role"], "role")
+        agent = names.check_part(a["agent"], "agent", a.get("accept_normalized", False))
+        cli = a.get("cli")
+        if not cli:
+            try:
+                with open(os.path.join(ROOT, "run", f"{legacy}.cli")) as f:
+                    cli = f.read().strip() or "shell"
+            except OSError:
+                cli = "shell"
+        snap = self.resolve_role(repo, role)
+        token = secrets.token_urlsafe(32)
+        session = await self.db(self.store.adopt, legacy, repo, role, agent, cli, snap, h[0], h[1],
+                                hashlib.sha256(token.encode()).hexdigest())
+        adir = os.path.join(ROOT, "repos", repo, "agents", f"{role}-{agent}")
+        for sub in ("run", "logs", "briefs", "cli"):
+            os.makedirs(os.path.join(adir, sub), exist_ok=True)
+        write_secret(os.path.join(adir, "run", "token"), token)
+        lp = os.path.join(adir, "logs", "pane.log")
+        if not os.path.lexists(lp):
+            os.symlink(os.path.join(ROOT, "logs", f"{legacy}.log"), lp)
+        self.started[session] = 0
+        cwd = (await self.db(self.store.q1, "SELECT path FROM repo_paths WHERE repo=? ORDER BY path", (repo,)) or {}).get("path", "")
+        await self.db(self.store.post, "virtual:hub", f"agent:{session}", "control",
+                      welcome(session, repo, role, cwd, snap) + f"\n(You were adopted: your tmux session is still "
+                      f"'{legacy}', and messages to '{legacy}' reach you.)", None, None, f"welcome:{session}")
+        return {"session": session, "legacy": legacy, "handle": h[0], "cli": cli}
+
+    async def retire_courier(self, dry_run=False):
+        """Hand the courier's undelivered backlog to the hub, then stop the courier for
+        good. Idempotent: every imported line carries an idem key built from its outbox
+        inode and byte offset, so a second run imports nothing twice."""
+        qdir, cdir = os.path.join(ROOT, "queue"), os.path.join(ROOT, "courier")
+        report = {"imported": 0, "duplicate": 0, "unresolved": [], "no_cursor": [], "outboxes": 0}
+        todo = []
+        for fn in sorted(os.listdir(qdir)) if os.path.isdir(qdir) else []:
+            if not fn.endswith(".jsonl") or fn == "courier.jsonl":
+                continue
+            path, sender = os.path.join(qdir, fn), fn[:-6]
+            report["outboxes"] += 1
+            try:
+                st = os.lstat(path)
+                with open(os.path.join(cdir, f"{sender}.cursor")) as f:
+                    cur = json.load(f)
+            except (OSError, ValueError):
+                report["no_cursor"].append(sender)       # the courier never read it: leave it be
+                continue
+            off = int(cur["offset"]) if int(cur.get("ino", -1)) == st.st_ino else 0
+            with open(path, "rb") as f:
+                f.seek(off)
+                pos = off
+                for raw in f:
+                    todo.append((sender, st.st_ino, pos, raw))
+                    pos += len(raw)
+        try:
+            with open(os.path.join(cdir, "pending.jsonl"), "rb") as f:
+                for i, raw in enumerate(f):
+                    todo.append(("pending", 0, i, raw))
+        except OSError:
+            pass
+        for sender, ino, pos, raw in todo:
+            try:
+                rec = json.loads(raw)
+                rec = rec.get("message", rec) if isinstance(rec, dict) else {}
+            except ValueError:
+                continue
+            rcpt, src = rec.get("recipient"), rec.get("sender") or sender
+            if not rcpt:
+                continue
+            try:
+                to = await self.db(self.store.canonical_target, rcpt, self.virtual_names())
+            except HubError:
+                report["unresolved"].append(f"{src}->{rcpt}")
+                continue
+            src_ag = await self.db(self.store.agent, src)
+            frm = f"agent:{src_ag['session']}" if src_ag else f"virtual:legacy_{names.normalize(src) or 'unknown'}"
+            kind = rec.get("kind") if await self.db(self.store.q1, "SELECT 1 FROM message_kinds WHERE kind=?",
+                                                    (rec.get("kind"),)) else "note"
+            if dry_run:
+                report["imported"] += 1
+                continue
+            r = await self.db(self.store.post, frm, to, kind, rec.get("body") or "", rec.get("ref"), None,
+                              f"import:{sender}:{ino}:{pos}")
+            report["duplicate" if r["duplicate"] else "imported"] += 1
+        if not dry_run:
+            report["courier_stopped"] = await asyncio.get_running_loop().run_in_executor(
+                self.io, self.harness, "courier", "stop")
+            with open(os.path.join(HUBDIR, "courier-retired"), "w") as f:
+                json.dump({**report, "at": now()}, f)
+        return report
+
     # -- spawn --------------------------------------------------------------------------
     async def spawn(self, a):
         repo = names.check_part(a["repo"], "repo")
@@ -387,10 +600,15 @@ class Hub:
             raise HubError(f"repo {repo} has no checkout path")
         cwd = a.get("cwd") or paths[0]["path"]
         snap = self.resolve_role(repo, role)
-        session = await self.db(self.store.register, repo, role, agent, cli, snap)
+        # A per-agent token for callers the kernel cannot vouch for (TCP, later NATS).
+        # Only its sha256 is stored; the token itself goes to a 0600 file the agent owns.
+        token = secrets.token_urlsafe(32)
+        session = await self.db(self.store.register, repo, role, agent, cli, snap,
+                                token_sha=hashlib.sha256(token.encode()).hexdigest())
         adir = os.path.join(ROOT, "repos", repo, "agents", f"{role}-{agent}")
         for sub in ("run", "logs", "briefs", "cli"):
             os.makedirs(os.path.join(adir, sub), exist_ok=True)
+        write_secret(os.path.join(adir, "run", "token"), token)
         with open(os.path.join(adir, "agent.toml"), "w") as f:
             f.write(toml_dump({"session": session, "repo": repo, "role": role, "agent": agent, "cli": cli,
                                "model": a.get("model", ""), "cwd": cwd}))
@@ -466,7 +684,7 @@ class Hub:
         text = prof.bell(n_msg=n_msg, n_claim=n_claim, session=sess)
         try:
             rc = await asyncio.get_running_loop().run_in_executor(
-                self.io, lambda: deliver.deliver_line(self.tp, prof, sess, ag["handle"], text,
+                self.io, lambda: deliver.deliver_line(self.tp, prof, term(ag), ag["handle"], text,
                                                        started_at=self.started.get(sess)))
             ev = rc.as_dict()
             await self.db(self.store.event, "bell", sess, rc.outcome, "hub", ev)
@@ -488,6 +706,11 @@ class Hub:
                         await self.db(self.store.delivery_report, p["message_id"], sess, "submitted", ev)
                 await self.db(self.store.db.execute, "UPDATE agents SET last_bell=?, state='busy' WHERE session=?",
                               (now(), sess))
+                if ag["cli"] in ("codex", "claude", "grok"):
+                    # Now wait for the CLI's own log to show it (TM-213). Keep the EARLIEST
+                    # unreceived bell time: a hold is measured from the first unseen bell.
+                    aw = self.awaiting.get(sess)
+                    self.awaiting[sess] = {"at": aw["at"] if aw else time.time(), "upto": upto, "alerted": False}
             elif rc.outcome == "deferred":
                 st["next"] = time.time() + (5 if rc.reason == "busy" else 3)
             elif rc.outcome == "blocked":
@@ -526,14 +749,14 @@ class Hub:
                         # declared dead 70 ms after register, while tmux was creating it.
                         # spawn() itself marks it dead if the terminal never appears.
                         continue
-                    alive = await asyncio.get_running_loop().run_in_executor(self.io, self.tp.alive, sess)
+                    alive = await asyncio.get_running_loop().run_in_executor(self.io, self.tp.alive, term(ag))
                     if not alive:
                         await self.db(self.store.set_state, sess, "dead", "terminal gone")
                         await asyncio.get_running_loop().run_in_executor(self.io, self.harness, "reap")
                         await self._tell_operator(f"{sess} died (terminal gone); its leases went back to the queue",
                                                   f"died:{sess}:{ag['created']}")
                         continue
-                    mark = self.tp.output_mark(sess)
+                    mark = self.tp.output_mark(term(ag))
                     if mark is not None and mark != self.marks.get(sess):
                         self.marks[sess] = mark
                         await self.db(self.store.touch_output, sess)
@@ -556,8 +779,48 @@ class Hub:
                 log("live loop error", type(e).__name__, e)
             await asyncio.sleep(3)
 
+    async def receipt_loop(self):
+        """TM-213 / C15. Promote submitted deliveries to received when the CLI's own log
+        shows the bell, and tell the operator once when a submitted bell has sat unseen
+        longer than hold_alert_s - the grok pager-queue hold, made visible."""
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(self.io, self.receipts.prime)
+        while not self.stop.is_set():
+            try:
+                for sess, cli, ref in await loop.run_in_executor(self.io, self.receipts.scan):
+                    aw = self.awaiting.pop(sess, None)
+                    if aw is None:
+                        continue                  # a bell we did not send this run, or a quoted one
+                    got = await self.db(self.store.mark_received, sess, aw["upto"],
+                                        {"cli_receipt": ref, "cli": cli, "after_s": round(time.time() - aw["at"], 1)})
+                    log("cli receipt", sess, cli, len(got), "delivery(ies)")
+                await self.check_holds(time.time())
+            except Exception as e:
+                log("receipt loop error", type(e).__name__, e)
+            await asyncio.sleep(3)
+
+    async def check_holds(self, t_now):
+        limit = float(self.cfg.get("hold_alert_s", 300))
+        for sess, aw in list(self.awaiting.items()):
+            pend = [p for p in await self.db(self.store.pending_for, sess) if p["message_id"] <= aw["upto"]]
+            if not pend:
+                self.awaiting.pop(sess, None)     # the agent read and acked: received, by definition
+                continue
+            if not aw["alerted"] and t_now - aw["at"] > limit:
+                aw["alerted"] = True
+                await self.db(self.store.event, "agent", sess, "cli_hold", "hub",
+                              {"held_s": round(t_now - aw["at"]), "pending": len(pend)})
+                await self._tell_operator(
+                    f"{sess}: a doorbell was submitted {int(t_now - aw['at'])} s ago but its CLI log shows no user "
+                    f"turn yet - the CLI is holding input (C15). {len(pend)} message(s) wait.",
+                    f"hold:{sess}:{int(aw['at'])}")
+
     async def lease_loop(self):
         last_ck = time.time()
+        # Back up once at startup, so a hub that never lives an hour still has one.
+        last_bk = 0.0
+        last_prune = time.time()
+        bdir = os.path.join(HUBDIR, "backups")
         while not self.stop.is_set():
             try:
                 back = await self.db(self.store.sweep_leases)
@@ -566,6 +829,15 @@ class Hub:
                 if time.time() - last_ck > 600:
                     await self.db(self.store.checkpoint)
                     last_ck = time.time()
+                if time.time() - last_bk >= float(self.cfg["backup_every_s"]):
+                    p = await self.db(self.store.backup_to, bdir, int(self.cfg["backup_keep"]), "hourly")
+                    log("backup", p)
+                    last_bk = time.time()
+                if time.time() - last_prune >= float(self.cfg["prune_every_s"]):
+                    n = await self.db(self.store.prune, self.cfg["retention_events_days"],
+                                      self.cfg["retention_messages_days"])
+                    log("pruned", n)
+                    last_prune = time.time()
             except Exception as e:
                 log("lease loop error", type(e).__name__, e)
             await asyncio.sleep(5)
@@ -582,6 +854,14 @@ class Hub:
         old = os.umask(0o077)
         server = await asyncio.start_unix_server(self.handle_conn, path=SOCK)
         os.umask(old)
+        tcp = None
+        port = int(self.cfg.get("tcp_port", 0) or 0)
+        if port:
+            # Loopback only, token-authenticated (caller_of). For Windows-side tools,
+            # which reach WSL's 127.0.0.1 through localhost forwarding and cannot use
+            # the unix socket or process ancestry.
+            tcp = await asyncio.start_server(lambda r, w: self.handle_conn(r, w, tcp=True), "127.0.0.1", port)
+            log("tcp listening 127.0.0.1:%d" % port)
         with open(os.path.join(HUBDIR, "hub.pid"), "w") as f:
             f.write(str(os.getpid()))
         # agents alive from a previous hub run: recover their handles and boot clocks
@@ -591,9 +871,14 @@ class Hub:
         for sig in (signal.SIGTERM, signal.SIGINT):
             loop.add_signal_handler(sig, self.stop.set)
         log("hub up", SOCK, "db", self.store.path)
-        tasks = [asyncio.create_task(c) for c in (self.bell_loop(), self.live_loop(), self.lease_loop())]
+        loops = [self.bell_loop(), self.live_loop(), self.lease_loop(), self.receipt_loop()]
+        if self.bridge:
+            loops.append(self.bridge.run())
+        tasks = [asyncio.create_task(c) for c in loops]
         async with server:
             await self.stop.wait()
+        if tcp:
+            tcp.close()
         for t in tasks:
             t.cancel()
         await self.db(self.store.checkpoint)
@@ -602,6 +887,20 @@ class Hub:
         except FileNotFoundError:
             pass
         log("hub down")
+
+
+def term(ag):
+    """The tmux session an agent really lives in: its protocol name, or - for an agent
+    adopted from before the protocol - the legacy name it was spawned under."""
+    return ag.get("term_name") or ag["session"]
+
+
+def write_secret(path, value):
+    """Create a 0600 file holding a secret; never world- or group-readable, even briefly."""
+    fd = os.open(path + ".tmp", os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as f:
+        f.write(value + "\n")
+    os.replace(path + ".tmp", path)
 
 
 def normalize_remote(url):

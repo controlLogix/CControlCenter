@@ -21,17 +21,20 @@ ROOT = os.environ.get("AGENTMUX_HOME") or os.path.expanduser("~/.agentmux")
 SOCK = os.path.join(ROOT, "hub", "hub.sock")
 
 USAGE = """usage: agentmux hub <verb> [args]
-  daemon     start | stop | status | ping
+  daemon     start | stop | status | ping | token (where your TCP token file is)
+  stream     subscribe [--events [--since SEQ]]   one JSON line per new message / claimable change / event
   agent      whoami | inbox [--ack] | ack <id>... | claim [<work_id>] | heartbeat
              done|fail|return|block <work_id> [--result TEXT]
              post --to ADDR [--kind K] [--ref R] [--idem KEY] TEXT|-
              work add --to ADDR --title T [--body B | --body-file F] [--parent ID] [--priority N]
-                      [--require CAP]... [--repo R] [--task-key K]
+                      [--require CAP]... [--repo R] [--task-key K] [--federate (offer it to every hub on NATS)]
              work show <id> | work list [--state S] [--repo R] | work cancel <id> [--reason R] (operator)
   operator   repo add <repo> <path>... [--title T] [--group G]... [--accept-normalized]
              team add <repo> <team> [--member SESSION]...
              spawn <repo> <role> <agent> [--cli codex|claude|grok|shell] [--model M] [--team T] [--cwd P]
              kill <session> | agents [--live] | events [--since N] [--entity E] | resolve ADDR
+             adopt <legacy-session> <repo> <role> <agent> [--cli C]    bring a pre-hub agent under the hub
+             retire-courier [--dry-run]   import the courier's backlog, stop it; post goes via the hub
   global     --json   --as SESSION (operator only; testing)
 addresses: agent:<repo>-<role>-<agent>  role:<repo>/<role>  role:*/<role>  role:group:<g>/<role>
            role:team:<repo>/<team>/<role>  team:<repo>/<team>  virtual:operator"""
@@ -41,16 +44,42 @@ class Fail(SystemExit):
     pass
 
 
+def connect(timeout):
+    """Unix socket by default. AGENTMUX_HUB_URL=tcp://127.0.0.1:PORT selects the
+    token-authenticated TCP listener - the only way in from Windows, where there is no
+    unix socket and no process ancestry for the hub to read."""
+    url = os.environ.get("AGENTMUX_HUB_URL", "")
+    if url.startswith("tcp://"):
+        host, _, port = url[6:].rpartition(":")
+        s = socket.create_connection((host or "127.0.0.1", int(port)), timeout=timeout)
+        return s, True
+    s = socket.socket(socket.AF_UNIX)
+    s.settimeout(timeout)
+    s.connect(SOCK)
+    return s, False
+
+
+def tcp_token():
+    tok = os.environ.get("AGENTMUX_HUB_TOKEN")
+    path = os.environ.get("AGENTMUX_HUB_TOKEN_FILE")
+    if not tok and path:
+        with open(path) as f:
+            tok = f.read().strip()
+    if not tok:
+        raise Fail("agentmux hub: TCP needs AGENTMUX_HUB_TOKEN or AGENTMUX_HUB_TOKEN_FILE")
+    return tok
+
+
 def call(verb, args=None, as_=None, timeout=30):
     req = {"verb": verb, "args": args or {}}
     if as_:
         req["as"] = as_
-    s = socket.socket(socket.AF_UNIX)
-    s.settimeout(timeout)
     try:
-        s.connect(SOCK)
-    except (FileNotFoundError, ConnectionRefusedError):
-        raise Fail("agentmux hub: the hub is not running (agentmux hub start)")
+        s, tcp = connect(timeout)
+    except (FileNotFoundError, ConnectionRefusedError, OSError) as e:
+        raise Fail(f"agentmux hub: the hub is not reachable ({e.__class__.__name__}; agentmux hub start)")
+    if tcp:
+        req["token"] = tcp_token()
     s.sendall((json.dumps(req) + "\n").encode())
     buf = b""
     while not buf.endswith(b"\n"):
@@ -170,6 +199,11 @@ def main(argv):
         return start()
     if verb == "stop":
         call("shutdown"); print("hub stopping"); return
+    if verb == "status" and opt(rest, "--bridge", flag=True):
+        r = call("status", {"bridge": True}, as_=as_)
+        b = r["result"]
+        return out(r, f"node {b['node']}  nats {b['nats_url'] or 'off'}  connected={b['connected']}\n"
+                      f"stats {json.dumps(b['stats'])}\nrole subjects: {', '.join(b['role_subjects']) or '-'}")
     if verb in ("ping", "status", "whoami"):
         r = call(verb, as_=as_)
         if verb == "whoami" and not js:
@@ -188,6 +222,26 @@ def main(argv):
                 print(f"  DEAD {d['message_id']} -> {d['recipient']}: {d['last_error']}")
             return
         return out(r)
+    if verb == "token":
+        r = call("token", as_=as_)
+        return out(r, f"your token is in {r['result']['path']} (mode 0600). Use it with "
+                      "AGENTMUX_HUB_URL=tcp://127.0.0.1:<tcp_port> AGENTMUX_HUB_TOKEN_FILE=<that path>")
+    if verb == "subscribe":
+        stream = "events" if opt(rest, "--events", flag=True) else "mail"
+        req = {"verb": "subscribe", "args": {"stream": stream, "since": int(opt(rest, "--since", 0))}}
+        if as_:
+            req["as"] = as_
+        s, tcp = connect(None)
+        if tcp:
+            req["token"] = tcp_token()
+        s.sendall((json.dumps(req) + "\n").encode())
+        f = s.makefile("r")
+        try:
+            for line in f:
+                print(line.rstrip("\n"), flush=True)
+        except KeyboardInterrupt:
+            pass
+        return
     if verb == "inbox":
         ack = opt(rest, "--ack", flag=True)
         sess = opt(rest, "--session")
@@ -218,6 +272,8 @@ def main(argv):
         idem = opt(rest, "--idem")
         if not to:
             raise Fail("post needs --to ADDRESS")
+        if rest[:1] == ["--"]:
+            rest = rest[1:]
         body = " ".join(rest)
         if body == "-":
             body = sys.stdin.read()
@@ -233,7 +289,8 @@ def main(argv):
             req = opt(rest, "--require", multi=True)
             a = {"to": opt(rest, "--to"), "title": opt(rest, "--title"), "body": body, "parent": opt(rest, "--parent"),
                  "priority": int(opt(rest, "--priority", 100)), "repo": opt(rest, "--repo"),
-                 "task_key": opt(rest, "--task-key"), "requirements": {"capabilities": req} if req else None}
+                 "task_key": opt(rest, "--task-key"), "requirements": {"capabilities": req} if req else None,
+                 "federate": opt(rest, "--federate", flag=True)}
             if not a["to"] or not a["title"]:
                 raise Fail("work add needs --to and --title")
             r = call("work_add", a, as_=as_)
@@ -275,6 +332,25 @@ def main(argv):
         return out(r, f"spawned {r['result']['session']} ({r['result']['handle']}) in {r['result']['cwd']}")
     if verb == "kill":
         return out(call("kill", {"session": rest[0]}, as_=as_))
+    if verb == "adopt":
+        cli = opt(rest, "--cli"); acc = opt(rest, "--accept-normalized", flag=True)
+        if len(rest) != 4:
+            raise Fail("usage: agentmux hub adopt <legacy-session> <repo> <role> <agent> [--cli C]")
+        r = call("adopt", {"legacy": rest[0], "repo": rest[1], "role": rest[2], "agent": rest[3], "cli": cli,
+                           "accept_normalized": acc}, as_=as_)
+        return out(r, f"adopted {r['result']['legacy']} as {r['result']['session']} ({r['result']['cli']}, "
+                      f"{r['result']['handle']}); both names now reach it")
+    if verb == "retire-courier":
+        dry = opt(rest, "--dry-run", flag=True)
+        r = call("retire_courier", {"dry_run": dry}, as_=as_, timeout=180)
+        res = r["result"]
+        text = (f"{'would import' if dry else 'imported'} {res['imported']} undelivered message(s) from "
+                f"{res['outboxes']} outbox(es); {res['duplicate']} already imported")
+        if res["unresolved"]:
+            text += f"\n  left in the queue (recipient unknown to the hub - adopt it first): {', '.join(res['unresolved'][:10])}"
+        if not dry:
+            text += f"\n  courier stopped: {res.get('courier_stopped')}; `agentmux post` now goes through the hub"
+        return out(r, text)
     if verb == "agents":
         r = call("agents", {"live": opt(rest, "--live", flag=True)}, as_=as_)
         return out(r, "\n".join(f"{a['session']:<40} {a['cli']:<7} {a['state']:<8} {a['handle'] or '-':<5} "

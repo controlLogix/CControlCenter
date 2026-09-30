@@ -553,7 +553,7 @@ COMMIT;
 
 | Protocol | NATS |
 |---|---|
-| direct `agent:R/X/A` | subject `am.<node>.R.X.A` |
+| direct `agent:R/X/A` | subject `am.agent.R.X.A`: node-agnostic, because a sender cannot know which node hosts the recipient. Every hub subscribes to `am.agent.>` and only the hub that has the agent ingests it (idempotent on the message id) |
 | role `role:S/X` | subject `am.work.S.X`, JetStream work-queue stream, consumer group `X`. A work queue delivers each message to exactly one consumer, which is the same rule as first claim. |
 | team `team:R/T` | subject `am.team.R.T` |
 | doorbell | core NATS (not persisted), `am.bell.<node>.<session>` |
