@@ -308,7 +308,7 @@ agentmux - drive other agent CLIs in tmux panes
                                unready card is refused BY THE BOARD, not by dispatch
   collect [<id>]               reconcile dispatched cards: release claims, reap the
                                pane, park what died. NEVER closes a task - the done
-                               gate wants evidence and an actor, and that judgement
+                               gate wants evidence and an actor, and that judgment
                                is not the collector's to make
   pool   once|start|stop|status|resume
                                the pickup loop: collect, then fill free slots up to
@@ -639,7 +639,7 @@ except Exception:
   fi
   # Auth method. An explicit --auth wins; otherwise use whatever setup_auth.py
   # recorded as this CLI's active method. No method configured means the CLI's own
-  # built-in default (an existing OAuth login), which is the pre-existing behaviour.
+  # built-in default (an existing OAuth login), which is the pre-existing behavior.
   local auth_flags="" auth_exports="" auth_line=""
   [ -n "$auth" ] || auth="$(auth_default_for "$cli")"
   if [ -n "$auth" ]; then
@@ -653,7 +653,21 @@ except Exception:
   [ -z "$model" ] || printf -v quoted_model '%q' "$model"
   case "$cli" in
     codex)
-      launch="codex${auth_flags:+ $auth_flags}${model:+ -m $quoted_model}"
+      # --no-daemon IS LOAD-BEARING, NOT A PREFERENCE.
+      # codex 0.159 runs a SHARED app-server daemon and delegates every shell
+      # command to it. That daemon is a singleton: the first pane to start it wins,
+      # and it keeps THAT pane's environment for its whole life. Measured 2026-09-29
+      # with five codex agents up - every one of them saw $AGENTMUX_AGENT=agora-image,
+      # the first to spawn, so a claim or a journal entry from any of the five would
+      # have been filed in agora-image's name. resolve_identity exists to stop exactly
+      # that and cannot see it, because the crossover happens below the shell it checks.
+      # The daemon also execs under seccomp (Seccomp: 2) in its own mount and network
+      # namespaces, so connect() to the tmux socket returns EPERM, live_agents() raises
+      # TmuxUnavailable, and `agentmux claim` exits 2. That is what blocked all four art
+      # agents on TM-137: they could not claim, so they correctly refused to edit.
+      # The bypass flag below cannot fix either half - it configures THIS client, while
+      # the exec happens inside the daemon.
+      launch="codex --no-daemon${auth_flags:+ $auth_flags}${model:+ -m $quoted_model}"
       if [ "$bypass" = 1 ]; then
         launch="$launch --dangerously-bypass-approvals-and-sandbox"
       else
@@ -1073,7 +1087,7 @@ cmd_key() {
       # types itself - and every tmux key name is two characters or more. A single
       # character cannot be a mistyped name, so admitting exactly one is unambiguous.
       [!-~]) ;;
-      *) die "not a recognised tmux key name: '$k'
+      *) die "not a recognized tmux key name: '$k'
        (valid: Enter Escape Tab BTab Space BSpace Up Down Left Right Home End
         PageUp PageDown Insert Delete F1-F12, a modifier form like C-c or M-x,
         or a single printable character such as 2 or y for a numbered menu)
@@ -1158,7 +1172,7 @@ cmd_wait() {
   # Only for CLIs whose footers were actually captured. Anything else - `shell`, a
   # passthrough command, a CLI that changes its footer in a future release - falls
   # back to the quiet timer, which always worked and still does.
-  # AGENTMUX_WAIT_NO_MARKER=1 forces the old stillness-only behaviour. Needed if a CLI
+  # AGENTMUX_WAIT_NO_MARKER=1 forces the old stillness-only behavior. Needed if a CLI
   # changes its footer in a release and the marker stops matching: the symptom would be
   # `ask` returning early, and this is the switch that proves or disproves it without
   # editing the harness. It is also how the before/after timings were measured.
@@ -2030,7 +2044,7 @@ stop_courier_if_idle() {
   # just told it had. The failure is SILENT in exactly the way the autostart exists to
   # prevent: `post` succeeds, the message sits in the queue, nobody ever hears it.
   #
-  # Serialise on a lock directory that `spawn` also takes, then re-check liveness
+  # Serialize on a lock directory that `spawn` also takes, then re-check liveness
   # while holding it. mkdir is atomic on every filesystem this runs on.
   local lock="$RUNDIR/.courier.lock" waited=0
   mkdir -p "$RUNDIR" 2>/dev/null
