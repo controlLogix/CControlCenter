@@ -107,15 +107,236 @@ effective_claude_dir() {
 # NOT symlinked into the mirror - mutable operator state. These entries may point
 # at the Windows profile; linking them could let a spawned agent overwrite or
 # prune the operator's own history and backups.
+#
+# ARCHIVE, NEVER DELETE (TM-211, C14 / R-EVID-1). The mirror is where a spawned
+# claude keeps its projects/ session transcripts - projects is deliberately NOT
+# linked above, so the transcript of what an agent actually did lives only here.
+# This GC used to `rm -rf` every mirror whose agent was not live, which is how the
+# 2026-09-29 credential failure below could not be reconstructed the next morning:
+# every mirror had already been deleted by the next spawn, evidence and all.
+#
+# Credentials are the one thing an archive must never hold. They are adopted back
+# into the shared store first (claude_credentials_sync), then stripped from the
+# mirror BEFORE it moves, so no archived copy ever contains a token even briefly.
 # Called while holding the spawn lock, including the interval before new-session.
 claude_config_gc() {
-  local d agent
+  local d agent dest
+  [ -d "$ROOT/claude-config" ] && [ ! -L "$ROOT/claude-config" ] || return 0
+  # A dead mirror can hold the ONLY valid refresh token on the box (see
+  # claude_credentials_sync). If adopting it failed, stripping it would destroy the
+  # login, so archive nothing this round and leave every mirror where it is.
+  claude_credentials_sync || {
+    printf 'agentmux: credential sync failed; claude-config GC skipped this round\n' >&2
+    return 0
+  }
   for d in "$ROOT/claude-config"/*; do
     [ -d "$d" ] && [ ! -L "$d" ] || continue
     agent="${d##*/}"
     [[ "$agent" =~ ^[A-Za-z0-9_-]{1,64}$ ]] || continue
-    have "$agent" || rm -rf -- "$d"
+    have "$agent" && continue
+    strip_credentials "$d" || continue
+    mkdir -p "$ROOT/claude-config/.archive" && chmod 700 "$ROOT/claude-config/.archive" || continue
+    dest="$(archive_dest "$ROOT/claude-config/.archive" "$agent" "")"
+    mv -T -- "$d" "$dest" || continue
+    archive_prune "$ROOT/claude-config/.archive" "$agent" \
+      "${AGENTMUX_CLAUDE_ARCHIVE_KEEP:-10}" "${AGENTMUX_CLAUDE_ARCHIVE_MB:-2048}" || true
   done
+}
+
+# Remove anything credential-shaped from a tree about to be archived.
+#
+# Matches names, not contents: .credentials.json today, plus any *credential* or
+# *token* file or link a future claude release adds. -delete on a symlink removes
+# the link, never its target, and find does not descend through links, so the
+# shared store and the operator's linked skills/plugins are never touched. Fails
+# (and the caller archives nothing) if anything matching is still there afterwards.
+strip_credentials() {
+  local tree="$1"
+  find "$tree" \( -type f -o -type l \) \( -iname '*credential*' -o -iname '*token*' \) \
+    -delete 2>/dev/null
+  [ -z "$(find "$tree" \( -type f -o -type l \) \( -iname '*credential*' -o -iname '*token*' \) -print -quit 2>/dev/null)" ]
+}
+
+# Move a non-empty pane log into logs/archive/ and apply retention: the newest
+# AGENTMUX_LOG_ARCHIVE_KEEP (default 20) per agent, and never more than
+# AGENTMUX_LOG_ARCHIVE_MB (default 2048) in total. Returns 0 when there was nothing
+# to archive; non-zero only when a log existed and could not be moved. Pruning is
+# best-effort - a failed prune must not turn into a truncated log.
+archive_log() {
+  local name="$1" log="$LOGDIR/$1.log" dest
+  [ -s "$log" ] && [ ! -L "$log" ] || return 0
+  mkdir -p "$LOGDIR/archive" || return 1
+  dest="$(archive_dest "$LOGDIR/archive" "$name" .log)"
+  mv -T -- "$log" "$dest" || return 1
+  archive_prune "$LOGDIR/archive" "$name" \
+    "${AGENTMUX_LOG_ARCHIVE_KEEP:-20}" "${AGENTMUX_LOG_ARCHIVE_MB:-2048}" || true
+}
+
+# Archive naming and retention, shared by pane logs and claude mirrors.
+#
+# Names are <agent>.<UTC stamp>[-N]<ext>. Agent names cannot contain '.' (spawn
+# validates them), so the "<agent>." prefix identifies one agent's archives
+# exactly, and -N only breaks a same-second collision. Nothing that does not match
+# that shape is ever pruned - the archive may hold things this code did not write.
+archive_dest() {
+  local dir="$1" name="$2" ext="$3" stamp n=0 dest
+  stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+  dest="$dir/$name.$stamp$ext"
+  while [ -e "$dest" ] || [ -L "$dest" ]; do
+    n=$((n + 1))
+    dest="$dir/$name.$stamp-$n$ext"
+  done
+  printf '%s' "$dest"
+}
+
+# Keep the newest KEEP archives for NAME, then delete oldest-first across ALL
+# agents until DIR is at most MB megabytes. Sizes are lstat sizes and rmtree never
+# follows a link, so a mirror's links to shared skills count as nothing and are
+# never followed out of the archive.
+archive_prune() {
+  python3 - "$@" <<'PYPRUNE'
+import os, re, shutil, sys
+d, name, keep, mb = sys.argv[1:5]
+keep = int(keep) if keep.isdigit() else 20
+cap = (int(mb) if mb.isdigit() else 2048) * 1024 * 1024
+shape = re.compile(r'^([A-Za-z0-9_-]{1,64})\.(\d{8}T\d{6}Z)(?:-(\d+))?(\.log)?$')
+def entries():
+    out = []
+    for e in os.listdir(d):
+        m = shape.match(e)
+        if m:
+            out.append(((m.group(2), int(m.group(3) or 0)), m.group(1), os.path.join(d, e)))
+    return sorted(out)
+def size(p):
+    if os.path.islink(p) or not os.path.isdir(p):
+        return os.lstat(p).st_size
+    total = 0
+    for root, dirs, files in os.walk(p):
+        for f in dirs + files:
+            try:
+                total += os.lstat(os.path.join(root, f)).st_size
+            except OSError:
+                pass
+    return total
+def remove(p):
+    if os.path.isdir(p) and not os.path.islink(p):
+        shutil.rmtree(p, ignore_errors=True)
+    else:
+        os.unlink(p)
+mine = [e for e in entries() if e[1] == name]
+for _, _, p in mine[:max(0, len(mine) - keep)]:
+    remove(p)
+rows = [(k, p, size(p)) for k, _, p in entries()]
+total = sum(s for _, _, s in rows)
+for _, p, s in rows:
+    if total <= cap:
+        break
+    remove(p)
+    total -= s
+PYPRUNE
+}
+
+# ONE credential store for every spawned claude (TM-212).
+#
+# HOW IT WORKED BEFORE. claude_config_dir linked every entry of the operator's
+# config dir into each mirror, .credentials.json included, but only when the name
+# was absent (`[ -e ] || ln -s`). Claude Code rewrites that file on every OAuth
+# refresh, and the rewrite REPLACES the symlink with a regular file rather than
+# writing through it. From then on that agent had a private copy. Refresh tokens
+# rotate: the agent that refreshed got the only valid refresh token, in its own
+# mirror, and the shared file was left holding one the server had already retired.
+# Nothing ever repaired it, because a real file satisfies `-e`. Measured
+# 2026-09-29: the WSL login expired at 23:15 and could not refresh, and an agent's
+# mirror held a REAL 669-byte .credentials.json written by claude at 23:11 instead
+# of a link. Then the GC deleted that mirror, and the live token with it.
+#
+# HOW IT WORKS NOW. On every spawn, every GC, every kill and every idle-watchdog
+# tick, each mirror's .credentials.json is checked:
+#   - a link to the shared file: left alone.
+#   - a REAL file (the refresh replaced the link): if it is valid (parses, has a
+#     claudeAiOauth refresh token) and newer than the shared file - or the shared
+#     file is missing or invalid - it is ADOPTED: written atomically over the
+#     shared file's real target, mode 0600. The newest refresh wins, so the token
+#     the server currently honors is the one everybody uses.
+#   - then the real file, a wrong link or a dangling one is replaced by the link,
+#     atomically (symlink to a temp name, rename over).
+# The window where one agent holds a private copy is therefore bounded by the next
+# of those events - about a minute while the watchdog runs - rather than forever.
+# Only names and sizes are ever printed; token contents never leave the file.
+claude_credentials_sync() {
+  local shared_dir
+  [ -d "$ROOT/claude-config" ] || return 0
+  [ ! -L "$ROOT/claude-config" ] || return 1
+  shared_dir="$(effective_claude_dir)"
+  python3 - "$shared_dir" "$ROOT/claude-config" <<'PYCRED'
+import json, os, pathlib, re, sys, tempfile
+shared_dir, cfg_root = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
+shared = shared_dir / '.credentials.json'
+agent_name = re.compile(r'^[A-Za-z0-9_-]{1,64}$')
+def valid(p):
+    try:
+        oauth = json.loads(p.read_text()).get('claudeAiOauth') or {}
+        return bool(oauth.get('refreshToken'))
+    except Exception:
+        return False
+def mtime(p):
+    try:
+        return p.stat().st_mtime
+    except OSError:
+        return -1.0
+mirrors = [d for d in sorted(cfg_root.iterdir())
+           if agent_name.match(d.name) and d.is_dir() and not d.is_symlink()]
+diverged = [d / '.credentials.json' for d in mirrors
+            if (d / '.credentials.json').is_file() and not (d / '.credentials.json').is_symlink()]
+candidates = sorted((p for p in diverged if valid(p)), key=mtime)
+if candidates:
+    best = candidates[-1]
+    if not valid(shared) or mtime(best) > mtime(shared):
+        target = pathlib.Path(os.path.realpath(shared))
+        target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        fd, tmp = tempfile.mkstemp(prefix='.credentials.agentmux.', dir=target.parent)
+        try:
+            os.fchmod(fd, 0o600)
+            with os.fdopen(fd, 'wb') as out:
+                out.write(best.read_bytes())
+                out.flush()
+                os.fsync(out.fileno())
+            os.replace(tmp, target)
+        except BaseException:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            raise
+        print(f"agentmux: adopted {best.parent.name}'s newer claude credential into {shared}",
+              file=sys.stderr)
+if not (shared.exists() or shared.is_symlink()):
+    sys.exit(0)
+for d in mirrors:
+    link = d / '.credentials.json'
+    if link.is_symlink() and os.readlink(link) == str(shared):
+        continue
+    if link.exists() and link.is_dir() and not link.is_symlink():
+        continue
+    tmp = d / f'.credentials.json.agentmux-link-{os.getpid()}'
+    try:
+        os.unlink(tmp)
+    except FileNotFoundError:
+        pass
+    os.symlink(str(shared), tmp)
+    os.replace(tmp, link)
+    print(f'agentmux: repaired {d.name}/.credentials.json -> shared store', file=sys.stderr)
+PYCRED
+}
+
+# The same sync from outside spawn, under the spawn lock so it cannot interleave
+# with a spawn's GC or mirror build. Best-effort: never fails a kill or a tick.
+claude_credentials_sync_locked() {
+  [ -d "$ROOT/claude-config" ] || return 0
+  (
+    flock -w 10 -x 9 || exit 0
+    claude_credentials_sync
+  ) 9>"$ROOT/.spawn.lock" || true
 }
 
 claude_config_dir() {
@@ -750,7 +971,18 @@ except Exception:
 
   tm set-option -t "=$name" history-limit 50000 >/dev/null 2>&1
   tm set-option -t "=$name" mouse on >/dev/null 2>&1   # scroll works when you attach
-  : > "$LOGDIR/$name.log"
+  # ARCHIVE THE PREVIOUS LOG, NEVER TRUNCATE IT (TM-211, C14 / R-EVID-1). Agent
+  # names are roles - rev, lead, worker2 are respawned under the same name all day -
+  # so `: >` here erased the only pane record of the previous run the moment its
+  # successor started, often before anyone had asked what it delivered. If the move
+  # fails, append to the old log rather than truncate it: a mixed log is recoverable,
+  # an emptied one is not.
+  if archive_log "$name"; then
+    : > "$LOGDIR/$name.log"
+  else
+    printf "agentmux: could not archive %s.log; appending to it instead of truncating\n" "$name" >&2
+    printf '\n===== agentmux: respawned %s at %s =====\n' "$name" "$(date -Is)" >> "$LOGDIR/$name.log"
+  fi
   tm pipe-pane -o -t "$pane" "cat >> '$LOGDIR/$name.log'"
 
   printf '%s\n' "$cli" > "$RUNDIR/$name.cli"
@@ -2083,6 +2315,7 @@ cmd_kill() {
   [ -n "$target" ] || die "kill needs a name or --all"
   if [ "$target" = "--all" ]; then
     if tm kill-server 2>/dev/null; then echo "killed all agents"; else echo "no agents running"; fi
+    claude_credentials_sync_locked
     stop_courier_if_idle
     stop_idle_watchdog_if_no_agents
     return 0
@@ -2110,6 +2343,12 @@ cmd_kill() {
   if tm kill-session -t "=$target"; then
     printf "killed '%s'\n" "$target"
     sweep_sidecars "$target"
+    # The pane log and the claude mirror are deliberately NOT removed here: the log
+    # is archived by the next spawn of this name and the mirror by the next GC
+    # (TM-211). What IS done now is pulling a refresh this agent made back into the
+    # shared credential store, so the operator's own claude and every other agent
+    # are not left holding the refresh token it just retired (TM-212).
+    claude_credentials_sync_locked
   else
     printf "could not kill '%s'; its sidecars are left in place\n" "$target" >&2
     stop_courier_if_idle
@@ -2206,6 +2445,11 @@ cmd_idle() {
 
   command -v tmux >/dev/null 2>&1 \
     || die "tmux not found - cannot tell an idle session from a broken query; refusing to act"
+
+  # Every tick also re-converges the claude credential store, so an agent whose
+  # OAuth refresh replaced its credential link is repaired within a minute instead
+  # of at the next spawn (TM-212). Skipped on a dry run, which must change nothing.
+  [ "$dry" = 1 ] || claude_credentials_sync_locked
 
   local listing
   # No sessions at all is not a failure, it is the normal quiet state.
