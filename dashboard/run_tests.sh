@@ -223,6 +223,10 @@ run test_coordination.sh bash /dev/fd/6 6< <(tr -d '\r' < dashboard/test_coordin
 run test_run.sh   bash /dev/fd/7 7< <(tr -d '\r' < dashboard/test_run.sh)
 run test_residue.sh bash /dev/fd/12 12< <(tr -d '\r' < dashboard/test_residue.sh)
 run test_lifecycle.sh bash /dev/fd/10 10< <(tr -d '\r' < dashboard/test_lifecycle.sh)
+# Evidence retention (TM-211) and the shared claude credential store (TM-212):
+# respawned logs and dead claude mirrors are archived, never deleted, and no
+# archive ever holds a credential. Offline - fake tmux, throwaway home.
+run test_evidence_archive.sh bash /dev/fd/22 22< <(tr -d '\r' < dashboard/test_evidence_archive.sh)
 run test_theme_import.sh bash /dev/fd/13 13< <(tr -d '\r' < dashboard/test_theme_import.sh)
 run test_themes.sh bash /dev/fd/13 13< <(tr -d '\r' < dashboard/test_themes.sh)
 run test_frontend.sh bash /dev/fd/12 12< <(tr -d '\r' < dashboard/test_frontend.sh)
@@ -271,6 +275,10 @@ for suite in test_modbus_poll.py test_modbus_rtu.py test_enip.py test_orchestrat
   fi
 done
 run test_github_panel.py python3 dashboard/test_github_panel.py
+# The Hub view (TM-216). Starts its own agentmux-hub on a throwaway AGENTMUX_HOME and
+# its own HTTP server on an ephemeral port, so it touches neither the operator's hub
+# nor the shared server this suite brought up.
+run test_hub_panel.py python3 dashboard/test_hub_panel.py
 run test_codesys_panel.py python3 dashboard/test_codesys_panel.py
 run test_logix.py python3 dashboard/test_logix.py
 run test_ads.py python3 dashboard/test_ads.py

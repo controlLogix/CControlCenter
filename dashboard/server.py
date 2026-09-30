@@ -6,6 +6,7 @@ import boardagents
 import chatter_feed
 import codesys_panel
 import github_panel
+import hub_panel
 import boardteams
 import ccboard
 import ccstore
@@ -2368,6 +2369,22 @@ class Handler(BaseHTTPRequestHandler):
                          and 1 <= int(raw) <= 2000 else 200)
                 self.send_json(200, feed_snapshot(limit))
                 return
+            if path.startswith("/api/hub/"):
+                # The Hub view (TM-216). Read-only, and a CLIENT of agentmux-hub over
+                # its unix socket - never a reader of hub.db. That database is WAL
+                # with one writer connection owned by the hub process, and the hub/
+                # directory is "owned by agentmux-hub. Nothing else opens these
+                # files" (docs/PROTOCOL.md sections 3 and 8). A second sqlite reader
+                # here would pin the WAL against checkpoints, couple this page to the
+                # hub's private schema, and step around its identity rules. See
+                # hub_panel.py. Routed in the shared block so a POST gets 405.
+                if self.command not in ("GET", "HEAD"):
+                    self.send_json(405, {"error": "read-only endpoint"})
+                    return
+                status, body = hub_panel.endpoint(path[len("/api/hub/"):],
+                                                  parse_qs(parsed.query), HOME_DIR)
+                self.send_json(status, body)
+                return
             if path == "/api/runs" or path.startswith("/api/runs/"):
                 # Deliberately NOT under /api/board/, whose op regex is [a-z]{1,16}
                 # with no slash - a run id and a sub-resource would not survive it.
@@ -2506,7 +2523,7 @@ class Handler(BaseHTTPRequestHandler):
             content_type = "text/html; charset=utf-8"
         elif path in ("/app.js", "/fitmatrix.js", "/agents.js", "/teams.js", "/iiot.js",
                       "/github.js", "/codesys.js", "/chatter.js", "/mqtt.js",
-                      "/netscan.js", "/runs.js", "/kanban.js"):
+                      "/netscan.js", "/runs.js", "/kanban.js", "/hub.js"):
             # fitmatrix.js is the readability test harness. index.html loads it only
             # when the URL carries ?fit=1, so it is inert on the normal page but can
             # be run against the REAL page rather than a mock.
