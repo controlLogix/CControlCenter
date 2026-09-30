@@ -1,0 +1,103 @@
+{
+  "run": "20260930-142203-team",
+  "scenario": "team",
+  "started": "2026-09-30T14:22:03-0500",
+  "agents": [
+    "calc-lead-codexb_1422",
+    "calc-worker-codex_1422",
+    "calc-reviewer-grok_1422"
+  ],
+  "work": [
+    {
+      "id": "W-EKCSEJPRTC",
+      "parent_id": null,
+      "target": "team:calc/t_1422",
+      "title": "Add variance and stdev to calc",
+      "state": "done",
+      "claimed_by": "calc-lead-codexb_1422",
+      "attempts": 1,
+      "result": "Added population variance(xs) and stdev(xs), ValueError for empty inputs, and unit tests in commit 54f85d4; all 7 tests pass and reviewer approved."
+    },
+    {
+      "id": "W-AZXVVS1087",
+      "parent_id": "W-EKCSEJPRTC",
+      "target": "role:team:calc/t_1422/worker",
+      "title": "Implement population variance and stdev with tests",
+      "state": "done",
+      "claimed_by": "calc-worker-codex_1422",
+      "attempts": 1,
+      "result": "Implemented population variance(xs) and stdev(xs), supporting iterables and raising ValueError on empty input. Added tests for population denominator, fractional results, constants, generators, and empty inputs. python3 -m unittest discover -s tests: all 7 tests passed; git diff --check passed. Commit: 54f85d47eb6b588252f600c1a76c96530b58dad2."
+    },
+    {
+      "id": "W-5S4E5GRYV9",
+      "parent_id": "W-EKCSEJPRTC",
+      "target": "role:team:calc/t_1422/reviewer",
+      "title": "Review variance and stdev implementation",
+      "state": "done",
+      "claimed_by": "calc-reviewer-grok_1422",
+      "attempts": 1,
+      "result": "APPROVE: commit 54f85d47eb6b588252f600c1a76c96530b58dad2.\n\nvariance(xs) is the population variance: materializes xs, raises ValueError(\"variance of empty sequence\") when empty, then sum((x - mean)^2) / n. The textbook series [2, 4, 4, 4, 5, 5, 7, 9] is exactly 4 (sample variance would be 32/7), so the divisor is n.\n\nstdev(xs) is variance(xs) ** 0.5, so empty input raises the same ValueError and a constant series is 0.\n\nFollows mean(): list() so generators work, ValueError on empty, true division. Tests cover the population example, a fractional case (assertAlmostEqual on 2/3 and its square root), single-value and constant series, generators, and empty list plus empty iterator for both functions.\n\npython3 -m unittest discover -s tests -v: 7 tests, OK."
+    }
+  ],
+  "errors": [],
+  "timeline": [
+    "14:22:06 spawned calc-lead-codexb_1422 (codex) %0",
+    "14:22:08 spawned calc-worker-codex_1422 (codex) %1",
+    "14:22:10 spawned calc-reviewer-grok_1422 (grok) %2",
+    "14:22:10 team calc/t_1422: calc-lead-codexb_1422, calc-worker-codex_1422, calc-reviewer-grok_1422",
+    "14:22:10 posted W-EKCSEJPRTC -> team:calc/t_1422: Add variance and stdev to calc",
+    "14:22:10 W-EKCSEJPRTC ready by -",
+    "14:22:40 W-EKCSEJPRTC claimed by calc-lead-codexb_1422",
+    "14:22:50 W-EKCSEJPRTC waiting_children by calc-lead-codexb_1422 children: W-AZXVVS1087[ready:-]",
+    "14:23:00 W-EKCSEJPRTC waiting_children by calc-lead-codexb_1422 children: W-AZXVVS1087[claimed:calc-worker-codex_1422]",
+    "14:24:30 W-EKCSEJPRTC waiting_children by calc-lead-codexb_1422 children: W-AZXVVS1087[done:calc-worker-codex_1422]",
+    "14:24:50 W-EKCSEJPRTC waiting_children by calc-lead-codexb_1422 children: W-AZXVVS1087[done:calc-worker-codex_1422], W-5S4E5GRYV9[ready:-]",
+    "14:25:10 W-EKCSEJPRTC waiting_children by calc-lead-codexb_1422 children: W-AZXVVS1087[done:calc-worker-codex_1422], W-5S4E5GRYV9[claimed:calc-reviewer-grok_1422]",
+    "14:26:00 W-EKCSEJPRTC waiting_children by calc-lead-codexb_1422 children: W-AZXVVS1087[done:calc-worker-codex_1422], W-5S4E5GRYV9[done:calc-reviewer-grok_1422]",
+    "14:26:20 W-EKCSEJPRTC done by calc-lead-codexb_1422 children: W-AZXVVS1087[done:calc-worker-codex_1422], W-5S4E5GRYV9[done:calc-reviewer-grok_1422]"
+  ],
+  "verify": "calc: tests pass, stdev ok; log: 54f85d4 Add population variance and standard deviation",
+  "checks": {
+    "E1_all_top_done": true,
+    "E2_no_dead_delivery": true,
+    "E3_no_failed_bell": true,
+    "E4_no_blocked_or_died": true,
+    "E5_all_acked": true,
+    "E6_verified": true
+  },
+  "error_free": true,
+  "stats": {
+    "deliveries": 5,
+    "acked": 5,
+    "bells": {
+      "deferred": 9,
+      "submitted": 5
+    },
+    "modal_answers": [
+      [
+        {
+          "kind": "update",
+          "keys": [
+            "2"
+          ]
+        }
+      ],
+      [
+        {
+          "kind": "update",
+          "keys": [
+            "2"
+          ]
+        }
+      ]
+    ],
+    "extra_enters": 2,
+    "work_items": 3,
+    "duration_s": 250
+  },
+  "pane_tails": {
+    "calc-lead-codexb_1422": "  \u2022 Added population variance(xs) and stdev(xs).                                                                                                                                                        \n  \u2022 Both raise ValueError on empty input.                                                                                                                                                               \n  \u2022 All 7 tests pass; reviewer approved.                                                                                                                                                                \n  Hub work item marked done.                                                                                                                                                                            \n  Worked for 3m 59s \u2022 14:26                                                                                                                                                                             \n\u203a Ask Codex to do anything                                                                                 \n  GPT-6.1-Sol default \u00b7 ~/hubdemo/calc \u00b7 Acknowledge hub inbox\n  ? for shortcuts                                                                                                                                                              \u26a0 1 warning \u00b7 f2 to view",
+    "calc-worker-codex_1422": "lation denominator, f\u2026\n  \u2514 W-AZXVVS1087 -> done                                                                                                                                                                                \n    + Show details                                                                                                                                                                                      \n\u2022 Implemented population variance and stdev, including ValueError for empty input.                                                                                                                      \n  All 7 tests pass. Committed as 54f85d4; work item marked done.                                                                                                                                        \n  Worked for 1m 44s \u2022 14:24                                                                                                                                                                             \n\u203a Ask Codex to do anything                                                                                  \n  GPT-6.1-Sol default \u00b7 ~/hubdemo/calc \u00b7 Acknowledge hub inbox\n  ? for shortcuts                                                                                                                                                              \u26a0 1 warning \u00b7 f2 to view",
+    "calc-reviewer-grok_1422": "                                                                                                                                                                                             \u2588\n                                                                                                                                                                                                       \u2588\n                                                                                                                                                                                                       \u2588\n  \u256d\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e  \n  \u2502 \u276f                                                                                                                                                                                                \u2502  \n  \u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 Grok 4.7 (high) \u00b7 always-approve \u2500\u256f  \n  Shift+Tab:mode  \u2502  Ctrl+x:shortcuts                                                                                                                                                                   "
+  }
+}

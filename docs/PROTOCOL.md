@@ -14,14 +14,26 @@ Status: **implemented for one machine**, in `hub/` (`store.py`, `server.py`, `cl
 - identity by process ancestry
 - the transactional NATS outbox (written, not yet drained)
 
-**Designed, not built yet:**
-- the `subscribe` stream (agents are rung by the doorbell instead)
-- the 127.0.0.1 TCP listener for Windows tools
-- per-agent tokens for non-local callers
-- hourly online backups
-- adopting legacy sessions
-- the courier retirement and archive steps of section 10
-- the NATS bridge
+**Built 2026-09-30 (board EP-031, TM-211 to TM-218):**
+- the `subscribe` stream: `agentmux hub subscribe [--events]`
+- the 127.0.0.1 TCP listener (`tcp_port` in `hub/config.toml`), with per-agent and
+  operator tokens (0600 files, sha256 in hub.db). TCP never honors `--as`
+- hourly online backups, a backup before every migration, and retention
+  (`hub/backups/`, 0600 in 0700)
+- receipts from each CLI's own session log, plus a one-time operator note on a CLI
+  input hold (`hub/receipts.py`)
+- adopting legacy sessions (`agentmux hub adopt`) and retiring the courier
+  (`agentmux hub retire-courier`). `agentmux post` now goes through the hub
+- the NATS bridge (`hub/bridge.py`, `nats_url` in `hub/config.toml`, off by default).
+  Direct messages and federated role work cross hubs. Proven with a real
+  `nats-server` and two hubs on separate homes
+- evidence preservation in `agentmux.sh`: pane logs and claude homes are archived,
+  not deleted, and one shared claude credential is kept
+
+**Not built:**
+- JetStream persistence on the NATS side (the hubs keep their own at-least-once
+  guarantee; NATS only carries traffic)
+- adopting legacy sessions automatically (it is an explicit operator verb)
 
 The terminal side (how bytes reach a CLI) is specified separately in
 [`TRANSPORT.md`](TRANSPORT.md). This document covers what happens before and after that:

@@ -84,13 +84,39 @@ agentmux hub spawn calc worker My-Worker --cli codex      # refused: hyphen rese
 python3 -m unittest discover -s hub/tests -t . -v
 ```
 
-There are 37 tests. They cover:
+There are 59 tests. They cover:
 - names and addresses
 - ordering and idempotency
 - first-claim across 8 processes
 - leases and dead-agent recovery
 - team decomposition
 - per-repo claims
-- every delivery guard, each against scripted screens: update modal, login, unknown prompt,
-  copy-mode, busy, booting, paste placeholder, stale line, handle mismatch, and
-  menu-by-label with "No, exit" preselected
+- every delivery guard, each against scripted screens: update menu, codex's non-modal
+  update banner, login, unknown prompt, copy-mode, busy, booting, paste placeholder,
+  stale line, handle mismatch, and menu-by-label with "No, exit" preselected
+- a real hub over its socket and over token-authenticated TCP, including `subscribe`
+- receipts from codex, claude and grok logs, and the hold alert
+- backups, retention, and a backup before every migration
+- courier retirement, legacy adoption, and `agentmux post` routed through the hub
+- **two hubs federating through a real `nats-server`** (`test_nats_federation.py`,
+  skipped if `nats-server` is not installed)
+
+## 6. Federation (NATS)
+
+```bash
+nats-server -a 127.0.0.1 -p 4222 &                  # installed at ~/.local/bin/nats-server
+printf 'node = "ws1"\nnats_url = "nats://127.0.0.1:4222"\n' >> ~/.agentmux/hub/config.toml
+agentmux hub stop; agentmux hub start
+agentmux hub status --bridge                        # connected, role subjects served
+agentmux hub work add --to role:calc/worker --title "..." --federate   # exactly one hub on the network takes it
+```
+
+## 7. From Windows (TCP)
+
+Set `tcp_port = 8790` in `~/.agentmux/hub/config.toml`, then run this in PowerShell:
+
+```powershell
+$env:AGENTMUX_HUB_URL = "tcp://127.0.0.1:8790"
+$env:AGENTMUX_HUB_TOKEN_FILE = "\\wsl.localhost\Ubuntu\home\nick\.agentmux\hub\operator.token"
+python C:\Dev\agentmux\hub\cli.py status
+```
