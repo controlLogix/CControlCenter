@@ -593,7 +593,11 @@ cmd_spawn() (
   nb="$(node_bin)"
   # ~/.grok/bin holds xAI's grok CLI. Its installer adds that to .bashrc, which a
   # tmux pane never sources (non-login, non-interactive), so add it explicitly.
-  env_prefix="export PATH='${nb}:'\$HOME'/.grok/bin:'\$PATH;"
+  # ~/.local/bin is where install.sh puts `agentmux` itself. Without it an agent's own
+  # shell cannot run `agentmux hub inbox` or `agentmux post` - measured 2026-09-29 on a
+  # shell pane: "agentmux: command not found". It only ever worked where a CLI happened
+  # to start a login shell that added it.
+  env_prefix="export PATH='${nb}:'\$HOME'/.local/bin:'\$HOME'/.grok/bin:'\$PATH;"
   # An issue key is not a secret, so exporting it directly is fine. Contrast
   # $ROOT/env below, which is SOURCED precisely so credentials never reach the
   # tmux command line or `ps`. The key is validated in the arg loop above.
@@ -2615,6 +2619,11 @@ case "${1:-}" in
   idle)   shift; cmd_idle   "$@" ;;
   attach) shift; cmd_attach "$@" ;;
   exec)   shift; cmd_exec   "$@" ;;
+  # The messaging protocol and work hub (docs/PROTOCOL.md). Everything past `hub` is
+  # the Python client's; the hub itself decides who the caller is.
+  hub)    shift
+          _self="$(agentmux_self)" || die "hub: cannot locate the agentmux checkout"
+          exec python3 "$(dirname "$_self")/hub/cli.py" "$@" ;;
   ""|-h|--help|help) usage ;;
   *) die "unknown command '$1' (try: agentmux help)" ;;
 esac

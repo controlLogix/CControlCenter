@@ -1,0 +1,62 @@
+{
+  "run": "20260929-222043-team",
+  "scenario": "team",
+  "started": "2026-09-29T22:20:43-0500",
+  "agents": [
+    "calc-lead-claude_2220",
+    "calc-worker-codex_2220",
+    "calc-reviewer-grok_2220"
+  ],
+  "work": [
+    {
+      "id": "W-SNN2R7AYDX",
+      "parent_id": null,
+      "target": "team:calc/t_2220",
+      "title": "Add variance and stdev to calc",
+      "state": "ready",
+      "claimed_by": null,
+      "attempts": 0,
+      "result": null
+    }
+  ],
+  "errors": [
+    "agent calc-lead-claude_2220 dead: {\"from\":\"ready\",\"note\":\"terminal gone\"}",
+    "delivery 01M3R58DVCCQXZHGX6F8PK7AC2>calc-lead-claude_2220 ended queued"
+  ],
+  "timeline": [
+    "22:20:46 spawned calc-lead-claude_2220 (claude) %6",
+    "22:20:48 spawned calc-worker-codex_2220 (codex) %7",
+    "22:20:50 spawned calc-reviewer-grok_2220 (grok) %8",
+    "22:20:50 team calc/t_2220: calc-lead-claude_2220, calc-worker-codex_2220, calc-reviewer-grok_2220",
+    "22:20:50 posted W-SNN2R7AYDX -> team:calc/t_2220: Add variance and stdev to calc",
+    "22:20:50 W-SNN2R7AYDX ready by -",
+    "22:21:00 AGENT calc-lead-claude_2220 dead: terminal gone"
+  ],
+  "verify": "calc.stdev check failed: Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nImportError: cannot import name 'variance' from 'calc' (/home/nick/hubdemo/calc/calc/__init__.py)\n",
+  "checks": {
+    "E1_all_top_done": false,
+    "E2_no_dead_delivery": true,
+    "E3_no_failed_bell": true,
+    "E4_no_blocked_or_died": false,
+    "E5_all_acked": false,
+    "E6_verified": false
+  },
+  "error_free": false,
+  "stats": {
+    "deliveries": 3,
+    "acked": 2,
+    "bells": {
+      "deferred": 7,
+      "submitted": 2
+    },
+    "modal_answers": [],
+    "extra_enters": 0,
+    "work_items": 1,
+    "duration_s": 1801
+  },
+  "pane_tails": {
+    "calc-lead-claude_2220": "can't find pane: calc-lead-claude_2220",
+    "calc-worker-codex_2220": "  >_ OpenAI Codex (v0.159.0)\n     ~/hubdemo/calc\n  permissions: YOLO mode\n  You, me, and a blinking cursor.\n\u203a [hub] 1 new message(s), 0 claimable work item(s) for calc-worker-\n  codex_2220. Run: agentmux hub inbox --ack\n\u2022 I\u2019ll read the hub message and handle any requested work.\n\u2022 Ran agentmux hub inbox --ack\n  \u2514 As a worker: claim one item, do exactly what it says in the repo check\u2026\n    ---\n    Acknowledged 1 message(s).\n    + 15 lines (ctrl+t to expand)                                          \n\u2022 Acknowledged the hub welcome. No work is claimable; waiting for the next\n  hub notification.\n  Worked for 8s \u2022 22:21                                                    \n\u203a Ask Codex to do anything\n  GPT-6.1-Sol default \u00b7 ~/hubdemo/calc \u00b7 Acknowledge hub inbox\n  ? for shortcuts                                 \u26a0 1 warning \u00b7 f2 to view",
+    "calc-reviewer-grok_2220": "  \u256d\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e  \n  \u2502 \u276f                                                                   \u2502  \n  \u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 Grok 4.7 (high) \u00b7 always-approve \u2500\u256f  \n  Shift+Tab:mode  \u2502  Ctrl+x:shortcuts                                      "
+  }
+}
