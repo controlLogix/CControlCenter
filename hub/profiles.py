@@ -34,6 +34,9 @@ class Profile:
     modals: list = field(default_factory=list)
     submit_keys: tuple = ("Enter",)
     boot_s: float = 8.0           # minimum time after spawn before ready is trusted
+    submit_timeout_s: float = 6.0 # how long to watch for the line to leave the composer
+    enter_retry_s: float = 2.0    # spacing between re-sent Enters while it has not
+    pre_enter_s: float = 0.25     # pause between typing the line and its first Enter
     # The doorbell line. For an LLM CLI it is an instruction; for a shell it must be a
     # command that is harmless to execute, so the notice rides along as a comment.
     doorbell: str = "[hub] {n_msg} new message(s), {n_claim} claimable work item(s) for {session}. Run: agentmux hub inbox --ack"
@@ -138,13 +141,24 @@ CLAUDE = Profile(
 GROK = Profile(
     cli="grok",
     ready=re.compile(r"^\s*[│|]?\s*[❯>]\s?"),
-    busy=BUSY_COMMON,
+    # grok's working line is a braille spinner ("⠴ Writing command… 0.6s"), and its
+    # footer shows "Ctrl+c:cancel" only while a turn runs (BUSY_COMMON).
+    busy=re.compile(BUSY_COMMON.pattern + r"|[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏] \w", _I),
     placeholder=PLACEHOLDER,
     modals=[
         Modal("trust", re.compile(r"do you trust the contents|trust this (folder|directory)", _I), ["y"], "letter y"),
         GENERIC_MODAL,
     ],
     boot_s=6.0,
+    # Measured 2026-09-29 (orchestration 2): grok left the doorbell in its composer
+    # through 3 Enters in 8 s, then took it on its own. It queues input internally
+    # (the receipts analysis found a 25-minute pager-queue hold). Watch longer, and
+    # space the Enters so each can land.
+    submit_timeout_s=20.0,
+    enter_retry_s=5.0,
+    # Orchestration 3: the first Enter after a typing burst was ignored, the one 5 s
+    # later landed. Let the burst settle before the first Enter.
+    pre_enter_s=1.5,
 )
 
 # shell: a plain bash prompt. No busy marker; readiness = a prompt char at line end.

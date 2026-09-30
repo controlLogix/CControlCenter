@@ -204,6 +204,12 @@ class Work(unittest.TestCase):
         self.s.release(self.ws[1], k["id"], "done", "ok")
         self.assertEqual(self.s.release(lead, p["id"], "done", "shipped")["state"], "done")
 
+    def test_cancel_takes_open_children(self):
+        p = self.s.work_create("virtual:operator", "alpha", "role:alpha/worker", "parent")
+        k = self.s.work_create("virtual:operator", "alpha", "role:alpha/worker", "kid", parent_id=p["id"])
+        self.assertEqual(sorted(self.s.cancel(p["id"], "orphaned")), sorted([p["id"], k["id"]]))
+        self.assertIsNone(self.s.claim(self.ws[0])["claimed"])
+
     def test_path_claims_are_per_repo(self):  # R-HOME-2
         self.s.claim_path(self.ws[0], "alpha", "README.md")
         self.s.claim_path(self.ws[1], "beta", "README.md")          # same path, other repo: fine

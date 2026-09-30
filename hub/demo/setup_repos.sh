@@ -15,6 +15,7 @@ mk() {
   mkdir -p "$d"
   ( cd "$d"
     "$@"
+    printf '%s\n' '__pycache__/' '*.pyc' > .gitignore
     git init -q -b main
     git -c user.name=hubdemo -c user.email=hubdemo@localhost add -A
     git -c user.name=hubdemo -c user.email=hubdemo@localhost commit -qm "initial $name"

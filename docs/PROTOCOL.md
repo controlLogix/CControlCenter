@@ -1,9 +1,27 @@
 # agentmux messaging protocol and hub
 
-Status: **DRAFT**, Phase B of the messaging epic. Requirement IDs (`R-*`) link to failure
-classes (`C1`–`C12`) in
-`C:\theWork\git\findings\2026-09-XX_agentmux_communication_failures.md`. Anything marked
-`[trace pending]` gets its class once Phase A is done.
+Status: **implemented for one machine**, in `hub/` (`store.py`, `server.py`, `cli.py`,
+`names.py`), and exercised by `hub/tests` and by live orchestrations
+(`evals/orchestrations/SCOREBOARD.md`). Requirement IDs (`R-*`) link to failure classes in
+`C:\theWork\git\findings\2026-09-30_agentmux_communication_failures.md`.
+
+**Built:**
+- naming and the normalizer
+- the home layout (`hub/`, `roles/`, `repos/<repo>/{agents,roles,teams}`)
+- the hub.db schema and PRAGMAs
+- first claim, lease sweeping, dead-agent lease return, team decomposition
+- idempotency keys, ordering, attempts and dead letters
+- identity by process ancestry
+- the transactional NATS outbox (written, not yet drained)
+
+**Designed, not built yet:**
+- the `subscribe` stream (agents are rung by the doorbell instead)
+- the 127.0.0.1 TCP listener for Windows tools
+- per-agent tokens for non-local callers
+- hourly online backups
+- adopting legacy sessions
+- the courier retirement and archive steps of section 10
+- the NATS bridge
 
 The terminal side (how bytes reach a CLI) is specified separately in
 [`TRANSPORT.md`](TRANSPORT.md). This document covers what happens before and after that:
@@ -238,7 +256,7 @@ The chosen route is written back to the card as a comment, so the operator can s
 - **`id`** is a ULID: time-ordered, and unique without coordination, which the NATS layer
   needs.
 - **`idem_key`** is optional. A second `post` with the same `(from, idem_key)` returns
-  the original `id` and creates nothing. `R-MSG-1` `[C11 duplicate briefs, C1 re-sends]`
+  the original `id` and creates nothing. `R-MSG-1` `[C13 duplicate delivery, C1 re-sends]`
 - **Kinds come from one table** (`message_kinds` in hub.db), not four hardcoded lists.
   `R-MSG-2` `[C9: stale courier silently dropped new kinds, bug #38]`
 
@@ -485,6 +503,15 @@ COMMIT;
 
 ## 9. Identity
 
+- **As built, local identity is process ancestry** (`hub/server.py` `identify`). The
+  unix socket gives the hub the caller's pid (`SO_PEERCRED`), and the hub walks
+  `/proc/<pid>/stat` parent links until it reaches a registered agent's pane pid.
+  - A caller inside a tmux pane that is not registered is `unregistered`, and may
+    neither act as the operator nor use `--as`.
+  - A caller outside every pane is the operator.
+  - Nothing the caller says about itself is consulted.
+- **Tokens (below) are the design for callers the kernel cannot vouch for:** TCP, and
+  later NATS.
 - **The token, not the environment, is the identity.**
   - At registration the hub issues a per-agent token. The transport injects it into the
     agent's own process environment, and stores it in `agents/<…>/run/token` (mode 0600).
@@ -546,7 +573,7 @@ address ever needs escaping to become a subject.
 | R-NAME-2 | The hub gives out session names; a live duplicate is refused | C8, C4 |
 | R-HOME-1 | The hub refuses a 9P/drvfs db path; Windows uses the API | C12 |
 | R-HOME-2 | Every agent path sits under its repo and session key; claims are keyed by (repo, path) | cross-repo claim collision |
-| R-MSG-1 | `idem_key` dedup on post | C1, C11 |
+| R-MSG-1 | `idem_key` dedup on post | C1, C13 |
 | R-MSG-2 | One kinds table | C9 |
 | R-DLV-1 | Only `acked` counts as success | C1, C5, C10 |
 | R-DLV-2 | Unverifiable stages are recorded as unverified | C10 |
@@ -558,5 +585,7 @@ address ever needs escaping to become a subject.
 | R-LIVE-3 | Never kill an agent holding a lease; every kill is an event | C4 |
 | R-ID-1 | Token identity; the environment is display-only | C8 |
 | R-ID-2 | The transport handle is cross-checked | C8 |
+| R-EVID-1 | Never destroy delivery evidence: keep pane logs across respawn and CLI homes across teardown, and archive them rather than delete them. **Not built:** the hub still spawns through `agentmux spawn`, which truncates the log (`agentmux.sh` spawn) and whose `claude_config_gc` deletes claude homes | C14 |
+| R-QUEUE-1 | Treat a CLI's internal input queue as not received: only the CLI's own session log (or the agent's `inbox`/`ack`) counts. Built through ack; the CLI-log receipt is not built | C15 |
 
 `[trace pending]`: counts and evidence refs are added from Phase A output.

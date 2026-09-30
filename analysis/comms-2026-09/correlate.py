@@ -3,7 +3,10 @@
 every intended delivery with exactly one outcome (README "Merge").
 
 Read-only. Inputs: out/{courier,panes,receipts,receipts.rescued-claude-config,
-transcripts}.jsonl and, if present, spotcheck.judgments.json (hand verdicts).
+transcripts}.jsonl and, if present, spotcheck.judgments.json and
+spotcheck.pass1.judgments.json (verdicts from spotcheck.py). For rows with no receipt
+match, contained_receipt() also opens the raw queue line and the raw receipt lines in a
+bounded time window, to find a message contained in a larger user turn.
 Outputs: out/outcomes.jsonl, out/summary.md. Deterministic: every collection is sorted,
 no clock is read, and the spot-check sample uses a fixed seed.
 
@@ -73,7 +76,19 @@ def keys_match(a, b, minlen=12):
 # ─────────────────────────────────────────────────────────────── load everything
 courier = load("courier.jsonl")
 panes = load("panes.jsonl")
-receipts = load("receipts.jsonl") + load("receipts.rescued-claude-config.jsonl")
+# The rescued-claude-config file repeats 78 records already in receipts.jsonl (the
+# nfl-lead / nfl-rev sessions). Drop exact repeats, or a single user turn counts twice
+# and a duplicated delivery looks like two turns. The key is the whole record, NOT the
+# ref alone: grok folds several queued messages into ONE user turn, and the extractor
+# emits one receipt per contained message under the same ref.
+_rc_seen = set()
+receipts = []
+for _r in load("receipts.jsonl") + load("receipts.rescued-claude-config.jsonl"):
+    _k = json.dumps(_r, sort_keys=True)
+    if _k in _rc_seen:
+        continue
+    _rc_seen.add(_k)
+    receipts.append(_r)
 transcripts = load("transcripts.jsonl")
 
 known_agents = set()
@@ -185,11 +200,18 @@ def find_pane(agent, typ, key, t, sender=None):
 
 
 def find_modal(agent, t):
+    """First modal whose window covers t; `kinds` lists every modal covering t."""
+    hit = None
+    kinds = []
     for p in pane_by_agent.get(agent, {}).get("modal", []):
         lo = p["lo"] or (p["hi"] - timedelta(minutes=30))
         if lo - MODAL_SLACK <= t <= p["hi"] + MODAL_SLACK:
-            return p
-    return None
+            hit = hit or p
+            if p["modal"] not in kinds:
+                kinds.append(p["modal"])
+    if hit:
+        hit = dict(hit, kinds="+".join(str(k) for k in kinds), windowed=hit["lo"] is None)
+    return hit
 
 
 # ─────────────────────────────────────────────────────────────── build the ledger
@@ -247,12 +269,13 @@ for r in transcripts:
     rejected = (f"'{a}' is showing a prompt" in out or f"'{a}' is not running" in out
                 or (res.get("exit_code") not in (0, None)))
     ledger.append({
-        "id": "i:" + r["ref"].split("/")[-1], "origin": "operator", "path": r["path"],
+        "id": "i:" + r["ref"].split("/")[-1] + "#" + a, "origin": "operator", "path": r["path"],
         "t": ts(r["t"]), "agent": a, "sender": "operator", "kind": r["path"],
         "sha": r.get("body_sha"), "prefix": r.get("prefix"),
         "key": pkey(VAR.split(r.get("prefix") or "")[0]) if d.get("body_has_expansion") else pkey(r.get("prefix")),
         "len": r.get("body_len"), "courier": None, "liveness": None, "ref": r["ref"],
         "events": [], "expansion": bool(d.get("body_has_expansion")), "rejected": rejected,
+        "argv_body": (d.get("positional") or [None])[-1],
         "literal": max(VAR.split(r.get("prefix") or ""), key=len).strip() if d.get("body_has_expansion") else None})
 
 ledger.sort(key=lambda x: (x["t"], x["id"]))
@@ -285,6 +308,95 @@ def match_receipts(item, want=1):
     return got
 
 
+# ── second-chance match: the message is CONTAINED in a larger user turn.
+# Two real causes, both found by the raw spot check:
+#   - the body began with a shell variable, so its literal lies past the 80-char prefix
+#   - earlier unsubmitted composer text was submitted together with this message
+# Only receipt lines in [t-2m, t+CONTAIN_AFTER] whose body is at least as long as the
+# needle's source are opened, each file is read once, and matching is on lowercase
+# alphanumerics of every string in the decoded JSON line.
+CONTAIN_AFTER = timedelta(minutes=30)
+AN = re.compile(r"[^a-z0-9]")
+_file_cache = {}
+_queue_cache = {}
+
+
+def _an(s):
+    return AN.sub("", (s or "").lower())
+
+
+def _strings(o, acc):
+    if isinstance(o, str):
+        acc.append(o)
+    elif isinstance(o, dict):
+        for k in sorted(o):
+            _strings(o[k], acc)
+    elif isinstance(o, list):
+        for v in o:
+            _strings(v, acc)
+
+
+def _raw_line(path, lineno, cache):
+    if path not in cache:
+        try:
+            with open(path, encoding="utf-8", errors="replace") as f:
+                cache[path] = f.read().split("\n")
+        except OSError:
+            cache[path] = None
+    lines = cache[path]
+    if lines is None or lineno < 1 or lineno > len(lines):
+        return None
+    return lines[lineno - 1]
+
+
+def full_body(item):
+    """The whole body from the raw source: queue line, or the argv literal."""
+    if item["origin"] == "operator":
+        return item.get("argv_body") or item["prefix"] or ""
+    m = re.match(r"^(.*):(\d+)$", item["ref"])
+    raw = _raw_line(m.group(1), int(m.group(2)), _queue_cache) if m else None
+    try:
+        return json.loads(raw).get("body") or ""
+    except Exception:
+        return ""
+
+
+def contained_receipt(item):
+    body = full_body(item)
+    if item["expansion"]:
+        segs = sorted(VAR.split(body), key=lambda s: (-len(_an(s)), s))
+        body = segs[0] if segs else ""
+    k = _an(body)
+    if len(k) < 24:
+        return None
+    mid = len(k) // 2
+    nds = [k[:40], k[mid:mid + 40]]
+    lo, hi = item["t"] - RECEIPT_BEFORE, item["t"] + CONTAIN_AFTER
+    for x in rc_by_agent.get(item["agent"], []):
+        # a merged turn may serve several DIFFERENT messages, never the same body twice
+        if item["sha"] in x.get("shas", ()) or not (lo <= x["t"] <= hi):
+            continue
+        if x["len"] is not None and x["len"] < 0.9 * len(body.strip()):
+            continue
+        m = re.match(r"^(.*):(\d+)$", x["ref"])
+        if not m:
+            continue
+        raw = _raw_line(m.group(1), int(m.group(2)), _file_cache)
+        if raw is None:
+            continue
+        try:
+            acc = []
+            _strings(json.loads(raw), acc)
+        except Exception:
+            continue
+        text = _an(" ".join(acc))
+        if all(n in text for n in nds):
+            # merged: the receipt's own first words are not this message's first words
+            merged = not item["expansion"] and not _an(x["prefix"] or "").startswith(k[:20])
+            return x, ("contained-merged" if merged else "contained")
+    return None
+
+
 def wrong_recipient(item):
     if not item["sha"] or item["expansion"]:
         return None
@@ -306,6 +418,7 @@ def wrong_recipient(item):
 intended_pairs = {(it["agent"], it["sha"]) for it in ledger if it["sha"]}
 
 rows = []
+pane_matched = set()
 for it in ledger:
     ev = it["events"]
     sends = [e for e in ev if e["type"] == "sent"]
@@ -319,8 +432,14 @@ for it in ledger:
 
     want = 2 if dup_sends else 1
     rm = match_receipts(it, want)
+    if not rm and it["courier"] not in ("dead-lettered", "never-attempted", "history-adopted-at-eof",
+                                          "deferred-no-final-outcome") and not dls:
+        c = contained_receipt(it)
+        if c:
+            rm = [c]
     for x, how in rm:
         x["used"] += 1
+        x.setdefault("shas", set()).add(it["sha"])
     rrefs = [x["ref"] for x, _ in rm]
     parr = find_pane(it["agent"], "arrived", it["key"], it["t"], it["sender"] if it["origin"] == "courier" else None)
     ppend = find_pane(it["agent"], "pending_input", it["key"], it["t"])
@@ -342,7 +461,7 @@ for it in ledger:
                   "deferred-no-final-outcome": "deferred forever to a recipient that never existed; no notice"}[co]
     elif dup_sends:
         outcome = "duplicated"
-        reason = f"courier sent it {len(sends)} times; {len(rm)} receipt(s) matched"
+        reason = f"courier sent it {len(sends)} times; {len(rm)} distinct user turn(s) matched"
         evidence += [e["ref"] for e in sends]
     elif rm:
         x, how = rm[0]
@@ -352,13 +471,19 @@ for it in ledger:
             outcome, reason = "deferred-then-received", f"{len(defers)} defer(s) then delivered"
         else:
             outcome, reason = "received", f"receipt matched by {how}"
+        if how == "contained-merged":
+            reason += " (earlier unsubmitted composer text was submitted in the same turn)"
         if how == "time-only":
             reason += " (body had an unexpanded shell variable; weakest match)"
-    elif ppend:
+    elif ppend and cli != "shell":
+        # a shell has no busy marker and executes on Enter, so "arrived, no busy" means
+        # nothing there; those rows fall through to the shell blind spot below
         outcome, reason = "typed-not-submitted", "text/placeholder left in the input box: " + str(ppend["reason"])
         evidence.append(ppend["ref"])
     elif pmodal and not (parr and parr["busy_after"]):
-        outcome, reason = "into-modal", f"pane showed a {pmodal['modal']} modal at delivery time"
+        outcome = "into-modal"
+        reason = f"pane showed {pmodal['kinds']} at delivery time" + (
+            " (modal time is an upper bound; window = 30 min before it)" if pmodal["windowed"] else "")
         evidence.append(pmodal["ref"])
     elif parr and parr["busy_after"] and not covered(it["agent"], it["t"]):
         outcome, reason = "received", "pane: text arrived and a busy marker followed (no receipt store)"
@@ -394,6 +519,9 @@ for it in ledger:
                 reason += "; pane shows arrival" + (" + busy" if parr["busy_after"] else " (no busy marker)")
     if parr:
         evidence.append(parr["ref"])
+    for p in (parr, ppend, pmodal):
+        if p:
+            pane_matched.add(p["i"])
     rows.append({
         "id": it["id"], "t": iso(it["t"]), "day": iso(it["t"])[:10], "origin": it["origin"],
         "path": it["path"], "agent": it["agent"], "sender": it["sender"], "cli": cli,
@@ -456,35 +584,84 @@ L += ["", "## Outcome x day (UTC)", ""]
 days = sorted({r["day"] for r in rows})
 L += table(Counter((r["day"], r["outcome"]) for r in rows), days, OUTCOMES, "day")
 L += ["", "## Reasons (blind spots are the `unknown` rows)", "", "| outcome | reason | count |", "|---|---|---|"]
-rs_ = Counter((r["outcome"], re.sub(r"session [0-9a-f-]+", "session S", re.sub(r"\d+", "N", r["reason"] or ""))) for r in rows)
+UUID = re.compile(r"[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}")
+rs_ = Counter((r["outcome"], re.sub(r"\d+", "N", UUID.sub("S", r["reason"] or ""))) for r in rows)
 for (o, why), n in sorted(rs_.items(), key=lambda kv: (OUTCOMES.index(kv[0][0]), -kv[1], kv[0][1])):
     L.append(f"| {o} | {why} | {n} |")
 L += ["", "## Receipt match method (rows with a receipt)", "", "| method | count |", "|---|---|"]
 for k, n in sorted(Counter(m for r in rows for m in r["receipt_match"][:1]).items()):
     L.append(f"| {k} | {n} |")
+L += ["", "## Pane evidence outside the ledger", "",
+      "Pane records that no ledger row matched. These are mostly dispatch briefs and spawn "
+      "prompts, which are typed by `dispatch`/`spawn` rather than queued, so they are counted "
+      "here instead of labeled.", "",
+      "| pane record | cli | subkind / reason | total | matched a ledger row | unmatched |",
+      "|---|---|---|---|---|---|"]
+pc = Counter()
+pm = Counter()
+for i, p in enumerate(panes):
+    if p["type"] not in ("pending_input", "modal", "death"):
+        continue
+    d = p["detail"]
+    k = (p["type"], d.get("cli") or "unknown", d.get("subkind") or d.get("reason") or "-")
+    pc[k] += 1
+    if i in pane_matched:
+        pm[k] += 1
+for k in sorted(pc):
+    L.append(f"| {k[0]} | {k[1]} | {k[2]} | {pc[k]} | {pm[k]} | {pc[k]-pm[k]} |")
 L += ["", "## Excluded from the ledger", "", "| why | count |", "|---|---|"]
 for k, n in sorted(skipped.items()):
     L.append(f"| {k} | {n} |")
 L += ["", "## Spot check", "",
       f"Sample: {len(sample)} random `received` rows (seed 20260930) and all {len(lost)} "
-      "`lost-silent` rows, listed in `out/spotcheck.sample.jsonl`. Each was re-checked "
-      "against the raw sources (queue line, courier.log, the CLI's own session file, the "
-      "pane log) by `spotcheck.sh`; verdicts are in `spotcheck.judgments.json`.", ""]
-if judg:
-    checked = [r for r in sample + lost if r["id"] in judg]
-    dis = [r for r in checked if judg[r["id"]]["verdict"] != "agree"]
-    L.append(f"Checked {len(checked)} of {len(sample)+len(lost)}; disagreements "
-             f"{len(dis)} ({100.0*len(dis)/max(1,len(checked)):.1f}%).")
-    for grp, name in ((sample, "received"), (lost, "lost-silent")):
-        c = [r for r in grp if r["id"] in judg]
-        dd = [r for r in c if judg[r["id"]]["verdict"] != "agree"]
-        L.append(f"- `{name}`: {len(dd)}/{len(c)} disagree")
-    L += ["", "| id | label | verdict | raw-source note |", "|---|---|---|---|"]
-    for r in checked:
-        j = judg[r["id"]]
-        L.append(f"| {r['id']} | {r['outcome']} | {j['verdict']} | {j.get('note','')} |")
+      "`lost-silent` rows, listed in `out/spotcheck.sample.jsonl`. `spotcheck.py` re-checks "
+      "each against the RAW sources: it recovers the full body from the snapshot queue line "
+      "or the transcript argv, then searches every one of the CLI session files that hold "
+      "receipts (codex rollouts, claude projects and history, grok updates) and the "
+      "recipient's pane log for start/middle/end needles. Verdicts are in "
+      "`spotcheck.judgments.json`. `unverifiable` = the session file was deleted after "
+      "extraction (claude-config removed at team teardown); those rows are left out of the "
+      "rate.", ""]
+
+
+def spot_block(title, smp, jd):
+    out = [f"### {title}", ""]
+    rec = [r for r in smp if r["outcome"] == "received"]
+    los = [r for r in smp if r["outcome"] == "lost-silent"]
+    chk = [r for r in smp if r["id"] in jd and jd[r["id"]]["verdict"] != "unverifiable"]
+    dis = [r for r in chk if jd[r["id"]]["verdict"] != "agree"]
+    unv = [r for r in smp if r["id"] in jd and jd[r["id"]]["verdict"] == "unverifiable"]
+    out.append(f"Checked {len(chk)} of {len(smp)} ({len(unv)} unverifiable); disagreements "
+               f"**{len(dis)} ({100.0*len(dis)/max(1,len(chk)):.1f}%)**.")
+    for grp, name in ((rec, "received"), (los, "lost-silent")):
+        c = [r for r in grp if r["id"] in jd and jd[r["id"]]["verdict"] != "unverifiable"]
+        dd = [r for r in c if jd[r["id"]]["verdict"] != "agree"]
+        out.append(f"- `{name}`: {len(dd)}/{len(c)} disagree")
+    out += ["", "| id | agent | label | verdict | raw-source note |", "|---|---|---|---|---|"]
+    for r in sorted(smp, key=lambda r: (r["outcome"], r["id"])):
+        if r["id"] in jd:
+            j = jd[r["id"]]
+            out.append(f"| {r['id']} | {r['agent']} | {r['outcome']} | {j['verdict']} | {j.get('note','')} |")
+    return out + [""]
+
+
+p1s = load("spotcheck.pass1.sample.jsonl")
+p1j = {}
+if os.path.exists(os.path.join(HERE, "spotcheck.pass1.judgments.json")):
+    with open(os.path.join(HERE, "spotcheck.pass1.judgments.json"), encoding="utf-8") as f:
+        p1j = json.load(f)
+if p1s and p1j:
+    L += spot_block("Pass 1 (before the containment rule)", p1s, p1j)
+    L += ["Pass 1 found two systematic errors, both fixed by `contained_receipt()`: bodies "
+          "that begin with a shell variable (the literal lies past the 80-character receipt "
+          "prefix), and a message submitted in the same turn as earlier unsubmitted composer "
+          "text (tm-082, 09-24). The rows it fixed are now `received` with match "
+          "`contained` or `contained-merged`.", ""]
+cur_ids = {r["id"] for r in sample + lost}
+if judg and cur_ids <= set(judg):
+    L += spot_block("Pass 2 (current labels)", sample + lost, judg)
 else:
-    L.append("No judgments file yet.")
+    L.append("Pass 2: judgments not yet regenerated for the current sample; run spotcheck.py.")
 with open(os.path.join(OUT, "summary.md"), "w", encoding="utf-8", newline="\n") as f:
     f.write("\n".join(L) + "\n")
 print(json.dumps({"rows": len(rows), "outcomes": dict(sorted(oc.items())),

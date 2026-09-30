@@ -187,7 +187,7 @@ def deliver_line(t: Transport, prof: P.Profile, session: str, handle: str, text:
             t.send_buffer(handle, text)
         else:
             t.send_text(handle, text)
-        time.sleep(0.25 if len(text) < 200 else 0.6)
+        time.sleep(max(prof.pre_enter_s, 0.25 if len(text) < 200 else 0.6))
         after = settle(t, handle, quiet_s=0.4, max_s=3.0)
         if _norm(text)[:30] in _norm(after) or prof.has_placeholder(after):
             rc.stages["typed"] = "ok"
@@ -203,7 +203,9 @@ def deliver_line(t: Transport, prof: P.Profile, session: str, handle: str, text:
         rc.enters += 1
 
     # 7. submitted: our text left the composer, and no placeholder remains.
-    deadline = time.time() + submit_timeout_s
+    timeout = max(submit_timeout_s, prof.submit_timeout_s)
+    deadline = time.time() + timeout
+    last_enter = time.time()
     probe = _norm(text)[:30]
     while time.time() < deadline:
         time.sleep(0.4)
@@ -213,9 +215,12 @@ def deliver_line(t: Transport, prof: P.Profile, session: str, handle: str, text:
         if not still_there:
             rc.stages["submitted"] = "ok"
             return done("submitted")
-        if rc.enters < 3 and time.time() > deadline - submit_timeout_s / 2:
-            # The C1 case: Enter arrived while the paste was still assembling.
+        if rc.enters < 3 and time.time() - last_enter >= prof.enter_retry_s:
+            # The C1 case: Enter arrived while the input was still being assembled
+            # (a paste, or grok's typing burst). Retries are SPACED - an earlier draft
+            # fired them on consecutive polls, which is no retry at all.
             t.send_key(handle, "Enter")
             rc.enters += 1
+            last_enter = time.time()
     rc.stages["submitted"] = "still in composer"
     return done("failed", "text still in the input box after submit")

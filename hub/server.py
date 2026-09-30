@@ -296,6 +296,9 @@ class Hub:
             w = await self.db(s.release, me, a["work_id"], a["outcome"], a.get("result"))
             await self._notify_work_owner(w, me)
             return w
+        if verb == "work_cancel":
+            self.need_operator(caller)
+            return {"cancelled": await self.db(s.cancel, a["work_id"], a.get("reason") or "cancelled by operator")}
         if verb == "work_show":
             return await self.db(s.work, a["work_id"])
         if verb == "work_list":
@@ -501,6 +504,12 @@ class Hub:
             try:
                 for ag in await self.db(self.store.agents, True):
                     sess = ag["session"]
+                    if not ag["handle"]:
+                        # Registered but still being spawned: the row exists before the
+                        # terminal does. Orchestration 5 lost a healthy claude to this -
+                        # declared dead 70 ms after register, while tmux was creating it.
+                        # spawn() itself marks it dead if the terminal never appears.
+                        continue
                     alive = await asyncio.get_running_loop().run_in_executor(self.io, self.tp.alive, sess)
                     if not alive:
                         await self.db(self.store.set_state, sess, "dead", "terminal gone")

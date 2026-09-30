@@ -1,0 +1,99 @@
+{
+  "run": "20260929-230742-swarm",
+  "scenario": "swarm",
+  "started": "2026-09-29T23:07:42-0500",
+  "agents": [
+    "calc-worker-codex_2307",
+    "calc-worker-claude_2307",
+    "calc-worker-grok_2307"
+  ],
+  "work": [
+    {
+      "id": "W-Z74PGNS4XN",
+      "parent_id": null,
+      "target": "role:calc/worker",
+      "title": "Add calc.clamp",
+      "state": "ready",
+      "claimed_by": null,
+      "attempts": 0,
+      "result": null
+    },
+    {
+      "id": "W-0C1NP74MED",
+      "parent_id": null,
+      "target": "role:calc/worker",
+      "title": "Add calc.product",
+      "state": "ready",
+      "claimed_by": null,
+      "attempts": 0,
+      "result": null
+    },
+    {
+      "id": "W-NPY04MYP1X",
+      "parent_id": null,
+      "target": "role:calc/worker",
+      "title": "Add calc.rng",
+      "state": "ready",
+      "claimed_by": null,
+      "attempts": 0,
+      "result": null
+    },
+    {
+      "id": "W-9RZ414R88E",
+      "parent_id": null,
+      "target": "role:calc/worker",
+      "title": "Add calc.mode",
+      "state": "ready",
+      "claimed_by": null,
+      "attempts": 0,
+      "result": null
+    }
+  ],
+  "errors": [
+    "agent calc-worker-claude_2307 dead: {\"from\":\"starting\",\"note\":\"terminal gone\"}",
+    "delivery 01M3R7YF6TBM7PD4KGDP222TYC>calc-worker-codex_2307 ended queued",
+    "delivery 01M3R7YHBE46MYJXDHNM3V3VVD>calc-worker-claude_2307 ended queued",
+    "delivery 01M3R7YKN0A8TM7YPN5JD1JQ17>calc-worker-grok_2307 ended queued"
+  ],
+  "timeline": [
+    "23:07:45 spawned calc-worker-codex_2307 (codex) %0",
+    "23:07:47 spawned calc-worker-claude_2307 (claude) %1",
+    "23:07:50 spawned calc-worker-grok_2307 (grok) %2",
+    "23:07:50 posted W-Z74PGNS4XN -> role:calc/worker: Add calc.clamp",
+    "23:07:50 posted W-0C1NP74MED -> role:calc/worker: Add calc.product",
+    "23:07:50 posted W-NPY04MYP1X -> role:calc/worker: Add calc.rng",
+    "23:07:50 posted W-9RZ414R88E -> role:calc/worker: Add calc.mode",
+    "23:07:50 W-Z74PGNS4XN ready by -",
+    "23:07:50 W-0C1NP74MED ready by -",
+    "23:07:50 W-NPY04MYP1X ready by -",
+    "23:07:50 W-9RZ414R88E ready by -",
+    "23:07:50 AGENT calc-worker-claude_2307 dead: terminal gone",
+    "23:07:50 an agent died; stopping early (the run is already not error-free)"
+  ],
+  "verify": "calc.clamp check failed: Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nImportError: cannot import name 'clamp' from 'calc' (/home/nick/hubdemo/calc/calc/__init__.py)\n | calc.product check failed: Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nImportError: cannot import name 'product' from 'calc' (/home/nick/hubdemo/calc/calc/__init__.py)\n | calc.rng check failed: Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nImportError: cannot import name 'rng' from 'calc' (/home/nick/hubdemo/calc/calc/__init__.py)\n | calc.mode check failed: Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nImportError: cannot import name 'mode' from 'calc' (/home/nick/hubdemo/calc/calc/__init__.py)\n",
+  "checks": {
+    "E1_all_top_done": false,
+    "E2_no_dead_delivery": true,
+    "E3_no_failed_bell": true,
+    "E4_no_blocked_or_died": false,
+    "E5_all_acked": false,
+    "E6_verified": false
+  },
+  "error_free": false,
+  "stats": {
+    "deliveries": 3,
+    "acked": 0,
+    "bells": {
+      "deferred": 2
+    },
+    "modal_answers": [],
+    "extra_enters": 0,
+    "work_items": 4,
+    "duration_s": 0
+  },
+  "pane_tails": {
+    "calc-worker-codex_2307": "\u28e4\u2840\n                                                                                          \u2880\u28fe\u28ff\u28ff\u283f\u280b\u2809\u2809\u2889\u28ed\u28ff\u28ff\u28ff\u28ff\u28ff\u283f\u28ff\u28ff\u28ff\u28ff\u28f7\u28c4\n                                                                                         \u28c0\u28fe\u28ff\u28ff\u2803 \u28c0\u28f4\u28fe\u28ff\u28ff\u287f\u281f\u280b \u28c0\u2840 \u2808\u2819\u28bf\u28ff\u28ff\u28e7\n                                                                                      \u28c0\u28f6\u28ff\u28ff\u28ff\u28ff\u2847 \u28b8\u28ff\u28ff\u287f\u281b\u2809\u2880\u28e0\u28f4\u28ff\u28ff\u28ff\u28f7\u28e6\u28c0\u2808\u28bb\u28ff\u28ff\u2847\n                                                                                     \u28f0\u28ff\u28ff\u287f\u28bf\u28ff\u28ff\u2847 \u28b8\u28ff\u28ff\u2880\u28e4\u28f6\u28ff\u28ff\u28ff\u281f\u281b\u283b\u28ff\u28ff\u28ff\u28ff\u28ee\u28ff\u28ff\u2877\n                                                                                    \u28b0\u28ff\u28ff\u285f\u2801\u28b8\u28ff\u28ff\u2847 \u28b8\u28ff\u28ff\u28ff\u28ff\u283f\u283f\u28ff\u28ff\u28ff\u28e6\u28c4\u2840\u2808\u281b\u283f\u28ff\u28ff\u28ff\u28e7\u2840\n                                                                                    \u28fe\u28ff\u28ff\u2803 \u28b8\u28ff\u28ff\u2847 \u28b8\u28ff\u28ff\u280b\u2801  \u2808\u2819\u28bb\u28ff\u28ff\u28ff\u28f6\u28e4\u2840 \u2839\u28bf\u28ff\u28f7\u2844\n                                                                                    \u28b8\u28ff\u28ff\u28c7 \u2838\u28ff\u28ff\u28f7\u28e6\u28fc\u28ff\u28ff      \u28b8\u28ff\u28ff\u283b\u28bf\u28ff\u28ff\u2847 \u2818\u28ff\u28ff\u28ff\n                                                                                    \u2808\u28bf\u28ff\u28ff\u28e6\u2840\u2808\u281b\u283f\u28ff\u28ff\u28ff\u28ff\u28c4\u2840  \u2880\u28e0\u28fc\u28ff\u28ff  \u28ff\u28ff\u2847  \u28ff\u28ff\u28ff\u2807\n                                                                                      \u28bb\u28ff\u28ff\u28ff\u28f7\u28e6\u28c0\u2808\u2819\u283b\u28ff\u28ff\u28ff\u28f6\u28f6\u28ff\u28ff\u28ff\u28ff\u28ff  \u28ff\u28ff\u2847 \u28e0\u28ff\u28ff\u28ff\n                                                                                      \u28b8\u28ff\u28ff\u287f\u28bf\u28ff\u28ff\u28ff\u28e6\u28e0\u28f4\u28ff\u28ff\u28ff\u287f\u281f\u280b\u28b8\u28ff\u28ff  \u28ff\u28ff\u28f7\u28f4\u28ff\u28ff\u28ff\u2803\n                                                                                      \u2818\u28ff\u28ff\u28f7 \u2808\u281b\u28bf\u28ff\u28ff\u28ff\u283f\u280b\u2809 \u28e0\u28f4\u28ff\u28ff\u28ff  \u28ff\u28ff\u28ff\u28ff\u28ff\u281f\u2801\n                                                                                       \u283b\u28ff\u28ff\u28ff\u28e4\u28c0 \u2808\u2809 \u2880\u28e4\u28f6\u28ff\u28ff\u28ff\u283f\u281f\u2801 \u28f0\u28ff\u28ff\u285f\u280b\u2801\n                                                                                        \u2808\u283f\u28ff\u28ff\u28ff\u28ff\u28f6\u28fe\u28ff\u28ff\u28ff\u28ff\u281f\u280b\u2801  \u28e0\u28fc\u28ff\u28ff\u285f\n                                                                                           \u2819\u281b\u281b\u281b\u283b\u281b\u28bf\u28ff\u28ff\u28ff\u28ff\u28f7\u28fe\u28ff\u28ff\u28ff\u287f\u280f\n                                                                                                  \u2808\u2819\u281b\u283f\u283f\u283f\u283f\u281b\u2809\n\u203a Ask Codex to do anything\n  GPT-6.1-Sol default \u00b7 ~/hubdemo/calc\n  ? for shortcuts                                                                                                                                                              \u26a0 1 warning \u00b7 f2 to view",
+    "calc-worker-claude_2307": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  WARNING: Claude Code running in Bypass Permissions mode\n  In Bypass Permissions mode, Claude Code will not ask for your approval before running potentially dangerous commands.\n  This mode should only be used in a sandboxed container/VM that has restricted internet access and can easily be restored if damaged.\n  By proceeding, you accept all responsibility for actions taken while running in Bypass Permissions mode.\n  https://code.claude.com/docs/en/security\n  \u276f No, exit\n    Yes, I accept\n  Enter to confirm \u00b7 Esc to cancel",
+    "calc-worker-grok_2307": ""
+  }
+}

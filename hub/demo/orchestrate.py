@@ -152,6 +152,11 @@ def main():
     keep = "--keep" in args
     tag = time.strftime("%H%M")
     sc = SCENARIOS[name](tag)
+    if os.environ.get("HUBDEMO_NO_CLAUDE") == "1":
+        # When the WSL claude login has expired (a person must run /login), keep
+        # running the protocol with claude's roles taken by codex.
+        sc["agents"] = [(r, ro, a.replace("claude", "codexb"), "codex" if c == "claude" else c)
+                        for r, ro, a, c in sc["agents"]]
     run_id = f"{time.strftime('%Y%m%d-%H%M%S')}-{name}"
     os.makedirs(RESULTS, exist_ok=True)
     report = {"run": run_id, "scenario": name, "started": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "agents": [],
@@ -263,6 +268,16 @@ def main():
     for s in sessions:
         rc, out = sh(["tmux", "-L", "agentmux", "capture-pane", "-p", "-J", "-t", s])
         report["pane_tails"][s] = "\n".join([l for l in out.splitlines() if l.strip()][-25:])
+    # A run that stops early must not leave its items claimable: runs 6 and 7 finished
+    # three items that run 5 abandoned. The protocol did its job - they were routed to
+    # live holders of the role - but that is cross-run contamination, not this run's work.
+    for t in tops:
+        if mine[t]["state"] not in ("done", "failed", "cancelled"):
+            try:
+                call("work_cancel", {"work_id": t, "reason": f"run {run_id} ended"})
+                note(f"cancelled unfinished {t}")
+            except Fail as e:
+                note(f"could not cancel {t}: {e}")
     if not keep:
         for s in sessions:
             try:

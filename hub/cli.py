@@ -27,7 +27,7 @@ USAGE = """usage: agentmux hub <verb> [args]
              post --to ADDR [--kind K] [--ref R] [--idem KEY] TEXT|-
              work add --to ADDR --title T [--body B | --body-file F] [--parent ID] [--priority N]
                       [--require CAP]... [--repo R] [--task-key K]
-             work show <id> | work list [--state S] [--repo R]
+             work show <id> | work list [--state S] [--repo R] | work cancel <id> [--reason R] (operator)
   operator   repo add <repo> <path>... [--title T] [--group G]... [--accept-normalized]
              team add <repo> <team> [--member SESSION]...
              spawn <repo> <role> <agent> [--cli codex|claude|grok|shell] [--model M] [--team T] [--cwd P]
@@ -238,6 +238,9 @@ def main(argv):
                 raise Fail("work add needs --to and --title")
             r = call("work_add", a, as_=as_)
             return out(r, f"created {r['result']['id']} -> {r['result']['target']}")
+        if sub == "cancel":
+            r = call("work_cancel", {"work_id": rest[0], "reason": opt(rest, "--reason")}, as_=as_)
+            return out(r, f"cancelled: {', '.join(r['result']['cancelled']) or 'nothing open'}")
         if sub == "show":
             r = call("work_show", {"work_id": rest[0]}, as_=as_)
             return out(r, show_work(r["result"]))

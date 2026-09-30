@@ -528,6 +528,15 @@ class Store:
             self.db.execute("DELETE FROM claims WHERE work_id=?", (work_id,))
         return self.q1("SELECT * FROM work_items WHERE id=?", (work_id,))
 
+    def cancel(self, work_id, reason):
+        """Operator-only: end an item (and its open children) that nobody should do."""
+        with self.tx():
+            rows = self.db.execute(
+                "UPDATE work_items SET state='cancelled', result=?, lease_until=NULL, updated=? WHERE (id=? OR parent_id=?) "
+                "AND state NOT IN ('done','failed','cancelled') RETURNING id", (reason, now(), work_id, work_id)).fetchall()
+            self.db.execute("DELETE FROM claims WHERE work_id=?", (work_id,))
+        return [r[0] for r in rows]
+
     def work(self, work_id=None, state=None, repo=None):
         if work_id:
             w = self.q1("SELECT * FROM work_items WHERE id=?", (work_id,))

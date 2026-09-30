@@ -93,3 +93,19 @@ assigns each intended delivery exactly one outcome:
 - `unknown`
 
 The results are written to `out/outcomes.jsonl` and `out/summary.md`.
+
+## Spot check and determinism
+
+| Script | What it does |
+|---|---|
+| `spotcheck.py` | Re-checks 20 random `received` rows (seed 20260930) and every `lost-silent` row against the RAW sources: the snapshot queue line or transcript argv, every CLI session file that holds receipts, and the recipient's pane log. It writes `out/spotcheck.raw.jsonl` and `spotcheck.judgments.json`, which `correlate.py` folds into `summary.md`. |
+| `spotcheck.pass1.judgments.json` and `out/spotcheck.pass1.sample.jsonl` | The first pass, kept so that `summary.md` can report the disagreement rate from before the containment rule was added. |
+| `determinism.sh` | Runs correlate, then spotcheck, then correlate, twice, and compares the sha1 of every output. |
+
+Run the scripts in WSL:
+
+```
+wsl.py run determinism.sh --cwd <this folder>
+```
+
+The findings document is `C:\theWork\git\findings\2026-09-30_agentmux_communication_failures.md`.
