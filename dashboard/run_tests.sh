@@ -14,8 +14,17 @@ set -u
 [ -f dashboard/server.py ] || { echo 'run this from the agentmux repo root' >&2; exit 2; }
 
 # HTTP writes occur in the SERVER process: a client-side home cannot isolate them.
-# Lease port 8787 for this suite, swap to an empty home, and restore without ever
-# passing --fresh-db. The EXIT handler is installed before the first restart.
+#
+# THE OPERATOR'S DASHBOARD IS NEVER TOUCHED (TM-223). This used to lease port 8787:
+# stop the live server, restart it on the throwaway home, run, restore. For the whole
+# run - twenty minutes - every board write from an operator or an agent went to the
+# throwaway home and failed with "not found: TM-213", and a run killed in the wrong
+# place left the live board pointed at a deleted directory. Now the suite starts its
+# OWN dashboard on a free port, points every suite at it with AGENTMUX_BASE_URL and
+# AGENTMUX_DASHBOARD, and kills it on exit. Whatever answers on 8787 is recorded at
+# start and checked at the end; if it changed, the gate fails.
+#
+# The lock stays: it is what stops two gate runs sharing tmux selftest agents.
 exec 200>"${TMPDIR:-/tmp}/agentmux-dashboard-tests-${UID}.lock"
 flock -n 200 || {
   # This used to say "another dashboard suite owns port 8787", which sent two
@@ -27,19 +36,13 @@ flock -n 200 || {
   echo "  a killed run can leave a detached tmux server or idle watchdog holding it" >&2
   exit 2
 }
-OPERATOR_ROOT="$(python3 dashboard/suite_server.py --fallback "${AGENTMUX_HOME:-$HOME/.agentmux}")" || exit 2
+LIVE_BEFORE="$(python3 dashboard/suite_server.py --pid --port 8787 2>/dev/null)"
+LIVE_HOME_BEFORE="$(python3 dashboard/suite_server.py --port 8787 --fallback /none 2>/dev/null)"
 TEST_ROOT="$(mktemp -d)" || exit 2
 SPAWNED=""
 HARNESS=""
 SUITE_PID=""
-RESTORE_NEEDED=0
-
-restart_for_home() {
-  # Cleanup ignores repeated interrupts, but the restored server must retain its
-  # normal signal handlers so the next restart can stop it.
-  AGENTMUX_HOME="$1" python3 -c 'import os, signal, sys; signal.signal(signal.SIGINT, signal.SIG_DFL); signal.signal(signal.SIGTERM, signal.SIG_DFL); os.execvp("bash", ["bash", sys.argv[1]])' \
-    <(tr -d '\r' < dashboard/restart.sh) 200>&-
-}
+TEST_SERVER_PID=""
 
 cleanup() {
   local status=$? restore_status=0
@@ -60,15 +63,24 @@ cleanup() {
     bash "$HARNESS" kill "$agent" >/dev/null 2>&1
   done
   [ -n "$HARNESS" ] && rm -f "$HARNESS"
-  if [ "$RESTORE_NEEDED" = 1 ]; then
-    restart_for_home "$OPERATOR_ROOT" >/dev/null &&
-      python3 dashboard/suite_server.py --expect "$OPERATOR_ROOT"
-    restore_status=$?
+  if [ -n "$TEST_SERVER_PID" ]; then
+    kill -TERM -- "-$TEST_SERVER_PID" 2>/dev/null || kill -TERM "$TEST_SERVER_PID" 2>/dev/null || true
+    for _ in {1..30}; do kill -0 "$TEST_SERVER_PID" 2>/dev/null || break; sleep 0.1; done
+    kill -KILL -- "-$TEST_SERVER_PID" 2>/dev/null || true
   fi
-  if [ "$restore_status" != 0 ]; then
-    echo "  FAIL  could not restore dashboard home $OPERATOR_ROOT; retained test home $TEST_ROOT for recovery" >&2
+  # The point of the whole arrangement: the operator's dashboard is exactly as it was.
+  local live_after live_home_after
+  live_after="$(python3 dashboard/suite_server.py --pid --port 8787 2>/dev/null)"
+  live_home_after="$(python3 dashboard/suite_server.py --port 8787 --fallback /none 2>/dev/null)"
+  if [ "$live_after" != "$LIVE_BEFORE" ] || [ "$live_home_after" != "$LIVE_HOME_BEFORE" ]; then
+    echo "  FAIL  the operator dashboard on 8787 changed during the run" >&2
+    echo "        before: pid '${LIVE_BEFORE}' home '${LIVE_HOME_BEFORE}'" >&2
+    echo "        after:  pid '${live_after}' home '${live_home_after}'" >&2
     status=1
   else
+    echo "operator dashboard on 8787 untouched (pid ${LIVE_BEFORE:-none}, home ${LIVE_HOME_BEFORE:-none})"
+  fi
+  if [ "$restore_status" = 0 ]; then
     rm -rf "$TEST_ROOT"
   fi
   exit "$status"
@@ -81,9 +93,21 @@ export AGENTMUX_HOME="$TEST_ROOT"
 export AGENTMUX_NO_COURIER=1
 # Suites simulate several identities; an invoking worker is not their identity.
 unset AGENTMUX_AGENT
-RESTORE_NEEDED=1
-restart_for_home "$TEST_ROOT" >/dev/null || exit 1
-python3 dashboard/suite_server.py --expect "$TEST_ROOT" || exit 1
+
+# The suite's own dashboard, on a port nobody else is using.
+TEST_PORT="$(python3 -c 'import socket; s = socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1]); s.close()')" || exit 2
+python3 -c 'import os, signal, sys; os.setsid(); signal.signal(signal.SIGINT, signal.SIG_DFL); signal.signal(signal.SIGTERM, signal.SIG_DFL); os.execvp(sys.argv[1], sys.argv[1:])' \
+  python3 dashboard/server.py --port "$TEST_PORT" > "$TEST_ROOT/server.log" 2>&1 200>&- &
+TEST_SERVER_PID=$!
+export AGENTMUX_BASE_URL="http://127.0.0.1:$TEST_PORT"
+export AGENTMUX_DASHBOARD="$AGENTMUX_BASE_URL"
+for _ in {1..100}; do
+  curl -s -o /dev/null "$AGENTMUX_BASE_URL/" && break
+  kill -0 "$TEST_SERVER_PID" 2>/dev/null || { echo "test dashboard died:" >&2; cat "$TEST_ROOT/server.log" >&2; exit 1; }
+  sleep 0.1
+done
+python3 dashboard/suite_server.py --port "$TEST_PORT" --expect "$TEST_ROOT" || exit 1
+echo "(test dashboard on $AGENTMUX_BASE_URL, home $TEST_ROOT; 8787 is not touched)"
 
 
 # Agents, if there are none.

@@ -10,6 +10,7 @@ enough of the protocol to prove the client's framing is correct.
 """
 
 import json
+import os
 import socket
 import struct
 import subprocess
@@ -29,7 +30,9 @@ _spec = importlib.util.spec_from_file_location(
 bootp_probe = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(bootp_probe)
 
-BASE = "http://127.0.0.1:8787"
+# The gate runs a private dashboard and exports its URL (run_tests.sh, TM-223);
+# run by hand, this still talks to the operator's dashboard on 8787.
+BASE = os.environ.get("AGENTMUX_BASE_URL", "http://127.0.0.1:8787")
 passed = failed = 0
 
 

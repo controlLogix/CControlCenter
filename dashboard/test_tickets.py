@@ -23,7 +23,10 @@ import urllib.request
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-BASE = "http://127.0.0.1:8787"
+import os  # noqa: E402
+# The gate runs a private dashboard and exports its URL (run_tests.sh, TM-223);
+# run by hand, this still talks to the operator's dashboard on 8787.
+BASE = os.environ.get("AGENTMUX_BASE_URL", "http://127.0.0.1:8787")
 passed = failed = 0
 
 

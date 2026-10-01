@@ -38,7 +38,9 @@ import urllib.request
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-BASE = "http://127.0.0.1:8787"
+# The gate runs a private dashboard and exports its URL (run_tests.sh, TM-223);
+# run by hand, this still talks to the operator's dashboard on 8787.
+BASE = os.environ.get("AGENTMUX_BASE_URL", "http://127.0.0.1:8787")
 FAKE_TOKEN = "FAKE-NOT-A-REAL-KEY-do-not-use-0000"
 GATEWAY = "http://127.0.0.1:4000/v1"
 CODEX_MODEL = "example-model-v1"

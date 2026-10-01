@@ -9,7 +9,8 @@
 # sent writes to /dev/null and reported them as passing while the server was in
 # fact rejecting them - a test that cannot fail is worse than no test.
 set -u
-BASE="http://127.0.0.1:8787"
+# The gate exports its private dashboard's URL (TM-223); by hand this is 8787.
+BASE="${AGENTMUX_BASE_URL:-http://127.0.0.1:8787}"
 # shellcheck source=/dev/null
 . dashboard/testlib.sh          # ok/bad/check/check_rc/rc_is/count_msgs, one copy
 
@@ -127,8 +128,8 @@ done
 
 echo '--- themes.json shape ---'
 if python3 - <<'PY'
-import json, sys, urllib.request
-d = json.load(urllib.request.urlopen('http://127.0.0.1:8787/themes.json'))
+import json, os, sys, urllib.request
+d = json.load(urllib.request.urlopen(os.environ.get('AGENTMUX_BASE_URL', 'http://127.0.0.1:8787') + '/themes.json'))
 tok = set(d['tokens'])
 bad = [t['id'] for t in d['themes'] if tok - set(t['tokens'])]
 print(f"        {len(d['themes'])} themes, default={d['default']}: "

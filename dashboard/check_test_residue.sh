@@ -13,7 +13,7 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 if [ "${#roots[@]}" -eq 0 ]; then
-  server_root="$(python3 dashboard/suite_server.py --fallback "${AGENTMUX_HOME:-$HOME/.agentmux}")" || exit 2
+  server_root="$(python3 dashboard/suite_server.py --port 8787 --fallback "${AGENTMUX_HOME:-$HOME/.agentmux}")" || exit 2
   roots=(--root "$server_root" --root "${AGENTMUX_HOME:-$HOME/.agentmux}" --root "$HOME/.agentmux"
          --codex "${CODEX_HOME:-$HOME/.codex}" --codex "$HOME/.codex")
 fi

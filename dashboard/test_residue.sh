@@ -64,45 +64,60 @@ try:
     check('a failed suite cannot pass a clean residue gate', failed.returncode != 0
           and 'SUITE FAILED: exit 7' in failed.stdout, f'(rc={failed.returncode})')
 
-    for mode in ('normal', 'suite-failure', 'INT', 'TERM', 'start-failure', 'restore-failure', 'different-caller-home', 'wrong-server-home'):
+    # THE GATE NEVER TOUCHES THE OPERATOR'S DASHBOARD (TM-223). It used to restart the
+    # 8787 server onto a throwaway home and restore it afterwards, and these cases
+    # pinned that dance. They now pin its replacement, under the same failures: the
+    # operator's server is never restarted; the gate starts its OWN server (with
+    # --port, on the test home) and kills it on every exit path; the test home is
+    # removed; the operator's database is untouched; and a run whose 8787 listener
+    # changed underneath it fails loudly instead of passing.
+    for mode in ('normal', 'suite-failure', 'INT', 'TERM', 'start-failure', 'different-caller-home', 'operator-changed'):
         fixture = work / ('runner-' + mode)
         fixture.mkdir()
         live = fixture / 'operator'
         live.mkdir()
         put(live / 'cc.db', 'operator database\n')
         copy('dashboard/run_tests.sh', fixture)
-        # Model discovery/verification without inspecting or restarting any server.
-        put(fixture / 'dashboard/suite_server.py', "import os, sys\nif '--expect' not in sys.argv: print(os.environ['ORIGINAL_SERVER_HOME'])\nelif os.environ['CASE_MODE'] == 'wrong-server-home' and sys.argv[-1] != os.environ['ORIGINAL_SERVER_HOME']: sys.exit(1)\n")
+        # Discovery stubs: the 8787 listener's pid and home, as run_tests.sh asks for
+        # them at start and again at exit. 'operator-changed' answers differently the
+        # second time - a live server that was swapped during the run.
+        put(fixture / 'dashboard/suite_server.py', '''import os, pathlib, sys
+root = pathlib.Path(os.environ['FIXTURE'])
+calls = root / 'pid-calls'
+if '--pid' in sys.argv:
+    n = len(calls.read_text().splitlines()) if calls.exists() else 0
+    with calls.open('a') as f:
+        f.write('x\\n')
+    print('4242' if (n == 0 or os.environ['CASE_MODE'] != 'operator-changed') else '9999')
+elif '--expect' in sys.argv:
+    sys.exit(0)
+else:
+    print(os.environ['ORIGINAL_SERVER_HOME'])
+''')
         put(fixture / 'agentmux.sh', '# fixture\n')
-        put(fixture / 'dashboard/server.py', '# existence only; never started\n')
-        # All external effects terminate at these fixture-owned stubs.
+        # The gate's private server. Records how it was started, then lives until killed
+        # - unless this is the case where it cannot start at all.
+        put(fixture / 'dashboard/server.py', '''import json, os, pathlib, sys, time
+root = pathlib.Path(os.environ['FIXTURE'])
+with (root / 'servers').open('a') as f:
+    f.write(json.dumps({'home': os.environ.get('AGENTMUX_HOME'), 'args': sys.argv[1:], 'pid': os.getpid()}) + '\\n')
+if os.environ['CASE_MODE'] == 'start-failure':
+    print('OSError: [Errno 98] Address already in use', file=sys.stderr)
+    sys.exit(1)
+time.sleep(60)
+''')
+        # Any call to restart.sh is a failure of the contract: it is how the old gate
+        # took the operator's server away.
+        put(fixture / 'dashboard/restart.sh', 'echo called >> "$FIXTURE/restarts"\n')
         put(fixture / 'bin/flock', '#!/bin/sh\nexit 0\n', True)
         put(fixture / 'bin/tmux', '#!/bin/sh\ncase "$*" in *list-sessions*) echo fixture-agent;; esac\n', True)
-        put(fixture / 'dashboard/restart.sh', '''python3 - "$@" <<'RESTART'
-import json, os, pathlib, sys
-root = pathlib.Path(os.environ['FIXTURE'])
-log = root / 'restarts'
-rows = log.read_text().splitlines() if log.exists() else []
-ready = root / 'ready'
-writer_running = False
-if ready.exists():
-    state = pathlib.Path('/proc') / ready.read_text() / 'stat'
-    try:
-        writer_running = state.read_text().split(') ', 1)[1].split()[0] != 'Z'
-    except FileNotFoundError:
-        pass
-with log.open('a') as handle:
-    handle.write(json.dumps({'home': os.environ.get('AGENTMUX_HOME'), 'args': sys.argv[1:], 'writer_running': writer_running}) + '\\n')
-mode = os.environ['CASE_MODE']
-if (mode == 'start-failure' and not rows) or (mode == 'restore-failure' and rows):
-    sys.exit(1)
-RESTART
-''')
+        put(fixture / 'bin/curl', '#!/bin/sh\n[ "$CASE_MODE" = start-failure ] && exit 7\nexit 0\n', True)
         subject = '''import os, pathlib, time
 root = pathlib.Path(os.environ['FIXTURE'])
 mode = os.environ['CASE_MODE']
 if os.environ.get('FIRST_SUITE') == '1':
     (root / 'ready').write_text(str(os.getpid()))
+    (root / 'suite-env').write_text(os.environ.get('AGENTMUX_BASE_URL', '') + '\\n' + os.environ.get('AGENTMUX_DASHBOARD', ''))
     if mode in ('INT', 'TERM'):
         time.sleep(5)
     if mode == 'suite-failure':
@@ -119,8 +134,11 @@ print('passed 1, failed 0')
             put(fixture / 'dashboard' / source.name, subject)
         for name in ('smoke.sh', 'check_test_failability.sh'):
             put(fixture / 'dashboard' / name, 'python3 subject.py\n')
-        env = dict(os.environ, AGENTMUX_HOME=str(fixture / 'caller-home') if mode == 'different-caller-home' else str(live), ORIGINAL_SERVER_HOME=str(live), FIXTURE=str(fixture), CASE_MODE=mode,
+        env = dict(os.environ, AGENTMUX_HOME=str(fixture / 'caller-home') if mode == 'different-caller-home' else str(live),
+                   ORIGINAL_SERVER_HOME=str(live), FIXTURE=str(fixture), CASE_MODE=mode,
                    TMPDIR=str(fixture), PATH=str(fixture / 'bin') + os.pathsep + os.environ['PATH'])
+        env.pop('AGENTMUX_BASE_URL', None)
+        env.pop('AGENTMUX_DASHBOARD', None)
         proc = subprocess.Popen(['bash', 'dashboard/run_tests.sh'], cwd=fixture, env=env,
                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, start_new_session=True,
                                 preexec_fn=lambda: signal.signal(signal.SIGINT, signal.SIG_DFL))
@@ -135,15 +153,29 @@ print('passed 1, failed 0')
         except subprocess.TimeoutExpired:
             os.killpg(proc.pid, signal.SIGKILL)
             output, _ = proc.communicate()
-        rows = [json.loads(line) for line in (fixture / 'restarts').read_text().splitlines()]
+        servers = [json.loads(l) for l in (fixture / 'servers').read_text().splitlines()] if (fixture / 'servers').exists() else []
         rc = {'normal': 0, 'different-caller-home': 0, 'INT': 130, 'TERM': 143}.get(mode, 1)
-        isolated = bool(rows) and rows[0]['home'] != str(live)
-        restored = len(rows) == 2 and rows[-1]['home'] == str(live) and not rows[-1]['writer_running']
-        safe = all(not row['args'] for row in rows) and (live / 'cc.db').read_bytes() == b'operator database\n'
-        cleanup = isolated and (Path(rows[0]['home']).exists() if mode == 'restore-failure' else not Path(rows[0]['home']).exists())
-        check('runner isolates and restores on ' + mode,
-              proc.returncode == rc and isolated and restored and safe and cleanup,
-              f'(rc={proc.returncode}, restarts={len(rows)}, isolated={isolated}, cleanup={cleanup})')
+        never_restarted = not (fixture / 'restarts').exists()
+        one_private = len(servers) == 1 and '--port' in servers[0]['args'] and servers[0]['home'] not in (str(live), str(fixture / 'caller-home'))
+        def gone(pid):
+            state = Path('/proc') / str(pid) / 'stat'
+            try:
+                return state.read_text().split(') ', 1)[1].split()[0] == 'Z'
+            except FileNotFoundError:
+                return True
+        time.sleep(0.2)
+        killed = one_private and gone(servers[0]['pid'])
+        cleaned = one_private and not Path(servers[0]['home']).exists()
+        safe = (live / 'cc.db').read_bytes() == b'operator database\n' and not (fixture / 'caller-home').exists()
+        pointed = True
+        if mode == 'normal':
+            urls = (fixture / 'suite-env').read_text().splitlines() if (fixture / 'suite-env').exists() else []
+            pointed = len(urls) == 2 and urls[0] == urls[1] and urls[0].startswith('http://127.0.0.1:') and not urls[0].endswith(':8787')
+        reported = ('changed during the run' in output) if mode == 'operator-changed' else ('untouched' in output or mode == 'start-failure')
+        check('gate leaves the operator dashboard alone on ' + mode,
+              proc.returncode == rc and never_restarted and one_private and killed and cleaned and safe and pointed and reported,
+              f'(rc={proc.returncode}, restarted={not never_restarted}, servers={len(servers)}, killed={killed}, '
+              f'cleaned={cleaned}, safe={safe}, pointed={pointed}, reported={reported})')
     # Exercise the actual restart launch in a safe process fixture. Only the log
     # destination and external discovery/readiness commands are redirected; no port
     # is bound and pgrep can never return an operator PID.

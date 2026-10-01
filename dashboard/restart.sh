@@ -79,9 +79,9 @@ fi
 # the port, every write in that suite lands on the operator's real board while the
 # run believes it is isolated. run_tests.sh already re-checks this after each of
 # its own restarts - the verification belongs here, where the restart is.
-if ! python3 dashboard/suite_server.py --expect "$ROOT" 2>/dev/null; then
+if ! python3 dashboard/suite_server.py --port 8787 --expect "$ROOT" 2>/dev/null; then
   echo "FAILED: 8787 answers, but not from a dashboard serving $ROOT" >&2
-  serving=$(python3 dashboard/suite_server.py --fallback '' 2>/dev/null)
+  serving=$(python3 dashboard/suite_server.py --port 8787 --fallback '' 2>/dev/null)
   [ -n "$serving" ] && echo "  it is serving: $serving" >&2
   tail -5 /tmp/ccc-server.log >&2
   exit 1

@@ -544,7 +544,12 @@ def served_home():
     try:
         sys.path.insert(0, str(REPO / "dashboard"))
         import suite_server           # noqa: PLC0415 - lazy, and optional
-        return suite_server.server_home()
+        from urllib.parse import urlsplit  # noqa: PLC0415
+        # The server at the URL this process would POST to - not "any dashboard".
+        # The gate now runs a private one beside the operator's (TM-223), and an
+        # unscoped scan would see two homes, raise, and fail open: the guard off.
+        port = urlsplit(coordination.DASHBOARD).port or 80
+        return suite_server.server_home(port)
     except Exception:                 # noqa: BLE001 - see FAIL OPEN in foreign_board
         return None
 
