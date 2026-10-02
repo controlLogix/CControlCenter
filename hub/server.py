@@ -307,7 +307,8 @@ class Hub:
         if verb == "status":
             return await self.db(s.status)
         if verb == "events":
-            return await self.db(s.events, int(a.get("since", 0)), int(a.get("limit", 200)), a.get("entity"))
+            return await self.db(s.events, int(a.get("since", 0)), int(a.get("limit", 200)), a.get("entity"),
+                                 bool(a.get("tail")))
         if verb == "repo_add":
             self.need_operator(caller)
             repo = names.check_part(a["repo"], "repo", a.get("accept_normalized", False))

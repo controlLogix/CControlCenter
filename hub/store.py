@@ -752,10 +752,15 @@ class Store:
             "teams": self.q("SELECT repo, team, lead_role FROM teams ORDER BY repo, team"),
         }
 
-    def events(self, since=0, limit=200, entity=None):
+    def events(self, since=0, limit=200, entity=None, tail=False):
+        # tail=True: the NEWEST `limit` rows after `since`, still oldest-first. Forward
+        # paging from since=0 returns the oldest rows, which once the table outgrows
+        # one page is never what a person asking "what just happened" wants.
         sql, args = "SELECT * FROM events WHERE seq > ?", [since]
         if entity:
             sql += " AND entity=?"; args.append(entity)
+        if tail:
+            return self.q(f"SELECT * FROM ({sql} ORDER BY seq DESC LIMIT ?) ORDER BY seq", args + [limit])
         return self.q(sql + " ORDER BY seq LIMIT ?", args + [limit])
 
 

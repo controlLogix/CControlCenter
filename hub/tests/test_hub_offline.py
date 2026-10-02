@@ -144,6 +144,19 @@ class Messaging(unittest.TestCase):
         self.assertEqual(len(dead), 1)
         self.assertEqual(self.s.status()["deliveries"].get("dead"), 1)
 
+    def test_events_tail_returns_newest_oldest_first(self):
+        # The 2026-10-02 smoke failure: forward paging from 0 returned the oldest rows,
+        # so a fresh ack past the first page was invisible to `hub events`.
+        for i in range(30):
+            self.s.post("virtual:operator", f"agent:{self.w1}", "note", f"m{i}")
+        seqs = [e["seq"] for e in self.s.events(since=0, limit=1000)]
+        head = [e["seq"] for e in self.s.events(limit=5)]
+        tail = [e["seq"] for e in self.s.events(limit=5, tail=True)]
+        self.assertEqual(head, seqs[:5])
+        self.assertEqual(tail, seqs[-5:])
+        since = [e["seq"] for e in self.s.events(since=seqs[-8], limit=5, tail=True)]
+        self.assertEqual(since, seqs[-5:])
+
     def test_fts_and_audit(self):
         self.s.post("virtual:operator", f"agent:{self.w1}", "note", "the quick brown fox")
         hits = self.s.q("SELECT rowid FROM messages_fts WHERE messages_fts MATCH 'brown'")

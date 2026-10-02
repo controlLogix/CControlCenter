@@ -356,7 +356,10 @@ def main(argv):
         return out(r, "\n".join(f"{a['session']:<40} {a['cli']:<7} {a['state']:<8} {a['handle'] or '-':<5} "
                                 f"out={a['last_output'] or '-'}" for a in r["result"]) or "no agents")
     if verb == "events":
-        r = call("events", {"since": int(opt(rest, "--since", 0)), "entity": opt(rest, "--entity"),
+        # Without --since, show the newest events: the oldest 200 are never what
+        # `hub events | tail` is asked for once the table outgrows one page.
+        since = opt(rest, "--since")
+        r = call("events", {"since": int(since or 0), "entity": opt(rest, "--entity"), "tail": since is None,
                             "limit": int(opt(rest, "--limit", 200))}, as_=as_)
         return out(r, "\n".join(f"{e['seq']:>5} {e['at']} {e['entity']:<8} {e['entity_id'][:48]:<48} {e['event']:<12} "
                                 f"{e['actor'] or ''} {(e['detail'] or '')[:120]}" for e in r["result"]))
