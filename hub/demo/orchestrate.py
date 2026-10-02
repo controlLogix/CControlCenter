@@ -144,6 +144,32 @@ def _verify_all(*results):
     return ok, " | ".join(r[1] for r in results)
 
 
+DRAIN_S = 120
+
+
+def _drain(ev0, sessions, note, limit_s=DRAIN_S):
+    """Give mail still in flight to a live agent time to land before the run is scored
+    and its agents killed. The hub rightly never rings a busy pane, so a note posted
+    while the recipient is mid-item waits for it to go idle - and the last item's
+    'done' used to end the run a second later (20261002-095926-swarm: a peer's heads-up
+    to grok, deferred busy 10 times, killed while queued, scored as an E5 miss)."""
+    pending = set()
+    end = time.time() + limit_s
+    while time.time() < end:
+        final = {}
+        for e in call("events", {"since": ev0, "limit": 100000, "entity": "delivery"})["result"]:
+            if any(e["entity_id"].endswith(">" + s) for s in sessions):
+                final[e["entity_id"]] = e["event"]
+        live = {a["session"] for a in call("status")["result"]["agents"]
+                if a["session"] in sessions and a["state"] != "dead"}
+        pending = {d for d, ev in final.items() if ev not in ("acked", "dead") and d.split(">", 1)[1] in live}
+        if not pending:
+            return
+        note(f"draining: {len(pending)} deliveries still in flight")
+        time.sleep(5)
+    note(f"drain timed out after {limit_s}s with {len(pending)} in flight")
+
+
 # -- run ----------------------------------------------------------------------------------
 def main():
     args = sys.argv[1:]
@@ -211,6 +237,7 @@ def main():
                     last[key] = True
                     note(f"AGENT {a['session']} {a['state']}: {a['state_note']}")
         if all(s in ("done", "failed", "cancelled") for s in states.values()):
+            _drain(ev0, sessions, note)
             break
         if any(a["session"] in sessions and a["state"] == "dead" for a in st["agents"]):
             note("an agent died; stopping early (the run is already not error-free)")
