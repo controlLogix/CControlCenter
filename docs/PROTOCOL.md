@@ -3,7 +3,7 @@
 Status: **implemented for one machine**, in `hub/` (`store.py`, `server.py`, `cli.py`,
 `names.py`), and exercised by `hub/tests` and by live orchestrations
 (`evals/orchestrations/SCOREBOARD.md`). Requirement IDs (`R-*`) link to failure classes in
-`C:\theWork\git\findings\2026-09-30_agentmux_communication_failures.md`.
+`C:\Dev\findings\2026-09-30_agentmux_communication_failures.md`.
 
 **Built:**
 - naming and the normalizer

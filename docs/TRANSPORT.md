@@ -8,7 +8,7 @@ Naming, storage, routing and acknowledgment are in [`PROTOCOL.md`](PROTOCOL.md).
 ## 1. Why this layer exists
 
 Every failure class in
-`C:\theWork\git\findings\2026-09-30_agentmux_communication_failures.md` that happened at
+`C:\Dev\findings\2026-09-30_agentmux_communication_failures.md` that happened at
 the terminal falls into one of two shapes:
 - **a keystroke sent without reading the screen first:** Enter into a modal (C2), text
   into a booting TUI (C5), keys into copy-mode (C7)

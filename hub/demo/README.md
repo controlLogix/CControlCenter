@@ -3,7 +3,7 @@
 This folder runs real multi-agent orchestrations (claude, codex and grok together) on
 the messaging hub, and scores each run. Design: [`docs/PROTOCOL.md`](../../docs/PROTOCOL.md)
 and [`docs/TRANSPORT.md`](../../docs/TRANSPORT.md). Why it exists:
-`C:\theWork\git\findings\2026-09-30_agentmux_communication_failures.md`.
+`C:\Dev\findings\2026-09-30_agentmux_communication_failures.md`.
 
 All commands run inside WSL, from `/mnt/c/Dev/agentmux`.
 
