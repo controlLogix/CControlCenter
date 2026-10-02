@@ -1,0 +1,25 @@
+# systemd USER unit: bring the CCC dashboard up on 127.0.0.1:8787 whenever WSL boots.
+#
+# Why: a WSL restart wipes /tmp and every process, and nothing brought the dashboard
+# back - 8787 simply stopped answering (2026-10-02). It runs restart.sh rather than
+# server.py so there is still exactly one way the server is started; restart.sh kills
+# any previous copy, launches it detached and refuses to report "up" unless 8787 is
+# answering from a dashboard serving this home.
+#
+# Install (inside WSL, from the repo root):
+#   mkdir -p ~/.config/systemd/user
+#   cp dashboard/ccc-dashboard.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now ccc-dashboard
+#   loginctl enable-linger "$USER"     # start at boot, not at first login
+[Unit]
+Description=agentmux CCC dashboard (127.0.0.1:8787)
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/mnt/c/Dev/agentmux
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/bin/bash -c 'tr -d "\r" < dashboard/restart.sh | bash'
+
+[Install]
+WantedBy=default.target

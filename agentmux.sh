@@ -827,6 +827,16 @@ cmd_spawn() (
   # so it cannot fill in the sender field and `agentmux post` has nothing to
   # attribute. Validated against the pattern above, so the quoting holds.
   env_prefix="$env_prefix export AGENTMUX_AGENT='${name}';"
+  # The pane runs under the shared tmux server, whose environment is whatever the
+  # FIRST spawn had - not this caller's. Without this, an agent spawned under a
+  # private AGENTMUX_HOME runs `agentmux hub inbox --ack` against the default hub
+  # and acks there instead (2026-10-02). Only exported when set, so a default spawn
+  # is unchanged.
+  if [ -n "${AGENTMUX_HOME:-}" ]; then
+    local quoted_home
+    printf -v quoted_home '%q' "$AGENTMUX_HOME"
+    env_prefix="$env_prefix export AGENTMUX_HOME=$quoted_home;"
+  fi
 
   # Private env for spawned panes - API keys for custom providers (e.g.
   # XAI_API_KEY for the codex "grok" profile) go in $ROOT/env, mode 0600, on the
