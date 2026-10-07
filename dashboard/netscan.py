@@ -208,11 +208,20 @@ def running_under_wsl():
         return False
 
 
+# macOS `arp -a` drops leading zeros from each octet ("0:1c:42:f2:8b:40"), which
+# MAC_RE would not match. Pad single-digit octets back out before matching.
+_SHORT_OCTET = re.compile(r"(?<![0-9a-f:])((?:[0-9a-f]{1,2}:){5}[0-9a-f]{1,2})(?![0-9a-f:])", re.I)
+
+
+def _pad_mac(match):
+    return ":".join(octet.zfill(2) for octet in match.group(1).split(":"))
+
+
 def _parse_arp(text):
     table = {}
     for line in text.splitlines():
         addresses = re.findall(r"\b\d{1,3}(?:\.\d{1,3}){3}\b", line)
-        mac = MAC_RE.search(line.replace("-", ":"))
+        mac = MAC_RE.search(_SHORT_OCTET.sub(_pad_mac, line.replace("-", ":")))
         if addresses and mac:
             candidate = mac.group(0).lower()
             # Broadcast and multicast rows are not devices.

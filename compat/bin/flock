@@ -1,0 +1,44 @@
+#!/usr/bin/python3
+# Not env: the real tool is a binary, so a stub python3 first on PATH (as test
+# fixtures install) must not run in place of the shim. CLT, which Homebrew needs,
+# provides this one.
+"""flock(1) for macOS, which has no util-linux. Fd form only: flock [-x|-s|-u] [-n] [-w SECS] FD
+
+The lock outlives this process because flock(2) locks belong to the open file
+description, which the calling shell shares with us and keeps open."""
+import fcntl
+import sys
+import time
+
+op, nb, wait, fd = fcntl.LOCK_EX, False, None, None
+args = sys.argv[1:]
+while args:
+    a = args.pop(0)
+    if a in ("-x", "-e", "--exclusive"):
+        op = fcntl.LOCK_EX
+    elif a in ("-s", "--shared"):
+        op = fcntl.LOCK_SH
+    elif a in ("-u", "--unlock"):
+        op = fcntl.LOCK_UN
+    elif a in ("-n", "--nonblock"):
+        nb = True
+    elif a in ("-w", "--timeout"):
+        wait = float(args.pop(0))
+    elif a.isdecimal():
+        fd = int(a)
+    else:
+        sys.exit(f"flock shim: only the fd form is supported (got {a!r})")
+if fd is None:
+    sys.exit("flock shim: no file descriptor given")
+if op == fcntl.LOCK_UN or not (nb or wait is not None):
+    fcntl.flock(fd, op)
+    sys.exit(0)
+deadline = time.monotonic() + (wait or 0)
+while True:
+    try:
+        fcntl.flock(fd, op | fcntl.LOCK_NB)
+        sys.exit(0)
+    except BlockingIOError:
+        if time.monotonic() >= deadline:
+            sys.exit(1)
+        time.sleep(0.05)

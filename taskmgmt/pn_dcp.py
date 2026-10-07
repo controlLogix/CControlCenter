@@ -168,6 +168,8 @@ class Client:
         if not math.isfinite(timeout) or timeout <= 0 or timeout > 60:
             raise ValueError('timeout must be > 0 and <= 60 seconds')
         self.timeout, self.iface = timeout, iface
+        if not hasattr(socket, 'AF_PACKET'):
+            raise DCPError('raw Ethernet (AF_PACKET) is Linux-only; PROFINET DCP is unavailable on this OS')
         self.sock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(ETHERTYPE))
         try:
             self.sock.bind((iface, 0))

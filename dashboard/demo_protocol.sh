@@ -55,7 +55,7 @@ check_rc 'an agent CANNOT open a run' 2 "$?"
 
 AGENTMUX_AGENT="$WORKER" $RUN assign "$R" --worker "$WORKER" --reviewer "$REVIEWER" >/dev/null 2>&1
 check_rc 'an agent CANNOT assign' 2 "$?"
-check 'and no job id was allocated by the refusal' 0 "$(ls "$AGENTMUX_HOME/runs/$R/jobs" 2>/dev/null | wc -l)"
+check 'and no job id was allocated by the refusal' 0 "$(ls "$AGENTMUX_HOME/runs/$R/jobs" 2>/dev/null | wc -l | tr -d " ")"
 
 J=$($RUN assign "$R" --worker "$WORKER" --reviewer "$REVIEWER" --brief 'demo' 2>/dev/null)
 check 'orchestrator assigns' "$R/1" "$J"

@@ -25,6 +25,7 @@ import re
 import stat
 import struct
 import subprocess
+import suite_server
 import sys
 import threading
 import time
@@ -2625,6 +2626,8 @@ def main():
             # is looking at it cannot tell you what happened while nobody was.
             modbus_service()
             mqtt_service()
+            # Tells suite_server.py which home this pid serves on hosts without /proc.
+            suite_server.declare_home(HOME_DIR)
             print(f"agentmux dashboard: http://127.0.0.1:{server.server_address[1]}",
                   flush=True)
             server.serve_forever()

@@ -49,7 +49,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 am() { bash "$HARNESS" "$@"; }
-sidecars() { ls "$RUNDIR/$1".* 2>/dev/null | wc -l; }
+sidecars() { ls "$RUNDIR/$1".* 2>/dev/null | wc -l | tr -d " "; }   # BSD wc pads
 make_sidecars() {
   printf 'shell\n' > "$RUNDIR/$1.cli"
   printf '/tmp\n'  > "$RUNDIR/$1.cwd"

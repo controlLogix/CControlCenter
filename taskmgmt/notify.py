@@ -54,7 +54,7 @@ COMMAND_TIMEOUT_S = 20
 TOAST_TIMEOUT_S = 25
 
 # Where the desktop lives, when there is one. WSL reaches the Windows toast API through
-# interop; on a headless plant box there is no powershell.exe and toast() says so
+# interop; macOS uses osascript (macos_toast below); on a headless plant box there is no powershell.exe and toast() says so
 # instead of pretending.
 POWERSHELL = "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"
 
@@ -112,6 +112,8 @@ def toast(subject, body, urgency="info"):
     """
     shell = powershell_path()
     if not shell:
+        if sys.platform == "darwin" and os.environ.get("AGENTMUX_NO_TOAST") != "1":
+            return macos_toast(subject, body, urgency)
         return False, "no desktop on this box (powershell.exe not reachable)"
     tag = {"error": "Error", "warn": "Warning"}.get(urgency, "Information")
     env = dict(os.environ)
@@ -140,6 +142,37 @@ def toast(subject, body, urgency="info"):
     out = one_line(proc.stdout or proc.stderr or "powershell failed", 200)
     if proc.returncode != 0 or out != "ok":
         return False, out
+    return True, ""
+
+
+# macOS: Notification Center through osascript, which is in the OS like WinRT is.
+# The same rule as the PowerShell path holds: THE TEXT NEVER BECOMES SCRIPT. It travels
+# as argv to a fixed `on run argv` handler, so a reviewer's reason containing quotes or
+# AppleScript is displayed, not executed.
+OSASCRIPT = "/usr/bin/osascript"
+MACOS_TOAST_SCRIPT = ("on run argv", "display notification (item 2 of argv) "
+                      "with title (item 1 of argv)", "end run")
+
+
+def macos_toast(subject, body, urgency="info"):
+    if not Path(OSASCRIPT).is_file():
+        return False, "no desktop on this box (osascript not found)"
+    tag = {"error": "Error", "warn": "Warning"}.get(urgency, "Information")
+    title = one_line(f"agentmux {tag}: {subject}", SUBJECT_MAX)
+    text = one_line(body, 300) or one_line(subject, 300)
+    argv = [OSASCRIPT]
+    for line in MACOS_TOAST_SCRIPT:
+        argv += ["-e", line]
+    try:
+        proc = subprocess.run(argv + [title, text], stdin=subprocess.DEVNULL,
+                              capture_output=True, text=True, timeout=TOAST_TIMEOUT_S,
+                              errors="replace")
+    except subprocess.TimeoutExpired:
+        return False, f"osascript did not answer within {TOAST_TIMEOUT_S}s"
+    except (OSError, subprocess.SubprocessError) as err:
+        return False, f"osascript could not be run ({type(err).__name__})"
+    if proc.returncode != 0:
+        return False, one_line(proc.stderr or "osascript failed", 200)
     return True, ""
 
 

@@ -1,12 +1,80 @@
 #!/usr/bin/env bash
 # agentmux - drive other coding-agent CLIs (codex, claude, ...) in tmux panes.
 #
-# Runs inside WSL. Each agent is one tmux session on a dedicated tmux server
+# Runs inside WSL or on macOS (see the portability block below). Each agent is one tmux session on a dedicated tmux server
 # socket ("agentmux"), so it never collides with an interactive tmux.
 #
 # Canonical source: <checkout>/agentmux.sh
 
 set -uo pipefail
+
+# --- portability: WSL/Linux and macOS ------------------------------------------
+#
+# The harness was written against GNU userland in WSL. macOS ships BSD tools and
+# lacks tac, flock, timeout and setsid outright. Each shim below is defined ONLY when
+# the real command is missing, so a Linux box keeps running exactly what it ran
+# before; nothing here changes behaviour where the GNU tool exists.
+#
+# bash itself must be 4.1+ (`exec {fd}>`, associative arrays). macOS /bin/bash is 3.2;
+# install.sh points the launcher at a Homebrew bash instead.
+case "$(uname -s)" in Darwin) AGENTMUX_OS=macos ;; *) AGENTMUX_OS=linux ;; esac
+
+command -v tac >/dev/null 2>&1 || tac() { tail -r "$@"; }
+
+# timeout SECS CMD...: perl's alarm survives exec, so CMD is killed by SIGALRM at the
+# deadline. Exit status differs from GNU (142, not 124); no caller here tests it.
+command -v timeout >/dev/null 2>&1 || timeout() {
+  local secs="$1"; shift
+  perl -e 'alarm shift @ARGV; exec @ARGV or exit 127' "$secs" "$@"
+}
+
+# setsid is NOT shimmed as a function: `func &` forks a subshell, so $! would name the
+# subshell rather than the daemon and a later kill would miss it. See detach_run.
+
+# flock [-x|-s|-u] [-n] [-w SECS] FD. Only the fd form is used in this repo. A child
+# can take the lock for us because flock(2) locks belong to the open file
+# description, which the child shares with this shell and which outlives the child.
+command -v flock >/dev/null 2>&1 || flock() {
+  local op=LOCK_EX nb=0 wait="" fd=""
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -x|-e) op=LOCK_EX ;; -s) op=LOCK_SH ;; -u) op=LOCK_UN ;;
+      -n) nb=1 ;; -w) wait="$2"; shift ;;
+      *) fd="$1" ;;
+    esac
+    shift
+  done
+  python3 -c '
+import fcntl, sys, time
+fd, op, nb, wait = int(sys.argv[1]), getattr(fcntl, sys.argv[2]), sys.argv[3] == "1", sys.argv[4]
+if op == fcntl.LOCK_UN or not (nb or wait):
+    fcntl.flock(fd, op); sys.exit(0)
+deadline = time.monotonic() + (float(wait) if wait else 0)
+while True:
+    try:
+        fcntl.flock(fd, op | fcntl.LOCK_NB); sys.exit(0)
+    except BlockingIOError:
+        if time.monotonic() >= deadline:
+            sys.exit(1)
+        time.sleep(0.05)
+' "$fd" "$op" "$nb" "$wait"
+}
+
+# How a person reaches the tmux socket: through wsl.exe from Windows, directly on a Mac.
+attach_prefix() { [ "$AGENTMUX_OS" = linux ] && printf 'wsl -d Ubuntu -- '; }
+
+# `mv -T SRC DEST`: never move INTO DEST if a directory appeared there. BSD mv has no
+# -T; rename(2) itself has exactly that semantics, and archives never cross devices.
+mv_T() {
+  if [ "$AGENTMUX_OS" = linux ]; then mv -T -- "$1" "$2"; return; fi
+  perl -e 'rename $ARGV[0], $ARGV[1] or die "mv: $ARGV[0] -> $ARGV[1]: $!\n"' "$1" "$2"
+}
+
+# Octal permission bits of a file: GNU `stat -c %a`, BSD `stat -f %Lp`.
+file_mode() { stat -c '%a' "$1" 2>/dev/null || stat -f '%Lp' "$1" 2>/dev/null; }
+
+# ISO-8601 to the second with a colon in the offset, as GNU `date -Is` prints it.
+iso_now() { date -Is 2>/dev/null || date +%Y-%m-%dT%H:%M:%S%z | sed 's/\(..\)$/:\1/'; }
 
 SOCKET="agentmux"
 # Where THIS script lives on disk, for the idle watchdog to re-invoke minutes later.
@@ -72,9 +140,15 @@ to_wsl_path() {
 }
 
 # Newest nvm-managed node bin dir, so panes get the Linux toolchain ahead of
-# the Windows shims that WSL interop appends to PATH.
+# the Windows shims that WSL interop appends to PATH. On macOS without nvm, the
+# Homebrew (or other PATH) node is the right one and there are no shims to beat.
 node_bin() {
-  ls -d "$HOME"/.nvm/versions/node/*/bin 2>/dev/null | sort -V | tail -1
+  local d
+  d="$(ls -d "$HOME"/.nvm/versions/node/*/bin 2>/dev/null | sort -V | tail -1)"
+  if [ -z "$d" ] && [ "$AGENTMUX_OS" = macos ] && command -v node >/dev/null 2>&1; then
+    d="$(dirname "$(command -v node)")"
+  fi
+  printf '%s\n' "$d"
 }
 
 # The claude config dir this machine ACTUALLY uses.
@@ -85,7 +159,8 @@ node_bin() {
 # Ask a login shell instead, and only fall back to ~/.claude.
 effective_claude_dir() {
   local d="${CLAUDE_CONFIG_DIR:-}"
-  [ -z "$d" ] && d="$(bash -lc 'printf "%s" "${CLAUDE_CONFIG_DIR:-}"' 2>/dev/null)"
+  # $SHELL, not bash: a macOS operator's login shell is zsh, configured in .zprofile.
+  [ -z "$d" ] && d="$("${SHELL:-bash}" -lc 'printf "%s" "${CLAUDE_CONFIG_DIR:-}"' 2>/dev/null)"
   [ -n "$d" ] && [ -d "$d" ] && { printf '%s' "$d"; return 0; }
   printf '%s' "$HOME/.claude"
 }
@@ -137,7 +212,7 @@ claude_config_gc() {
     strip_credentials "$d" || continue
     mkdir -p "$ROOT/claude-config/.archive" && chmod 700 "$ROOT/claude-config/.archive" || continue
     dest="$(archive_dest "$ROOT/claude-config/.archive" "$agent" "")"
-    mv -T -- "$d" "$dest" || continue
+    mv_T "$d" "$dest" || continue
     archive_prune "$ROOT/claude-config/.archive" "$agent" \
       "${AGENTMUX_CLAUDE_ARCHIVE_KEEP:-10}" "${AGENTMUX_CLAUDE_ARCHIVE_MB:-2048}" || true
   done
@@ -167,7 +242,7 @@ archive_log() {
   [ -s "$log" ] && [ ! -L "$log" ] || return 0
   mkdir -p "$LOGDIR/archive" || return 1
   dest="$(archive_dest "$LOGDIR/archive" "$name" .log)"
-  mv -T -- "$log" "$dest" || return 1
+  mv_T "$log" "$dest" || return 1
   archive_prune "$LOGDIR/archive" "$name" \
     "${AGENTMUX_LOG_ARCHIVE_KEEP:-20}" "${AGENTMUX_LOG_ARCHIVE_MB:-2048}" || true
 }
@@ -845,7 +920,7 @@ cmd_spawn() (
   # `#{pane_start_command}`, or in this script's own logs. Panes are non-login
   # shells, so ~/.bashrc and ~/.profile are not read - this is the hook for them.
   if [ -f "$ROOT/env" ]; then
-    case "$(stat -c '%a' "$ROOT/env" 2>/dev/null)" in
+    case "$(file_mode "$ROOT/env")" in
       600|400) ;;
       *) printf "agentmux: %s/env is not mode 0600 - refusing to load it.\n         chmod 600 '%s/env'\n" "$ROOT" "$ROOT" >&2; return 1 ;;
     esac
@@ -865,7 +940,7 @@ try:
 except Exception:
     pass' "$ROOT/orchestrator.warrant" 2>/dev/null)"
     if [ -n "$warranted" ] && [ "$warranted" = "$name" ]; then
-      case "$(stat -c '%a' "$ROOT/orchestrator.env" 2>/dev/null)" in
+      case "$(file_mode "$ROOT/orchestrator.env")" in
         600|400) env_prefix="$env_prefix set -a; . '$ROOT/orchestrator.env'; set +a;" ;;
         *) printf "agentmux: %s/orchestrator.env is not mode 0600 - refusing to load it.
 " "$ROOT" >&2; return 1 ;;
@@ -961,7 +1036,7 @@ except Exception:
       printf 'agentmux: degraded: %s named tool restrictions recorded in persona\n' "$cli" >&2
     fi
     chmod 600 "$persona_tmp" && mv -f "$persona_tmp" "$RUNDIR/$name.persona" || die "cannot publish private persona"
-    [ "$(stat -c '%a' "$RUNDIR/$name.persona")" = 600 ] || die "persona must be mode 0600"
+    [ "$(file_mode "$RUNDIR/$name.persona")" = 600 ] || die "persona must be mode 0600"
     printf -v quoted_path '%q' "$RUNDIR/$name.persona"
     env_prefix="$env_prefix export AGENTMUX_PERSONA_FILE=$quoted_path;"
   else
@@ -991,14 +1066,14 @@ except Exception:
     : > "$LOGDIR/$name.log"
   else
     printf "agentmux: could not archive %s.log; appending to it instead of truncating\n" "$name" >&2
-    printf '\n===== agentmux: respawned %s at %s =====\n' "$name" "$(date -Is)" >> "$LOGDIR/$name.log"
+    printf '\n===== agentmux: respawned %s at %s =====\n' "$name" "$(iso_now)" >> "$LOGDIR/$name.log"
   fi
   tm pipe-pane -o -t "$pane" "cat >> '$LOGDIR/$name.log'"
 
   printf '%s\n' "$cli" > "$RUNDIR/$name.cli"
   printf '%s\n' "$cwd" > "$RUNDIR/$name.cwd"
   printf '%s\n' "$launch" > "$RUNDIR/$name.launch"
-  date -Is > "$RUNDIR/$name.started"
+  iso_now > "$RUNDIR/$name.started"
   if ! { printf '%s\n' "$agentdef" > "$RUNDIR/$name.agentdef" &&
          printf '%s\n' "$posture" > "$RUNDIR/$name.posture" &&
          printf '%s\n' "$team" > "$RUNDIR/$name.team" &&
@@ -1085,7 +1160,7 @@ except Exception:
       "${AGENTMUX_IDLE_MINUTES:-$IDLE_MINUTES}"
   fi
   case "$cli" in codex|claude|grok) printf '  posture: %s\n' "$posture" ;; esac
-  printf "watch it:  wsl -d Ubuntu -- tmux -L %s attach -t %s\n" "$SOCKET" "$name"
+  printf "watch it:  %stmux -L %s attach -t %s\n" "$(attach_prefix)" "$SOCKET" "$name"
 )
 
 # Does the pane currently show a blocking prompt that is NOT the agent's normal input?
@@ -2396,10 +2471,11 @@ cmd_kill() {
   stop_idle_watchdog_if_no_agents
 }
 
-# All names that have sidecars under run/, live or not.
+# All names that have sidecars under run/, live or not. ERE, because BRE alternation
+# (\|) is a GNU extension: BSD sed matched nothing and reap saw no stale agents.
 sidecar_names() {
   ls "$RUNDIR" 2>/dev/null \
-    | sed -n 's/\.\(cli\|cwd\|perms\|task\|auth\|pane\|launch\|started\|reported\)$//p' \
+    | sed -nE 's/\.(cli|cwd|perms|task|auth|pane|launch|started|reported)$//p' \
     | sort -u
 }
 
@@ -2579,11 +2655,12 @@ start_idle_watchdog() {
 #
 # Done in the CHILD rather than at each call site so it holds for every caller,
 # including ones that have not been written yet.
-for _fd in /proc/self/fd/*; do
+[ -d /proc/self/fd ] && _fds=/proc/self/fd || _fds=/dev/fd   # macOS has no /proc
+for _fd in "\$_fds"/*; do
   _n="\${_fd##*/}"
   [ "\$_n" -gt 2 ] 2>/dev/null && eval "exec \$_n>&-" 2>/dev/null
 done
-unset _fd _n
+unset _fd _n _fds
 
 # STOP WHEN THIS HOME GOES, not only when the tmux server empties.
 #
@@ -2597,12 +2674,19 @@ unset _fd _n
 while sleep "\${AGENTMUX_IDLE_TICK:-60}"; do
   [ -d "$RUNDIR" ] || break
   tmux -L "$SOCKET" list-sessions >/dev/null 2>&1 || break
-  bash <(tr -d '\r' < "$script") idle >> "$RUNDIR/.idle.log" 2>&1
+  "$BASH" <(tr -d '\r' < "$script") idle >> "$RUNDIR/.idle.log" 2>&1
 done
 rm -f "$RUNDIR/.idle.pid" "$self" 2>/dev/null
 WATCHDOG
   chmod +x "$self" 2>/dev/null
-  setsid bash "$self" >/dev/null 2>&1 &
+  # "$BASH", not bash: on macOS the first bash on PATH can be /bin/bash 3.2.
+  # macOS has no setsid(1); python execs in place, so $! is still the watchdog's pid.
+  if command -v setsid >/dev/null 2>&1; then
+    setsid "$BASH" "$self" >/dev/null 2>&1 &
+  else
+    python3 -c 'import os, sys; os.setsid(); os.execvp(sys.argv[1], sys.argv[1:])' \
+      "$BASH" "$self" >/dev/null 2>&1 &
+  fi
   printf '%s\n' "$!" > "$RUNDIR/.idle.pid"
   return 0
 }
@@ -2634,7 +2718,7 @@ cmd_reap() {
     [ -n "$name" ] || continue
     if have "$name"; then continue; fi
     found=$((found + 1))
-    local files; files="$(ls "$RUNDIR/$name".* 2>/dev/null | wc -l)"
+    local files; files="$(ls "$RUNDIR/$name".* 2>/dev/null | wc -l | tr -d " ")"
     if [ "$dry" = 1 ]; then
       printf 'would reap %-14s (%s file(s))\n' "$name" "$files"
       continue
@@ -2690,7 +2774,7 @@ cmd_attach() {
   local name="${1:-}"
   [ -n "$name" ] || die "attach needs a name"
   need "$name"
-  printf 'wsl -d Ubuntu -- tmux -L %s attach -t %s\n' "$SOCKET" "$name"
+  printf '%stmux -L %s attach -t %s\n' "$(attach_prefix)" "$SOCKET" "$name"
   echo "(detach with Ctrl-b d)"
 }
 

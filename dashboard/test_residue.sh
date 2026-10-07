@@ -31,6 +31,17 @@ def put(path, text, executable=False):
 def copy(name, fixture):
     put(fixture / name, (repo / name).read_text())
 
+def proc_state(pid):
+    # The state letter, or None once the pid is gone. macOS has no /proc; ps there.
+    if not Path('/proc/self').exists():
+        out = subprocess.run(['ps', '-o', 'stat=', '-p', str(pid)], stdin=subprocess.DEVNULL,
+                             capture_output=True, text=True).stdout.strip()
+        return out[:1] or None
+    try:
+        return (Path('/proc') / str(pid) / 'stat').read_text().split(') ', 1)[1].split()[0]
+    except FileNotFoundError:
+        return None
+
 try:
     for index, name in enumerate(('auth.json', 'cc.db', 'cc.db-wal', 'cc.db-shm', 'cc.db-journal', 'env',
                                   'atlassian.json', 'journal.jsonl', 'run/agent.cli',
@@ -158,11 +169,7 @@ print('passed 1, failed 0')
         never_restarted = not (fixture / 'restarts').exists()
         one_private = len(servers) == 1 and '--port' in servers[0]['args'] and servers[0]['home'] not in (str(live), str(fixture / 'caller-home'))
         def gone(pid):
-            state = Path('/proc') / str(pid) / 'stat'
-            try:
-                return state.read_text().split(') ', 1)[1].split()[0] == 'Z'
-            except FileNotFoundError:
-                return True
+            return proc_state(pid) in (None, 'Z')
         time.sleep(0.2)
         killed = one_private and gone(servers[0]['pid'])
         cleaned = one_private and not Path(servers[0]['home']).exists()
@@ -203,8 +210,7 @@ print('passed 1, failed 0')
         except ProcessLookupError:
             pass
         time.sleep(.05)
-        state = Path('/proc') / str(pid) / 'stat'
-        alive = state.exists() and state.read_text().split(') ', 1)[1].split()[0] != 'Z'
+        alive = proc_state(pid) not in (None, 'Z')
         check('restored server outlives the launcher process group', proc.returncode == 0 and detached and alive)
     finally:
         try:

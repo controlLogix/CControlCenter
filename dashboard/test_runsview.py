@@ -292,7 +292,9 @@ class TestApprovalPinsBytes(RunsBase):
 
     def setUp(self):
         super().setUp()
-        self.repo = Path(tempfile.mkdtemp(prefix="runsview-repo-"))
+        # Resolved, as runsview.REPO always is: it checks paths with resolve(), and
+        # the macOS tempdir under /var is a symlink to /private/var.
+        self.repo = Path(tempfile.mkdtemp(prefix="runsview-repo-")).resolve()
         self.addCleanup(shutil.rmtree, self.repo, ignore_errors=True)
         self.rv.REPO = self.repo
 
@@ -357,7 +359,9 @@ class TestReviewState(RunsBase):
 class TestDiff(RunsBase):
     def setUp(self):
         super().setUp()
-        self.repo = Path(tempfile.mkdtemp(prefix="runsview-git-"))
+        # Resolved, as runsview.REPO always is: it checks paths with resolve(), and
+        # the macOS tempdir under /var is a symlink to /private/var.
+        self.repo = Path(tempfile.mkdtemp(prefix="runsview-git-")).resolve()
         self.addCleanup(shutil.rmtree, self.repo, ignore_errors=True)
         self.rv.REPO = self.repo
         for cmd in (["init", "-q"], ["config", "user.email", "t@example.invalid"],

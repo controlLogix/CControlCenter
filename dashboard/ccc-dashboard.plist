@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  launchd USER agent: the macOS counterpart of ccc-dashboard.service. Brings the CCC
+  dashboard up on 127.0.0.1:8787 at login.
+
+  Like the systemd unit it runs restart.sh rather than server.py, so there is still
+  exactly one way the server is started. restart.sh launches the server detached and
+  exits; AbandonProcessGroup stops launchd from killing the server when it does.
+
+  install.sh renders this into ~/Library/LaunchAgents/ with @REPO@, @PATH@ and @BASH@
+  filled in, and prints the command that loads it. By hand:
+    launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.agentmux.ccc-dashboard.plist
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.agentmux.ccc-dashboard</string>
+  <key>WorkingDirectory</key>
+  <string>@REPO@</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>@PATH@</string>
+  </dict>
+  <key>ProgramArguments</key>
+  <array>
+    <string>@BASH@</string>
+    <string>dashboard/restart.sh</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>AbandonProcessGroup</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/tmp/ccc-dashboard.launchd.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/ccc-dashboard.launchd.log</string>
+</dict>
+</plist>

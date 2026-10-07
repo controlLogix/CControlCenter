@@ -43,6 +43,33 @@ redraws and key handling; a Linux binary in a Linux pty does not. The tradeoff
 is that the WSL `codex` has its own `~/.codex` — separate login, separate
 `config.toml`, separate MCP servers from the Windows install.
 
+### macOS
+
+macOS has tmux natively, so on a Mac the harness and the dashboard run directly,
+with no VM. One checkout serves both platforms.
+
+```
+brew install bash tmux python node
+bash install.sh                                   # writes ~/.local/bin/agentmux and a launchd agent
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.agentmux.ccc-dashboard.plist
+open http://127.0.0.1:8787
+
+# optional: the Modbus RTU panel needs pyserial (Homebrew Python is PEP 668-managed)
+python3 -m pip install --user --break-system-packages pyserial   # WSL: sudo apt install python3-serial
+```
+
+What differs, and why:
+
+| | WSL | macOS |
+| --- | --- | --- |
+| bash | system bash 5 | Homebrew bash, pinned by absolute path in the launcher. `/bin/bash` is 3.2 and cannot run the harness. |
+| `flock`, `timeout`, `setsid`, `tac` | util-linux / coreutils | `agentmux.sh` carries inline shims; other scripts prepend `compat/bin` to `PATH` on Darwin only. |
+| Desktop toast | WinRT via `powershell.exe` | Notification Center via `osascript`. The text travels as argv, never as script. |
+| Dashboard at boot | `ccc-dashboard.service` (systemd user unit) | `ccc-dashboard.plist` (launchd agent), rendered by `install.sh` |
+| Which home a dashboard serves | read from `/proc/<pid>/environ` | macOS hides other processes' environments, so the server declares its home in `/tmp/agentmux-dashboards-<uid>/<pid>`. A declaration counts only when the pid's argv and cwd prove it is this checkout's `server.py`. |
+| ARP neighbours | `ip neigh`, then the Windows host's table | `arp -a`, with BSD's unpadded MAC octets (`0:1c:42:…`) normalised |
+| Not available | | PROFINET DCP raw frames (`AF_PACKET`) and `bootp_probe.py`'s interface binding are Linux-only and report that. `link-windows-state.sh` and `agentmux.cmd` are WSL-only. |
+
 ## Orchestration: who may say the work is finished
 
 The hard part of running agents is not starting them. It is knowing when to believe

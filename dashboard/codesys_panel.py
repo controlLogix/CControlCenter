@@ -14,7 +14,8 @@ by the operator to this exact SSH target. machine_id pins SSH identity in additi
 to normal host-key checking. MCP credentials are inherited from the server process.
 No request may supply a command, project path, host, or package. Package files must
 be staged on the target; installation is sudo -n apt-get install of that exact file.
-Local node launches resolve ONLY from /c/Users/Nick/.nvm/versions/node/*/bin.
+Local node launches resolve ONLY from /c/Users/Nick/.nvm/versions/node/*/bin, or on
+macOS from ~/.nvm/versions/node/*/bin, then the fixed Homebrew prefixes. Never $PATH.
 """
 from contextlib import contextmanager
 import datetime as dt
@@ -28,6 +29,7 @@ import selectors
 import shlex
 import signal
 import subprocess
+import sys
 import threading
 import time
 
@@ -101,12 +103,25 @@ def inventory():
         raise ccboard.Invalid('Invalid codesys.json; see the inventory example in dashboard/codesys_panel.py.') from None
 
 
+NVM_ROOTS = (Path('/c/Users/Nick/.nvm/versions/node'),)
+if sys.platform == 'darwin':
+    NVM_ROOTS += (Path.home() / '.nvm/versions/node',)
+    # Fixed locations, not a PATH lookup: Apple Silicon Homebrew, then Intel Homebrew.
+    FIXED_NODES = (Path('/opt/homebrew/bin/node'), Path('/usr/local/bin/node'))
+else:
+    FIXED_NODES = ()
+
+
 def node_binary():
-    candidates = [p for p in Path('/c/Users/Nick/.nvm/versions/node').glob('*/bin/node')
-                  if p.is_file() and os.access(p, os.X_OK)]
-    if not candidates:
-        raise Unavailable('SKIP node unavailable under /c/Users/Nick/.nvm/versions/node/*/bin; CODESYS MCP disabled.')
-    return str(max(candidates, key=lambda p: tuple(int(n) for n in re.findall(r'\d+', p.parts[-3]))))
+    for root in NVM_ROOTS:
+        candidates = [p for p in root.glob('*/bin/node') if p.is_file() and os.access(p, os.X_OK)]
+        if candidates:
+            return str(max(candidates, key=lambda p: tuple(int(n) for n in re.findall(r'\d+', p.parts[-3]))))
+    for node in FIXED_NODES:
+        if node.is_file() and os.access(node, os.X_OK):
+            return str(node)
+    raise Unavailable('SKIP node unavailable under ' + ', '.join(str(r) + '/*/bin' for r in NVM_ROOTS)
+                      + ''.join(', ' + str(n) for n in FIXED_NODES) + '; CODESYS MCP disabled.')
 
 
 class MCP:
@@ -200,6 +215,13 @@ class MCP:
             os.killpg(self.proc.pid, signal.SIGKILL)
             self.proc.wait()
         except ProcessLookupError:
+            self.proc.wait()
+        except PermissionError:
+            # Darwin answers EPERM, not ESRCH, when every member of the group is
+            # already a zombie: our child exited and only needs reaping. Linux
+            # signals a zombie group without error, so EPERM there is real.
+            if sys.platform != 'darwin':
+                raise
             self.proc.wait()
         for stream in (self.proc.stdin, self.proc.stdout):
             stream.close()

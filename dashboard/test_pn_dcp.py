@@ -14,6 +14,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import unittest.mock
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -80,6 +81,13 @@ class Wire:
 
     def close(self):
         self.closed = True
+
+
+# The tests mock socket.socket; the AF_PACKET constant itself exists only on Linux.
+# Supplying it (Linux's value) lets the socket-path checks run on macOS too; on Linux
+# the real constant is left in place.
+def packet_family():
+    return patch.object(dcp.socket, 'AF_PACKET', getattr(socket, 'AF_PACKET', 17), create=True)
 
 
 def client(wire):
@@ -154,7 +162,7 @@ class ProtocolTests(unittest.TestCase):
         self.assertFalse(w.sent)
 
     def test_privilege_failure_and_validation_before_socket(self):
-        with patch.object(dcp.socket, 'socket', side_effect=PermissionError('denied')) as create, contextlib.redirect_stderr(io.StringIO()) as err:
+        with packet_family(), patch.object(dcp.socket, 'socket', side_effect=PermissionError('denied')) as create, contextlib.redirect_stderr(io.StringIO()) as err:
             self.assertEqual(dcp.main(['--iface', 'eth0', 'identify']), 1)
             self.assertIn('sudo/CAP_NET_RAW', err.getvalue())
             create.reset_mock()
@@ -172,11 +180,22 @@ class ProtocolTests(unittest.TestCase):
             with patch.object(dcp.socket, 'socket') as create, self.assertRaises(ValueError):
                 dcp.Client('eth0', value)
             create.assert_not_called()
-        with patch.object(dcp.socket, 'socket') as create:
+        with packet_family(), patch.object(dcp.socket, 'socket') as create:
             create.return_value.getsockname.return_value = ('lo', 0, 0, 772, bytes(6))
             with self.assertRaises(dcp.DCPError):
                 dcp.Client('lo')
             create.return_value.close.assert_called_once()
+
+    def test_no_packet_family_refused_before_socket(self):
+        # A socket module without AF_PACKET (macOS, Windows) refuses by name, opens nothing.
+        bare = unittest.mock.Mock(spec=['socket', 'SOCK_RAW', 'htons', 'timeout'])
+        with patch.object(dcp, 'socket', bare), self.assertRaisesRegex(dcp.DCPError, 'AF_PACKET'):
+            dcp.Client('eth0')
+        bare.socket.assert_not_called()
+        with patch.object(dcp, 'socket', bare), contextlib.redirect_stderr(io.StringIO()) as err:
+            self.assertEqual(dcp.main(['--iface', 'eth0', 'identify']), 1)
+        self.assertIn('AF_PACKET', err.getvalue())
+        bare.socket.assert_not_called()
 
 
 class SafetyTests(unittest.TestCase):

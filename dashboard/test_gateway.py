@@ -297,7 +297,12 @@ if SOURCE.is_file() and PRESERVED.is_file():
         original = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(original)
     except Exception as err:                       # a newer CPython refuses the magic
+        # module_from_spec already bound an EMPTY module; left in place, every differ()
+        # below compared the source against nothing and failed on AttributeError.
+        original = None
         print(f"        skipped: cannot load the 2026-09-19 bytecode ({err})")
+        print(f"        it needs CPython 3.12; this is {sys.version.split()[0]}. "
+              "Run this file under python3.12 for the differential.")
         print("        the checks above still stand as a specification.")
 else:
     print("        skipped: nothing to compare against "

@@ -29,6 +29,11 @@
 pass=0
 fail=0
 
+# macOS lacks flock, timeout, setsid and tac; compat/bin supplies them there only.
+# Suites source this from the repo root, so $PWD is the checkout.
+[ "$(uname -s)" = Darwin ] && [ -d "$PWD/compat/bin" ] && case ":$PATH:" in
+  *":$PWD/compat/bin:"*) ;; *) export PATH="$PWD/compat/bin:$PATH" ;; esac
+
 ok()   { printf '  ok    %s\n' "$1"; pass=$((pass + 1)); }
 bad()  { printf '  FAIL  %s\n' "$1"; fail=$((fail + 1)); }
 
@@ -88,7 +93,7 @@ assert_one_winner() {
   wait
   local count files
   count=$(count_msgs "$winners")
-  files=$(ls $glob 2>/dev/null | wc -l)
+  files=$(ls $glob 2>/dev/null | wc -l | tr -d " ")   # BSD wc pads with spaces
   rm -f "$winners"
   if [ "$count" = "1" ] && [ "$files" = "1" ]; then
     ok "$label ($n concurrent, 1 winner, 1 artifact)"

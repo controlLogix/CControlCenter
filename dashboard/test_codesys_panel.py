@@ -310,7 +310,8 @@ class CodesysTests(unittest.TestCase):
     def test_stdio_disconnect_and_node_discovery_fail_explicitly(self):
         with self.assertRaisesRegex(panel.Unavailable, 'disconnected'):
             panel.MCP([sys.executable, '-c', 'pass'])
-        with patch.object(panel.Path, 'glob', return_value=[]):
+        # No nvm install anywhere, and (macOS) no Homebrew node either; Linux has none.
+        with patch.object(panel.Path, 'glob', return_value=[]), patch.object(panel, 'FIXED_NODES', ()):
             with self.assertRaisesRegex(panel.Unavailable, '^SKIP node unavailable'):
                 panel.MCP(['node', '/unused/server.js'])
 
@@ -448,20 +449,34 @@ class El {
  addEventListener(k, f) {this.events[k]=f;}
  setAttribute() {}
 }
-const root = new El('section'); let loader, approve=false, confirms=[], posts=[];
+const root = new El('section'); let entered, approve=false, confirms=[], posts=[], gets=0;
 let row = {id:'lab', name:'<img src=x>', address:'admin@lab', reachable:true, state:'run', runtime_version:'4.18', application:'App', actions:['start','reset','boot'], errors:[]};
 let offline=false;
-global.document={getElementById:()=>root};
-global.window={confirm:t=>{confirms.push(t); return approve;}, addEventListener:(k,f)=>f(), CCC:{
- el:(...a)=>new El(...a), registerView:(k,f)=>{assert.equal(k,'codesys'); loader=f;},
- getJSON:async p=>{assert.equal(p,'/api/board/targets'); if(offline) throw Error('offline'); return {targets:[row]};},
+// codesys.js is a lazy card in the IIOT view (index.html: <details data-collapse-key=
+// "iiot:codesys"> around #viewCodesys), registered through registerCard on ccc:ready.
+const card = new El('details'); card.open = false;
+global.document={
+ getElementById:id=>{assert.equal(id,'viewCodesys'); return root;},
+ querySelector:q=>{assert.equal(q,'details[data-collapse-key="iiot:codesys"]'); return card;}};
+global.window={confirm:t=>{confirms.push(t); return approve;}, addEventListener:(k,f)=>{assert.equal(k,'ccc:ready'); f();}, CCC:{
+ el:(...a)=>new El(...a),
+ registerCard:(v,f,ms)=>{assert.equal(v,'iiot'); assert.equal(ms,0); entered=f;},
+ getJSON:async p=>{gets++; assert.equal(p,'/api/board/targets'); if(offline) throw Error('offline'); return {targets:[row]};},
  post:async(p,b)=>{posts.push({p,b}); return b.phase==='prepare'?{token:'abc',confirmation:'RESET lab Cold destructive'}:{ok:true,message:'done'};}
 }};
 vm.runInThisContext(fs.readFileSync(process.argv[1],'utf8'));
 const all=n=>[n,...n.children.flatMap(all)];
 const button=t=>all(root).find(n=>n.tag==='button' && n.text===t);
+// After the first open, a reload is the operator's Refresh button, never a poll.
+const loader=()=>button('Refresh targets').events.click();
+const settle=()=>new Promise(r=>setImmediate(r));
 (async()=>{
- await loader();
+ entered(); await settle();
+ assert.equal(gets,0); assert.equal(root.children.length,0);   // collapsed: no SSH
+ card.open=true; card.events.toggle(); await settle();
+ assert.equal(gets,1);
+ entered(); card.events.toggle(); await settle();
+ assert.equal(gets,1);                                         // opened once, loaded once
  let input=all(root).find(n=>n.tag==='input'); input.value='operator'; input.events.input();
  all(root).find(n=>n.tag==='select').value='Cold';
  await button('Reset').events.click();

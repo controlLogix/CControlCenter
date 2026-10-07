@@ -1,0 +1,49 @@
+#!/usr/bin/python3
+# Not env: the real tool is a binary, so a stub python3 first on PATH (as test
+# fixtures install) must not run in place of the shim. CLT, which Homebrew needs,
+# provides this one.
+"""setsid(1) for macOS: run CMD in a new session.
+
+Takes util-linux's options: -f/--fork always forks, -w/--wait waits for the
+child and exits with its status (test_auth.py uses `setsid -w`), -c/--ctty is
+accepted and ignored - nothing here needs a controlling terminal.
+"""
+import os
+import sys
+
+args = sys.argv[1:]
+force = wait = False
+while args and args[0].startswith("-") and args[0] != "-":
+    opt = args.pop(0)
+    if opt == "--":
+        break
+    if opt in ("-f", "--fork"):
+        force = True
+    elif opt in ("-w", "--wait"):
+        wait = True
+    elif opt in ("-c", "--ctty"):
+        pass
+    elif opt.startswith("-") and not opt.startswith("--") and len(opt) > 2 \
+            and set(opt[1:]) <= set("fwc"):
+        force = force or "f" in opt
+        wait = wait or "w" in opt
+    else:
+        sys.exit(f"setsid: unrecognized option '{opt}'")
+if not args:
+    sys.exit("usage: setsid [-fwc] CMD [ARGS...]")
+if force or os.getpgrp() == os.getpid():
+    # Already a group leader, where setsid(2) fails: fork, as util-linux does.
+    pid = os.fork()
+    if pid:
+        if not wait:
+            os._exit(0)
+        _, status = os.waitpid(pid, 0)
+        if os.WIFSIGNALED(status):
+            os._exit(128 + os.WTERMSIG(status))
+        os._exit(os.WEXITSTATUS(status))
+os.setsid()
+try:
+    os.execvp(args[0], args)
+except OSError as err:
+    sys.stderr.write(f"setsid: failed to execute {args[0]}: {err.strerror}\n")
+    os._exit(127 if isinstance(err, FileNotFoundError) else 126)

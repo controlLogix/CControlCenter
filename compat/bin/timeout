@@ -1,0 +1,28 @@
+#!/usr/bin/python3
+# Not env: the real tool is a binary, so a stub python3 first on PATH (as test
+# fixtures install) must not run in place of the shim. CLT, which Homebrew needs,
+# provides this one.
+"""timeout(1) for macOS: timeout SECS CMD [ARGS...]. Exits 124 on expiry, like GNU."""
+import signal
+import subprocess
+import sys
+
+if len(sys.argv) < 3:
+    sys.exit("usage: timeout SECS CMD [ARGS...]")
+secs = float(sys.argv[1].rstrip("s"))
+try:
+    proc = subprocess.Popen(sys.argv[2:])
+except OSError:
+    sys.exit(127)
+try:
+    sys.exit(proc.wait(timeout=secs))
+except subprocess.TimeoutExpired:
+    proc.send_signal(signal.SIGTERM)
+    try:
+        proc.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+    sys.exit(124)
+except KeyboardInterrupt:
+    proc.send_signal(signal.SIGINT)
+    sys.exit(proc.wait())

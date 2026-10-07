@@ -13,6 +13,8 @@ if [ ! -f dashboard/server.py ]; then
   echo 'run this from the agentmux repo root' >&2
   exit 2
 fi
+# macOS lacks flock, timeout, setsid and tac; compat/bin supplies them there only.
+[ "$(uname -s)" = Darwin ] && [ -d "$PWD/compat/bin" ] && export PATH="$PWD/compat/bin:$PATH"
 
 # Match on a pattern that cannot match this script's own command line.
 for pid in $(pgrep -f 'dashboard/serv' 2>/dev/null); do

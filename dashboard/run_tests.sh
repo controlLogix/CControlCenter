@@ -12,6 +12,8 @@
 # not on PATH.
 set -u
 [ -f dashboard/server.py ] || { echo 'run this from the agentmux repo root' >&2; exit 2; }
+# macOS lacks flock, timeout, setsid and tac; compat/bin supplies them there only.
+[ "$(uname -s)" = Darwin ] && [ -d "$PWD/compat/bin" ] && export PATH="$PWD/compat/bin:$PATH"
 
 # HTTP writes occur in the SERVER process: a client-side home cannot isolate them.
 #

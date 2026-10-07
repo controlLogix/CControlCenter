@@ -342,8 +342,25 @@ source = Path("taskmgmt/bootp_probe.py").read_text(encoding="utf-8")
 check("no sendto anywhere", 0, source.count("sendto"))
 check("no sendall anywhere", 0, source.count("sendall"))
 check("names the privilege it needs", True, "needs root" in source)
-result = subprocess.run([sys.executable, "taskmgmt/bootp_probe.py", "--timeout", "1"],
-                        capture_output=True, text=True, timeout=30)
+# macOS (since Mojave) lets any user bind a port below 1024 on the wildcard address, so
+# an unprivileged probe there would simply listen for its second and exit 0. Darwin
+# never reaches EACCES; the refusal path it can reach is EADDRINUSE, so this suite
+# holds UDP 67 itself (no SO_REUSEADDR, which the probe's own flag cannot get past)
+# for the run. If bootpd already holds it, that is the same refusal. Linux unchanged.
+holder = None
+if sys.platform == "darwin":
+    holder = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        holder.bind(("", 67))
+    except OSError:
+        holder.close()
+        holder = None
+try:
+    result = subprocess.run([sys.executable, "taskmgmt/bootp_probe.py", "--timeout", "1"],
+                            capture_output=True, text=True, timeout=30)
+finally:
+    if holder is not None:
+        holder.close()
 check("unprivileged bind exits non-zero", True, result.returncode != 0)
 # TWO WAYS THAT BIND FAILS, AND WHICH ONE YOU GET IS A PROPERTY OF THE MACHINE.
 #

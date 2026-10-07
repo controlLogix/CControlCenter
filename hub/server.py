@@ -79,16 +79,24 @@ def load_toml(p):
         return {}
 
 
+def parent_pid(pid):
+    """Parent of `pid`, or None. /proc on Linux; macOS has none, so ask ps."""
+    try:
+        if os.path.isdir("/proc"):
+            with open(f"/proc/{pid}/stat") as f:
+                return int(f.read().rsplit(")", 1)[1].split()[1])
+        return int(subprocess.run(["ps", "-o", "ppid=", "-p", str(pid)], stdin=subprocess.DEVNULL,
+                                  capture_output=True, text=True, timeout=5).stdout.strip())
+    except (OSError, ValueError, IndexError, subprocess.SubprocessError):
+        return None
+
+
 def ancestors(pid):
     out, seen = [], set()
     while pid and pid > 1 and pid not in seen:
         seen.add(pid)
         out.append(pid)
-        try:
-            with open(f"/proc/{pid}/stat") as f:
-                pid = int(f.read().rsplit(")", 1)[1].split()[1])
-        except (OSError, ValueError, IndexError):
-            break
+        pid = parent_pid(pid)
     return out
 
 
@@ -149,8 +157,15 @@ class Hub:
 
     # -- identity ------------------------------------------------------------------------
     def peer(self, sock: socket.socket):
-        creds = sock.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, struct.calcsize("3i"))
-        pid, uid, _gid = struct.unpack("3i", creds)
+        if hasattr(socket, "SO_PEERCRED"):
+            creds = sock.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, struct.calcsize("3i"))
+            pid, uid, _gid = struct.unpack("3i", creds)
+            return pid, uid
+        # macOS has no SO_PEERCRED. The kernel still vouches, in two calls at SOL_LOCAL (0):
+        # LOCAL_PEERPID (2) for the pid, LOCAL_PEERCRED (1) for a struct xucred whose
+        # second field is the uid. Python names only the latter, so both are spelled out.
+        pid = struct.unpack("i", sock.getsockopt(0, 2, struct.calcsize("i")))[0]
+        _version, uid = struct.unpack("2I", sock.getsockopt(0, socket.LOCAL_PEERCRED, 76)[:8])
         return pid, uid
 
     def identify(self, pid):
