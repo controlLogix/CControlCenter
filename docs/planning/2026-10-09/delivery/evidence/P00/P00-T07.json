@@ -1,0 +1,45 @@
+{
+  "taskId": "P00-T07",
+  "sourceCommit": "b067e98e8a051c33d7df2e7facfe26d9f747239a",
+  "reviewedBy": "Codex",
+  "date": "2026-10-09",
+  "scope": "P00 design acceptance only; phase advancement separate",
+  "acceptanceResults": [
+    {
+      "criterionId": "P00-T07-AC01",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/decisions/startup-contract.md",
+        "docs/planning/2026-10-09/delivery/decisions/acceptance.md"
+      ],
+      "rationale": "The full scoped design is accepted with alternatives and consequences in the decision review."
+    },
+    {
+      "criterionId": "P00-T07-AC02",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/decisions/startup-contract.md",
+        "docs/planning/2026-10-09/delivery/decisions/acceptance.md"
+      ],
+      "rationale": "Focused design/fixture review passed; implementation qualification remains explicitly owned by future phases, not claimed here."
+    },
+    {
+      "criterionId": "P00-T07-AC03",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/decisions/startup-contract.md",
+        "docs/planning/2026-10-09/delivery/decisions/acceptance.md"
+      ],
+      "rationale": "Runtime source and user data are unchanged; migration ownership and all existing component checks are preserved."
+    },
+    {
+      "criterionId": "P00-T07-AC04",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/decisions/startup-contract.md",
+        "docs/planning/2026-10-09/delivery/decisions/acceptance.md"
+      ],
+      "rationale": "Source candidate, review date, executed evidence and environment limits are recorded in the linked reports."
+    }
+  ]
+}

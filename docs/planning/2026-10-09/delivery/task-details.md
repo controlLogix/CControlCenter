@@ -59,7 +59,7 @@ An approved implementation contract with no unresolved decision hidden in code.
 
 ### P00-T02: Resolve launch workflow, dashboard controls, language/runtime and initial SDKs, storage topology, NATS account/domain layout, supported OS/tool versions, initial scale, identity enrollment, and provider/data policy.
 
-**Status:** verification. **Owner:** Codex.
+**Status:** done. **Owner:** Codex.
 
 **Dependencies:** P00-T06.
 
@@ -90,9 +90,9 @@ An approved implementation contract with no unresolved decision hidden in code.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Review the LOCAL-01 flow and FAIL-55–FAIL-62 against actual host startup capabilities; distinguish approved behavior from unresolved host/version choices.
 
-**Evidence:** docs/planning/2026-10-09/delivery/decisions/runtime-and-deployment.md, docs/planning/2026-10-09/delivery/spikes/runtime/comparison-result.json
+**Evidence:** docs/planning/2026-10-09/delivery/decisions/runtime-and-deployment.md, docs/planning/2026-10-09/delivery/spikes/runtime/comparison-result.json, docs/planning/2026-10-09/delivery/evidence/P00/P00-T02.json
 
-**Commits:** not yet recorded
+**Commits:** b067e98e8a051c33d7df2e7facfe26d9f747239a
 
 
 <a id="P00-T03"></a>
@@ -140,7 +140,7 @@ An approved implementation contract with no unresolved decision hidden in code.
 
 ### P00-T04: Approve versioned state machines, authority boundaries, plugin manifest/context schemas, migration ownership, and the requirement-to-phase matrix.
 
-**Status:** in_progress. **Owner:** Codex.
+**Status:** done. **Owner:** Codex.
 
 **Dependencies:** P00-T06.
 
@@ -172,16 +172,16 @@ An approved implementation contract with no unresolved decision hidden in code.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Review the LOCAL-01 flow and FAIL-55–FAIL-62 against actual host startup capabilities; distinguish approved behavior from unresolved host/version choices.
 
-**Evidence:** not yet recorded
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P00/P00-T04.json
 
-**Commits:** not yet recorded
+**Commits:** b067e98e8a051c33d7df2e7facfe26d9f747239a
 
 
 <a id="P00-T05"></a>
 
 ### P00-T05: Record approved storage direction STATE-01
 
-**Status:** verification. **Owner:** Codex.
+**Status:** done. **Owner:** Codex.
 
 **Dependencies:** P00-T06.
 
@@ -212,9 +212,9 @@ An approved implementation contract with no unresolved decision hidden in code.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Review the LOCAL-01 flow and FAIL-55–FAIL-62 against actual host startup capabilities; distinguish approved behavior from unresolved host/version choices.
 
-**Evidence:** docs/planning/2026-10-09/delivery/decisions/storage-contract.md
+**Evidence:** docs/planning/2026-10-09/delivery/decisions/storage-contract.md, docs/planning/2026-10-09/delivery/evidence/P00/P00-T05.json
 
-**Commits:** not yet recorded
+**Commits:** b067e98e8a051c33d7df2e7facfe26d9f747239a
 
 
 <a id="P00-T06"></a>
@@ -261,7 +261,7 @@ An approved implementation contract with no unresolved decision hidden in code.
 
 ### P00-T07: Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch
 
-**Status:** verification. **Owner:** Codex.
+**Status:** done. **Owner:** Codex.
 
 **Dependencies:** P00-T06.
 
@@ -292,16 +292,16 @@ An approved implementation contract with no unresolved decision hidden in code.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Review the LOCAL-01 flow and FAIL-55–FAIL-62 against actual host startup capabilities; distinguish approved behavior from unresolved host/version choices.
 
-**Evidence:** docs/planning/2026-10-09/delivery/decisions/startup-contract.md
+**Evidence:** docs/planning/2026-10-09/delivery/decisions/startup-contract.md, docs/planning/2026-10-09/delivery/evidence/P00/P00-T07.json
 
-**Commits:** not yet recorded
+**Commits:** b067e98e8a051c33d7df2e7facfe26d9f747239a
 
 
 <a id="P00-GATE"></a>
 
 ### P00-GATE: Verify and accept P00
 
-**Status:** blocked. **Owner:** Codex.
+**Status:** verification. **Owner:** Codex.
 
 **Dependencies:** P00-T01, P00-T02, P00-T03, P00-T04, P00-T05, P00-T06, P00-T07.
 
@@ -341,8 +341,6 @@ An approved implementation contract with no unresolved decision hidden in code.
 **Evidence:** not yet recorded
 
 **Commits:** not yet recorded
-
-**Blocker:** Complete the pending P00 contract and decision review, inspect all required criterion evidence, and verify the pushed phase candidate before advancement.
 
 ## P01. Executable contracts, baseline repairs, and verification
 

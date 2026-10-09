@@ -1,0 +1,139 @@
+{
+  "sourceCommit": "b067e98e8a051c33d7df2e7facfe26d9f747239a",
+  "status": "passed",
+  "checks": [
+    {
+      "path": "docs/planning/2026-10-09/delivery/contracts/common.schema.json",
+      "sha256": "bac0eca18c7c086d3cbb06a58d709e196b417878dd25ad41b69cf2232f2f4187"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/contracts/ingress-attestation.schema.json",
+      "sha256": "a2dd51369d82a6b56d437d5309d80e788d413931eccb49a23925199c8d8f1209"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/contracts/invalid-examples.json",
+      "sha256": "9ac2203424e1f14c1419cb67ad5b56766ffaa3f3f31e7168f7b41714f489e585"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/contracts/message-envelope.schema.json",
+      "sha256": "08d2fb49547c6b7f442f00cf90c0fdfae35b50a4bed0cf14a2c9d17ff6c8db3b"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/contracts/model-examples.json",
+      "sha256": "d7fb26e9250c61178a3f2c3e6fb1331fad075a0e876d66ed9d4dfc5de42fa329"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/contracts/nesting-examples.json",
+      "sha256": "2f160b4f1ab64daf05733f728f73473e18f16f127b820a62727686e538366516"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/contracts/operation-context.schema.json",
+      "sha256": "03c672e648863d4dcadf9f93ceebfb61ff67d137073d515cf8c28fcb45240944"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/contracts/owner-record.schema.json",
+      "sha256": "e897ae1d0cca49b672fb53101ed800233e5f57d23e3708da3c99712e6a3d09e2"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/contracts/plugin-context.schema.json",
+      "sha256": "12050a15169169a39248c1b40ca7414c93182eaa7fd7dddfe6175a37999a072f"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/contracts/plugin-manifest.schema.json",
+      "sha256": "7fa3b0c4483782f3d10ec238534a9c279e88793dbd07648fae82bdf1665f8d8c"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/contracts/protected-assembly.schema.json",
+      "sha256": "22d4e4533eed079e2a5cb57025b812f2c3b5a8bfc8a74b504991903873605efe"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/contracts/requirements.lock",
+      "sha256": "5bf6d53930534ae6cbfe3242813b04d60c69599efe0b8bd7b8168ed6330615f0"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/contracts/semantic-examples.json",
+      "sha256": "bbb47da7030085e25e5465b820c8650f67f9ddf251baf42e9bc8b995b03914ec"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/contracts/state-machines.json",
+      "sha256": "607a4a1a89c3a16cff5904d740b3fa21c45130a091a2fd811b88c06007cda8a6"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/contracts/valid-examples.json",
+      "sha256": "3309135e7925bd7b927d9fba81701eaa749366f7cb09b8017f8af3de01d4df50"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/contracts/verify.py",
+      "sha256": "2b4b9f26e8b974621ce6c91b1e3bb09a29c65b34e5a9856276dfa795222ac97c"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/spikes/runtime/main.go",
+      "sha256": "3c9c7351742288c45a3360857a6b873095cc16e47dec015140cdb488f2fdd2ae"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/spikes/runtime/go.mod",
+      "sha256": "815b76d50cf3296ac81c1e86af5ec48eecce3e0f52eb6496df06991e747fcfb8"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/spikes/runtime/go.sum",
+      "sha256": "09efba9fc8d00f95bb05093eca20d8660bb81ad3955813eff31ea7083f499542"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/spikes/runtime/client.py",
+      "sha256": "b10e31af7c6b8feb81d9af927f8b1ce6c04c9fccad8d21c330eaf50656cdc658"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/spikes/runtime/compare.py",
+      "sha256": "298463dfbaafeb8c5f1b7e5a4569faafa51abec0316dd927960016d7fe3196a7"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/spikes/runtime/client.ts",
+      "sha256": "09e13e1879df5b6a37156b286ac9aeedcf94207edf730df8cc43a1bdb7c38b96"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/spikes/runtime/tsconfig.json",
+      "sha256": "620b409681b484eb761107bbc5a26314152528183e9ec0a8c7848dfffb0641b5"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/spikes/runtime/package.json",
+      "sha256": "d9ee4550f3f3544ecdb47381c0ba79a6c36e09f6225a4f6e3f8823cfdb0be61a"
+    },
+    {
+      "path": "docs/planning/2026-10-09/delivery/spikes/runtime/package-lock.json",
+      "sha256": "71e1952721a0730e008db7d4d58d143351ac6a8d0c6741d60fb89f5303abc139"
+    },
+    {
+      "path": "hub/store.py",
+      "sha256": "144cafdc425d73ac420f5762ccd4a6153f8c5f70175226d0504e1040d4526f33"
+    },
+    {
+      "path": "hub/fed/envelope.py",
+      "sha256": "328d418cfd6517956237cddd3b1c5a4f5221cbd4789a3939b400753808fc91d2"
+    },
+    {
+      "path": "hub/fed/guard.py",
+      "sha256": "34a4347534eda49fbea2d9facf5e0bb8bf01abc602a28d2dba74b2e98377660f"
+    },
+    {
+      "path": "hub/fed/runtime.py",
+      "sha256": "b4f0a9a57bc5ba1a6895955c91625e6188b40206d35f628d7756e3ddefb89661"
+    },
+    {
+      "path": "hub/fed/plugins/work.py",
+      "sha256": "d52f850b230f1af473e239933114f1566f0e6f792d6e91d749a5b43ee47cbb49"
+    },
+    {
+      "path": "hub/tests/test_fed_unit.py",
+      "sha256": "b5753215fef5705fdb829078730e5fb14e12bc4c1ec040870e84ff2603772adf"
+    },
+    {
+      "path": "hub/tests/test_fed_live.py",
+      "sha256": "af39ed93f205952f90a9975a7ed7381a7560ee8e0e4278dee220a57b08ad3b0c"
+    },
+    {
+      "path": "hub/tests/test_governance.py",
+      "sha256": "6c35a7014e10b78a4872a2eb02df214b537f89a7afba7efed56a42d476ac1c61"
+    }
+  ],
+  "scope": "Retained runtime comparison, current draft contracts and repaired product source remain byte-identical to their recorded executed evidence. This check does not rerun those runtime tests."
+}

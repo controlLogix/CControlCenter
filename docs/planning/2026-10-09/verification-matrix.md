@@ -60,7 +60,7 @@ The phase acceptance criteria live in [phases.json](phases.json). Use [gate-reco
 | FAIL-50 | A new implementation passes its reference workflow but breaks an existing workflow | Baseline and candidate comparisons identify the regression. Keep the working path available and deny cutover until corrected or an explicit capability change is approved. | P05, P06, P07, P10, P11, P12 |
 | FAIL-51 | Dashboard migration loses a terminal generation, view action, theme, saved preference or conflict check | The view/action/preference matrix and existing assertions fail. Preserve all ten current views and control semantics through the approved interface migration. | P07 |
 | FAIL-52 | Federation cutover drops pending outbox, quarantine, seen IDs, consumer position, board revision or enrollment data | Compare full legacy and candidate fixtures before writer transfer; reconcile deliveries and credentials without duplicate execution, message loss or privilege expansion. | P04, P10, P12 |
-| FAIL-53 | A rewrite or narrower launch matrix silently removes an existing capability | The required replacement and capability-change record is absent, so approval fails. Ryan reviews the impact with Nick before authorizing any reduction. | P00, P03, P06, P07, P11, P12 |
+| FAIL-53 | A rewrite or narrower launch matrix silently removes an existing capability | The required replacement and capability-change record is absent, so Codex rejects phase acceptance. Codex reviews impact, alternatives and evidence against the full authorized scope; silent capability reduction is not permitted. | P00, P03, P06, P07, P11, P12 |
 | FAIL-54 | A baseline/candidate result uses stale source, a skipped environment or a mock in place of a supported live system | Invalidate the comparison or mark the claim unverified. Require matching source/environment evidence and the actual supported system before declaring parity. | P01, P06, P10, P11, P12 |
 | FAIL-55 | Cold launch with no selected instance, then warm launch from another project directory | One owned Compose project reaches actual service and application readiness; the next launch reuses its identity and volumes unchanged. Both display the same scoped status schema. | P02, P06, P12 |
 | FAIL-56 | Two terminals or WSL sessions start together; startup owner crashes mid-boot | One startup owner and one selected instance; waiting callers receive bounded progress or failure. Stale ownership recovery cannot create duplicate stacks or trust an unrelated PID. | P02, P06, P12 |
@@ -77,8 +77,8 @@ The phase acceptance criteria live in [phases.json](phases.json). Use [gate-reco
 2. Run the phase criteria and affected earlier regression tests. Use real broker, actual clients and hardware where the claim requires them.
 3. Inject the listed failures and inspect authoritative state plus correlated evidence. Screenshots alone cannot prove ownership or delivery.
 4. Rehearse the documented recovery and rollback boundary. Record incomplete environments separately from failures and passes.
-5. Obtain independent review and the authorized phase-advancement decision. Material changes invalidate affected evidence.
-6. Keep the branch unmerged until Ryan has reviewed it with Nick and explicitly authorizes merging.
+5. Codex reviews actual evidence and subagent findings and records the phase-advancement decision. Material changes invalidate affected evidence.
+6. Commit and push the reviewed phase candidate to the feature branch and verify the remote commit. Keep the branch unmerged; final delivery acceptance is not merge permission.
 
 ## Quality evidence
 
@@ -95,3 +95,9 @@ STATE-01 adds FAIL-42–FAIL-48. Run these alongside existing concurrency, ident
 ## Automatic startup qualification
 
 LOCAL-01 adds FAIL-55–FAIL-62. Record the installed plugin/client, OS, Docker context and Compose versions, instance/project/volume IDs, readiness deadlines, actual timings, status revisions and diagnostic output. P02 fixtures do not qualify P06 client launch or P10 federation. P12 repeats the complete flow against the packaged candidate. All scenarios remain not-run.
+
+## Delivery governance history
+
+The user assigned delivery review to Codex. The previous FAIL-53 oracle was: The required replacement and capability-change record is absent, so approval fails. Ryan reviews the impact with Nick before authorizing any reduction.
+
+The previous gate procedure required independent review and Ryan/Nick merge approval. Delivery now uses Codex review and verified feature-branch pushes; no merge is authorized. Runtime product approval controls remain unchanged.

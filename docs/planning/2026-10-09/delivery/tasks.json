@@ -4,7 +4,7 @@
   "createdAt": "2026-10-09T18:43:14.940314+00:00",
   "sourceHashes": {
     "phases.json": "5bb9037937a00621214ad58873c368fdc55b2f8c3722653c97432efa8031a82a",
-    "verification-matrix.json": "eb491dbab934696b3a0f6ead230ef1c0182ba795dd8a959b911132b4093ae099",
+    "verification-matrix.json": "516813fd034d6c73b4b0d6f9eaaf4b1b54798828e137336324605d0b956085bc",
     "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
     "component-inventory.json": "c197c2e88eca98622b3c4b0bcc673b1de1697f6e5ce7aa2edba770e94c08727a",
     "component-audit-hub.json": "da50535679a7e2001a71660e7072262139643871f22779d189331419fb17f4aa",
@@ -744,7 +744,7 @@
           "text": "Resolve launch workflow, dashboard controls, language/runtime and initial SDKs, storage topology, NATS account/domain layout, supported OS/tool versions, initial scale, identity enrollment, and provider/data policy."
         }
       ],
-      "status": "verification",
+      "status": "done",
       "owner": "Codex",
       "dependsOn": [
         "P00-T06"
@@ -775,9 +775,12 @@
       ],
       "evidence": [
         "docs/planning/2026-10-09/delivery/decisions/runtime-and-deployment.md",
-        "docs/planning/2026-10-09/delivery/spikes/runtime/comparison-result.json"
+        "docs/planning/2026-10-09/delivery/spikes/runtime/comparison-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/P00-T02.json"
       ],
-      "commits": [],
+      "commits": [
+        "b067e98e8a051c33d7df2e7facfe26d9f747239a"
+      ],
       "blocker": null,
       "history": [
         {
@@ -806,6 +809,13 @@
           "from": "in_progress",
           "to": "verification",
           "note": "Three-language NATS comparison and four Go build targets passed; D01-D06 recommendations await P00 review and any required revisions."
+        },
+        {
+          "at": "2026-10-09T21:07:54.516621+00:00",
+          "actor": "Codex",
+          "from": "verification",
+          "to": "done",
+          "note": "Codex accepted runtime, deployment, identity and provider design; qualification stays assigned to implementation phases."
         }
       ],
       "phaseCriteria": [
@@ -959,7 +969,7 @@
           "text": "Approve versioned state machines, authority boundaries, plugin manifest/context schemas, migration ownership, and the requirement-to-phase matrix."
         }
       ],
-      "status": "in_progress",
+      "status": "done",
       "owner": "Codex",
       "dependsOn": [
         "P00-T06"
@@ -989,8 +999,12 @@
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
         }
       ],
-      "evidence": [],
-      "commits": [],
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/P00-T04.json"
+      ],
+      "commits": [
+        "b067e98e8a051c33d7df2e7facfe26d9f747239a"
+      ],
       "blocker": null,
       "history": [
         {
@@ -999,6 +1013,13 @@
           "from": "planned",
           "to": "in_progress",
           "note": "Prepare reviewable v0.1 manifest/context schemas, authority and lifecycle/work transitions, migration ownership and contract fixtures; no product cutover."
+        },
+        {
+          "at": "2026-10-09T21:07:55.224907+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "done",
+          "note": "Codex accepted versioned contracts, state models, migration ownership and requirement mapping after independent review."
         }
       ],
       "phaseCriteria": [
@@ -1040,7 +1061,7 @@
           "text": "Record approved storage direction STATE-01. Select JetStream authority boundaries, retention/checkpoint policy, replication/sync profiles, broker/API access scopes and supported SDK versions. Keep any proposed authoritative SQL exception visible for review."
         }
       ],
-      "status": "verification",
+      "status": "done",
       "owner": "Codex",
       "dependsOn": [
         "P00-T06"
@@ -1070,9 +1091,12 @@
         }
       ],
       "evidence": [
-        "docs/planning/2026-10-09/delivery/decisions/storage-contract.md"
+        "docs/planning/2026-10-09/delivery/decisions/storage-contract.md",
+        "docs/planning/2026-10-09/delivery/evidence/P00/P00-T05.json"
       ],
-      "commits": [],
+      "commits": [
+        "b067e98e8a051c33d7df2e7facfe26d9f747239a"
+      ],
       "blocker": null,
       "history": [
         {
@@ -1101,6 +1125,13 @@
           "from": "in_progress",
           "to": "verification",
           "note": "S01-S05 storage recommendation ready for review. Syntax checked; persistence guarantees remain assigned to P01/P04/P10/P12."
+        },
+        {
+          "at": "2026-10-09T21:07:55.928969+00:00",
+          "actor": "Codex",
+          "from": "verification",
+          "to": "done",
+          "note": "Codex accepted single-authority NATS storage and recovery contract; production proof remains required."
         }
       ],
       "phaseCriteria": [
@@ -1266,7 +1297,7 @@
           "text": "Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch. Approve instance/profile ownership, Docker context selection, enrollment prerequisites, host startup hooks, status schema and timeout targets."
         }
       ],
-      "status": "verification",
+      "status": "done",
       "owner": "Codex",
       "dependsOn": [
         "P00-T06"
@@ -1296,9 +1327,12 @@
         }
       ],
       "evidence": [
-        "docs/planning/2026-10-09/delivery/decisions/startup-contract.md"
+        "docs/planning/2026-10-09/delivery/decisions/startup-contract.md",
+        "docs/planning/2026-10-09/delivery/evidence/P00/P00-T07.json"
       ],
-      "commits": [],
+      "commits": [
+        "b067e98e8a051c33d7df2e7facfe26d9f747239a"
+      ],
       "blocker": null,
       "history": [
         {
@@ -1327,6 +1361,13 @@
           "from": "in_progress",
           "to": "verification",
           "note": "L01-L05 startup recommendation ready for review. Docker is unavailable in current WSL; actual Compose and host launch qualification remains open."
+        },
+        {
+          "at": "2026-10-09T21:07:56.831199+00:00",
+          "actor": "Codex",
+          "from": "verification",
+          "to": "done",
+          "note": "Codex accepted automatic startup/reuse contract, host matrix, readiness and assigned verification."
         }
       ],
       "phaseCriteria": [
@@ -1388,7 +1429,7 @@
           "text": "LOCAL-01 has a reviewed host/platform support matrix, stable instance identity, safe Docker context and credential rules, readiness/status contract, and assigned verification owners. Automatic launch is required for every integration advertised as supporting it."
         }
       ],
-      "status": "blocked",
+      "status": "verification",
       "owner": "Codex",
       "dependsOn": [
         "P00-T01",
@@ -1441,7 +1482,7 @@
       ],
       "evidence": [],
       "commits": [],
-      "blocker": "Complete the pending P00 contract and decision review, inspect all required criterion evidence, and verify the pushed phase candidate before advancement.",
+      "blocker": null,
       "history": [
         {
           "at": "2026-10-09T18:43:15.681895+00:00",
@@ -1592,6 +1633,13 @@
               }
             ]
           }
+        },
+        {
+          "at": "2026-10-09T21:08:56.844439+00:00",
+          "actor": "Codex",
+          "from": "blocked",
+          "to": "verification",
+          "note": "All seven P00 tasks accepted; review and commit the complete P00 design evidence, then verify remote before recording advancement."
         }
       ],
       "phaseCriteria": [
@@ -32744,6 +32792,62 @@
       "to": "done",
       "note": "Codex accepted pinned inventory and independent dynamic-dispatch ownership review; runtime parity remains assigned to owning phases.",
       "taskId": "P00-T01"
+    },
+    {
+      "at": "2026-10-09T21:07:54.516621+00:00",
+      "actor": "Codex",
+      "from": "verification",
+      "to": "done",
+      "note": "Codex accepted runtime, deployment, identity and provider design; qualification stays assigned to implementation phases.",
+      "taskId": "P00-T02"
+    },
+    {
+      "at": "2026-10-09T21:07:55.224907+00:00",
+      "actor": "Codex",
+      "from": "in_progress",
+      "to": "done",
+      "note": "Codex accepted versioned contracts, state models, migration ownership and requirement mapping after independent review.",
+      "taskId": "P00-T04"
+    },
+    {
+      "at": "2026-10-09T21:07:55.928969+00:00",
+      "actor": "Codex",
+      "from": "verification",
+      "to": "done",
+      "note": "Codex accepted single-authority NATS storage and recovery contract; production proof remains required.",
+      "taskId": "P00-T05"
+    },
+    {
+      "at": "2026-10-09T21:07:56.831199+00:00",
+      "actor": "Codex",
+      "from": "verification",
+      "to": "done",
+      "note": "Codex accepted automatic startup/reuse contract, host matrix, readiness and assigned verification.",
+      "taskId": "P00-T07"
+    },
+    {
+      "at": "2026-10-09T21:08:56.288874+00:00",
+      "actor": "Codex",
+      "action": "reconcile-failure-oracle",
+      "previousSourceHashes": {
+        "phases.json": "5bb9037937a00621214ad58873c368fdc55b2f8c3722653c97432efa8031a82a",
+        "verification-matrix.json": "eb491dbab934696b3a0f6ead230ef1c0182ba795dd8a959b911132b4093ae099",
+        "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
+        "component-inventory.json": "c197c2e88eca98622b3c4b0bcc673b1de1697f6e5ce7aa2edba770e94c08727a",
+        "component-audit-hub.json": "da50535679a7e2001a71660e7072262139643871f22779d189331419fb17f4aa",
+        "component-audit-harness.json": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08",
+        "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
+        "component-audit-repository.json": "39001427bd59e2b0bf45ad6b953a4221c0edf9cdbaaf541179317775e0d29a6f"
+      },
+      "note": "FAIL-53 now matches authorized autonomous review. Scenario scope, IDs, phase ownership and task criteria unchanged."
+    },
+    {
+      "at": "2026-10-09T21:08:56.844439+00:00",
+      "actor": "Codex",
+      "from": "blocked",
+      "to": "verification",
+      "note": "All seven P00 tasks accepted; review and commit the complete P00 design evidence, then verify remote before recording advancement.",
+      "taskId": "P00-GATE"
     }
   ],
   "deliveryGovernance": {

@@ -1,6 +1,6 @@
 {
   "reviewer": "Codex, autonomous governance and P00 draft-contract review, 2026-10-09; P00 gate remains open",
-  "sourceDigest": "1fd06089251e106f7a267571c104b76bb3aa9a5b3aab643caa73718d2919a052",
+  "sourceDigest": "6acc8ac29dd5f5bda53c9b9b39d86b5c561e30cedfd9a63ebba452079befdbfb",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -298,6 +298,18 @@
         "docs/planning/2026-10-09/delivery/decisions/storage-contract.md"
       ],
       "rationale": "Reviewed dynamic dispatch ownership and accepted inventory task only. Independent policy review found split config authority and missing caller binding; resolved through ledger-owned config and canonical signed ingress claims. Updated planned pattern descriptions and proposal diagram, preserving prior how text. Draft checks distinguish shape/semantic examples from cryptography and runtime proof. P00 gate remains open."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "previousSourceDigest": "1fd06089251e106f7a267571c104b76bb3aa9a5b3aab643caa73718d2919a052",
+      "scope": "P00 decision task acceptance and preservation negative evidence",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/decisions/acceptance.md",
+        "docs/planning/2026-10-09/delivery/evidence/P00/preservation-negative-results.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/acceptance-source-checks.json"
+      ],
+      "rationale": "All seven planning tasks accepted with source-bound evidence. Static negative fixtures reject omitted inventory and unexplained replacement; they do not assert runtime parity. Retained source hashes match 33 runtime/contract evidence inputs. Updated stale delivery reviewer text in FAIL-53 without changing its full-scope requirement. No product runtime code or pattern relationship changed."
     }
   ],
   "rules": {

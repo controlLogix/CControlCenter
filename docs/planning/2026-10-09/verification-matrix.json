@@ -529,7 +529,7 @@
     {
       "id": "FAIL-53",
       "scenario": "A rewrite or narrower launch matrix silently removes an existing capability",
-      "oracle": "The required replacement and capability-change record is absent, so approval fails. Ryan reviews the impact with Nick before authorizing any reduction.",
+      "oracle": "The required replacement and capability-change record is absent, so Codex rejects phase acceptance. Codex reviews impact, alternatives and evidence against the full authorized scope; silent capability reduction is not permitted.",
       "phases": [
         "P00",
         "P03",
@@ -637,6 +637,17 @@
         "P12"
       ],
       "status": "not-run"
+    }
+  ],
+  "governanceHistory": [
+    {
+      "at": "2026-10-09T21:08:12.034551+00:00",
+      "actor": "Codex",
+      "action": "autonomous-delivery-oracle",
+      "scenarioId": "FAIL-53",
+      "supersededOracle": "The required replacement and capability-change record is absent, so approval fails. Ryan reviews the impact with Nick before authorizing any reduction.",
+      "currentOracle": "The required replacement and capability-change record is absent, so Codex rejects phase acceptance. Codex reviews impact, alternatives and evidence against the full authorized scope; silent capability reduction is not permitted.",
+      "reason": "User assigned delivery review to Codex; preservation scope and required evidence remain unchanged."
     }
   ]
 }

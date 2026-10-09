@@ -6,7 +6,7 @@ Branch: `feat/agentmux-platform-rearchitecture`. No phase or merge approval is i
 
 | Phase | Planned | Ready | In progress | Blocked | Verification | Done | Gate |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| P00 | 0 | 0 | 1 | 1 | 3 | 3 | blocked |
+| P00 | 0 | 0 | 0 | 0 | 1 | 7 | verification |
 | P01 | 9 | 0 | 0 | 0 | 0 | 0 | planned |
 | P02 | 8 | 0 | 0 | 0 | 0 | 0 | planned |
 | P03 | 8 | 0 | 0 | 0 | 0 | 0 | planned |
@@ -24,12 +24,7 @@ Branch: `feat/agentmux-platform-rearchitecture`. No phase or merge approval is i
 
 ## Current work and blockers
 
-- **P00-T02 — verification:** Resolve launch workflow, dashboard controls, language/runtime and initial SDKs, storage topology, NATS account/domain layout, supported OS/tool versions, initial scale, identity enrollment, and provider/data policy.
-- **P00-T04 — in_progress:** Approve versioned state machines, authority boundaries, plugin manifest/context schemas, migration ownership, and the requirement-to-phase matrix.
-- **P00-T05 — verification:** Record approved storage direction STATE-01
-- **P00-T07 — verification:** Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch
-- **P00-GATE — blocked:** Verify and accept P00
-  Reason: Complete the pending P00 contract and decision review, inspect all required criterion evidence, and verify the pushed phase candidate before advancement.
+- **P00-GATE — verification:** Verify and accept P00
 
 ## P00. Scope, baseline, and architecture decisions
 
@@ -38,13 +33,13 @@ An approved implementation contract with no unresolved decision hidden in code.
 | Task | Status | Owner | Scope |
 | --- | --- | --- | --- |
 | [P00-T01](delivery/task-details.md#P00-T01) | done | Codex | Freeze df46e94570fadf78ef67a75a692dd48b968a10f7 as the behavioral comparison baseline and inventory every CLI verb, dashboard view, protocol, state store, integration, and evaluation. |
-| [P00-T02](delivery/task-details.md#P00-T02) | verification | Codex | Resolve launch workflow, dashboard controls, language/runtime and initial SDKs, storage topology, NATS account/domain layout, supported OS/tool versions, initial scale, identity enrollment, and provider/data policy. |
+| [P00-T02](delivery/task-details.md#P00-T02) | done | Codex | Resolve launch workflow, dashboard controls, language/runtime and initial SDKs, storage topology, NATS account/domain layout, supported OS/tool versions, initial scale, identity enrollment, and provider/data policy. |
 | [P00-T03](delivery/task-details.md#P00-T03) | done | Codex | Reproduce or explicitly scope the previously reported federation correctness defects |
-| [P00-T04](delivery/task-details.md#P00-T04) | in_progress | Codex | Approve versioned state machines, authority boundaries, plugin manifest/context schemas, migration ownership, and the requirement-to-phase matrix. |
-| [P00-T05](delivery/task-details.md#P00-T05) | verification | Codex | Record approved storage direction STATE-01 |
+| [P00-T04](delivery/task-details.md#P00-T04) | done | Codex | Approve versioned state machines, authority boundaries, plugin manifest/context schemas, migration ownership, and the requirement-to-phase matrix. |
+| [P00-T05](delivery/task-details.md#P00-T05) | done | Codex | Record approved storage direction STATE-01 |
 | [P00-T06](delivery/task-details.md#P00-T06) | done | Codex | Apply ADD-01 and the component preservation matrix to every changed source file and affected caller |
-| [P00-T07](delivery/task-details.md#P00-T07) | verification | Codex | Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch |
-| [P00-GATE](delivery/task-details.md#P00-GATE) | blocked | Codex | Verify and accept P00 |
+| [P00-T07](delivery/task-details.md#P00-T07) | done | Codex | Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch |
+| [P00-GATE](delivery/task-details.md#P00-GATE) | verification | Codex | Verify and accept P00 |
 
 ## P01. Executable contracts, baseline repairs, and verification
 
