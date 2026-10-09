@@ -56,6 +56,79 @@ class Fed(unittest.TestCase):
             p.close()
         cls.circle.close()
 
+    def test_governance_same_peer_different_node_round_trip(self):
+        """AMX-BASE-004: the consuming node must not look for the origin's local row."""
+        other = self._person("nick", {"falcon": self.nick_path}, [("falcon", "diagnostic", "worker")],
+                             {"alice": "auto"}, node="nick_other")
+        origin = self.nick.ok("fed_work_add", {"to": "role:falcon/diagnostic", "title": "safe multi-node fixture"})
+        rows = wait(lambda: [w for w in other.ok("work_list") if w["title"] == "safe multi-node fixture" and w["state"] == "ready"], 25)
+        self.assertTrue(rows)
+        session = other.sessions[0]
+        self.assertTrue(other.ok("claim", {"work_id": rows[0]["id"]}, as_=session)["claimed"])
+        other.ok("release", {"work_id": rows[0]["id"], "outcome": "done", "result": "read-only fixture verified"}, as_=session)
+        result = wait(lambda: (lambda w: w if w["state"] == "done" else None)(self.nick.ok("work_show", {"work_id": origin["id"]})), 25)
+        self.assertTrue(result)
+        self.assertEqual(result["result"], "read-only fixture verified")
+        flags = json.loads(result["fed_flags"])
+        self.assertEqual(flags["executor"]["node"], "nick_other")
+        self.assertIn("accepted_result", flags)
+
+    def test_governance_wrong_executor_result_cannot_complete_work(self):
+        from hub.fed import conn, envelope
+        from hub.fed.plugins.work import result_digest
+        origin = self.nick.ok("fed_work_add", {"to": "role:falcon/worker", "title": "result binding fixture"})
+        row = wait(lambda: (lambda w: w if json.loads(w.get("fed_flags") or "{}").get("executor") else None)(
+            self.nick.ok("work_show", {"work_id": origin["id"]})), 25)
+        self.assertTrue(row)
+        flags = json.loads(row["fed_flags"])
+        selected = flags["executor"]
+        self.assertEqual(selected["peer"], "alice")
+        d = {"origin_id": origin["id"], "origin_node": flags["origin_node"], "offer_id": flags["env"],
+             "offer_digest": flags["offer_digest"], "execution_id": selected["execution_id"],
+             "grant_id": selected["grant_id"], "state": "done", "result": "forged success"}
+        d["result_digest"] = result_digest(d)
+        forged = envelope.make("result", "mallory", "mallory_box", flags["rid"], "nick", d)
+        self.nick.ok("fed_trust", {"peer": "mallory", "level": "auto"})
+        try:
+            async def publish():
+                nc = await conn.connect(self.circle.url, self.circle.creds("mallory"), self.circle.ca, "negative-result")
+                try:
+                    await nc.jetstream().publish("am.msg.mallory.nick", json.dumps(forged).encode())
+                finally:
+                    await conn.close(nc)
+            asyncio.run(publish())
+            self.assertTrue(wait(lambda: [r for r in self.audit(self.nick, "unbound_result") if r["msg_id"] == forged["id"]], 15))
+            self.assertEqual(self.nick.ok("work_show", {"work_id": origin["id"]})["claimed_by"], "fed:pending")
+        finally:
+            self.nick.ok("fed_trust", {"peer": "mallory", "level": "approve"})
+        # Finish the safe task on its legitimate receiver, leaving no reservation behind.
+        incoming = wait(lambda: [w for w in self.alice.ok("work_list") if w["title"] == "result binding fixture" and w["state"] == "ready"], 15)
+        self.assertTrue(incoming)
+        self.assertTrue(self.alice.ok("claim", {"work_id": incoming[0]["id"]}, as_=ALICE_W1)["claimed"])
+        self.alice.ok("release", {"work_id": incoming[0]["id"], "outcome": "done", "result": "legitimate fixture result"}, as_=ALICE_W1)
+        self.assertTrue(wait(lambda: self.nick.ok("work_show", {"work_id": origin["id"]})["state"] == "done", 20))
+
+    def test_governance_v3_offer_isolated_from_legacy_work_consumer(self):
+        from hub.fed import conn, envelope
+        import nats.errors
+        async def check():
+            nc = await conn.connect(self.circle.url, self.circle.creds("nick"), self.circle.ca, "version-check")
+            try:
+                js = nc.jetstream()
+                rid = self.nick.ok("fed_status")["shared"]["falcon"]
+                old = await js.pull_subscribe(f"am.work.nick.{rid}.versionproof", durable="legacy_versionproof", stream="AM_WORK")
+                new = await js.pull_subscribe(envelope.subject("work", "nick", rid, "versionproof"), durable="v3_versionproof", stream="AM_WORK")
+                work = self.nick.ok("fed_work_add", {"to": "role:falcon/versionproof", "title": "version isolation"})
+                received = await new.fetch(1, timeout=10)
+                self.assertEqual(json.loads(received[0].data)["v"], 3)
+                with self.assertRaises(nats.errors.TimeoutError):
+                    await old.fetch(1, timeout=0.3)
+                await received[0].ack()
+                self.nick.ok("work_cancel", {"work_id": work["id"], "reason": "safe routing fixture finished"})
+            finally:
+                await conn.close(nc)
+        asyncio.run(check())
+
     # -- helpers ---------------------------------------------------------------------------
     def find(self, person, session, needle, timeout=15):
         return wait(lambda: [m for m in person.inbox(session) if needle in (m.get("body") or "")], timeout)
@@ -172,7 +245,8 @@ class Fed(unittest.TestCase):
         self.assertTrue(held, "privileged remote work is held even from an auto-trust peer")
         self.assertIn("privileged", held[0]["reason"])
         self.nick.ok("fed_approve", {"id": held[0]["id"]})        # approved, but NOT for privileged tools
-        item = wait(lambda: [x for x in self.nick.ok("work_list", {}) if x["title"] == "force the PLC output"], 10)
+        item = wait(lambda: [x for x in self.nick.ok("work_list", {})
+                            if x["title"] == "force the PLC output" and x["state"] == "ready"], 10)
         c = self.nick.ok("claim", {"work_id": item[0]["id"]}, as_=NICK_LEAD)
         self.assertTrue(c["claimed"])
         g = self.nick.ok("fed_gate", {}, as_=NICK_LEAD)

@@ -99,9 +99,15 @@ class Inbound(unittest.TestCase):
 
     def d(self, frm, type_="message", rid="default", data=None, subj_from=None):
         rid = self.rid if rid == "default" else rid
-        env = envelope.make(type_, frm, "x", rid, "nick", data or {"body": "b"})
         plane = envelope.PLANE_OF[type_]
-        return guard.inbound(self.p, f"am.{plane}.{subj_from or frm}.nick", env)
+        payload = data or {"body": "b"}
+        if type_ == "work":
+            payload = {"role": "worker", **payload}
+        env = envelope.make(type_, frm, "x", rid, "nick" if plane == "msg" else "*", payload)
+        tail = ["nick"] if plane == "msg" else [rid or self.rid]
+        if plane == "work":
+            tail.append(payload["role"])
+        return guard.inbound(self.p, envelope.subject(plane, subj_from or frm, *tail), env)
 
     def test_trust_levels(self):
         self.assertEqual(self.d("alice").action, "deliver")
@@ -116,7 +122,7 @@ class Inbound(unittest.TestCase):
         self.assertIn("spoof", self.d("alice", subj_from="mallory").reason)
         self.assertEqual(self.d("nick").reason, "self")
         self.assertEqual(self.d("alice", rid="r000000000000").reason, "not_shared")
-        self.assertEqual(self.d("alice", "knowledge", rid=None).reason, "no rid")
+        self.assertEqual(self.d("alice", "knowledge", rid=None).action, "drop")
 
     def test_privileged_work_is_quarantined_even_from_auto(self):
         dec = self.d("alice", "work", data={"title": "t", "requirements": {"capabilities": ["plc_write"]}})

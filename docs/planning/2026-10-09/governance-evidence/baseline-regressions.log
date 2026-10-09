@@ -1,0 +1,257 @@
+test_subject_destination_repository_and_role_match (hub.tests.test_governance.AuthorizationBinding.test_subject_destination_repository_and_role_match) ...
+  test_subject_destination_repository_and_role_match (hub.tests.test_governance.AuthorizationBinding.test_subject_destination_repository_and_role_match) (subject='am.work.alice.r000000000000.worker.v3', env={'v': 2, 'id': '01M4GWCPGJ5GPXAAT813QNRW6P', 'type': 'work', 'from': 'alice', 'node': 'remote', 'rid': 'rc63822ec2d7d', 'to': '*', 'at': '2026-10-09T17:46:49.746Z', 'data': {'role': 'worker', 'title': 'review'}}) ... FAIL
+  test_subject_destination_repository_and_role_match (hub.tests.test_governance.AuthorizationBinding.test_subject_destination_repository_and_role_match) (subject='am.work.alice.rc63822ec2d7d.lead.v3', env={'v': 2, 'id': '01M4GWCPGJ5GPXAAT813QNRW6P', 'type': 'work', 'from': 'alice', 'node': 'remote', 'rid': 'rc63822ec2d7d', 'to': '*', 'at': '2026-10-09T17:46:49.746Z', 'data': {'role': 'worker', 'title': 'review'}}) ... FAIL
+  test_subject_destination_repository_and_role_match (hub.tests.test_governance.AuthorizationBinding.test_subject_destination_repository_and_role_match) (subject='am.msg.alice.mallory', env={'v': 2, 'id': '01M4GWCPGJ5GPXAAT813QNRW6Q', 'type': 'message', 'from': 'alice', 'node': 'remote', 'rid': None, 'to': 'nick', 'at': '2026-10-09T17:46:49.746Z', 'data': {'body': 'hi'}}) ... FAIL
+  test_subject_destination_repository_and_role_match (hub.tests.test_governance.AuthorizationBinding.test_subject_destination_repository_and_role_match) (subject='am.msg.alice.nick.extra', env={'v': 2, 'id': '01M4GWCPGJ5GPXAAT813QNRW6Q', 'type': 'message', 'from': 'alice', 'node': 'remote', 'rid': None, 'to': 'nick', 'at': '2026-10-09T17:46:49.746Z', 'data': {'body': 'hi'}}) ... FAIL
+  test_subject_destination_repository_and_role_match (hub.tests.test_governance.AuthorizationBinding.test_subject_destination_repository_and_role_match) (subject='am.msg.alice.nick', env={'v': 2, 'id': '01M4GWCPGJ5GPXAAT813QNRW6Q', 'type': 'message', 'from': 'alice', 'node': 'remote', 'rid': None, 'to': 'mallory', 'at': '2026-10-09T17:46:49.746Z', 'data': {'body': 'hi'}}) ... FAIL
+test_work_cannot_enter_through_information_plane (hub.tests.test_governance.AuthorizationBinding.test_work_cannot_enter_through_information_plane) ...
+  test_work_cannot_enter_through_information_plane (hub.tests.test_governance.AuthorizationBinding.test_work_cannot_enter_through_information_plane) (subject='am.know.mallory.rc63822ec2d7d') ... FAIL
+  test_work_cannot_enter_through_information_plane (hub.tests.test_governance.AuthorizationBinding.test_work_cannot_enter_through_information_plane) (subject='am.code.mallory.rc63822ec2d7d') ... FAIL
+test_concurrent_stores_do_not_replace_snapshots (hub.tests.test_governance.BackupIdentity.test_concurrent_stores_do_not_replace_snapshots) ... ERROR
+test_failed_copy_does_not_publish_or_prune_a_snapshot (hub.tests.test_governance.BackupIdentity.test_failed_copy_does_not_publish_or_prune_a_snapshot) ... FAIL
+test_frozen_clock_keeps_distinct_restorable_snapshots (hub.tests.test_governance.BackupIdentity.test_frozen_clock_keeps_distinct_restorable_snapshots) ... FAIL
+test_completion_keeps_durable_return_intent_without_callback (hub.tests.test_governance.WorkRecovery.test_completion_keeps_durable_return_intent_without_callback) ... <frozen importlib._bootstrap>:466: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x73a2159c64d0>
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+FAIL
+test_incoming_creation_rolls_back_when_attribution_fails (hub.tests.test_governance.WorkRecovery.test_incoming_creation_rolls_back_when_attribution_fails) ... FAIL
+test_same_peer_other_node_is_not_discarded (hub.tests.test_governance.WorkRecovery.test_same_peer_other_node_is_not_discarded) ... FAIL
+test_wrong_peer_result_does_not_complete_origin (hub.tests.test_governance.WorkRecovery.test_wrong_peer_result_does_not_complete_origin) ... FAIL
+
+======================================================================
+ERROR: test_concurrent_stores_do_not_replace_snapshots (hub.tests.test_governance.BackupIdentity.test_concurrent_stores_do_not_replace_snapshots)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ryan/.cache/agentmux-governance/baseline-5ee428b/hub/tests/test_governance.py", line 86, in test_concurrent_stores_do_not_replace_snapshots
+    result = list(pool.map(backup, range(8)))
+  File "/usr/lib/python3.14/concurrent/futures/_base.py", line 639, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/usr/lib/python3.14/concurrent/futures/_base.py", line 311, in _result_or_cancel
+    return fut.result(timeout)
+           ~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.14/concurrent/futures/_base.py", line 443, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/concurrent/futures/_base.py", line 395, in __get_result
+    raise self._exception
+  File "/usr/lib/python3.14/concurrent/futures/thread.py", line 86, in run
+    result = ctx.run(self.task)
+  File "/usr/lib/python3.14/concurrent/futures/thread.py", line 73, in run
+    return fn(*args, **kwargs)
+  File "/home/ryan/.cache/agentmux-governance/baseline-5ee428b/hub/tests/test_governance.py", line 81, in backup
+    return i, s.backup_to(self.dest, keep=20)
+              ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/home/ryan/.cache/agentmux-governance/baseline-5ee428b/hub/store.py", line 274, in backup_to
+    os.chmod(tmp, 0o600)
+    ~~~~~~~~^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/amx-gov-wcgod5ez/backups/hub-hourly-20261009T174649123Z.db.tmp'
+
+======================================================================
+FAIL: test_subject_destination_repository_and_role_match (hub.tests.test_governance.AuthorizationBinding.test_subject_destination_repository_and_role_match) (subject='am.work.alice.r000000000000.worker.v3', env={'v': 2, 'id': '01M4GWCPGJ5GPXAAT813QNRW6P', 'type': 'work', 'from': 'alice', 'node': 'remote', 'rid': 'rc63822ec2d7d', 'to': '*', 'at': '2026-10-09T17:46:49.746Z', 'data': {'role': 'worker', 'title': 'review'}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ryan/.cache/agentmux-governance/baseline-5ee428b/hub/tests/test_governance.py", line 43, in test_subject_destination_repository_and_role_match
+    self.assertEqual(guard.inbound(p, subject, env).action, "drop")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'deliver' != 'drop'
+- deliver
++ drop
+
+
+======================================================================
+FAIL: test_subject_destination_repository_and_role_match (hub.tests.test_governance.AuthorizationBinding.test_subject_destination_repository_and_role_match) (subject='am.work.alice.rc63822ec2d7d.lead.v3', env={'v': 2, 'id': '01M4GWCPGJ5GPXAAT813QNRW6P', 'type': 'work', 'from': 'alice', 'node': 'remote', 'rid': 'rc63822ec2d7d', 'to': '*', 'at': '2026-10-09T17:46:49.746Z', 'data': {'role': 'worker', 'title': 'review'}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ryan/.cache/agentmux-governance/baseline-5ee428b/hub/tests/test_governance.py", line 43, in test_subject_destination_repository_and_role_match
+    self.assertEqual(guard.inbound(p, subject, env).action, "drop")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'deliver' != 'drop'
+- deliver
++ drop
+
+
+======================================================================
+FAIL: test_subject_destination_repository_and_role_match (hub.tests.test_governance.AuthorizationBinding.test_subject_destination_repository_and_role_match) (subject='am.msg.alice.mallory', env={'v': 2, 'id': '01M4GWCPGJ5GPXAAT813QNRW6Q', 'type': 'message', 'from': 'alice', 'node': 'remote', 'rid': None, 'to': 'nick', 'at': '2026-10-09T17:46:49.746Z', 'data': {'body': 'hi'}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ryan/.cache/agentmux-governance/baseline-5ee428b/hub/tests/test_governance.py", line 43, in test_subject_destination_repository_and_role_match
+    self.assertEqual(guard.inbound(p, subject, env).action, "drop")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'deliver' != 'drop'
+- deliver
++ drop
+
+
+======================================================================
+FAIL: test_subject_destination_repository_and_role_match (hub.tests.test_governance.AuthorizationBinding.test_subject_destination_repository_and_role_match) (subject='am.msg.alice.nick.extra', env={'v': 2, 'id': '01M4GWCPGJ5GPXAAT813QNRW6Q', 'type': 'message', 'from': 'alice', 'node': 'remote', 'rid': None, 'to': 'nick', 'at': '2026-10-09T17:46:49.746Z', 'data': {'body': 'hi'}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ryan/.cache/agentmux-governance/baseline-5ee428b/hub/tests/test_governance.py", line 43, in test_subject_destination_repository_and_role_match
+    self.assertEqual(guard.inbound(p, subject, env).action, "drop")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'deliver' != 'drop'
+- deliver
++ drop
+
+
+======================================================================
+FAIL: test_subject_destination_repository_and_role_match (hub.tests.test_governance.AuthorizationBinding.test_subject_destination_repository_and_role_match) (subject='am.msg.alice.nick', env={'v': 2, 'id': '01M4GWCPGJ5GPXAAT813QNRW6Q', 'type': 'message', 'from': 'alice', 'node': 'remote', 'rid': None, 'to': 'mallory', 'at': '2026-10-09T17:46:49.746Z', 'data': {'body': 'hi'}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ryan/.cache/agentmux-governance/baseline-5ee428b/hub/tests/test_governance.py", line 43, in test_subject_destination_repository_and_role_match
+    self.assertEqual(guard.inbound(p, subject, env).action, "drop")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'deliver' != 'drop'
+- deliver
++ drop
+
+
+======================================================================
+FAIL: test_work_cannot_enter_through_information_plane (hub.tests.test_governance.AuthorizationBinding.test_work_cannot_enter_through_information_plane) (subject='am.know.mallory.rc63822ec2d7d')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ryan/.cache/agentmux-governance/baseline-5ee428b/hub/tests/test_governance.py", line 30, in test_work_cannot_enter_through_information_plane
+    self.assertEqual(guard.inbound(p, subject, e).action, "drop")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'deliver' != 'drop'
+- deliver
++ drop
+
+
+======================================================================
+FAIL: test_work_cannot_enter_through_information_plane (hub.tests.test_governance.AuthorizationBinding.test_work_cannot_enter_through_information_plane) (subject='am.code.mallory.rc63822ec2d7d')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ryan/.cache/agentmux-governance/baseline-5ee428b/hub/tests/test_governance.py", line 30, in test_work_cannot_enter_through_information_plane
+    self.assertEqual(guard.inbound(p, subject, e).action, "drop")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'deliver' != 'drop'
+- deliver
++ drop
+
+
+======================================================================
+FAIL: test_failed_copy_does_not_publish_or_prune_a_snapshot (hub.tests.test_governance.BackupIdentity.test_failed_copy_does_not_publish_or_prune_a_snapshot)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ryan/.cache/agentmux-governance/baseline-5ee428b/hub/tests/test_governance.py", line 74, in test_failed_copy_does_not_publish_or_prune_a_snapshot
+    self.assertEqual([p.name for p in Path(self.dest).iterdir()], [Path(good).name])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['hub-hourly-20261009T174649868Z.db.tmp', 'hub-hourly-20261009T174649867Z.db'] != ['hub-hourly-20261009T174649867Z.db']
+
+First differing element 0:
+'hub-hourly-20261009T174649868Z.db.tmp'
+'hub-hourly-20261009T174649867Z.db'
+
+First list contains 1 additional elements.
+First extra element 1:
+'hub-hourly-20261009T174649867Z.db'
+
+- ['hub-hourly-20261009T174649868Z.db.tmp', 'hub-hourly-20261009T174649867Z.db']
++ ['hub-hourly-20261009T174649867Z.db']
+
+======================================================================
+FAIL: test_frozen_clock_keeps_distinct_restorable_snapshots (hub.tests.test_governance.BackupIdentity.test_frozen_clock_keeps_distinct_restorable_snapshots)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ryan/.cache/agentmux-governance/baseline-5ee428b/hub/tests/test_governance.py", line 61, in test_frozen_clock_keeps_distinct_restorable_snapshots
+    self.assertEqual(len(set(paths)), 5)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 5
+
+======================================================================
+FAIL: test_completion_keeps_durable_return_intent_without_callback (hub.tests.test_governance.WorkRecovery.test_completion_keeps_durable_return_intent_without_callback)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/lib/python3.14/asyncio/runners.py", line 127, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/home/ryan/.cache/agentmux-governance/baseline-5ee428b/hub/tests/test_governance.py", line 186, in test_completion_keeps_durable_return_intent_without_callback
+    self.assertTrue(json.loads(row["fed_flags"]).get("result_pending"))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: None is not true
+
+======================================================================
+FAIL: test_incoming_creation_rolls_back_when_attribution_fails (hub.tests.test_governance.WorkRecovery.test_incoming_creation_rolls_back_when_attribution_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/lib/python3.14/asyncio/runners.py", line 127, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/home/ryan/.cache/agentmux-governance/baseline-5ee428b/hub/tests/test_governance.py", line 156, in test_incoming_creation_rolls_back_when_attribution_fails
+    self.assertEqual(self.ctx.store.q("SELECT * FROM work_items"), [])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [{'id': 'W-SMTJXXX6PQ', 'parent_id': None,[461 chars]one}] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+{'id': 'W-SMTJXXX6PQ', 'parent_id': None, 'task_key': None, 'repo': 'falcon', 'target': 'role:falcon/worker', 'target_kind': 'role', 'title': 'review fixture', 'body': None, 'created_by': 'peer:nick', 'requirements': None, 'priority': 100, 'state': 'ready', 'claimed_by': None, 'lease_until': None, 'attempts': 0, 'max_attempts': 3, 'result': None, 'blocked_reason': None, 'created': '2026-10-09T17:46:49.924Z', 'updated': '2026-10-09T17:46:49.924Z', 'origin': None, 'origin_peer': None, 'fed_flags': None}
+
++ []
+- [{'attempts': 0,
+-   'blocked_reason': None,
+-   'body': None,
+-   'claimed_by': None,
+-   'created': '2026-10-09T17:46:49.924Z',
+-   'created_by': 'peer:nick',
+-   'fed_flags': None,
+-   'id': 'W-SMTJXXX6PQ',
+-   'lease_until': None,
+-   'max_attempts': 3,
+-   'origin': None,
+-   'origin_peer': None,
+-   'parent_id': None,
+-   'priority': 100,
+-   'repo': 'falcon',
+-   'requirements': None,
+-   'result': None,
+-   'state': 'ready',
+-   'target': 'role:falcon/worker',
+-   'target_kind': 'role',
+-   'task_key': None,
+-   'title': 'review fixture',
+-   'updated': '2026-10-09T17:46:49.924Z'}]
+
+======================================================================
+FAIL: test_same_peer_other_node_is_not_discarded (hub.tests.test_governance.WorkRecovery.test_same_peer_other_node_is_not_discarded)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/lib/python3.14/asyncio/runners.py", line 127, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/home/ryan/.cache/agentmux-governance/baseline-5ee428b/hub/tests/test_governance.py", line 163, in test_same_peer_other_node_is_not_discarded
+    self.assertNotEqual(outcome, "stale")
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+AssertionError: 'stale' == 'stale'
+
+======================================================================
+FAIL: test_wrong_peer_result_does_not_complete_origin (hub.tests.test_governance.WorkRecovery.test_wrong_peer_result_does_not_complete_origin)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/lib/python3.14/asyncio/runners.py", line 127, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/home/ryan/.cache/agentmux-governance/baseline-5ee428b/hub/tests/test_governance.py", line 176, in test_wrong_peer_result_does_not_complete_origin
+    self.assertEqual(self.ctx.store.work(w["id"])["claimed_by"], PENDING)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'peer:bob' != 'fed:pending'
+- peer:bob
++ fed:pending
+
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.200s
+
+FAILED (failures=13, errors=1)

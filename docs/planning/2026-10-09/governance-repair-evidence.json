@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-09",
+  "status": "runtime-verification-passed",
+  "branch": "feat/agentmux-platform-rearchitecture",
+  "comparisonCommit": "5ee428b8152ef3ac3f5036b8e1a930b1eec31d4e",
+  "candidateIdentity": "SHA-256 hashes of all eight changed runtime/test files captured before the final run and rechecked before packaging; containing commit is the Git provenance of this record.",
+  "testedSource": {
+    "hub/store.py": "144cafdc425d73ac420f5762ccd4a6153f8c5f70175226d0504e1040d4526f33",
+    "hub/fed/envelope.py": "328d418cfd6517956237cddd3b1c5a4f5221cbd4789a3939b400753808fc91d2",
+    "hub/fed/guard.py": "34a4347534eda49fbea2d9facf5e0bb8bf01abc602a28d2dba74b2e98377660f",
+    "hub/fed/runtime.py": "b4f0a9a57bc5ba1a6895955c91625e6188b40206d35f628d7756e3ddefb89661",
+    "hub/fed/plugins/work.py": "d52f850b230f1af473e239933114f1566f0e6f792d6e91d749a5b43ee47cbb49",
+    "hub/tests/test_fed_unit.py": "b5753215fef5705fdb829078730e5fb14e12bc4c1ec040870e84ff2603772adf",
+    "hub/tests/test_fed_live.py": "af39ed93f205952f90a9975a7ed7381a7560ee8e0e4278dee220a57b08ad3b0c",
+    "hub/tests/test_governance.py": "6c35a7014e10b78a4872a2eb02df214b537f89a7afba7efed56a42d476ac1c61"
+  },
+  "environment": {
+    "host": "Windows with Ubuntu-26.04 WSL",
+    "kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "python": "3.14.4",
+    "sqlite": "3.46.1",
+    "natsServer": "nats-server: v2.15.0",
+    "nsc": "nsc version 2.15.0",
+    "dependencies": [
+      "cffi==2.1.1",
+      "nats-py==2.16.0",
+      "nkeys==0.2.1",
+      "pycparser==3.0",
+      "PyNaCl==1.6.2"
+    ]
+  },
+  "binaryDownloads": [
+    {
+      "url": "https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-amd64.tar.gz",
+      "sha256": "5d2c51caca950333aba84911df7d377f826f3a59ec36061c6539105084f65c92",
+      "verification": "Matched official release SHA256SUMS before extraction"
+    },
+    {
+      "url": "https://github.com/nats-io/nsc/releases/download/v2.15.0/nsc-linux-amd64.zip",
+      "sha256": "7d55eda757dc9f233675a3038fcf8779bcda99753b1603f7009fc8537e126b7e",
+      "verification": "Matched official release SHA256SUMS before extraction"
+    }
+  ],
+  "runs": [
+    {
+      "id": "baseline",
+      "command": "python -m unittest hub.tests.test_governance.AuthorizationBinding hub.tests.test_governance.BackupIdentity hub.tests.test_governance.WorkRecovery -v",
+      "source": "Isolated git archive of comparisonCommit; current regression classes copied in. Only the new offer_digest import and fixture call were omitted for compatibility. Invariant assertions were unchanged.",
+      "expectedExitCode": 1,
+      "exitCode": 1,
+      "tests": 9,
+      "failedAssertionsOrSubtests": 13,
+      "errors": 1,
+      "result": "All six findings reproduced; the error is the concurrent backup filename collision.",
+      "log": "governance-evidence/baseline-regressions.log"
+    },
+    {
+      "id": "repaired",
+      "command": "python -m unittest hub.tests.test_governance hub.tests.test_fed_unit hub.tests.test_hub_offline hub.tests.test_nats_federation hub.tests.test_fed_live -v",
+      "exitCode": 0,
+      "tests": 119,
+      "skipped": 0,
+      "seconds": 74.815,
+      "result": "passed",
+      "log": "governance-evidence/full-suite-final.log"
+    },
+    {
+      "id": "dashboard",
+      "commands": [
+        "python dashboard/test_fed_panel.py",
+        "python dashboard/test_host_guard.py",
+        "bash dashboard/syntax_check.sh"
+      ],
+      "exitCodes": [
+        0,
+        0,
+        0
+      ],
+      "tests": 9,
+      "result": "passed; syntax gate passed",
+      "log": "governance-evidence/dashboard-checks.log"
+    }
+  ],
+  "logSha256": {
+    "baseline-regressions.log": "757d539c18a45ba32eb816404e2000bb046f544c7091da2ea2d260e564fcdcd3",
+    "full-suite-final.log": "d14c3a049b52452b6c3dafe9c44dff63660a5d773aad424120d8b0f40c546ba9",
+    "dashboard-checks.log": "b011dacc7f3456ae1d3c6bed290a0e20c341ba113823a189ff86766622cc7ffb"
+  },
+  "limits": [
+    "Broker tests used disposable credentials, separate local hub processes and deterministic fixture workers.",
+    "No native macOS, real Ryan/Nick machines, actual AI terminal worker, R3 cluster, broad power-loss or multi-host partition qualification is claimed.",
+    "Docker was unavailable in this WSL distro; Compose automatic startup remains P02/P06 work.",
+    "119 tests repair the six baseline findings; the complete P00/P01 and later acceptance matrices have not passed.",
+    "Identity and content digests do not prove semantic correctness or verify external artifact bytes; those product acceptance checks remain P05/P10.",
+    "No merge or phase advancement is authorized by this evidence."
+  ],
+  "staticVerification": {
+    "componentCoverage": {
+      "passed": true,
+      "baselineFiles": 338,
+      "additionalFiles": 2,
+      "components": 93,
+      "behaviorChecks": 198,
+      "acceptanceCriteria": 99,
+      "failureScenarios": 62
+    },
+    "changedPythonCompilation": "passed",
+    "gitDiffWhitespace": "passed",
+    "htmlReview": {
+      "componentTests": 3,
+      "embeddedImages": 6,
+      "embeddedPlan": "exact current source bytes",
+      "anchorsAndLabels": "passed",
+      "externalResourceReferences": 0,
+      "scriptSyntax": "passed",
+      "browserInteraction": "not verified; prior local-file policy rejection retained"
+    },
+    "governanceCommand": "node .bytedesk/design-patterns/check.mjs check --root .",
+    "governanceResultLocation": ".bytedesk/design-patterns/review.json finalVerification (excluded from the checker digest to avoid a self-reference)"
+  },
+  "logNormalization": {
+    "baseline-regressions.log": {
+      "operation": "Removed trailing spaces on two unittest progress lines; test assertions, output and line order are unchanged.",
+      "originalSha256": "f9b4a1ec6a4f5f0aec0c1301897f4cb4c4915f1d34456033a6cd2ed5027350ba"
+    }
+  }
+}

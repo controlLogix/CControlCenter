@@ -190,6 +190,20 @@ MIGRATIONS = [
     ALTER TABLE work_items ADD COLUMN origin_peer TEXT;
     ALTER TABLE work_items ADD COLUMN fed_flags TEXT CHECK (fed_flags IS NULL OR json_valid(fed_flags));
     """,
+    # 5: a durable result obligation for every remote terminal transition, including
+    # exhausted leases. A plugin callback can disappear without losing this intent.
+    """
+    CREATE TRIGGER fed_work_terminal AFTER UPDATE OF state ON work_items
+      WHEN new.origin_peer IS NOT NULL AND new.state IN ('done','failed') AND old.state <> new.state
+    BEGIN
+      UPDATE work_items SET fed_flags=json_set(coalesce(fed_flags,'{}'),
+        '$.result_pending',json('true'),'$.result_id',lower(hex(randomblob(16)))) WHERE id=new.id;
+    END;
+    UPDATE work_items SET fed_flags=json_set(coalesce(fed_flags,'{}'),
+      '$.result_pending',json('true'),'$.result_id',lower(hex(randomblob(16))))
+      WHERE origin_peer IS NOT NULL AND state IN ('done','failed')
+        AND json_extract(fed_flags,'$.result_id') IS NULL;
+    """,
 ]
 
 
@@ -255,26 +269,42 @@ class Store:
 
     def backup(self, dest: str):
         d = sqlite3.connect(dest)
-        with d:
-            self.db.backup(d)
-        d.close()
+        try:
+            with d:
+                self.db.backup(d)
+        finally:
+            d.close()
 
     def backup_to(self, dest_dir: str, keep: int = 24, label: str = "hourly") -> str:
         """Online backup (consistent under WAL, no long lock) into dest_dir, keeping the
         newest `keep` per label. Written to a temp name and renamed, so a crash mid-copy
         never leaves a truncated file that looks like a good backup."""
         import glob
+        import re
+        import tempfile
+        if not re.fullmatch(r"[a-zA-Z0-9_-]+", label):
+            raise HubError("backup label must contain only letters, digits, underscore or dash")
         os.makedirs(dest_dir, mode=0o700, exist_ok=True)
         os.chmod(dest_dir, 0o700)                       # backups hold every message body
         stamp = time.strftime("%Y%m%dT%H%M%S", time.gmtime()) + f"{int(time.time() * 1000) % 1000:03d}Z"
-        final = os.path.join(dest_dir, f"hub-{label}-{stamp}.db")
-        tmp = final + ".tmp"
-        os.close(os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600))
-        self.backup(tmp)
-        os.chmod(tmp, 0o600)
-        os.replace(tmp, final)
+        # Exclusive temporary creation plus no-replace publication: a clock collision
+        # or another process must never overwrite a previously completed snapshot.
+        fd, tmp = tempfile.mkstemp(prefix=f"hub-{label}-{stamp}-{ulid()}-", suffix=".tmp", dir=dest_dir)
+        os.close(fd)
+        final = tmp[:-4] + ".db"
+        try:
+            self.backup(tmp)
+            os.chmod(tmp, 0o600)
+            with open(tmp, "rb") as snapshot:
+                os.fsync(snapshot.fileno())
+            os.link(tmp, final)
+        finally:
+            os.unlink(tmp)
         for old in sorted(glob.glob(os.path.join(dest_dir, f"hub-{label}-*.db")))[:-max(1, int(keep))]:
-            os.remove(old)
+            try:
+                os.remove(old)
+            except FileNotFoundError:  # another completed backup's retention pass
+                pass
         return final
 
     def prune(self, events_days: float = 14, messages_days: float = 30) -> dict:

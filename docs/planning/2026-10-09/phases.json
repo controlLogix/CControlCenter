@@ -76,7 +76,7 @@
         "Specify lifecycle, delivery acknowledgment, idempotency, deadline, cancellation, approval, and unavailable/unknown result semantics.",
         "Establish per-phase evidence records, dependency gates, migration fixtures, and security/quality regression jobs.",
         "Build an early two-hub contract spike with separate broker accounts and a leaf link. Exercise lost acceptance acknowledgment and reservation reconciliation before the later production federation phase.",
-        "Repair the six known baseline blockers after implementation approval, with focused regressions and truthful governance evidence. This prevents existing violations from blocking every later phase while waiting for the new federation layer.",
+        "Preserve and extend the verified repairs for the six baseline findings. Ryan authorized this bounded repair pass; its source hashes and executed regressions are in governance-repair-evidence.json. Complete every other P01 criterion before advancing to P02.",
         "Build a bounded NATS persistence spike before production storage code: one owning task record, persistent operation identity, conditional competing writes, complete provenance/effect intent, lost acknowledgments and replay. Exercise single-record commits and any required atomic batch inside one stream.",
         "Apply ADD-01 and the component preservation matrix to every changed source file and affected caller. Record reuse, intentional behavior changes, migration needs and the specific added functionality before editing implementation."
       ],
@@ -994,7 +994,7 @@
       "FAIL-62"
     ]
   },
-  "authorizationNote": "Ryan requested proceeding toward phased implementation after committing and pushing this package. No phase evidence or Nick review is attested here. P00 exit, sequential promotion and explicit Ryan/Nick merge review remain required.",
+  "authorizationNote": "Ryan requested proceeding toward phased implementation after committing and pushing this package. No phase evidence or Nick review is attested here. P00 exit, sequential promotion and explicit Ryan/Nick merge review remain required. Ryan later explicitly authorized autonomous implementation decisions for the six baseline governance findings. That bounded repair is verified; it does not pass a complete phase gate or authorize later promotion.",
   "mergeGate": {
     "id": "MERGE-01",
     "status": "not-run-not-approved",
@@ -1028,5 +1028,14 @@
     "evidenceRecord": "gate-record.template.json:finalMergeGate",
     "requiredApproval": "Ryan explicitly authorizes merge after joint review with Nick of exact-candidate phase and real-instance evidence.",
     "autoMergeAllowed": false
+  },
+  "baselineRepair": {
+    "date": "2026-10-09",
+    "status": "six-baseline-defects-repaired-and-verified",
+    "authorization": "Ryan explicitly authorized autonomous repair decisions for these six findings.",
+    "report": "governance-repairs.md",
+    "evidence": "governance-repair-evidence.json",
+    "completePhaseGatePassed": false,
+    "mergeApproved": false
   }
 }

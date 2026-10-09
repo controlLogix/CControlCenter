@@ -7,11 +7,11 @@
   "brokenInternalLinks": false,
   "externalResourceReferences": 0,
   "javascriptNetworkCalls": 0,
-  "bytes": 12957629,
+  "bytes": 12959077,
   "browserInspection": "Not run: browser tool policy rejected local file URL; no alternate route attempted.",
   "runtimeImplementationVerified": false,
   "componentTests": "3 passed",
   "javascriptSyntax": "passed",
-  "planSha256": "856468952eada1606e66161979c1604e866b05a400f8e475168224183cf80386",
-  "scope": "Static recheck after MERGE-01 final acceptance update; browser interaction qualification remains incomplete."
+  "planSha256": "efc16da8a5fac01855895531efbaf46017fb9f87a45d367e057eda87d63bab98",
+  "scope": "Static checks and three component tests rerun after the six baseline repair update; browser interaction qualification remains incomplete."
 }

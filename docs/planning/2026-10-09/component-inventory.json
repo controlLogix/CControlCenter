@@ -2097,6 +2097,13 @@
       ]
     },
     {
+      "path": "hub/tests/test_governance.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
       "path": "hub/tests/test_hub_offline.py",
       "baselineBlob": "4468ba015aec4fa7d82f6eab95b24e246d9af045",
       "componentIds": [

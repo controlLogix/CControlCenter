@@ -4073,3 +4073,7 @@ P00 must reconcile maintainers’ workflows with the declared entry points. Miss
 4. P04/P10/P12 prove state, delivery, credential and deployment migration at the relevant boundaries.
 5. P12 requires a release disposition for every component and every required check. No missing or skipped evidence can be labeled a pass.
 6. Deleting a legacy path requires a separate reviewed change after successful migration and acceptance.
+
+## Scoped P01 baseline repair update, October 9
+
+Ryan authorized autonomous repair of all six governance findings. HUB-03 retains the store API while adding schema migration 5 and collision-safe snapshots. HUB-17 gains origin-owned reservations and bound v3 results over NATS. HUB-26 owns the added `hub/tests/test_governance.py` and expanded real-broker tests. The source index preserves its previous hashes/declarations in history and records the reviewed current code. The inventory now covers 338 baseline files plus two added files (340 total), still across 93 components and 198 future comparison checks. See [repair evidence](governance-repairs.md); these targeted results do not qualify every planned replacement or phase.

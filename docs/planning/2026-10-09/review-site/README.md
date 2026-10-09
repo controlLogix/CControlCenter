@@ -18,7 +18,7 @@ Claude Opus 5.5 authored the layout, styling, scene renderer, image viewer and l
 
 The [verification record](verification.json) reports three passing component tests, JavaScript syntax checks, valid local anchors and form labels, six unchanged embedded PNGs, an exact embedded plan, and no external resource references or network calls in the page script. Browser inspection was not completed: the browser tool's policy rejected the local file URL. Static checks do not establish rendered layout or browser interaction correctness.
 
-The repository pattern gate still reports the six previously recorded baseline findings. This artifact does not repair or retire those findings or implement the planned product.
+The six baseline defects now have [verified runtime repairs](../governance-repairs.md) and preserved governance history. The rebuilt HTML embeds the current plan, including that limited progress. Its concept screens remain future designs; the HTML does not establish complete phase or product acceptance.
 
 ## Rebuild
 

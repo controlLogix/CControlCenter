@@ -107,6 +107,7 @@ class Federation:
     def stage(self, env, subject, local_repo=None, to_peer=None):
         """DB thread, INSIDE the caller's transaction: guard, then outbox + audit rows that
         commit (or roll back) with the caller's own state change."""
+        envelope.validate_route(subject, env)
         plane = subject.split(".")[1]
         try:
             clean, kinds = guard.outbound(self.policy, env, local_repo, to_peer)
@@ -290,21 +291,22 @@ class Federation:
             return "dropped"
         frm = subject.split(".")[2] if subject.count(".") >= 2 else None
         mid = str(env.get("id", "")) if isinstance(env, dict) else ""
-        if mid and await self.db(ledger.seen, self.store, mid):
+        dec = guard.inbound(self.policy, subject, env)
+        if dec.action != "drop" and mid and await self.db(ledger.seen, self.store, mid):
             self.stats["duplicates"] += 1
             await _ack(msg)
             return "duplicate"
-        dec = guard.inbound(self.policy, subject, env)
         return await self.apply(subject, env, dec, msg, plane, frm)
 
     async def apply(self, subject, env, dec, msg=None, plane=None, frm=None):
         plane = plane or subject.split(".")[1]
-        frm = frm or env.get("from")
+        frm = frm or (env.get("from") if isinstance(env, dict) else None)
         rid = env.get("rid") if isinstance(env, dict) else None
         if dec.action == "drop":
             self.stats["dropped"] += 1
             if dec.reason != "self":
-                await self.db(self._audit_tx, "in", plane, frm, rid, subject, env.get("id"), env, "dropped",
+                await self.db(self._audit_tx, "in", plane, frm, rid, subject,
+                              env.get("id") if isinstance(env, dict) else None, env, "dropped",
                               {"why": dec.reason})
             await _ack(msg)
             return "dropped"
@@ -402,8 +404,10 @@ class Federation:
     async def _on_ctl(self, m):
         try:
             env = json.loads(m.data)
-            frm = m.subject.split(".")[2]
-        except (ValueError, IndexError):
+            plane, frm, _ = envelope.validate_route(m.subject, env)
+            if plane != "ctl":
+                return
+        except (ValueError, IndexError, TypeError):
             return
         if frm == self.me or env.get("from") != frm or env.get("type") != "revoke":
             return

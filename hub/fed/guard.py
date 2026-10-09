@@ -46,7 +46,7 @@ def outbound(policy: Policy, env: dict, local_repo: str | None, to_peer: str | N
     if local_repo is not None:
         if policy.rid_of(local_repo) is None:
             raise Refused(f"repo {local_repo!r} is not shared: agentmux hub fed share {local_repo}", "not_shared")
-        if to_peer and to_peer != "*" and not policy.may_send(local_repo, to_peer):
+        if to_peer and to_peer not in ("*", policy.me) and not policy.may_send(local_repo, to_peer):
             raise Refused(f"repo {local_repo!r} is not shared with {to_peer} "
                           f"(peers = {policy.repo_peers(local_repo)})", "not_shared")
     try:
@@ -64,15 +64,12 @@ def outbound(policy: Policy, env: dict, local_repo: str | None, to_peer: str | N
 # -- inbound -------------------------------------------------------------------------
 def inbound(policy: Policy, subject: str, env: dict) -> Decision:
     try:
-        plane, frm, _tail = envelope.parse_subject(subject)
-        envelope.validate(env)
+        plane, frm, _tail = envelope.validate_route(subject, env)
     except envelope.BadEnvelope as e:
         return Decision("drop", f"malformed: {e}")
-    if env["from"] != frm:
-        # The server vouches for the subject's sender token; a payload that disagrees
-        # is someone putting words in another peer's mouth.
-        return Decision("drop", f"spoof: payload says {env['from']}, subject says {frm}")
-    if frm == policy.me and env["type"] != "work":
+    if plane == "msg" and env.get("to") != policy.me:
+        return Decision("drop", "not addressed to this peer")
+    if frm == policy.me and env["type"] not in envelope.WORK_TYPES:
         return Decision("drop", "self")
     if not policy.known_peer(frm):
         return Decision("drop", "unknown peer")
@@ -81,11 +78,13 @@ def inbound(policy: Policy, subject: str, env: dict) -> Decision:
         local = policy.local_of(env["rid"])
         if frm != policy.me and not policy.may_receive(env["rid"], frm):
             return Decision("drop", "not_shared", local_repo=local)
-    elif env["type"] in ("work", "knowledge", "code"):
+    elif env["type"] in envelope.WORK_TYPES | {"knowledge", "code"}:
         return Decision("drop", "no rid")
     trust = "auto" if frm == policy.me else policy.trust(frm)
     if trust == "deny":
         return Decision("drop", "denied", trust, local_repo=local)
+    if env["type"] in envelope.WORK_TYPES and env["v"] != 3:
+        return Decision("quarantine", "legacy work protocol: reconcile before upgrade", trust, True, local)
     if env["type"] == "work":
         req = (env.get("data") or {}).get("requirements") or {}
         if isinstance(req, str):
@@ -93,7 +92,10 @@ def inbound(policy: Policy, subject: str, env: dict) -> Decision:
                 req = json.loads(req)
             except ValueError:
                 req = {}
-        caps = set(req.get("capabilities", []) if isinstance(req, dict) else [])
+        values = req.get("capabilities", []) if isinstance(req, dict) else []
+        if not isinstance(values, list) or any(not isinstance(c, str) for c in values):
+            return Decision("drop", "malformed capabilities")
+        caps = set(values)
         if frm != policy.me and caps & PRIVILEGED_CAPS:
             return Decision("quarantine", f"privileged: {', '.join(sorted(caps & PRIVILEGED_CAPS))}", trust,
                             True, local)

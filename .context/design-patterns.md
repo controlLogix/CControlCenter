@@ -43,9 +43,9 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Transactional Client",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/TransactionalClient.html",
       "referenceDepth": "full-public-reference",
-      "how": "Plugins write the outbox row (fed_outbox) and its audit row in the same SQLite transaction as the state change; the runtime publishes with a JetStream ack and only then marks the row sent.",
+      "how": "Work offer creation, incoming attribution/request, origin reservation/grant and result staging each have one SQLite commit boundary. Store migration 5 records a durable return obligation with terminal state; the work plugin retries staging it into the existing NATS outbox.",
       "why": "A crash must never publish something that did not happen or lose something that did (FEDERATION.md 8).",
-      "tradeoffs": "At-least-once on the wire, so receivers must be idempotent (FED-04). Alternative: publish directly from the verb, rejected - loses messages on disconnect.",
+      "tradeoffs": "At-least-once on the wire, so receivers must be idempotent (FED-04). Alternative: publish directly from the verb, rejected - loses messages on disconnect. The additional claim/grant exchange costs a round trip; new execution waits for its origin. Granted work stays reserved through disconnection.",
       "locations": [
         {
           "path": "hub/fed/runtime.py",
@@ -58,13 +58,34 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
         {
           "path": "hub/store.py",
           "symbol": "Store._outbox"
+        },
+        {
+          "path": "hub/fed/plugins/work.py",
+          "symbol": "Work"
+        },
+        {
+          "path": "hub/store.py",
+          "symbol": "MIGRATIONS"
         }
       ],
       "verificationEvidence": [
-        "hub/tests/test_fed_live.py"
+        "hub/tests/test_fed_live.py",
+        "hub/tests/test_governance.py"
       ],
       "decisionEvidence": [
-        "docs/FEDERATION.md"
+        "docs/FEDERATION.md",
+        "docs/planning/2026-10-09/governance-repairs.md"
+      ],
+      "implementationRevisions": [
+        {
+          "date": "2026-10-09",
+          "reason": "Repairs for six explicitly authorized baseline findings",
+          "previous": {
+            "how": "Plugins write the outbox row (fed_outbox) and its audit row in the same SQLite transaction as the state change; the runtime publishes with a JetStream ack and only then marks the row sent.",
+            "why": "A crash must never publish something that did not happen or lose something that did (FEDERATION.md 8).",
+            "tradeoffs": "At-least-once on the wire, so receivers must be idempotent (FED-04). Alternative: publish directly from the verb, rejected - loses messages on disconnect."
+          }
+        }
       ]
     },
     {
@@ -101,9 +122,9 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Idempotent Receiver",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/IdempotentReceiver.html",
       "referenceDepth": "full-public-reference",
-      "how": "Every inbound envelope id is recorded in fed_seen after its ingest commits; redeliveries are acked and skipped. Publishes carry Nats-Msg-Id so the stream also drops republished outbox rows.",
+      "how": "Incoming work also deduplicates by origin peer, origin node and immutable offer ID inside its owning transaction. A selected execution/grant and stable result ID survive retries beyond the broker deduplication window.",
       "why": "JetStream redelivers after ack_wait and the outbox is at-least-once (FED-02).",
-      "tradeoffs": "fed_seen grows with traffic (pruning is future work). Alternative: exactly-once publishing, not available end to end.",
+      "tradeoffs": "fed_seen grows with traffic (pruning is future work). Alternative: exactly-once publishing, not available end to end. Broker acknowledgment alone cannot prevent duplicate execution across consumers; the origin grant is required before readiness.",
       "locations": [
         {
           "path": "hub/fed/runtime.py",
@@ -112,13 +133,30 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
         {
           "path": "hub/fed/ledger.py",
           "symbol": "seen"
+        },
+        {
+          "path": "hub/fed/plugins/work.py",
+          "symbol": "Work"
         }
       ],
       "verificationEvidence": [
-        "hub/tests/test_fed_live.py"
+        "hub/tests/test_fed_live.py",
+        "hub/tests/test_governance.py"
       ],
       "decisionEvidence": [
-        "docs/FEDERATION.md"
+        "docs/FEDERATION.md",
+        "docs/planning/2026-10-09/governance-repairs.md"
+      ],
+      "implementationRevisions": [
+        {
+          "date": "2026-10-09",
+          "reason": "Repairs for six explicitly authorized baseline findings",
+          "previous": {
+            "how": "Every inbound envelope id is recorded in fed_seen after its ingest commits; redeliveries are acked and skipped. Publishes carry Nats-Msg-Id so the stream also drops republished outbox rows.",
+            "why": "JetStream redelivers after ack_wait and the outbox is at-least-once (FED-02).",
+            "tradeoffs": "fed_seen grows with traffic (pruning is future work). Alternative: exactly-once publishing, not available end to end."
+          }
+        }
       ]
     },
     {
@@ -151,20 +189,37 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Competing Consumers",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/CompetingConsumers.html",
       "referenceDepth": "full-public-reference",
-      "how": "Federated role work goes to a work-queue stream; every hub that can serve (rid, role) pulls from one shared durable consumer per publisher, work_<from>_<rid>_<role>, only when it has idle capacity and trusts the publisher.",
+      "how": "V3 offers use am.work.<peer>.<rid>.<role>.v3 and work3_<peer>_<rid>_<role> consumers. Pullers honor repository scope, capacity and publisher trust. A receiver stages a claim while blocked; the origin selects one executor before any receiver becomes ready.",
       "why": "First claim wins across people: exactly one hub, then exactly one agent, does each item.",
-      "tradeoffs": "One consumer per (publisher, repo, role). Hubs only pull from trusted publishers (A19), so an untrusted hub cannot swallow work. Alternative: per-subject queue groups (TM-218), rejected - no persistence.",
+      "tradeoffs": "One consumer per (publisher, repo, role). Hubs only pull from trusted publishers (A19), so an untrusted hub cannot swallow work. Alternative: per-subject queue groups (TM-218), rejected - no persistence. Old exact-filter consumers cannot swallow v3 offers. Redelivery can create another blocked candidate, but only the origin-selected candidate may execute. Legacy in-flight work needs explicit reconciliation.",
       "locations": [
         {
           "path": "hub/fed/plugins/work.py",
           "symbol": "Work.on_tick"
+        },
+        {
+          "path": "hub/fed/plugins/work.py",
+          "symbol": "Work"
         }
       ],
       "verificationEvidence": [
-        "hub/tests/test_fed_live.py"
+        "hub/tests/test_fed_live.py",
+        "hub/tests/test_governance.py"
       ],
       "decisionEvidence": [
-        "docs/FEDERATION.md"
+        "docs/FEDERATION.md",
+        "docs/planning/2026-10-09/governance-repairs.md"
+      ],
+      "implementationRevisions": [
+        {
+          "date": "2026-10-09",
+          "reason": "Repairs for six explicitly authorized baseline findings",
+          "previous": {
+            "how": "Federated role work goes to a work-queue stream; every hub that can serve (rid, role) pulls from one shared durable consumer per publisher, work_<from>_<rid>_<role>, only when it has idle capacity and trusts the publisher.",
+            "why": "First claim wins across people: exactly one hub, then exactly one agent, does each item.",
+            "tradeoffs": "One consumer per (publisher, repo, role). Hubs only pull from trusted publishers (A19), so an untrusted hub cannot swallow work. Alternative: per-subject queue groups (TM-218), rejected - no persistence."
+          }
+        }
       ]
     },
     {
@@ -174,9 +229,9 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Message Filter",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/Filter.html",
       "referenceDepth": "full-public-reference",
-      "how": "Inbound: drop malformed, spoofed (payload sender differs from the server-enforced subject token), self, unshared-rid and denied-peer traffic; quarantine approve-trust and privileged work. Outbound: refuse repos not shared with the recipient.",
+      "how": "Validate subject sender, plane, destination, repository and role against the envelope before policy and dispatch. Outgoing staging and control reception validate the same route. Old work protocols are quarantined and cannot bypass the v3 grant by operator approval.",
       "why": "Interview F4/F5: per-peer trust and per-repo opt-in; F11: remote work never triggers privileged tools.",
-      "tradeoffs": "Policy lives in each hub, so the circle (account) is the confidentiality boundary (A7). Alternative: server-side per-repo ACLs, deferred - needs JWT reissue on every share change.",
+      "tradeoffs": "Policy lives in each hub, so the circle (account) is the confidentiality boundary (A7). Alternative: server-side per-repo ACLs, deferred - needs JWT reissue on every share change. This authenticates the peer through broker credentials, not independent nodes inside a peer. Semantic task/equipment safety remains a separate boundary.",
       "locations": [
         {
           "path": "hub/fed/guard.py",
@@ -189,10 +244,23 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       ],
       "verificationEvidence": [
         "hub/tests/test_fed_unit.py",
-        "hub/tests/test_fed_live.py"
+        "hub/tests/test_fed_live.py",
+        "hub/tests/test_governance.py"
       ],
       "decisionEvidence": [
-        "docs/FEDERATION.md"
+        "docs/FEDERATION.md",
+        "docs/planning/2026-10-09/governance-repairs.md"
+      ],
+      "implementationRevisions": [
+        {
+          "date": "2026-10-09",
+          "reason": "Repairs for six explicitly authorized baseline findings",
+          "previous": {
+            "how": "Inbound: drop malformed, spoofed (payload sender differs from the server-enforced subject token), self, unshared-rid and denied-peer traffic; quarantine approve-trust and privileged work. Outbound: refuse repos not shared with the recipient.",
+            "why": "Interview F4/F5: per-peer trust and per-repo opt-in; F11: remote work never triggers privileged tools.",
+            "tradeoffs": "Policy lives in each hub, so the circle (account) is the confidentiality boundary (A7). Alternative: server-side per-repo ACLs, deferred - needs JWT reissue on every share change."
+          }
+        }
       ]
     },
     {
@@ -254,9 +322,9 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Canonical Data Model",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/CanonicalDataModel.html",
       "referenceDepth": "full-public-reference",
-      "how": "Envelope v2 {v,id,type,from,node,rid,to,at,data} and the repo identity rid = r + sha256(normalized remote)[:12]; local repo names are translated to and from rids at the edge.",
+      "how": "Non-work messages remain envelope v2; work, work_claim, work_grant and result use v3. The work subject suffix isolates incompatible consumers, and work data carries immutable offer identity/digest plus origin node and execution/grant references.",
       "why": "Interview F6: two people's differently named clones of one repo must line up.",
-      "tradeoffs": "Every plugin must translate at its edge. Alternative: agree on shared names, rejected in the interview.",
+      "tradeoffs": "Every plugin must translate at its edge. Alternative: agree on shared names, rejected in the interview. Version isolation prevents unsafe fallback. Upgrades preserve old evidence but require draining or reconciling legacy work rather than fabricating missing authorization.",
       "locations": [
         {
           "path": "hub/fed/envelope.py",
@@ -269,10 +337,23 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       ],
       "verificationEvidence": [
         "hub/tests/test_fed_unit.py",
-        "hub/tests/test_fed_live.py"
+        "hub/tests/test_fed_live.py",
+        "hub/tests/test_governance.py"
       ],
       "decisionEvidence": [
-        "docs/FEDERATION.md"
+        "docs/FEDERATION.md",
+        "docs/planning/2026-10-09/governance-repairs.md"
+      ],
+      "implementationRevisions": [
+        {
+          "date": "2026-10-09",
+          "reason": "Repairs for six explicitly authorized baseline findings",
+          "previous": {
+            "how": "Envelope v2 {v,id,type,from,node,rid,to,at,data} and the repo identity rid = r + sha256(normalized remote)[:12]; local repo names are translated to and from rids at the edge.",
+            "why": "Interview F6: two people's differently named clones of one repo must line up.",
+            "tradeoffs": "Every plugin must translate at its edge. Alternative: agree on shared names, rejected in the interview."
+          }
+        }
       ]
     },
     {
@@ -409,20 +490,37 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Correlation Identifier",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/CorrelationIdentifier.html",
       "referenceDepth": "full-public-reference",
-      "how": "A federated item's result carries origin_id, the publisher's local work id, which closes the fed:pending placeholder on the origin hub.",
+      "how": "Correlate by origin peer/node, origin work ID, offer ID/digest and repository ID, then the selected peer/node/execution and grant. Accept terminal payload state/text only with a matching result digest. Store validated result identity on the origin record.",
       "why": "Results arrive asynchronously, from another person, on a shared inbox subject.",
-      "tradeoffs": "Origin ids are only unique per hub; the pair (peer, origin_id) is the key.",
+      "tradeoffs": "Origin ids are only unique per hub; the pair (peer, origin_id) is the key. The result digest binds returned content but does not prove semantic correctness or verify arbitrary external artifacts; full product acceptance remains a later planned contract.",
       "locations": [
         {
           "path": "hub/fed/plugins/work.py",
           "symbol": "Work._on_result"
+        },
+        {
+          "path": "hub/fed/plugins/work.py",
+          "symbol": "Work"
         }
       ],
       "verificationEvidence": [
-        "hub/tests/test_fed_live.py"
+        "hub/tests/test_fed_live.py",
+        "hub/tests/test_governance.py"
       ],
       "decisionEvidence": [
-        "docs/FEDERATION.md"
+        "docs/FEDERATION.md",
+        "docs/planning/2026-10-09/governance-repairs.md"
+      ],
+      "implementationRevisions": [
+        {
+          "date": "2026-10-09",
+          "reason": "Repairs for six explicitly authorized baseline findings",
+          "previous": {
+            "how": "A federated item's result carries origin_id, the publisher's local work id, which closes the fed:pending placeholder on the origin hub.",
+            "why": "Results arrive asynchronously, from another person, on a shared inbox subject.",
+            "tradeoffs": "Origin ids are only unique per hub; the pair (peer, origin_id) is the key."
+          }
+        }
       ]
     },
     {

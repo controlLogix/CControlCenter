@@ -90,6 +90,17 @@
       ],
       "limitations": [
         "Current check fails on six recorded baseline findings."
+      ],
+      "incrementalReviews": [
+        {
+          "date": "2026-10-09",
+          "scope": "Authorized six-finding governance repair",
+          "note": "Six baseline findings repaired with preserved history and executed source-bound evidence; full platform acceptance remains open.",
+          "evidence": [
+            "governance-repairs.md",
+            "governance-repair-evidence.json"
+          ]
+        }
       ]
     },
     {
@@ -130,7 +141,18 @@
       "migrationChecks": [
         "Preserve test identities, environment requirements and logs across pipeline changes."
       ],
-      "limitations": []
+      "limitations": [],
+      "incrementalReviews": [
+        {
+          "date": "2026-10-09",
+          "scope": "Authorized six-finding governance repair",
+          "note": "The existing CI unittest command now includes hub.tests.test_governance. Live broker evidence was collected in WSL; this edit does not add a broker to CI.",
+          "evidence": [
+            "governance-repairs.md",
+            "governance-repair-evidence.json"
+          ]
+        }
+      ]
     },
     {
       "id": "REPO-04",

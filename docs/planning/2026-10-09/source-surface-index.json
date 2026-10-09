@@ -5720,43 +5720,82 @@
       "componentIds": [
         "HUB-11"
       ],
-      "workingFileSha256": "178abcf364d44498c6a8f687a0d102e9dae78a3fb429e9537e12c81e19ebd4a7",
+      "workingFileSha256": "328d418cfd6517956237cddd3b1c5a4f5221cbd4789a3939b400753808fc91d2",
       "declarations": [
         {
           "name": "BadEnvelope",
-          "line": 23,
+          "line": 24,
           "kind": "ClassDef"
         },
         {
           "name": "make",
-          "line": 27,
+          "line": 28,
           "kind": "FunctionDef"
         },
         {
           "name": "subject",
-          "line": 34,
+          "line": 35,
           "kind": "FunctionDef"
         },
         {
           "name": "parse_subject",
-          "line": 41,
+          "line": 45,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "validate_route",
+          "line": 54,
           "kind": "FunctionDef"
         },
         {
           "name": "validate",
-          "line": 48,
+          "line": 77,
           "kind": "FunctionDef"
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
+      "reviewStatus": "Scoped P01 repair reviewed against original behavior and regression evidence; target platform phase qualification remains open.",
+      "history": [
+        {
+          "date": "2026-10-09",
+          "workingFileSha256": "178abcf364d44498c6a8f687a0d102e9dae78a3fb429e9537e12c81e19ebd4a7",
+          "declarations": [
+            {
+              "name": "BadEnvelope",
+              "line": 23,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "make",
+              "line": 27,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "subject",
+              "line": 34,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "parse_subject",
+              "line": 41,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "validate",
+              "line": 48,
+              "kind": "FunctionDef"
+            }
+          ],
+          "reason": "Preserved before scoped P01 governance repairs; see governance-repairs.md."
+        }
+      ]
     },
     {
       "path": "hub/fed/guard.py",
       "componentIds": [
         "HUB-12"
       ],
-      "workingFileSha256": "46997240fc607c1ca9cdb46460f507c32a5d9ea893911b78d14d309566f4bb2d",
+      "workingFileSha256": "34a4347534eda49fbea2d9facf5e0bb8bf01abc602a28d2dba74b2e98377660f",
       "declarations": [
         {
           "name": "Refused",
@@ -5785,12 +5824,51 @@
         },
         {
           "name": "wrap",
-          "line": 107,
+          "line": 109,
           "kind": "FunctionDef"
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
+      "reviewStatus": "Scoped P01 repair reviewed against original behavior and regression evidence; target platform phase qualification remains open.",
+      "history": [
+        {
+          "date": "2026-10-09",
+          "workingFileSha256": "46997240fc607c1ca9cdb46460f507c32a5d9ea893911b78d14d309566f4bb2d",
+          "declarations": [
+            {
+              "name": "Refused",
+              "line": 21,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "Refused.__init__",
+              "line": 24,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Decision",
+              "line": 31,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "outbound",
+              "line": 43,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "inbound",
+              "line": 65,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "wrap",
+              "line": 107,
+              "kind": "FunctionDef"
+            }
+          ],
+          "reason": "Preserved before scoped P01 governance repairs; see governance-repairs.md."
+        }
+      ]
     },
     {
       "path": "hub/fed/hooks/__init__.py",
@@ -6360,81 +6438,215 @@
       "componentIds": [
         "HUB-17"
       ],
-      "workingFileSha256": "cbb34f8e4e0635fdac7d560982f7ead393a3940d6872212ed0d72eb9c340929b",
+      "workingFileSha256": "d52f850b230f1af473e239933114f1566f0e6f792d6e91d749a5b43ee47cbb49",
       "declarations": [
         {
+          "name": "offer_digest",
+          "line": 26,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "digest",
+          "line": 32,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "result_digest",
+          "line": 36,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "reference",
+          "line": 40,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "valid_reference",
+          "line": 45,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "matches_offer",
+          "line": 53,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "valid_work_data",
+          "line": 58,
+          "kind": "FunctionDef"
+        },
+        {
           "name": "Work",
-          "line": 23,
+          "line": 81,
           "kind": "ClassDef"
         },
         {
           "name": "Work.__init__",
-          "line": 27,
+          "line": 85,
           "kind": "FunctionDef"
         },
         {
           "name": "Work.verbs",
-          "line": 30,
+          "line": 88,
           "kind": "FunctionDef"
         },
         {
           "name": "Work.v_add",
-          "line": 42,
+          "line": 100,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Work.add",
-          "line": 47,
+          "line": 105,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Work.on_local_event",
-          "line": 76,
+          "line": 134,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "Work._stage_result",
+          "line": 138,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "Work.recover_results",
+          "line": 164,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Work.on_connect",
-          "line": 92,
+          "line": 176,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Work.on_tick",
-          "line": 95,
+          "line": 179,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Work.on_envelope",
-          "line": 133,
+          "line": 221,
           "kind": "AsyncFunctionDef"
         },
         {
+          "name": "Work._claim",
+          "line": 272,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "Work._grant",
+          "line": 301,
+          "kind": "FunctionDef"
+        },
+        {
           "name": "Work._on_result",
-          "line": 166,
+          "line": 327,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Work.on_revoke",
-          "line": 184,
+          "line": 355,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Work.v_list",
-          "line": 193,
+          "line": 364,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Work._rows",
-          "line": 196,
+          "line": 367,
           "kind": "FunctionDef"
         },
         {
           "name": "Work.panel",
-          "line": 201,
+          "line": 372,
           "kind": "FunctionDef"
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
+      "reviewStatus": "Scoped P01 repair reviewed against original behavior and regression evidence; target platform phase qualification remains open.",
+      "history": [
+        {
+          "date": "2026-10-09",
+          "workingFileSha256": "cbb34f8e4e0635fdac7d560982f7ead393a3940d6872212ed0d72eb9c340929b",
+          "declarations": [
+            {
+              "name": "Work",
+              "line": 23,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "Work.__init__",
+              "line": 27,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Work.verbs",
+              "line": 30,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Work.v_add",
+              "line": 42,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Work.add",
+              "line": 47,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Work.on_local_event",
+              "line": 76,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Work.on_connect",
+              "line": 92,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Work.on_tick",
+              "line": 95,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Work.on_envelope",
+              "line": 133,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Work._on_result",
+              "line": 166,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Work.on_revoke",
+              "line": 184,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Work.v_list",
+              "line": 193,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Work._rows",
+              "line": 196,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Work.panel",
+              "line": 201,
+              "kind": "FunctionDef"
+            }
+          ],
+          "reason": "Preserved before scoped P01 governance repairs; see governance-repairs.md."
+        }
+      ]
     },
     {
       "path": "hub/fed/policy.py",
@@ -6553,7 +6765,7 @@
       "componentIds": [
         "HUB-10"
       ],
-      "workingFileSha256": "8ee45c22210239d6fee39111a4b820860e16a4b4eefdcf7b1cc9eed21798fd1c",
+      "workingFileSha256": "b4f0a9a57bc5ba1a6895955c91625e6188b40206d35f628d7756e3ddefb89661",
       "declarations": [
         {
           "name": "Federation",
@@ -6627,212 +6839,496 @@
         },
         {
           "name": "Federation.publish",
-          "line": 122,
+          "line": 123,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation.kv",
-          "line": 128,
+          "line": 129,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation.post_local",
-          "line": 133,
+          "line": 134,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation.sender_of",
-          "line": 140,
+          "line": 141,
           "kind": "FunctionDef"
         },
         {
           "name": "Federation.resolve_repo",
-          "line": 151,
+          "line": 152,
           "kind": "FunctionDef"
         },
         {
           "name": "Federation.address_of",
-          "line": 168,
+          "line": 169,
           "kind": "FunctionDef"
         },
         {
           "name": "Federation.notify_operator",
-          "line": 175,
+          "line": 176,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation.run",
-          "line": 180,
+          "line": 181,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation._nap",
-          "line": 238,
+          "line": 239,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation._on_error",
-          "line": 245,
+          "line": 246,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation._on_disc",
-          "line": 249,
+          "line": 250,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation._on_reconn",
-          "line": 252,
+          "line": 253,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation._bind_core",
-          "line": 255,
+          "line": 256,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation.consume",
-          "line": 265,
+          "line": 266,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation.receive",
-          "line": 281,
+          "line": 282,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation.apply",
-          "line": 300,
+          "line": 301,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation._audit_tx",
-          "line": 354,
+          "line": 356,
           "kind": "FunctionDef"
         },
         {
           "name": "Federation._drain_outbox",
-          "line": 358,
+          "line": 360,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation._presence",
-          "line": 371,
+          "line": 373,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation._on_ctl",
-          "line": 402,
+          "line": 404,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation.local_event",
-          "line": 421,
+          "line": 425,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation.guarded",
-          "line": 433,
+          "line": 437,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation._audit_refusal",
-          "line": 442,
+          "line": 446,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation.dispatch",
-          "line": 450,
+          "line": 454,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Federation._core_verbs",
-          "line": 465,
+          "line": 469,
           "kind": "FunctionDef"
         },
         {
           "name": "_ack",
-          "line": 500,
+          "line": 504,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "_v_status",
-          "line": 509,
+          "line": 513,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "_v_peers",
-          "line": 520,
+          "line": 524,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "_v_share",
-          "line": 542,
+          "line": 546,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "_v_unshare",
-          "line": 563,
+          "line": 567,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "_v_trust",
-          "line": 570,
+          "line": 574,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "_v_kill",
-          "line": 583,
+          "line": 587,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "_withdraw_work",
-          "line": 606,
+          "line": 610,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "_v_resume",
-          "line": 625,
+          "line": 629,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "_v_quarantine",
-          "line": 632,
+          "line": 636,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "_v_approve",
-          "line": 637,
+          "line": 641,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "_v_deny",
-          "line": 655,
+          "line": 659,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "_v_audit",
-          "line": 664,
+          "line": 668,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "_v_gate",
-          "line": 672,
+          "line": 676,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "_v_verbs",
-          "line": 685,
+          "line": 689,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "_v_panel",
-          "line": 694,
+          "line": 698,
           "kind": "AsyncFunctionDef"
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
+      "reviewStatus": "Scoped P01 repair reviewed against original behavior and regression evidence; target platform phase qualification remains open.",
+      "history": [
+        {
+          "date": "2026-10-09",
+          "workingFileSha256": "8ee45c22210239d6fee39111a4b820860e16a4b4eefdcf7b1cc9eed21798fd1c",
+          "declarations": [
+            {
+              "name": "Federation",
+              "line": 24,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "Federation.__init__",
+              "line": 25,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Federation.fcfg",
+              "line": 52,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Federation.me",
+              "line": 56,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Federation.enabled",
+              "line": 60,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Federation._load_plugins",
+              "line": 63,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Federation._init_db",
+              "line": 72,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Federation._refresh_policy_sync",
+              "line": 81,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Federation.refresh_policy",
+              "line": 89,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation.save_cfg",
+              "line": 92,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Federation.store",
+              "line": 97,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Federation.db",
+              "line": 100,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation.kick",
+              "line": 103,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Federation.stage",
+              "line": 107,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Federation.publish",
+              "line": 122,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation.kv",
+              "line": 128,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation.post_local",
+              "line": 133,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation.sender_of",
+              "line": 140,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Federation.resolve_repo",
+              "line": 151,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Federation.address_of",
+              "line": 168,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Federation.notify_operator",
+              "line": 175,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation.run",
+              "line": 180,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation._nap",
+              "line": 238,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation._on_error",
+              "line": 245,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation._on_disc",
+              "line": 249,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation._on_reconn",
+              "line": 252,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation._bind_core",
+              "line": 255,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation.consume",
+              "line": 265,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation.receive",
+              "line": 281,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation.apply",
+              "line": 300,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation._audit_tx",
+              "line": 354,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Federation._drain_outbox",
+              "line": 358,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation._presence",
+              "line": 371,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation._on_ctl",
+              "line": 402,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation.local_event",
+              "line": 421,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation.guarded",
+              "line": 433,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation._audit_refusal",
+              "line": 442,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation.dispatch",
+              "line": 450,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Federation._core_verbs",
+              "line": 465,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "_ack",
+              "line": 500,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "_v_status",
+              "line": 509,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "_v_peers",
+              "line": 520,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "_v_share",
+              "line": 542,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "_v_unshare",
+              "line": 563,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "_v_trust",
+              "line": 570,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "_v_kill",
+              "line": 583,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "_withdraw_work",
+              "line": 606,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "_v_resume",
+              "line": 625,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "_v_quarantine",
+              "line": 632,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "_v_approve",
+              "line": 637,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "_v_deny",
+              "line": 655,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "_v_audit",
+              "line": 664,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "_v_gate",
+              "line": 672,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "_v_verbs",
+              "line": 685,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "_v_panel",
+              "line": 694,
+              "kind": "AsyncFunctionDef"
+            }
+          ],
+          "reason": "Preserved before scoped P01 governance repairs; see governance-repairs.md."
+        }
+      ]
     },
     {
       "path": "hub/names.py",
@@ -7223,7 +7719,7 @@
       "componentIds": [
         "HUB-03"
       ],
-      "workingFileSha256": "5b4d0a4dd5787f0328cdac7e27926eb40be7b57161abb25b406ea13b47f53eb9",
+      "workingFileSha256": "144cafdc425d73ac420f5762ccd4a6153f8c5f70175226d0504e1040d4526f33",
       "declarations": [
         {
           "name": "now",
@@ -7237,307 +7733,626 @@
         },
         {
           "name": "HubError",
-          "line": 196,
+          "line": 210,
           "kind": "ClassDef"
         },
         {
           "name": "Store",
-          "line": 200,
+          "line": 214,
           "kind": "ClassDef"
         },
         {
           "name": "Store.__init__",
-          "line": 201,
+          "line": 215,
           "kind": "FunctionDef"
         },
         {
           "name": "Store._migrate",
-          "line": 216,
+          "line": 230,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.tx",
-          "line": 238,
-          "kind": "FunctionDef"
-        },
-        {
-          "name": "Store.q",
-          "line": 241,
-          "kind": "FunctionDef"
-        },
-        {
-          "name": "Store.q1",
-          "line": 244,
-          "kind": "FunctionDef"
-        },
-        {
-          "name": "Store.event",
-          "line": 248,
-          "kind": "FunctionDef"
-        },
-        {
-          "name": "Store.checkpoint",
           "line": 252,
           "kind": "FunctionDef"
         },
         {
-          "name": "Store.backup",
-          "line": 256,
+          "name": "Store.q",
+          "line": 255,
           "kind": "FunctionDef"
         },
         {
-          "name": "Store.backup_to",
+          "name": "Store.q1",
+          "line": 258,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "Store.event",
           "line": 262,
           "kind": "FunctionDef"
         },
         {
+          "name": "Store.checkpoint",
+          "line": 266,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "Store.backup",
+          "line": 270,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "Store.backup_to",
+          "line": 278,
+          "kind": "FunctionDef"
+        },
+        {
           "name": "Store.prune",
-          "line": 280,
+          "line": 310,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.repo_add",
-          "line": 301,
+          "line": 331,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.repo_for_path",
-          "line": 317,
+          "line": 347,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.register",
-          "line": 327,
+          "line": 357,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.set_handle",
-          "line": 355,
+          "line": 385,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.set_state",
-          "line": 360,
+          "line": 390,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.touch_output",
-          "line": 367,
+          "line": 397,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.agents",
-          "line": 370,
+          "line": 400,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.agent",
-          "line": 374,
+          "line": 404,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.team_add",
-          "line": 382,
+          "line": 412,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.team",
-          "line": 393,
+          "line": 423,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.eligible_targets",
-          "line": 401,
+          "line": 431,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.canonical_target",
-          "line": 416,
+          "line": 446,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.adopt",
-          "line": 429,
-          "kind": "FunctionDef"
-        },
-        {
-          "name": "Store.recipients",
-          "line": 439,
-          "kind": "FunctionDef"
-        },
-        {
-          "name": "Store.post",
           "line": 459,
           "kind": "FunctionDef"
         },
         {
+          "name": "Store.recipients",
+          "line": 469,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "Store.post",
+          "line": 489,
+          "kind": "FunctionDef"
+        },
+        {
           "name": "Store._recips_of",
-          "line": 497,
-          "kind": "FunctionDef"
-        },
-        {
-          "name": "Store._outbox",
-          "line": 500,
-          "kind": "FunctionDef"
-        },
-        {
-          "name": "Store.outbox_pending",
-          "line": 507,
-          "kind": "FunctionDef"
-        },
-        {
-          "name": "Store.outbox_sent",
-          "line": 510,
-          "kind": "FunctionDef"
-        },
-        {
-          "name": "Store.ingest_message",
-          "line": 516,
-          "kind": "FunctionDef"
-        },
-        {
-          "name": "Store.ingest_work",
           "line": 527,
           "kind": "FunctionDef"
         },
         {
+          "name": "Store._outbox",
+          "line": 530,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "Store.outbox_pending",
+          "line": 537,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "Store.outbox_sent",
+          "line": 540,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "Store.ingest_message",
+          "line": 546,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "Store.ingest_work",
+          "line": 557,
+          "kind": "FunctionDef"
+        },
+        {
           "name": "Store.ingest_result",
-          "line": 541,
+          "line": 571,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.inbox",
-          "line": 552,
+          "line": 582,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.ack",
-          "line": 564,
+          "line": 594,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.delivery_report",
-          "line": 574,
+          "line": 604,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.mark_received",
-          "line": 581,
+          "line": 611,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.pending_for",
-          "line": 592,
+          "line": 622,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.bump_attempt",
-          "line": 596,
+          "line": 626,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.work_create",
-          "line": 607,
+          "line": 637,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.claimable",
-          "line": 640,
+          "line": 670,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.claim",
-          "line": 650,
+          "line": 680,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.heartbeat",
-          "line": 672,
+          "line": 702,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.release",
-          "line": 683,
+          "line": 713,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.cancel",
-          "line": 712,
+          "line": 742,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.work",
-          "line": 721,
+          "line": 751,
           "kind": "FunctionDef"
         },
         {
           "name": "Store._return_leases",
-          "line": 735,
+          "line": 765,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.sweep_leases",
-          "line": 743,
+          "line": 773,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.claim_path",
-          "line": 754,
+          "line": 784,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.status",
-          "line": 767,
+          "line": 797,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.events",
-          "line": 777,
-          "kind": "FunctionDef"
-        },
-        {
-          "name": "_Tx",
-          "line": 789,
-          "kind": "ClassDef"
-        },
-        {
-          "name": "_Tx.__init__",
-          "line": 790,
-          "kind": "FunctionDef"
-        },
-        {
-          "name": "_Tx.__enter__",
-          "line": 794,
-          "kind": "FunctionDef"
-        },
-        {
-          "name": "_Tx.__exit__",
-          "line": 800,
-          "kind": "FunctionDef"
-        },
-        {
-          "name": "_caps",
           "line": 807,
           "kind": "FunctionDef"
         },
         {
+          "name": "_Tx",
+          "line": 819,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "_Tx.__init__",
+          "line": 820,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_Tx.__enter__",
+          "line": 824,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_Tx.__exit__",
+          "line": 830,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_caps",
+          "line": 837,
+          "kind": "FunctionDef"
+        },
+        {
           "name": "_meets",
-          "line": 812,
+          "line": 842,
           "kind": "FunctionDef"
         },
         {
           "name": "_split_sql",
-          "line": 825,
+          "line": 855,
           "kind": "FunctionDef"
         },
         {
           "name": "_is_9p",
-          "line": 847,
+          "line": 877,
           "kind": "FunctionDef"
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
+      "reviewStatus": "Scoped P01 repair reviewed against original behavior and regression evidence; target platform phase qualification remains open.",
+      "history": [
+        {
+          "date": "2026-10-09",
+          "workingFileSha256": "5b4d0a4dd5787f0328cdac7e27926eb40be7b57161abb25b406ea13b47f53eb9",
+          "declarations": [
+            {
+              "name": "now",
+              "line": 23,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "ulid",
+              "line": 33,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "HubError",
+              "line": 196,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "Store",
+              "line": 200,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "Store.__init__",
+              "line": 201,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store._migrate",
+              "line": 216,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.tx",
+              "line": 238,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.q",
+              "line": 241,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.q1",
+              "line": 244,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.event",
+              "line": 248,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.checkpoint",
+              "line": 252,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.backup",
+              "line": 256,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.backup_to",
+              "line": 262,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.prune",
+              "line": 280,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.repo_add",
+              "line": 301,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.repo_for_path",
+              "line": 317,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.register",
+              "line": 327,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.set_handle",
+              "line": 355,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.set_state",
+              "line": 360,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.touch_output",
+              "line": 367,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.agents",
+              "line": 370,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.agent",
+              "line": 374,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.team_add",
+              "line": 382,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.team",
+              "line": 393,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.eligible_targets",
+              "line": 401,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.canonical_target",
+              "line": 416,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.adopt",
+              "line": 429,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.recipients",
+              "line": 439,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.post",
+              "line": 459,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store._recips_of",
+              "line": 497,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store._outbox",
+              "line": 500,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.outbox_pending",
+              "line": 507,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.outbox_sent",
+              "line": 510,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.ingest_message",
+              "line": 516,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.ingest_work",
+              "line": 527,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.ingest_result",
+              "line": 541,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.inbox",
+              "line": 552,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.ack",
+              "line": 564,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.delivery_report",
+              "line": 574,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.mark_received",
+              "line": 581,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.pending_for",
+              "line": 592,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.bump_attempt",
+              "line": 596,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.work_create",
+              "line": 607,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.claimable",
+              "line": 640,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.claim",
+              "line": 650,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.heartbeat",
+              "line": 672,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.release",
+              "line": 683,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.cancel",
+              "line": 712,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.work",
+              "line": 721,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store._return_leases",
+              "line": 735,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.sweep_leases",
+              "line": 743,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.claim_path",
+              "line": 754,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.status",
+              "line": 767,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.events",
+              "line": 777,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "_Tx",
+              "line": 789,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "_Tx.__init__",
+              "line": 790,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "_Tx.__enter__",
+              "line": 794,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "_Tx.__exit__",
+              "line": 800,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "_caps",
+              "line": 807,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "_meets",
+              "line": 812,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "_split_sql",
+              "line": 825,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "_is_9p",
+              "line": 847,
+              "kind": "FunctionDef"
+            }
+          ],
+          "reason": "Preserved before scoped P01 governance repairs; see governance-repairs.md."
+        }
+      ]
     },
     {
       "path": "hub/transport.py",

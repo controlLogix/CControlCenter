@@ -250,3 +250,33 @@ flowchart LR
 ```
 
 P02 verifies bootstrap with explicit later-service fixtures; P06 verifies actual client launch; P07 verifies dashboard consistency; P10 verifies real hub visibility; P12 repeats the packaged workflow. The current plan defines conflict, timeout and recovery handling. No new pattern catalog entry or implemented relationship is claimed.
+
+## October 9 baseline repairs: current work reservation boundary
+
+The diagrams above are preserved as design history. This current detail revises FED-02, FED-04, FED-06, FED-07, FED-10 and FED-16; it does not mark the planned platform phases implemented.
+
+```mermaid
+sequenceDiagram
+  participant O as Origin work plugin
+  participant N as NATS / JetStream
+  participant R as Receiving work plugin
+  participant W as Local worker
+  O->>O: Commit pending task and v3 offer outbox together
+  O->>N: Publish versioned offer
+  N->>R: Deliver or redeliver
+  R->>R: Commit attributed blocked task and claim outbox together
+  R->>N: Claim with offer digest and execution identity
+  N->>O: Deliver claim
+  O->>O: Commit one selected executor and grant outbox together
+  O->>N: Publish grant
+  N->>R: Deliver matching grant
+  R->>R: Validate origin/offer/execution; become ready
+  R->>W: Local claim and execution
+  W->>R: Done or failed
+  R->>R: Terminal state and durable return intent commit together
+  R->>N: Retry stable result from outbox after any restart
+  N->>O: Deliver result
+  O->>O: Validate selected executor, grant, task/repository and content digest
+```
+
+An origin or receiver outage delays the exchange without selecting another executor. V2 work consumers use a different exact subject and cannot consume v3 offers. Same-peer nodes are distinct execution identities; the peer credential remains the authenticated principal. Schema migration 5 and snapshot publication are detailed in `docs/planning/2026-10-09/governance-repairs.md`.

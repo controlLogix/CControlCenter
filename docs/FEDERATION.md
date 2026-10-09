@@ -1,5 +1,8 @@
 # Cross-user federation (EP-032)
 
+> **October 9 governance repair:** Work now uses a v3 reservation/grant protocol and versioned `am.work.<peer>.<rid>.<role>.v3` subjects. A receiving item waits for an origin grant before becoming claimable. Other message families remain v2. See [the repair and upgrade record](planning/2026-10-09/governance-repairs.md). Earlier design and test records below remain historical where they describe the former v2 work behavior.
+
+
 Written 2026-10-07 from the requirements interview the same day. This document is the
 design record for letting **different people's** agentmux hubs, and the Claude (or codex)
 sessions behind them, work together over a shared NATS server: messages, task handoffs,

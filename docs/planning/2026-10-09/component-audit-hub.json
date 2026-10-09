@@ -205,6 +205,15 @@
         "STATE-01 changes the authority provider; preserving functionality does not require preserving SQLite as the shared authority.",
         "Known baseline backup and federation defects require focused regression evidence before progress.",
         "The existing SQL transaction boundary cannot be assumed across NATS streams, projections and external effects."
+      ],
+      "incrementalReviews": [
+        {
+          "date": "2026-10-09",
+          "scope": "User-authorized six baseline repairs",
+          "change": "Schema migration 5 persists terminal return intent; backups use exclusive temporary creation and no-replace publication. Existing schema history and local store behavior remain the migration source for STATE-01.",
+          "evidence": "docs/planning/2026-10-09/governance-repairs.md",
+          "targetPhaseStatus": "not-qualified-by-this-incremental-repair"
+        }
       ]
     },
     {
@@ -1020,6 +1029,15 @@
       "limitations": [
         "AMX-BASE-002–005 identify existing provenance, result and multi-node defects; parity must preserve intended capability rather than reproduce those defects.",
         "The current workqueue is not the target reservation/acceptance protocol."
+      ],
+      "incrementalReviews": [
+        {
+          "date": "2026-10-09",
+          "scope": "User-authorized six baseline repairs",
+          "change": "The scoped P01 baseline repair adds version-isolated v3 offers, blocked receiver candidates, origin-owned executor grants and bound results. P10 broader independent-hub federation remains planned.",
+          "evidence": "docs/planning/2026-10-09/governance-repairs.md",
+          "targetPhaseStatus": "not-qualified-by-this-incremental-repair"
+        }
       ]
     },
     {
@@ -1501,7 +1519,8 @@
         "hub/tests/test_hub_offline.py",
         "hub/tests/test_nats_federation.py",
         "hub/tests/test_fed_unit.py",
-        "hub/tests/test_fed_live.py"
+        "hub/tests/test_fed_live.py",
+        "hub/tests/test_governance.py"
       ],
       "role": "test-support",
       "baselineGroups": [
@@ -1530,7 +1549,8 @@
             "hub/tests/test_hub_offline.py",
             "hub/tests/test_nats_federation.py",
             "hub/tests/test_fed_unit.py",
-            "hub/tests/test_fed_live.py"
+            "hub/tests/test_fed_live.py",
+            "hub/tests/test_governance.py"
           ],
           "requiredEnvironment": "Pinned Python and SQLite with FTS5 on native macOS/Linux and Linux filesystems in WSL; isolated temporary homes. Bash; real NATS/nsc/nats-py/Git for broker suites; disposable kind only when requested.",
           "baselineStatus": "not-run",
@@ -1543,7 +1563,8 @@
             "hub/tests/test_hub_offline.py",
             "hub/tests/test_nats_federation.py",
             "hub/tests/test_fed_unit.py",
-            "hub/tests/test_fed_live.py"
+            "hub/tests/test_fed_live.py",
+            "hub/tests/test_governance.py"
           ],
           "requiredEnvironment": "P01 verification harness plus each component's target environment.",
           "baselineStatus": "not-run",
@@ -1552,7 +1573,9 @@
         {
           "id": "HUB-26-C03",
           "description": "Check fixture isolation, cleanup, account boundaries and repeatability; a skipped broker suite cannot satisfy a phase's live gate.",
-          "existingTests": [],
+          "existingTests": [
+            "hub/tests/test_governance.py"
+          ],
           "requiredEnvironment": "P01 harness validation in disposable local and cluster test installations.",
           "baselineStatus": "not-run",
           "targetStatus": "not-run"
@@ -1567,6 +1590,15 @@
         "All checks in this file are not-run; this is static source review, not a test report.",
         "Some legacy suites use real process/broker environments and have platform/dependency requirements; the word offline in a filename is not a guarantee of no services.",
         "No existing suite establishes exhaustive target parity, worker containment or independent-hub ownership."
+      ],
+      "incrementalReviews": [
+        {
+          "date": "2026-10-09",
+          "scope": "User-authorized six baseline repairs",
+          "change": "Added test_governance.py for all six findings, plus real NATS tests in test_fed_live.py. Original invariant assertions are retained; the approval test now waits for the explicitly required grant before claiming.",
+          "evidence": "docs/planning/2026-10-09/governance-repairs.md",
+          "targetPhaseStatus": "not-qualified-by-this-incremental-repair"
+        }
       ]
     }
   ]

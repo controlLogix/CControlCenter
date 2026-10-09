@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, scoped MERGE-01 instruction and planning review, 2026-10-09; six baseline findings remain active",
-  "sourceDigest": "8b01347fcae29fefdfd8788912e71618c3763f862f5d858c1ca675d8a1c8293b",
+  "reviewer": "Codex, evidence-backed six-finding baseline repair review, 2026-10-09; phase and MERGE-01 gates remain open",
+  "sourceDigest": "cbb80f7b63b073f30c48955f38bc75d8c452137df91b201ca02a931aee5f2b0f",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -178,6 +178,22 @@
         "docs/planning/2026-10-09/review-site/verification.json"
       ],
       "rationale": "Recorded Ryan's stricter branch-only merge condition in both agent instruction files and the canonical plan. All required phases and functional checks must pass before Ryan and Nick review successful safe orchestration evidence from both of their own real instances and Ryan explicitly authorizes merge. P12 readiness is separate from final merge authorization, avoiding a circular dependency on P13/P14. The blank evidence template captures exact candidates, both directions, immutable fixture hashes, restricted effects, artifacts, durable records, origin acceptance and joint review without fabricating a pass. No runtime, architecture pattern relationship or phase count changed. Fresh remote refs showed the original planning commit only on origin/feat/agentmux-platform-rearchitecture, and origin/main contained none of this planning package. Coverage validation passed for 339 files, 93 components, 198 behavior checks, 99 criteria and 62 future scenarios. HTML static anchor/label, exact source-plan and six unchanged image checks passed; browser inspection remains incomplete. Existing assessments and six active baseline findings remain intact. These instructions do not claim server-enforced branch protection or a passing repository governance gate."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "previousReviewer": "Codex, scoped MERGE-01 instruction and planning review, 2026-10-09; six baseline findings remain active",
+      "previousSourceDigest": "8b01347fcae29fefdfd8788912e71618c3763f862f5d858c1ca675d8a1c8293b",
+      "scope": "Authorized six-finding baseline repair and documentation/evidence synchronization",
+      "evidence": [
+        "docs/planning/2026-10-09/governance-repairs.md",
+        "docs/planning/2026-10-09/governance-repair-evidence.json",
+        "docs/planning/2026-10-09/implementation-plan.md",
+        ".context/design-patterns.md",
+        ".context/design-patterns-diagrams.md",
+        ".github/workflows/tests.yml"
+      ],
+      "rationale": "Reviewed runtime transaction/authorization boundaries, v3 upgrade isolation and backup publication; reproduced old-source failures and verified repaired source. Preserved original finding and rule history, registered changed pattern behavior and diagrams, retained every future phase criterion and scenario, and updated source/component coverage. The HTML is rebuilt only to embed the current plan. No adoption reset, legacy debt reclassification, phase promotion, merge or full-product acceptance is claimed."
     }
   ],
   "rules": {
@@ -193,59 +209,56 @@
     },
     "DP002": {
       "status": "pass",
-      "rationale": "One process (Hub in hub/server.py) owns hub.db, and every Store call runs on its single writer thread. The CLI, the federation MCP server (hub/fed/mcp.py) and the dashboard panels talk to the hub socket and never open the database. hub/fed/plugin.py gives each plugin its own p_<name>_* tables and a ctx.publish() that always runs the guard pipeline; envelope.validate enforces the v2 wire contract.",
+      "rationale": "The single hub writer and store/plugin boundaries are retained. Work offers, claims, grants and results now use explicit v3 contracts; other envelopes remain v2. Route validation binds the envelope to the NATS subject. The repair does not implement future protected-kernel or tenant-isolation boundaries.",
       "evidence": [
         "hub/server.py",
         "hub/fed/plugin.py",
         "hub/fed/envelope.py",
-        "hub/fed/mcp.py"
+        "docs/planning/2026-10-09/governance-repairs.md"
       ]
     },
     "DP003": {
-      "status": "findings",
-      "rationale": "Current planning review records unresolved baseline findings AMX-BASE-002, AMX-BASE-003, AMX-BASE-004. Prior pass rationale is preserved in historicalRuleAssessments. Source was reread and the earlier analysis was reconciled, but runtime tests were not rerun in this planning task. Findings must be repaired or disproved with evidence under approved P01 implementation. The source provenance does not qualify for unchanged adoption-era remediation.",
+      "status": "pass",
+      "rationale": "The three consistency findings AMX-BASE-002/003/004 are repaired. Offer creation, incoming attribution plus claim, origin selection plus grant, and result staging each share an owning SQLite transaction. A terminal-state trigger records return intent before callbacks. Stable offer/grant/result identities survive retries. Different nodes under one peer follow the normal reservation path. Injected rollback, abrupt exit, reopened-store recovery, competing contenders and live same-peer-node tests pass. This is local durable recovery, not a cross-hub transaction or multi-host power-loss qualification.",
       "evidence": [
-        "hub/bridge.py",
+        "hub/store.py",
+        "hub/fed/plugins/work.py",
         "hub/fed/runtime.py",
-        "hub/fed/conn.py",
-        "hub/transport.py",
-        "hub/tests/test_hub_offline.py",
-        "docs/planning/2026-10-09/known-baseline-blockers.md"
+        "hub/tests/test_governance.py",
+        "hub/tests/test_fed_live.py",
+        "docs/planning/2026-10-09/governance-repair-evidence.json"
       ]
     },
     "DP004": {
-      "status": "findings",
-      "rationale": "Current planning review records unresolved baseline findings AMX-BASE-001, AMX-BASE-005. Prior pass rationale is preserved in historicalRuleAssessments. Source was reread and the earlier analysis was reconciled, but runtime tests were not rerun in this planning task. Findings must be repaired or disproved with evidence under approved P01 implementation. The source provenance does not qualify for unchanged adoption-era remediation.",
+      "status": "pass",
+      "rationale": "AMX-BASE-001/005 are repaired: authorization checks bind the authenticated subject sender to plane/type, destination and repository/role before dispatch; results match the origin-recorded peer/node/execution/grant, immutable offer and result payload digest. Wrong-route, wrong-executor and malformed-reference tests pass, including real JWT broker enforcement. Existing privilege and dashboard host checks also pass. Peer credentials remain the security principal; node IDs and payload actor display fields are not independent authenticated identities. Future project confidentiality, actor delegation, version/artifact and origin acceptance contracts remain P04/P05/P10 requirements.",
       "evidence": [
-        "hub/server.py",
+        "hub/fed/envelope.py",
         "hub/fed/guard.py",
-        "hub/fed/redact.py",
-        "dashboard/server.py",
+        "hub/fed/plugins/work.py",
+        "hub/tests/test_governance.py",
+        "hub/tests/test_fed_live.py",
         "dashboard/test_host_guard.py",
-        "docs/planning/2026-10-09/known-baseline-blockers.md"
+        "docs/planning/2026-10-09/governance-repair-evidence.json"
       ]
     },
     "DP005": {
       "status": "pass",
-      "rationale": "Behaviour is covered by suites that were run for this review on macOS (Python 3.14.8, 2026-10-08): hub.tests test_hub_offline, test_fed_unit, test_nats_federation and test_fed_live 96/96 against a throwaway operator-mode nats-server; dashboard/test_fed_panel.py 5/5; dashboard/test_host_guard.py 4/4; and the whole dashboard gate dashboard/run_tests.sh, all suites passed, with the Playwright e2e suite skipped because Playwright is not installed. The one prior failure (test_retire_courier..., recorded as pre-existing in FEDERATION.md 12.1) was a macOS-only test bug, the harness stub /bin/true, and is fixed. The kind-cluster variant (AGENTMUX_FED_KIND=1) was not re-run for this review; its 2026-10-07 result is in FEDERATION.md 12.1. .github/workflows/tests.yml now runs the syntax checks and the standalone suites in CI; the tmux-dependent dashboard gate stays local.",
+      "rationale": "For the exact changed runtime/test source hashes recorded in evidence, 119 hub tests passed without skips on Ubuntu WSL / Python 3.14.4 using NATS Server and nsc 2.15.0 and the repository dependency lock. Nine selected dashboard tests and dashboard syntax checks passed. Against an isolated archive of 5ee428b, nine focused regressions fail with 13 failed assertions/subtests and one concurrent-backup error. The invariant assertions are unchanged; only the unavailable new offer-digest fixture helper is omitted on old source. The new offline suite is added to CI. Full dashboard/tmux, native macOS, actual AI workers, R3 and real Ryan/Nick qualification were not run in this repair pass; historical results remain separately attributed.",
       "evidence": [
-        "hub/tests/test_hub_offline.py",
-        "hub/tests/test_fed_unit.py",
+        "hub/tests/test_governance.py",
         "hub/tests/test_fed_live.py",
-        "dashboard/run_tests.sh",
         ".github/workflows/tests.yml",
-        "docs/FEDERATION.md"
+        "docs/planning/2026-10-09/governance-repair-evidence.json"
       ]
     },
     "DP006": {
-      "status": "findings",
-      "rationale": "Current planning review records unresolved baseline findings AMX-BASE-006. Prior pass rationale is preserved in historicalRuleAssessments. Source was reread and the earlier analysis was reconciled, but runtime tests were not rerun in this planning task. Findings must be repaired or disproved with evidence under approved P01 implementation. The source provenance does not qualify for unchanged adoption-era remediation.",
+      "status": "pass",
+      "rationale": "AMX-BASE-006 is repaired with exclusive temporary creation, flushed complete SQLite content and atomic no-replace hard-link publication. Retention considers completed snapshots and tolerates concurrent pruning. Frozen-clock snapshots retain distinct contents, concurrent stores preserve snapshots, failed copying leaves existing backups intact, and restore/integrity tests pass. Requires a local filesystem supporting hard links; the tests do not establish power-loss or replicated backup guarantees.",
       "evidence": [
-        "hub/fed/runtime.py",
-        "hub/fed/ledger.py",
-        "dashboard/fed_panel.py",
-        "evals/orchestrations/SCOREBOARD.md",
-        "docs/planning/2026-10-09/known-baseline-blockers.md"
+        "hub/store.py",
+        "hub/tests/test_governance.py",
+        "docs/planning/2026-10-09/governance-repair-evidence.json"
       ]
     },
     "DP007": {
@@ -261,12 +274,15 @@
     },
     "DP008": {
       "status": "pass",
-      "rationale": "Store._migrate applies ordered, all-or-nothing migrations guarded by application_id and PRAGMA user_version, with a backup first; federation columns (origin_peer, fed_flags) are added with ALTER TABLE ADD COLUMN, never a table rebuild. The envelope carries v=2, and the single-operator Bridge and nats_url behaviour are unchanged (FEDERATION.md); test_hub_offline covers the existing verbs and courier compatibility. A future envelope v3 needs an explicit migration plan, because validate() rejects any other version.",
+      "rationale": "Prior migrations and v2 non-work envelopes remain intact. Migration 5 preserves data and adds a durable terminal-result obligation with the existing pre-migration backup. Work protocol v3 uses version-suffixed subjects and new consumers so old exact-filter workers cannot swallow new offers; the real-broker compatibility test passes. Legacy work/results remain quarantined and cannot execute through approval, and ungranted legacy completions require reconciliation. The repair report documents stop/drain, pending reservation reconciliation and rollback limits. This is a controlled compatibility change, not a mixed-version execution guarantee.",
       "evidence": [
         "hub/store.py",
         "hub/fed/envelope.py",
-        "hub/tests/test_hub_offline.py",
-        "docs/FEDERATION.md"
+        "hub/fed/guard.py",
+        "hub/tests/test_governance.py",
+        "hub/tests/test_fed_live.py",
+        "docs/planning/2026-10-09/governance-repairs.md",
+        "docs/planning/2026-10-09/governance-repair-evidence.json"
       ]
     },
     "DP009": {
@@ -288,86 +304,7 @@
       "evidence": []
     }
   },
-  "findings": [
-    {
-      "id": "AMX-BASE-001",
-      "rule": "DP004",
-      "summary": "Subject plane and envelope type can select different authorization/dispatch paths",
-      "symbol": "inbound",
-      "path": "hub/fed/guard.py",
-      "firstReported": "2026-10-08",
-      "recordedOn": "2026-10-09",
-      "evidenceScope": "Reproduced in the earlier repository analysis with an authenticated shared peer. Source reread in this planning pass confirms that the guard uses subject plane while dispatch selects env.type.",
-      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-001",
-      "repairGate": "P01",
-      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)"
-    },
-    {
-      "id": "AMX-BASE-002",
-      "rule": "DP003",
-      "summary": "Incoming work creation and remote provenance commit separately",
-      "symbol": "Work.on_envelope",
-      "path": "hub/fed/plugins/work.py",
-      "firstReported": "2026-10-08",
-      "recordedOn": "2026-10-09",
-      "evidenceScope": "Earlier interruption test left a ready work item without origin metadata and allowed duplicate creation on redelivery. Source reread confirms separate work_create and mark transactions.",
-      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-002",
-      "repairGate": "P01",
-      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)"
-    },
-    {
-      "id": "AMX-BASE-003",
-      "rule": "DP003",
-      "summary": "Completed work can lose its return-result publication",
-      "symbol": "Work.on_local_event",
-      "path": "hub/fed/plugins/work.py",
-      "firstReported": "2026-10-08",
-      "recordedOn": "2026-10-09",
-      "evidenceScope": "Earlier injected failure after local completion and before result staging left the origin pending with no recoverable result record. Current release dispatch and callback paths still separate those steps.",
-      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-003",
-      "repairGate": "P01",
-      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)"
-    },
-    {
-      "id": "AMX-BASE-004",
-      "rule": "DP003",
-      "summary": "Same-peer work consumed by a different node can be acknowledged as stale",
-      "symbol": "Work.on_envelope",
-      "path": "hub/fed/plugins/work.py",
-      "firstReported": "2026-10-08",
-      "recordedOn": "2026-10-09",
-      "evidenceScope": "Code-backed finding, not a claimed live-cluster reproduction. The same-peer branch reopens origin_id in the consuming node's database without a full origin-node ownership check.",
-      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-004",
-      "repairGate": "P01",
-      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)"
-    },
-    {
-      "id": "AMX-BASE-005",
-      "rule": "DP004",
-      "summary": "Result processing lacks binding to the selected executor and original repository",
-      "symbol": "Work._on_result",
-      "path": "hub/fed/plugins/work.py",
-      "firstReported": "2026-10-08",
-      "recordedOn": "2026-10-09",
-      "evidenceScope": "Code-backed finding from the repository analysis, confirmed by source reread. The result path checks an origin work ID and pending state but does not bind the result to a recorded selected executor/repository contract.",
-      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-005",
-      "repairGate": "P01",
-      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)"
-    },
-    {
-      "id": "AMX-BASE-006",
-      "rule": "DP006",
-      "summary": "Backup names can collide and replace a retained snapshot",
-      "symbol": "Store.backup_to",
-      "path": "hub/store.py",
-      "firstReported": "2026-10-08",
-      "recordedOn": "2026-10-09",
-      "evidenceScope": "Earlier offline retention test and frozen-clock reproduction identified millisecond timestamp filename collisions. Current code uses that stamp plus os.replace for the final backup path.",
-      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-006",
-      "repairGate": "P01",
-      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)"
-    }
-  ],
+  "findings": [],
   "historicalRuleAssessments": [
     {
       "recordedOn": "2026-10-09",
@@ -408,6 +345,270 @@
           ]
         }
       }
+    },
+    {
+      "recordedOn": "2026-10-09",
+      "reviewer": "Codex, scoped MERGE-01 instruction and planning review, 2026-10-09; six baseline findings remain active",
+      "sourceDigest": "8b01347fcae29fefdfd8788912e71618c3763f862f5d858c1ca675d8a1c8293b",
+      "note": "Preserved the full preceding assessment before recording executed repairs for the six findings. These statements describe their original review versions and environments.",
+      "rules": {
+        "DP001": {
+          "status": "pass",
+          "rationale": "docs/FEDERATION.md records interview requirements F1-F13, the topology decision (hubs as plain NATS clients of one hosted JetStream cluster), and the alternatives and assumptions A1-A24 behind it; project.json carries the decision, constraints and alternatives. The boundaries exist in source: hub/fed/ is a separate layer enabled only by federation.toml, the single-operator Bridge in hub/bridge.py is a distinct path, and every outbound effect goes through hub/fed/guard.py.",
+          "evidence": [
+            "docs/FEDERATION.md",
+            "docs/PROTOCOL.md",
+            "hub/fed/runtime.py",
+            "hub/fed/guard.py"
+          ]
+        },
+        "DP002": {
+          "status": "pass",
+          "rationale": "One process (Hub in hub/server.py) owns hub.db, and every Store call runs on its single writer thread. The CLI, the federation MCP server (hub/fed/mcp.py) and the dashboard panels talk to the hub socket and never open the database. hub/fed/plugin.py gives each plugin its own p_<name>_* tables and a ctx.publish() that always runs the guard pipeline; envelope.validate enforces the v2 wire contract.",
+          "evidence": [
+            "hub/server.py",
+            "hub/fed/plugin.py",
+            "hub/fed/envelope.py",
+            "hub/fed/mcp.py"
+          ]
+        },
+        "DP003": {
+          "status": "findings",
+          "rationale": "Current planning review records unresolved baseline findings AMX-BASE-002, AMX-BASE-003, AMX-BASE-004. Prior pass rationale is preserved in historicalRuleAssessments. Source was reread and the earlier analysis was reconciled, but runtime tests were not rerun in this planning task. Findings must be repaired or disproved with evidence under approved P01 implementation. The source provenance does not qualify for unchanged adoption-era remediation.",
+          "evidence": [
+            "hub/bridge.py",
+            "hub/fed/runtime.py",
+            "hub/fed/conn.py",
+            "hub/transport.py",
+            "hub/tests/test_hub_offline.py",
+            "docs/planning/2026-10-09/known-baseline-blockers.md"
+          ]
+        },
+        "DP004": {
+          "status": "findings",
+          "rationale": "Current planning review records unresolved baseline findings AMX-BASE-001, AMX-BASE-005. Prior pass rationale is preserved in historicalRuleAssessments. Source was reread and the earlier analysis was reconciled, but runtime tests were not rerun in this planning task. Findings must be repaired or disproved with evidence under approved P01 implementation. The source provenance does not qualify for unchanged adoption-era remediation.",
+          "evidence": [
+            "hub/server.py",
+            "hub/fed/guard.py",
+            "hub/fed/redact.py",
+            "dashboard/server.py",
+            "dashboard/test_host_guard.py",
+            "docs/planning/2026-10-09/known-baseline-blockers.md"
+          ]
+        },
+        "DP005": {
+          "status": "pass",
+          "rationale": "Behaviour is covered by suites that were run for this review on macOS (Python 3.14.8, 2026-10-08): hub.tests test_hub_offline, test_fed_unit, test_nats_federation and test_fed_live 96/96 against a throwaway operator-mode nats-server; dashboard/test_fed_panel.py 5/5; dashboard/test_host_guard.py 4/4; and the whole dashboard gate dashboard/run_tests.sh, all suites passed, with the Playwright e2e suite skipped because Playwright is not installed. The one prior failure (test_retire_courier..., recorded as pre-existing in FEDERATION.md 12.1) was a macOS-only test bug, the harness stub /bin/true, and is fixed. The kind-cluster variant (AGENTMUX_FED_KIND=1) was not re-run for this review; its 2026-10-07 result is in FEDERATION.md 12.1. .github/workflows/tests.yml now runs the syntax checks and the standalone suites in CI; the tmux-dependent dashboard gate stays local.",
+          "evidence": [
+            "hub/tests/test_hub_offline.py",
+            "hub/tests/test_fed_unit.py",
+            "hub/tests/test_fed_live.py",
+            "dashboard/run_tests.sh",
+            ".github/workflows/tests.yml",
+            "docs/FEDERATION.md"
+          ]
+        },
+        "DP006": {
+          "status": "findings",
+          "rationale": "Current planning review records unresolved baseline findings AMX-BASE-006. Prior pass rationale is preserved in historicalRuleAssessments. Source was reread and the earlier analysis was reconciled, but runtime tests were not rerun in this planning task. Findings must be repaired or disproved with evidence under approved P01 implementation. The source provenance does not qualify for unchanged adoption-era remediation.",
+          "evidence": [
+            "hub/fed/runtime.py",
+            "hub/fed/ledger.py",
+            "dashboard/fed_panel.py",
+            "evals/orchestrations/SCOREBOARD.md",
+            "docs/planning/2026-10-09/known-baseline-blockers.md"
+          ]
+        },
+        "DP007": {
+          "status": "pass",
+          "rationale": "The core hub is stdlib-only. Federation dependencies are declared in hub/requirements.txt and, after this change, every transitive is pinned exactly in hub/requirements.lock, which 'agentmux hub fed setup' and CI install as a constraints file. The Helm chart is pinned to nats/nats 2.15.0 and paho is vendored. The review found no build identity; this change adds VERSION (0.32.0) and 'agentmux version', which prints it with the checkout's git describe. Toolchains are recorded in project.json. Gap noted, not a violation: the lock pins versions without hashes, and the kind node image in deploy/nats/kind.yaml follows the kind release default.",
+          "evidence": [
+            "hub/requirements.txt",
+            "hub/requirements.lock",
+            "VERSION",
+            "agentmux.sh",
+            "deploy/nats/up.sh"
+          ]
+        },
+        "DP008": {
+          "status": "pass",
+          "rationale": "Store._migrate applies ordered, all-or-nothing migrations guarded by application_id and PRAGMA user_version, with a backup first; federation columns (origin_peer, fed_flags) are added with ALTER TABLE ADD COLUMN, never a table rebuild. The envelope carries v=2, and the single-operator Bridge and nats_url behaviour are unchanged (FEDERATION.md); test_hub_offline covers the existing verbs and courier compatibility. A future envelope v3 needs an explicit migration plan, because validate() rejects any other version.",
+          "evidence": [
+            "hub/store.py",
+            "hub/fed/envelope.py",
+            "hub/tests/test_hub_offline.py",
+            "docs/FEDERATION.md"
+          ]
+        },
+        "DP009": {
+          "status": "not-applicable",
+          "reason": "The project declares only the backend surface. The dashboard is a local operator console served by dashboard/server.py on 127.0.0.1, scoped with the backend by owner decision on 2026-10-08, not a separate web application.",
+          "rationale": "",
+          "evidence": []
+        },
+        "DP010": {
+          "status": "not-applicable",
+          "reason": "No CODESYS surface: the repository contains no CODESYS project, ST source or controller target.",
+          "rationale": "",
+          "evidence": []
+        },
+        "DP011": {
+          "status": "not-applicable",
+          "reason": "The project declares only the backend surface. The dashboard is a local operator console served by dashboard/server.py on 127.0.0.1, scoped with the backend by owner decision on 2026-10-08, so the atomic src/components structure does not apply.",
+          "rationale": "",
+          "evidence": []
+        }
+      }
     }
-  ]
+  ],
+  "resolvedFindings": [
+    {
+      "id": "AMX-BASE-001",
+      "rule": "DP004",
+      "summary": "Subject plane and envelope type can select different authorization/dispatch paths",
+      "symbol": "inbound",
+      "path": "hub/fed/guard.py",
+      "firstReported": "2026-10-08",
+      "recordedOn": "2026-10-09",
+      "evidenceScope": "Reproduced in the earlier repository analysis with an authenticated shared peer. Source reread in this planning pass confirms that the guard uses subject plane while dispatch selects env.type.",
+      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-001",
+      "repairGate": "P01",
+      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)",
+      "status": "resolved-baseline-defect",
+      "resolvedOn": "2026-10-09",
+      "implementedBy": "Codex under Ryan Helms's explicit autonomous repair authorization",
+      "resolution": "Validated subject sender/plane/destination/repository/role together before policy or dispatch; conflicting-route fixtures and existing broker spoof tests pass.",
+      "resolutionEvidence": [
+        "docs/planning/2026-10-09/governance-repairs.md",
+        "docs/planning/2026-10-09/governance-repair-evidence.json",
+        "hub/tests/test_governance.py",
+        "hub/tests/test_fed_live.py"
+      ]
+    },
+    {
+      "id": "AMX-BASE-002",
+      "rule": "DP003",
+      "summary": "Incoming work creation and remote provenance commit separately",
+      "symbol": "Work.on_envelope",
+      "path": "hub/fed/plugins/work.py",
+      "firstReported": "2026-10-08",
+      "recordedOn": "2026-10-09",
+      "evidenceScope": "Earlier interruption test left a ready work item without origin metadata and allowed duplicate creation on redelivery. Source reread confirms separate work_create and mark transactions.",
+      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-002",
+      "repairGate": "P01",
+      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)",
+      "status": "resolved-baseline-defect",
+      "resolvedOn": "2026-10-09",
+      "implementedBy": "Codex under Ryan Helms's explicit autonomous repair authorization",
+      "resolution": "Incoming creation, provenance, blocked state and claim outbox are atomic; attribution and outbox fault injection roll back and retry without duplicate work.",
+      "resolutionEvidence": [
+        "docs/planning/2026-10-09/governance-repairs.md",
+        "docs/planning/2026-10-09/governance-repair-evidence.json",
+        "hub/tests/test_governance.py",
+        "hub/tests/test_fed_live.py"
+      ]
+    },
+    {
+      "id": "AMX-BASE-003",
+      "rule": "DP003",
+      "summary": "Completed work can lose its return-result publication",
+      "symbol": "Work.on_local_event",
+      "path": "hub/fed/plugins/work.py",
+      "firstReported": "2026-10-08",
+      "recordedOn": "2026-10-09",
+      "evidenceScope": "Earlier injected failure after local completion and before result staging left the origin pending with no recoverable result record. Current release dispatch and callback paths still separate those steps.",
+      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-003",
+      "repairGate": "P01",
+      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)",
+      "status": "resolved-baseline-defect",
+      "resolvedOn": "2026-10-09",
+      "implementedBy": "Codex under Ryan Helms's explicit autonomous repair authorization",
+      "resolution": "Migration 5 commits stable result intent with terminal state, including lease exhaustion; restart, abrupt exit and failed staging recover the same result.",
+      "resolutionEvidence": [
+        "docs/planning/2026-10-09/governance-repairs.md",
+        "docs/planning/2026-10-09/governance-repair-evidence.json",
+        "hub/tests/test_governance.py",
+        "hub/tests/test_fed_live.py"
+      ]
+    },
+    {
+      "id": "AMX-BASE-004",
+      "rule": "DP003",
+      "summary": "Same-peer work consumed by a different node can be acknowledged as stale",
+      "symbol": "Work.on_envelope",
+      "path": "hub/fed/plugins/work.py",
+      "firstReported": "2026-10-08",
+      "recordedOn": "2026-10-09",
+      "evidenceScope": "Code-backed finding, not a claimed live-cluster reproduction. The same-peer branch reopens origin_id in the consuming node's database without a full origin-node ownership check.",
+      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-004",
+      "repairGate": "P01",
+      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)",
+      "status": "resolved-baseline-defect",
+      "resolvedOn": "2026-10-09",
+      "implementedBy": "Codex under Ryan Helms's explicit autonomous repair authorization",
+      "resolution": "Self-reopen requires the exact origin peer/node. A different node under the same peer completes through claim/grant; unit and real broker tests pass.",
+      "resolutionEvidence": [
+        "docs/planning/2026-10-09/governance-repairs.md",
+        "docs/planning/2026-10-09/governance-repair-evidence.json",
+        "hub/tests/test_governance.py",
+        "hub/tests/test_fed_live.py"
+      ]
+    },
+    {
+      "id": "AMX-BASE-005",
+      "rule": "DP004",
+      "summary": "Result processing lacks binding to the selected executor and original repository",
+      "symbol": "Work._on_result",
+      "path": "hub/fed/plugins/work.py",
+      "firstReported": "2026-10-08",
+      "recordedOn": "2026-10-09",
+      "evidenceScope": "Code-backed finding from the repository analysis, confirmed by source reread. The result path checks an origin work ID and pending state but does not bind the result to a recorded selected executor/repository contract.",
+      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-005",
+      "repairGate": "P01",
+      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)",
+      "status": "resolved-baseline-defect",
+      "resolvedOn": "2026-10-09",
+      "implementedBy": "Codex under Ryan Helms's explicit autonomous repair authorization",
+      "resolution": "The origin records one selected peer/node/execution/grant and validates the offer, repository ID and result digest before state change. This resolves the baseline identity gap. Broader checked-out version, external artifact and delegated actor evidence remain open under P05/P10; FAIL-16/FAIL-19 are not fully passed.",
+      "resolutionEvidence": [
+        "docs/planning/2026-10-09/governance-repairs.md",
+        "docs/planning/2026-10-09/governance-repair-evidence.json",
+        "hub/tests/test_governance.py",
+        "hub/tests/test_fed_live.py"
+      ]
+    },
+    {
+      "id": "AMX-BASE-006",
+      "rule": "DP006",
+      "summary": "Backup names can collide and replace a retained snapshot",
+      "symbol": "Store.backup_to",
+      "path": "hub/store.py",
+      "firstReported": "2026-10-08",
+      "recordedOn": "2026-10-09",
+      "evidenceScope": "Earlier offline retention test and frozen-clock reproduction identified millisecond timestamp filename collisions. Current code uses that stamp plus os.replace for the final backup path.",
+      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-006",
+      "repairGate": "P01",
+      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)",
+      "status": "resolved-baseline-defect",
+      "resolvedOn": "2026-10-09",
+      "implementedBy": "Codex under Ryan Helms's explicit autonomous repair authorization",
+      "resolution": "Exclusive temporary snapshots and no-replace publication preserve retained backups under frozen clocks and concurrent stores; restore/integrity and failed-copy tests pass.",
+      "resolutionEvidence": [
+        "docs/planning/2026-10-09/governance-repairs.md",
+        "docs/planning/2026-10-09/governance-repair-evidence.json",
+        "hub/tests/test_governance.py",
+        "hub/tests/test_fed_live.py"
+      ]
+    }
+  ],
+  "finalVerification": {
+    "date": "2026-10-09",
+    "command": "node .bytedesk/design-patterns/check.mjs check --root .",
+    "result": {
+      "baselineVersion": "1.1.0",
+      "ok": true,
+      "errors": [],
+      "assurance": "Validates review attestations, source freshness and remediation; does not prove semantic correctness or execute build/tests."
+    }
+  }
 }
