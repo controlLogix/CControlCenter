@@ -248,6 +248,11 @@ status, payload = post("api/mqtt/publish",
                         "topic": "plant/line1/temp", "payload": "21.5"})
 check("publish -> 200", 200, status)
 check("detail says unacknowledged", True, "unacknowledged" in (payload or {}).get("detail", ""))
+# HTTP completion means the QoS 0 bytes were sent, not that the broker thread
+# has read them. DISCONNECT follows PUBLISH on this connection; wait for that
+# actual packet before inspecting the complete sequence and exact counts.
+check("client sent DISCONNECT", True,
+      wait_for(lambda: len(broker.packets(mqtt.DISCONNECT)) == 1))
 connects = broker.packets(mqtt.CONNECT)
 check("broker got exactly one CONNECT", 1, len(connects))
 if connects:
@@ -262,8 +267,6 @@ if publishes:
     check("PUBLISH flags are QoS 0", 0, publishes[0][1])
     check("topic and payload round-trip", ("plant/line1/temp", "21.5"),
           decode_publish_body(publishes[0][2]))
-check("client sent DISCONNECT", True,
-      wait_for(lambda: len(broker.packets(mqtt.DISCONNECT)) == 1))
 broker.stop()
 
 print("--- subscribe against a stub broker ---")

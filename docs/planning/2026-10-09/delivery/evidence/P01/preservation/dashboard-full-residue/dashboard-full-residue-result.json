@@ -1,0 +1,52 @@
+{
+  "originalSha256": "afe6f74d4ad27ae693e09e95f389aa901b03b3fc984fea398ada9e8051fcf8dd",
+  "replacementSha256": "7708e0132460a5da4607b7bbcac5a34f903e0eab6c7b0f748c334e5ddc697e78",
+  "checks": [
+    {
+      "mode": "positive1",
+      "exitCode": 0,
+      "seconds": 30.799,
+      "logSha256": "58944082d65374063393447df26fbb92d68ced98121fd15d7e5e4dd828e604b4",
+      "tail": [
+        "  ok    residue: gate leaves the operator dashboard alone on operator-changed",
+        "  ok    residue: restored server outlives the launcher process group",
+        "  ok    residue: a restart whose server never bound is not reported as up",
+        "",
+        "passed 26, failed 0"
+      ]
+    },
+    {
+      "mode": "positive2",
+      "exitCode": 0,
+      "seconds": 30.974,
+      "logSha256": "58944082d65374063393447df26fbb92d68ced98121fd15d7e5e4dd828e604b4",
+      "tail": [
+        "  ok    residue: gate leaves the operator dashboard alone on operator-changed",
+        "  ok    residue: restored server outlives the launcher process group",
+        "  ok    residue: a restart whose server never bound is not reported as up",
+        "",
+        "passed 26, failed 0"
+      ]
+    },
+    {
+      "mode": "controlled-startup-delay",
+      "exitCode": 0,
+      "seconds": 31.977,
+      "logSha256": "58944082d65374063393447df26fbb92d68ced98121fd15d7e5e4dd828e604b4",
+      "tail": [
+        "  ok    residue: gate leaves the operator dashboard alone on operator-changed",
+        "  ok    residue: restored server outlives the launcher process group",
+        "  ok    residue: a restart whose server never bound is not reported as up",
+        "",
+        "passed 26, failed 0"
+      ]
+    }
+  ],
+  "retention": "Original26checks retained; only curl readiness stub waits for server startup record. Original start-failure exit7 retained.",
+  "limits": [
+    "Focused fixture qualification, not full dashboard acceptance."
+  ],
+  "allPassed": true,
+  "copiedSourceRestored": true,
+  "harnessSha256": "caacf9825222576fed8ff6f2a552c4f3173fef4f54115aeeb590a0b58d98e247"
+}

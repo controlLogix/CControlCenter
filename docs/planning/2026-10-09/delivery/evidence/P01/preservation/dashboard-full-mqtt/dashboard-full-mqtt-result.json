@@ -1,0 +1,51 @@
+{
+  "originalTestSha256": "66d432328c9ee90cfc23b4965fda0580508292d11a9f6c82eeef90aded0e35f3",
+  "replacementTestSha256": "3254068c83abf53803e18bed953cff93d84663752f5df04c96ef205483977c9e",
+  "productionMqttSha256": "407a703fc592abcc847b0c9a4e8396b145d6317c10c64e2deeb9aa24ab53dafd",
+  "checks": [
+    {
+      "mode": "positive1",
+      "exitCode": 0,
+      "seconds": 11.313,
+      "logSha256": "aa134687699f27b17a72713e5ce41f71e6f6c253a60126e065973074f20e2e36",
+      "failureLines": [],
+      "tail": [
+        "        status codes: [502, 502, 502, 502, 503, 503, 503, 503, 503, 503]",
+        "",
+        "passed 57, failed 0"
+      ]
+    },
+    {
+      "mode": "positive2",
+      "exitCode": 0,
+      "seconds": 11.395,
+      "logSha256": "aa134687699f27b17a72713e5ce41f71e6f6c253a60126e065973074f20e2e36",
+      "failureLines": [],
+      "tail": [
+        "        status codes: [502, 502, 502, 502, 503, 503, 503, 503, 503, 503]",
+        "",
+        "passed 57, failed 0"
+      ]
+    },
+    {
+      "mode": "negative-suppress-publish",
+      "exitCode": 1,
+      "seconds": 11.252,
+      "logSha256": "eff7ef3f7e6018c3de9d8e3183a0090c350efb3cbee6374ea2f2b5d702ba487e",
+      "failureLines": [
+        "  FAIL  broker got exactly one PUBLISH               got 0 want 1"
+      ],
+      "tail": [
+        "        status codes: [502, 502, 502, 502, 503, 503, 503, 503, 503, 503]",
+        "",
+        "passed 54, failed 1"
+      ]
+    }
+  ],
+  "retention": "All original assertions retained. Move bounded DISCONNECT observation before exact CONNECT/PUBLISH packet counts; no production protocol change.",
+  "positivePass": true,
+  "negativeRejected": true,
+  "productionRestored": true,
+  "workingSourceUnchanged": true,
+  "harnessSha256": "e5a8058b6c78cb9b459c5c2fb948b0d2d22c8d46ecc88698979c05d068775f72"
+}

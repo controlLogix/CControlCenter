@@ -181,6 +181,24 @@
       "reviewedAt": "2026-10-09",
       "reason": "Retains prior contract requirements and documents original full hub qualification with pinned NSC.",
       "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md"
+    },
+    "dashboard/test_mqtt.py": {
+      "path": "dashboard/test_mqtt.py",
+      "originalSha256": "66d432328c9ee90cfc23b4965fda0580508292d11a9f6c82eeef90aded0e35f3",
+      "replacementSha256": "3254068c83abf53803e18bed953cff93d84663752f5df04c96ef205483977c9e",
+      "reviewer": "Codex",
+      "reviewedAt": "2026-10-09",
+      "reason": "Move the existing bounded DISCONNECT observation before exact packet assertions to avoid reading an incomplete sequence. All original checks retained; deliberately suppressed PUBLISH still fails.",
+      "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md"
+    },
+    "dashboard/test_residue.sh": {
+      "path": "dashboard/test_residue.sh",
+      "originalSha256": "afe6f74d4ad27ae693e09e95f389aa901b03b3fc984fea398ada9e8051fcf8dd",
+      "replacementSha256": "7708e0132460a5da4607b7bbcac5a34f903e0eab6c7b0f748c334e5ddc697e78",
+      "reviewer": "Codex",
+      "reviewedAt": "2026-10-09",
+      "reason": "Make only the fake readiness probe wait for the fixture server startup record; all original cleanup assertions retained and delayed startup qualified.",
+      "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md"
     }
   },
   "history": [

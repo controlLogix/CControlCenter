@@ -1,0 +1,11 @@
+{
+  "durableRoot": "/home/ryan/.local/share/agentmux/windows-clients",
+  "forwardSha256": "8c702954575d96e9169cce0c7e1399018e22496aa1b3e4e41c607e23f1734600",
+  "clientsSha256": "28f37c3b81b5450b8458b1b77e5ea6af266f114e90653609a2b07121911a8cfa",
+  "variadicPathCasesPassed": 4,
+  "backupCorruptionRejectedBeforeAnyRestoreWrite": true,
+  "liveRestoreExecuted": false,
+  "codexParserSource": "https://raw.githubusercontent.com/openai/codex/main/codex-rs/utils/cli/src/shared_options.rs",
+  "codexParserBasis": "Official source declares comma delimiter and num_args=1..; installed 0.162.1 help declares --image <FILE>... . Main source is reference, not an assertion that it is the installed binary exact revision.",
+  "claudeParserBasis": "Installed 2.1.296 help declares --add-dir and --mcp-config variadic; --plugin-dir is single/repeatable."
+}

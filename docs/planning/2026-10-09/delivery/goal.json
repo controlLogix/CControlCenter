@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "status": "active",
-  "objective": "Autonomously implement the complete docs/planning/2026-10-09/implementation-plan.md, P00 through P14, preserving existing functionality and all acceptance requirements. Maintain detailed epics, tasks, implementation steps, acceptance criteria, status and evidence in delivery/tasks.json using delivery/track.py; repository files replace Atlassian, Rovo and Jira. Resume the earliest incomplete phase, delegate independent work to subagents only within that phase, and have Codex review actual results. Use focused local test/debug/fix cycles, then pass the required phase verification, commit and push to feat/agentmux-platform-rearchitecture, and verify the remote commit before advancing. Complete all phases and prove safe bilateral orchestration between independently enrolled real hubs, including automatic Docker Compose startup/reuse and origin-owned result acceptance. Record final Codex acceptance and verify the final branch push without requiring Ryan or Nick. Do not merge.",
+  "objective": "Autonomously implement the complete docs/planning/2026-10-09/implementation-plan.md, P00 through P14, preserving existing functionality and all acceptance requirements. Maintain detailed epics, tasks, implementation steps, acceptance criteria, status and evidence in delivery/tasks.json using delivery/track.py; repository files replace Atlassian, Rovo and Jira. Resume the earliest incomplete phase, delegate independent work to subagents only within that phase, and have Codex review actual results. Use focused local test/debug/fix cycles, then pass the required phase verification, commit and push to feat/agentmux-platform-rearchitecture, and verify the remote commit before advancing. Complete all phases and prove safe bilateral orchestration between independently enrolled real hubs, including automatic Docker Compose startup/reuse and origin-owned result acceptance. Record final Codex acceptance and verify the final branch push without requiring Ryan or Nick. Do not merge. Apply WSL-CLIENT-01: Windows owns Windows-installed AI clients, updates, authentication and configuration; WSL launchers invoke the same installation while Agentmux runtime, Docker Compose and tmux remain Linux-based. Qualify version/update parity, paths, callbacks and isolated concurrent sessions with actual-host evidence and no credential copying.",
   "branch": "feat/agentmux-platform-rearchitecture",
   "tracking": "Use delivery/tasks.json as the authoritative task ledger; use delivery/track.py for status transitions and generated views. No Atlassian, Rovo or Jira installation, authorization or external issue creation is required.",
   "reviewer": "Codex",
@@ -11,7 +11,8 @@
   "preservedRequirements": [
     "All existing capabilities remain in scope; no missing environment or mocked proof is silently counted as a pass.",
     "Product runtime authorization, tenant isolation, human approval when product policy calls for it, evidence and non-destructive tool restrictions remain enforced.",
-    "NATS backbone and preferred shared authority; protected plugin kernel; language-neutral extension contracts; automatic Docker Compose startup; actual supported client and hub evidence."
+    "NATS backbone and preferred shared authority; protected plugin kernel; language-neutral extension contracts; automatic Docker Compose startup; actual supported client and hub evidence.",
+    "WSL-CLIENT-01: Windows-only client updates and Windows-owned auth/config; stable WSL invocation of the same client, correct arguments/paths and WSL hub callbacks, explicit unsupported interop and isolated concurrent sessions. Native macOS/Linux runtime support remains required."
   ],
   "governanceRevision": {
     "date": "2026-10-09",
@@ -32,6 +33,13 @@
       "reason": "User requested explicit file-based tracking and a more efficient execution goal.",
       "previousObjective": "Complete the entire Agentmux implementation plan, P00 through P14, using repository-owned epics and detailed tasks with task/phase acceptance evidence. Work autonomously, with Codex as reviewer. Use subagents in parallel within one active phase at a time. Verify every phase, commit and push phase candidates before advancing, and complete final real-hub safe bilateral orchestration and feature-branch commit/push without requiring Ryan or Nick. Do not merge.",
       "previousTracking": "Repository delivery/tasks.json replaces Jira/Atlassian; no Jira installation is part of the active scope."
+    },
+    {
+      "date": "2026-10-09T23:22:59.252092+00:00",
+      "actor": "Codex",
+      "reason": "WSL-CLIENT-01: user requires Windows-owned AI client installations, updates, authentication and configuration; WSL invokes the same installation.",
+      "previousObjective": "Autonomously implement the complete docs/planning/2026-10-09/implementation-plan.md, P00 through P14, preserving existing functionality and all acceptance requirements. Maintain detailed epics, tasks, implementation steps, acceptance criteria, status and evidence in delivery/tasks.json using delivery/track.py; repository files replace Atlassian, Rovo and Jira. Resume the earliest incomplete phase, delegate independent work to subagents only within that phase, and have Codex review actual results. Use focused local test/debug/fix cycles, then pass the required phase verification, commit and push to feat/agentmux-platform-rearchitecture, and verify the remote commit before advancing. Complete all phases and prove safe bilateral orchestration between independently enrolled real hubs, including automatic Docker Compose startup/reuse and origin-owned result acceptance. Record final Codex acceptance and verify the final branch push without requiring Ryan or Nick. Do not merge.",
+      "scopeLimit": "Adds client-environment acceptance without starting P06, reducing other requirements or authorizing a merge."
     }
   ],
   "executionPolicy": [

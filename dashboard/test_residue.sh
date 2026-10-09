@@ -122,7 +122,9 @@ time.sleep(60)
         put(fixture / 'dashboard/restart.sh', 'echo called >> "$FIXTURE/restarts"\n')
         put(fixture / 'bin/flock', '#!/bin/sh\nexit 0\n', True)
         put(fixture / 'bin/tmux', '#!/bin/sh\ncase "$*" in *list-sessions*) echo fixture-agent;; esac\n', True)
-        put(fixture / 'bin/curl', '#!/bin/sh\n[ "$CASE_MODE" = start-failure ] && exit 7\nexit 0\n', True)
+        # Model real readiness: a successful probe requires the server to have
+        # started before a test can signal the runner and check its cleanup.
+        put(fixture / 'bin/curl', '#!/bin/sh\n[ "$CASE_MODE" = start-failure ] && exit 7\n[ -s "$FIXTURE/servers" ]\n', True)
         subject = '''import os, pathlib, time
 root = pathlib.Path(os.environ['FIXTURE'])
 mode = os.environ['CASE_MODE']

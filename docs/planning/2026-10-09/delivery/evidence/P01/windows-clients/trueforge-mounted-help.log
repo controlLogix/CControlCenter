@@ -1,0 +1,12 @@
+Usage:
+  npx @truefoundry/trueforge
+  npx @truefoundry/trueforge --port <n>
+
+TrueForge v0.1.4. Start the agent server.
+Defaults to standalone mode (SQLite, no Redis) — local use only, not production-safe.
+Set STANDALONE=false with Postgres and Redis for multi-replica peering.
+
+Options:
+  --port <n>   HTTP port (default: 8790, or PORT env)
+  -h, --help   Show this help
+

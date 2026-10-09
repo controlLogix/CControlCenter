@@ -14,3 +14,12 @@ Native CI now adds original hub/federation execution and report admission to the
 Evidence locations: `dashboard-full-fba373a/`, `field-race-review/`, `pattern-negative-result.json`, and `../native/37e0d8c/review.json`. Further full-run and name-regression reports retain their own source hashes and outcomes. The architecture negative fixture passed its unchanged baseline, rejected each of the three deliberate mutations, and passed after restoration; the original review and registry stayed unchanged.
 
 Missing external `agentmux-orchestration` plugin coverage and real-provider scenario repetitions remain open. An unrelated installed orchestration plugin is not equivalent evidence. No phase advancement or merge is authorized by this checkpoint.
+
+## Follow-up fixture timing repairs
+
+The second full dashboard run passed the scanner and browser checks, but exposed two additional timing races in unchanged tests. That failed run remains in `dashboard-full-repaired/`.
+
+- `dashboard/test_mqtt.py` now waits for the actual DISCONNECT packet before inspecting the broker's completed packet sequence. It retains all original checks, including exactly one PUBLISH and the exact topic, payload and QoS. HTTP completion for QoS 0 did not mean the broker's thread had read the bytes. Two focused runs passed 57 checks each; deliberately suppressing PUBLISH failed the original exact-count assertion. See `dashboard-full-mqtt/`.
+- `dashboard/test_residue.sh` now makes its fake readiness probe wait for the fixture server's startup record. The old stub returned success before the server started, allowing SIGINT to arrive before there was a process to clean up. All 26 assertions remain. Two ordinary runs and one with a deliberate half-second server startup delay passed. See `dashboard-full-residue/`.
+
+Production MQTT, scanner and dashboard cleanup code did not change. No further full dashboard run is claimed after these repairs. Windows-owned client forwarding changes how isolated client configurations must be passed; that boundary must be checked before another full run.

@@ -1,0 +1,55 @@
+{
+  "sourceCommit": "7a7d47ae6830f86b8fed318ee64da6a5aac52701",
+  "workflowRun": 38003789949,
+  "url": "https://github.com/controlLogix/agentmux/actions/runs/38003789949",
+  "reviewer": "Codex",
+  "recordedAt": "2026-10-09T23:24:31.939715+00:00",
+  "phaseAccepted": false,
+  "platforms": [
+    {
+      "platform": "macos",
+      "host": "macOS-15.7.9-arm64-arm-64bit-Mach-O",
+      "checks": 20,
+      "sourceHashesVerifiedAgainstCommit": 206,
+      "hubTests": 128,
+      "hubSourceFilesVerified": 44,
+      "contractAdmission": [],
+      "artifactSha256": {
+        "ci-result.json": "bfc65ab2121d4c520c8bb122233ff9d30423f9aebbc970eaa0fd2abc6b1fa6c6",
+        "conformance-admission-negative.json": "d21e887b0b35ad9ba242e40233ecc0b94c02a145c79b2dc9dcc3b93e60304f28",
+        "conformance-admission.json": "62e28873f3fa196e57aee32642c191fcbd010353a6aa94b25298338a1ec90aef",
+        "contracts.json": "d1862a2cbb84f3d99129529ee73a70845314b09dfb9a40976b1bf960133f2c8a",
+        "hub-full-result.json": "77c2151820f45894f1264953ebcfa2047e812277b5d9e83c269f8bf50bc8833d",
+        "leaf-result.json": "8a13b580303230508fd5c916251dbc38b3fb722876b9c42b4dfb3004581d5da9",
+        "negative-fixture.json": "e38e007eb308245f59d60c3c5543f2559cf60729ece195f04f9f9080a6c90758",
+        "signed-leaf-result.json": "611184387c17d5c97ba6e0f0c10de0500e25a312b40c22c2614e608d7a5acb99",
+        "storage-result.json": "c5c06c0486e7a97b3a4b0c4904a6fd6b1e5ff04d6e1cf68ce300449f75fc949e"
+      }
+    },
+    {
+      "platform": "linux",
+      "host": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+      "checks": 20,
+      "sourceHashesVerifiedAgainstCommit": 206,
+      "hubTests": 128,
+      "hubSourceFilesVerified": 44,
+      "contractAdmission": [],
+      "artifactSha256": {
+        "ci-result.json": "18061bbfc5ef09d464abfec016d19a5d3efbd0084b4b7009155b60087ceb7132",
+        "conformance-admission-negative.json": "9b9c9b4f0165937e13686fe7f0f02e7b6024e3613aef0cf29068a03e33417d4a",
+        "conformance-admission.json": "a1c9c96089e1032d0853801a7524e66ca8c1440455a80ad78dbba0a3613839b8",
+        "contracts.json": "1fff35ce835807688e76c879543a3e4b920654191e94ade93c0d1e6f1d758400",
+        "hub-full-result.json": "22a3493b3c7b157f2c88d4a5ff4c75b55df90cbca8c52379ee590c9138a900ae",
+        "leaf-result.json": "ee5e0198f37b9807cf0e567b5bf290c567fd144fe8dad9b94035c4cba5c5f3b2",
+        "negative-fixture.json": "e38e007eb308245f59d60c3c5543f2559cf60729ece195f04f9f9080a6c90758",
+        "signed-leaf-result.json": "e0c8d4f258536373925a80ca87e93232a962dab05ee15918d7cf9a530e18a142",
+        "storage-result.json": "94e81d53c271067987e9cc840ae7eabf229a26af5d4560880e60b5cb399a4bf1"
+      }
+    }
+  ],
+  "limits": [
+    "P01 native contract/broker and original hub fixtures; no desktop client or actual provider orchestration proof.",
+    "R1 broker and fixture trust do not establish production enrollment, R3, power-loss recovery or final bilateral acceptance.",
+    "Dashboard and external-plugin preservation remain separately tracked."
+  ]
+}

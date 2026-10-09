@@ -1,0 +1,39 @@
+{
+  "beforeWindowsUpdate": "codex-cli 0.147.0",
+  "afterWindowsUpdate": "codex-cli 0.162.1",
+  "wrapperUnchanged": false,
+  "stableWindowsScript": "C:/nvm4w/nodejs/node_modules/@openai/codex/bin/codex.js",
+  "checks": [
+    {
+      "command": [
+        "/home/ryan/.local/bin/codex",
+        "--version"
+      ],
+      "exitCode": 0,
+      "output": "codex-cli 0.162.1\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/home/ryan/.local/bin/codex",
+        "--no-daemon",
+        "--help"
+      ],
+      "exitCode": 0,
+      "output": "Codex CLI",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/bin/bash",
+        "-lc",
+        "codex --version"
+      ],
+      "exitCode": 0,
+      "output": "codex-cli 0.162.1\n",
+      "stderr": ""
+    }
+  ],
+  "stableAliasAndWindowsTargetUnchanged": true,
+  "note": "Only wrapper argument handling was hardened between recorded probes; no WSL CLI package was installed or updated. Windows update changed the version observed through the same stable Windows installation path. Bare wsl --exec now also uses it through reversible system links."
+}

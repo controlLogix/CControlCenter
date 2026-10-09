@@ -1,0 +1,57 @@
+{
+  "reviewedAt": "2026-10-09T23:34:37.988850+00:00",
+  "reviewer": "Codex independent subagent p01_pattern_checkpoint",
+  "scope": "P01 local Windows-backed WSL client setup only",
+  "phaseAccepted": false,
+  "P06Accepted": false,
+  "sourceHashes": {
+    "forward.py": "8c702954575d96e9169cce0c7e1399018e22496aa1b3e4e41c607e23f1734600",
+    "clients.json": "28f37c3b81b5450b8458b1b77e5ea6af266f114e90653609a2b07121911a8cfa",
+    "restore.py": "5b218f8e418245ecd468a4b87df6992d29bb4f2a2e5af64f2a03e7cb810e7298"
+  },
+  "independentlyVerified": {
+    "liveExternalArchiveSourceEquality": [
+      "forward.py",
+      "clients.json"
+    ],
+    "durableSymlinksMatchingManifest": 14,
+    "originalBackupHashesMatchingManifest": 2,
+    "finalHelpLogHashesMatchingSuccessfulReport": 7,
+    "focusedArgumentCasesRerun": 4,
+    "corruptBackupRejectedBeforeDisposableTargetChanged": true,
+    "liveRestoreExecuted": false
+  },
+  "method": "Read final forwarder and restore code; compare SHA-256 hashes and link targets; run only the pure argument checks and disposable restore fixture prefix of review-fixes-verify.py, stopping before evidence mutation code. Read final verification, config override and Windows update reports. No auth/config values or private startup file contents were read.",
+  "resolvedFindings": [
+    "Live launchers and client map now reside under durable ~/.local/share/agentmux/windows-clients; all fourteen links point there.",
+    "Claude variadic path arguments and Codex comma-separated/variadic image arguments pass four focused cases including end-of-options preservation.",
+    "Restore checks original backup hashes before any restore writes; corrupt-backup fixture rejected without changing its target."
+  ],
+  "remainingLimits": [
+    "Windows update report records wrapperUnchanged=false because argument hardening overlapped the update. Stable alias and Windows target remained unchanged; final unchanged-wrapper update behavior was not demonstrated.",
+    "Config override reports use harmless Windows Node metadata, not authenticated inference. Automatic Grok/Kimi config override forwarding is not qualified.",
+    "Correct Windows-tool-to-WSL hub callbacks remain unimplemented in this setup; agentmux.cmd still names Ubuntu and /home/nick/.local/bin/agentmux.",
+    "Concurrent tmux/host isolation and complete terminal orchestration workflows were not demonstrated.",
+    "Pi was not found in the inspected paths; this is not an exhaustive machine inventory.",
+    "Live restore was not executed; original backups remain in the private cache."
+  ],
+  "patternAssessment": "External local-machine environment setup does not establish a repository runtime pattern location or P06 implementation. Existing planned PLAN-02 host adapters remain planned. No new registry entry is warranted for this evidence archive.",
+  "requiredPatternCheck": {
+    "command": "node .bytedesk/design-patterns/check.mjs check --root .",
+    "exitCode": 1,
+    "errors": [
+      "Review is stale or missing: inspect changes and refresh sourceDigest"
+    ],
+    "owner": "Parent integrates and reviews final candidate; this subagent did not refresh its attestation."
+  },
+  "readmeEditorialChange": {
+    "archiveManifestPreserved": true,
+    "originalSha256": "b53414a14451f965fdb9af8d3da80cda19fbb39de5fc3d6c81775bfff215507d",
+    "reviewedSha256": "d1981bbc224e14994bfba67fc92206196678c93301cc20fca8d9b93ccecce6f2",
+    "changes": [
+      "Removed duplicate override paragraph.",
+      "Made update and orchestration proof limits explicit.",
+      "Labeled README as review prose added after external archive snapshot."
+    ]
+  }
+}

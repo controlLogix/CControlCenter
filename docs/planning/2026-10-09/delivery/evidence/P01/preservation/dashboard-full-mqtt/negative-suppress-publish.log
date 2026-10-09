@@ -1,0 +1,70 @@
+--- guards (no broker needed) ---
+  ok    GET publish                                  405
+  ok    GET subscribe                                405
+  ok    no JSON content type                         415
+  ok    cross-origin Origin                          403
+  ok    unknown field                                400
+--- input validation (must reject before opening a socket) ---
+  ok    bad host                                     (400, 'invalid host')
+  ok    host with scheme                             (400, 'invalid host')
+  ok    port 0                                       (400, 'invalid port')
+  ok    port as string                               (400, 'invalid port')
+  ok    port too big                                 (400, 'invalid port')
+  ok    empty topic                                  (400, 'invalid topic')
+  ok    wildcard publish +                           (400, 'cannot publish to a wildcard topic')
+  ok    wildcard publish #                           (400, 'cannot publish to a wildcard topic')
+  ok    oversize payload                             True
+--- wildcards ARE allowed on subscribe ---
+  ok    wildcard subscribe reaches the broker step   502
+--- unreachable broker: 502 with a reason, no hang ---
+  ok    unreachable -> 502                           502
+  ok    names a reason                               True
+--- a rejected request must not leak a slot ---
+  ok    slot still available after 9 rejections      200
+--- publish against a stub broker ---
+  ok    publish -> 200                               200
+  ok    detail says unacknowledged                   True
+  ok    client sent DISCONNECT                       True
+  ok    broker got exactly one CONNECT               1
+  ok    protocol name is MQTT                        b'MQTT'
+  ok    protocol level is 4 (3.1.1)                  4
+  ok    clean-session flag set                       2
+  ok    keepalive is 15s                             15
+  FAIL  broker got exactly one PUBLISH               got 0 want 1
+--- subscribe against a stub broker ---
+  ok    subscribe -> 200                             200
+  ok    delivered the broker's message               [{'topic': 'plant/line1/temp', 'payload': '22.0', 'qos': 0, 'retain': False, 'bytes': 4}]
+  ok    broker got one SUBSCRIBE                     1
+  ok    SUBSCRIBE flags are 0x02 (required)          2
+  ok    client sent UNSUBSCRIBE                      True
+--- broker refusal is reported, not swallowed ---
+  ok    CONNACK 5 -> 502                             502
+  ok    reports 'not authorised'                     True
+  ok    no PUBLISH was sent after refusal            0
+--- control characters are stripped from inbound payloads ---
+  ok    escape bytes removed from payload            'val[0m'
+  ok    escape bytes removed from topic              't/[31m'
+--- BOOTP parser (no root needed) ---
+  ok    op                                           'BOOTREQUEST'
+  ok    mac                                          '00:1d:9c:c7:b0:1a'
+  ok    xid                                          '0xdeadbeef'
+  ok    dhcp type                                    'DISCOVER'
+  ok    hostname                                     'wago-750'
+  ok    requested ip                                 '10.0.0.42'
+  ok    short datagram rejected                      None
+  ok    truncated option field survives              None
+--- the probe refuses to escalate and never replies ---
+  ok    no sendto anywhere                           0
+  ok    no sendall anywhere                          0
+  ok    names the privilege it needs                 True
+  ok    unprivileged bind exits non-zero             True
+  ok    says which port it could not bind            True
+  ok    and gives a reason for it                    True
+--- concurrency cap (grok finding 3) ---
+  ok    some requests were refused (503)             True
+  ok    no request succeeded against a silent broker 0
+  ok    every request got an answer                  10
+  ok    refusals + broker errors account for all     True
+        status codes: [502, 502, 502, 502, 503, 503, 503, 503, 503, 503]
+
+passed 54, failed 1

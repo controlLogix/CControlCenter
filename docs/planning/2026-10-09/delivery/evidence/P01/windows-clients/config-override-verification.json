@@ -1,0 +1,46 @@
+{
+  "cases": [
+    {
+      "case": "default",
+      "passed": true,
+      "metadata": {
+        "home": "C:\\Users\\RyanHelms",
+        "USERPROFILE": "C:\\Users\\RyanHelms",
+        "CODEX_HOME": null,
+        "CLAUDE_CONFIG_DIR": null,
+        "probe": "preserved"
+      }
+    },
+    {
+      "case": "linux-config",
+      "passed": true,
+      "metadata": {
+        "home": "C:\\Users\\RyanHelms",
+        "USERPROFILE": "C:\\Users\\RyanHelms",
+        "CODEX_HOME": "\\\\wsl.localhost\\Ubuntu-26.04\\home\\ryan\\.cache\\agentmux-governance\\windows-cli-links\\20261009-192119\\fixture config\\.codex",
+        "CLAUDE_CONFIG_DIR": "\\\\wsl.localhost\\Ubuntu-26.04\\home\\ryan\\.cache\\agentmux-governance\\windows-cli-links\\20261009-192119\\fixture config\\.claude",
+        "probe": "preserved"
+      }
+    },
+    {
+      "case": "windows-config",
+      "passed": true,
+      "metadata": {
+        "home": "C:\\Users\\RyanHelms",
+        "USERPROFILE": "C:\\Users\\RyanHelms",
+        "CODEX_HOME": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\codex fixture",
+        "CLAUDE_CONFIG_DIR": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\claude fixture",
+        "probe": "preserved"
+      }
+    }
+  ],
+  "otherWSLENVEntryPreserved": true,
+  "globalHOMEOverrideAdded": false,
+  "noCredentialsReadCopiedOrRefreshed": true,
+  "launcherSha256": "8c702954575d96e9169cce0c7e1399018e22496aa1b3e4e41c607e23f1734600",
+  "source": "https://learn.microsoft.com/en-us/windows/wsl/interop",
+  "limits": [
+    "Overrides validated through harmless Windows Node metadata, not authenticated model calls.",
+    "Automatic GROK_HOME and Kimi-specific config forwarding are not implemented or qualified. Explicit WSLENV supplied by the caller is preserved; separate validation is required for those providers."
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "launcherSha256": "8c702954575d96e9169cce0c7e1399018e22496aa1b3e4e41c607e23f1734600",
+  "checks": [
+    {
+      "client": "claude",
+      "command": [
+        "claude",
+        "--help"
+      ],
+      "cwd": "/tmp",
+      "exitCode": 0,
+      "log": "claude-final-help.log",
+      "logSha256": "550db4f88ae1d97bf7244ca96dc89554aabd3978241ceb69f79001e816c35f09"
+    },
+    {
+      "client": "codex",
+      "command": [
+        "codex",
+        "--help"
+      ],
+      "cwd": "/tmp",
+      "exitCode": 0,
+      "log": "codex-final-help.log",
+      "logSha256": "4a7f0188d4d6e6d812c5cfbcf82468336b899acd5e437de7450421a403c0071e"
+    },
+    {
+      "client": "grok",
+      "command": [
+        "grok",
+        "--help"
+      ],
+      "cwd": "/tmp",
+      "exitCode": 0,
+      "log": "grok-final-help.log",
+      "logSha256": "0ad66e27b7d5f0c82ed65e67ce1c87da06e4686949f448eecaaf9e255b603bbd"
+    },
+    {
+      "client": "kimi",
+      "command": [
+        "kimi",
+        "--help"
+      ],
+      "cwd": "/tmp",
+      "exitCode": 0,
+      "log": "kimi-final-help.log",
+      "logSha256": "fba090e5ffc85ed7b8763a272a0b042c88c36063b60fc42719feb6fd706a2e56"
+    },
+    {
+      "client": "goose",
+      "command": [
+        "goose",
+        "--help"
+      ],
+      "cwd": "/tmp",
+      "exitCode": 0,
+      "log": "goose-final-help.log",
+      "logSha256": "9b8b6b72e6001e02bc1f33615677441557b438d2d61117cbb0ba1dbe391b2051"
+    },
+    {
+      "client": "dsh",
+      "command": [
+        "dsh",
+        "--help"
+      ],
+      "cwd": "/tmp",
+      "exitCode": 0,
+      "log": "dsh-final-help.log",
+      "logSha256": "92370cf0ad4d6a1b991c0cafb249ea574efbe087d6e692a692b264d52bc3a57a"
+    },
+    {
+      "client": "trueforge",
+      "command": [
+        "trueforge",
+        "--help"
+      ],
+      "cwd": "/tmp",
+      "exitCode": 0,
+      "log": "trueforge-final-help.log",
+      "logSha256": "4b42d1e35bc49bac5142edac701f3182b423179e84116007e1fa5277588fc5e1"
+    }
+  ],
+  "modelPrompts": 0,
+  "credentialsCopied": false,
+  "configContentsArchived": false
+}

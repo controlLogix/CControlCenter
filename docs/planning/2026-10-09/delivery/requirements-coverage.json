@@ -6,11 +6,11 @@
   "sourceFiles": [
     {
       "path": "implementation-plan.md",
-      "sha256": "f2a809c4c7525894376ea3b93ebc11f92c7bd42648606d1cd0b7149721b79465"
+      "sha256": "33a2b962bfc101732f4532a0313de65f518b8dc1fabd8bd2fa0d3704cae0f452"
     },
     {
       "path": "phases.json",
-      "sha256": "5bb9037937a00621214ad58873c368fdc55b2f8c3722653c97432efa8031a82a"
+      "sha256": "882de6f13f309b878ebd8898ba73ab05fe94dc68ec517b311054f2a99f3102f7"
     },
     {
       "path": "component-audit-dashboard.json",
@@ -433,21 +433,25 @@
     },
     {
       "id": "R08",
-      "requirement": "Native macOS/Linux and Windows via WSL",
-      "owningPhaseExpression": "P02, P06, P12",
+      "requirement": "Native macOS/Linux and Windows via WSL; Windows-owned AI clients via WSL invocation (WSL-CLIENT-01)",
+      "owningPhaseExpression": "P01, P02, P06, P12",
       "owningPhases": [
+        "P01",
         "P02",
         "P06",
         "P12"
       ],
-      "requiredEvidence": "Install, workflow, upgrade, and recovery matrix.",
+      "requiredEvidence": "Install, workflow, upgrade, and recovery matrix. WSL-CLIENT-01: environment contract and actual direct/WSL version and update parity, Windows auth/config ownership without copied secrets, argument/path/UNC correctness, hub callbacks, concurrent-session isolation and honest interop failures.",
       "phaseCriterionIds": [
         "P02-AC01",
         "P02-AC06",
         "P06-AC05",
         "P06-AC06",
         "P12-AC02",
-        "P12-AC08"
+        "P12-AC08",
+        "P01-AC04",
+        "P06-AC02",
+        "P06-AC04"
       ],
       "componentReferences": [
         {
@@ -3207,6 +3211,102 @@
           "sha256": "52a2e7648da7727c260b28764f6fc5817b6776d4e24198bec7a4b8436bf442c2"
         }
       ]
+    },
+    {
+      "date": "2026-10-09T23:22:59.252092+00:00",
+      "actor": "Codex",
+      "reason": "WSL-CLIENT-01: user requires Windows-owned AI client installations, updates, authentication and configuration; WSL invokes the same installation.",
+      "previousSourceFiles": [
+        {
+          "path": "implementation-plan.md",
+          "sha256": "f2a809c4c7525894376ea3b93ebc11f92c7bd42648606d1cd0b7149721b79465"
+        },
+        {
+          "path": "phases.json",
+          "sha256": "5bb9037937a00621214ad58873c368fdc55b2f8c3722653c97432efa8031a82a"
+        },
+        {
+          "path": "component-audit-dashboard.json",
+          "sha256": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f"
+        },
+        {
+          "path": "component-audit-harness.json",
+          "sha256": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08"
+        },
+        {
+          "path": "component-audit-hub.json",
+          "sha256": "b2eb15d467fc12d4099a0a9534184b1be308fa11c55adcd68d6f2533c21a3cca"
+        },
+        {
+          "path": "component-audit-repository.json",
+          "sha256": "52a2e7648da7727c260b28764f6fc5817b6776d4e24198bec7a4b8436bf442c2"
+        }
+      ],
+      "previousRequirement": {
+        "id": "R08",
+        "requirement": "Native macOS/Linux and Windows via WSL",
+        "owningPhaseExpression": "P02, P06, P12",
+        "owningPhases": [
+          "P02",
+          "P06",
+          "P12"
+        ],
+        "requiredEvidence": "Install, workflow, upgrade, and recovery matrix.",
+        "phaseCriterionIds": [
+          "P02-AC01",
+          "P02-AC06",
+          "P06-AC05",
+          "P06-AC06",
+          "P12-AC02",
+          "P12-AC08"
+        ],
+        "componentReferences": [
+          {
+            "componentId": "HAR-01",
+            "manifest": "component-audit-harness.json",
+            "ownerPhase": "P06",
+            "behaviorCheckIds": [
+              "HAR-01-C01",
+              "HAR-01-C02"
+            ],
+            "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+          },
+          {
+            "componentId": "HAR-05",
+            "manifest": "component-audit-harness.json",
+            "ownerPhase": "P12",
+            "behaviorCheckIds": [
+              "HAR-05-C01",
+              "HAR-05-C02",
+              "HAR-05-C03"
+            ],
+            "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+          },
+          {
+            "componentId": "HAR-06",
+            "manifest": "component-audit-harness.json",
+            "ownerPhase": "P06",
+            "behaviorCheckIds": [
+              "HAR-06-C01",
+              "HAR-06-C02"
+            ],
+            "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+          },
+          {
+            "componentId": "DASH-28",
+            "manifest": "component-audit-dashboard.json",
+            "ownerPhase": "P12",
+            "behaviorCheckIds": [
+              "DASH-28-C01",
+              "DASH-28-C02"
+            ],
+            "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+          }
+        ],
+        "additionalGateIds": [],
+        "status": "mapped-not-accepted",
+        "acceptanceEvidence": []
+      }
     }
   ]
 }

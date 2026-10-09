@@ -1,0 +1,4 @@
+*.log -text -whitespace
+*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+*.py -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+README.md -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

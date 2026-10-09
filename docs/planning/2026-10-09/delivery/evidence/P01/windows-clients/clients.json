@@ -1,0 +1,64 @@
+{
+  "claude": {
+    "exe": "/mnt/c/nvm4w/nodejs/node_modules/@anthropic-ai/claude-code/bin/claude.exe",
+    "paths": [
+      "--settings",
+      "--plugin-dir",
+      "--add-dir",
+      "--mcp-config"
+    ],
+    "variadicPaths": [
+      "--add-dir",
+      "--mcp-config"
+    ]
+  },
+  "codex": {
+    "exe": "/mnt/c/nvm4w/nodejs/node.exe",
+    "script": "/mnt/c/nvm4w/nodejs/node_modules/@openai/codex/bin/codex.js",
+    "paths": [
+      "--cd",
+      "-C",
+      "--add-dir",
+      "--image",
+      "-i"
+    ],
+    "variadicPaths": [
+      "--image",
+      "-i"
+    ],
+    "commaPaths": [
+      "--image",
+      "-i"
+    ]
+  },
+  "grok": {
+    "exe": "/mnt/c/Users/RyanHelms/.grok/bin/grok.exe",
+    "paths": [
+      "--cwd",
+      "--prompt-file",
+      "--debug-file"
+    ]
+  },
+  "kimi": {
+    "exe": "/mnt/c/Users/RyanHelms/.kimi-code/bin/kimi.exe",
+    "paths": [
+      "--skills-dir",
+      "--agent-file",
+      "--add-dir"
+    ]
+  },
+  "goose": {
+    "exe": "/mnt/c/Users/RyanHelms/.local/bin/goose.exe",
+    "paths": []
+  },
+  "dsh": {
+    "exe": "/mnt/c/nvm4w/nodejs/node.exe",
+    "script": "/mnt/c/nvm4w/nodejs/node_modules/@deepseek-ai/dsh/lib/bin.js",
+    "paths": []
+  },
+  "trueforge": {
+    "exe": "/mnt/c/nvm4w/nodejs/node.exe",
+    "script": "/mnt/c/nvm4w/nodejs/node_modules/@truefoundry/trueforge/dist/cli.js",
+    "paths": []
+  }
+}

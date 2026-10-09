@@ -1,0 +1,213 @@
+{
+  "root": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119",
+  "runs": [
+    {
+      "client": "claude",
+      "cwd": "/mnt/c/Users/RyanHelms/GitHub/agentmux",
+      "flag": "--version",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/claude-mounted-version.log",
+      "logSha256": "ced06c95bb4c0780504b700880ceea37cd764283d2be9d3ea2555683183207ea"
+    },
+    {
+      "client": "claude",
+      "cwd": "/mnt/c/Users/RyanHelms/GitHub/agentmux",
+      "flag": "--help",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/claude-mounted-help.log",
+      "logSha256": "550db4f88ae1d97bf7244ca96dc89554aabd3978241ceb69f79001e816c35f09"
+    },
+    {
+      "client": "codex",
+      "cwd": "/mnt/c/Users/RyanHelms/GitHub/agentmux",
+      "flag": "--version",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/codex-mounted-version.log",
+      "logSha256": "47e8650c39eae3ea896e5873f03a97a65d183d81cd0d86616e8b83d7d87877ca"
+    },
+    {
+      "client": "codex",
+      "cwd": "/mnt/c/Users/RyanHelms/GitHub/agentmux",
+      "flag": "--help",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/codex-mounted-help.log",
+      "logSha256": "ee859522150318f2590d1e3a9e7490d93a2dd611ce56f3eb8db54a358593904d"
+    },
+    {
+      "client": "grok",
+      "cwd": "/mnt/c/Users/RyanHelms/GitHub/agentmux",
+      "flag": "--version",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/grok-mounted-version.log",
+      "logSha256": "c01540ff9dbc089978dc84acf3ca5ebf4a464a00eda75089f486aab0dd3207f5"
+    },
+    {
+      "client": "grok",
+      "cwd": "/mnt/c/Users/RyanHelms/GitHub/agentmux",
+      "flag": "--help",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/grok-mounted-help.log",
+      "logSha256": "0ad66e27b7d5f0c82ed65e67ce1c87da06e4686949f448eecaaf9e255b603bbd"
+    },
+    {
+      "client": "kimi",
+      "cwd": "/mnt/c/Users/RyanHelms/GitHub/agentmux",
+      "flag": "--version",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/kimi-mounted-version.log",
+      "logSha256": "867a70774294546ebe3cac14fa311d8d27922466625e3fd9a42e9a26682a86e7"
+    },
+    {
+      "client": "kimi",
+      "cwd": "/mnt/c/Users/RyanHelms/GitHub/agentmux",
+      "flag": "--help",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/kimi-mounted-help.log",
+      "logSha256": "fba090e5ffc85ed7b8763a272a0b042c88c36063b60fc42719feb6fd706a2e56"
+    },
+    {
+      "client": "goose",
+      "cwd": "/mnt/c/Users/RyanHelms/GitHub/agentmux",
+      "flag": "--version",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/goose-mounted-version.log",
+      "logSha256": "bcf27e68b0e8c384655c596fd410a9a6df3a604878baf8bc6a40c7383939a2c6"
+    },
+    {
+      "client": "goose",
+      "cwd": "/mnt/c/Users/RyanHelms/GitHub/agentmux",
+      "flag": "--help",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/goose-mounted-help.log",
+      "logSha256": "9b8b6b72e6001e02bc1f33615677441557b438d2d61117cbb0ba1dbe391b2051"
+    },
+    {
+      "client": "dsh",
+      "cwd": "/mnt/c/Users/RyanHelms/GitHub/agentmux",
+      "flag": "--version",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/dsh-mounted-version.log",
+      "logSha256": "4ee8f65c28fe2f2f7223c395c2fe65f98eb1cd28428bfbf25ee068836ba9de40"
+    },
+    {
+      "client": "dsh",
+      "cwd": "/mnt/c/Users/RyanHelms/GitHub/agentmux",
+      "flag": "--help",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/dsh-mounted-help.log",
+      "logSha256": "92370cf0ad4d6a1b991c0cafb249ea574efbe087d6e692a692b264d52bc3a57a"
+    },
+    {
+      "client": "trueforge",
+      "cwd": "/mnt/c/Users/RyanHelms/GitHub/agentmux",
+      "flag": "--help",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/trueforge-mounted-help.log",
+      "logSha256": "4b42d1e35bc49bac5142edac701f3182b423179e84116007e1fa5277588fc5e1"
+    },
+    {
+      "client": "claude",
+      "cwd": "/tmp",
+      "flag": "--version",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/claude-linux-version.log",
+      "logSha256": "ced06c95bb4c0780504b700880ceea37cd764283d2be9d3ea2555683183207ea"
+    },
+    {
+      "client": "claude",
+      "cwd": "/tmp",
+      "flag": "--help",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/claude-linux-help.log",
+      "logSha256": "550db4f88ae1d97bf7244ca96dc89554aabd3978241ceb69f79001e816c35f09"
+    },
+    {
+      "client": "codex",
+      "cwd": "/tmp",
+      "flag": "--version",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/codex-linux-version.log",
+      "logSha256": "47e8650c39eae3ea896e5873f03a97a65d183d81cd0d86616e8b83d7d87877ca"
+    },
+    {
+      "client": "codex",
+      "cwd": "/tmp",
+      "flag": "--help",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/codex-linux-help.log",
+      "logSha256": "ee859522150318f2590d1e3a9e7490d93a2dd611ce56f3eb8db54a358593904d"
+    },
+    {
+      "client": "grok",
+      "cwd": "/tmp",
+      "flag": "--version",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/grok-linux-version.log",
+      "logSha256": "c01540ff9dbc089978dc84acf3ca5ebf4a464a00eda75089f486aab0dd3207f5"
+    },
+    {
+      "client": "grok",
+      "cwd": "/tmp",
+      "flag": "--help",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/grok-linux-help.log",
+      "logSha256": "0ad66e27b7d5f0c82ed65e67ce1c87da06e4686949f448eecaaf9e255b603bbd"
+    },
+    {
+      "client": "kimi",
+      "cwd": "/tmp",
+      "flag": "--version",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/kimi-linux-version.log",
+      "logSha256": "867a70774294546ebe3cac14fa311d8d27922466625e3fd9a42e9a26682a86e7"
+    },
+    {
+      "client": "kimi",
+      "cwd": "/tmp",
+      "flag": "--help",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/kimi-linux-help.log",
+      "logSha256": "fba090e5ffc85ed7b8763a272a0b042c88c36063b60fc42719feb6fd706a2e56"
+    },
+    {
+      "client": "goose",
+      "cwd": "/tmp",
+      "flag": "--version",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/goose-linux-version.log",
+      "logSha256": "bcf27e68b0e8c384655c596fd410a9a6df3a604878baf8bc6a40c7383939a2c6"
+    },
+    {
+      "client": "goose",
+      "cwd": "/tmp",
+      "flag": "--help",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/goose-linux-help.log",
+      "logSha256": "9b8b6b72e6001e02bc1f33615677441557b438d2d61117cbb0ba1dbe391b2051"
+    },
+    {
+      "client": "dsh",
+      "cwd": "/tmp",
+      "flag": "--version",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/dsh-linux-version.log",
+      "logSha256": "4ee8f65c28fe2f2f7223c395c2fe65f98eb1cd28428bfbf25ee068836ba9de40"
+    },
+    {
+      "client": "dsh",
+      "cwd": "/tmp",
+      "flag": "--help",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/dsh-linux-help.log",
+      "logSha256": "92370cf0ad4d6a1b991c0cafb249ea574efbe087d6e692a692b264d52bc3a57a"
+    },
+    {
+      "client": "trueforge",
+      "cwd": "/tmp",
+      "flag": "--help",
+      "exitCode": 0,
+      "log": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/trueforge-linux-help.log",
+      "logSha256": "4b42d1e35bc49bac5142edac701f3182b423179e84116007e1fa5277588fc5e1"
+    }
+  ]
+}

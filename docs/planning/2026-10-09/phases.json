@@ -73,9 +73,9 @@
       "outcome": "Contracts and failure scenarios can be tested before business plugins grow.",
       "work": [
         "Publish language-neutral command/event schemas and compatibility rules with organization, project, task, delegation, attempt, operation, schema version, and trace identifiers.",
-        "Create reusable contract fixtures and controllable fake workers/providers plus real NATS integration environments for CI.",
+        "Create reusable contract fixtures and controllable fake workers/providers plus real NATS integration environments for CI. Include WSL-CLIENT-01 environmental contract fixtures and an actual Windows/WSL client inventory; distinguish this preparation from P06 host integration.",
         "Specify lifecycle, delivery acknowledgment, idempotency, deadline, cancellation, approval, and unavailable/unknown result semantics.",
-        "Establish per-phase evidence records, dependency gates, migration fixtures, and security/quality regression jobs.",
+        "Establish per-phase evidence records, dependency gates, migration fixtures, and security/quality regression jobs. Bind WSL evidence to Windows-owned client identity, version, configuration ownership and explicit interop limits; native Linux evidence cannot stand in for the Windows/WSL path.",
         "Build an early two-hub contract spike with separate broker accounts and a leaf link. Exercise lost acceptance acknowledgment and reservation reconciliation before the later production federation phase.",
         "Preserve and extend the verified repairs for the six baseline findings. Ryan authorized this bounded repair pass; its source hashes and executed regressions are in governance-repair-evidence.json. Complete every other P01 criterion before advancing to P02.",
         "Build a bounded NATS persistence spike before production storage code: one owning task record, persistent operation identity, conditional competing writes, complete provenance/effect intent, lost acknowledgments and replay. Exercise single-record commits and any required atomic batch inside one stream.",
@@ -96,7 +96,7 @@
         },
         {
           "id": "P01-AC04",
-          "text": "CI captures exact versions and logs without recording credentials or private model reasoning. Known baseline blockers are repaired or disproved with evidence, and the required repository governance gate passes before P02 progression."
+          "text": "CI captures exact versions and logs without recording credentials or private model reasoning. Known baseline blockers are repaired or disproved with evidence, and the required repository governance gate passes before P02 progression. WSL-CLIENT-01 has a recorded placement contract, Windows/WSL client/version inventory and honest current interop observations; P06-specific integration claims remain unaccepted until actual-host qualification."
         },
         {
           "id": "P01-AC05",
@@ -112,14 +112,16 @@
         "Break one contract fixture and one phase gate deliberately and confirm the pipeline refuses promotion.",
         "Exercise a real broker restart and reconnect in the harness.",
         "Run FAIL-42, FAIL-43 and FAIL-47 with real JetStream. Record which server/API/SDK capabilities provide each guarantee, including batch behavior and authoritative read freshness.",
-        "Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records."
+        "Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.",
+        "For WSL-CLIENT-01, record direct Windows and WSL-resolved client identity/version, configuration ownership and observed interop failures without copying credentials. Keep platform-runtime tests distinct from Windows-client transport tests; identify P06-owned qualification gaps."
       ],
       "evidence": [
         "Contract version 1 fixtures",
         "Failure injection harness",
         "CI gate and compatibility reports",
         "NATS storage capability report and transaction-boundary fixtures for STATE-01",
-        "Component reuse decisions, baseline/candidate results, gain evidence and approved exceptions for ADD-01"
+        "Component reuse decisions, baseline/candidate results, gain evidence and approved exceptions for ADD-01",
+        "WSL-CLIENT-01 client ownership contract, current environment inventory and explicit interop gap record"
       ],
       "rollback": "Keep the new test path isolated from the legacy runtime. If a baseline repair is reverted, reopen its finding and invalidate the affected regression and phase-gate evidence.",
       "dependsOn": [
@@ -396,14 +398,14 @@
       "owner": "Integrations + developer experience",
       "outcome": "Developers use Agentmux from their preferred supported client.",
       "work": [
-        "Extend current CLI, MCP, provider and workspace tooling. Preserve command semantics, safe prompt handling, session cleanup boundaries and credential setup; expose new scopes through the existing entry points where compatible.",
+        "Extend current CLI, MCP, provider and workspace tooling. Preserve command semantics, safe prompt handling, session cleanup boundaries and credential setup; expose new scopes through the existing entry points where compatible. Apply WSL-CLIENT-01: WSL wrappers or symlinks invoke the Windows-owned client installation; preserve argument and working-directory semantics without installing duplicate Linux clients.",
         "Provide stable CLI and MCP interfaces generated from declared command contracts, with discoverable resources and error semantics.",
-        "Package and test integrations for Claude Code, Codex CLI, Pi, and Claude Desktop using each host's documented capabilities.",
-        "Distinguish external client sessions submitting work from Agentmux-managed worker sessions. Publish coverage for events, controls, resume, hooks, and compaction.",
-        "Add setup, credential references, diagnostics, install checks, and client-specific documentation without silently replacing user configuration.",
+        "Package and test integrations for Claude Code, Codex CLI, Pi, and Claude Desktop using each host's documented capabilities. On Windows/WSL, qualify the same Windows installation from direct Windows launch and WSL/tmux entry, including version parity, Windows-only updates and explicit unsupported interop behavior.",
+        "Distinguish external client sessions submitting work from Agentmux-managed worker sessions. Publish coverage for events, controls, resume, hooks, and compaction. Prove concurrent WSL tmux workers and external Windows clients retain separate project, hub, session and host identity and route callbacks correctly.",
+        "Add setup, credential references, diagnostics, install checks, and client-specific documentation without silently replacing user configuration. Keep Windows authentication/configuration authoritative. Use durable discovery or stable launchers that survive Windows-only updates; do not copy credentials, pin version-specific executables or silently replace unrelated settings.",
         "Inventory and qualify existing Grok/provider authentication methods and any Bedrock compatibility path. Migrate GitHub and Jira/Confluence workflows as tool plugins with explicit writes and credentials.",
         "Apply ADD-01 and the component preservation matrix to every changed source file and affected caller. Record reuse, intentional behavior changes, migration needs and the specific added functionality before editing implementation.",
-        "Wire LOCAL-01 ensure-running into each supported terminal/client startup integration. Show one concise status summary with dashboard access; provide structured status for clients, suppress recursive bootstrap in managed workers, and keep protocol stdout free of banners."
+        "Wire LOCAL-01 ensure-running into each supported terminal/client startup integration. Show one concise status summary with dashboard access; provide structured status for clients, suppress recursive bootstrap in managed workers, and keep protocol stdout free of banners. Route Windows client callbacks and CLI/MCP traffic to the selected WSL hub; verify startup/reuse status, path translation, protocol framing and concurrent launches."
       ],
       "criteria": [
         {
@@ -412,7 +414,7 @@
         },
         {
           "id": "P06-AC02",
-          "text": "Unsupported event capture, cancellation, or compaction reports an explicit capability limit instead of simulating success."
+          "text": "Unsupported event capture, cancellation, or compaction reports an explicit capability limit instead of simulating success. Windows/WSL interop failures and unsupported client/path combinations remain explicit; a Linux fallback or version-only check cannot simulate a supported workflow."
         },
         {
           "id": "P06-AC03",
@@ -420,15 +422,15 @@
         },
         {
           "id": "P06-AC04",
-          "text": "Fresh-user install and uninstall preserve unrelated client settings and secrets."
+          "text": "Fresh-user install and uninstall preserve unrelated client settings and secrets. Under WSL-CLIENT-01, Windows retains sole ownership of each Windows-installed AI client and its updates, authentication and configuration; no duplicate Linux installation or credential copying is introduced."
         },
         {
           "id": "P06-AC05",
-          "text": "All existing supported harness commands, session safeguards, agent definitions, provider setup methods and integration workflows have passing comparisons or an explicitly approved capability change. Retained and added tests cover modal decisions, idle cleanup, credential refresh, WSL paths and external-write uncertainty."
+          "text": "All existing supported harness commands, session safeguards, agent definitions, provider setup methods and integration workflows have passing comparisons or an explicitly approved capability change. Retained and added tests cover modal decisions, idle cleanup, credential refresh, WSL paths and external-write uncertainty. Direct Windows and WSL/tmux launches resolve the same installed version before and after a Windows-only update. Stable launchers survive updates without version-specific binary paths; arguments and working directories preserve spaces, quoting, mounted Windows paths and WSL UNC paths."
         },
         {
           "id": "P06-AC06",
-          "text": "Installing and configuring the Agentmux plugin makes each supported terminal/client launch automatically start or reuse the selected stack and show its instance and authorized hub summary. Actual-host tests qualify startup hooks or a clearly named installed launcher; manual commands cannot stand in for promised automatic launch."
+          "text": "Installing and configuring the Agentmux plugin makes each supported terminal/client launch automatically start or reuse the selected stack and show its instance and authorized hub summary. Actual-host tests qualify startup hooks or a clearly named installed launcher; manual commands cannot stand in for promised automatic launch. Windows-owned client callbacks reach the selected WSL hub, and concurrent tmux workers/external clients preserve distinct project, hub, session and host identities without cross-session configuration or callbacks."
         },
         {
           "id": "P06-AC07",
@@ -440,13 +442,15 @@
         "Test reconnect, authentication expiry, missing tool, malformed MCP request, and client shutdown.",
         "Review provider commercial integration terms before promising a supported paid distribution.",
         "Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.",
-        "Run cold, warm and concurrent launches on each advertised client/OS version, including separate WSL sessions and paths with spaces. Capture client-visible status and protocol streams; exercise FAIL-60–FAIL-61."
+        "Run cold, warm and concurrent launches on each advertised client/OS version, including separate WSL sessions and paths with spaces. Capture client-visible status and protocol streams; exercise FAIL-60–FAIL-61.",
+        "Execute WSL-CLIENT-01 on each supported Windows-installed client: compare direct/WSL version and installation identity, perform a Windows-only update and repeat, verify Windows auth/config ownership without secret copying, test exact arguments and working directories with spaces and WSL UNC paths, verify selected-hub callbacks, and run concurrent tmux/host sessions. Capture actual failures and recovery; retain native macOS/Linux runtime tests separately."
       ],
       "evidence": [
         "Actual-host compatibility matrix",
         "CLI/MCP reference and setup guides",
         "Per-client workflow results",
-        "Component reuse decisions, baseline/candidate results, gain evidence and approved exceptions for ADD-01"
+        "Component reuse decisions, baseline/candidate results, gain evidence and approved exceptions for ADD-01",
+        "WSL-CLIENT-01 direct-Windows/WSL identity and update parity, configuration ownership, argument/path, callback and concurrent-session evidence"
       ],
       "rollback": "Disable only the affected adapter and preserve the underlying task state and alternate CLI access.",
       "dependsOn": [
@@ -1102,6 +1106,143 @@
         "P12-AC05": "Ryan and Nick review the release-readiness evidence and record provisional readiness plus all outstanding MERGE-01 requirements. P12 acceptance does not authorize merge or release; the separate final gate requires the entire approved plan, their real-instance orchestration evidence and Ryan's explicit merge approval.",
         "preservationApprovalClause": "Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick."
       }
+    },
+    {
+      "date": "2026-10-09T23:22:59.252092+00:00",
+      "actor": "Codex",
+      "reason": "WSL-CLIENT-01: user requires Windows-owned AI client installations, updates, authentication and configuration; WSL invokes the same installation.",
+      "previousPhases": [
+        {
+          "id": "P01",
+          "name": "Executable contracts, baseline repairs, and verification",
+          "size": "L",
+          "owner": "Architecture + quality",
+          "outcome": "Contracts and failure scenarios can be tested before business plugins grow.",
+          "work": [
+            "Publish language-neutral command/event schemas and compatibility rules with organization, project, task, delegation, attempt, operation, schema version, and trace identifiers.",
+            "Create reusable contract fixtures and controllable fake workers/providers plus real NATS integration environments for CI.",
+            "Specify lifecycle, delivery acknowledgment, idempotency, deadline, cancellation, approval, and unavailable/unknown result semantics.",
+            "Establish per-phase evidence records, dependency gates, migration fixtures, and security/quality regression jobs.",
+            "Build an early two-hub contract spike with separate broker accounts and a leaf link. Exercise lost acceptance acknowledgment and reservation reconciliation before the later production federation phase.",
+            "Preserve and extend the verified repairs for the six baseline findings. Ryan authorized this bounded repair pass; its source hashes and executed regressions are in governance-repair-evidence.json. Complete every other P01 criterion before advancing to P02.",
+            "Build a bounded NATS persistence spike before production storage code: one owning task record, persistent operation identity, conditional competing writes, complete provenance/effect intent, lost acknowledgments and replay. Exercise single-record commits and any required atomic batch inside one stream.",
+            "Apply ADD-01 and the component preservation matrix to every changed source file and affected caller. Record reuse, intentional behavior changes, migration needs and the specific added functionality before editing implementation."
+          ],
+          "criteria": [
+            {
+              "id": "P01-AC01",
+              "text": "Two independently implemented test clients exchange valid requests and reject incompatible or malformed envelopes."
+            },
+            {
+              "id": "P01-AC02",
+              "text": "Fixtures cover duplicate, delayed, out-of-order, unauthorized, canceled, timed-out, and replayed messages without conflating execution with delivery."
+            },
+            {
+              "id": "P01-AC03",
+              "text": "A failing predecessor gate prevents promotion. Waivers cannot bypass accepted ownership or security invariants."
+            },
+            {
+              "id": "P01-AC04",
+              "text": "CI captures exact versions and logs without recording credentials or private model reasoning. Known baseline blockers are repaired or disproved with evidence, and the required repository governance gate passes before P02 progression."
+            },
+            {
+              "id": "P01-AC05",
+              "text": "Two language clients pass the NATS storage fixtures on pinned server/client versions: competing revisions admit one transition, partial atomic batches leave no partial record set, and lost acknowledgments reconcile the same operation. Unsupported cross-stream or external-effect transactions are rejected or handled by an explicit recovery contract."
+            },
+            {
+              "id": "P01-AC06",
+              "text": "The existing regression assertions are retained or mapped to equivalent assertions. Characterization fixtures capture each affected behavior before refactoring; a deliberately removed assertion, missing component, or unapproved retirement prevents progression."
+            }
+          ],
+          "verify": [
+            "Run schema/contract suites in macOS, Linux, and WSL test jobs.",
+            "Break one contract fixture and one phase gate deliberately and confirm the pipeline refuses promotion.",
+            "Exercise a real broker restart and reconnect in the harness.",
+            "Run FAIL-42, FAIL-43 and FAIL-47 with real JetStream. Record which server/API/SDK capabilities provide each guarantee, including batch behavior and authoritative read freshness.",
+            "Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records."
+          ],
+          "evidence": [
+            "Contract version 1 fixtures",
+            "Failure injection harness",
+            "CI gate and compatibility reports",
+            "NATS storage capability report and transaction-boundary fixtures for STATE-01",
+            "Component reuse decisions, baseline/candidate results, gain evidence and approved exceptions for ADD-01"
+          ],
+          "rollback": "Keep the new test path isolated from the legacy runtime. If a baseline repair is reverted, reopen its finding and invalidate the affected regression and phase-gate evidence.",
+          "dependsOn": [
+            "P00"
+          ],
+          "status": "proposed",
+          "deliveryOwner": "Codex with bounded subagents in the active phase"
+        },
+        {
+          "id": "P06",
+          "name": "Agent-client entry points and portable tooling",
+          "size": "L",
+          "owner": "Integrations + developer experience",
+          "outcome": "Developers use Agentmux from their preferred supported client.",
+          "work": [
+            "Extend current CLI, MCP, provider and workspace tooling. Preserve command semantics, safe prompt handling, session cleanup boundaries and credential setup; expose new scopes through the existing entry points where compatible.",
+            "Provide stable CLI and MCP interfaces generated from declared command contracts, with discoverable resources and error semantics.",
+            "Package and test integrations for Claude Code, Codex CLI, Pi, and Claude Desktop using each host's documented capabilities.",
+            "Distinguish external client sessions submitting work from Agentmux-managed worker sessions. Publish coverage for events, controls, resume, hooks, and compaction.",
+            "Add setup, credential references, diagnostics, install checks, and client-specific documentation without silently replacing user configuration.",
+            "Inventory and qualify existing Grok/provider authentication methods and any Bedrock compatibility path. Migrate GitHub and Jira/Confluence workflows as tool plugins with explicit writes and credentials.",
+            "Apply ADD-01 and the component preservation matrix to every changed source file and affected caller. Record reuse, intentional behavior changes, migration needs and the specific added functionality before editing implementation.",
+            "Wire LOCAL-01 ensure-running into each supported terminal/client startup integration. Show one concise status summary with dashboard access; provide structured status for clients, suppress recursive bootstrap in managed workers, and keep protocol stdout free of banners."
+          ],
+          "criteria": [
+            {
+              "id": "P06-AC01",
+              "text": "Each supported client can submit a task, inspect progress/evidence, participate in required approvals, and retrieve the result."
+            },
+            {
+              "id": "P06-AC02",
+              "text": "Unsupported event capture, cancellation, or compaction reports an explicit capability limit instead of simulating success."
+            },
+            {
+              "id": "P06-AC03",
+              "text": "Closing the originating client or observer does not duplicate or implicitly terminate durable work."
+            },
+            {
+              "id": "P06-AC04",
+              "text": "Fresh-user install and uninstall preserve unrelated client settings and secrets."
+            },
+            {
+              "id": "P06-AC05",
+              "text": "All existing supported harness commands, session safeguards, agent definitions, provider setup methods and integration workflows have passing comparisons or an explicitly approved capability change. Retained and added tests cover modal decisions, idle cleanup, credential refresh, WSL paths and external-write uncertainty."
+            },
+            {
+              "id": "P06-AC06",
+              "text": "Installing and configuring the Agentmux plugin makes each supported terminal/client launch automatically start or reuse the selected stack and show its instance and authorized hub summary. Actual-host tests qualify startup hooks or a clearly named installed launcher; manual commands cannot stand in for promised automatic launch."
+            },
+            {
+              "id": "P06-AC07",
+              "text": "Client startup preserves MCP/JSON-RPC framing, never prints secrets and avoids recursive starts by managed workers. Closing a terminal leaves shared work running; an explicit authorized stop follows the drain policy. Failed prerequisites report recovery steps without silently installing privileged software or changing client settings."
+            }
+          ],
+          "verify": [
+            "Execute the same reference workflow on every pinned client version in the support matrix.",
+            "Test reconnect, authentication expiry, missing tool, malformed MCP request, and client shutdown.",
+            "Review provider commercial integration terms before promising a supported paid distribution.",
+            "Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.",
+            "Run cold, warm and concurrent launches on each advertised client/OS version, including separate WSL sessions and paths with spaces. Capture client-visible status and protocol streams; exercise FAIL-60–FAIL-61."
+          ],
+          "evidence": [
+            "Actual-host compatibility matrix",
+            "CLI/MCP reference and setup guides",
+            "Per-client workflow results",
+            "Component reuse decisions, baseline/candidate results, gain evidence and approved exceptions for ADD-01"
+          ],
+          "rollback": "Disable only the affected adapter and preserve the underlying task state and alternate CLI access.",
+          "dependsOn": [
+            "P05"
+          ],
+          "status": "proposed",
+          "deliveryOwner": "Codex with bounded subagents in the active phase"
+        }
+      ],
+      "scopeLimit": "Existing phase and criterion IDs retained. P06 remains planned; no later-phase implementation authorized by this documentation update."
     }
   ],
   "deliveryGovernance": {
@@ -1111,5 +1252,22 @@
     "parallelism": "subagents within one active phase only",
     "mergeAuthorized": false,
     "scopeReductionAuthorized": false
+  },
+  "clientOwnershipDecision": {
+    "id": "WSL-CLIENT-01",
+    "date": "2026-10-09T23:22:59.252092+00:00",
+    "source": "Explicit user instruction during P01",
+    "decision": "For Windows-installed AI terminal clients, Windows owns the installation, updates, authentication and configuration. WSL symlinks or wrappers invoke that same Windows installation. Do not add a separate Linux client installation or copy credentials to make the bridge work.",
+    "runtimePlacement": "Agentmux remains native on macOS/Linux; the Windows Agentmux runtime, Docker Compose integration and tmux remain in WSL/Linux. This decision changes client ownership, not runtime placement.",
+    "phaseBoundary": "P01 records the environmental contract, actual environment observations and explicit gaps. P06 delivers and qualifies complete client integration after its predecessors pass.",
+    "acceptance": [
+      "Direct Windows and WSL-invoked client version and installation identity agree.",
+      "A Windows-only client update is reflected through the same durable launcher without editing a version-specific binary path or maintaining a second installation.",
+      "Windows configuration and authentication remain authoritative; no credential copying, secret logging or silent secondary login store.",
+      "Exact arguments and working directories survive spaces, quoting, mounted Windows paths and WSL UNC paths; unsupported paths fail explicitly.",
+      "Client callbacks, CLI/MCP transports and LOCAL-01 startup/status target the correct WSL hub and preserve protocol framing.",
+      "Concurrent tmux workers and external clients preserve project, hub, session and host identity without cross-session callbacks or configuration changes.",
+      "Actual Windows/WSL interop failures are retained as failed or unsupported observations with recovery steps; Linux substitutes and successful version checks cannot count as full workflow proof."
+    ]
   }
 }

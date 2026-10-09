@@ -351,7 +351,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 - **P01-AC01:** Two independently implemented test clients exchange valid requests and reject incompatible or malformed envelopes.
 - **P01-AC02:** Fixtures cover duplicate, delayed, out-of-order, unauthorized, canceled, timed-out, and replayed messages without conflating execution with delivery.
 - **P01-AC03:** A failing predecessor gate prevents promotion. Waivers cannot bypass accepted ownership or security invariants.
-- **P01-AC04:** CI captures exact versions and logs without recording credentials or private model reasoning. Known baseline blockers are repaired or disproved with evidence, and the required repository governance gate passes before P02 progression.
+- **P01-AC04:** CI captures exact versions and logs without recording credentials or private model reasoning. Known baseline blockers are repaired or disproved with evidence, and the required repository governance gate passes before P02 progression. WSL-CLIENT-01 has a recorded placement contract, Windows/WSL client/version inventory and honest current interop observations; P06-specific integration claims remain unaccepted until actual-host qualification.
 - **P01-AC05:** Two language clients pass the NATS storage fixtures on pinned server/client versions: competing revisions admit one transition, partial atomic batches leave no partial record set, and lost acknowledgments reconcile the same operation. Unsupported cross-stream or external-effect transactions are rejected or handled by an explicit recovery contract.
 - **P01-AC06:** The existing regression assertions are retained or mapped to equivalent assertions. Characterization fixtures capture each affected behavior before refactoring; a deliberately removed assertion, missing component, or unapproved retirement prevents progression.
 
@@ -411,16 +411,18 @@ Contracts and failure scenarios can be tested before business plugins grow.
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Record WSL-CLIENT-01 actual client installation/version ownership and environmental contract fixtures. Separate Windows-client interop observations from native Linux/WSL runtime conformance and leave P06-specific client integration open.
 
 **Deliverables**
 
 1. Create reusable contract fixtures and controllable fake workers/providers plus real NATS integration environments for CI.
 2. Focused regression evidence and affected compatibility/migration records
+3. WSL-CLIENT-01 client ownership contract, current environment inventory and explicit interop gap record
 
 **Acceptance criteria**
 
-1. P01-T02-AC01: The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Create reusable contract fixtures and controllable fake workers/providers plus real NATS integration environments for CI.
-2. P01-T02-AC02: Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope.
+1. P01-T02-AC01: The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Create reusable contract fixtures and controllable fake workers/providers plus real NATS integration environments for CI. WSL-CLIENT-01: Record WSL-CLIENT-01 actual client installation/version ownership and environmental contract fixtures. Separate Windows-client interop observations from native Linux/WSL runtime conformance and leave P06-specific client integration open.
+2. P01-T02-AC02: Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope. Each applicable WSL-CLIENT-01 claim requires actual evidence; failed interop, omitted host coverage or Linux-client substitution cannot count as success. P01 environmental evidence does not accept P06 integration.
 3. P01-T02-AC03: Affected existing behavior has a baseline/candidate comparison or an approved behavior-change record; no capability, required assertion or stored identity is silently removed.
 4. P01-T02-AC04: Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented.
 
@@ -431,6 +433,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 3. Exercise a real broker restart and reconnect in the harness.
 4. Run FAIL-42, FAIL-43 and FAIL-47 with real JetStream. Record which server/API/SDK capabilities provide each guarantee, including batch behavior and authoritative read freshness.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
+6. For WSL-CLIENT-01, record direct Windows and WSL-resolved client identity/version, configuration ownership and observed interop failures without copying credentials. Keep platform-runtime tests distinct from Windows-client transport tests; identify P06-owned qualification gaps.
 
 **Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md
 
@@ -493,16 +496,18 @@ Contracts and failure scenarios can be tested before business plugins grow.
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Bind Windows/WSL evidence to client installation/version, Windows auth/config ownership and actual interop observations; keep unsupported environments and P06 qualification gaps explicit rather than treating native Linux results as equivalent.
 
 **Deliverables**
 
 1. Establish per-phase evidence records, dependency gates, migration fixtures, and security/quality regression jobs.
 2. Focused regression evidence and affected compatibility/migration records
+3. WSL-CLIENT-01 client ownership contract, current environment inventory and explicit interop gap record
 
 **Acceptance criteria**
 
-1. P01-T04-AC01: The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Establish per-phase evidence records, dependency gates, migration fixtures, and security/quality regression jobs.
-2. P01-T04-AC02: Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope.
+1. P01-T04-AC01: The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Establish per-phase evidence records, dependency gates, migration fixtures, and security/quality regression jobs. WSL-CLIENT-01: Bind Windows/WSL evidence to client installation/version, Windows auth/config ownership and actual interop observations; keep unsupported environments and P06 qualification gaps explicit rather than treating native Linux results as equivalent.
+2. P01-T04-AC02: Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope. Each applicable WSL-CLIENT-01 claim requires actual evidence; failed interop, omitted host coverage or Linux-client substitution cannot count as success. P01 environmental evidence does not accept P06 integration.
 3. P01-T04-AC03: Affected existing behavior has a baseline/candidate comparison or an approved behavior-change record; no capability, required assertion or stored identity is silently removed.
 4. P01-T04-AC04: Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented.
 
@@ -513,10 +518,11 @@ Contracts and failure scenarios can be tested before business plugins grow.
 3. Exercise a real broker restart and reconnect in the harness.
 4. Run FAIL-42, FAIL-43 and FAIL-47 with real JetStream. Record which server/API/SDK capabilities provide each guarantee, including batch behavior and authoritative read freshness.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
+6. For WSL-CLIENT-01, record direct Windows and WSL-resolved client identity/version, configuration ownership and observed interop failures without copying credentials. Keep platform-runtime tests distinct from Windows-client transport tests; identify P06-owned qualification gaps.
 
-**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md, docs/planning/2026-10-09/delivery/evidence/P01/native/37e0d8c/review.json, docs/planning/2026-10-09/delivery/evidence/P01/preservation/acceptance-map.json
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md, docs/planning/2026-10-09/delivery/evidence/P01/native/37e0d8c/review.json, docs/planning/2026-10-09/delivery/evidence/P01/preservation/acceptance-map.json, docs/planning/2026-10-09/delivery/evidence/P01/native/7a7d47a/review.json, docs/planning/2026-10-09/delivery/evidence/P01/windows-clients/README.md
 
-**Commits:** f19c6473d56335b8eeb28704b02895b9d9ab7fcc, a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41, 00353fd0ccb0b4ce34cb4eb45549703430af30d1
+**Commits:** f19c6473d56335b8eeb28704b02895b9d9ab7fcc, a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41, 00353fd0ccb0b4ce34cb4eb45549703430af30d1, 7a7d47ae6830f86b8fed318ee64da6a5aac52701
 
 
 <a id="P01-T05"></a>
@@ -698,6 +704,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
 3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
+5. Review WSL-CLIENT-01 evidence at this phase boundary: environment contract, inventory and honest observations; do not accept P06 integration early.
 
 **Deliverables**
 
@@ -709,7 +716,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 
 **Acceptance criteria**
 
-1. P01-GATE-AC01: Two independently implemented test clients exchange valid requests and reject incompatible or malformed envelopes.
+1. P01-GATE-AC01: Two independently implemented test clients exchange valid requests and reject incompatible or malformed envelopes. WSL-CLIENT-01 is included in this phase's evidence review, with no skipped-environment substitution.
 2. P01-GATE-AC02: Fixtures cover duplicate, delayed, out-of-order, unauthorized, canceled, timed-out, and replayed messages without conflating execution with delivery.
 3. P01-GATE-AC03: A failing predecessor gate prevents promotion. Waivers cannot bypass accepted ownership or security invariants.
 4. P01-GATE-AC04: CI captures exact versions and logs without recording credentials or private model reasoning. Known baseline blockers are repaired or disproved with evidence, and the required repository governance gate passes before P02 progression.
@@ -725,6 +732,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 3. Exercise a real broker restart and reconnect in the harness.
 4. Run FAIL-42, FAIL-43 and FAIL-47 with real JetStream. Record which server/API/SDK capabilities provide each guarantee, including batch behavior and authoritative read freshness.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
+6. For WSL-CLIENT-01, record direct Windows and WSL-resolved client identity/version, configuration ownership and observed interop failures without copying credentials. Keep platform-runtime tests distinct from Windows-client transport tests; identify P06-owned qualification gaps.
 
 **Evidence:** not yet recorded
 
@@ -2191,11 +2199,11 @@ Developers use Agentmux from their preferred supported client.
 **Epic acceptance criteria**
 
 - **P06-AC01:** Each supported client can submit a task, inspect progress/evidence, participate in required approvals, and retrieve the result.
-- **P06-AC02:** Unsupported event capture, cancellation, or compaction reports an explicit capability limit instead of simulating success.
+- **P06-AC02:** Unsupported event capture, cancellation, or compaction reports an explicit capability limit instead of simulating success. Windows/WSL interop failures and unsupported client/path combinations remain explicit; a Linux fallback or version-only check cannot simulate a supported workflow.
 - **P06-AC03:** Closing the originating client or observer does not duplicate or implicitly terminate durable work.
-- **P06-AC04:** Fresh-user install and uninstall preserve unrelated client settings and secrets.
-- **P06-AC05:** All existing supported harness commands, session safeguards, agent definitions, provider setup methods and integration workflows have passing comparisons or an explicitly approved capability change. Retained and added tests cover modal decisions, idle cleanup, credential refresh, WSL paths and external-write uncertainty.
-- **P06-AC06:** Installing and configuring the Agentmux plugin makes each supported terminal/client launch automatically start or reuse the selected stack and show its instance and authorized hub summary. Actual-host tests qualify startup hooks or a clearly named installed launcher; manual commands cannot stand in for promised automatic launch.
+- **P06-AC04:** Fresh-user install and uninstall preserve unrelated client settings and secrets. Under WSL-CLIENT-01, Windows retains sole ownership of each Windows-installed AI client and its updates, authentication and configuration; no duplicate Linux installation or credential copying is introduced.
+- **P06-AC05:** All existing supported harness commands, session safeguards, agent definitions, provider setup methods and integration workflows have passing comparisons or an explicitly approved capability change. Retained and added tests cover modal decisions, idle cleanup, credential refresh, WSL paths and external-write uncertainty. Direct Windows and WSL/tmux launches resolve the same installed version before and after a Windows-only update. Stable launchers survive updates without version-specific binary paths; arguments and working directories preserve spaces, quoting, mounted Windows paths and WSL UNC paths.
+- **P06-AC06:** Installing and configuring the Agentmux plugin makes each supported terminal/client launch automatically start or reuse the selected stack and show its instance and authorized hub summary. Actual-host tests qualify startup hooks or a clearly named installed launcher; manual commands cannot stand in for promised automatic launch. Windows-owned client callbacks reach the selected WSL hub, and concurrent tmux workers/external clients preserve distinct project, hub, session and host identities without cross-session configuration or callbacks.
 - **P06-AC07:** Client startup preserves MCP/JSON-RPC framing, never prints secrets and avoids recursive starts by managed workers. Closing a terminal leaves shared work running; an explicit authorized stop follows the drain policy. Failed prerequisites report recovery steps without silently installing privileged software or changing client settings.
 
 <a id="P06-T01"></a>
@@ -2214,16 +2222,18 @@ Developers use Agentmux from their preferred supported client.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
 6. Qualify REPO-01-C01 in actual supported agent hosts: confirm shared instructions and the branch/merge restriction are delivered, preserve user settings, and retain per-host/version evidence. P00 static review is not a substitute.
+7. Implement durable WSL symlinks or wrappers resolving each Windows-owned AI client. Preserve exact arguments and working directories, including spaces, quoting, mounted Windows paths and WSL UNC paths; do not install a duplicate Linux client.
 
 **Deliverables**
 
 1. Extend current CLI, MCP, provider and workspace tooling. Preserve command semantics, safe prompt handling, session cleanup boundaries and credential setup; expose new scopes through the existing entry points where compatible.
 2. Focused regression evidence and affected compatibility/migration records
+3. WSL-CLIENT-01 direct-Windows/WSL identity and update parity, configuration ownership, argument/path, callback and concurrent-session evidence
 
 **Acceptance criteria**
 
-1. P06-T01-AC01: The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Extend current CLI, MCP, provider and workspace tooling. Preserve command semantics, safe prompt handling, session cleanup boundaries and credential setup; expose new scopes through the existing entry points where compatible.
-2. P06-T01-AC02: Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope.
+1. P06-T01-AC01: The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Extend current CLI, MCP, provider and workspace tooling. Preserve command semantics, safe prompt handling, session cleanup boundaries and credential setup; expose new scopes through the existing entry points where compatible. WSL-CLIENT-01: Implement durable WSL symlinks or wrappers resolving each Windows-owned AI client. Preserve exact arguments and working directories, including spaces, quoting, mounted Windows paths and WSL UNC paths; do not install a duplicate Linux client.
+2. P06-T01-AC02: Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope. WSL-CLIENT-01 requires actual Windows/WSL workflow evidence; a version-only check, Linux-client substitution or skipped interop case cannot count as success.
 3. P06-T01-AC03: Affected existing behavior has a baseline/candidate comparison or an approved behavior-change record; no capability, required assertion or stored identity is silently removed.
 4. P06-T01-AC04: Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented.
 
@@ -2234,6 +2244,7 @@ Developers use Agentmux from their preferred supported client.
 3. Review provider commercial integration terms before promising a supported paid distribution.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Run cold, warm and concurrent launches on each advertised client/OS version, including separate WSL sessions and paths with spaces. Capture client-visible status and protocol streams; exercise FAIL-60–FAIL-61.
+6. Execute WSL-CLIENT-01 on each supported Windows-installed client: compare direct/WSL version and installation identity, perform a Windows-only update and repeat, verify Windows auth/config ownership without secret copying, test exact arguments and working directories with spaces and WSL UNC paths, verify selected-hub callbacks, and run concurrent tmux/host sessions. Capture actual failures and recovery; retain native macOS/Linux runtime tests separately.
 
 **Evidence:** not yet recorded
 
@@ -2296,16 +2307,18 @@ Developers use Agentmux from their preferred supported client.
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Execute supported-client workflows from Windows and WSL/tmux against the same installation, compare version identity, perform a Windows-only update and repeat without editing version-specific paths. Record actual interop limitations and recovery steps.
 
 **Deliverables**
 
 1. Package and test integrations for Claude Code, Codex CLI, Pi, and Claude Desktop using each host's documented capabilities.
 2. Focused regression evidence and affected compatibility/migration records
+3. WSL-CLIENT-01 direct-Windows/WSL identity and update parity, configuration ownership, argument/path, callback and concurrent-session evidence
 
 **Acceptance criteria**
 
-1. P06-T03-AC01: The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Package and test integrations for Claude Code, Codex CLI, Pi, and Claude Desktop using each host's documented capabilities.
-2. P06-T03-AC02: Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope.
+1. P06-T03-AC01: The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Package and test integrations for Claude Code, Codex CLI, Pi, and Claude Desktop using each host's documented capabilities. WSL-CLIENT-01: Execute supported-client workflows from Windows and WSL/tmux against the same installation, compare version identity, perform a Windows-only update and repeat without editing version-specific paths. Record actual interop limitations and recovery steps.
+2. P06-T03-AC02: Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope. WSL-CLIENT-01 requires actual Windows/WSL workflow evidence; a version-only check, Linux-client substitution or skipped interop case cannot count as success.
 3. P06-T03-AC03: Affected existing behavior has a baseline/candidate comparison or an approved behavior-change record; no capability, required assertion or stored identity is silently removed.
 4. P06-T03-AC04: Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented.
 
@@ -2316,6 +2329,7 @@ Developers use Agentmux from their preferred supported client.
 3. Review provider commercial integration terms before promising a supported paid distribution.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Run cold, warm and concurrent launches on each advertised client/OS version, including separate WSL sessions and paths with spaces. Capture client-visible status and protocol streams; exercise FAIL-60–FAIL-61.
+6. Execute WSL-CLIENT-01 on each supported Windows-installed client: compare direct/WSL version and installation identity, perform a Windows-only update and repeat, verify Windows auth/config ownership without secret copying, test exact arguments and working directories with spaces and WSL UNC paths, verify selected-hub callbacks, and run concurrent tmux/host sessions. Capture actual failures and recovery; retain native macOS/Linux runtime tests separately.
 
 **Evidence:** not yet recorded
 
@@ -2337,16 +2351,18 @@ Developers use Agentmux from their preferred supported client.
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Run concurrent tmux workers and external Windows clients on separate projects/hubs. Verify session and host identity, correct callbacks and no cross-session configuration changes or result attribution.
 
 **Deliverables**
 
 1. Distinguish external client sessions submitting work from Agentmux-managed worker sessions. Publish coverage for events, controls, resume, hooks, and compaction.
 2. Focused regression evidence and affected compatibility/migration records
+3. WSL-CLIENT-01 direct-Windows/WSL identity and update parity, configuration ownership, argument/path, callback and concurrent-session evidence
 
 **Acceptance criteria**
 
-1. P06-T04-AC01: The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Distinguish external client sessions submitting work from Agentmux-managed worker sessions. Publish coverage for events, controls, resume, hooks, and compaction.
-2. P06-T04-AC02: Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope.
+1. P06-T04-AC01: The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Distinguish external client sessions submitting work from Agentmux-managed worker sessions. Publish coverage for events, controls, resume, hooks, and compaction. WSL-CLIENT-01: Run concurrent tmux workers and external Windows clients on separate projects/hubs. Verify session and host identity, correct callbacks and no cross-session configuration changes or result attribution.
+2. P06-T04-AC02: Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope. WSL-CLIENT-01 requires actual Windows/WSL workflow evidence; a version-only check, Linux-client substitution or skipped interop case cannot count as success.
 3. P06-T04-AC03: Affected existing behavior has a baseline/candidate comparison or an approved behavior-change record; no capability, required assertion or stored identity is silently removed.
 4. P06-T04-AC04: Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented.
 
@@ -2357,6 +2373,7 @@ Developers use Agentmux from their preferred supported client.
 3. Review provider commercial integration terms before promising a supported paid distribution.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Run cold, warm and concurrent launches on each advertised client/OS version, including separate WSL sessions and paths with spaces. Capture client-visible status and protocol streams; exercise FAIL-60–FAIL-61.
+6. Execute WSL-CLIENT-01 on each supported Windows-installed client: compare direct/WSL version and installation identity, perform a Windows-only update and repeat, verify Windows auth/config ownership without secret copying, test exact arguments and working directories with spaces and WSL UNC paths, verify selected-hub callbacks, and run concurrent tmux/host sessions. Capture actual failures and recovery; retain native macOS/Linux runtime tests separately.
 
 **Evidence:** not yet recorded
 
@@ -2378,16 +2395,18 @@ Developers use Agentmux from their preferred supported client.
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Keep authentication and configuration in their Windows-owned locations. Reference them through the Windows client without copying credentials or printing secrets; preserve unrelated settings during install, update and uninstall.
 
 **Deliverables**
 
 1. Add setup, credential references, diagnostics, install checks, and client-specific documentation without silently replacing user configuration.
 2. Focused regression evidence and affected compatibility/migration records
+3. WSL-CLIENT-01 direct-Windows/WSL identity and update parity, configuration ownership, argument/path, callback and concurrent-session evidence
 
 **Acceptance criteria**
 
-1. P06-T05-AC01: The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Add setup, credential references, diagnostics, install checks, and client-specific documentation without silently replacing user configuration.
-2. P06-T05-AC02: Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope.
+1. P06-T05-AC01: The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Add setup, credential references, diagnostics, install checks, and client-specific documentation without silently replacing user configuration. WSL-CLIENT-01: Keep authentication and configuration in their Windows-owned locations. Reference them through the Windows client without copying credentials or printing secrets; preserve unrelated settings during install, update and uninstall.
+2. P06-T05-AC02: Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope. WSL-CLIENT-01 requires actual Windows/WSL workflow evidence; a version-only check, Linux-client substitution or skipped interop case cannot count as success.
 3. P06-T05-AC03: Affected existing behavior has a baseline/candidate comparison or an approved behavior-change record; no capability, required assertion or stored identity is silently removed.
 4. P06-T05-AC04: Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented.
 
@@ -2398,6 +2417,7 @@ Developers use Agentmux from their preferred supported client.
 3. Review provider commercial integration terms before promising a supported paid distribution.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Run cold, warm and concurrent launches on each advertised client/OS version, including separate WSL sessions and paths with spaces. Capture client-visible status and protocol streams; exercise FAIL-60–FAIL-61.
+6. Execute WSL-CLIENT-01 on each supported Windows-installed client: compare direct/WSL version and installation identity, perform a Windows-only update and repeat, verify Windows auth/config ownership without secret copying, test exact arguments and working directories with spaces and WSL UNC paths, verify selected-hub callbacks, and run concurrent tmux/host sessions. Capture actual failures and recovery; retain native macOS/Linux runtime tests separately.
 
 **Evidence:** not yet recorded
 
@@ -2500,16 +2520,18 @@ Developers use Agentmux from their preferred supported client.
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Verify Windows client startup and callbacks reach the selected WSL hub across cold, warm and concurrent launches, preserving CLI/MCP framing and authorized instance/hub status.
 
 **Deliverables**
 
 1. Wire LOCAL-01 ensure-running into each supported terminal/client startup integration. Show one concise status summary with dashboard access; provide structured status for clients, suppress recursive bootstrap in managed workers, and keep protocol stdout free of banners.
 2. Focused regression evidence and affected compatibility/migration records
+3. WSL-CLIENT-01 direct-Windows/WSL identity and update parity, configuration ownership, argument/path, callback and concurrent-session evidence
 
 **Acceptance criteria**
 
-1. P06-T08-AC01: The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Wire LOCAL-01 ensure-running into each supported terminal/client startup integration. Show one concise status summary with dashboard access; provide structured status for clients, suppress recursive bootstrap in managed workers, and keep protocol stdout free of banners.
-2. P06-T08-AC02: Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope.
+1. P06-T08-AC01: The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Wire LOCAL-01 ensure-running into each supported terminal/client startup integration. Show one concise status summary with dashboard access; provide structured status for clients, suppress recursive bootstrap in managed workers, and keep protocol stdout free of banners. WSL-CLIENT-01: Verify Windows client startup and callbacks reach the selected WSL hub across cold, warm and concurrent launches, preserving CLI/MCP framing and authorized instance/hub status.
+2. P06-T08-AC02: Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope. WSL-CLIENT-01 requires actual Windows/WSL workflow evidence; a version-only check, Linux-client substitution or skipped interop case cannot count as success.
 3. P06-T08-AC03: Affected existing behavior has a baseline/candidate comparison or an approved behavior-change record; no capability, required assertion or stored identity is silently removed.
 4. P06-T08-AC04: Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented.
 
@@ -2520,6 +2542,7 @@ Developers use Agentmux from their preferred supported client.
 3. Review provider commercial integration terms before promising a supported paid distribution.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Run cold, warm and concurrent launches on each advertised client/OS version, including separate WSL sessions and paths with spaces. Capture client-visible status and protocol streams; exercise FAIL-60–FAIL-61.
+6. Execute WSL-CLIENT-01 on each supported Windows-installed client: compare direct/WSL version and installation identity, perform a Windows-only update and repeat, verify Windows auth/config ownership without secret copying, test exact arguments and working directories with spaces and WSL UNC paths, verify selected-hub callbacks, and run concurrent tmux/host sessions. Capture actual failures and recovery; retain native macOS/Linux runtime tests separately.
 
 **Evidence:** not yet recorded
 
@@ -2588,6 +2611,7 @@ Developers use Agentmux from their preferred supported client.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
 3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
+5. Review WSL-CLIENT-01 evidence at this phase boundary: all required direct Windows/WSL installation, update, config/auth, path, callback and concurrent-session proofs.
 
 **Deliverables**
 
@@ -2598,7 +2622,7 @@ Developers use Agentmux from their preferred supported client.
 
 **Acceptance criteria**
 
-1. P06-GATE-AC01: Each supported client can submit a task, inspect progress/evidence, participate in required approvals, and retrieve the result.
+1. P06-GATE-AC01: Each supported client can submit a task, inspect progress/evidence, participate in required approvals, and retrieve the result. WSL-CLIENT-01 is included in this phase's evidence review, with no skipped-environment substitution.
 2. P06-GATE-AC02: Unsupported event capture, cancellation, or compaction reports an explicit capability limit instead of simulating success.
 3. P06-GATE-AC03: Closing the originating client or observer does not duplicate or implicitly terminate durable work.
 4. P06-GATE-AC04: Fresh-user install and uninstall preserve unrelated client settings and secrets.
@@ -2615,6 +2639,7 @@ Developers use Agentmux from their preferred supported client.
 3. Review provider commercial integration terms before promising a supported paid distribution.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Run cold, warm and concurrent launches on each advertised client/OS version, including separate WSL sessions and paths with spaces. Capture client-visible status and protocol streams; exercise FAIL-60–FAIL-61.
+6. Execute WSL-CLIENT-01 on each supported Windows-installed client: compare direct/WSL version and installation identity, perform a Windows-only update and repeat, verify Windows auth/config ownership without secret copying, test exact arguments and working directories with spaces and WSL UNC paths, verify selected-hub callbacks, and run concurrent tmux/host sessions. Capture actual failures and recovery; retain native macOS/Linux runtime tests separately.
 
 **Evidence:** not yet recorded
 

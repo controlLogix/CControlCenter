@@ -1,0 +1,57 @@
+{
+  "checks": [
+    {
+      "client": "claude",
+      "resolved": "/usr/local/bin/claude",
+      "exitCode": 0,
+      "output": "2.1.296 (Claude Code)",
+      "stderr": ""
+    },
+    {
+      "client": "codex",
+      "resolved": "/usr/local/bin/codex",
+      "exitCode": 0,
+      "output": "codex-cli 0.162.1",
+      "stderr": ""
+    },
+    {
+      "client": "grok",
+      "resolved": "/usr/local/bin/grok",
+      "exitCode": 0,
+      "output": "grok 1.0.13 (5e9a58528b76) [stable]",
+      "stderr": ""
+    },
+    {
+      "client": "kimi",
+      "resolved": "/usr/local/bin/kimi",
+      "exitCode": 0,
+      "output": "0.36.0",
+      "stderr": ""
+    },
+    {
+      "client": "goose",
+      "resolved": "/usr/local/bin/goose",
+      "exitCode": 0,
+      "output": "1.46.0",
+      "stderr": ""
+    },
+    {
+      "client": "dsh",
+      "resolved": "/usr/local/bin/dsh",
+      "exitCode": 0,
+      "output": "0.1.0-rc.7",
+      "stderr": ""
+    },
+    {
+      "client": "trueforge",
+      "resolved": "/usr/local/bin/trueforge",
+      "exitCode": 0,
+      "output": "Usage:\n  npx @truefoundry/trueforge\n  npx @truefoundry/trueforge --port <n>\n\nTrueForge v0.1.4. Start the agent server.\nDefaults to standalone mode (SQLite, no Redis) \u2014 local use only, not production-s",
+      "stderr": ""
+    }
+  ],
+  "endOfOptionsPreserved": true,
+  "trailingPathWhitespacePreserved": true,
+  "launcherSha256": "f22450073f63187a92c0699b772461aa76445377204581edaae7c0db77cdc187",
+  "scope": "Default Ubuntu-26.04 WSL PATH now resolves Windows-backed system entries; original native Codex package remains installed."
+}

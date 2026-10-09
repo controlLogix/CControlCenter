@@ -1,0 +1,28 @@
+  ok    residue: gate detects auth.json
+  ok    residue: gate detects cc.db
+  ok    residue: gate detects cc.db-wal
+  ok    residue: gate detects cc.db-shm
+  ok    residue: gate detects cc.db-journal
+  ok    residue: gate detects env
+  ok    residue: gate detects atlassian.json
+  ok    residue: gate detects journal.jsonl
+  ok    residue: gate detects run/agent.cli
+  ok    residue: gate detects claims/file.json
+  ok    residue: gate detects runs/run/events.jsonl
+  ok    residue: gate detects queue/agent.jsonl
+  ok    residue: gate detects inbox/agent.jsonl
+  ok    residue: gate detects claude-config/settings.json
+  ok    residue: gate detects new-file.json
+  ok    residue: gate detects deleted.json
+  ok    residue: a failed suite cannot pass a clean residue gate
+  ok    residue: gate leaves the operator dashboard alone on normal
+  ok    residue: gate leaves the operator dashboard alone on suite-failure
+  ok    residue: gate leaves the operator dashboard alone on INT
+  ok    residue: gate leaves the operator dashboard alone on TERM
+  ok    residue: gate leaves the operator dashboard alone on start-failure
+  ok    residue: gate leaves the operator dashboard alone on different-caller-home
+  ok    residue: gate leaves the operator dashboard alone on operator-changed
+  ok    residue: restored server outlives the launcher process group
+  ok    residue: a restart whose server never bound is not reported as up
+
+passed 26, failed 0

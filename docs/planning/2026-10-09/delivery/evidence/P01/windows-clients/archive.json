@@ -1,0 +1,268 @@
+{
+  "externalRoot": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119",
+  "restoreCommand": "wsl -d Ubuntu-26.04 --user root --exec python3 /home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/restore.py",
+  "files": [
+    {
+      "name": "kimi-linux-version.log",
+      "sha256": "867a70774294546ebe3cac14fa311d8d27922466625e3fd9a42e9a26682a86e7",
+      "bytesEqual": true
+    },
+    {
+      "name": "goose-mounted-version.log",
+      "sha256": "bcf27e68b0e8c384655c596fd410a9a6df3a604878baf8bc6a40c7383939a2c6",
+      "bytesEqual": true
+    },
+    {
+      "name": "kimi-linux-help.log",
+      "sha256": "fba090e5ffc85ed7b8763a272a0b042c88c36063b60fc42719feb6fd706a2e56",
+      "bytesEqual": true
+    },
+    {
+      "name": "README.md",
+      "sha256": "b53414a14451f965fdb9af8d3da80cda19fbb39de5fc3d6c81775bfff215507d",
+      "bytesEqual": true
+    },
+    {
+      "name": "dsh-mounted-version.log",
+      "sha256": "4ee8f65c28fe2f2f7223c395c2fe65f98eb1cd28428bfbf25ee068836ba9de40",
+      "bytesEqual": true
+    },
+    {
+      "name": "goose-linux-help.log",
+      "sha256": "9b8b6b72e6001e02bc1f33615677441557b438d2d61117cbb0ba1dbe391b2051",
+      "bytesEqual": true
+    },
+    {
+      "name": "review-fixes-verify.py",
+      "sha256": "4f01c6b070da1cfa308ca45968bf032737da23a067275929d5bd73d9c1662238",
+      "bytesEqual": true
+    },
+    {
+      "name": "goose-linux-version.log",
+      "sha256": "bcf27e68b0e8c384655c596fd410a9a6df3a604878baf8bc6a40c7383939a2c6",
+      "bytesEqual": true
+    },
+    {
+      "name": "claude-mounted-version.log",
+      "sha256": "ced06c95bb4c0780504b700880ceea37cd764283d2be9d3ea2555683183207ea",
+      "bytesEqual": true
+    },
+    {
+      "name": "claude-linux-version.log",
+      "sha256": "ced06c95bb4c0780504b700880ceea37cd764283d2be9d3ea2555683183207ea",
+      "bytesEqual": true
+    },
+    {
+      "name": "claude-mounted-help.log",
+      "sha256": "550db4f88ae1d97bf7244ca96dc89554aabd3978241ceb69f79001e816c35f09",
+      "bytesEqual": true
+    },
+    {
+      "name": "dsh-linux-help.log",
+      "sha256": "92370cf0ad4d6a1b991c0cafb249ea574efbe087d6e692a692b264d52bc3a57a",
+      "bytesEqual": true
+    },
+    {
+      "name": "kimi-final-help.log",
+      "sha256": "fba090e5ffc85ed7b8763a272a0b042c88c36063b60fc42719feb6fd706a2e56",
+      "bytesEqual": true
+    },
+    {
+      "name": "restore-manifest.json",
+      "sha256": "626115b85baded76807319ed7c0b19b74d9d9f5591cd067a1db1fae2104b85b4",
+      "bytesEqual": true
+    },
+    {
+      "name": "dsh-linux-version.log",
+      "sha256": "4ee8f65c28fe2f2f7223c395c2fe65f98eb1cd28428bfbf25ee068836ba9de40",
+      "bytesEqual": true
+    },
+    {
+      "name": "grok-mounted-version.log",
+      "sha256": "c01540ff9dbc089978dc84acf3ca5ebf4a464a00eda75089f486aab0dd3207f5",
+      "bytesEqual": true
+    },
+    {
+      "name": "trueforge-mounted-help.log",
+      "sha256": "4b42d1e35bc49bac5142edac701f3182b423179e84116007e1fa5277588fc5e1",
+      "bytesEqual": true
+    },
+    {
+      "name": "review-fixes-verification.json",
+      "sha256": "89216d7b77087280ef25c39a56a78044a7575de0e1c6c86ab608626f00a57d5c",
+      "bytesEqual": true
+    },
+    {
+      "name": "config-verify.py",
+      "sha256": "943ff5d0243b40698355674b3e008e630425e283bf36bab361457be8a1448546",
+      "bytesEqual": true
+    },
+    {
+      "name": "final-verification.json",
+      "sha256": "789950d0cade11d20582824a23985ec1e4decfa88e5a599fe7cbb5fa08cd9e04",
+      "bytesEqual": true
+    },
+    {
+      "name": "finalize.py",
+      "sha256": "5eb6d083ad192521443dbd72484cd1e78369e4d8692bd09ed61de2fe0b8cc5f6",
+      "bytesEqual": true
+    },
+    {
+      "name": "claude-final-help.log",
+      "sha256": "550db4f88ae1d97bf7244ca96dc89554aabd3978241ceb69f79001e816c35f09",
+      "bytesEqual": true
+    },
+    {
+      "name": "goose-mounted-help.log",
+      "sha256": "9b8b6b72e6001e02bc1f33615677441557b438d2d61117cbb0ba1dbe391b2051",
+      "bytesEqual": true
+    },
+    {
+      "name": "codex-linux-help.log",
+      "sha256": "ee859522150318f2590d1e3a9e7490d93a2dd611ce56f3eb8db54a358593904d",
+      "bytesEqual": true
+    },
+    {
+      "name": "system-links.py",
+      "sha256": "92df106db41458c5f08a32b2748fbe600bdd62367d528b19c28fc85cf8859923",
+      "bytesEqual": true
+    },
+    {
+      "name": "grok-linux-help.log",
+      "sha256": "0ad66e27b7d5f0c82ed65e67ce1c87da06e4686949f448eecaaf9e255b603bbd",
+      "bytesEqual": true
+    },
+    {
+      "name": "codex-linux-version.log",
+      "sha256": "47e8650c39eae3ea896e5873f03a97a65d183d81cd0d86616e8b83d7d87877ca",
+      "bytesEqual": true
+    },
+    {
+      "name": "bare-exec-verification.json",
+      "sha256": "66f1af7663feadd0c20602c53f5d89f8942ed5e505702c7b11ef2995970a95a0",
+      "bytesEqual": true
+    },
+    {
+      "name": "dsh-mounted-help.log",
+      "sha256": "92370cf0ad4d6a1b991c0cafb249ea574efbe087d6e692a692b264d52bc3a57a",
+      "bytesEqual": true
+    },
+    {
+      "name": "kimi-mounted-help.log",
+      "sha256": "fba090e5ffc85ed7b8763a272a0b042c88c36063b60fc42719feb6fd706a2e56",
+      "bytesEqual": true
+    },
+    {
+      "name": "grok-mounted-help.log",
+      "sha256": "0ad66e27b7d5f0c82ed65e67ce1c87da06e4686949f448eecaaf9e255b603bbd",
+      "bytesEqual": true
+    },
+    {
+      "name": "kimi-mounted-version.log",
+      "sha256": "867a70774294546ebe3cac14fa311d8d27922466625e3fd9a42e9a26682a86e7",
+      "bytesEqual": true
+    },
+    {
+      "name": "results.json",
+      "sha256": "5d853c1396af4ea073376cd2bc0439628a346ea56f58ab4914cb2e73c59cba2e",
+      "bytesEqual": true
+    },
+    {
+      "name": "config-env-fix.py",
+      "sha256": "1f8694a96b1a683262de31e8edddb7879f38fe2ec406fcd73b3028125fcb734d",
+      "bytesEqual": true
+    },
+    {
+      "name": "trueforge-final-help.log",
+      "sha256": "4b42d1e35bc49bac5142edac701f3182b423179e84116007e1fa5277588fc5e1",
+      "bytesEqual": true
+    },
+    {
+      "name": "grok-final-help.log",
+      "sha256": "0ad66e27b7d5f0c82ed65e67ce1c87da06e4686949f448eecaaf9e255b603bbd",
+      "bytesEqual": true
+    },
+    {
+      "name": "dsh-final-help.log",
+      "sha256": "92370cf0ad4d6a1b991c0cafb249ea574efbe087d6e692a692b264d52bc3a57a",
+      "bytesEqual": true
+    },
+    {
+      "name": "trueforge-linux-help.log",
+      "sha256": "4b42d1e35bc49bac5142edac701f3182b423179e84116007e1fa5277588fc5e1",
+      "bytesEqual": true
+    },
+    {
+      "name": "setup.py",
+      "sha256": "cb39fa47f3b62c4e430a196b3515b4edb0a111832aaa6a680213a4632b6a2926",
+      "bytesEqual": true
+    },
+    {
+      "name": "clients.json",
+      "sha256": "28f37c3b81b5450b8458b1b77e5ea6af266f114e90653609a2b07121911a8cfa",
+      "bytesEqual": true
+    },
+    {
+      "name": "codex-update-propagation.json",
+      "sha256": "fa895c4171e3dba30d655da250cf6dcb9ccba9eb3b65c5d0b98fde559f5aae23",
+      "bytesEqual": true
+    },
+    {
+      "name": "codex-mounted-version.log",
+      "sha256": "47e8650c39eae3ea896e5873f03a97a65d183d81cd0d86616e8b83d7d87877ca",
+      "bytesEqual": true
+    },
+    {
+      "name": "restore.py",
+      "sha256": "5b218f8e418245ecd468a4b87df6992d29bb4f2a2e5af64f2a03e7cb810e7298",
+      "bytesEqual": true
+    },
+    {
+      "name": "codex-mounted-help.log",
+      "sha256": "ee859522150318f2590d1e3a9e7490d93a2dd611ce56f3eb8db54a358593904d",
+      "bytesEqual": true
+    },
+    {
+      "name": "claude-linux-help.log",
+      "sha256": "550db4f88ae1d97bf7244ca96dc89554aabd3978241ceb69f79001e816c35f09",
+      "bytesEqual": true
+    },
+    {
+      "name": "goose-final-help.log",
+      "sha256": "9b8b6b72e6001e02bc1f33615677441557b438d2d61117cbb0ba1dbe391b2051",
+      "bytesEqual": true
+    },
+    {
+      "name": "verify.py",
+      "sha256": "648e61a7f2a4abe29032eb6ceb2771338c8034de2f86899420f076d010f77a91",
+      "bytesEqual": true
+    },
+    {
+      "name": "forwarding-verification.json",
+      "sha256": "4f12a4c4a837f2f0e8b6e5a9d620d1c641502e40b6056e84f490fe15750df33f",
+      "bytesEqual": true
+    },
+    {
+      "name": "config-override-verification.json",
+      "sha256": "a25a020d55bae151189e9c827fc85e663e587b3590aa6122c1f67f31c1d786fd",
+      "bytesEqual": true
+    },
+    {
+      "name": "grok-linux-version.log",
+      "sha256": "c01540ff9dbc089978dc84acf3ca5ebf4a464a00eda75089f486aab0dd3207f5",
+      "bytesEqual": true
+    },
+    {
+      "name": "forward.py",
+      "sha256": "8c702954575d96e9169cce0c7e1399018e22496aa1b3e4e41c607e23f1734600",
+      "bytesEqual": true
+    },
+    {
+      "name": "codex-final-help.log",
+      "sha256": "4a7f0188d4d6e6d812c5cfbcf82468336b899acd5e437de7450421a403c0071e",
+      "bytesEqual": true
+    }
+  ],
+  "excluded": "backups/ contains private shell startup snapshots and is deliberately not copied. No auth files, provider config files, access tokens or private startup file contents are in this archive.",
+  "claim": "Forwarding and metadata/argument checks only; not authentication, provider orchestration or P01 acceptance."
+}

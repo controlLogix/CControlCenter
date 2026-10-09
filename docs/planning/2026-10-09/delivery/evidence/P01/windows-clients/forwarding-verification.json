@@ -1,0 +1,44 @@
+{
+  "argumentProbePassed": true,
+  "pathFlagsConvertOnlyRecognizedAbsolutePaths": true,
+  "jsonAndPromptTextUnchanged": true,
+  "windowsRuntimeMetadata": {
+    "args": [
+      "--settings",
+      "\\\\wsl.localhost\\Ubuntu-26.04\\home\\ryan\\.cache\\agentmux-governance\\windows-cli-links\\20261009-192119\\workspace with spaces\\settings file.json",
+      "--model",
+      "model name",
+      "prompt /tmp/is-text",
+      "quotes \" and apostrophe '",
+      "$HOME; & |",
+      "",
+      "unicode caf\u00e9",
+      "line1\nline2",
+      "C:\\space dir\\file"
+    ],
+    "cwd": "\\\\wsl.localhost\\Ubuntu-26.04\\home\\ryan\\.cache\\agentmux-governance\\windows-cli-links\\20261009-192119\\workspace with spaces",
+    "home": "C:\\Users\\RyanHelms",
+    "platform": "win32",
+    "USERPROFILE": "C:\\Users\\RyanHelms",
+    "HOME": null,
+    "CODEX_HOME": null,
+    "CLAUDE_CONFIG_DIR": null,
+    "GROK_HOME": null
+  },
+  "loginShellResolution": [
+    "/home/ryan/.local/bin/claude",
+    "/home/ryan/.local/bin/codex",
+    "/home/ryan/.local/bin/grok",
+    "/home/ryan/.local/bin/kimi",
+    "/home/ryan/.local/bin/goose",
+    "/home/ryan/.local/bin/dsh",
+    "/home/ryan/.local/bin/trueforge"
+  ],
+  "restorePreconditionsVerified": true,
+  "backupHashesVerified": true,
+  "restoreScriptCompiles": true,
+  "restoreNotExecuted": true,
+  "nativeInstallRetained": true,
+  "noModelPrompts": true,
+  "noCredentialsCopiedOrConfigDirectoriesLinked": true
+}

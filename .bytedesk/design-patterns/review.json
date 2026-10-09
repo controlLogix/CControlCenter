@@ -1,6 +1,6 @@
 {
   "reviewer": "Codex, P01 preservation repairs; phase gate remains open",
-  "sourceDigest": "57cbb632d494525a521a53c91bfc0038c00acb3d46ddc23f52eea49011420836",
+  "sourceDigest": "d10f3ba399abe4faaafd670245eb3ef1c401e05315b6df03c6a22d0a852ec58f",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -465,6 +465,18 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/native/37e0d8c/review.json"
       ],
       "rationale": "Reviewed all staged changes and independent negative evidence. Fix name validation without changing valid identities, retain exact browser navigation assertion, synchronize actual scanner concurrency test. Add isolated original hub native CI with verified pinned NSC; local full128 test proof and original failures retained. No pattern relationships or architecture changed. Preserve captured evidence bytes including CRLF in captured scripts/reports. Phase remains open; current native candidate verification, external plugin and actual provider evidence remain outstanding."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "previousSourceDigest": "57cbb632d494525a521a53c91bfc0038c00acb3d46ddc23f52eea49011420836",
+      "scope": "Windows-owned WSL client environment and plan, preserved dashboard fixture timing assertions, native P01 evidence at 7a7d47a",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/windows-clients/review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/7a7d47a/review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md"
+      ],
+      "rationale": "Reviewed final forwarding and rollback code, independent local checks and explicit limitations; no credentials copied. Windows setup is local P01 evidence, not P06 integration acceptance; PLAN-02 remains planned. Fixture repairs retain exact assertions and have positive and negative/delayed-start evidence. Native CI reports are bound to committed source. No runtime pattern or diagram relationship changed. P01 remains active; no phase acceptance or merge."
     }
   ],
   "rules": {

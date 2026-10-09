@@ -1,0 +1,196 @@
+{
+  "root": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119",
+  "scope": "WSL links only; Windows binaries/auth/config unchanged. No native installation removed.",
+  "entries": [
+    {
+      "path": "/home/ryan/.local/bin/claude",
+      "type": "absent",
+      "installedTarget": "/home/ryan/.local/share/agentmux/windows-clients/forward.py",
+      "originalUid": 1000,
+      "originalGid": 1000
+    },
+    {
+      "path": "/home/ryan/.local/bin/codex",
+      "type": "absent",
+      "installedTarget": "/home/ryan/.local/share/agentmux/windows-clients/forward.py",
+      "originalUid": 1000,
+      "originalGid": 1000
+    },
+    {
+      "path": "/home/ryan/.local/bin/grok",
+      "type": "absent",
+      "installedTarget": "/home/ryan/.local/share/agentmux/windows-clients/forward.py",
+      "originalUid": 1000,
+      "originalGid": 1000
+    },
+    {
+      "path": "/home/ryan/.local/bin/kimi",
+      "type": "absent",
+      "installedTarget": "/home/ryan/.local/share/agentmux/windows-clients/forward.py",
+      "originalUid": 1000,
+      "originalGid": 1000
+    },
+    {
+      "path": "/home/ryan/.local/bin/goose",
+      "type": "absent",
+      "installedTarget": "/home/ryan/.local/share/agentmux/windows-clients/forward.py",
+      "originalUid": 1000,
+      "originalGid": 1000
+    },
+    {
+      "path": "/home/ryan/.local/bin/dsh",
+      "type": "absent",
+      "installedTarget": "/home/ryan/.local/share/agentmux/windows-clients/forward.py",
+      "originalUid": 1000,
+      "originalGid": 1000
+    },
+    {
+      "path": "/home/ryan/.local/bin/trueforge",
+      "type": "absent",
+      "installedTarget": "/home/ryan/.local/share/agentmux/windows-clients/forward.py",
+      "originalUid": 1000,
+      "originalGid": 1000
+    },
+    {
+      "path": "/home/ryan/.profile",
+      "type": "file",
+      "backup": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/backups/7",
+      "originalMode": 420,
+      "originalSha256": "28b4a453b68dde64f814e94bab14ee651f4f162e15dd9920490aa1d49f05d2a4",
+      "installedSha256": "34317ecd63912d5b57cb037c708c02209e9cf229d2b41980a80c4132f308048c",
+      "originalUid": 1000,
+      "originalGid": 1000
+    },
+    {
+      "path": "/home/ryan/.bashrc",
+      "type": "file",
+      "backup": "/home/ryan/.cache/agentmux-governance/windows-cli-links/20261009-192119/backups/8",
+      "originalMode": 420,
+      "originalSha256": "b1083de0b85d9f498cb5261a1c2b7740f25d2575dfb3663db425b8c585d03c2a",
+      "installedSha256": "716bcca4d858eee34660af990e1788d01ca5652bd3c0678aa7b107565d2f6982",
+      "originalUid": 1000,
+      "originalGid": 1000
+    },
+    {
+      "path": "/usr/local/bin/claude",
+      "type": "absent",
+      "installedTarget": "/home/ryan/.local/share/agentmux/windows-clients/forward.py"
+    },
+    {
+      "path": "/usr/local/bin/codex",
+      "type": "symlink",
+      "target": "/home/ryan/.codex/lib/node_modules/@openai/codex/bin/codex.js",
+      "originalUid": 0,
+      "originalGid": 0,
+      "installedTarget": "/home/ryan/.local/share/agentmux/windows-clients/forward.py"
+    },
+    {
+      "path": "/usr/local/bin/grok",
+      "type": "absent",
+      "installedTarget": "/home/ryan/.local/share/agentmux/windows-clients/forward.py"
+    },
+    {
+      "path": "/usr/local/bin/kimi",
+      "type": "absent",
+      "installedTarget": "/home/ryan/.local/share/agentmux/windows-clients/forward.py"
+    },
+    {
+      "path": "/usr/local/bin/goose",
+      "type": "absent",
+      "installedTarget": "/home/ryan/.local/share/agentmux/windows-clients/forward.py"
+    },
+    {
+      "path": "/usr/local/bin/dsh",
+      "type": "absent",
+      "installedTarget": "/home/ryan/.local/share/agentmux/windows-clients/forward.py"
+    },
+    {
+      "path": "/usr/local/bin/trueforge",
+      "type": "absent",
+      "installedTarget": "/home/ryan/.local/share/agentmux/windows-clients/forward.py"
+    },
+    {
+      "path": "/home/ryan/.local/share/agentmux/windows-clients/forward.py",
+      "type": "absent",
+      "installedSha256": "8c702954575d96e9169cce0c7e1399018e22496aa1b3e4e41c607e23f1734600"
+    },
+    {
+      "path": "/home/ryan/.local/share/agentmux/windows-clients/clients.json",
+      "type": "absent",
+      "installedSha256": "28f37c3b81b5450b8458b1b77e5ea6af266f114e90653609a2b07121911a8cfa"
+    }
+  ],
+  "clients": {
+    "claude": {
+      "exe": "/mnt/c/nvm4w/nodejs/node_modules/@anthropic-ai/claude-code/bin/claude.exe",
+      "paths": [
+        "--settings",
+        "--plugin-dir",
+        "--add-dir",
+        "--mcp-config"
+      ],
+      "variadicPaths": [
+        "--add-dir",
+        "--mcp-config"
+      ]
+    },
+    "codex": {
+      "exe": "/mnt/c/nvm4w/nodejs/node.exe",
+      "script": "/mnt/c/nvm4w/nodejs/node_modules/@openai/codex/bin/codex.js",
+      "paths": [
+        "--cd",
+        "-C",
+        "--add-dir",
+        "--image",
+        "-i"
+      ],
+      "variadicPaths": [
+        "--image",
+        "-i"
+      ],
+      "commaPaths": [
+        "--image",
+        "-i"
+      ]
+    },
+    "grok": {
+      "exe": "/mnt/c/Users/RyanHelms/.grok/bin/grok.exe",
+      "paths": [
+        "--cwd",
+        "--prompt-file",
+        "--debug-file"
+      ]
+    },
+    "kimi": {
+      "exe": "/mnt/c/Users/RyanHelms/.kimi-code/bin/kimi.exe",
+      "paths": [
+        "--skills-dir",
+        "--agent-file",
+        "--add-dir"
+      ]
+    },
+    "goose": {
+      "exe": "/mnt/c/Users/RyanHelms/.local/bin/goose.exe",
+      "paths": []
+    },
+    "dsh": {
+      "exe": "/mnt/c/nvm4w/nodejs/node.exe",
+      "script": "/mnt/c/nvm4w/nodejs/node_modules/@deepseek-ai/dsh/lib/bin.js",
+      "paths": []
+    },
+    "trueforge": {
+      "exe": "/mnt/c/nvm4w/nodejs/node.exe",
+      "script": "/mnt/c/nvm4w/nodejs/node_modules/@truefoundry/trueforge/dist/cli.js",
+      "paths": []
+    }
+  },
+  "systemEntryScope": {
+    "distribution": "Ubuntu-26.04",
+    "windowsUser": "RyanHelms",
+    "interactiveLinuxUser": "ryan",
+    "otherUsers": "Nix build service users have nologin shells; no other ordinary interactive user found.",
+    "originalNativeCodexTarget": "/home/ryan/.codex/lib/node_modules/@openai/codex/bin/codex.js",
+    "nativePackageStillPresent": true
+  },
+  "durableLauncherRoot": "/home/ryan/.local/share/agentmux/windows-clients"
+}

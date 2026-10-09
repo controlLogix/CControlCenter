@@ -1,0 +1,27 @@
+{
+  "recordedAt": "2026-10-09T23:20:18.263485+00:00",
+  "candidateCommit": "7a7d47ae6830f86b8fed318ee64da6a5aac52701",
+  "command": [
+    "/Library/Frameworks/Python.framework/Versions/3.14/bin/python",
+    "docs/planning/2026-10-09/delivery/check_conformance_evidence.py",
+    "--report",
+    "/Users/runner/work/_temp/agentmux-evidence/contracts.json",
+    "--candidate",
+    "7a7d47ae6830f86b8fed318ee64da6a5aac52701",
+    "--environment",
+    "macos",
+    "--evidence",
+    "/Users/runner/work/_temp/agentmux-evidence/conformance-admission.json"
+  ],
+  "environmentRequired": "macos",
+  "report": "/Users/runner/work/_temp/agentmux-evidence/contracts.json",
+  "reportSha256": "d1862a2cbb84f3d99129529ee73a70845314b09dfb9a40976b1bf960133f2c8a",
+  "checkerSha256": "2f1508894c5fccd9ee1d4f44d11171f959529e2b1fa55621d76757f866129dc6",
+  "exitCode": 0,
+  "errors": [],
+  "limits": [
+    "Conformance-format evidence admission only; not authenticity proof, other suite acceptance or phase approval.",
+    "Compiled hashes record tested output identity; this tool does not rebuild or authenticate binaries.",
+    "Candidate comparison reads committed Git blobs, never working-tree files."
+  ]
+}
