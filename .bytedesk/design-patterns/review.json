@@ -1,6 +1,6 @@
 {
   "reviewer": "Codex, autonomous governance and P00 draft-contract review, 2026-10-09; P00 gate remains open",
-  "sourceDigest": "685b728452ad460f68b59c7904b5b4e56284e5b7ecb8bfb7a9bf534fe460ac01",
+  "sourceDigest": "9ab75f373ec243de09f05c33ebdc4ee19bce0c12398656fb836dc9dd847a73de",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -276,6 +276,16 @@
         "docs/planning/2026-10-09/delivery/requirements-coverage.json"
       ],
       "rationale": "Reviewed phase-local delegation, preserved task history and full criteria, and explicit no-merge boundary. Draft contract review corrected cancellation uncertainty and child permission limits; follow-up source review added federation tables and CLI receipts to migration ownership. Seventy draft fixtures passed. Existing planned patterns gain concrete contract evidence; no product runtime implementation, phase acceptance or broker security proof is claimed. Existing pattern and review history retained."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "previousSourceDigest": "685b728452ad460f68b59c7904b5b4e56284e5b7ecb8bfb7a9bf534fe460ac01",
+      "scope": "Repository execution goal clarification",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/goal.json"
+      ],
+      "rationale": "Reviewed the goal-only change: file-based tracking explicitly supersedes Atlassian/Rovo/Jira; focused iteration and evidence reuse preserve full verification and sequential phase gates. No runtime code, pattern relationships or task acceptance criteria changed."
     }
   ],
   "rules": {

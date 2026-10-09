@@ -1,9 +1,9 @@
 {
   "schemaVersion": "1.0.0",
   "status": "active",
-  "objective": "Complete the entire Agentmux implementation plan, P00 through P14, using repository-owned epics and detailed tasks with task/phase acceptance evidence. Work autonomously, with Codex as reviewer. Use subagents in parallel within one active phase at a time. Verify every phase, commit and push phase candidates before advancing, and complete final real-hub safe bilateral orchestration and feature-branch commit/push without requiring Ryan or Nick. Do not merge.",
+  "objective": "Autonomously implement the complete docs/planning/2026-10-09/implementation-plan.md, P00 through P14, preserving existing functionality and all acceptance requirements. Maintain detailed epics, tasks, implementation steps, acceptance criteria, status and evidence in delivery/tasks.json using delivery/track.py; repository files replace Atlassian, Rovo and Jira. Resume the earliest incomplete phase, delegate independent work to subagents only within that phase, and have Codex review actual results. Use focused local test/debug/fix cycles, then pass the required phase verification, commit and push to feat/agentmux-platform-rearchitecture, and verify the remote commit before advancing. Complete all phases and prove safe bilateral orchestration between independently enrolled real hubs, including automatic Docker Compose startup/reuse and origin-owned result acceptance. Record final Codex acceptance and verify the final branch push without requiring Ryan or Nick. Do not merge.",
   "branch": "feat/agentmux-platform-rearchitecture",
-  "tracking": "Repository delivery/tasks.json replaces Jira/Atlassian; no Jira installation is part of the active scope.",
+  "tracking": "Use delivery/tasks.json as the authoritative task ledger; use delivery/track.py for status transitions and generated views. No Atlassian, Rovo or Jira installation, authorization or external issue creation is required.",
   "reviewer": "Codex",
   "humanDeliveryApprovalRequired": false,
   "parallelism": "Subagents may work concurrently only on tasks in the current phase. Codex integrates and reviews their work; later-phase implementation waits for the current gate.",
@@ -24,5 +24,24 @@
     ],
     "notAuthorized": "Merging the feature branch into main or another integration/release branch."
   },
-  "appGoalRecord": "The active app goal tool supports status changes only and cannot rewrite objective text. This version-controlled objective and the latest user instructions govern execution; the older app text is retained as history, not a requirement to install Jira or seek human delivery approvals."
+  "appGoalRecord": "The active app goal tool supports status changes only and cannot rewrite objective text. This version-controlled objective and the latest user instructions govern execution; the older app text is retained as history, not a requirement to install Jira or seek human delivery approvals.",
+  "history": [
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "User requested explicit file-based tracking and a more efficient execution goal.",
+      "previousObjective": "Complete the entire Agentmux implementation plan, P00 through P14, using repository-owned epics and detailed tasks with task/phase acceptance evidence. Work autonomously, with Codex as reviewer. Use subagents in parallel within one active phase at a time. Verify every phase, commit and push phase candidates before advancing, and complete final real-hub safe bilateral orchestration and feature-branch commit/push without requiring Ryan or Nick. Do not merge.",
+      "previousTracking": "Repository delivery/tasks.json replaces Jira/Atlassian; no Jira installation is part of the active scope."
+    }
+  ],
+  "executionPolicy": [
+    "Resume from current repository state and the earliest incomplete phase. Inspect changed sources and relevant evidence; avoid restarting completed research or repeating valid work.",
+    "Keep one active phase. Give subagents bounded tasks with separate file ownership, dependencies and expected evidence; Codex integrates and reviews their results.",
+    "Use the smallest relevant failing check during local debugging. Reuse prepared dependencies and isolated fixtures; rerun failures first, then affected integration checks. Run all required phase checks on the stable candidate.",
+    "Reuse source-bound evidence only when code, configuration, dependencies, environment and tested assumptions remain applicable. Changed assumptions require new verification; missing required evidence never counts as a pass.",
+    "Update task status, blockers and evidence as work changes. Preserve IDs and history; regenerate task views after a coherent set of updates. Rebuild presentations only when their source changes and at review checkpoints.",
+    "Batch independent reads and checks. Keep edits, dependent operations and state updates ordered. Prefer actual implementation and defect resolution over repeated status narration or planning churn.",
+    "At each phase gate, review full scope, preservation, failure/recovery and supported-environment evidence. Commit, push and verify the candidate before starting the next phase. Keep unresolved findings explicit.",
+    "At final acceptance, verify every required deliverable, real-hub bilateral execution, unchanged non-destructive inputs, correlated results and artifacts, final remote commit and clean worktree. Never substitute mocks or reduced scope for required proof."
+  ]
 }
