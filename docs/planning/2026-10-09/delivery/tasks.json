@@ -1838,11 +1838,14 @@
       "evidence": [
         "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md",
         "docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md",
-        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md"
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md"
       ],
       "commits": [
         "7ef00dcb299c100d6dda45bfffa2b4e127345a50",
-        "f19c6473d56335b8eeb28704b02895b9d9ab7fcc"
+        "f19c6473d56335b8eeb28704b02895b9d9ab7fcc",
+        "a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41",
+        "00353fd0ccb0b4ce34cb4eb45549703430af30d1"
       ],
       "blocker": null,
       "history": [
@@ -2047,10 +2050,13 @@
         }
       ],
       "evidence": [
-        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md"
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md"
       ],
       "commits": [
-        "f19c6473d56335b8eeb28704b02895b9d9ab7fcc"
+        "f19c6473d56335b8eeb28704b02895b9d9ab7fcc",
+        "a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41",
+        "00353fd0ccb0b4ce34cb4eb45549703430af30d1"
       ],
       "blocker": null,
       "history": [
@@ -2389,11 +2395,14 @@
       ],
       "evidence": [
         "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md",
-        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md"
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md"
       ],
       "commits": [
         "7ef00dcb299c100d6dda45bfffa2b4e127345a50",
-        "f19c6473d56335b8eeb28704b02895b9d9ab7fcc"
+        "f19c6473d56335b8eeb28704b02895b9d9ab7fcc",
+        "a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41",
+        "00353fd0ccb0b4ce34cb4eb45549703430af30d1"
       ],
       "blocker": null,
       "history": [

@@ -1,6 +1,6 @@
 {
   "reviewer": "Codex, P01 controlled execution and preservation checkpoint review, 2026-10-09; phase gate remains open",
-  "sourceDigest": "f8dcd2e42167507a654641445358df9db5eeab9d43d94f202ff2c0e50dee092c",
+  "sourceDigest": "1a58956aa12e3f3fbd0262c8056c0e605d73ce2ed9e66ab60b5b66dfa382e27f",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -438,6 +438,19 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/preservation/gateway-result.json"
       ],
       "rationale": "CI run38001678164 rejected the digest because three new report worktree files had CRLF while Git stored LF. Verified each normalized file exactly equals its committed blob and parsed JSON is unchanged, then restored exact committed bytes locally. No test result, tested input, recorded source hash or implementation changed. Local and CI now review the same bytes; the failed run remains historical evidence."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "Real isolated shell smoke evidence",
+      "previousReviewer": "Codex, P01 controlled execution and preservation checkpoint review, 2026-10-09; phase gate remains open",
+      "previousSourceDigest": "f8dcd2e42167507a654641445358df9db5eeab9d43d94f202ff2c0e50dee092c",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/shell-smoke-summary.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/shell-smoke-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/shell-smoke-source-check.json"
+      ],
+      "rationale": "Reviewed exact fba373a snapshot, private HOME/state/tmux isolation, 403 committed source matches, real hub and shell pane delivery/acknowledgments, operator-scoped claim/done, agent death and sidecar removal. Preserved queued operator result rather than claiming every recipient acknowledged. Owned hub and processes stopped, temporary root removed without fallback kills. No provider, NATS or full-dashboard claim. Existing commands and assertions unchanged."
     }
   ],
   "rules": {

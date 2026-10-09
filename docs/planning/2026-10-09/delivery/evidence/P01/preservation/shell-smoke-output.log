@@ -1,0 +1,7 @@
+hub started (/home/ryan/.cache/agentmux-governance/shell-smoke-uo2jjc1m/state/hub/hub.sock)
+spawned calc-worker-smoke_sh (%0) in /home/ryan/.cache/agentmux-governance/shell-smoke-uo2jjc1m/home/hubdemo/calc
+welcome acked by the pane itself
+direct message acked
+role claim + done ok
+sidecars cleaned
+SMOKE PASS

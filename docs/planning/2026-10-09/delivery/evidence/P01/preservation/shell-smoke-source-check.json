@@ -1,0 +1,12 @@
+{
+  "candidateCommit": "fba373a06a7b356b49fc778b96be5d6e5ae387b6",
+  "committedSourcesMatch": true,
+  "verifiedSourceCount": 403,
+  "logHashMatches": true,
+  "executionHarnessMatches": true,
+  "runtimeVersions": {
+    "hubPython": "Python 3.14.4",
+    "tmux": "tmux 3.6",
+    "bash": "GNU bash, version 5.3.9(1)-release (x86_64-pc-linux-gnu)"
+  }
+}
