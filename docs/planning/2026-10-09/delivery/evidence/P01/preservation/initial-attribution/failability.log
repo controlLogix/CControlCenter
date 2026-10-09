@@ -1,0 +1,31 @@
+  ok    failability self-test: nondiscriminating (exit=1)
+  ok    failability self-test: below-threshold (exit=1)
+  ok    failability self-test: discriminating (exit=0)
+  ok    failability self-test: crashed (exit=1)
+  ok    failability self-test: head (exit=1)
+  ok    failability self-test: head-alias (exit=1)
+  ok    failability self-test: unrelated (exit=1)
+  ok    failability self-test: missing (exit=0)
+  ok    failability self-test: invalid-minimum (exit=1)
+  ok    failability self-test: live-suite (exit=1)
+  ok    failability self-test: outside (exit=0)
+  ok    failability: test_argguard.sh base=753d791 expected=11 actual=25
+  ok    failability: test_run.sh base=753d791 expected=9 actual=35
+  ok    failability: test_lifecycle.sh base=753d791 expected=15 actual=18
+  ok    failability: test_coordination.sh base=a2258a8 expected=12 actual=19
+  ok    failability: test_lifecycle.sh base=a2258a8 expected=6 actual=9
+  ok    failability: test_residue.sh base=b64cef1 expected=26 actual=26
+  ok    failability: test_coordination.sh base=514bd33 expected=3 actual=5
+failability: 0 baseline(s) skipped
+failability: 5 of 48 registered suites have a pinned baseline
+  unpinned: check_test_failability.sh smoke.sh test_ads.py test_auth.py test_board.py 
+            test_chatter.py test_codesys_panel.py test_courier.py test_dispatch.py test_e2e.sh 
+            test_ecat_diag.py test_evidence_archive.sh test_fed_panel.py test_field_panels.py test_frontend.sh 
+            test_frontend_board.sh test_frontend_drawer.sh test_frontend_kanban.sh test_frontend_post.sh 
+            test_frontend_tabs.sh test_gateway.py test_github_panel.py test_host_guard.py test_hub_panel.py 
+            test_idle.sh test_inbox_guard.sh test_logix.py test_modal_guard.sh test_mqtt.py 
+            test_no_inherited_stdin.py test_notify.py test_pn_dcp.py test_runcards.py test_runlock.py 
+            test_runsview.py test_sandbox_coordination.py test_snapshot.py test_stream_slots.sh test_testlib.sh 
+            test_theme_import.sh test_themes.sh test_tickets.py test_warrant.py 
+
+passed 18, failed 0

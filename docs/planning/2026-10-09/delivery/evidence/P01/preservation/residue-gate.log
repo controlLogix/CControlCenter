@@ -1,0 +1,12 @@
+Coverage: top-level state files (including auth, env, Atlassian, cc.db and SQLite sidecars), run/, claims/, runs/, queue/, inbox/, claude-config/, and configured Codex profiles.
+Excluded: continuously changing pane logs, courier runtime files, and Claude histories/backups/cache stamps. Concurrent operator edits count as residue.
+        ok    residue: gate leaves the operator dashboard alone on TERM
+        ok    residue: gate leaves the operator dashboard alone on start-failure
+        ok    residue: gate leaves the operator dashboard alone on different-caller-home
+        ok    residue: gate leaves the operator dashboard alone on operator-changed
+        ok    residue: restored server outlives the launcher process group
+        ok    residue: a restart whose server never bound is not reported as up
+      
+      passed 26, failed 0
+CLEAN: 0 covered files are byte/mode-identical; no additions or deletions
+IDEMPOTENT: all covered live state is unchanged after a successful suite

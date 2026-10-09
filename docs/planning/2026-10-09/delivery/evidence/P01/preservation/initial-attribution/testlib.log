@@ -1,0 +1,17 @@
+--- assert_one_winner ---
+  ok    passes an O_EXCL implementation
+  ok    CATCHES a check-then-act implementation (the original claim bug)
+--- assert_no_loss ---
+  ok    passes an atomic-claim consumer
+  ok    CATCHES a read-then-truncate consumer (the original inbox bug)
+--- a test that never raced must not report success ---
+  ok    fails when the writer finished before the destructive op (no interleave)
+--- the shared helpers behave ---
+  ok    check compares equal values                          5
+  ok    check_rc compares return codes
+  ok    count_msgs on a missing file is 0                    0
+  ok    count_msgs on an existing EMPTY file is a single 0   0
+  ok    and it survives arithmetic                           1
+  ok    count_msgs counts lines                              3
+
+passed 11, failed 0

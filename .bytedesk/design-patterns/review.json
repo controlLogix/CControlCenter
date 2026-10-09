@@ -1,6 +1,6 @@
 {
   "reviewer": "Codex, P01 controlled execution and preservation checkpoint review, 2026-10-09; phase gate remains open",
-  "sourceDigest": "0126686213714f0c366edcc9f9617ae09f062f70a0a9a69c31b9b2e49f33c82d",
+  "sourceDigest": "b898f3de4e34d47d4094737526d5dfcc88aa52aa041432149e3abbc0afd8e7a9",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -412,6 +412,19 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/preservation/historical-scoreboard.json"
       ],
       "rationale": "Inspected all controlled provider/worker paths, actual callback histories and timeout/cancellation limits; full45test suite passes. Storage18cases preserve every original assertion and add lost final batch acknowledgment reconciliation, staleKV owner/policy revalidation, unsupported atomicity rejection and actual conditional winner dispatch exactly once. Reviewed evidence admission against Git-derived inventory and test method IDs; fixed omitted-method scope gap and12negative/positive tests pass. Native a2e9ee6 Linux/macOS reports were independently bound to156 committed source hashes each. Later extensions need new native evidence. Preservation retains historical failures; communication diagnostic inconsistency COMMS-01 stays open with Codex owner, no full-phase claim. Inventory preserves338baseline files,93components,198checks; no production migration, later phase or merge."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "Preserve exact captured preservation logs",
+      "previousReviewer": "Codex, P01 controlled execution and preservation checkpoint review, 2026-10-09; phase gate remains open",
+      "previousSourceDigest": "0126686213714f0c366edcc9f9617ae09f062f70a0a9a69c31b9b2e49f33c82d",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/README.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/local-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/.gitattributes"
+      ],
+      "rationale": "The global log ignore rule excluded captured stdout files from the prior commit. Explicitly retain the reviewed disposable test logs, including initial attribution failure. Local .gitattributes preserves exact log bytes; verified staged hashes against every referenced logSha256 in both reports. No product source or test behavior changes."
     }
   ],
   "rules": {

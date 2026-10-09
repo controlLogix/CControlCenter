@@ -1,0 +1,33 @@
+test_host_bits_are_refused (test_cidr.HostsInTests.test_host_bits_are_refused) ... ok
+test_ipv6_is_refused (test_cidr.HostsInTests.test_ipv6_is_refused) ... ok
+test_malformed_cidr_is_refused_with_reason (test_cidr.HostsInTests.test_malformed_cidr_is_refused_with_reason) ... ok
+test_usable_host_counts (test_cidr.HostsInTests.test_usable_host_counts) ... ok
+test_deterministic_across_repeated_and_interleaved_calls (test_digest8.Digest8Tests.test_deterministic_across_repeated_and_interleaved_calls) ... ok
+test_documented_collision_demonstrates_unmet_ac3 (test_digest8.Digest8Tests.test_documented_collision_demonstrates_unmet_ac3) ... ok
+test_known_vectors (test_digest8.Digest8Tests.test_known_vectors) ... ok
+test_output_format_for_binary_and_large_inputs (test_digest8.Digest8Tests.test_output_format_for_binary_and_large_inputs) ... ok
+test_durations (test_durations.HumanTimeTests.test_durations) ... ok
+test_negative_duration_is_refused (test_durations.HumanTimeTests.test_negative_duration_is_refused) ... ok
+test_nonfinite_duration_is_refused (test_durations.HumanTimeTests.test_nonfinite_duration_is_refused) ... ok
+test_nonnumeric_duration_is_refused (test_durations.HumanTimeTests.test_nonnumeric_duration_is_refused) ... ok
+test_negatives_are_refused_with_reason (test_ordinal.OrdinalTests.test_negatives_are_refused_with_reason) ... ok
+test_non_integers_are_refused_with_reason (test_ordinal.OrdinalTests.test_non_integers_are_refused_with_reason) ... ok
+test_requested_examples (test_ordinal.OrdinalTests.test_requested_examples) ... ok
+test_suffix_boundaries_repeat_in_each_hundred (test_ordinal.OrdinalTests.test_suffix_boundaries_repeat_in_each_hundred) ... ok
+test_limit_of_one (test_shorten.ShortenTests.test_limit_of_one) ... ok
+test_limit_too_small_is_refused (test_shorten.ShortenTests.test_limit_too_small_is_refused) ... ok
+test_text_exactly_at_limit (test_shorten.ShortenTests.test_text_exactly_at_limit) ... ok
+test_text_over_limit (test_shorten.ShortenTests.test_text_over_limit) ... ok
+test_text_under_limit (test_shorten.ShortenTests.test_text_under_limit) ... ok
+test_byte_counts (test_sizes.HumanBytesTests.test_byte_counts) ... ok
+test_negative_count_is_refused (test_sizes.HumanBytesTests.test_negative_count_is_refused) ... ok
+test_empty_or_punctuation_only (test_slug.SlugifyTests.test_empty_or_punctuation_only) ... ok
+test_leading_and_trailing_spaces (test_slug.SlugifyTests.test_leading_and_trailing_spaces) ... ok
+test_mixed_punctuation (test_slug.SlugifyTests.test_mixed_punctuation) ... ok
+test_normal_sentence (test_slug.SlugifyTests.test_normal_sentence) ... ok
+test_other_whitespace (test_slug.SlugifyTests.test_other_whitespace) ... ok
+
+----------------------------------------------------------------------
+Ran 28 tests in 0.126s
+
+OK
