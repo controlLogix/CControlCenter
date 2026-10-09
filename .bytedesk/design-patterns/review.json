@@ -1,6 +1,6 @@
 {
   "reviewer": "Codex, autonomous governance and P00 draft-contract review, 2026-10-09; P00 gate remains open",
-  "sourceDigest": "1c7c29b9ecfe2c6e4ffac3d38633e5a62b2b75b21f1b96c2e0cfb2d60aaba1b5",
+  "sourceDigest": "7cd1f2d428bfb28369d2ded8aedf350222502005b1849152e233dae59970d5fb",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -320,6 +320,17 @@
         "docs/planning/2026-10-09/delivery/evidence/P00/gate.json"
       ],
       "rationale": "Reviewed all six P00 criteria, seven completed work tasks, two scoped failure checks and source-bound evidence. Approved advancement against remotely verified 605e96d. Future runtime/environment obligations remain explicit and unwaived. Gate-record/status change only; no pattern relationship or product code changed."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "previousSourceDigest": "1c7c29b9ecfe2c6e4ffac3d38633e5a62b2b75b21f1b96c2e0cfb2d60aaba1b5",
+      "scope": "P01 preservation preflight started",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/tasks.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preflight.md"
+      ],
+      "rationale": "P00 gate record is committed and remotely verified at 466496a. P01-T08 is the only active phase task; bounded subagents inspect preservation and implementation preparation. No P01 product implementation or acceptance is claimed. Reviewed the 14-component preservation preflight, retained regression mappings and disposable-state requirements; no new runtime pass claimed."
     }
   ],
   "rules": {

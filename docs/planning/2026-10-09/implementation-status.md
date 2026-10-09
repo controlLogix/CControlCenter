@@ -7,7 +7,7 @@ Branch: `feat/agentmux-platform-rearchitecture`. No phase or merge approval is i
 | Phase | Planned | Ready | In progress | Blocked | Verification | Done | Gate |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
 | P00 | 0 | 0 | 0 | 0 | 0 | 8 | done |
-| P01 | 9 | 0 | 0 | 0 | 0 | 0 | planned |
+| P01 | 8 | 0 | 1 | 0 | 0 | 0 | planned |
 | P02 | 8 | 0 | 0 | 0 | 0 | 0 | planned |
 | P03 | 8 | 0 | 0 | 0 | 0 | 0 | planned |
 | P04 | 8 | 0 | 0 | 0 | 0 | 0 | planned |
@@ -24,6 +24,7 @@ Branch: `feat/agentmux-platform-rearchitecture`. No phase or merge approval is i
 
 ## Current work and blockers
 
+- **P01-T08 — in_progress:** Apply ADD-01 and the component preservation matrix to every changed source file and affected caller
 
 ## P00. Scope, baseline, and architecture decisions
 
@@ -53,7 +54,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 | [P01-T05](delivery/task-details.md#P01-T05) | planned | Codex | Build an early two-hub contract spike with separate broker accounts and a leaf link |
 | [P01-T06](delivery/task-details.md#P01-T06) | planned | Codex | Preserve and extend the verified repairs for the six baseline findings |
 | [P01-T07](delivery/task-details.md#P01-T07) | planned | Codex | Build a bounded NATS persistence spike before production storage code: one owning task record, persistent operation identity, conditional competing writes, complete provenance/effect intent, lost acknowledgments and replay |
-| [P01-T08](delivery/task-details.md#P01-T08) | planned | Codex | Apply ADD-01 and the component preservation matrix to every changed source file and affected caller |
+| [P01-T08](delivery/task-details.md#P01-T08) | in_progress | Codex | Apply ADD-01 and the component preservation matrix to every changed source file and affected caller |
 | [P01-GATE](delivery/task-details.md#P01-GATE) | planned | Codex | Verify and accept P01 |
 
 ## P02. Protected boot and the NATS foundation

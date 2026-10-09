@@ -648,7 +648,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 
 ### P01-T08: Apply ADD-01 and the component preservation matrix to every changed source file and affected caller
 
-**Status:** planned. **Owner:** Codex.
+**Status:** in_progress. **Owner:** Codex.
 
 **Dependencies:** P00-GATE.
 

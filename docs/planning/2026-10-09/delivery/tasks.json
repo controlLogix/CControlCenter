@@ -2342,7 +2342,7 @@
           "text": "Apply ADD-01 and the component preservation matrix to every changed source file and affected caller. Record reuse, intentional behavior changes, migration needs and the specific added functionality before editing implementation."
         }
       ],
-      "status": "planned",
+      "status": "in_progress",
       "owner": "Codex",
       "dependsOn": [
         "P00-GATE"
@@ -2388,6 +2388,13 @@
               "Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction."
             ]
           }
+        },
+        {
+          "at": "2026-10-09T21:10:28.554614+00:00",
+          "actor": "Codex",
+          "from": "planned",
+          "to": "in_progress",
+          "note": "P00 gate and record pushed; begin P01 preservation preflight before executable contract work."
         }
       ],
       "phaseCriteria": [
@@ -32867,6 +32874,14 @@
       "to": "done",
       "note": "Codex approved P00 after full design/inventory review and verified remote candidate 605e96d; P01 may begin after gate record push.",
       "taskId": "P00-GATE"
+    },
+    {
+      "at": "2026-10-09T21:10:28.554614+00:00",
+      "actor": "Codex",
+      "from": "planned",
+      "to": "in_progress",
+      "note": "P00 gate and record pushed; begin P01 preservation preflight before executable contract work.",
+      "taskId": "P01-T08"
     }
   ],
   "deliveryGovernance": {
