@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "target": "ES2022",
+    "strict": true,
+    "outDir": "dist",
+    "types": ["node"],
+    "skipLibCheck": false
+  },
+  "include": ["client.ts"]
+}

@@ -5,6 +5,8 @@ Prepared October 9, 2026. Branch: `feat/agentmux-platform-rearchitecture`. Basel
 
 **Live delivery tracking:** [Phase and task status](implementation-status.md) · [Detailed implementation tasks](delivery/task-details.md) · [Tracking procedure](delivery/README.md). Ryan selected repository tracking instead of Jira. Task status and evidence are maintained throughout implementation in `delivery/tasks.json`.
 
+**P00 review package:** [Concrete runtime, storage and automatic-startup recommendations](delivery/decisions/README.md), supported by a bounded Go/Python/TypeScript NATS comparison. These recommendations await review; source research and cross-compilation do not qualify a supported host or pass a phase gate.
+
 This plan combines the original architecture review, repository analysis, accepted interview decisions, NATS and UI architecture brief, both Jev research rounds, the video supplement, and the proposed skill suite. It defines a complete delivery sequence and the evidence needed to advance. The accompanying presentation explains the before/after experience and each phase. The structured [phase definitions](phases.json) and [coverage appendix](coverage.md) retain individual acceptance and opportunity identifiers.
 
 **Storage revision, October 9:** Ryan approved the NATS-backed shared-persistence direction described in STATE-01 below. This approval updates the design; implementation and merge still require their existing review gates.
@@ -26,8 +28,8 @@ The following decisions must be made explicitly. Recommendations below allow rev
 | Decision | Proposed starting point | Must be resolved before |
 | --- | --- | --- |
 | Primary launch audience and proof workflow | General developer teams with excellent solo use. Prove a software change and a scoped industrial reference workflow. Market emphasis remains open. | P00 exit |
-| Dashboard command scope | Activity plus approvals and supported run controls. Work creation remains in agent clients initially. | P00 exit / P07 design |
-| Runtime language and SDKs | Run a bounded engineering comparison in P00. Prefer a small typed runtime and at least two interoperable SDK implementations. No language is silently selected here. | P01 implementation |
+| Dashboard command scope | Preserve existing work creation, board/team actions, approvals and guarded controls. Agent clients remain the primary conversational entry point; P00's additive recommendation supersedes the earlier proposed restriction on dashboard work creation. | P00 exit / P07 design |
+| Runtime language and SDKs | P00 recommends a narrow Go foundation with Python and TypeScript SDKs, retaining existing domain code. Three language clients passed the bounded NATS comparison; full lifecycle/storage/host qualification remains pending. Review the concrete alternatives and pins in the P00 package before selection. | P01 implementation |
 | Storage qualification | STATE-01 establishes NATS as the preferred shared authority. Pin stream/record boundaries, versions, access, retention and recovery. SQL serves optional rebuildable views; an authoritative SQL exception needs an evidenced unmet requirement and explicit review. | P01/P04 |
 | NATS account and JetStream domain layout | Separate kernel scope, scoped application identities, and explicit independent-hub boundaries. Project segregation must be broker- and service-enforced where confidentiality requires it. | P02/P04 |
 | Identity provider and administration | Simple local identity plus standards-based self-hosted enrollment/SSO, with per-device service credentials and revocation. Select actual protocols/providers. | P04 |

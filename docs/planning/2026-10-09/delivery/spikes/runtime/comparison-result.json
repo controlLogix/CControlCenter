@@ -1,0 +1,82 @@
+{
+  "scope": "Core NATS JSON interoperability and Go cross-compilation only",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+  "node": "v22.22.1",
+  "go": "go version go1.27.2 linux/amd64",
+  "nats": "nats-server: v2.15.0",
+  "clients": [
+    {
+      "client": "go",
+      "ok": true
+    },
+    {
+      "client": "python",
+      "ok": true
+    },
+    {
+      "client": "typescript",
+      "ok": true
+    }
+  ],
+  "crossBuilds": [
+    {
+      "os": "linux",
+      "arch": "amd64",
+      "bytes": 10179375,
+      "sha256": "40d4b0fee63518f4ccf7ae8ea7810f2ce5afb71bc07a5b32fdcc0542e4009768",
+      "executed": true
+    },
+    {
+      "os": "linux",
+      "arch": "arm64",
+      "bytes": 9380912,
+      "sha256": "cc1d0d773510ee98f6691f1b067a16004ef58cf0a53b85121a9294c8f22448d4",
+      "executed": false
+    },
+    {
+      "os": "darwin",
+      "arch": "amd64",
+      "bytes": 10416512,
+      "sha256": "5f98920789b570898b4aa21c1a79c2054114b4433e212ea91c504316bd6a9d09",
+      "executed": false
+    },
+    {
+      "os": "darwin",
+      "arch": "arm64",
+      "bytes": 9657506,
+      "sha256": "0543a68fa8566f44a38f6e3719d281e63016c39982d9ef38d7b6825520c9b254",
+      "executed": false
+    }
+  ],
+  "negativeChecks": [
+    {
+      "clientCommand": "/home/ryan/.cache/agentmux-governance/runtime-comparison/work/client-linux-amd64",
+      "absentServiceExitCode": 1
+    },
+    {
+      "clientCommand": "/home/ryan/.cache/agentmux-governance/venv/bin/python",
+      "absentServiceExitCode": 1
+    },
+    {
+      "clientCommand": "node",
+      "absentServiceExitCode": 1
+    }
+  ],
+  "limits": [
+    "Not a throughput/latency benchmark or full plugin SDK.",
+    "No JetStream, account isolation, restart, container, native macOS execution or user-host qualification."
+  ],
+  "sourceSha256": {
+    "main.go": "3c9c7351742288c45a3360857a6b873095cc16e47dec015140cdb488f2fdd2ae",
+    "go.mod": "815b76d50cf3296ac81c1e86af5ec48eecce3e0f52eb6496df06991e747fcfb8",
+    "go.sum": "09efba9fc8d00f95bb05093eca20d8660bb81ad3955813eff31ea7083f499542",
+    "client.py": "b10e31af7c6b8feb81d9af927f8b1ce6c04c9fccad8d21c330eaf50656cdc658",
+    "compare.py": "298463dfbaafeb8c5f1b7e5a4569faafa51abec0316dd927960016d7fe3196a7",
+    "client.ts": "09e13e1879df5b6a37156b286ac9aeedcf94207edf730df8cc43a1bdb7c38b96",
+    "tsconfig.json": "620b409681b484eb761107bbc5a26314152528183e9ec0a8c7848dfffb0641b5",
+    "package.json": "d9ee4550f3f3544ecdb47381c0ba79a6c36e09f6225a4f6e3f8823cfdb0be61a",
+    "package-lock.json": "71e1952721a0730e008db7d4d58d143351ac6a8d0c6741d60fb89f5303abc139"
+  },
+  "passed": true
+}

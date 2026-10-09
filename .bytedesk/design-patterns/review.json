@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, P00 preparation and evidence review, 2026-10-09; phase and MERGE-01 gates remain open",
-  "sourceDigest": "157af7cd1919e8ae859718d4f8ec4bb53fd9ecd5edf0a03ff4a8a90db4ebb9bc",
+  "reviewer": "Codex, P00 runtime comparison and decision-package review, 2026-10-09; approval gates remain open",
+  "sourceDigest": "c05ca0084a5977291bf6b3d101565804a4729b2e04976307d73579ca023db20e",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -248,6 +248,20 @@
         "docs/planning/2026-10-09/delivery/test_track.py"
       ],
       "rationale": "Reviewed historical dashboard constraints against current mutation routes and current root instruction content; corrected stale CLAUDE restriction note with previous text retained. P00-T06 preparation and P00-T03 defect reproduction/scoping have source-bound evidence. Inventory remains in verification pending behavioral completeness review. Twenty current focused governance tests pass in WSL; all recorded repair sources and historical logs match, and five repaired runtime baseline blobs match the frozen comparison. No new broker, native macOS, actual AI-host or Ryan/Nick evidence claimed. Every repaired invariant is assigned to its replacing task. REPO-01-C01 runtime qualification explicitly belongs to P06 while P00 retains static review, avoiding a sequencing dependency on future host code. Eight tracker tests pass, including duplicate-owner and wrong-phase rejection; 344 governed files, 93 components and 198 checks retain coverage. No product runtime, data authority, pattern or architecture relationship changed; existing diagrams remain applicable. No phase acceptance or merge approval."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "previousReviewer": "Codex, P00 preparation and evidence review, 2026-10-09; phase and MERGE-01 gates remain open",
+      "previousSourceDigest": "157af7cd1919e8ae859718d4f8ec4bb53fd9ecd5edf0a03ff4a8a90db4ebb9bc",
+      "scope": "P00 runtime comparison and concrete runtime/storage/startup review package",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/decisions/README.md",
+        "docs/planning/2026-10-09/delivery/spikes/runtime/comparison-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/design-observations.json",
+        "docs/planning/2026-10-09/review-site/verification.json"
+      ],
+      "rationale": "Compared locked Go, Python and TypeScript Core NATS clients against a disposable loopback token-protected broker; three exchanges and three absent-service failures pass, with four Go cross-builds and Linux/amd64 execution only. Retained source hashes match. The recommendation uses a narrow Go foundation without replacing existing Python domain code. Concrete NATS ownership/retention/recovery and Compose startup/status/host contracts retain accepted requirements and current dashboard controls. Proposed patterns retain their previous rationale, gain precise decision references and a proposed account/process diagram; no product runtime implementation or full SDK is claimed. Eight tracker tests, three presentation component tests, source coverage, artifact checks and rebuilt exact-plan/image/script checks pass. Docker unavailable in current WSL; actual Compose/host/macOS/partner qualification remains open. P00-T02/T05/T07 are in verification, P00-T04 contract work remains; no human approval, phase pass or merge."
     }
   ],
   "rules": {

@@ -6,7 +6,7 @@ Branch: `feat/agentmux-platform-rearchitecture`. No phase or merge approval is i
 
 | Phase | Planned | Ready | In progress | Blocked | Verification | Done | Gate |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| P00 | 4 | 0 | 0 | 1 | 1 | 2 | blocked |
+| P00 | 1 | 0 | 0 | 1 | 4 | 2 | blocked |
 | P01 | 9 | 0 | 0 | 0 | 0 | 0 | planned |
 | P02 | 8 | 0 | 0 | 0 | 0 | 0 | planned |
 | P03 | 8 | 0 | 0 | 0 | 0 | 0 | planned |
@@ -25,6 +25,9 @@ Branch: `feat/agentmux-platform-rearchitecture`. No phase or merge approval is i
 ## Current work and blockers
 
 - **P00-T01 — verification:** Freeze df46e94570fadf78ef67a75a692dd48b968a10f7 as the behavioral comparison baseline and inventory every CLI verb, dashboard view, protocol, state store, integration, and evaluation.
+- **P00-T02 — verification:** Resolve launch workflow, dashboard controls, language/runtime and initial SDKs, storage topology, NATS account/domain layout, supported OS/tool versions, initial scale, identity enrollment, and provider/data policy.
+- **P00-T05 — verification:** Record approved storage direction STATE-01
+- **P00-T07 — verification:** Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch
 - **P00-GATE — blocked:** Verify and accept P00
   Reason: Complete P00 tasks, resolve architecture decisions, and obtain the required Ryan/Nick review before advancement.
 
@@ -35,12 +38,12 @@ An approved implementation contract with no unresolved decision hidden in code.
 | Task | Status | Owner | Scope |
 | --- | --- | --- | --- |
 | [P00-T01](delivery/task-details.md#P00-T01) | verification | Codex | Freeze df46e94570fadf78ef67a75a692dd48b968a10f7 as the behavioral comparison baseline and inventory every CLI verb, dashboard view, protocol, state store, integration, and evaluation. |
-| [P00-T02](delivery/task-details.md#P00-T02) | planned | Codex | Resolve launch workflow, dashboard controls, language/runtime and initial SDKs, storage topology, NATS account/domain layout, supported OS/tool versions, initial scale, identity enrollment, and provider/data policy. |
+| [P00-T02](delivery/task-details.md#P00-T02) | verification | Codex | Resolve launch workflow, dashboard controls, language/runtime and initial SDKs, storage topology, NATS account/domain layout, supported OS/tool versions, initial scale, identity enrollment, and provider/data policy. |
 | [P00-T03](delivery/task-details.md#P00-T03) | done | Codex | Reproduce or explicitly scope the previously reported federation correctness defects |
 | [P00-T04](delivery/task-details.md#P00-T04) | planned | Codex | Approve versioned state machines, authority boundaries, plugin manifest/context schemas, migration ownership, and the requirement-to-phase matrix. |
-| [P00-T05](delivery/task-details.md#P00-T05) | planned | Codex | Record approved storage direction STATE-01 |
+| [P00-T05](delivery/task-details.md#P00-T05) | verification | Codex | Record approved storage direction STATE-01 |
 | [P00-T06](delivery/task-details.md#P00-T06) | done | Codex | Apply ADD-01 and the component preservation matrix to every changed source file and affected caller |
-| [P00-T07](delivery/task-details.md#P00-T07) | planned | Codex | Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch |
+| [P00-T07](delivery/task-details.md#P00-T07) | verification | Codex | Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch |
 | [P00-GATE](delivery/task-details.md#P00-GATE) | blocked | Codex | Verify and accept P00 |
 
 ## P01. Executable contracts, baseline repairs, and verification

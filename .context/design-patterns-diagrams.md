@@ -280,3 +280,28 @@ sequenceDiagram
 ```
 
 An origin or receiver outage delays the exchange without selecting another executor. V2 work consumers use a different exact subject and cannot consume v3 offers. Same-peer nodes are distinct execution identities; the peer credential remains the authenticated principal. Schema migration 5 and snapshot publication are detailed in `docs/planning/2026-10-09/governance-repairs.md`.
+
+## P00 runtime and account refinement — proposed
+
+This detail supports PLAN-02/03/04/05/07/08/09/10/12/13/14. It remains a proposal in `docs/planning/2026-10-09/delivery/decisions/`; the bounded runtime spike proves only client wire interoperability. Existing implementation and historical diagrams above remain unchanged.
+
+```mermaid
+flowchart TB
+  Host["Client hook / owned launcher: PLAN-02"] --> Compose["Selected local Compose project"]
+  Compose --> Broker["NATS infrastructure"]
+  subgraph Protected["Protected account and fixed release assembly: PLAN-03"]
+    Boot["Boot plugin"] <--> Internal["Internal NATS subjects: PLAN-07"]
+    Lifecycle["Kernel lifecycle plugin"] <--> Internal
+    Status["Kernel status plugin"] <--> Internal
+  end
+  Status -->|"Exported information only: PLAN-05"| App["Scoped application NATS accounts"]
+  Clients["Python / TypeScript SDK clients: PLAN-04"] <--> App
+  Owners["Ordinary domain owner plugins"] <--> App
+  Owners -->|"Conditional complete record: PLAN-09/10"| Records["Project JetStream ledger: PLAN-13"]
+  Records --> Views["Rebuildable KV / SQL views"]
+  Owners --> Artifacts["Immutable artifact references: PLAN-12"]
+  App <--> Export["Agreement-scoped federation account"]
+  Export <-->|"Leaf link; explicit exports"| Partner["Independent hub / persistence domain"]
+```
+
+No application arrow enters the protected account. The broker is shared infrastructure, while account permissions and domain-owner validation enforce distinct boundaries. A leaf link does not merge persistence or ownership. Proposed separate protected processes add lifecycle overhead; P02 must measure it. No Go implementation replaces current Python business logic through this diagram.

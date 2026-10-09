@@ -59,17 +59,16 @@ An approved implementation contract with no unresolved decision hidden in code.
 
 ### P00-T02: Resolve launch workflow, dashboard controls, language/runtime and initial SDKs, storage topology, NATS account/domain layout, supported OS/tool versions, initial scale, identity enrollment, and provider/data policy.
 
-**Status:** planned. **Owner:** Codex.
+**Status:** verification. **Owner:** Codex.
 
 **Dependencies:** P00-T06.
 
 **Implementation plan**
 
-1. Inspect the existing source and callers for this exact work item: Resolve launch workflow, dashboard controls, language/runtime and initial SDKs, storage topology, NATS account/domain layout, supported OS/tool versions, initial scale, identity enrollment, and provider/data policy.
-2. Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.
-3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
-4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
-5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+1. Compare Go, Python and TypeScript over the same disposable NATS request/reply fixture, verify absent-service failure, and cross-compile the candidate foundation without treating build success as native-platform evidence.
+2. Recommend runtime/SDK pins, protected process placement, repository layout and reuse boundaries. Record alternatives and costs in decisions/runtime-and-deployment.md.
+3. Define identity/enrollment, worker isolation, provider/data policy, audience/workflow, retained dashboard controls and capacity test targets. Preserve existing functionality and distinguish proposed support from actual host evidence.
+4. Attach exact source/dependency/result hashes and submit D01-D06 for P00 review. Resolve or explicitly assign later-provider/version decisions before their owning implementation begins.
 
 **Deliverables**
 
@@ -91,7 +90,7 @@ An approved implementation contract with no unresolved decision hidden in code.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Review the LOCAL-01 flow and FAIL-55–FAIL-62 against actual host startup capabilities; distinguish approved behavior from unresolved host/version choices.
 
-**Evidence:** not yet recorded
+**Evidence:** docs/planning/2026-10-09/delivery/decisions/runtime-and-deployment.md, docs/planning/2026-10-09/delivery/spikes/runtime/comparison-result.json
 
 **Commits:** not yet recorded
 
@@ -182,17 +181,16 @@ An approved implementation contract with no unresolved decision hidden in code.
 
 ### P00-T05: Record approved storage direction STATE-01
 
-**Status:** planned. **Owner:** Codex.
+**Status:** verification. **Owner:** Codex.
 
 **Dependencies:** P00-T06.
 
 **Implementation plan**
 
-1. Inspect the existing source and callers for this exact work item: Record approved storage direction STATE-01. Select JetStream authority boundaries, retention/checkpoint policy, replication/sync profiles, broker/API access scopes and supported SDK versions. Keep any proposed authoritative SQL exception visible for review.
-2. Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.
-3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
-4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
-5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+1. Define independent hub domains and kernel/system/project/agreement account boundaries, with broker-enforced credentials and domain-owner validation.
+2. Specify one conditional complete transition record, durable operation identity, recoverable effect intent, lost-reply reconciliation and immutable artifacts; distinguish same-stream atomicity from cross-boundary recovery.
+3. Set initial retention, quota/headroom, checkpoint, replica/sync and backup/restore targets for solo/team/offline profiles. Record what source research and configuration validation do and do not prove.
+4. Assign concurrency, migration, authorization, replay and fault-model checks to P01/P04/P10/P12; carry every baseline invariant forward. Submit S01-S05 for review without introducing authoritative SQL.
 
 **Deliverables**
 
@@ -214,7 +212,7 @@ An approved implementation contract with no unresolved decision hidden in code.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Review the LOCAL-01 flow and FAIL-55–FAIL-62 against actual host startup capabilities; distinguish approved behavior from unresolved host/version choices.
 
-**Evidence:** not yet recorded
+**Evidence:** docs/planning/2026-10-09/delivery/decisions/storage-contract.md
 
 **Commits:** not yet recorded
 
@@ -263,17 +261,16 @@ An approved implementation contract with no unresolved decision hidden in code.
 
 ### P00-T07: Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch
 
-**Status:** planned. **Owner:** Codex.
+**Status:** verification. **Owner:** Codex.
 
 **Dependencies:** P00-T06.
 
 **Implementation plan**
 
-1. Inspect the existing source and callers for this exact work item: Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch. Approve instance/profile ownership, Docker context selection, enrollment prerequisites, host startup hooks, status schema and timeout targets.
-2. Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.
-3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
-4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
-5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+1. Specify stable enrolled profile identity, release/context ownership and an OS-held startup lock that works before NATS exists; prohibit accidental second stacks and implicit upgrades.
+2. Define inspect/reuse/start/readiness/failure states, separate warm/cold/download budgets, helper lifecycle and honest partial status.
+3. Research actual host startup events and record the required integration path for Claude Code, Codex, Pi and Desktop; distinguish documented capabilities, observed installed versions and untested Agentmux hooks.
+4. Define the shared caller-scoped instance/persistence/work/hub status fields and assign FAIL-55 through FAIL-62 to actual host and Compose qualification. Record Docker availability gaps and submit L01-L05 for review.
 
 **Deliverables**
 
@@ -295,7 +292,7 @@ An approved implementation contract with no unresolved decision hidden in code.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Review the LOCAL-01 flow and FAIL-55–FAIL-62 against actual host startup capabilities; distinguish approved behavior from unresolved host/version choices.
 
-**Evidence:** not yet recorded
+**Evidence:** docs/planning/2026-10-09/delivery/decisions/startup-contract.md
 
 **Commits:** not yet recorded
 

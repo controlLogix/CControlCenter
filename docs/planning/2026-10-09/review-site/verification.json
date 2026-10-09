@@ -7,11 +7,30 @@
   "brokenInternalLinks": false,
   "externalResourceReferences": 0,
   "javascriptNetworkCalls": 0,
-  "bytes": 12961845,
+  "bytes": 12962637,
   "browserInspection": "Not run: browser tool policy rejected local file URL; no alternate route attempted.",
   "runtimeImplementationVerified": false,
   "componentTests": "3 passed",
   "javascriptSyntax": "passed",
-  "planSha256": "ec64dec23d6a1a8baa984e74fb254bbd481c91926a7f72df2ec7ab2ad3cfcf4d",
-  "scope": "Rebuilt and checked exact embedded plan, unchanged images and local links after repository task tracking. Existing component/script checks remain attributed to their prior run; browser interaction remains unverified."
+  "planSha256": "321a7e79482b04d9fa9f17377f16437330a5cb1dae2f4a0e71e7c7ed2e4f7210",
+  "scope": "Rebuilt after the P00 decision package. Exact embedded plan, six unchanged images, anchors/labels, no external resource URLs and inline JavaScript syntax checked. Three scene tests rerun and passed. Browser layout/interaction remains unverified.",
+  "history": [
+    {
+      "status": "passed-static-checks",
+      "imagesVerified": 6,
+      "imageIntegrity": "Exact source bytes preserved",
+      "sourcePlan": "Exact source bytes embedded",
+      "duplicateIds": false,
+      "brokenInternalLinks": false,
+      "externalResourceReferences": 0,
+      "javascriptNetworkCalls": 0,
+      "bytes": 12961845,
+      "browserInspection": "Not run: browser tool policy rejected local file URL; no alternate route attempted.",
+      "runtimeImplementationVerified": false,
+      "componentTests": "3 passed",
+      "javascriptSyntax": "passed",
+      "planSha256": "ec64dec23d6a1a8baa984e74fb254bbd481c91926a7f72df2ec7ab2ad3cfcf4d",
+      "scope": "Rebuilt and checked exact embedded plan, unchanged images and local links after repository task tracking. Existing component/script checks remain attributed to their prior run; browser interaction remains unverified."
+    }
+  ]
 }

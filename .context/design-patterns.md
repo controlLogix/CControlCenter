@@ -574,7 +574,7 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Adapter",
       "source": "https://www.dofactory.com/net/adapter-design-pattern",
       "referenceDepth": "full-public-reference",
-      "how": "Translate client, worker, vendor, storage and AG-UI protocols at owning plugin boundaries. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03, P06, P07, P11. Implementation locations will be recorded when implemented. ADD-01 first maps existing CLI, hub plugin, dashboard and protocol implementations to retained or extracted code. A new boundary may wrap that code; any replacement needs behavior and migration evidence before cutover. LOCAL-01 client startup adapters invoke an idempotent local Compose bootstrap and expose the same authorized instance/hub status after start or reuse. Actual host hooks are qualified in P06; the dashboard uses the same contract in P07.",
+      "how": "Translate client, worker, vendor, storage and AG-UI protocols at owning plugin boundaries. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03, P06, P07, P11. Implementation locations will be recorded when implemented. ADD-01 first maps existing CLI, hub plugin, dashboard and protocol implementations to retained or extracted code. A new boundary may wrap that code; any replacement needs behavior and migration evidence before cutover. LOCAL-01 client startup adapters invoke an idempotent local Compose bootstrap and expose the same authorized instance/hub status after start or reuse. Actual host hooks are qualified in P06; the dashboard uses the same contract in P07. P00 proposes command-hook or qualified launcher adapters translating LOCAL-01 status into each host output format. Existing dashboard control capabilities remain available; see delivery/decisions/startup-contract.md and runtime-and-deployment.md. This is a recommendation pending P00 review.",
       "why": "External interfaces differ while internal operations must remain language-neutral and NATS-based.",
       "tradeoffs": "A single bespoke integration is simpler; adapters add translation/version upkeep and cannot invent unsupported host capabilities. Maintaining transition paths and equivalent behavior adds testing cost. Reuse is preferred where contracts and authority permit it; a new framework or language alone is not a replacement justification. Host-specific automatic launch needs actual-host tests and protocol-clean output; manual launch is simpler but does not satisfy the accepted automatic-start requirement.",
       "locations": [],
@@ -582,7 +582,8 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
         "docs/planning/2026-10-09/phases.json",
-        "docs/planning/2026-10-09/component-preservation.md"
+        "docs/planning/2026-10-09/component-preservation.md",
+        "docs/planning/2026-10-09/delivery/decisions/README.md"
       ],
       "planningRevisions": [
         {
@@ -604,6 +605,12 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
             "tradeoffs": "A single bespoke integration is simpler; adapters add translation/version upkeep and cannot invent unsupported host capabilities. Maintaining transition paths and equivalent behavior adds testing cost. Reuse is preferred where contracts and authority permit it; a new framework or language alone is not a replacement justification."
           },
           "reason": "Retain earlier rationale; clarify bootstrap versus runtime control and client status. Planned only, not implementation evidence."
+        },
+        {
+          "date": "2026-10-09",
+          "decision": "P00 concrete implementation recommendation; pending review",
+          "previousHow": "Translate client, worker, vendor, storage and AG-UI protocols at owning plugin boundaries. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03, P06, P07, P11. Implementation locations will be recorded when implemented. ADD-01 first maps existing CLI, hub plugin, dashboard and protocol implementations to retained or extracted code. A new boundary may wrap that code; any replacement needs behavior and migration evidence before cutover. LOCAL-01 client startup adapters invoke an idempotent local Compose bootstrap and expose the same authorized instance/hub status after start or reuse. Actual host hooks are qualified in P06; the dashboard uses the same contract in P07.",
+          "evidence": "docs/planning/2026-10-09/delivery/decisions/README.md"
         }
       ]
     },
@@ -614,14 +621,23 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Composite",
       "source": "https://www.dofactory.com/net/composite-design-pattern",
       "referenceDepth": "full-public-reference",
-      "how": "Leaf plugins and assemblies expose the same declared lifecycle/inspection component contract. Represent nesting with private-child ownership and independent-child references kept distinct, with explicit instance lifecycles and all inter-plugin calls over NATS. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03. Implementation locations will be recorded when implemented.",
+      "how": "Leaf plugins and assemblies expose the same declared lifecycle/inspection component contract. Represent nesting with private-child ownership and independent-child references kept distinct, with explicit instance lifecycles and all inter-plugin calls over NATS. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03. Implementation locations will be recorded when implemented. P00 proposes fixed protected assembly membership and separately supervised processes, with explicit private-child ownership and independent child references for ordinary packages; see delivery/decisions/runtime-and-deployment.md. Process overhead remains to be measured. This is a recommendation pending P00 review.",
       "why": "Assemblies must install and operate together without erasing independent child identity.",
       "tradeoffs": "A flat dependency list is simpler; nesting increases lifecycle/version resolution complexity and must not imply inherited authority.",
       "locations": [],
       "verificationEvidence": [],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
-        "docs/planning/2026-10-09/phases.json"
+        "docs/planning/2026-10-09/phases.json",
+        "docs/planning/2026-10-09/delivery/decisions/README.md"
+      ],
+      "planningRevisions": [
+        {
+          "date": "2026-10-09",
+          "decision": "P00 concrete implementation recommendation; pending review",
+          "previousHow": "Leaf plugins and assemblies expose the same declared lifecycle/inspection component contract. Represent nesting with private-child ownership and independent-child references kept distinct, with explicit instance lifecycles and all inter-plugin calls over NATS. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03. Implementation locations will be recorded when implemented.",
+          "evidence": "docs/planning/2026-10-09/delivery/decisions/README.md"
+        }
       ]
     },
     {
@@ -631,14 +647,15 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Facade",
       "source": "https://www.dofactory.com/net/facade-design-pattern",
       "referenceDepth": "full-public-reference",
-      "how": "Expose small scoped context clients for domain commands, approved NATS reads, configuration and artifacts. Injected handles do not expose unrestricted JetStream management or another project's data. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P03, P04, P08. Implementation locations will be recorded when implemented.",
+      "how": "Expose small scoped context clients for domain commands, approved NATS reads, configuration and artifacts. Injected handles do not expose unrestricted JetStream management or another project's data. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P03, P04, P08. Implementation locations will be recorded when implemented. P00 proposes Python and TypeScript SDK clients that construct scoped domain service handles rather than expose unrestricted storage administration; see delivery/decisions/runtime-and-deployment.md and storage-contract.md. This is a recommendation pending P00 review.",
       "why": "Plugin authors need common logging, config and approved services without coupling to implementations.",
       "tradeoffs": "Direct shared-runtime access is simpler but violates the accepted scopes. Narrow clients add schema/version maintenance; typed handles alone do not sandbox trusted native plugins.",
       "locations": [],
       "verificationEvidence": [],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
-        "docs/planning/2026-10-09/phases.json"
+        "docs/planning/2026-10-09/phases.json",
+        "docs/planning/2026-10-09/delivery/decisions/README.md"
       ],
       "planningRevisions": [
         {
@@ -650,6 +667,12 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
             "tradeoffs": "Direct access is simpler but violates the accepted boundary; facades can grow too wide and require explicit contract ownership."
           },
           "reason": "Preserve the original planning rationale while updating storage placement and recovery boundaries. This is a design revision, not implementation evidence."
+        },
+        {
+          "date": "2026-10-09",
+          "decision": "P00 concrete implementation recommendation; pending review",
+          "previousHow": "Expose small scoped context clients for domain commands, approved NATS reads, configuration and artifacts. Injected handles do not expose unrestricted JetStream management or another project's data. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P03, P04, P08. Implementation locations will be recorded when implemented.",
+          "evidence": "docs/planning/2026-10-09/delivery/decisions/README.md"
         }
       ]
     },
@@ -660,14 +683,23 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Observer",
       "source": "https://www.dofactory.com/net/observer-design-pattern",
       "referenceDepth": "full-public-reference",
-      "how": "Deliver approved kernel information and versioned status updates over NATS subscriptions. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P02, P07. Implementation locations will be recorded when implemented.",
+      "how": "Deliver approved kernel information and versioned status updates over NATS subscriptions. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P02, P07. Implementation locations will be recorded when implemented. P00 proposes exported kernel information in a separate account, consumed by ordinary status services without a kernel command path; see delivery/decisions/storage-contract.md. This is a recommendation pending P00 review.",
       "why": "Outside plugins need readiness information while kernel writes remain disallowed.",
       "tradeoffs": "Polling snapshots is simpler; subscriptions require replay/snapshot gap handling and bounded slow consumers.",
       "locations": [],
       "verificationEvidence": [],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
-        "docs/planning/2026-10-09/phases.json"
+        "docs/planning/2026-10-09/phases.json",
+        "docs/planning/2026-10-09/delivery/decisions/README.md"
+      ],
+      "planningRevisions": [
+        {
+          "date": "2026-10-09",
+          "decision": "P00 concrete implementation recommendation; pending review",
+          "previousHow": "Deliver approved kernel information and versioned status updates over NATS subscriptions. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P02, P07. Implementation locations will be recorded when implemented.",
+          "evidence": "docs/planning/2026-10-09/delivery/decisions/README.md"
+        }
       ]
     },
     {
@@ -694,14 +726,25 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Message Bus",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageBus.html",
       "referenceDepth": "full-public-reference",
-      "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01–P12. Implementation locations will be recorded when implemented.",
+      "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01–P12. Implementation locations will be recorded when implemented. P00 proposes NATS for every inter-plugin exchange across the fixed protected assembly and ordinary scoped accounts. A bounded three-language request/reply spike proves client interoperability only; it does not qualify lifecycle, security or persistence. See delivery/spikes/runtime/comparison-result.json. This is a recommendation pending P00 review.",
       "why": "Accepted requirement mandates NATS locally and across connected systems.",
       "tradeoffs": "Direct local calls are simpler/faster but contradict scope; message contracts add latency, retry, schema and operational cost.",
       "locations": [],
-      "verificationEvidence": [],
+      "verificationEvidence": [
+        "docs/planning/2026-10-09/delivery/spikes/runtime/comparison-result.json"
+      ],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
-        "docs/planning/2026-10-09/phases.json"
+        "docs/planning/2026-10-09/phases.json",
+        "docs/planning/2026-10-09/delivery/decisions/README.md"
+      ],
+      "planningRevisions": [
+        {
+          "date": "2026-10-09",
+          "decision": "P00 concrete implementation recommendation; pending review",
+          "previousHow": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01–P12. Implementation locations will be recorded when implemented.",
+          "evidence": "docs/planning/2026-10-09/delivery/decisions/README.md"
+        }
       ]
     },
     {
@@ -711,14 +754,23 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Canonical Data Model",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/CanonicalDataModel.html",
       "referenceDepth": "full-public-reference",
-      "how": "Define versioned envelopes and identity/state vocabulary across languages and hubs. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01, P10. Implementation locations will be recorded when implemented.",
+      "how": "Define versioned envelopes and identity/state vocabulary across languages and hubs. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01, P10. Implementation locations will be recorded when implemented. P00 proposes shared versioned identities and transition/status fields across languages. Canonical JSON hashing and executable schemas remain P01/P00-T04 work; the spike checks decoded equality only. See delivery/decisions/storage-contract.md and startup-contract.md. This is a recommendation pending P00 review.",
       "why": "Client/provider diversity must not obscure ownership or schema compatibility.",
       "tradeoffs": "Pairwise translation is simpler for two plugins; shared contracts need careful evolution and must not become a universal domain schema.",
       "locations": [],
       "verificationEvidence": [],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
-        "docs/planning/2026-10-09/phases.json"
+        "docs/planning/2026-10-09/phases.json",
+        "docs/planning/2026-10-09/delivery/decisions/README.md"
+      ],
+      "planningRevisions": [
+        {
+          "date": "2026-10-09",
+          "decision": "P00 concrete implementation recommendation; pending review",
+          "previousHow": "Define versioned envelopes and identity/state vocabulary across languages and hubs. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01, P10. Implementation locations will be recorded when implemented.",
+          "evidence": "docs/planning/2026-10-09/delivery/decisions/README.md"
+        }
       ]
     },
     {
@@ -728,14 +780,15 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Transactional Client",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/TransactionalClient.html",
       "referenceDepth": "full-public-reference",
-      "how": "Apply a bounded transaction boundary at the owning JetStream record or qualified atomic batch within one stream: state, provenance, operation outcome and recoverable outgoing intent commit together. Consumer acknowledgment, projection updates, cross-stream/hub transfer and external tool actions remain separate recoverable steps. Legacy SQL plus outbox repairs remain relevant to P01 baseline work; STATE-01 supersedes SQL as the preferred new authority. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P05, P10. Implementation locations will be recorded when implemented.",
+      "how": "Apply a bounded transaction boundary at the owning JetStream record or qualified atomic batch within one stream: state, provenance, operation outcome and recoverable outgoing intent commit together. Consumer acknowledgment, projection updates, cross-stream/hub transfer and external tool actions remain separate recoverable steps. Legacy SQL plus outbox repairs remain relevant to P01 baseline work; STATE-01 supersedes SQL as the preferred new authority. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P05, P10. Implementation locations will be recorded when implemented. P00 prefers one conditional complete entity transition including state, provenance, outcome and effect intent. Same-stream batching requires the P01 SDK/concurrency proof; cross-boundary work remains recoverable. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review.",
       "why": "Crash windows must not lose results or create unattributed executable work.",
       "tradeoffs": "One complete record is simpler than a batch and is preferred when it preserves the invariant. Same-stream atomic batches require pinned server/client qualification and do not create a distributed database/broker/hub/tool transaction. SQL authority is an explicit exception requiring evidence and review.",
       "locations": [],
       "verificationEvidence": [],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
-        "docs/planning/2026-10-09/phases.json"
+        "docs/planning/2026-10-09/phases.json",
+        "docs/planning/2026-10-09/delivery/decisions/README.md"
       ],
       "planningRevisions": [
         {
@@ -747,6 +800,12 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
             "tradeoffs": "Separate writes are simpler but reproduce known defects; atomic local intent does not transact external tool effects or multiple hubs."
           },
           "reason": "Preserve the original planning rationale while updating storage placement and recovery boundaries. This is a design revision, not implementation evidence."
+        },
+        {
+          "date": "2026-10-09",
+          "decision": "P00 concrete implementation recommendation; pending review",
+          "previousHow": "Apply a bounded transaction boundary at the owning JetStream record or qualified atomic batch within one stream: state, provenance, operation outcome and recoverable outgoing intent commit together. Consumer acknowledgment, projection updates, cross-stream/hub transfer and external tool actions remain separate recoverable steps. Legacy SQL plus outbox repairs remain relevant to P01 baseline work; STATE-01 supersedes SQL as the preferred new authority. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P05, P10. Implementation locations will be recorded when implemented.",
+          "evidence": "docs/planning/2026-10-09/delivery/decisions/README.md"
         }
       ]
     },
@@ -757,14 +816,15 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Idempotent Receiver",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/IdempotentReceiver.html",
       "referenceDepth": "full-public-reference",
-      "how": "Bind an operation ID, canonical payload hash and expected version to the durable NATS-owned outcome. Reconcile lost acknowledgments, reject changed-payload ID reuse, and retain outcomes/deletion markers across the agreed replay and restore horizon. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P10. Implementation locations will be recorded when implemented.",
+      "how": "Bind an operation ID, canonical payload hash and expected version to the durable NATS-owned outcome. Reconcile lost acknowledgments, reject changed-payload ID reuse, and retain outcomes/deletion markers across the agreed replay and restore horizon. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P10. Implementation locations will be recorded when implemented. P00 retains operation outcomes and payload digests beyond broker deduplication windows, with reconciliation-required on missing history. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review.",
       "why": "At-least-once delivery and uncertain replies must not create duplicate task attempts.",
       "tradeoffs": "Broker duplicate windows are simpler but insufficient for business ownership. Durable outcome records and conflict policy cost storage; external actions require their own idempotency or explicit unknown-outcome handling.",
       "locations": [],
       "verificationEvidence": [],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
-        "docs/planning/2026-10-09/phases.json"
+        "docs/planning/2026-10-09/phases.json",
+        "docs/planning/2026-10-09/delivery/decisions/README.md"
       ],
       "planningRevisions": [
         {
@@ -776,6 +836,12 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
             "tradeoffs": "Best-effort duplicate windows are simpler but inadequate for business ownership; durable retention and conflict policy cost storage."
           },
           "reason": "Preserve the original planning rationale while updating storage placement and recovery boundaries. This is a design revision, not implementation evidence."
+        },
+        {
+          "date": "2026-10-09",
+          "decision": "P00 concrete implementation recommendation; pending review",
+          "previousHow": "Bind an operation ID, canonical payload hash and expected version to the durable NATS-owned outcome. Reconcile lost acknowledgments, reject changed-payload ID reuse, and retain outcomes/deletion markers across the agreed replay and restore horizon. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P10. Implementation locations will be recorded when implemented.",
+          "evidence": "docs/planning/2026-10-09/delivery/decisions/README.md"
         }
       ]
     },
@@ -803,14 +869,15 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Claim Check",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/StoreInLibrary.html",
       "referenceDepth": "full-public-reference",
-      "how": "Send authorized immutable artifact references and digests while owning providers retain the bytes in NATS Object Store where size/retention fit, or an approved external artifact store. Use version/digest names and recheck access on retrieval. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P04, P10, P11. Implementation locations will be recorded when implemented.",
+      "how": "Send authorized immutable artifact references and digests while owning providers retain the bytes in NATS Object Store where size/retention fit, or an approved external artifact store. Use version/digest names and recheck access on retrieval. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P04, P10, P11. Implementation locations will be recorded when implemented. P00 proposes upload/verify before reference commit and reference-aware orphan collection, using immutable artifact IDs and byte digests. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review.",
       "why": "Code and engineering evidence can exceed safe message sizes and have separate access policies.",
       "tradeoffs": "Inline small evidence is simpler. References require coordinated retention and backups; uploading bytes and committing a task record are separate steps, with incomplete/orphan objects handled explicitly.",
       "locations": [],
       "verificationEvidence": [],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
-        "docs/planning/2026-10-09/phases.json"
+        "docs/planning/2026-10-09/phases.json",
+        "docs/planning/2026-10-09/delivery/decisions/README.md"
       ],
       "planningRevisions": [
         {
@@ -822,6 +889,12 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
             "tradeoffs": "Inline small payloads are simpler; referenced content requires access rechecks, partial-transfer handling and retention coordination."
           },
           "reason": "Preserve the original planning rationale while updating storage placement and recovery boundaries. This is a design revision, not implementation evidence."
+        },
+        {
+          "date": "2026-10-09",
+          "decision": "P00 concrete implementation recommendation; pending review",
+          "previousHow": "Send authorized immutable artifact references and digests while owning providers retain the bytes in NATS Object Store where size/retention fit, or an approved external artifact store. Use version/digest names and recheck access on retrieval. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P04, P10, P11. Implementation locations will be recorded when implemented.",
+          "evidence": "docs/planning/2026-10-09/delivery/decisions/README.md"
         }
       ]
     },
@@ -832,14 +905,15 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Message Store",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageStore.html",
       "referenceDepth": "full-public-reference",
-      "how": "Retain authoritative validated JetStream records with scoped replay, versioned checkpoints and explicit retention. Derive current KV views and optional SQL query indexes without replaying effects. Keep task/audit history separate from acknowledged work queues and bounded presence records. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P04, P07, P10, P12. Implementation locations will be recorded when implemented.",
+      "how": "Retain authoritative validated JetStream records with scoped replay, versioned checkpoints and explicit retention. Derive current KV views and optional SQL query indexes without replaying effects. Keep task/audit history separate from acknowledged work queues and bounded presence records. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P04, P07, P10, P12. Implementation locations will be recorded when implemented. P00 proposes non-expiring authoritative history by default, explicit quota rejection, verified checkpoints and fenced restore, with optional rebuildable SQL views. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review.",
       "why": "Recovery, audits and authorized dashboard history must survive disconnected viewers and hubs.",
       "tradeoffs": "A local relational authority simplifies joins and multi-row constraints, but the accepted direction prefers shared NATS persistence. Rebuildable views add lag and recovery complexity; quotas, snapshots, schema evolution, privacy deletion and retention gaps require explicit evidence.",
       "locations": [],
       "verificationEvidence": [],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
-        "docs/planning/2026-10-09/phases.json"
+        "docs/planning/2026-10-09/phases.json",
+        "docs/planning/2026-10-09/delivery/decisions/README.md"
       ],
       "planningRevisions": [
         {
@@ -851,6 +925,12 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
             "tradeoffs": "Ephemeral logs are simpler but cannot support these guarantees; retention, deletion and sensitive data create operating cost."
           },
           "reason": "Preserve the original planning rationale while updating storage placement and recovery boundaries. This is a design revision, not implementation evidence."
+        },
+        {
+          "date": "2026-10-09",
+          "decision": "P00 concrete implementation recommendation; pending review",
+          "previousHow": "Retain authoritative validated JetStream records with scoped replay, versioned checkpoints and explicit retention. Derive current KV views and optional SQL query indexes without replaying effects. Keep task/audit history separate from acknowledged work queues and bounded presence records. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P04, P07, P10, P12. Implementation locations will be recorded when implemented.",
+          "evidence": "docs/planning/2026-10-09/delivery/decisions/README.md"
         }
       ]
     },
@@ -861,14 +941,15 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Control Bus",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/ControlBus.html",
       "referenceDepth": "full-public-reference",
-      "how": "Expose surrounding runtime operations for allowed drain, pause, cancellation and recovery over authorized NATS contracts. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03, P05, P07, P10. Implementation locations will be recorded when implemented. LOCAL-01 startup reads scoped instance/hub status after readiness; P10 supplies real hub observations. Starting local infrastructure before NATS exists remains a bounded host bootstrap operation, not a kernel command channel.",
+      "how": "Expose surrounding runtime operations for allowed drain, pause, cancellation and recovery over authorized NATS contracts. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03, P05, P07, P10. Implementation locations will be recorded when implemented. LOCAL-01 startup reads scoped instance/hub status after readiness; P10 supplies real hub observations. Starting local infrastructure before NATS exists remains a bounded host bootstrap operation, not a kernel command channel. P00 proposes one authorized instance/work/partner status contract for terminal and dashboard clients; local pre-broker Compose startup is the bounded infrastructure exception. See delivery/decisions/startup-contract.md. This is a recommendation pending P00 review.",
       "why": "Operators need observable action control without opening protected kernel command channels.",
       "tradeoffs": "Local shell procedures are simpler but harder to govern; controls need authority, durable intent and honest unknown outcomes. Cached status must disclose age and unavailable services; it cannot authorize work, widen hub trust or prove partner capacity.",
       "locations": [],
       "verificationEvidence": [],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
-        "docs/planning/2026-10-09/phases.json"
+        "docs/planning/2026-10-09/phases.json",
+        "docs/planning/2026-10-09/delivery/decisions/README.md"
       ],
       "planningRevisions": [
         {
@@ -880,6 +961,12 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
             "tradeoffs": "Local shell procedures are simpler but harder to govern; controls need authority, durable intent and honest unknown outcomes."
           },
           "reason": "Retain earlier rationale; clarify bootstrap versus runtime control and client status. Planned only, not implementation evidence."
+        },
+        {
+          "date": "2026-10-09",
+          "decision": "P00 concrete implementation recommendation; pending review",
+          "previousHow": "Expose surrounding runtime operations for allowed drain, pause, cancellation and recovery over authorized NATS contracts. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03, P05, P07, P10. Implementation locations will be recorded when implemented. LOCAL-01 startup reads scoped instance/hub status after readiness; P10 supplies real hub observations. Starting local infrastructure before NATS exists remains a bounded host bootstrap operation, not a kernel command channel.",
+          "evidence": "docs/planning/2026-10-09/delivery/decisions/README.md"
         }
       ]
     },

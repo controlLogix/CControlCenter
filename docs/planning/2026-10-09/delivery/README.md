@@ -2,6 +2,8 @@
 
 Ryan chose repository-based tracking instead of Jira. No Atlassian installation or account is needed. This tracks delivery of the implementation plan; it is not a new runtime task store for the Agentmux product.
 
+The [P00 decision package](decisions/README.md) contains the current runtime, storage and automatic-startup recommendations. Its review status is tracked on P00-T02/T05/T07; recommendations are not phase acceptance.
+
 ## Source of truth
 
 - `tasks.json` owns task status, scope, dependencies, implementation steps, acceptance criteria, evidence, commit references and append-only change history.

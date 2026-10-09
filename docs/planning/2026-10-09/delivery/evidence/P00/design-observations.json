@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-09",
+  "baseCommit": "5b3a01162ada04aac43e5784bcd69c60e11a5692",
+  "runtimeComparison": "docs/planning/2026-10-09/delivery/spikes/runtime/comparison-result.json",
+  "sourceHashesMatched": true,
+  "observations": [
+    {
+      "command": "codex --version",
+      "environment": "Windows host",
+      "exitCode": 0,
+      "output": "codex-cli 0.147.0"
+    },
+    {
+      "command": "claude --version",
+      "environment": "Windows host",
+      "exitCode": 0,
+      "output": "2.1.295 (Claude Code)"
+    },
+    {
+      "check": "Read local Codex hooks.json event names only",
+      "result": "SessionStart present; commands/credentials not copied; Agentmux startup not tested"
+    },
+    {
+      "command": "docker compose version",
+      "environment": "Ubuntu-26.04 WSL",
+      "result": "Docker unavailable; no daemon or host setting changed"
+    },
+    {
+      "command": "nats-server -t -c <temporary loopback config with jetstream sync_interval: always>",
+      "version": "2.15.0",
+      "exitCode": 0,
+      "result": "Configuration syntax valid; no durability or throughput claim"
+    }
+  ],
+  "limits": [
+    "All decision records are proposed for P00 review.",
+    "Only the runtime comparison is executed interoperability evidence.",
+    "No native macOS, Compose, supported agent-hook or live partner qualification."
+  ]
+}

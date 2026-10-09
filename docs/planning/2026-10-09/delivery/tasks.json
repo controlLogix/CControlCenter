@@ -718,17 +718,16 @@
           "text": "Resolve launch workflow, dashboard controls, language/runtime and initial SDKs, storage topology, NATS account/domain layout, supported OS/tool versions, initial scale, identity enrollment, and provider/data policy."
         }
       ],
-      "status": "planned",
+      "status": "verification",
       "owner": "Codex",
       "dependsOn": [
         "P00-T06"
       ],
       "implementationPlan": [
-        "Inspect the existing source and callers for this exact work item: Resolve launch workflow, dashboard controls, language/runtime and initial SDKs, storage topology, NATS account/domain layout, supported OS/tool versions, initial scale, identity enrollment, and provider/data policy.",
-        "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
-        "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
-        "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Compare Go, Python and TypeScript over the same disposable NATS request/reply fixture, verify absent-service failure, and cross-compile the candidate foundation without treating build success as native-platform evidence.",
+        "Recommend runtime/SDK pins, protected process placement, repository layout and reuse boundaries. Record alternatives and costs in decisions/runtime-and-deployment.md.",
+        "Define identity/enrollment, worker isolation, provider/data policy, audience/workflow, retained dashboard controls and capacity test targets. Preserve existing functionality and distinguish proposed support from actual host evidence.",
+        "Attach exact source/dependency/result hashes and submit D01-D06 for P00 review. Resolve or explicitly assign later-provider/version decisions before their owning implementation begins."
       ],
       "acceptanceCriteria": [
         {
@@ -748,10 +747,41 @@
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
         }
       ],
-      "evidence": [],
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/decisions/runtime-and-deployment.md",
+        "docs/planning/2026-10-09/delivery/spikes/runtime/comparison-result.json"
+      ],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T19:05:02.607340+00:00",
+          "actor": "Codex",
+          "from": "planned",
+          "to": "in_progress",
+          "note": "Compare bounded Go/Python/TypeScript NATS interoperability and packaging, then document runtime, identity, deployment and provider-policy choices for review."
+        },
+        {
+          "at": "2026-10-09T19:16:14.495068+00:00",
+          "actor": "Codex",
+          "kind": "implementation-plan-refinement",
+          "previousImplementationPlan": [
+            "Inspect the existing source and callers for this exact work item: Resolve launch workflow, dashboard controls, language/runtime and initial SDKs, storage topology, NATS account/domain layout, supported OS/tool versions, initial scale, identity enrollment, and provider/data policy.",
+            "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
+            "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
+            "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
+            "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+          ],
+          "note": "Bounded engineering comparison and concrete review contracts; original scope/acceptance retained."
+        },
+        {
+          "at": "2026-10-09T19:16:16.114854+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "verification",
+          "note": "Three-language NATS comparison and four Go build targets passed; D01-D06 recommendations await P00 review and any required revisions."
+        }
+      ],
       "phaseCriteria": [
         "P00-AC01",
         "P00-AC02",
@@ -970,17 +1000,16 @@
           "text": "Record approved storage direction STATE-01. Select JetStream authority boundaries, retention/checkpoint policy, replication/sync profiles, broker/API access scopes and supported SDK versions. Keep any proposed authoritative SQL exception visible for review."
         }
       ],
-      "status": "planned",
+      "status": "verification",
       "owner": "Codex",
       "dependsOn": [
         "P00-T06"
       ],
       "implementationPlan": [
-        "Inspect the existing source and callers for this exact work item: Record approved storage direction STATE-01. Select JetStream authority boundaries, retention/checkpoint policy, replication/sync profiles, broker/API access scopes and supported SDK versions. Keep any proposed authoritative SQL exception visible for review.",
-        "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
-        "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
-        "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Define independent hub domains and kernel/system/project/agreement account boundaries, with broker-enforced credentials and domain-owner validation.",
+        "Specify one conditional complete transition record, durable operation identity, recoverable effect intent, lost-reply reconciliation and immutable artifacts; distinguish same-stream atomicity from cross-boundary recovery.",
+        "Set initial retention, quota/headroom, checkpoint, replica/sync and backup/restore targets for solo/team/offline profiles. Record what source research and configuration validation do and do not prove.",
+        "Assign concurrency, migration, authorization, replay and fault-model checks to P01/P04/P10/P12; carry every baseline invariant forward. Submit S01-S05 for review without introducing authoritative SQL."
       ],
       "acceptanceCriteria": [
         {
@@ -1000,10 +1029,40 @@
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
         }
       ],
-      "evidence": [],
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/decisions/storage-contract.md"
+      ],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T19:16:14.495068+00:00",
+          "actor": "Codex",
+          "kind": "implementation-plan-refinement",
+          "previousImplementationPlan": [
+            "Inspect the existing source and callers for this exact work item: Record approved storage direction STATE-01. Select JetStream authority boundaries, retention/checkpoint policy, replication/sync profiles, broker/API access scopes and supported SDK versions. Keep any proposed authoritative SQL exception visible for review.",
+            "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
+            "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
+            "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
+            "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+          ],
+          "note": "Bounded engineering comparison and concrete review contracts; original scope/acceptance retained."
+        },
+        {
+          "at": "2026-10-09T19:16:14.946551+00:00",
+          "actor": "Codex",
+          "from": "planned",
+          "to": "in_progress",
+          "note": "Prepared concrete NATS storage boundary, retention, recovery and qualification profile recommendations."
+        },
+        {
+          "at": "2026-10-09T19:16:16.679778+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "verification",
+          "note": "S01-S05 storage recommendation ready for review. Syntax checked; persistence guarantees remain assigned to P01/P04/P10/P12."
+        }
+      ],
       "phaseCriteria": [
         "P00-AC01",
         "P00-AC02",
@@ -1149,17 +1208,16 @@
           "text": "Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch. Approve instance/profile ownership, Docker context selection, enrollment prerequisites, host startup hooks, status schema and timeout targets."
         }
       ],
-      "status": "planned",
+      "status": "verification",
       "owner": "Codex",
       "dependsOn": [
         "P00-T06"
       ],
       "implementationPlan": [
-        "Inspect the existing source and callers for this exact work item: Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch. Approve instance/profile ownership, Docker context selection, enrollment prerequisites, host startup hooks, status schema and timeout targets.",
-        "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
-        "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
-        "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Specify stable enrolled profile identity, release/context ownership and an OS-held startup lock that works before NATS exists; prohibit accidental second stacks and implicit upgrades.",
+        "Define inspect/reuse/start/readiness/failure states, separate warm/cold/download budgets, helper lifecycle and honest partial status.",
+        "Research actual host startup events and record the required integration path for Claude Code, Codex, Pi and Desktop; distinguish documented capabilities, observed installed versions and untested Agentmux hooks.",
+        "Define the shared caller-scoped instance/persistence/work/hub status fields and assign FAIL-55 through FAIL-62 to actual host and Compose qualification. Record Docker availability gaps and submit L01-L05 for review."
       ],
       "acceptanceCriteria": [
         {
@@ -1179,10 +1237,40 @@
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
         }
       ],
-      "evidence": [],
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/decisions/startup-contract.md"
+      ],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T19:16:14.495068+00:00",
+          "actor": "Codex",
+          "kind": "implementation-plan-refinement",
+          "previousImplementationPlan": [
+            "Inspect the existing source and callers for this exact work item: Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch. Approve instance/profile ownership, Docker context selection, enrollment prerequisites, host startup hooks, status schema and timeout targets.",
+            "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
+            "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
+            "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
+            "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+          ],
+          "note": "Bounded engineering comparison and concrete review contracts; original scope/acceptance retained."
+        },
+        {
+          "at": "2026-10-09T19:16:15.561760+00:00",
+          "actor": "Codex",
+          "from": "planned",
+          "to": "in_progress",
+          "note": "Prepared automatic-start contract, actual host-hook research, status fields and explicit environment gaps."
+        },
+        {
+          "at": "2026-10-09T19:16:17.205066+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "verification",
+          "note": "L01-L05 startup recommendation ready for review. Docker is unavailable in current WSL; actual Compose and host launch qualification remains open."
+        }
+      ],
       "phaseCriteria": [
         "P00-AC01",
         "P00-AC02",
@@ -29981,6 +30069,96 @@
       "to": "verification",
       "note": "Pinned baseline and all 344 governed files pass static coverage checks. Surface review package is ready; maintainer review of dynamic entry points and behavioral completeness remains part of P00 acceptance.",
       "taskId": "P00-T01"
+    },
+    {
+      "at": "2026-10-09T19:05:02.607340+00:00",
+      "actor": "Codex",
+      "from": "planned",
+      "to": "in_progress",
+      "note": "Compare bounded Go/Python/TypeScript NATS interoperability and packaging, then document runtime, identity, deployment and provider-policy choices for review.",
+      "taskId": "P00-T02"
+    },
+    {
+      "at": "2026-10-09T19:16:14.495068+00:00",
+      "actor": "Codex",
+      "kind": "implementation-plan-refinement",
+      "previousImplementationPlan": [
+        "Inspect the existing source and callers for this exact work item: Resolve launch workflow, dashboard controls, language/runtime and initial SDKs, storage topology, NATS account/domain layout, supported OS/tool versions, initial scale, identity enrollment, and provider/data policy.",
+        "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
+        "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
+        "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+      ],
+      "note": "Bounded engineering comparison and concrete review contracts; original scope/acceptance retained.",
+      "taskId": "P00-T02"
+    },
+    {
+      "at": "2026-10-09T19:16:14.495068+00:00",
+      "actor": "Codex",
+      "kind": "implementation-plan-refinement",
+      "previousImplementationPlan": [
+        "Inspect the existing source and callers for this exact work item: Record approved storage direction STATE-01. Select JetStream authority boundaries, retention/checkpoint policy, replication/sync profiles, broker/API access scopes and supported SDK versions. Keep any proposed authoritative SQL exception visible for review.",
+        "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
+        "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
+        "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+      ],
+      "note": "Bounded engineering comparison and concrete review contracts; original scope/acceptance retained.",
+      "taskId": "P00-T05"
+    },
+    {
+      "at": "2026-10-09T19:16:14.495068+00:00",
+      "actor": "Codex",
+      "kind": "implementation-plan-refinement",
+      "previousImplementationPlan": [
+        "Inspect the existing source and callers for this exact work item: Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch. Approve instance/profile ownership, Docker context selection, enrollment prerequisites, host startup hooks, status schema and timeout targets.",
+        "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
+        "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
+        "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+      ],
+      "note": "Bounded engineering comparison and concrete review contracts; original scope/acceptance retained.",
+      "taskId": "P00-T07"
+    },
+    {
+      "at": "2026-10-09T19:16:14.946551+00:00",
+      "actor": "Codex",
+      "from": "planned",
+      "to": "in_progress",
+      "note": "Prepared concrete NATS storage boundary, retention, recovery and qualification profile recommendations.",
+      "taskId": "P00-T05"
+    },
+    {
+      "at": "2026-10-09T19:16:15.561760+00:00",
+      "actor": "Codex",
+      "from": "planned",
+      "to": "in_progress",
+      "note": "Prepared automatic-start contract, actual host-hook research, status fields and explicit environment gaps.",
+      "taskId": "P00-T07"
+    },
+    {
+      "at": "2026-10-09T19:16:16.114854+00:00",
+      "actor": "Codex",
+      "from": "in_progress",
+      "to": "verification",
+      "note": "Three-language NATS comparison and four Go build targets passed; D01-D06 recommendations await P00 review and any required revisions.",
+      "taskId": "P00-T02"
+    },
+    {
+      "at": "2026-10-09T19:16:16.679778+00:00",
+      "actor": "Codex",
+      "from": "in_progress",
+      "to": "verification",
+      "note": "S01-S05 storage recommendation ready for review. Syntax checked; persistence guarantees remain assigned to P01/P04/P10/P12.",
+      "taskId": "P00-T05"
+    },
+    {
+      "at": "2026-10-09T19:16:17.205066+00:00",
+      "actor": "Codex",
+      "from": "in_progress",
+      "to": "verification",
+      "note": "L01-L05 startup recommendation ready for review. Docker is unavailable in current WSL; actual Compose and host launch qualification remains open.",
+      "taskId": "P00-T07"
     }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "file": "agentmux-visual-review.html",
-  "bytes": 12961845,
-  "sha256": "ee21947e6bb9817f5ec8eba896a4035e491d6b82e675f7b310b2c47b489a73a8",
+  "bytes": 12962637,
+  "sha256": "acc330c9b568292a8989570c9d9c23a9f111d85e62cc08fd54408d6934a47138",
   "imageCount": 6,
-  "planSha256": "ec64dec23d6a1a8baa984e74fb254bbd481c91926a7f72df2ec7ab2ad3cfcf4d",
+  "planSha256": "321a7e79482b04d9fa9f17377f16437330a5cb1dae2f4a0e71e7c7ed2e4f7210",
   "logoSha256": "b72097103e251ae3487e987e8a4a3a16c1fdd76a85a0b4b0670e19f6e4683bc4",
   "imageHashes": {
     "01-workspace-and-terminal.png": "2b5c40037445bf697e944f69d759927f19f3257c8ccd2af7c199b3c307b8eb43",
