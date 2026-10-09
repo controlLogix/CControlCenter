@@ -20,6 +20,8 @@ Follow [the local testing workflow](docs/LOCAL_TESTING.md). During debugging, us
 
 ## Platform Rearchitecture Branch and Review
 
+Track implementation work in [delivery/tasks.json](docs/planning/2026-10-09/delivery/tasks.json), following [the tracking procedure](docs/planning/2026-10-09/delivery/README.md). Update task status, blockers, evidence and commit references as work changes; regenerate the status board with `delivery/track.py`. Each phase has a separate verification task. Complete required review, commit and push the phase candidate, verify its remote commit, and record the gate before advancing. Keep historical evidence distinct from current acceptance. Repository tracking replaces Jira for this work.
+
 All work for the platform rearchitecture, including the plugin framework, NATS hub federation, Jev integration, and related skills, belongs on `feat/agentmux-platform-rearchitecture`.
 
 All planning and implementation work stays on `feat/agentmux-platform-rearchitecture`. Do not merge, squash, cherry-pick or otherwise transfer it into `main` or another integration or release branch until MERGE-01 in [the implementation plan](docs/planning/2026-10-09/implementation-plan.md) is satisfied. Do not enable automatic merging.

@@ -3,6 +3,8 @@
 **Status: phased plan with six baseline governance repairs implemented and verified under Ryan's scoped authorization. Complete P00/P01 and later gates are not yet passed; no Nick review or merge approval is recorded.**
 Prepared October 9, 2026. Branch: `feat/agentmux-platform-rearchitecture`. Baseline: `df46e94570fadf78ef67a75a692dd48b968a10f7`, Agentmux 0.32.0.
 
+**Live delivery tracking:** [Phase and task status](implementation-status.md) · [Detailed implementation tasks](delivery/task-details.md) · [Tracking procedure](delivery/README.md). Ryan selected repository tracking instead of Jira. Task status and evidence are maintained throughout implementation in `delivery/tasks.json`.
+
 This plan combines the original architecture review, repository analysis, accepted interview decisions, NATS and UI architecture brief, both Jev research rounds, the video supplement, and the proposed skill suite. It defines a complete delivery sequence and the evidence needed to advance. The accompanying presentation explains the before/after experience and each phase. The structured [phase definitions](phases.json) and [coverage appendix](coverage.md) retain individual acceptance and opportunity identifiers.
 
 **Storage revision, October 9:** Ryan approved the NATS-backed shared-persistence direction described in STATE-01 below. This approval updates the design; implementation and merge still require their existing review gates.
@@ -248,6 +250,16 @@ The portable `jev` plugin has a shared CLI/MCP runtime and host-specific packagi
 For each definition, P08 sets risk-specific thresholds before scoring the holdout. Proposed starting values are at least 95% precision and recall for low-risk classification, zero missed mandatory obligations in the curated critical-case suite, and no more than a two-percentage-point degradation in accepted task outcomes with uncertainty reported. An efficiency feature should show at least 10% lower total cost per accepted outcome on its target workload before default activation. These are reviewable starting targets, not measured results or universal safety guarantees. If sample size is inadequate, remain advisory and gather evidence.
 
 ## 6. Phase gates and evidence
+
+### Repository task management
+
+Each of the 15 phases is tracked as an epic with its original acceptance criteria. The initial backlog contains 110 phase implementation work items, 132 Jev/video/skill qualification records, 15 phase-verification tasks, and one final MERGE-01 acceptance task: 258 tasks in total. Catalog tasks preserve overlapping source IDs and shared implementations; they do not imply 132 independent services or additive savings. All 198 existing component behavior checks have owners, and all 62 failure scenarios remain assigned to their phase gates.
+
+The [status board](implementation-status.md) and [task detail pages](delivery/task-details.md) are generated from one version-controlled task file. Each task records its implementation steps, acceptance criteria, dependencies, owner, status, blockers, evidence, commits and status history. Refine broad tasks into smaller steps before implementation without dropping their source scope. Use planned, ready, in progress, blocked, verification and done consistently. Update the tracker at each meaningful status change and include it in the related commit.
+
+Task completion requires criterion-level evidence. Phase completion additionally requires all phase work, the complete verification matrix, independent review, the required advancement approval, and a committed and pushed candidate on the existing feature branch. Verify the remote candidate before recording the gate and starting the next phase. A blocker or missing environment stays visible. Existing governance repairs and test tooling are historical contributions, not automatic passes for P00/P01. The complete tracking procedure is in [delivery/README.md](delivery/README.md).
+
+### Acceptance and advancement
 
 The machine-readable sequence has 15 phases and 99 acceptance criteria. The [verification matrix](verification-matrix.md) adds 62 explicit failure scenarios and observable results. The promotion order is sequential. Teams may prepare independent designs and fixtures within approved scope, but no phase is accepted before its predecessor and required contracts are accepted.
 

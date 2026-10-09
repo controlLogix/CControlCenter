@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, scoped local test-loop review, 2026-10-09; phase and MERGE-01 gates remain open",
-  "sourceDigest": "073ee657a73adbcaa9aa9978214b97080dc99de51e9f387ef9f6414103e9cd10",
+  "reviewer": "Codex, scoped repository delivery-tracking review, 2026-10-09; product phase and merge gates remain open",
+  "sourceDigest": "2adf3a1c479449c846aee4911c69e7dee01254d33184ea8cebdc1f0fdab7696f",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -212,6 +212,24 @@
         ".github/workflows/tests.yml"
       ],
       "rationale": "Added a small unittest entry point and WSL launcher, explicit profiles, fail-fast focused runs, failed/incomplete selection retries, local evidence and timings. Verified subtest and setup failures, import-error retries, skips and empty selections. Full hub profile passed 124 tests; after a retry-metadata correction the final fast profile passed 44 and a focused regression passed. Product runtime and existing test assertions are unchanged. This adds test-support code, not a new product architecture or design pattern; existing diagrams remain accurate. Component ownership is updated, and phase/full-platform acceptance remains separate. Prepared tools are reused, while mutable fixture data remains isolated."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "previousReviewer": "Codex, scoped local test-loop review, 2026-10-09; phase and MERGE-01 gates remain open",
+      "previousSourceDigest": "073ee657a73adbcaa9aa9978214b97080dc99de51e9f387ef9f6414103e9cd10",
+      "scope": "Repository-owned implementation tracking replaces requested Jira integration",
+      "evidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/implementation-status.md",
+        "docs/planning/2026-10-09/delivery/tasks.json",
+        "docs/planning/2026-10-09/delivery/track.py",
+        "docs/planning/2026-10-09/delivery/test_track.py",
+        "docs/planning/2026-10-09/delivery/README.md",
+        "AGENTS.md",
+        "CLAUDE.md"
+      ],
+      "rationale": "Ryan explicitly chose local tracking instead of Jira while authorization was pending; no external issues or connector installation are claimed. Reviewed one authoritative task JSON with generated board/detail views, history, source hashes, explicit scope and predecessor checks, evidence requirements and phase commit/push checks. The initial breakdown retains 15 epics, 110 phase work items, 132 catalog records, 15 phase gates and MERGE-01: 258 tasks; 99 phase criteria, 62 failure scenarios and 198 behavior checks remain owned. Broad source work may be refined before implementation without dropping scope. Six focused tracker tests pass, the tracker and component coverage checks pass, and the rebuilt HTML embeds the exact plan with unchanged image hashes. No product runtime, runtime store, architecture relationship or pattern changed; existing diagrams remain accurate. Task metadata cannot establish authentic human approval or semantic correctness. P00 preflight is in progress and its gate is blocked on remaining work and required review; no phase or merge is accepted."
     }
   ],
   "rules": {

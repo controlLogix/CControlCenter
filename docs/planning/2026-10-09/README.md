@@ -10,6 +10,7 @@ Start with the revised presentation, then review the full plan and individual ga
 - [Component preservation and gains](component-preservation.md)
 - [Complete source file inventory](component-inventory.json)
 - [Phased implementation plan](implementation-plan.md)
+- [Live phase and task status](implementation-status.md) · [Detailed task backlog](delivery/task-details.md) · [Tracking procedure](delivery/README.md)
 - [Structured phases and 99 acceptance criteria](phases.json)
 - [Complete functionality, Jev, video, and skill coverage](coverage.md)
 - [Structured Jev coverage and evaluation gates](jev-coverage.json)
