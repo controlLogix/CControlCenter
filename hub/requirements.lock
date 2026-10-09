@@ -1,0 +1,10 @@
+# Exact versions of every federation dependency, transitives included, as installed
+# and tested (python3 -m unittest hub.tests.test_fed_unit hub.tests.test_fed_live
+# hub.tests.test_nats_federation, Python 3.14.8, 2026-10-08). `agentmux hub fed setup`
+# installs hub/requirements.txt constrained by this file, so a fresh clone gets the
+# same build. Regenerate with `.venv/bin/python -m pip freeze` after changing pins.
+cffi==2.1.1
+nats-py==2.16.0
+nkeys==0.2.1
+pycparser==3.0
+PyNaCl==1.6.2

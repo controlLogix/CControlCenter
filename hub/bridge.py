@@ -27,6 +27,8 @@ import time
 
 from . import names
 
+CONNECT_TIMEOUT_S = 5   # TCP connect, then the server's INFO line
+
 
 class NatsClient:
     def __init__(self, url: str, name: str):
@@ -39,9 +41,13 @@ class NatsClient:
         self._next_sid = 1
         self.handlers = {}
 
-    async def connect(self):
-        self.reader, self.writer = await asyncio.open_connection(self.host or "127.0.0.1", self.port)
-        info = await self.reader.readline()
+    async def connect(self, timeout=CONNECT_TIMEOUT_S):
+        # Bounded: a black-holed or silent endpoint would otherwise stall Bridge.run (and the
+        # outbox drain) forever, since backoff only starts after an exception. TimeoutError is
+        # an OSError, so run()'s retry loop handles it like a refused connection.
+        self.reader, self.writer = await asyncio.wait_for(
+            asyncio.open_connection(self.host or "127.0.0.1", self.port), timeout)
+        info = await asyncio.wait_for(self.reader.readline(), timeout)
         if not info.startswith(b"INFO"):
             raise ConnectionError(f"not a NATS server: {info[:60]!r}")
         opts = {"verbose": False, "pedantic": False, "name": self.name, "lang": "python-stdlib", "version": "1"}

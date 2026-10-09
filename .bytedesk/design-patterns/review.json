@@ -1,59 +1,107 @@
 {
-  "reviewer": "",
-  "sourceDigest": "",
+  "reviewer": "Claude Opus 5.5 for Nick Klute (owners: Nick Klute, Ryan Helms), 2026-10-08",
+  "sourceDigest": "116e0eb0cf7dcd9e776d32084e4efcef2e994fe50568eb80d0b99037eb3a97f1",
   "rules": {
     "DP001": {
-      "status": "unreviewed",
-      "rationale": "",
-      "evidence": []
+      "status": "pass",
+      "rationale": "docs/FEDERATION.md records interview requirements F1-F13, the topology decision (hubs as plain NATS clients of one hosted JetStream cluster), and the alternatives and assumptions A1-A24 behind it; project.json carries the decision, constraints and alternatives. The boundaries exist in source: hub/fed/ is a separate layer enabled only by federation.toml, the single-operator Bridge in hub/bridge.py is a distinct path, and every outbound effect goes through hub/fed/guard.py.",
+      "evidence": [
+        "docs/FEDERATION.md",
+        "docs/PROTOCOL.md",
+        "hub/fed/runtime.py",
+        "hub/fed/guard.py"
+      ]
     },
     "DP002": {
-      "status": "unreviewed",
-      "rationale": "",
-      "evidence": []
+      "status": "pass",
+      "rationale": "One process (Hub in hub/server.py) owns hub.db, and every Store call runs on its single writer thread. The CLI, the federation MCP server (hub/fed/mcp.py) and the dashboard panels talk to the hub socket and never open the database. hub/fed/plugin.py gives each plugin its own p_<name>_* tables and a ctx.publish() that always runs the guard pipeline; envelope.validate enforces the v2 wire contract.",
+      "evidence": [
+        "hub/server.py",
+        "hub/fed/plugin.py",
+        "hub/fed/envelope.py",
+        "hub/fed/mcp.py"
+      ]
     },
     "DP003": {
-      "status": "unreviewed",
-      "rationale": "",
-      "evidence": []
+      "status": "pass",
+      "rationale": "External effects are bounded. Federation connect uses wait_for(20) and connect_timeout=5 with backoff capped at 30 s; JetStream publish has timeout=5 and the outbox row is marked sent only after the ack; consumers use explicit ack, ack_wait=60 and max_deliver=20, and ingest is idempotent on the message id. git calls have timeout=60 and tmux calls timeout=10. The review found that the single-operator Bridge's NatsClient.connect had no timeout on the TCP connect or the INFO line; this change bounds both (CONNECT_TIMEOUT_S=5, a TimeoutError that run()'s backoff loop catches), covered by BridgeConnectBounded in hub/tests/test_hub_offline.py.",
+      "evidence": [
+        "hub/bridge.py",
+        "hub/fed/runtime.py",
+        "hub/fed/conn.py",
+        "hub/transport.py",
+        "hub/tests/test_hub_offline.py"
+      ]
     },
     "DP004": {
-      "status": "unreviewed",
-      "rationale": "",
-      "evidence": []
+      "status": "pass",
+      "rationale": "The hub socket identifies callers by peer uid (SO_PEERCRED/LOCAL_PEERCRED) and process ancestry; the TCP listener is loopback-only, needs a token compared with hmac.compare_digest, and ignores a claimed 'as'. Secrets are written 0600 under umask 077. Federation takes the sender from subject token 3 and the server enforces it with per-user publish ACLs; redact.scrub blocks or redacts secrets outbound and privileged_gate fails closed. The review found that the dashboard checked Origin on writes but not Host on any request, so a DNS-rebinding page could read /api/stream/<agent> terminal content; this change adds Handler.host_allowed (421 for any Host other than its own 127.0.0.1/localhost port), covered by dashboard/test_host_guard.py. The hub/fed/demo.py and test strings that look like keys are fake redaction inputs.",
+      "evidence": [
+        "hub/server.py",
+        "hub/fed/guard.py",
+        "hub/fed/redact.py",
+        "dashboard/server.py",
+        "dashboard/test_host_guard.py"
+      ]
     },
     "DP005": {
-      "status": "unreviewed",
-      "rationale": "",
-      "evidence": []
+      "status": "pass",
+      "rationale": "Behaviour is covered by suites that were run for this review on macOS (Python 3.14.8, 2026-10-08): hub.tests test_hub_offline, test_fed_unit, test_nats_federation and test_fed_live 96/96 against a throwaway operator-mode nats-server; dashboard/test_fed_panel.py 5/5; dashboard/test_host_guard.py 4/4; and the whole dashboard gate dashboard/run_tests.sh, all suites passed, with the Playwright e2e suite skipped because Playwright is not installed. The one prior failure (test_retire_courier..., recorded as pre-existing in FEDERATION.md 12.1) was a macOS-only test bug, the harness stub /bin/true, and is fixed. The kind-cluster variant (AGENTMUX_FED_KIND=1) was not re-run for this review; its 2026-10-07 result is in FEDERATION.md 12.1. .github/workflows/tests.yml now runs the syntax checks and the standalone suites in CI; the tmux-dependent dashboard gate stays local.",
+      "evidence": [
+        "hub/tests/test_hub_offline.py",
+        "hub/tests/test_fed_unit.py",
+        "hub/tests/test_fed_live.py",
+        "dashboard/run_tests.sh",
+        ".github/workflows/tests.yml",
+        "docs/FEDERATION.md"
+      ]
     },
     "DP006": {
-      "status": "unreviewed",
-      "rationale": "",
-      "evidence": []
+      "status": "pass",
+      "rationale": "Operators see federation state through 'agentmux hub fed status/audit/quarantine'; Runtime.last_error records connect failures and every guard decision lands in fed_audit. The dashboard Federation panel shows peers, holds (alert after hold_alert_s=300) and a kill switch that survives restarts, with 'resume' to recover. Store._migrate takes a pre-migration backup. Targets are measurable: ack_wait 60 s, presence TTL 90 s, and orchestration scoreboards in evals/orchestrations/SCOREBOARD.md.",
+      "evidence": [
+        "hub/fed/runtime.py",
+        "hub/fed/ledger.py",
+        "dashboard/fed_panel.py",
+        "evals/orchestrations/SCOREBOARD.md"
+      ]
     },
     "DP007": {
-      "status": "unreviewed",
-      "rationale": "",
-      "evidence": []
+      "status": "pass",
+      "rationale": "The core hub is stdlib-only. Federation dependencies are declared in hub/requirements.txt and, after this change, every transitive is pinned exactly in hub/requirements.lock, which 'agentmux hub fed setup' and CI install as a constraints file. The Helm chart is pinned to nats/nats 2.15.0 and paho is vendored. The review found no build identity; this change adds VERSION (0.32.0) and 'agentmux version', which prints it with the checkout's git describe. Toolchains are recorded in project.json. Gap noted, not a violation: the lock pins versions without hashes, and the kind node image in deploy/nats/kind.yaml follows the kind release default.",
+      "evidence": [
+        "hub/requirements.txt",
+        "hub/requirements.lock",
+        "VERSION",
+        "agentmux.sh",
+        "deploy/nats/up.sh"
+      ]
     },
     "DP008": {
-      "status": "unreviewed",
-      "rationale": "",
-      "evidence": []
+      "status": "pass",
+      "rationale": "Store._migrate applies ordered, all-or-nothing migrations guarded by application_id and PRAGMA user_version, with a backup first; federation columns (origin_peer, fed_flags) are added with ALTER TABLE ADD COLUMN, never a table rebuild. The envelope carries v=2, and the single-operator Bridge and nats_url behaviour are unchanged (FEDERATION.md); test_hub_offline covers the existing verbs and courier compatibility. A future envelope v3 needs an explicit migration plan, because validate() rejects any other version.",
+      "evidence": [
+        "hub/store.py",
+        "hub/fed/envelope.py",
+        "hub/tests/test_hub_offline.py",
+        "docs/FEDERATION.md"
+      ]
     },
     "DP009": {
-      "status": "unreviewed",
+      "status": "not-applicable",
+      "reason": "The project declares only the backend surface. The dashboard is a local operator console served by dashboard/server.py on 127.0.0.1, scoped with the backend by owner decision on 2026-10-08, not a separate web application.",
       "rationale": "",
       "evidence": []
     },
     "DP010": {
-      "status": "unreviewed",
+      "status": "not-applicable",
+      "reason": "No CODESYS surface: the repository contains no CODESYS project, ST source or controller target.",
       "rationale": "",
       "evidence": []
     },
     "DP011": {
-      "status": "unreviewed",
+      "status": "not-applicable",
+      "reason": "The project declares only the backend surface. The dashboard is a local operator console served by dashboard/server.py on 127.0.0.1, scoped with the backend by owner decision on 2026-10-08, so the atomic src/components structure does not apply.",
       "rationale": "",
       "evidence": []
     }

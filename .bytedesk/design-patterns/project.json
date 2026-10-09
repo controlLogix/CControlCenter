@@ -1,21 +1,76 @@
 {
   "baselineVersion": "1.1.0",
   "initializedBy": "session-start",
-  "owner": "",
-  "surfaces": [],
-  "languages": [],
+  "owner": "Nick Klute; Ryan Helms",
+  "surfaces": [
+    "backend"
+  ],
+  "languages": [
+    "Python",
+    "Bash",
+    "JavaScript"
+  ],
   "frontendRoots": [],
   "architecture": {
-    "decision": "",
-    "rationale": "",
-    "alternatives": [],
-    "constraints": []
+    "decision": "Each person's agentmux hub stays the local owner of its own data: one hub process per machine owns an SQLite hub.db and the local socket protocol (docs/PROTOCOL.md). Cross-user collaboration is a separate, opt-in layer (hub/fed/) in which hubs connect as plain NATS clients, not leaf nodes, to one hosted JetStream cluster (deploy/nats, Helm chart nats 2.15.0) with operator/account/user JWTs. Messages, work, board, knowledge and code are delivered through a transactional outbox and an idempotent inbox, one plugin per capability behind one guard pipeline. The dashboard is a local operator console served by dashboard/server.py on 127.0.0.1 and is scoped as part of the backend surface, not as a separate web application.",
+    "rationale": "Agents keep the local hub protocol and work offline; crossing to another person must not change how an agent posts or claims. The NATS server enforces sender identity (per-user publish ACLs on subject token 3), and per-peer trust plus per-repo opt-in keep data local by default (docs/FEDERATION.md sections 3, 4, 6 and 8).",
+    "alternatives": [
+      "A leaf node per machine: rejected, because JetStream plus the local outbox already give offline buffering and a leaf node adds a server per machine (docs/FEDERATION.md A8).",
+      "One shared broker for every hub with no local store: rejected, because it removes local offline operation and per-person trust (.context/design-patterns.md FED-01).",
+      "Publishing directly from the verb without an outbox: rejected, because it loses messages on disconnect (.context/design-patterns.md FED-02).",
+      "Core NATS plus local outboxes only, without JetStream: rejected, because nothing survives the receiver being offline (.context/design-patterns.md FED-03)."
+    ],
+    "constraints": [
+      "The core hub stays stdlib-only; nats-py and its transitives live only in .venv, pinned by hub/requirements.lock (docs/FEDERATION.md A4).",
+      "The circle (one NATS account) is the confidentiality boundary; per-repo peers limit only sending and mirroring (docs/FEDERATION.md A7, 7.4).",
+      "Subject tokens are [a-z0-9_] and the sender is taken from subject token 3 only, never from the payload (docs/FEDERATION.md 4-5, docs/PROTOCOL.md 11).",
+      "Remote work never triggers privileged tools without operator approval (docs/FEDERATION.md F11, 7.2).",
+      "One circle per hub in v1 (docs/FEDERATION.md A5). The harness runs on macOS and WSL from one checkout and needs tmux 3.x and bash 5."
+    ]
   },
-  "toolchains": [],
+  "toolchains": [
+    {
+      "name": "python",
+      "version": "3.14.8"
+    },
+    {
+      "name": "bash",
+      "version": "5.3.20"
+    },
+    {
+      "name": "node (governance gate only)",
+      "version": "24.21.0"
+    },
+    {
+      "name": "nats-server",
+      "version": "2.15.0"
+    },
+    {
+      "name": "nsc",
+      "version": "2.15.0"
+    },
+    {
+      "name": "helm chart nats/nats",
+      "version": "2.15.0"
+    }
+  ],
   "verification": {
-    "build": [],
-    "test": []
+    "build": [
+      "bash dashboard/syntax_check.sh",
+      "python3 -m py_compile hub/*.py hub/fed/*.py hub/fed/plugins/*.py hub/fed/hooks/*.py",
+      "agentmux hub fed setup"
+    ],
+    "test": [
+      ".venv/bin/python -m unittest hub.tests.test_hub_offline hub.tests.test_fed_unit hub.tests.test_nats_federation hub.tests.test_fed_live",
+      "python3 dashboard/test_fed_panel.py",
+      "python3 dashboard/test_host_guard.py",
+      "bash dashboard/run_tests.sh"
+    ]
   },
-  "decisionEvidence": [],
+  "decisionEvidence": [
+    "docs/FEDERATION.md",
+    "docs/PROTOCOL.md",
+    ".context/design-patterns.md"
+  ],
   "adoptionCommit": "f4c84b09b187f7e895d1406fb5a8f885d5845e35"
 }

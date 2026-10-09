@@ -1,0 +1,33 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: read
+
+# The suites that need no tmux session, agent CLI or NATS server. The live federation
+# suites (test_fed_live, test_nats_federation) skip themselves without nats-server/nsc,
+# and dashboard/run_tests.sh needs tmux and spawned agents, so both of those are run
+# locally (docs/FEDERATION.md 12.1 records those runs).
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      - name: Syntax
+        run: |
+          bash dashboard/syntax_check.sh
+          python -m py_compile hub/*.py hub/fed/*.py hub/fed/plugins/*.py hub/fed/hooks/*.py
+      - name: Federation dependencies (pinned by hub/requirements.lock)
+        run: python -m pip install -r hub/requirements.txt -c hub/requirements.lock
+      - name: Hub and federation
+        run: python -m unittest -v hub.tests.test_hub_offline hub.tests.test_fed_unit hub.tests.test_nats_federation hub.tests.test_fed_live
+      - name: Dashboard
+        run: |
+          python dashboard/test_fed_panel.py
+          python dashboard/test_host_guard.py

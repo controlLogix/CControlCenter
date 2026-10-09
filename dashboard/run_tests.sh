@@ -270,6 +270,7 @@ run smoke.sh      bash /dev/fd/3 3< <(tr -d '\r' < dashboard/smoke.sh)
 # written - a suite nothing invokes is decoration, which is the same standard
 # test_testlib.sh is held to above.
 run test_board.py python3 dashboard/test_board.py
+run test_host_guard.py python3 dashboard/test_host_guard.py
 run test_dispatch.py python3 dashboard/test_dispatch.py
 run test_sandbox_coordination.py python3 dashboard/test_sandbox_coordination.py
 # The Runs read surface and the human approval gate in front of completion.

@@ -1155,6 +1155,9 @@ class Handler(BaseHTTPRequestHandler):
         # on a kept-alive connection.
         self.body_consumed = False
         try:
+            if not self.host_allowed():
+                self.send_json(421, {"error": "misdirected request: unknown Host"})
+                return
             self.route()
         except (BrokenPipeError, ConnectionResetError):
             pass
@@ -1187,6 +1190,22 @@ class Handler(BaseHTTPRequestHandler):
         """
         port = self.server.server_address[1]
         return (f"http://127.0.0.1:{port}", f"http://localhost:{port}")
+
+    def host_allowed(self):
+        """Refuse any request whose Host is not this server's own loopback name.
+
+        The Origin check only guards writes. Reads such as /api/stream/<agent> return
+        live terminal content, and binding 127.0.0.1 does not stop DNS rebinding: a
+        page on evil.example re-points its own name at 127.0.0.1, and the browser then
+        treats this server as same-origin with that page and lets it read the
+        response. The browser still sends `Host: evil.example:8787`, so allowing only
+        our own names closes that path. A missing Host (HTTP/1.0 tooling) is allowed,
+        because a browser always sends one.
+        """
+        hosts = self.headers.get_all("Host", [])
+        if not hosts:
+            return True
+        return len(hosts) == 1 and f"http://{hosts[0].strip().lower()}" in self.allowed_origins()
 
     def read_cc_body(self, max_bytes=1024):
         """Apply the same JSON, origin, length and timeout guards as resize.

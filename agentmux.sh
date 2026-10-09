@@ -656,6 +656,7 @@ agentmux - drive other agent CLIs in tmux panes
   attach <name>                print the command to watch the agent live
   exec   <text...> [--cwd DIR] [--model M]
                                headless one-shot "codex exec", no tmux
+  version                      print VERSION and the checkout's commit
 
 Spawned codex/claude agents run with the provider's master permission bypass by
 default (unrestricted). Set AGENTMUX_NO_BYPASS=1 to spawn sandboxed instead.
@@ -3015,6 +3016,13 @@ case "${1:-}" in
   hub)    shift
           _self="$(agentmux_self)" || die "hub: cannot locate the agentmux checkout"
           exec python3 "$(dirname "$_self")/hub/cli.py" "$@" ;;
+  # The build a peer is running: VERSION plus the checkout's commit, so two machines in
+  # one circle can tell whether they run the same harness.
+  version|--version)
+          _self="$(agentmux_self)" || die "version: cannot locate the agentmux checkout"
+          _repo="$(dirname "$_self")"
+          printf 'agentmux %s (%s)\n' "$(tr -d '\r\n' < "$_repo/VERSION" 2>/dev/null || echo unknown)" \
+            "$(git -C "$_repo" describe --always --dirty 2>/dev/null || echo no-git)" ;;
   ""|-h|--help|help) usage ;;
   *) die "unknown command '$1' (try: agentmux help)" ;;
 esac

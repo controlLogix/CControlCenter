@@ -6,6 +6,7 @@ Each test names the failure class (C#) or requirement (R-*) it pins.
 import json
 import multiprocessing as mp
 import os
+import shutil
 import sys
 import tempfile
 import time
@@ -516,7 +517,8 @@ class ServerAPI(unittest.TestCase):
         with open(os.path.join(cls.home, "hub", "config.toml"), "w") as f:
             f.write(f"tcp_port = {cls.port}\n")
         env = {**os.environ, "AGENTMUX_HOME": cls.home, "AGENTMUX_SOCKET": "hubapi-test-none",
-               "AGENTMUX_BIN": "/bin/true"}         # harness calls (courier stop) succeed, touch nothing
+               "AGENTMUX_BIN": shutil.which("true")}  # harness calls (courier stop) succeed, touch nothing;
+                                                        # /usr/bin/true on macOS, /bin/true on Linux
         root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         cls.proc = subprocess.Popen([sys.executable, os.path.join(root, "hub", "server.py")], env=env,
                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
@@ -722,6 +724,36 @@ class MenuByLabel(unittest.TestCase):
         rc = deliver.deliver_line(t, profiles.get("claude"), "c", "c", "x")
         self.assertEqual(rc.outcome, "blocked")
         self.assertNotIn("Enter", [k for _, kind, k in t.sent if kind == "key"])
+
+
+class BridgeConnectBounded(unittest.TestCase):
+    def test_silent_endpoint_times_out_instead_of_hanging(self):  # a black-holed NATS must not stall the outbox
+        import asyncio
+        from hub.bridge import NatsClient
+
+        async def go():
+            held = []                                          # keep the socket open: silent, not closed
+
+            async def silent(r, w):
+                held.append(w)
+                await asyncio.sleep(10)
+
+            server = await asyncio.start_server(silent, "127.0.0.1", 0)  # accepts, never sends INFO
+            port = server.sockets[0].getsockname()[1]
+            nc = NatsClient(f"nats://127.0.0.1:{port}", "t")
+            t0 = time.monotonic()
+            try:
+                with self.assertRaises(TimeoutError):  # an OSError, so run()'s retry loop catches it
+                    await nc.connect(timeout=0.3)
+            finally:
+                if nc.writer:
+                    nc.writer.close()
+                for w in held:
+                    w.close()
+                server.close()
+            return time.monotonic() - t0
+
+        self.assertLess(asyncio.run(go()), 5)
 
 
 if __name__ == "__main__":

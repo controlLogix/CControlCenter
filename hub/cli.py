@@ -456,8 +456,9 @@ def fed_setup():
     venv = os.path.join(REPO, ".venv")
     if not os.path.exists(os.path.join(venv, "bin", "python")):
         subprocess.run([sys.executable, "-m", "venv", venv], check=True)
-    subprocess.run([os.path.join(venv, "bin", "pip"), "install", "-q", "-r",
-                    os.path.join(REPO, "hub", "requirements.txt")], check=True)
+    subprocess.run([os.path.join(venv, "bin", "pip"), "install", "-q",
+                    "-r", os.path.join(REPO, "hub", "requirements.txt"),
+                    "-c", os.path.join(REPO, "hub", "requirements.lock")], check=True)
     print(f"federation dependencies installed in {venv}; restart the hub (agentmux hub stop; agentmux hub start)")
 
 

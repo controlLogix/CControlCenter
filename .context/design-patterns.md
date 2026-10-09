@@ -6,7 +6,7 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
 ```json
 {
   "schemaVersion": "1.0.0",
-  "lastReviewed": "2026-10-07",
+  "lastReviewed": "2026-10-08",
   "entries": [
     {
       "id": "FED-01",

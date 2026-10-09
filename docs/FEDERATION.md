@@ -365,6 +365,7 @@ socket (like the Hub view):
 | `dashboard/test_fed_panel.py` | fake hub socket | 5/5 |
 | `dashboard/run_tests.sh` (whole dashboard gate) | macOS | all suites passed (Playwright e2e skipped: not installed) |
 | `hub/tests/test_hub_offline.py` + `test_nats_federation.py` | — | 59/60. `test_retire_courier_imports_only_the_undelivered_backlog_once` fails on a clean `HEAD` checkout too (pre-existing, macOS) |
+| re-run 2026-10-08, after the governance review | macOS, Python 3.14.8, `.venv` from `hub/requirements.lock` | `test_hub_offline` + `test_fed_unit` + `test_nats_federation` + `test_fed_live` 96/96; `test_fed_panel` 5/5; `test_host_guard` 4/4; `dashboard/run_tests.sh` all suites passed (Playwright e2e skipped). The courier failure above was the test stubbing the harness with `/bin/true`, which macOS does not have; it now uses `shutil.which("true")` |
 | `deploy/nats/demo.sh run` | kind cluster | every step ✓, 3.7 s |
 | `deploy/nats/demo.sh live` | kind cluster, **two real Claude Code sessions** (nick's lead, alice's worker) | ✓ in about 60 s. nick's Claude carded SH-2 and federated the work. alice's Claude implemented `slugify` plus a 5-assert test, shared the ref, a finding and a handoff, and closed the item. nick's Claude fetched and verified the sha, ran the tests, commented and replied. No human relay. The first live run found three bugs (cross-name addresses, duplicate shares on a bad `--to`, assignee naming), and all three were fixed and covered by tests |
 
