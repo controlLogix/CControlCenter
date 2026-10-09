@@ -1,6 +1,6 @@
 {
   "reviewer": "Codex, P01 controlled execution and preservation checkpoint review, 2026-10-09; phase gate remains open",
-  "sourceDigest": "b898f3de4e34d47d4094737526d5dfcc88aa52aa041432149e3abbc0afd8e7a9",
+  "sourceDigest": "f8dcd2e42167507a654641445358df9db5eeab9d43d94f202ff2c0e50dee092c",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -425,6 +425,19 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/preservation/.gitattributes"
       ],
       "rationale": "The global log ignore rule excluded captured stdout files from the prior commit. Explicitly retain the reviewed disposable test logs, including initial attribution failure. Local .gitattributes preserves exact log bytes; verified staged hashes against every referenced logSha256 in both reports. No product source or test behavior changes."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "Cross-platform review digest correction",
+      "previousReviewer": "Codex, P01 controlled execution and preservation checkpoint review, 2026-10-09; phase gate remains open",
+      "previousSourceDigest": "b898f3de4e34d47d4094737526d5dfcc88aa52aa041432149e3abbc0afd8e7a9",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/conformance-admission-macos-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/conformance-admission-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/gateway-result.json"
+      ],
+      "rationale": "CI run38001678164 rejected the digest because three new report worktree files had CRLF while Git stored LF. Verified each normalized file exactly equals its committed blob and parsed JSON is unchanged, then restored exact committed bytes locally. No test result, tested input, recorded source hash or implementation changed. Local and CI now review the same bytes; the failed run remains historical evidence."
     }
   ],
   "rules": {
