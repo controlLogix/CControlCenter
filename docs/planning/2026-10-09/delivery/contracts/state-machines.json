@@ -1,0 +1,774 @@
+{
+  "schemaVersion": "0.1.0",
+  "status": "P00-review-draft",
+  "rules": [
+    "Connectivity is a separate observation; link loss never releases a reservation.",
+    "Guard names specify required evidence; declaring a guard true is not production proof or authorization.",
+    "No provider, Jev result or delivery acknowledgment accepts a task.",
+    "No unspecified transition is allowed; clients cannot select a from-state without the owner current revision.",
+    "Every transition also requires an authenticated actor bound to the owner scope and a conditional commit against the current entity revision. Actor role strings supplied by a client never prove this authority.",
+    "Kernel resource classes are reserved. Ordinary capability requests may only subscribe to kernel-status. Broker permissions and the protected assembly must enforce this independently of manifest validation.",
+    "Private children receive newly scoped service handles and grants bound to the exact parent grant revision. Independent references retain independent lifecycle and authority.",
+    "Cancellation remains recorded through unknown outcomes. Resuming an uncertain attempt requires proof that no cancellation remains pending."
+  ],
+  "machines": {
+    "plugin": {
+      "owner": "ordinary-plugin-supervisor; kernel lifecycle uses protected identity only",
+      "initial": "registered",
+      "states": [
+        "registered",
+        "validated",
+        "starting",
+        "ready",
+        "degraded",
+        "draining",
+        "stopped",
+        "failed"
+      ],
+      "transitions": [
+        {
+          "from": "registered",
+          "event": "validate",
+          "to": "validated",
+          "actorRole": "supervisor",
+          "requires": [
+            "package_provenance_valid",
+            "compatible_dependencies",
+            "approved_capabilities"
+          ]
+        },
+        {
+          "from": "validated",
+          "event": "start",
+          "to": "starting",
+          "actorRole": "supervisor",
+          "requires": [
+            "scoped_context_issued"
+          ]
+        },
+        {
+          "from": "starting",
+          "event": "health_ready",
+          "to": "ready",
+          "actorRole": "supervisor",
+          "requires": [
+            "health_contract_passed"
+          ]
+        },
+        {
+          "from": "starting",
+          "event": "start_failed",
+          "to": "failed",
+          "actorRole": "supervisor",
+          "requires": [
+            "failure_recorded"
+          ]
+        },
+        {
+          "from": "ready",
+          "event": "health_lost",
+          "to": "degraded",
+          "actorRole": "supervisor",
+          "requires": [
+            "observation_recorded"
+          ]
+        },
+        {
+          "from": "degraded",
+          "event": "health_restored",
+          "to": "ready",
+          "actorRole": "supervisor",
+          "requires": [
+            "health_contract_passed"
+          ]
+        },
+        {
+          "from": "ready",
+          "event": "drain",
+          "to": "draining",
+          "actorRole": "supervisor",
+          "requires": [
+            "authorized_stop"
+          ]
+        },
+        {
+          "from": "degraded",
+          "event": "drain",
+          "to": "draining",
+          "actorRole": "supervisor",
+          "requires": [
+            "authorized_stop"
+          ]
+        },
+        {
+          "from": "draining",
+          "event": "drained",
+          "to": "stopped",
+          "actorRole": "supervisor",
+          "requires": [
+            "inflight_reconciled"
+          ]
+        },
+        {
+          "from": "draining",
+          "event": "drain_timeout",
+          "to": "failed",
+          "actorRole": "supervisor",
+          "requires": [
+            "uncertain_work_preserved"
+          ]
+        },
+        {
+          "from": "failed",
+          "event": "retry",
+          "to": "starting",
+          "actorRole": "supervisor",
+          "requires": [
+            "restart_budget_remaining",
+            "scoped_context_issued"
+          ]
+        },
+        {
+          "from": "stopped",
+          "event": "start",
+          "to": "starting",
+          "actorRole": "supervisor",
+          "requires": [
+            "scoped_context_issued"
+          ]
+        },
+        {
+          "from": "ready",
+          "event": "process_failed",
+          "to": "failed",
+          "actorRole": "supervisor",
+          "requires": [
+            "failure_recorded",
+            "uncertain_work_preserved"
+          ]
+        },
+        {
+          "from": "degraded",
+          "event": "process_failed",
+          "to": "failed",
+          "actorRole": "supervisor",
+          "requires": [
+            "failure_recorded",
+            "uncertain_work_preserved"
+          ]
+        }
+      ]
+    },
+    "task": {
+      "owner": "origin task owner",
+      "initial": "draft",
+      "states": [
+        "draft",
+        "ready",
+        "reserved",
+        "review_pending",
+        "changes_requested",
+        "cancel_requested",
+        "cancelled",
+        "accepted",
+        "failed"
+      ],
+      "transitions": [
+        {
+          "from": "draft",
+          "event": "approve_plan",
+          "to": "ready",
+          "actorRole": "origin_owner",
+          "requires": [
+            "plan_authorized",
+            "requirements_versioned"
+          ]
+        },
+        {
+          "from": "ready",
+          "event": "reserve",
+          "to": "reserved",
+          "actorRole": "origin_owner",
+          "requires": [
+            "expected_version_matches",
+            "executor_selected",
+            "grant_recorded",
+            "effect_intent_committed"
+          ]
+        },
+        {
+          "from": "reserved",
+          "event": "result_received",
+          "to": "review_pending",
+          "actorRole": "origin_owner",
+          "requires": [
+            "executor_and_grant_match",
+            "repository_version_verified",
+            "artifact_bytes_verified",
+            "result_recorded"
+          ]
+        },
+        {
+          "from": "review_pending",
+          "event": "accept",
+          "to": "accepted",
+          "actorRole": "origin_approver",
+          "requires": [
+            "acceptance_authorized",
+            "required_evidence_passed",
+            "task_version_matches"
+          ]
+        },
+        {
+          "from": "review_pending",
+          "event": "request_changes",
+          "to": "changes_requested",
+          "actorRole": "origin_approver",
+          "requires": [
+            "review_recorded"
+          ]
+        },
+        {
+          "from": "changes_requested",
+          "event": "schedule_revision",
+          "to": "ready",
+          "actorRole": "origin_owner",
+          "requires": [
+            "prior_attempt_reconciled",
+            "new_task_version"
+          ]
+        },
+        {
+          "from": "ready",
+          "event": "cancel",
+          "to": "cancelled",
+          "actorRole": "origin_owner",
+          "requires": [
+            "cancellation_authorized",
+            "no_execution_grant"
+          ]
+        },
+        {
+          "from": "reserved",
+          "event": "cancel",
+          "to": "cancel_requested",
+          "actorRole": "origin_owner",
+          "requires": [
+            "cancellation_authorized",
+            "cancellation_intent_committed"
+          ]
+        },
+        {
+          "from": "cancel_requested",
+          "event": "cancel_confirmed",
+          "to": "cancelled",
+          "actorRole": "origin_owner",
+          "requires": [
+            "executor_stop_or_fence_verified",
+            "effects_reconciled"
+          ]
+        },
+        {
+          "from": "reserved",
+          "event": "reassign",
+          "to": "ready",
+          "actorRole": "origin_owner",
+          "requires": [
+            "explicit_reassignment_approved",
+            "old_execution_fenced_or_uncertainty_accepted",
+            "new_ownership_epoch",
+            "prior_reservation_preserved"
+          ]
+        },
+        {
+          "from": "reserved",
+          "event": "terminal_failure",
+          "to": "failed",
+          "actorRole": "origin_owner",
+          "requires": [
+            "owner_failure_decision",
+            "effects_reconciled"
+          ]
+        },
+        {
+          "from": "reserved",
+          "event": "link_lost",
+          "to": "reserved",
+          "actorRole": "origin_owner",
+          "requires": [
+            "observation_recorded"
+          ]
+        },
+        {
+          "from": "cancel_requested",
+          "event": "result_received",
+          "to": "cancel_requested",
+          "actorRole": "origin_owner",
+          "requires": [
+            "executor_and_grant_match",
+            "result_recorded",
+            "cancellation_still_pending"
+          ]
+        }
+      ]
+    },
+    "delegation": {
+      "owner": "origin delegation owner; receiver owns its acceptance/execution record",
+      "initial": "offered",
+      "states": [
+        "offered",
+        "approval_pending",
+        "acceptance_unknown",
+        "accepted_reserved",
+        "executing",
+        "result_submitted",
+        "accepted_by_origin",
+        "changes_requested",
+        "cancel_requested",
+        "cancelled",
+        "rejected"
+      ],
+      "transitions": [
+        {
+          "from": "offered",
+          "event": "policy_review",
+          "to": "approval_pending",
+          "actorRole": "receiving_policy",
+          "requires": [
+            "not_hard_denied",
+            "review_required"
+          ]
+        },
+        {
+          "from": "offered",
+          "event": "accept",
+          "to": "accepted_reserved",
+          "actorRole": "receiving_owner",
+          "requires": [
+            "not_hard_denied",
+            "inside_approved_rules",
+            "origin_reservation_and_grant_verified",
+            "receiver_acceptance_committed"
+          ]
+        },
+        {
+          "from": "approval_pending",
+          "event": "approve",
+          "to": "accepted_reserved",
+          "actorRole": "receiving_approver",
+          "requires": [
+            "not_hard_denied",
+            "human_approval_valid",
+            "origin_reservation_and_grant_verified",
+            "receiver_acceptance_committed"
+          ]
+        },
+        {
+          "from": "offered",
+          "event": "reject",
+          "to": "rejected",
+          "actorRole": "receiving_policy",
+          "requires": [
+            "hard_denied_or_declined"
+          ]
+        },
+        {
+          "from": "approval_pending",
+          "event": "reject",
+          "to": "rejected",
+          "actorRole": "receiving_approver",
+          "requires": [
+            "hard_denied_or_declined"
+          ]
+        },
+        {
+          "from": "offered",
+          "event": "reply_lost",
+          "to": "acceptance_unknown",
+          "actorRole": "origin_owner",
+          "requires": [
+            "original_operation_preserved"
+          ]
+        },
+        {
+          "from": "acceptance_unknown",
+          "event": "reconcile_accepted",
+          "to": "accepted_reserved",
+          "actorRole": "origin_owner",
+          "requires": [
+            "matching_receiver_acceptance"
+          ]
+        },
+        {
+          "from": "acceptance_unknown",
+          "event": "reconcile_rejected",
+          "to": "rejected",
+          "actorRole": "origin_owner",
+          "requires": [
+            "no_execution_authority_verified"
+          ]
+        },
+        {
+          "from": "accepted_reserved",
+          "event": "start",
+          "to": "executing",
+          "actorRole": "receiving_owner",
+          "requires": [
+            "current_or_valid_offline_grant",
+            "execution_intent_committed"
+          ]
+        },
+        {
+          "from": "executing",
+          "event": "submit",
+          "to": "result_submitted",
+          "actorRole": "receiving_owner",
+          "requires": [
+            "terminal_attempt_recorded",
+            "durable_result_intent"
+          ]
+        },
+        {
+          "from": "result_submitted",
+          "event": "accept",
+          "to": "accepted_by_origin",
+          "actorRole": "origin_approver",
+          "requires": [
+            "executor_and_grant_match",
+            "required_evidence_passed",
+            "acceptance_authorized"
+          ]
+        },
+        {
+          "from": "result_submitted",
+          "event": "request_changes",
+          "to": "changes_requested",
+          "actorRole": "origin_approver",
+          "requires": [
+            "review_recorded"
+          ]
+        },
+        {
+          "from": "accepted_reserved",
+          "event": "cancel",
+          "to": "cancel_requested",
+          "actorRole": "origin_owner",
+          "requires": [
+            "cancellation_authorized",
+            "cancellation_intent_committed"
+          ]
+        },
+        {
+          "from": "executing",
+          "event": "cancel",
+          "to": "cancel_requested",
+          "actorRole": "origin_owner",
+          "requires": [
+            "cancellation_authorized",
+            "cancellation_intent_committed"
+          ]
+        },
+        {
+          "from": "cancel_requested",
+          "event": "cancel_confirmed",
+          "to": "cancelled",
+          "actorRole": "origin_owner",
+          "requires": [
+            "executor_stop_or_fence_verified",
+            "effects_reconciled"
+          ]
+        },
+        {
+          "from": "accepted_reserved",
+          "event": "link_lost",
+          "to": "accepted_reserved",
+          "actorRole": "origin_owner",
+          "requires": [
+            "observation_recorded"
+          ]
+        },
+        {
+          "from": "executing",
+          "event": "link_lost",
+          "to": "executing",
+          "actorRole": "receiving_owner",
+          "requires": [
+            "observation_recorded"
+          ]
+        },
+        {
+          "from": "cancel_requested",
+          "event": "submit",
+          "to": "cancel_requested",
+          "actorRole": "receiving_owner",
+          "requires": [
+            "terminal_attempt_recorded",
+            "durable_result_intent",
+            "cancellation_still_pending"
+          ]
+        }
+      ]
+    },
+    "attempt": {
+      "owner": "receiving execution owner, including local execution",
+      "initial": "allocated",
+      "states": [
+        "allocated",
+        "running",
+        "completion_reported",
+        "validated",
+        "failed",
+        "cancel_requested",
+        "cancelled",
+        "effect_uncertain"
+      ],
+      "transitions": [
+        {
+          "from": "allocated",
+          "event": "start",
+          "to": "running",
+          "actorRole": "execution_owner",
+          "requires": [
+            "current_or_valid_offline_grant",
+            "isolated_workspace_ready",
+            "attempt_identity_bound"
+          ]
+        },
+        {
+          "from": "running",
+          "event": "provider_done",
+          "to": "completion_reported",
+          "actorRole": "execution_owner",
+          "requires": [
+            "provider_receipt_recorded"
+          ]
+        },
+        {
+          "from": "completion_reported",
+          "event": "validate",
+          "to": "validated",
+          "actorRole": "execution_owner",
+          "requires": [
+            "required_evidence_passed",
+            "durable_result_intent"
+          ]
+        },
+        {
+          "from": "running",
+          "event": "provider_failed",
+          "to": "failed",
+          "actorRole": "execution_owner",
+          "requires": [
+            "failure_evidence",
+            "durable_result_intent",
+            "effects_reconciled"
+          ]
+        },
+        {
+          "from": "completion_reported",
+          "event": "validation_failed",
+          "to": "failed",
+          "actorRole": "execution_owner",
+          "requires": [
+            "failure_evidence",
+            "durable_result_intent",
+            "effects_reconciled"
+          ]
+        },
+        {
+          "from": "running",
+          "event": "cancel",
+          "to": "cancel_requested",
+          "actorRole": "execution_owner",
+          "requires": [
+            "cancellation_authorized",
+            "cancellation_intent_committed"
+          ]
+        },
+        {
+          "from": "cancel_requested",
+          "event": "stop_confirmed",
+          "to": "cancelled",
+          "actorRole": "execution_owner",
+          "requires": [
+            "executor_stop_or_fence_verified",
+            "effects_reconciled",
+            "durable_result_intent"
+          ]
+        },
+        {
+          "from": "cancel_requested",
+          "event": "outcome_unknown",
+          "to": "effect_uncertain",
+          "actorRole": "execution_owner",
+          "requires": [
+            "uncertainty_recorded"
+          ]
+        },
+        {
+          "from": "running",
+          "event": "connection_lost",
+          "to": "effect_uncertain",
+          "actorRole": "execution_owner",
+          "requires": [
+            "uncertainty_recorded"
+          ]
+        },
+        {
+          "from": "effect_uncertain",
+          "event": "reconcile_running",
+          "to": "running",
+          "actorRole": "execution_owner",
+          "requires": [
+            "same_attempt_verified",
+            "current_or_valid_offline_grant",
+            "no_pending_cancellation"
+          ]
+        },
+        {
+          "from": "effect_uncertain",
+          "event": "reconcile_terminal",
+          "to": "completion_reported",
+          "actorRole": "execution_owner",
+          "requires": [
+            "same_attempt_verified",
+            "provider_receipt_recorded"
+          ]
+        },
+        {
+          "from": "effect_uncertain",
+          "event": "reconcile_cancel_pending",
+          "to": "cancel_requested",
+          "actorRole": "execution_owner",
+          "requires": [
+            "same_attempt_verified",
+            "cancellation_still_pending"
+          ]
+        },
+        {
+          "from": "effect_uncertain",
+          "event": "reconcile_cancelled",
+          "to": "cancelled",
+          "actorRole": "execution_owner",
+          "requires": [
+            "same_attempt_verified",
+            "executor_stop_or_fence_verified",
+            "effects_reconciled",
+            "durable_result_intent"
+          ]
+        },
+        {
+          "from": "allocated",
+          "event": "cancel",
+          "to": "cancelled",
+          "actorRole": "execution_owner",
+          "requires": [
+            "cancellation_authorized",
+            "execution_not_started_verified",
+            "durable_result_intent"
+          ]
+        }
+      ]
+    },
+    "effect": {
+      "owner": "domain owner with a scoped dispatcher",
+      "initial": "intent_committed",
+      "states": [
+        "intent_committed",
+        "sending",
+        "outcome_unknown",
+        "confirmed",
+        "failed",
+        "reconciliation_required"
+      ],
+      "transitions": [
+        {
+          "from": "intent_committed",
+          "event": "dispatch",
+          "to": "sending",
+          "actorRole": "effect_owner",
+          "requires": [
+            "current_or_valid_offline_grant",
+            "stable_effect_identity"
+          ]
+        },
+        {
+          "from": "sending",
+          "event": "receipt",
+          "to": "confirmed",
+          "actorRole": "effect_owner",
+          "requires": [
+            "authenticated_matching_receipt"
+          ]
+        },
+        {
+          "from": "sending",
+          "event": "known_failure",
+          "to": "failed",
+          "actorRole": "effect_owner",
+          "requires": [
+            "no_effect_verified"
+          ]
+        },
+        {
+          "from": "sending",
+          "event": "reply_lost",
+          "to": "outcome_unknown",
+          "actorRole": "effect_owner",
+          "requires": [
+            "stable_effect_identity"
+          ]
+        },
+        {
+          "from": "outcome_unknown",
+          "event": "retry",
+          "to": "sending",
+          "actorRole": "effect_owner",
+          "requires": [
+            "retry_safe_or_prior_absence_verified",
+            "current_or_valid_offline_grant",
+            "stable_effect_identity"
+          ]
+        },
+        {
+          "from": "outcome_unknown",
+          "event": "receipt",
+          "to": "confirmed",
+          "actorRole": "effect_owner",
+          "requires": [
+            "authenticated_matching_receipt"
+          ]
+        },
+        {
+          "from": "outcome_unknown",
+          "event": "cannot_resolve",
+          "to": "reconciliation_required",
+          "actorRole": "effect_owner",
+          "requires": [
+            "uncertainty_recorded"
+          ]
+        },
+        {
+          "from": "reconciliation_required",
+          "event": "receipt",
+          "to": "confirmed",
+          "actorRole": "effect_owner",
+          "requires": [
+            "authenticated_matching_receipt",
+            "reconciliation_recorded"
+          ]
+        },
+        {
+          "from": "reconciliation_required",
+          "event": "known_failure",
+          "to": "failed",
+          "actorRole": "effect_owner",
+          "requires": [
+            "no_effect_verified",
+            "reconciliation_recorded"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # Agentmux phased implementation plan
 
-**Status: phased plan with six baseline governance repairs implemented and verified under Ryan's scoped authorization. Complete P00/P01 and later gates are not yet passed; no Nick review or merge approval is recorded.**
+**Status: phased plan with six baseline governance repairs implemented and verified under Ryan's scoped authorization. Complete P00/P01 and later gates are not yet passed; delivery review is now assigned to Codex; no merge is authorized.**
 Prepared October 9, 2026. Branch: `feat/agentmux-platform-rearchitecture`. Baseline: `df46e94570fadf78ef67a75a692dd48b968a10f7`, Agentmux 0.32.0.
 
 **Live delivery tracking:** [Phase and task status](implementation-status.md) · [Detailed implementation tasks](delivery/task-details.md) · [Tracking procedure](delivery/README.md). Ryan selected repository tracking instead of Jira. Task status and evidence are maintained throughout implementation in `delivery/tasks.json`.
@@ -9,7 +9,7 @@ Prepared October 9, 2026. Branch: `feat/agentmux-platform-rearchitecture`. Basel
 
 This plan combines the original architecture review, repository analysis, accepted interview decisions, NATS and UI architecture brief, both Jev research rounds, the video supplement, and the proposed skill suite. It defines a complete delivery sequence and the evidence needed to advance. The accompanying presentation explains the before/after experience and each phase. The structured [phase definitions](phases.json) and [coverage appendix](coverage.md) retain individual acceptance and opportunity identifiers.
 
-**Storage revision, October 9:** Ryan approved the NATS-backed shared-persistence direction described in STATE-01 below. This approval updates the design; implementation and merge still require their existing review gates.
+**Storage revision, October 9:** Ryan approved the NATS-backed shared-persistence direction described in STATE-01 below. This approval updates the design; implementation requires the evidence gates below; no merge is authorized.
 
 ## 1. Delivery recommendation
 
@@ -21,7 +21,7 @@ The release story is: a developer starts work in a supported agent client, Agent
 
 ## 2. Confirmed decisions and unresolved choices
 
-Confirmed: minimal protected kernel plugins; no kernel replacement; surrounding subscribers may observe exported kernel status but have no general kernel write path; NATS for every internal component interaction and preferred shared persistence; optional rebuildable SQL views; language-neutral plugin contracts; explicit independent/private nesting; automatically provided scoped context; trusted code first; native macOS/Linux and WSL initially; local and self-hosted teams; same- and cross-organization federation in the first release; origin-owned task acceptance; accepted disconnected work remains reserved; automatic receiving-hub acceptance only within approved rules; agent-client-led interaction; AG-UI/CopilotKit dashboard using Atomic Design; industrial engineering as optional domain packages; phased verification and no merge before Ryan/Nick review.
+Confirmed: minimal protected kernel plugins; no kernel replacement; surrounding subscribers may observe exported kernel status but have no general kernel write path; NATS for every internal component interaction and preferred shared persistence; optional rebuildable SQL views; language-neutral plugin contracts; explicit independent/private nesting; automatically provided scoped context; trusted code first; native macOS/Linux and WSL initially; local and self-hosted teams; same- and cross-organization federation in the first release; origin-owned task acceptance; accepted disconnected work remains reserved; automatic receiving-hub acceptance only within approved rules; agent-client-led interaction; AG-UI/CopilotKit dashboard using Atomic Design; industrial engineering as optional domain packages; phased verification, autonomous Codex delivery review, subagents within one active phase, and no authorized merge.
 
 The following decisions must be made explicitly. Recommendations below allow review of a concrete plan without pretending they have been accepted.
 
@@ -263,13 +263,13 @@ Task completion requires criterion-level evidence. Phase completion additionally
 
 ### Acceptance and advancement
 
-The machine-readable sequence has 15 phases and 99 acceptance criteria. The [verification matrix](verification-matrix.md) adds 62 explicit failure scenarios and observable results. The promotion order is sequential. Teams may prepare independent designs and fixtures within approved scope, but no phase is accepted before its predecessor and required contracts are accepted.
+The machine-readable sequence has 15 phases and 99 acceptance criteria. The [verification matrix](verification-matrix.md) adds 62 explicit failure scenarios and observable results. Execute one phase at a time in P00–P14 order. Use subagents to parallelize bounded implementation, tests and independent review within the active phase only. Codex integrates and reviews their evidence, commits and pushes the candidate, verifies the remote commit, and records the gate before starting the next phase.
 
 Each gate records: phase/revision; exact source commit and dependency/config/schema versions; acceptance-criterion IDs; environment and dataset; commands and exit codes; results and artifacts; failure injection results; known limitations; rollback rehearsal; independent reviewer; and authorized advancement decision. A material implementation change invalidates affected evidence. A changed plan receives a reviewed revision.
 
 **Gate outcomes:** not started, implementing, verification failed, awaiting review, accepted, or superseded. A missing environment, skipped test, or mock-only substitute is a gap. An agent's “done” message and a green build do not replace the gate. No waiver may silently change the accepted kernel, authority, reservation, data-isolation, or merge rules.
 
-P00 requires plan approval. The proposed normal rule is that Ryan or an explicitly designated owner accepts each gate after independent review. Ryan and Nick review at least P00, the foundational plugin/security gates, federation, and release readiness. Ryan can change the review cadence explicitly. Merge/release always remains separate and requires the agreed Ryan/Nick review plus Ryan's authorization.
+P00 requires Codex review of the complete plan, decisions and evidence. Codex is the reviewer and advancement authority throughout delivery. Use a separate subagent for independent review where practical, resolve its findings, and record the integrating Codex review. Ryan and Nick are not required for any delivery review, transition or final commit/push. This changes delivery governance only: product approval policies, full scope and required verification remain intact. No merge or release is authorized.
 
 Each phase below specifies its work, acceptance, verification, evidence, and rollback. Detailed catalog mapping appears in [coverage.md](coverage.md).
 
@@ -292,8 +292,8 @@ Each phase below specifies its work, acceptance, verification, evidence, and rol
 ### Acceptance criteria
 
 - **P00-AC01:** Every accepted user decision and all existing functional groups have a named owner phase and verification scenario.
-- **P00-AC02:** Ryan and Nick review the plan and decision log. Ryan explicitly authorizes implementation before P01 starts.
-- **P00-AC03:** All P01â€“P04 blocking choices have recorded alternatives, rationale, and consequences. Later choices have a deadline before their owning phase.
+- **P00-AC02:** Codex reviews the complete plan, decision log, contracts and criterion-level evidence, records its review and advancement decision, and verifies the committed and pushed P00 candidate before P01 starts. Ryan and Nick are not required for delivery approval.
+- **P00-AC03:** All P01–P04 blocking choices have recorded alternatives, rationale, and consequences. Later choices have a deadline before their owning phase.
 - **P00-AC04:** Baseline checks identify passes, failures, missing environments, and historic-only claims separately.
 - **P00-AC05:** The complete source inventory, component reuse decisions and behavior checks are reviewed. Every baseline file and additional governed source file has an owner; unmapped entry points or uncertain behavior are recorded as blocking gaps. No retirement is implied by a launch-scope choice.
 - **P00-AC06:** LOCAL-01 has a reviewed host/platform support matrix, stable instance identity, safe Docker context and credential rules, readiness/status contract, and assigned verification owners. Automatic launch is required for every integration advertised as supporting it.
@@ -448,7 +448,7 @@ Each phase below specifies its work, acceptance, verification, evidence, and rol
 - **P04-AC05:** Node revocation and secret rotation have tested online behavior and explicit offline limits.
 - **P04-AC06:** Deleting or corrupting an optional SQL index or derived KV view is recoverable from retained authoritative records and validated checkpoints. Rebuild preserves authorized results and cursors, detects missing history, and cannot launch work or replay external effects.
 - **P04-AC07:** Task history and reservations survive work-queue acknowledgment and presence expiry. Storage/API permissions prevent unauthorized reads and raw writes. Stale views expose their revision and cannot authorize a claim, approval or reassignment.
-- **P04-AC08:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+- **P04-AC08:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 
 ### Verification
 
@@ -487,7 +487,7 @@ Each phase below specifies its work, acceptance, verification, evidence, and rol
 - **P05-AC03:** No task becomes accepted from terminal text, process exit, or a worker's self-reported done event alone.
 - **P05-AC04:** A crashed or disconnected worker leaves a recoverable known or explicitly unknown attempt. Retry preserves the prior attempt and its effects.
 - **P05-AC05:** Every P05-owned legacy functional group has parity evidence or an explicit replacement and data migration decision. Later client, dashboard, federation, and domain groups have an owned inventory and migration plan, with parity gated in their own phases. Changed artifacts invalidate bound approvals, and migration preserves distinct board, run, hub-work, and shared-board identities.
-- **P05-AC06:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+- **P05-AC06:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 
 ### Verification
 
@@ -600,7 +600,7 @@ Each phase below specifies its work, acceptance, verification, evidence, and rol
 - **P08-AC03:** Cache keys bind tenant, scope, source/version, definition/model, and policy. Revoked sharing cannot return a cached restricted result.
 - **P08-AC04:** All calls obey size/time/budget limits and account for failed/uncertain attempts. Replay of stored annotations makes no new paid call.
 - **P08-AC05:** Each enabled definition passes its own labeled holdout criteria and workflow non-regression threshold before promotion.
-- **P08-AC06:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+- **P08-AC06:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 
 ### Verification
 
@@ -635,7 +635,7 @@ Each phase below specifies its work, acceptance, verification, evidence, and rol
 - **P09-AC03:** Every claimed host capability passes on that actual host. Unsupported hooks/compaction are declared.
 - **P09-AC04:** Skills preserve counterevidence and required obligations and cannot override system permissions or invent authority.
 - **P09-AC05:** Live semantic and end-to-end cost gates pass before the corresponding skill is enabled by default.
-- **P09-AC06:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+- **P09-AC06:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 
 ### Verification
 
@@ -747,7 +747,7 @@ Each phase below specifies its work, acceptance, verification, evidence, and rol
 - Apply ADD-01 and the component preservation matrix to every changed source file and affected caller. Record reuse, intentional behavior changes, migration needs and the specific added functionality before editing implementation.
 - Qualify LOCAL-01 installation, automatic launch, upgrade compatibility, data retention and recovery using the pinned Docker/Compose/OS/client matrix. Document setup prerequisites, diagnosis, explicit stop and backup/restore without making runtime Docker socket access a general plugin capability.
 
-- Prepare the MERGE-01 two-person, two-instance rehearsal and evidence package. Keep final merge authorization separate from P12 advancement so later approved phases can finish without an early merge.
+- Prepare the MERGE-01 two-instance, agent-operated rehearsal and evidence package. Final branch acceptance follows all required phases; no phase or final acceptance authorizes merging.
 
 ### Acceptance criteria
 
@@ -755,14 +755,14 @@ Each phase below specifies its work, acceptance, verification, evidence, and rol
 - **P12-AC02:** A new developer installs and completes the reference task using only published docs on every supported platform.
 - **P12-AC03:** A team administrator enrolls two organizations, shares a scoped project, delegates work, survives a partition, and restores a backup.
 - **P12-AC04:** The approved capacity/SLO targets and recovery drill pass without losing acknowledged durable records within the tested fault model.
-- **P12-AC05:** Ryan and Nick review the release-readiness evidence and record provisional readiness plus all outstanding MERGE-01 requirements. P12 acceptance does not authorize merge or release; the separate final gate requires the entire approved plan, their real-instance orchestration evidence and Ryan's explicit merge approval.
+- **P12-AC05:** Codex reviews release-readiness evidence and records provisional readiness plus all outstanding MERGE-01 requirements. P12 acceptance does not authorize merge or release; final branch acceptance requires every phase and safe bilateral orchestration between independently enrolled, agent-operated real hubs on the exact candidate.
 - **P12-AC06:** The approved NATS storage profile passes record/checkpoint/artifact restore, projection rebuild, retention-gap and migration rollback drills under the declared process/host/disk/quorum failure model. Published RPO/RTO and capacity claims match observed evidence, and no unreviewed SQL authority remains.
 - **P12-AC07:** Every component and behavior check has a reviewed release disposition. Required baseline/candidate comparisons and migration drills pass on the supported matrix; no skipped check, missing component or unapproved feature removal can be hidden by a successful new reference workflow.
 - **P12-AC08:** Fresh-user and upgrade drills pass LOCAL-01 cold/warm/concurrent startup, actionable Docker failures, explicit stop, persistent data recovery and scoped hub status on the supported platform/client matrix. No launch silently upgrades an incompatible live stack, loses durable work or bypasses a required phase gate.
 
 ### Verification
 
-- Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact merge candidate after all required phases pass.
+- Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact final branch candidate after all required phases pass.
 - Repeat FAIL-55–FAIL-62 with the exact packaged release, real federation and each advertised launch integration; record readiness deadlines, versions, volume identity and observed timing.
 - Run the complete release matrix, independent security review, load/soak tests, upgrade/restore rehearsal, and pilot acceptance.
 - Compare evidence manifests to the exact candidate digest and invalidate stale results after material changes.
@@ -794,7 +794,7 @@ Each phase below specifies its work, acceptance, verification, evidence, and rol
 - **P13-AC02:** Each batch passes schema, access, failure, semantic holdout, host-capability, and end-to-end economic gates.
 - **P13-AC03:** Compaction preserves mandatory obligations and active evidence and runs only on supported hosts.
 - **P13-AC04:** No savings claim relies only on shortened context or a provider's confidence score. Outcome quality and total cost meet approved thresholds.
-- **P13-AC05:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+- **P13-AC05:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 
 ### Verification
 
@@ -827,7 +827,7 @@ Each phase below specifies its work, acceptance, verification, evidence, and rol
 - **P14-AC02:** Sandboxed and trusted implementations pass the same language-neutral domain contract tests.
 - **P14-AC03:** Required native/device integrations declare and enforce narrower support or an explicitly trusted execution host.
 - **P14-AC04:** Security review and per-platform tests pass before claiming untrusted-plugin support. Marketplace availability requires this gate or a clearly restricted trusted catalog.
-- **P14-AC05:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+- **P14-AC05:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 
 ### Verification
 
@@ -867,7 +867,7 @@ Ryan directed a complete component review on October 9. This is a required plann
 
 For every affected component, prefer retaining, wrapping, extracting or extending working code. A replacement needs a concrete reason, alternatives considered, named behavior checks, data/contract migration and recovery evidence. A new language, UI library or architectural style alone does not justify rewriting working behavior. Every phase must show what capability it adds and what existing workflow it preserves.
 
-No current capability is retired by this plan. Reduced scope, narrower host support, removal of a command or UI action, changed defaults or deletion of a legacy path requires an explicit change record and Ryan's approval after review with Nick. An optional plugin may carry a capability, but existing users still need a supported installation and migration route. A defect or unsafe authority behavior is corrected through a recorded intended-behavior change, rather than preserved as a compatibility promise.
+No current capability is retired by this plan. Codex reviews every proposed change to host support, commands, UI actions, defaults or legacy paths against the full user scope. Record the reason, alternatives, equivalent capability, migration and verification evidence; autonomy does not authorize reduced scope or removal of a required capability. An optional plugin may carry a capability, but existing users still need a supported installation and migration route. A defect or unsafe authority behavior is corrected through a recorded intended-behavior change, rather than preserved as a compatibility promise.
 
 Before changing implementation, run affected existing tests in an isolated baseline environment and add missing behavior fixtures. Run the same intended-behavior assertions on the candidate. Bind both results to exact code, configuration, dependencies and environment. Historical passes, static source inspection and mocked hardware do not establish live compatibility. A missing test environment remains a blocking gap for that supported claim. A phase cannot advance merely because one new reference workflow passes.
 
@@ -930,7 +930,8 @@ The frontend declaration and governance configuration must reflect the new web s
 | R22 | All 88 opportunities and separate video additions retained | P08–P14 | Catalog coverage appendix with IDs and dispositions. |
 | R23 | Portable jev plugin and Agentmux/domain skills | P09, P11, P13 | All 26 named proposals mapped and host/eval qualified. |
 | R24 | Skill creation after discussion, using skill-creator and evals | P00, P09 | Approved scope then paired/trigger/holdout evaluation records. |
-| R25 | Entire plan on the feature branch; final functional and real-instance evidence before merge | P00–P14 and MERGE-01 | All required phase evidence, Ryan-to-Nick and Nick-to-Ryan safe orchestrations, joint review and Ryan's explicit merge decision. |
+| R25 | Entire plan on the feature branch; autonomous final functional and real-instance acceptance | P00–P14 and MERGE-01 | All phase evidence, safe hub A-to-B and B-to-A orchestrations, Codex review and verified final branch push. No merge authorized. |
+| R28 | ADD-01: preserve, reuse and extend all existing functionality | All affected phases | All 198 component behavior checks have baseline/candidate, migration/recovery and added-capability evidence; no scope reduction. |
 | R29 | Automatic Docker Compose start or reuse on client launch, with scoped instance and hub status (LOCAL-01) | P00, P02, P06, P07, P10, P12 | FAIL-55–FAIL-62 and nine explicit acceptance criteria. |
 | R26 | Phased acceptance and verification before progression | P00–P14 | 99 individual criteria and predecessor gate attestations. |
 | R27 | NATS as preferred shared persistence; optional rebuildable SQL views | P01, P04, P10, P12 | STATE-01, conditional commits, projection rebuild, retention/freshness, scoped access and migration/restore evidence. |
@@ -960,28 +961,28 @@ Primary references: [NATS concepts](https://docs.nats.io/), [leaf nodes](https:/
 
 The current deliverable is planning and presentation only. It does not report that any future acceptance test passed. Existing offline example results and historical product tests remain attributed to their original scope. No paid inference, skill installation, equipment action, merge, or release is part of this work.
 
-## MERGE-01. Final functional and real-instance acceptance
+## MERGE-01. Final branch and real-instance acceptance
 
-**Ryan's explicit condition, October 9:** Keep this entire plan and its implementation exclusively on `feat/agentmux-platform-rearchitecture` until everything in the approved plan is functional, Ryan and Nick can connect their own instances and successfully orchestrate simple, non-destructive work with evidence, and Ryan explicitly authorizes a merge after reviewing that evidence with Nick.
+**Delivery governance revision, October 9:** The user superseded the earlier requirement for Ryan/Nick review and personal machines. Codex now completes and reviews all delivery work autonomously through the final feature-branch commit and push. The original condition remains in Git and `phases.json` governance history. MERGE-01 retains its identifier for traceability; it is not merge permission.
 
-Do not merge, squash, cherry-pick or otherwise transfer this work into an integration or release branch before this gate. Do not enable automatic merging. Committing, pushing, approving the plan and accepting an individual phase do not authorize a merge.
+Keep the entire implementation on `feat/agentmux-platform-rearchitecture`. Do not merge, squash, cherry-pick or transfer it to an integration or release branch, and do not enable automatic merging.
 
-All required acceptance criteria, preservation checks and verification scenarios must pass for the exact candidate and its supported environments. Missing environments, skipped required tests, unresolved correctness/security blockers or unverified functionality remain open work. P00–P14 remain in the approved-plan checklist; the earlier P12 first-release milestone does not allow an early merge while remaining planned phases are outstanding. A scope change requires Ryan's explicit decision after review with Nick; none is implied here. This final gate is separate from sequential phase advancement, so later phases can be completed on this branch before merging.
+All P00–P14 criteria, preservation checks and verification scenarios must pass for the exact candidate and supported environments. Missing environments, skipped required tests and unresolved blockers remain open. Codex may decide implementation and migration details within the full user scope, but cannot remove capabilities or weaken verification to obtain a pass. Final branch acceptance is separate from sequential phase advancement.
 
-### Safe orchestration to demonstrate together
+### Safe bilateral orchestration
 
-1. Ryan and Nick each run the candidate on their own real instance and machine/environment, using their supported terminal integration. Record exact source commits, installed builds, OS/client/Docker/Compose versions and configuration references without secrets. Show automatic start on a stopped stack and reuse on a running stack, followed by instance identity, readiness and scoped hub status.
-2. Establish an explicit, limited hub trust agreement. Both people must see the authorized connection to the other's instance. A second process or simulated peer on one machine cannot replace this final user acceptance run.
-3. Prepare a small fixture repository containing synthetic text and expected checksums. Restrict the task to reading that fixture and creating a report/evidence artifact inside a dedicated test output directory. Deny deletion, production writes, deployment, equipment access, arbitrary external writes and changes to the source fixture. Preserve fixture hashes before and after.
-4. From Ryan's agent client, submit a short plan that delegates a fixture review to a worker on Nick's hub. The remote agent reads the fixture, produces a concise report and returns the artifact plus checksum/check evidence. Ryan's origin hub validates the selected executor, task/attempt identity and evidence, then records explicit origin acceptance. A broker acknowledgment or completed worker is not an accepted result.
-5. Repeat with Nick as origin and Ryan as executor. Capture visible progress in the terminal and dashboard and the linked durable task, delegation, execution, result and acceptance records in both directions. This proves each person can use the system, not only one-way connectivity.
-6. Together, review the evidence, preserved inputs and bounded output changes. Record failures and rerun after fixes. Run this on the final candidate; material changes invalidate affected evidence. A successful demonstration supplements the full phase suite and does not replace fault, security, preservation or recovery tests.
+1. Independently install and enroll two real, agent-operated hub instances in isolated supported environments, with distinct identities, credentials, state and trust scopes. Use the candidate's real terminal integrations, services, NATS transport and workers. Record exact commits/builds, OS/client/Docker/Compose versions and configuration references without secrets. Show cold startup and warm reuse, followed by authenticated instance identity, readiness and scoped hub status.
+2. Establish an explicit limited trust agreement. Verify each hub sees only its authorized peer and scope. Use separate broker accounts and the production federation/leaf path. A mock peer, direct function call or in-memory transport cannot replace this test; separately isolated deployments on available infrastructure are allowed without requiring Ryan's or Nick's machine.
+3. Prepare a fixture repository with synthetic text and expected checksums. Limit effects to reading the fixture and creating report/evidence artifacts in a dedicated test output directory. Deny deletion, production writes, deployment, equipment access, arbitrary external writes and fixture changes. Preserve before/after hashes.
+4. From hub A's agent client, submit a short plan delegating fixture review to a real worker on hub B. Return the report, artifact digest and check evidence. Hub A validates the selected executor, task/attempt identity and evidence and records origin acceptance through its authorized owner. A broker acknowledgment or worker completion is insufficient.
+5. Repeat with hub B as origin and hub A as executor. Capture terminal/dashboard progress and linked durable task, delegation, execution, result and acceptance records in both directions.
+6. Codex reviews the evidence, inputs and bounded outputs, using an independent subagent review. Resolve findings and rerun affected checks. Bind acceptance to the final candidate; material changes invalidate affected evidence. The demonstration supplements all fault, security, preservation and recovery checks.
 
 ### Required evidence and decision
 
-Use `finalMergeGate` in [the gate record template](gate-record.template.json). Attach the approved plan revision, candidate commits/builds, both instance identities, the bounded task definition and grants, linked run/attempt IDs, exported durable records, terminal/dashboard captures, fixture checksums before/after, report/artifact digests, verification commands/results and origin acceptance in both directions. Include a phase-by-phase evidence index, all open gaps, Ryan and Nick's dated joint review and Ryan's subsequent explicit merge authorization for that candidate and target branch.
+Use the historical `finalMergeGate` field in [the gate record template](gate-record.template.json). Attach plan revision, candidate commits/builds, separate instance identities, task definition and grants, run/attempt IDs, durable records, terminal/dashboard captures, before/after fixture hashes, artifact digests, commands/results and origin acceptance in both directions. Include all phase evidence, open gaps, independent subagent review, Codex's dated final acceptance and the verified final remote commit. `mergeAuthorization` remains null; no Ryan/Nick review is required.
 
-Status: **not run; not approved for merge**. This document is a future acceptance procedure. It does not claim either instance is installed, connected or qualified. These repository instructions guide agents; they do not establish server-enforced GitHub branch protection.
+Status: **not run; no merge or release authorized**. This procedure does not claim either instance is installed or qualified. Repository instructions do not establish server-enforced GitHub branch protection.
 
 ## 13. Governance repairs and remaining review gates
 
@@ -989,4 +990,4 @@ Ryan explicitly authorized autonomous repair decisions for the six [baseline fin
 
 The original AMX-BASE-005 wording also describes future repository-version and artifact validation. The baseline repair binds the offered task, repository ID, selected executor and returned text. P05-AC01/P05-AC03/P05-AC05 and P10-AC03 still require checked-out version, artifact and origin-acceptance evidence; FAIL-16/FAIL-19 are not fully qualified. NATS storage migration, the protected kernel, plugin framework and LOCAL-01 automatic Docker Compose startup remain planned work. No complete P00/P01 gate, later phase or MERGE-01 run is passed by these repair tests.
 
-Review the presentation, the phase criteria, and the coverage appendix together. Resolve the P00 choices, approve or revise the proposed release split and performance targets, and name gate reviewers. Record the approved plan revision and explicitly authorize the first implementation phase. Ryan has now requested committing and pushing this package before starting phased work. Begin with the P00 decisions and evidence; this request does not attest that P00 has passed or that Nick has reviewed the plan. Ryan's later scoped authorization allowed these six repairs; it does not replace complete P00/P01 evidence. P01 and later promotion still require their recorded predecessor gates. The branch stays unmerged until MERGE-01 passes and Ryan explicitly authorizes merging after reviewing the complete evidence with Nick.
+Review the presentation, phase criteria and coverage appendix together. Codex resolves P00 choices within the complete scope, records the decision/evidence review, verifies the phase commit is pushed, and advances sequentially. Use subagents only within the active phase. Earlier scoped repairs remain evidence for their specific behaviors, not complete phase passes. Ryan and Nick are not required for delivery. Complete every phase and final branch acceptance, commit and push; do not merge.

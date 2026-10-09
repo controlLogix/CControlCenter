@@ -62,8 +62,8 @@
         "reason": null,
         "alternatives": [],
         "dataAndContractImpact": null,
-        "ryanApproval": null,
-        "nickReview": null
+        "codexReview": null,
+        "scopePreservedEvidence": []
       }
     ],
     "reviewer": null
@@ -81,20 +81,24 @@
     "openGaps": [],
     "instances": [
       {
-        "owner": "Ryan",
+        "owner": "Agent-operated hub A",
         "instanceId": null,
         "hubId": null,
         "environment": null,
         "versions": {},
-        "startupAndConnectionEvidence": []
+        "startupAndConnectionEvidence": [],
+        "enrollmentEvidence": [],
+        "isolationEvidence": []
       },
       {
-        "owner": "Nick",
+        "owner": "Agent-operated hub B",
         "instanceId": null,
         "hubId": null,
         "environment": null,
         "versions": {},
-        "startupAndConnectionEvidence": []
+        "startupAndConnectionEvidence": [],
+        "enrollmentEvidence": [],
+        "isolationEvidence": []
       }
     ],
     "safeTaskDefinition": null,
@@ -102,8 +106,8 @@
     "trustAndGrantReferences": [],
     "runs": [
       {
-        "origin": "Ryan",
-        "executor": "Nick",
+        "origin": "Hub A",
+        "executor": "Hub B",
         "status": "not-run",
         "taskId": null,
         "delegationId": null,
@@ -117,8 +121,8 @@
         "originAcceptanceEvidence": []
       },
       {
-        "origin": "Nick",
-        "executor": "Ryan",
+        "origin": "Hub B",
+        "executor": "Hub A",
         "status": "not-run",
         "taskId": null,
         "delegationId": null,
@@ -132,13 +136,24 @@
         "originAcceptanceEvidence": []
       }
     ],
-    "jointReview": {
-      "ryan": null,
-      "nick": null,
+    "evidenceInvalidatedByLaterChanges": null,
+    "purpose": "Final branch acceptance; historical field and MERGE-01 ID retained, not merge permission.",
+    "independentSubagentReview": null,
+    "codexFinalReview": {
+      "actor": null,
       "date": null,
-      "decision": null
+      "decision": null,
+      "evidence": []
     },
-    "ryanExplicitMergeAuthorization": null,
-    "evidenceInvalidatedByLaterChanges": null
-  }
+    "finalRemoteCommit": null,
+    "mergeAuthorized": false
+  },
+  "deliveryGovernance": {
+    "reviewAuthority": "Codex",
+    "oneActivePhase": true,
+    "subagentReviews": [],
+    "humanDeliveryApprovalRequired": false,
+    "mergeAuthorized": false
+  },
+  "remoteCommit": null
 }

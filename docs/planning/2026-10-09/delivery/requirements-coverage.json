@@ -1,0 +1,3058 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-09",
+  "purpose": "Requirement-to-phase traceability for P00-AC01. References describe required coverage; none assert acceptance or executed tests.",
+  "source": "implementation-plan.md#11-requirement-traceability",
+  "sourceFiles": [
+    {
+      "path": "implementation-plan.md",
+      "sha256": "f2a809c4c7525894376ea3b93ebc11f92c7bd42648606d1cd0b7149721b79465"
+    },
+    {
+      "path": "phases.json",
+      "sha256": "5bb9037937a00621214ad58873c368fdc55b2f8c3722653c97432efa8031a82a"
+    },
+    {
+      "path": "component-audit-dashboard.json",
+      "sha256": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f"
+    },
+    {
+      "path": "component-audit-harness.json",
+      "sha256": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08"
+    },
+    {
+      "path": "component-audit-hub.json",
+      "sha256": "da50535679a7e2001a71660e7072262139643871f22779d189331419fb17f4aa"
+    },
+    {
+      "path": "component-audit-repository.json",
+      "sha256": "39001427bd59e2b0bf45ad6b953a4221c0edf9cdbaaf541179317775e0d29a6f"
+    }
+  ],
+  "coverage": {
+    "requirements": 29,
+    "phases": 15,
+    "phaseCriteria": 99,
+    "components": 93,
+    "behaviorChecks": 198
+  },
+  "limits": [
+    "Mappings are reviewable traceability, not test coverage or proof of full behavior. Phase gates must attach actual criterion-level and component evidence.",
+    "Some new capabilities have no legacy equivalent. Legacy component references identify preservation impact, not a substitute acceptance test.",
+    "Product approval/security requirements remain intact under autonomous delivery governance."
+  ],
+  "requirements": [
+    {
+      "id": "R01",
+      "requirement": "General orchestration product, with industrial specialization in plugins",
+      "owningPhaseExpression": "P05, P11, P12",
+      "owningPhases": [
+        "P05",
+        "P11",
+        "P12"
+      ],
+      "requiredEvidence": "Software and domain workflows share generic task contracts.",
+      "phaseCriterionIds": [
+        "P05-AC01",
+        "P05-AC05",
+        "P11-AC01",
+        "P11-AC02",
+        "P11-AC06",
+        "P12-AC01"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HAR-10",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "HAR-10-C01",
+            "HAR-10-C02",
+            "HAR-10-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-11",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "HAR-11-C01",
+            "HAR-11-C02",
+            "HAR-11-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-09",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HUB-09-C01",
+            "HUB-09-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-26",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-26-C01",
+            "DASH-26-C02",
+            "DASH-26-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R02",
+      "requirement": "Protected, non-replaceable kernel composed of boot plugins",
+      "owningPhaseExpression": "P02, P03",
+      "owningPhases": [
+        "P02",
+        "P03"
+      ],
+      "requiredEvidence": "Unauthorized kernel publication and replacement attempts fail.",
+      "phaseCriterionIds": [
+        "P02-AC01",
+        "P02-AC02",
+        "P02-AC04",
+        "P03-AC05"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HUB-02",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "HUB-02-C01",
+            "HUB-02-C02",
+            "HUB-02-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-09",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HUB-09-C01",
+            "HUB-09-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R03",
+      "requirement": "Everything above the boot substrate uses plugin contracts",
+      "owningPhaseExpression": "P03–P12",
+      "owningPhases": [
+        "P03",
+        "P04",
+        "P05",
+        "P06",
+        "P07",
+        "P08",
+        "P09",
+        "P10",
+        "P11",
+        "P12"
+      ],
+      "requiredEvidence": "No feature requires a kernel edit or undeclared cross-plugin call.",
+      "phaseCriterionIds": [
+        "P03-AC04",
+        "P03-AC06",
+        "P07-AC04",
+        "P11-AC01",
+        "P12-AC01"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HUB-09",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HUB-09-C01",
+            "HUB-09-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-10",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-10-C01",
+            "HUB-10-C02",
+            "HUB-10-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R04",
+      "requirement": "Independent and parent-owned nested package modes",
+      "owningPhaseExpression": "P03",
+      "owningPhases": [
+        "P03"
+      ],
+      "requiredEvidence": "Install, reuse, remove, upgrade, and instance ownership tests.",
+      "phaseCriterionIds": [
+        "P03-AC01",
+        "P03-AC03"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HUB-09",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HUB-09-C01",
+            "HUB-09-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R05",
+      "requirement": "Inherited scoped system services and per-operation authority",
+      "owningPhaseExpression": "P03, P04",
+      "owningPhases": [
+        "P03",
+        "P04"
+      ],
+      "requiredEvidence": "Two-language and concurrent-user context conformance.",
+      "phaseCriterionIds": [
+        "P03-AC02",
+        "P03-AC04",
+        "P04-AC01",
+        "P04-AC05"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HUB-09",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HUB-09-C01",
+            "HUB-09-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-11",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HUB-11-C01",
+            "HUB-11-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-12",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "HUB-12-C01",
+            "HUB-12-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R06",
+      "requirement": "NATS for all Agentmux component communication",
+      "owningPhaseExpression": "P01–P12",
+      "owningPhases": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+        "P06",
+        "P07",
+        "P08",
+        "P09",
+        "P10",
+        "P11",
+        "P12"
+      ],
+      "requiredEvidence": "Contract transport review and observed broker traffic.",
+      "phaseCriterionIds": [
+        "P01-AC01",
+        "P01-AC02",
+        "P02-AC04",
+        "P03-AC04",
+        "P10-AC06",
+        "P12-AC01"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HUB-01",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HUB-01-C01",
+            "HUB-01-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-08",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-08-C01",
+            "HUB-08-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-09",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HUB-09-C01",
+            "HUB-09-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-15",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P02",
+          "behaviorCheckIds": [
+            "HUB-15-C01",
+            "HUB-15-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-21",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HUB-21-C01",
+            "HUB-21-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R07",
+      "requirement": "NATS services used where their guarantees fit",
+      "owningPhaseExpression": "P02, P04, P10, P12",
+      "owningPhases": [
+        "P02",
+        "P04",
+        "P10",
+        "P12"
+      ],
+      "requiredEvidence": "Declared transient/durable contracts and topology fault tests.",
+      "phaseCriterionIds": [
+        "P02-AC04",
+        "P04-AC02",
+        "P04-AC06",
+        "P04-AC07",
+        "P10-AC06",
+        "P10-AC07",
+        "P12-AC06"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HUB-08",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-08-C01",
+            "HUB-08-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-14",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "HUB-14-C01",
+            "HUB-14-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-15",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P02",
+          "behaviorCheckIds": [
+            "HUB-15-C01",
+            "HUB-15-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-23",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-23-C01",
+            "HUB-23-C02",
+            "HUB-23-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R08",
+      "requirement": "Native macOS/Linux and Windows via WSL",
+      "owningPhaseExpression": "P02, P06, P12",
+      "owningPhases": [
+        "P02",
+        "P06",
+        "P12"
+      ],
+      "requiredEvidence": "Install, workflow, upgrade, and recovery matrix.",
+      "phaseCriterionIds": [
+        "P02-AC01",
+        "P02-AC06",
+        "P06-AC05",
+        "P06-AC06",
+        "P12-AC02",
+        "P12-AC08"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HAR-01",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HAR-01-C01",
+            "HAR-01-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-05",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P12",
+          "behaviorCheckIds": [
+            "HAR-05-C01",
+            "HAR-05-C02",
+            "HAR-05-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-06",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HAR-06-C01",
+            "HAR-06-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-28",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P12",
+          "behaviorCheckIds": [
+            "DASH-28-C01",
+            "DASH-28-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R09",
+      "requirement": "Language-neutral contracts",
+      "owningPhaseExpression": "P01, P03",
+      "owningPhases": [
+        "P01",
+        "P03"
+      ],
+      "requiredEvidence": "Independent SDK implementations pass shared fixtures.",
+      "phaseCriterionIds": [
+        "P01-AC01",
+        "P01-AC05",
+        "P03-AC04"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HUB-01",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HUB-01-C01",
+            "HUB-01-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-09",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HUB-09-C01",
+            "HUB-09-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-21",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HUB-21-C01",
+            "HUB-21-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R10",
+      "requirement": "Solo/local and customer-operated team modes",
+      "owningPhaseExpression": "P04, P05, P12",
+      "owningPhases": [
+        "P04",
+        "P05",
+        "P12"
+      ],
+      "requiredEvidence": "Same workflow passes in both deployment profiles.",
+      "phaseCriterionIds": [
+        "P04-AC01",
+        "P05-AC01",
+        "P05-AC02",
+        "P12-AC02",
+        "P12-AC03"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HUB-02",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "HUB-02-C01",
+            "HUB-02-C02",
+            "HUB-02-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-03",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "HUB-03-C01",
+            "HUB-03-C02",
+            "HUB-03-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-09",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "HAR-09-C01",
+            "HAR-09-C02",
+            "HAR-09-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-11",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "HAR-11-C01",
+            "HAR-11-C02",
+            "HAR-11-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R11",
+      "requirement": "Concurrent users and multiple concurrent projects",
+      "owningPhaseExpression": "P04, P05, P12",
+      "owningPhases": [
+        "P04",
+        "P05",
+        "P12"
+      ],
+      "requiredEvidence": "Isolation, fairness, conflicting edits, quota, and load tests.",
+      "phaseCriterionIds": [
+        "P04-AC01",
+        "P04-AC03",
+        "P05-AC02",
+        "P12-AC04"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HAR-09",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "HAR-09-C01",
+            "HAR-09-C02",
+            "HAR-09-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-11",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "HAR-11-C01",
+            "HAR-11-C02",
+            "HAR-11-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-03",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "HUB-03-C01",
+            "HUB-03-C02",
+            "HUB-03-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-12",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "HUB-12-C01",
+            "HUB-12-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R12",
+      "requirement": "Initial-release connected hubs within/across organizations",
+      "owningPhaseExpression": "P10, P12",
+      "owningPhases": [
+        "P10",
+        "P12"
+      ],
+      "requiredEvidence": "Real three-hub, two-organization acceptance scenario.",
+      "phaseCriterionIds": [
+        "P10-AC01",
+        "P10-AC04",
+        "P10-AC06",
+        "P12-AC03"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HUB-10",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-10-C01",
+            "HUB-10-C02",
+            "HUB-10-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-11",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HUB-11-C01",
+            "HUB-11-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-17",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-17-C01",
+            "HUB-17-C02",
+            "HUB-17-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-23",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-23-C01",
+            "HUB-23-C02",
+            "HUB-23-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-25",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-25-C01",
+            "HUB-25-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R13",
+      "requirement": "Origin owns task/acceptance and receiver owns execution",
+      "owningPhaseExpression": "P05, P10",
+      "owningPhases": [
+        "P05",
+        "P10"
+      ],
+      "requiredEvidence": "Executor binding and submitted-versus-accepted state tests.",
+      "phaseCriterionIds": [
+        "P05-AC01",
+        "P05-AC03",
+        "P05-AC04",
+        "P10-AC01",
+        "P10-AC03"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HAR-12",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "HAR-12-C01",
+            "HAR-12-C02",
+            "HAR-12-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-03",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "HUB-03-C01",
+            "HUB-03-C02",
+            "HUB-03-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-17",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-17-C01",
+            "HUB-17-C02",
+            "HUB-17-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R14",
+      "requirement": "Accepted disconnected work stays reserved",
+      "owningPhaseExpression": "P10",
+      "owningPhases": [
+        "P10"
+      ],
+      "requiredEvidence": "Lost-ack, partition, reconnect, cancel/reassign scenarios.",
+      "phaseCriterionIds": [
+        "P10-AC02",
+        "P10-AC03",
+        "P10-AC05",
+        "P10-AC07"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HUB-14",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "HUB-14-C01",
+            "HUB-14-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-17",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-17-C01",
+            "HUB-17-C02",
+            "HUB-17-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R15",
+      "requirement": "Automatic partner acceptance inside approved rules",
+      "owningPhaseExpression": "P04, P10",
+      "owningPhases": [
+        "P04",
+        "P10"
+      ],
+      "requiredEvidence": "Out-of-scope offer remains pending human approval.",
+      "phaseCriterionIds": [
+        "P04-AC01",
+        "P04-AC05",
+        "P10-AC01",
+        "P10-AC03",
+        "P10-AC04"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HUB-11",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HUB-11-C01",
+            "HUB-11-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-12",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "HUB-12-C01",
+            "HUB-12-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-13",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "HUB-13-C01",
+            "HUB-13-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-17",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-17-C01",
+            "HUB-17-C02",
+            "HUB-17-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R16",
+      "requirement": "Primary workflow in existing agent clients",
+      "owningPhaseExpression": "P06, P09",
+      "owningPhases": [
+        "P06",
+        "P09"
+      ],
+      "requiredEvidence": "Claude Code, Codex CLI, Pi, and Desktop actual-host tests.",
+      "phaseCriterionIds": [
+        "P06-AC01",
+        "P06-AC02",
+        "P06-AC05",
+        "P06-AC06",
+        "P09-AC03"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HAR-01",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HAR-01-C01",
+            "HAR-01-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-02",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HAR-02-C01",
+            "HAR-02-C02",
+            "HAR-02-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-05",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P12",
+          "behaviorCheckIds": [
+            "HAR-05-C01",
+            "HAR-05-C02",
+            "HAR-05-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-05",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HUB-05-C01",
+            "HUB-05-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-06",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HUB-06-C01",
+            "HUB-06-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-07",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HUB-07-C01",
+            "HUB-07-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-21",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HUB-21-C01",
+            "HUB-21-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R17",
+      "requirement": "Dashboard shows activity, plans, tasks, work, conversations",
+      "owningPhaseExpression": "P07",
+      "owningPhases": [
+        "P07"
+      ],
+      "requiredEvidence": "Authorized multi-viewer replay and task evidence inspection.",
+      "phaseCriterionIds": [
+        "P07-AC01",
+        "P07-AC02",
+        "P07-AC03",
+        "P07-AC06"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "DASH-01",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P07",
+          "behaviorCheckIds": [
+            "DASH-01-C01",
+            "DASH-01-C02",
+            "DASH-01-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-03",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "DASH-03-C01",
+            "DASH-03-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-04",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "DASH-04-C01",
+            "DASH-04-C02",
+            "DASH-04-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-06",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "DASH-06-C01",
+            "DASH-06-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-07",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "DASH-07-C01",
+            "DASH-07-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-08",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P07",
+          "behaviorCheckIds": [
+            "DASH-08-C01",
+            "DASH-08-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-09",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "DASH-09-C01",
+            "DASH-09-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R18",
+      "requirement": "AG-UI/CopilotKit and Atomic Design",
+      "owningPhaseExpression": "P07",
+      "owningPhases": [
+        "P07"
+      ],
+      "requiredEvidence": "Pinned protocol, event mapping, tiers, accessibility.",
+      "phaseCriterionIds": [
+        "P07-AC01",
+        "P07-AC04",
+        "P07-AC05",
+        "P07-AC06"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "DASH-01",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P07",
+          "behaviorCheckIds": [
+            "DASH-01-C01",
+            "DASH-01-C02",
+            "DASH-01-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-02",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "DASH-02-C01",
+            "DASH-02-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-30",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P07",
+          "behaviorCheckIds": [
+            "DASH-30-C01",
+            "DASH-30-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-34",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P12",
+          "behaviorCheckIds": [
+            "DASH-34-C01",
+            "DASH-34-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R19",
+      "requirement": "Trusted plugins initially, sandboxing later",
+      "owningPhaseExpression": "P03, P12, P14",
+      "owningPhases": [
+        "P03",
+        "P12",
+        "P14"
+      ],
+      "requiredEvidence": "Accurate trust promise, then adversarial containment qualification.",
+      "phaseCriterionIds": [
+        "P03-AC05",
+        "P12-AC01",
+        "P14-AC01",
+        "P14-AC02",
+        "P14-AC03",
+        "P14-AC04"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HUB-09",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HUB-09-C01",
+            "HUB-09-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-13",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "HUB-13-C01",
+            "HUB-13-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R20",
+      "requirement": "Jev across surrounding services and third-party contributions",
+      "owningPhaseExpression": "P08, P10, P11, P13",
+      "owningPhases": [
+        "P08",
+        "P10",
+        "P11",
+        "P13"
+      ],
+      "requiredEvidence": "Scoped decisions, no authority escalation, definition evals.",
+      "phaseCriterionIds": [
+        "P08-AC01",
+        "P08-AC02",
+        "P08-AC03",
+        "P08-AC04",
+        "P08-AC05",
+        "P10-AC03",
+        "P11-AC01",
+        "P13-AC01",
+        "P13-AC02"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HUB-09",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HUB-09-C01",
+            "HUB-09-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-17",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-17-C01",
+            "HUB-17-C02",
+            "HUB-17-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-19",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-19-C01",
+            "HUB-19-C02",
+            "HUB-19-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-26",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-26-C01",
+            "DASH-26-C02",
+            "DASH-26-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R21",
+      "requirement": "Jev conserves tokens only when outcomes/economics support it",
+      "owningPhaseExpression": "P08, P09, P13",
+      "owningPhases": [
+        "P08",
+        "P09",
+        "P13"
+      ],
+      "requiredEvidence": "Complete cost and quality baselines, including cache/rework.",
+      "phaseCriterionIds": [
+        "P08-AC04",
+        "P08-AC05",
+        "P09-AC05",
+        "P13-AC02",
+        "P13-AC04"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HUB-19",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-19-C01",
+            "HUB-19-C02",
+            "HUB-19-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-18",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HAR-18-C01",
+            "HAR-18-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R22",
+      "requirement": "All 88 opportunities and separate video additions retained",
+      "owningPhaseExpression": "P08–P14",
+      "owningPhases": [
+        "P08",
+        "P09",
+        "P10",
+        "P11",
+        "P12",
+        "P13",
+        "P14"
+      ],
+      "requiredEvidence": "Catalog coverage appendix with IDs and dispositions.",
+      "phaseCriterionIds": [
+        "P08-AC05",
+        "P09-AC01",
+        "P13-AC01",
+        "P13-AC02",
+        "P14-AC02"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HUB-09",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HUB-09-C01",
+            "HUB-09-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-08",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HAR-08-C01",
+            "HAR-08-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R23",
+      "requirement": "Portable jev plugin and Agentmux/domain skills",
+      "owningPhaseExpression": "P09, P11, P13",
+      "owningPhases": [
+        "P09",
+        "P11",
+        "P13"
+      ],
+      "requiredEvidence": "All 26 named proposals mapped and host/eval qualified.",
+      "phaseCriterionIds": [
+        "P09-AC01",
+        "P09-AC02",
+        "P09-AC03",
+        "P09-AC04",
+        "P09-AC05",
+        "P11-AC01",
+        "P11-AC02",
+        "P13-AC01",
+        "P13-AC02"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HAR-08",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HAR-08-C01",
+            "HAR-08-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-09",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HUB-09-C01",
+            "HUB-09-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-26",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-26-C01",
+            "DASH-26-C02",
+            "DASH-26-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R24",
+      "requirement": "Skill creation after discussion, using skill-creator and evals",
+      "owningPhaseExpression": "P00, P09",
+      "owningPhases": [
+        "P00",
+        "P09"
+      ],
+      "requiredEvidence": "Approved scope then paired/trigger/holdout evaluation records.",
+      "phaseCriterionIds": [
+        "P00-AC01",
+        "P00-AC02",
+        "P09-AC01",
+        "P09-AC02",
+        "P09-AC04",
+        "P09-AC05"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HAR-08",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HAR-08-C01",
+            "HAR-08-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-18",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HAR-18-C01",
+            "HAR-18-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "REPO-01",
+          "manifest": "component-audit-repository.json",
+          "ownerPhase": "P00",
+          "behaviorCheckIds": [
+            "REPO-01-C01"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R25",
+      "requirement": "Entire plan on the feature branch; autonomous final functional and real-instance acceptance",
+      "owningPhaseExpression": "P00–P14 and MERGE-01",
+      "owningPhases": [
+        "P00",
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+        "P06",
+        "P07",
+        "P08",
+        "P09",
+        "P10",
+        "P11",
+        "P12",
+        "P13",
+        "P14"
+      ],
+      "requiredEvidence": "All phase evidence, safe hub A-to-B and B-to-A orchestrations, Codex review and verified final branch push. No merge authorized.",
+      "phaseCriterionIds": [
+        "P00-AC01",
+        "P00-AC02",
+        "P00-AC03",
+        "P00-AC04",
+        "P00-AC05",
+        "P00-AC06",
+        "P01-AC01",
+        "P01-AC02",
+        "P01-AC03",
+        "P01-AC04",
+        "P01-AC05",
+        "P01-AC06",
+        "P02-AC01",
+        "P02-AC02",
+        "P02-AC03",
+        "P02-AC04",
+        "P02-AC05",
+        "P02-AC06",
+        "P02-AC07",
+        "P02-AC08",
+        "P03-AC01",
+        "P03-AC02",
+        "P03-AC03",
+        "P03-AC04",
+        "P03-AC05",
+        "P03-AC06",
+        "P04-AC01",
+        "P04-AC02",
+        "P04-AC03",
+        "P04-AC04",
+        "P04-AC05",
+        "P04-AC06",
+        "P04-AC07",
+        "P04-AC08",
+        "P05-AC01",
+        "P05-AC02",
+        "P05-AC03",
+        "P05-AC04",
+        "P05-AC05",
+        "P05-AC06",
+        "P06-AC01",
+        "P06-AC02",
+        "P06-AC03",
+        "P06-AC04",
+        "P06-AC05",
+        "P06-AC06",
+        "P06-AC07",
+        "P07-AC01",
+        "P07-AC02",
+        "P07-AC03",
+        "P07-AC04",
+        "P07-AC05",
+        "P07-AC06",
+        "P07-AC07",
+        "P08-AC01",
+        "P08-AC02",
+        "P08-AC03",
+        "P08-AC04",
+        "P08-AC05",
+        "P08-AC06",
+        "P09-AC01",
+        "P09-AC02",
+        "P09-AC03",
+        "P09-AC04",
+        "P09-AC05",
+        "P09-AC06",
+        "P10-AC01",
+        "P10-AC02",
+        "P10-AC03",
+        "P10-AC04",
+        "P10-AC05",
+        "P10-AC06",
+        "P10-AC07",
+        "P10-AC08",
+        "P10-AC09",
+        "P11-AC01",
+        "P11-AC02",
+        "P11-AC03",
+        "P11-AC04",
+        "P11-AC05",
+        "P11-AC06",
+        "P12-AC01",
+        "P12-AC02",
+        "P12-AC03",
+        "P12-AC04",
+        "P12-AC05",
+        "P12-AC06",
+        "P12-AC07",
+        "P12-AC08",
+        "P13-AC01",
+        "P13-AC02",
+        "P13-AC03",
+        "P13-AC04",
+        "P13-AC05",
+        "P14-AC01",
+        "P14-AC02",
+        "P14-AC03",
+        "P14-AC04",
+        "P14-AC05"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "REPO-01",
+          "manifest": "component-audit-repository.json",
+          "ownerPhase": "P00",
+          "behaviorCheckIds": [
+            "REPO-01-C01"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "REPO-03",
+          "manifest": "component-audit-repository.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "REPO-03-C01"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-25",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-25-C01",
+            "HUB-25-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [
+        "MERGE-01"
+      ],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R26",
+      "requirement": "Phased acceptance and verification before progression",
+      "owningPhaseExpression": "P00–P14",
+      "owningPhases": [
+        "P00",
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+        "P06",
+        "P07",
+        "P08",
+        "P09",
+        "P10",
+        "P11",
+        "P12",
+        "P13",
+        "P14"
+      ],
+      "requiredEvidence": "99 individual criteria and predecessor gate attestations.",
+      "phaseCriterionIds": [
+        "P00-AC01",
+        "P00-AC02",
+        "P00-AC03",
+        "P00-AC04",
+        "P00-AC05",
+        "P00-AC06",
+        "P01-AC01",
+        "P01-AC02",
+        "P01-AC03",
+        "P01-AC04",
+        "P01-AC05",
+        "P01-AC06",
+        "P02-AC01",
+        "P02-AC02",
+        "P02-AC03",
+        "P02-AC04",
+        "P02-AC05",
+        "P02-AC06",
+        "P02-AC07",
+        "P02-AC08",
+        "P03-AC01",
+        "P03-AC02",
+        "P03-AC03",
+        "P03-AC04",
+        "P03-AC05",
+        "P03-AC06",
+        "P04-AC01",
+        "P04-AC02",
+        "P04-AC03",
+        "P04-AC04",
+        "P04-AC05",
+        "P04-AC06",
+        "P04-AC07",
+        "P04-AC08",
+        "P05-AC01",
+        "P05-AC02",
+        "P05-AC03",
+        "P05-AC04",
+        "P05-AC05",
+        "P05-AC06",
+        "P06-AC01",
+        "P06-AC02",
+        "P06-AC03",
+        "P06-AC04",
+        "P06-AC05",
+        "P06-AC06",
+        "P06-AC07",
+        "P07-AC01",
+        "P07-AC02",
+        "P07-AC03",
+        "P07-AC04",
+        "P07-AC05",
+        "P07-AC06",
+        "P07-AC07",
+        "P08-AC01",
+        "P08-AC02",
+        "P08-AC03",
+        "P08-AC04",
+        "P08-AC05",
+        "P08-AC06",
+        "P09-AC01",
+        "P09-AC02",
+        "P09-AC03",
+        "P09-AC04",
+        "P09-AC05",
+        "P09-AC06",
+        "P10-AC01",
+        "P10-AC02",
+        "P10-AC03",
+        "P10-AC04",
+        "P10-AC05",
+        "P10-AC06",
+        "P10-AC07",
+        "P10-AC08",
+        "P10-AC09",
+        "P11-AC01",
+        "P11-AC02",
+        "P11-AC03",
+        "P11-AC04",
+        "P11-AC05",
+        "P11-AC06",
+        "P12-AC01",
+        "P12-AC02",
+        "P12-AC03",
+        "P12-AC04",
+        "P12-AC05",
+        "P12-AC06",
+        "P12-AC07",
+        "P12-AC08",
+        "P13-AC01",
+        "P13-AC02",
+        "P13-AC03",
+        "P13-AC04",
+        "P13-AC05",
+        "P14-AC01",
+        "P14-AC02",
+        "P14-AC03",
+        "P14-AC04",
+        "P14-AC05"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "REPO-01",
+          "manifest": "component-audit-repository.json",
+          "ownerPhase": "P00",
+          "behaviorCheckIds": [
+            "REPO-01-C01"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "REPO-02",
+          "manifest": "component-audit-repository.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "REPO-02-C01"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "REPO-03",
+          "manifest": "component-audit-repository.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "REPO-03-C01"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-26",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HUB-26-C01",
+            "HUB-26-C02",
+            "HUB-26-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-29",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "DASH-29-C01",
+            "DASH-29-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R27",
+      "requirement": "NATS as preferred shared persistence; optional rebuildable SQL views",
+      "owningPhaseExpression": "P01, P04, P10, P12",
+      "owningPhases": [
+        "P01",
+        "P04",
+        "P10",
+        "P12"
+      ],
+      "requiredEvidence": "STATE-01, conditional commits, projection rebuild, retention/freshness, scoped access and migration/restore evidence.",
+      "phaseCriterionIds": [
+        "P01-AC05",
+        "P04-AC02",
+        "P04-AC03",
+        "P04-AC04",
+        "P04-AC06",
+        "P04-AC07",
+        "P10-AC06",
+        "P10-AC07",
+        "P12-AC06"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HUB-03",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "HUB-03-C01",
+            "HUB-03-C02",
+            "HUB-03-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-14",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "HUB-14-C01",
+            "HUB-14-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-15",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P02",
+          "behaviorCheckIds": [
+            "HUB-15-C01",
+            "HUB-15-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-18",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-18-C01",
+            "HUB-18-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-19",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-19-C01",
+            "HUB-19-C02",
+            "HUB-19-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R28",
+      "requirement": "ADD-01: preserve, reuse and extend all existing functionality",
+      "owningPhaseExpression": "All affected phases",
+      "owningPhases": [
+        "P00",
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+        "P06",
+        "P07",
+        "P08",
+        "P09",
+        "P10",
+        "P11",
+        "P12",
+        "P13",
+        "P14"
+      ],
+      "requiredEvidence": "All 198 component behavior checks have baseline/candidate, migration/recovery and added-capability evidence; no scope reduction.",
+      "phaseCriterionIds": [
+        "P00-AC01",
+        "P00-AC02",
+        "P00-AC03",
+        "P00-AC04",
+        "P00-AC05",
+        "P00-AC06",
+        "P01-AC01",
+        "P01-AC02",
+        "P01-AC03",
+        "P01-AC04",
+        "P01-AC05",
+        "P01-AC06",
+        "P02-AC01",
+        "P02-AC02",
+        "P02-AC03",
+        "P02-AC04",
+        "P02-AC05",
+        "P02-AC06",
+        "P02-AC07",
+        "P02-AC08",
+        "P03-AC01",
+        "P03-AC02",
+        "P03-AC03",
+        "P03-AC04",
+        "P03-AC05",
+        "P03-AC06",
+        "P04-AC01",
+        "P04-AC02",
+        "P04-AC03",
+        "P04-AC04",
+        "P04-AC05",
+        "P04-AC06",
+        "P04-AC07",
+        "P04-AC08",
+        "P05-AC01",
+        "P05-AC02",
+        "P05-AC03",
+        "P05-AC04",
+        "P05-AC05",
+        "P05-AC06",
+        "P06-AC01",
+        "P06-AC02",
+        "P06-AC03",
+        "P06-AC04",
+        "P06-AC05",
+        "P06-AC06",
+        "P06-AC07",
+        "P07-AC01",
+        "P07-AC02",
+        "P07-AC03",
+        "P07-AC04",
+        "P07-AC05",
+        "P07-AC06",
+        "P07-AC07",
+        "P08-AC01",
+        "P08-AC02",
+        "P08-AC03",
+        "P08-AC04",
+        "P08-AC05",
+        "P08-AC06",
+        "P09-AC01",
+        "P09-AC02",
+        "P09-AC03",
+        "P09-AC04",
+        "P09-AC05",
+        "P09-AC06",
+        "P10-AC01",
+        "P10-AC02",
+        "P10-AC03",
+        "P10-AC04",
+        "P10-AC05",
+        "P10-AC06",
+        "P10-AC07",
+        "P10-AC08",
+        "P10-AC09",
+        "P11-AC01",
+        "P11-AC02",
+        "P11-AC03",
+        "P11-AC04",
+        "P11-AC05",
+        "P11-AC06",
+        "P12-AC01",
+        "P12-AC02",
+        "P12-AC03",
+        "P12-AC04",
+        "P12-AC05",
+        "P12-AC06",
+        "P12-AC07",
+        "P12-AC08",
+        "P13-AC01",
+        "P13-AC02",
+        "P13-AC03",
+        "P13-AC04",
+        "P13-AC05",
+        "P14-AC01",
+        "P14-AC02",
+        "P14-AC03",
+        "P14-AC04",
+        "P14-AC05"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "DASH-01",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P07",
+          "behaviorCheckIds": [
+            "DASH-01-C01",
+            "DASH-01-C02",
+            "DASH-01-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-02",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "DASH-02-C01",
+            "DASH-02-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-03",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "DASH-03-C01",
+            "DASH-03-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-04",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "DASH-04-C01",
+            "DASH-04-C02",
+            "DASH-04-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-05",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "DASH-05-C01",
+            "DASH-05-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-06",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "DASH-06-C01",
+            "DASH-06-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-07",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "DASH-07-C01",
+            "DASH-07-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-08",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P07",
+          "behaviorCheckIds": [
+            "DASH-08-C01",
+            "DASH-08-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-09",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "DASH-09-C01",
+            "DASH-09-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-10",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "DASH-10-C01",
+            "DASH-10-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-11",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "DASH-11-C01",
+            "DASH-11-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-12",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "DASH-12-C01",
+            "DASH-12-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-13",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "DASH-13-C01",
+            "DASH-13-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-14",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-14-C01",
+            "DASH-14-C02",
+            "DASH-14-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-15",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-15-C01",
+            "DASH-15-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-16",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-16-C01",
+            "DASH-16-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-17",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-17-C01",
+            "DASH-17-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-18",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-18-C01",
+            "DASH-18-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-19",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-19-C01",
+            "DASH-19-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-20",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-20-C01",
+            "DASH-20-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-21",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-21-C01",
+            "DASH-21-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-22",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-22-C01",
+            "DASH-22-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-23",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-23-C01",
+            "DASH-23-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-24",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-24-C01",
+            "DASH-24-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-25",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-25-C01",
+            "DASH-25-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-26",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-26-C01",
+            "DASH-26-C02",
+            "DASH-26-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-27",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "DASH-27-C01",
+            "DASH-27-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-28",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P12",
+          "behaviorCheckIds": [
+            "DASH-28-C01",
+            "DASH-28-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-29",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "DASH-29-C01",
+            "DASH-29-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-30",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P07",
+          "behaviorCheckIds": [
+            "DASH-30-C01",
+            "DASH-30-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-31",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "DASH-31-C01",
+            "DASH-31-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-32",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "DASH-32-C01",
+            "DASH-32-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-33",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "DASH-33-C01",
+            "DASH-33-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-34",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P12",
+          "behaviorCheckIds": [
+            "DASH-34-C01",
+            "DASH-34-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-35",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P07",
+          "behaviorCheckIds": [
+            "DASH-35-C01",
+            "DASH-35-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-36",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P00",
+          "behaviorCheckIds": [
+            "DASH-36-C01",
+            "DASH-36-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-01",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HAR-01-C01",
+            "HAR-01-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-02",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HAR-02-C01",
+            "HAR-02-C02",
+            "HAR-02-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-03",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HAR-03-C01",
+            "HAR-03-C02",
+            "HAR-03-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-04",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HAR-04-C01",
+            "HAR-04-C02",
+            "HAR-04-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-05",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P12",
+          "behaviorCheckIds": [
+            "HAR-05-C01",
+            "HAR-05-C02",
+            "HAR-05-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-06",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HAR-06-C01",
+            "HAR-06-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-07",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HAR-07-C01",
+            "HAR-07-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-08",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HAR-08-C01",
+            "HAR-08-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-09",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "HAR-09-C01",
+            "HAR-09-C02",
+            "HAR-09-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-10",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "HAR-10-C01",
+            "HAR-10-C02",
+            "HAR-10-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-11",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "HAR-11-C01",
+            "HAR-11-C02",
+            "HAR-11-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-12",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "HAR-12-C01",
+            "HAR-12-C02",
+            "HAR-12-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-13",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "HAR-13-C01",
+            "HAR-13-C02",
+            "HAR-13-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-14",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "HAR-14-C01",
+            "HAR-14-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-15",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HAR-15-C01",
+            "HAR-15-C02",
+            "HAR-15-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-16",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HAR-16-C01",
+            "HAR-16-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-17",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HAR-17-C01",
+            "HAR-17-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-18",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HAR-18-C01",
+            "HAR-18-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-19",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HAR-19-C01",
+            "HAR-19-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-20",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HAR-20-C01",
+            "HAR-20-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-21",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HAR-21-C01",
+            "HAR-21-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-22",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HAR-22-C01",
+            "HAR-22-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-01",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HUB-01-C01",
+            "HUB-01-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-02",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "HUB-02-C01",
+            "HUB-02-C02",
+            "HUB-02-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-03",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "HUB-03-C01",
+            "HUB-03-C02",
+            "HUB-03-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-04",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HUB-04-C01",
+            "HUB-04-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-05",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HUB-05-C01",
+            "HUB-05-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-06",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HUB-06-C01",
+            "HUB-06-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-07",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HUB-07-C01",
+            "HUB-07-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-08",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-08-C01",
+            "HUB-08-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-09",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P03",
+          "behaviorCheckIds": [
+            "HUB-09-C01",
+            "HUB-09-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-10",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-10-C01",
+            "HUB-10-C02",
+            "HUB-10-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-11",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HUB-11-C01",
+            "HUB-11-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-12",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "HUB-12-C01",
+            "HUB-12-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-13",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "HUB-13-C01",
+            "HUB-13-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-14",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P04",
+          "behaviorCheckIds": [
+            "HUB-14-C01",
+            "HUB-14-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-15",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P02",
+          "behaviorCheckIds": [
+            "HUB-15-C01",
+            "HUB-15-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-16",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-16-C01",
+            "HUB-16-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-17",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-17-C01",
+            "HUB-17-C02",
+            "HUB-17-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-18",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-18-C01",
+            "HUB-18-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-19",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-19-C01",
+            "HUB-19-C02",
+            "HUB-19-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-20",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-20-C01",
+            "HUB-20-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-21",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HUB-21-C01",
+            "HUB-21-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-22",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P12",
+          "behaviorCheckIds": [
+            "HUB-22-C01"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-23",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-23-C01",
+            "HUB-23-C02",
+            "HUB-23-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-24",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HUB-24-C01",
+            "HUB-24-C02",
+            "HUB-24-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-25",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-25-C01",
+            "HUB-25-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-26",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "HUB-26-C01",
+            "HUB-26-C02",
+            "HUB-26-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "REPO-01",
+          "manifest": "component-audit-repository.json",
+          "ownerPhase": "P00",
+          "behaviorCheckIds": [
+            "REPO-01-C01"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "REPO-02",
+          "manifest": "component-audit-repository.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "REPO-02-C01"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "REPO-03",
+          "manifest": "component-audit-repository.json",
+          "ownerPhase": "P01",
+          "behaviorCheckIds": [
+            "REPO-03-C01"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "REPO-04",
+          "manifest": "component-audit-repository.json",
+          "ownerPhase": "P12",
+          "behaviorCheckIds": [
+            "REPO-04-C01"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "REPO-05",
+          "manifest": "component-audit-repository.json",
+          "ownerPhase": "P12",
+          "behaviorCheckIds": [
+            "REPO-05-C01"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "REPO-06",
+          "manifest": "component-audit-repository.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "REPO-06-C01"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "REPO-07",
+          "manifest": "component-audit-repository.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "REPO-07-C01"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "REPO-08",
+          "manifest": "component-audit-repository.json",
+          "ownerPhase": "P07",
+          "behaviorCheckIds": [
+            "REPO-08-C01"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "REPO-09",
+          "manifest": "component-audit-repository.json",
+          "ownerPhase": "P11",
+          "behaviorCheckIds": [
+            "REPO-09-C01"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    },
+    {
+      "id": "R29",
+      "requirement": "Automatic Docker Compose start or reuse on client launch, with scoped instance and hub status (LOCAL-01)",
+      "owningPhaseExpression": "P00, P02, P06, P07, P10, P12",
+      "owningPhases": [
+        "P00",
+        "P02",
+        "P06",
+        "P07",
+        "P10",
+        "P12"
+      ],
+      "requiredEvidence": "FAIL-55–FAIL-62 and nine explicit acceptance criteria.",
+      "phaseCriterionIds": [
+        "P00-AC06",
+        "P02-AC06",
+        "P02-AC07",
+        "P02-AC08",
+        "P06-AC06",
+        "P06-AC07",
+        "P07-AC07",
+        "P10-AC09",
+        "P12-AC08"
+      ],
+      "componentReferences": [
+        {
+          "componentId": "HAR-01",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HAR-01-C01",
+            "HAR-01-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HAR-05",
+          "manifest": "component-audit-harness.json",
+          "ownerPhase": "P12",
+          "behaviorCheckIds": [
+            "HAR-05-C01",
+            "HAR-05-C02",
+            "HAR-05-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "DASH-28",
+          "manifest": "component-audit-dashboard.json",
+          "ownerPhase": "P12",
+          "behaviorCheckIds": [
+            "DASH-28-C01",
+            "DASH-28-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-02",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P05",
+          "behaviorCheckIds": [
+            "HUB-02-C01",
+            "HUB-02-C02",
+            "HUB-02-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-21",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P06",
+          "behaviorCheckIds": [
+            "HUB-21-C01",
+            "HUB-21-C02"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        },
+        {
+          "componentId": "HUB-23",
+          "manifest": "component-audit-hub.json",
+          "ownerPhase": "P10",
+          "behaviorCheckIds": [
+            "HUB-23-C01",
+            "HUB-23-C02",
+            "HUB-23-C03"
+          ],
+          "relationship": "Existing behavior to preserve or qualify while delivering this requirement; not proof that the new capability is implemented."
+        }
+      ],
+      "additionalGateIds": [],
+      "status": "mapped-not-accepted",
+      "acceptanceEvidence": []
+    }
+  ]
+}

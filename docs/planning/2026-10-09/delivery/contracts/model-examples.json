@@ -1,0 +1,295 @@
+[
+  {
+    "id": "offline-reservation-persists",
+    "machine": "task",
+    "from": "reserved",
+    "event": "link_lost",
+    "actorRole": "origin_owner",
+    "guards": [
+      "observation_recorded"
+    ],
+    "expectedTo": "reserved",
+    "allowed": true
+  },
+  {
+    "id": "timeout-is-not-reassignment",
+    "machine": "task",
+    "from": "reserved",
+    "event": "timeout_reassign",
+    "actorRole": "origin_owner",
+    "guards": [],
+    "allowed": false
+  },
+  {
+    "id": "jev-cannot-accept",
+    "machine": "task",
+    "from": "review_pending",
+    "event": "accept",
+    "actorRole": "jev",
+    "guards": [
+      "acceptance_authorized",
+      "required_evidence_passed",
+      "task_version_matches"
+    ],
+    "allowed": false
+  },
+  {
+    "id": "provider-exit-not-acceptance",
+    "machine": "task",
+    "from": "reserved",
+    "event": "provider_done",
+    "actorRole": "execution_owner",
+    "guards": [
+      "provider_receipt_recorded"
+    ],
+    "allowed": false
+  },
+  {
+    "id": "owner-accepts-evidence",
+    "machine": "task",
+    "from": "review_pending",
+    "event": "accept",
+    "actorRole": "origin_approver",
+    "guards": [
+      "acceptance_authorized",
+      "required_evidence_passed",
+      "task_version_matches"
+    ],
+    "expectedTo": "accepted",
+    "allowed": true
+  },
+  {
+    "id": "wrong-executor-cannot-submit",
+    "machine": "task",
+    "from": "reserved",
+    "event": "result_received",
+    "actorRole": "origin_owner",
+    "guards": [
+      "repository_version_verified",
+      "artifact_bytes_verified",
+      "result_recorded"
+    ],
+    "allowed": false
+  },
+  {
+    "id": "cancel-request-not-cancelled",
+    "machine": "task",
+    "from": "reserved",
+    "event": "cancel",
+    "actorRole": "origin_owner",
+    "guards": [
+      "cancellation_authorized",
+      "cancellation_intent_committed"
+    ],
+    "expectedTo": "cancel_requested",
+    "allowed": true
+  },
+  {
+    "id": "cancel-needs-remote-stop-evidence",
+    "machine": "task",
+    "from": "cancel_requested",
+    "event": "cancel_confirmed",
+    "actorRole": "origin_owner",
+    "guards": [
+      "effects_reconciled"
+    ],
+    "allowed": false
+  },
+  {
+    "id": "approval-cannot-override-denial",
+    "machine": "delegation",
+    "from": "approval_pending",
+    "event": "approve",
+    "actorRole": "receiving_approver",
+    "guards": [
+      "human_approval_valid",
+      "origin_reservation_and_grant_verified",
+      "receiver_acceptance_committed"
+    ],
+    "allowed": false
+  },
+  {
+    "id": "unknown-acceptance-not-new-offer",
+    "machine": "delegation",
+    "from": "acceptance_unknown",
+    "event": "timeout_reoffer",
+    "actorRole": "origin_owner",
+    "guards": [],
+    "allowed": false
+  },
+  {
+    "id": "unknown-acceptance-can-reconcile",
+    "machine": "delegation",
+    "from": "acceptance_unknown",
+    "event": "reconcile_accepted",
+    "actorRole": "origin_owner",
+    "guards": [
+      "matching_receiver_acceptance"
+    ],
+    "expectedTo": "accepted_reserved",
+    "allowed": true
+  },
+  {
+    "id": "offline-execution-keeps-state",
+    "machine": "delegation",
+    "from": "executing",
+    "event": "link_lost",
+    "actorRole": "receiving_owner",
+    "guards": [
+      "observation_recorded"
+    ],
+    "expectedTo": "executing",
+    "allowed": true
+  },
+  {
+    "id": "effect-retry-needs-reconciliation",
+    "machine": "effect",
+    "from": "outcome_unknown",
+    "event": "retry",
+    "actorRole": "effect_owner",
+    "guards": [
+      "current_or_valid_offline_grant",
+      "stable_effect_identity"
+    ],
+    "allowed": false
+  },
+  {
+    "id": "safe-effect-retry-keeps-identity",
+    "machine": "effect",
+    "from": "outcome_unknown",
+    "event": "retry",
+    "actorRole": "effect_owner",
+    "guards": [
+      "retry_safe_or_prior_absence_verified",
+      "current_or_valid_offline_grant",
+      "stable_effect_identity"
+    ],
+    "expectedTo": "sending",
+    "allowed": true
+  },
+  {
+    "id": "invalid-plugin-cannot-start",
+    "machine": "plugin",
+    "from": "registered",
+    "event": "start",
+    "actorRole": "supervisor",
+    "guards": [
+      "scoped_context_issued"
+    ],
+    "allowed": false
+  },
+  {
+    "id": "drain-timeout-preserves-uncertainty",
+    "machine": "plugin",
+    "from": "draining",
+    "event": "drain_timeout",
+    "actorRole": "supervisor",
+    "guards": [
+      "uncertain_work_preserved"
+    ],
+    "expectedTo": "failed",
+    "allowed": true
+  },
+  {
+    "id": "uncertain-cancel-cannot-resume",
+    "machine": "attempt",
+    "from": "effect_uncertain",
+    "event": "reconcile_running",
+    "actorRole": "execution_owner",
+    "guards": [
+      "same_attempt_verified",
+      "current_or_valid_offline_grant"
+    ],
+    "allowed": false
+  },
+  {
+    "id": "uncertain-cancel-remains-pending",
+    "machine": "attempt",
+    "from": "effect_uncertain",
+    "event": "reconcile_cancel_pending",
+    "actorRole": "execution_owner",
+    "guards": [
+      "same_attempt_verified",
+      "cancellation_still_pending"
+    ],
+    "allowed": true,
+    "expectedTo": "cancel_requested"
+  },
+  {
+    "id": "failure-needs-effect-reconciliation",
+    "machine": "attempt",
+    "from": "running",
+    "event": "provider_failed",
+    "actorRole": "execution_owner",
+    "guards": [
+      "failure_evidence",
+      "durable_result_intent"
+    ],
+    "allowed": false
+  },
+  {
+    "id": "late-result-preserves-cancellation",
+    "machine": "task",
+    "from": "cancel_requested",
+    "event": "result_received",
+    "actorRole": "origin_owner",
+    "guards": [
+      "executor_and_grant_match",
+      "result_recorded",
+      "cancellation_still_pending"
+    ],
+    "allowed": true,
+    "expectedTo": "cancel_requested"
+  },
+  {
+    "id": "late-result-cannot-auto-accept",
+    "machine": "task",
+    "from": "cancel_requested",
+    "event": "accept",
+    "actorRole": "origin_approver",
+    "guards": [
+      "acceptance_authorized",
+      "required_evidence_passed",
+      "task_version_matches"
+    ],
+    "allowed": false
+  },
+  {
+    "id": "effect-reconciliation-can-complete",
+    "machine": "effect",
+    "from": "reconciliation_required",
+    "event": "receipt",
+    "actorRole": "effect_owner",
+    "guards": [
+      "authenticated_matching_receipt",
+      "reconciliation_recorded"
+    ],
+    "allowed": true,
+    "expectedTo": "confirmed"
+  },
+  {
+    "id": "effect-reconciliation-cannot-blind-retry",
+    "machine": "effect",
+    "from": "reconciliation_required",
+    "event": "retry",
+    "actorRole": "effect_owner",
+    "guards": [
+      "current_or_valid_offline_grant",
+      "stable_effect_identity"
+    ],
+    "allowed": false
+  },
+  {
+    "id": "unexpected-plugin-exit-preserves-work",
+    "machine": "plugin",
+    "from": "ready",
+    "event": "process_failed",
+    "actorRole": "supervisor",
+    "guards": [
+      "failure_recorded",
+      "uncertain_work_preserved"
+    ],
+    "allowed": true,
+    "expectedTo": "failed"
+  }
+]

@@ -1,6 +1,6 @@
 # Runtime and deployment decisions
 
-Status: recommended for P00 review. This refines the main plan's open choices without claiming product implementation or approving a scope reduction. Ryan's protected-kernel, language-neutral, NATS, platform, federation and additive-migration requirements remain unchanged.
+Status: recommended for Codex P00 review. This refines the main plan's open choices without claiming product implementation or approving a scope reduction. Ryan's protected-kernel, language-neutral, NATS, platform, federation and additive-migration requirements remain unchanged.
 
 ## D01. Runtime and initial SDKs
 
@@ -36,7 +36,7 @@ Proposed new code layout: `platform/launcher`, `platform/kernel`, `platform/runt
 
 Use the existing proposed 20-developer team profile to size initial tests, with the same contracts in solo mode. Treat market positioning and pricing as product-review questions, not reasons to drop the industrial extensions or solo experience.
 
-The first proof workflow changes a fixture repository, runs its tests, returns a reviewable diff and evidence, and waits for owner acceptance. It performs no merge, deployment or device write. The federation proof repeats that workflow in both directions between Ryan's and Nick's actual instances. An industrial reference workflow reads approved exported project/configuration data and proposes a change; real vendor/tool qualification remains P11.
+The first proof workflow changes a fixture repository, runs its tests, returns a reviewable diff and evidence, and waits for owner acceptance. It performs no merge, deployment or device write. The federation proof repeats that workflow in both directions between two independently enrolled, agent-operated real hub instances. An industrial reference workflow reads approved exported project/configuration data and proposes a change; real vendor/tool qualification remains P11.
 
 Keep existing dashboard work creation, board/team actions, approvals and guarded run controls. The older suggestion to make it observation-only or to move all existing work creation out of the dashboard is not adopted. Agent clients remain the primary conversational interface. AG-UI carries authorized application events and supported commands at the UI boundary; CopilotKit and Atomic Design provide the UI structure. Internal UI-service traffic uses NATS. Display persisted plans, decisions, messages, tool events and evidence; do not invent or expose private model reasoning as an agent conversation.
 
@@ -71,4 +71,4 @@ Jev is optional and unavailable until configured and qualified. Exact authorizat
 
 ## Required review and exit evidence
 
-P00 review must accept or revise D01-D06 and the linked storage/startup records. Record alternatives and reasons, including any changed platform/capacity target. P01 verifies executable contracts and persistence behavior; P02 proves boot; P03 proves nesting and context; P04 proves identities/state/execution separation. Later provider, hardware and market decisions have named phase deadlines and cannot be hidden in a release claim. No human approval is inferred from this recommendation.
+P00 review must accept or revise D01-D06 and the linked storage/startup records. Record alternatives and reasons, including any changed platform/capacity target. P01 verifies executable contracts and persistence behavior; P02 proves boot; P03 proves nesting and context; P04 proves identities/state/execution separation. Later provider, hardware and market decisions have named phase deadlines and cannot be hidden in a release claim. Codex records the engineering review and advancement decision; this recommendation itself does not pass a phase gate. No Ryan/Nick delivery approval is required.

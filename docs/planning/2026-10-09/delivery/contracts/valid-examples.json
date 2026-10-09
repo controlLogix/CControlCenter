@@ -1,0 +1,429 @@
+{
+  "plugin-manifest": {
+    "schemaVersion": "0.1.0",
+    "packageId": "example-toolkit",
+    "version": "1.0.0",
+    "apiMajor": 1,
+    "installationModes": [
+      "independent",
+      "private-child"
+    ],
+    "platforms": [
+      {
+        "os": "linux",
+        "arch": "amd64"
+      },
+      {
+        "os": "darwin",
+        "arch": "arm64"
+      }
+    ],
+    "runtime": {
+      "kind": "process",
+      "executableRef": "bin/plugin",
+      "args": [
+        "--mode",
+        "serve"
+      ],
+      "workingDirectoryPolicy": "assigned-workspace"
+    },
+    "dependencies": [],
+    "children": [
+      {
+        "packageId": "example-modbus",
+        "relationship": "independent-reference",
+        "required": false
+      }
+    ],
+    "requestedCapabilities": [
+      {
+        "action": "task-read",
+        "resourceClass": "task",
+        "required": true
+      }
+    ],
+    "configurationSchemaRef": "schemas/config.json",
+    "contributions": [
+      {
+        "kind": "tool",
+        "id": "inspect-project",
+        "contractRef": "contracts/inspect.json"
+      }
+    ],
+    "lifecycle": {
+      "startDeadlineMs": 10000,
+      "drainDeadlineMs": 30000,
+      "restartLimit": 3
+    },
+    "migrations": []
+  },
+  "protected-assembly": {
+    "schemaVersion": "0.1.0",
+    "releaseVersion": "1.0.0",
+    "releaseManifestDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "releaseAuthorityRef": {
+      "id": "release-authority",
+      "ownerHubId": "hub-origin",
+      "revision": 1
+    },
+    "kernelApiMajor": 1,
+    "plugins": [
+      {
+        "id": "boot",
+        "binaryDigest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "entrypoint": "bin/boot"
+      },
+      {
+        "id": "kernel-lifecycle",
+        "binaryDigest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "entrypoint": "bin/kernel-lifecycle"
+      },
+      {
+        "id": "internal-communication",
+        "binaryDigest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "entrypoint": "bin/internal-communication"
+      },
+      {
+        "id": "exported-status",
+        "binaryDigest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "entrypoint": "bin/exported-status"
+      }
+    ]
+  },
+  "plugin-context": {
+    "schemaVersion": "0.1.0",
+    "instanceId": "plugin-child",
+    "packageId": "example-toolkit",
+    "packageVersion": "1.0.0",
+    "packageDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "hubId": "hub-origin",
+    "parent": {
+      "instanceId": "plugin-parent",
+      "relationship": "private"
+    },
+    "effectiveGrant": {
+      "grantId": "grant-child",
+      "issuerHubId": "hub-origin",
+      "subjectInstanceId": "plugin-child",
+      "scope": {
+        "organizationId": "org-demo",
+        "projectId": "project-demo",
+        "workspaceId": "ws-demo"
+      },
+      "actions": [
+        "task-read"
+      ],
+      "resourceIds": [
+        "task-one"
+      ],
+      "issuedAt": "2026-10-09T12:00:00Z",
+      "expiresAt": "2026-10-09T13:00:00Z",
+      "policyRef": {
+        "id": "policy-one",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      },
+      "parentGrantRef": {
+        "id": "grant-parent",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      },
+      "revision": 1
+    },
+    "services": {
+      "logger": {
+        "interfaceId": "logger",
+        "apiMajor": 1,
+        "scopeRef": {
+          "id": "scope-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "handleId": "handle-logger",
+        "transport": "nats"
+      },
+      "config": {
+        "interfaceId": "config",
+        "apiMajor": 1,
+        "scopeRef": {
+          "id": "scope-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "handleId": "handle-config",
+        "transport": "nats"
+      },
+      "lifecycle": {
+        "interfaceId": "lifecycle",
+        "apiMajor": 1,
+        "scopeRef": {
+          "id": "scope-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "handleId": "handle-lifecycle",
+        "transport": "nats"
+      },
+      "clock": {
+        "interfaceId": "clock",
+        "apiMajor": 1,
+        "scopeRef": {
+          "id": "scope-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "handleId": "handle-clock",
+        "transport": "nats"
+      },
+      "tracing": {
+        "interfaceId": "tracing",
+        "apiMajor": 1,
+        "scopeRef": {
+          "id": "scope-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "handleId": "handle-tracing",
+        "transport": "nats"
+      },
+      "metrics": {
+        "interfaceId": "metrics",
+        "apiMajor": 1,
+        "scopeRef": {
+          "id": "scope-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "handleId": "handle-metrics",
+        "transport": "nats"
+      },
+      "domainGateway": {
+        "interfaceId": "domain-gateway",
+        "apiMajor": 1,
+        "scopeRef": {
+          "id": "scope-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "handleId": "handle-domain-gateway",
+        "transport": "nats"
+      }
+    },
+    "secretReferences": [
+      {
+        "id": "secret-one",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      }
+    ],
+    "configurationRevision": 1
+  },
+  "operation-context": {
+    "schemaVersion": "0.1.0",
+    "operationId": "op-one",
+    "payloadDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "expectedVersion": 1,
+    "caller": {
+      "principalId": "user-ryan",
+      "kind": "human",
+      "authenticatedIdentityRef": {
+        "id": "identity-one",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      }
+    },
+    "effectiveActorRef": {
+      "id": "actor-one",
+      "ownerHubId": "hub-origin",
+      "revision": 1
+    },
+    "scope": {
+      "organizationId": "org-demo",
+      "projectId": "project-demo",
+      "workspaceId": "ws-demo"
+    },
+    "taskId": "task-one",
+    "runId": "run-one",
+    "attemptId": "attempt-one",
+    "delegationRef": {
+      "id": "delegation-one",
+      "ownerHubId": "hub-origin",
+      "revision": 1
+    },
+    "grantRef": {
+      "id": "grant-child",
+      "ownerHubId": "hub-origin",
+      "revision": 1
+    },
+    "approvalRefs": [],
+    "traceId": "trace-one",
+    "causationId": "cause-one",
+    "deadline": "2026-10-09T12:05:00Z",
+    "cancellationRef": {
+      "id": "cancel-one",
+      "ownerHubId": "hub-origin",
+      "revision": 1
+    }
+  },
+  "message-envelope": {
+    "schemaVersion": "0.1.0",
+    "messageId": "msg-one",
+    "kind": "command",
+    "contractId": "task-inspect",
+    "contractMajor": 1,
+    "sourceHubId": "hub-origin",
+    "sourceInstanceId": "client-one",
+    "destinationHubId": "hub-origin",
+    "sentAt": "2026-10-09T12:00:01Z",
+    "correlationId": "op-one",
+    "operation": {
+      "schemaVersion": "0.1.0",
+      "operationId": "op-one",
+      "payloadDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "expectedVersion": 1,
+      "caller": {
+        "principalId": "user-ryan",
+        "kind": "human",
+        "authenticatedIdentityRef": {
+          "id": "identity-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        }
+      },
+      "effectiveActorRef": {
+        "id": "actor-one",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      },
+      "scope": {
+        "organizationId": "org-demo",
+        "projectId": "project-demo",
+        "workspaceId": "ws-demo"
+      },
+      "taskId": "task-one",
+      "runId": "run-one",
+      "attemptId": "attempt-one",
+      "delegationRef": {
+        "id": "delegation-one",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      },
+      "grantRef": {
+        "id": "grant-child",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      },
+      "approvalRefs": [],
+      "traceId": "trace-one",
+      "causationId": "cause-one",
+      "deadline": "2026-10-09T12:05:00Z",
+      "cancellationRef": {
+        "id": "cancel-one",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      }
+    },
+    "payload": {
+      "taskId": "task-one"
+    }
+  },
+  "owner-record": {
+    "schemaVersion": "0.1.0",
+    "recordId": "record-one",
+    "entityId": "task-one",
+    "entityKind": "task",
+    "ownerHubId": "hub-origin",
+    "ownerDomain": "task",
+    "entityVersion": 2,
+    "previousRevision": 1,
+    "operation": {
+      "schemaVersion": "0.1.0",
+      "operationId": "op-one",
+      "payloadDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "expectedVersion": 1,
+      "caller": {
+        "principalId": "user-ryan",
+        "kind": "human",
+        "authenticatedIdentityRef": {
+          "id": "identity-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        }
+      },
+      "effectiveActorRef": {
+        "id": "actor-one",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      },
+      "scope": {
+        "organizationId": "org-demo",
+        "projectId": "project-demo",
+        "workspaceId": "ws-demo"
+      },
+      "taskId": "task-one",
+      "runId": "run-one",
+      "attemptId": "attempt-one",
+      "delegationRef": {
+        "id": "delegation-one",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      },
+      "grantRef": {
+        "id": "grant-child",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      },
+      "approvalRefs": [],
+      "traceId": "trace-one",
+      "causationId": "cause-one",
+      "deadline": "2026-10-09T12:05:00Z",
+      "cancellationRef": {
+        "id": "cancel-one",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      }
+    },
+    "recordedAt": "2026-10-09T12:00:02Z",
+    "outcome": "committed",
+    "state": {
+      "status": "reserved",
+      "executorHubId": "hub-receiver"
+    },
+    "effects": [
+      {
+        "effectId": "effect-one",
+        "contractId": "work-offer",
+        "payloadDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "grantRef": {
+          "id": "grant-child",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "recovery": "idempotent-retry",
+        "payload": {
+          "taskId": "task-one"
+        }
+      }
+    ],
+    "artifacts": [
+      {
+        "artifactId": "artifact-one",
+        "ownerHubId": "hub-origin",
+        "storeRef": {
+          "id": "store-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "version": "artifact-v1",
+        "digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "bytes": 42,
+        "mediaType": "text/plain"
+      }
+    ],
+    "repository": {
+      "repositoryId": "repo-one",
+      "revision": "fixture-commit",
+      "treeDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+    }
+  }
+}

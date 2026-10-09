@@ -11,7 +11,7 @@ The [P00 decision package](decisions/README.md) contains the current runtime, st
 - `phases.json` remains the design contract for phase scope and acceptance. Its `proposed` field is not a second execution-status field.
 - Each phase is an epic. Each numbered phase work item has an implementation task. Every Jev use case, video record and skill has a qualification task with its original proposal and item-specific acceptance criteria. Shared implementation links prevent treating overlapping records as separate services or additive savings.
 - Each phase has a separate `Pxx-GATE` task. It owns full acceptance, failure, rollback and advancement review. Individual task completion does not pass the gate.
-- `MERGE-01` is a final task after all 15 gates. It tracks the real Ryan/Nick demonstration and final decision; the ordinary status-update command cannot authorize a merge.
+- `MERGE-01` is a final task after all 15 gates. It tracks agent-operated real-hub demonstrations, Codex review and the verified final feature-branch push. It never authorizes a merge.
 
 This initial decomposition retains all source work. Refine broad tasks into bounded child tasks before starting them when needed, preserving parent scope and coverage. Phase-level verification procedures listed on an individual implementation task provide context: run the checks relevant to that slice, then the complete required matrix at its gate. Only the dedicated preflight task must finish before other implementation work in that phase; ongoing candidate preservation checks finish at the phase gate.
 
@@ -26,7 +26,7 @@ From the repository root:
 ```text
 python docs/planning/2026-10-09/delivery/track.py check
 python docs/planning/2026-10-09/delivery/track.py update P00-T06 in_progress --note "Review phase-owned components and baseline evidence."
-python docs/planning/2026-10-09/delivery/track.py update P00-GATE blocked --note "Complete P00 tasks and obtain the required Ryan/Nick review."
+python docs/planning/2026-10-09/delivery/track.py update P00-GATE blocked --note "Complete P00 tasks and Codex evidence review."
 python docs/planning/2026-10-09/delivery/track.py render
 ```
 
@@ -34,9 +34,18 @@ Update status when starting work, encountering a blocker, entering verification 
 
 Use one tracker writer at a time in a checkout. Updates replace the JSON file atomically, but independent concurrent edits still require Git conflict review; this delivery tool does not claim distributed task ownership.
 
-For `done`, pass `--record <repository-relative evidence JSON>`. That record must contain `taskId`, `sourceCommit` and `acceptanceResults`, with one entry for every task criterion: `criterionId`, `status: passed`, and nonempty `evidence` references. Include actual commands, exit codes, environments, limitations and reviewed outputs. The commit must exist. Phase verification also requires a `gateRecord` based on `gate-record.template.json`, `advancementApproval`, and `remoteCommit`; the tool checks the pushed candidate and phase criterion coverage. Required failure, migration, component and human-review evidence must be inspected by the reviewer. JSON validation cannot prove that test claims or human approvals are authentic.
+For `done`, pass `--record <repository-relative evidence JSON>`. That record must contain `taskId`, `sourceCommit` and `acceptanceResults`, with one entry for every task criterion: `criterionId`, `status: passed`, and nonempty `evidence` references. Include actual commands, exit codes, environments, limitations and reviewed outputs. The commit must exist. Phase verification also requires a `gateRecord` based on `gate-record.template.json`, `advancementApproval`, and `remoteCommit`; the tool checks the pushed candidate and phase criterion coverage. Codex must inspect required failure, migration and component evidence and subagent findings. The phase record must name Codex as independentReviewer and advancementApproval.actor, with a dated approved decision. JSON validation cannot prove that test claims are authentic.
 
-Only enter a human approval after that person actually gives it. P00 still requires Ryan and Nick's review; the instruction to proceed is not evidence of Nick's review. Final MERGE-01 requires every approved phase, their real-instance safe orchestration in both directions, joint evidence review and Ryan's explicit merge authorization.
+Codex owns review and acceptance through completion and final commit/push. Ryan and Nick are not required for delivery. Delegate bounded work to subagents in parallel within the current phase, then inspect their deliverables and evidence. Exactly one phase may have tasks in ready, in_progress or verification; a later phase cannot start until every earlier phase gate is done. Completed earlier phases remain recorded. Use one tracker writer to collect subagent updates.
+
+For final MERGE-01 completion, the task evidence also names `finalAcceptanceRecord` (a repository-relative JSON path) and `remoteCommit`, which must match `sourceCommit` and the remote feature-branch head. The final record contains:
+
+- `sourceCommit`, `reviewer: "Codex"`, `mergeAuthorized: false`, and `decision: {"actor": "Codex", "date": "<actual review date>", "decision": "accepted"}`.
+- `phaseGateEvidence`: exactly one object per P00–P14 gate, each with `taskId` and nonempty `evidence`; every gate must already be done. Review the final candidate against all required phase scope, including changed earlier components.
+- `hubs`: two objects with distinct `hubId` and `adminIdentity`, and nonempty `enrollmentEvidence` and `startupEvidence`. These must identify independently enrolled running instances operated by agents, not simulated worker reports.
+- `bilateralRuns`: two runs covering each direction. Each records `originHubId`, `executorHubId`, `taskId`, `delegationId`, `attemptId`, `resultId`, `artifactDigest`, and nonempty `evidence`. Each has `nonDestructive: true`, equal nonempty `inputDigestBefore` and `inputDigestAfter`, and `originAcceptance` containing the origin `hubId`, `decision: "accepted"` and nonempty `evidence`.
+
+These fields are minimum structural checks, not substitutes for inspecting real logs, permissions, artifacts and before/after state. No completion command merges, transfers changes to another branch or grants merge permission.
 
 ## Keeping scope and evidence current
 

@@ -6,7 +6,7 @@ Branch: `feat/agentmux-platform-rearchitecture`. No phase or merge approval is i
 
 | Phase | Planned | Ready | In progress | Blocked | Verification | Done | Gate |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| P00 | 1 | 0 | 0 | 1 | 4 | 2 | blocked |
+| P00 | 0 | 0 | 1 | 1 | 4 | 2 | blocked |
 | P01 | 9 | 0 | 0 | 0 | 0 | 0 | planned |
 | P02 | 8 | 0 | 0 | 0 | 0 | 0 | planned |
 | P03 | 8 | 0 | 0 | 0 | 0 | 0 | planned |
@@ -26,10 +26,11 @@ Branch: `feat/agentmux-platform-rearchitecture`. No phase or merge approval is i
 
 - **P00-T01 — verification:** Freeze df46e94570fadf78ef67a75a692dd48b968a10f7 as the behavioral comparison baseline and inventory every CLI verb, dashboard view, protocol, state store, integration, and evaluation.
 - **P00-T02 — verification:** Resolve launch workflow, dashboard controls, language/runtime and initial SDKs, storage topology, NATS account/domain layout, supported OS/tool versions, initial scale, identity enrollment, and provider/data policy.
+- **P00-T04 — in_progress:** Approve versioned state machines, authority boundaries, plugin manifest/context schemas, migration ownership, and the requirement-to-phase matrix.
 - **P00-T05 — verification:** Record approved storage direction STATE-01
 - **P00-T07 — verification:** Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch
 - **P00-GATE — blocked:** Verify and accept P00
-  Reason: Complete P00 tasks, resolve architecture decisions, and obtain the required Ryan/Nick review before advancement.
+  Reason: Complete the pending P00 contract and decision review, inspect all required criterion evidence, and verify the pushed phase candidate before advancement.
 
 ## P00. Scope, baseline, and architecture decisions
 
@@ -40,7 +41,7 @@ An approved implementation contract with no unresolved decision hidden in code.
 | [P00-T01](delivery/task-details.md#P00-T01) | verification | Codex | Freeze df46e94570fadf78ef67a75a692dd48b968a10f7 as the behavioral comparison baseline and inventory every CLI verb, dashboard view, protocol, state store, integration, and evaluation. |
 | [P00-T02](delivery/task-details.md#P00-T02) | verification | Codex | Resolve launch workflow, dashboard controls, language/runtime and initial SDKs, storage topology, NATS account/domain layout, supported OS/tool versions, initial scale, identity enrollment, and provider/data policy. |
 | [P00-T03](delivery/task-details.md#P00-T03) | done | Codex | Reproduce or explicitly scope the previously reported federation correctness defects |
-| [P00-T04](delivery/task-details.md#P00-T04) | planned | Codex | Approve versioned state machines, authority boundaries, plugin manifest/context schemas, migration ownership, and the requirement-to-phase matrix. |
+| [P00-T04](delivery/task-details.md#P00-T04) | in_progress | Codex | Approve versioned state machines, authority boundaries, plugin manifest/context schemas, migration ownership, and the requirement-to-phase matrix. |
 | [P00-T05](delivery/task-details.md#P00-T05) | verification | Codex | Record approved storage direction STATE-01 |
 | [P00-T06](delivery/task-details.md#P00-T06) | done | Codex | Apply ADD-01 and the component preservation matrix to every changed source file and affected caller |
 | [P00-T07](delivery/task-details.md#P00-T07) | verification | Codex | Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch |
@@ -291,7 +292,7 @@ Customers can install, operate, recover, and support the complete launch product
 | [P12-T07](delivery/task-details.md#P12-T07) | planned | Codex | Qualify NATS storage capacity, retention, immutable artifact lifecycle, snapshot/archive integrity, sync policy and recovery time for solo and team profiles |
 | [P12-T08](delivery/task-details.md#P12-T08) | planned | Codex | Apply ADD-01 and the component preservation matrix to every changed source file and affected caller |
 | [P12-T09](delivery/task-details.md#P12-T09) | planned | Codex | Qualify LOCAL-01 installation, automatic launch, upgrade compatibility, data retention and recovery using the pinned Docker/Compose/OS/client matrix |
-| [P12-T10](delivery/task-details.md#P12-T10) | planned | Codex | Prepare the MERGE-01 two-person, two-instance rehearsal and evidence package |
+| [P12-T10](delivery/task-details.md#P12-T10) | planned | Codex | Prepare the MERGE-01 two-instance, agent-operated rehearsal and evidence package |
 | [P12-GATE](delivery/task-details.md#P12-GATE) | planned | Codex | Verify and accept P12 |
 
 ## P13. Remaining Jev catalog and skill expansion
@@ -392,4 +393,4 @@ Untrusted third-party plugins gain a tested containment option.
 | [P14-T04](delivery/task-details.md#P14-T04) | planned | Codex | Retain trusted native profiles only with clear administrator choice |
 | [P14-T05](delivery/task-details.md#P14-T05) | planned | Codex | Apply ADD-01 and the component preservation matrix to every changed source file and affected caller |
 | [P14-GATE](delivery/task-details.md#P14-GATE) | planned | Codex | Verify and accept P14 |
-| [MERGE-01](delivery/task-details.md#MERGE-01) | planned | Codex | Ryan/Nick real-instance acceptance and final merge decision |
+| [MERGE-01](delivery/task-details.md#MERGE-01) | planned | Codex | Autonomous final feature-branch acceptance and verified push |

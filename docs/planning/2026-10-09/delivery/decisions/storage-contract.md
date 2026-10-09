@@ -1,6 +1,6 @@
 # STATE-01 implementation contract
 
-Status: detailed recommendation for P00 review. Ryan approved NATS-backed shared authority; the concrete layout and operating profiles below still require review and P01/P04/P10/P12 qualification. No authoritative SQL exception is proposed.
+Status: detailed recommendation for Codex P00 review. Ryan approved NATS-backed shared authority; the concrete layout and operating profiles below still require review and P01/P04/P10/P12 qualification. No authoritative SQL exception is proposed.
 
 ## S01. Account, domain and service boundaries
 

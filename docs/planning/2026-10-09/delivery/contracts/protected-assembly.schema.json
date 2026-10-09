@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agentmux:planning:0.1:protected-assembly",
+  "title": "Agentmux protected-assembly — P00 draft, not an approved runtime contract",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "0.1.0"
+    },
+    "releaseVersion": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "releaseManifestDigest": {
+      "$ref": "urn:agentmux:planning:0.1:common#/$defs/digest"
+    },
+    "releaseAuthorityRef": {
+      "$ref": "urn:agentmux:planning:0.1:common#/$defs/reference"
+    },
+    "kernelApiMajor": {
+      "const": 1
+    },
+    "plugins": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "enum": [
+              "boot",
+              "kernel-lifecycle",
+              "internal-communication",
+              "exported-status"
+            ]
+          },
+          "binaryDigest": {
+            "$ref": "urn:agentmux:planning:0.1:common#/$defs/digest"
+          },
+          "entrypoint": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "id",
+          "binaryDigest",
+          "entrypoint"
+        ]
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "releaseVersion",
+    "releaseManifestDigest",
+    "releaseAuthorityRef",
+    "kernelApiMajor",
+    "plugins"
+  ]
+}

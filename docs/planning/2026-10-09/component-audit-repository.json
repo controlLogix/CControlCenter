@@ -15,8 +15,8 @@
       "ownerPhase": "P00",
       "disposition": "extend",
       "currentBehavior": [
-        "Both AGENTS.md and CLAUDE.md carry the feature-branch restriction, Ryan/Nick real-instance merge gate, local fast-test workflow and repository delivery tracking requirements. Both link the shared plain-language rules.",
-        "Presence and content were statically reviewed at c513ffa0565936916b342ae8ad7a8dc837b4d6e8. Actual delivery/loading in every supported agent host remains unqualified under P06."
+        "Both AGENTS.md and CLAUDE.md require autonomous Codex delivery review, bounded subagents within one active phase, repository task/evidence updates, verified commit/push before advancement, and final acceptance with real agent-operated hubs. All work stays on feat/agentmux-platform-rearchitecture; no merge or release is authorized. Both link shared plain-language and local fast-test rules.",
+        "This is a static review of the current instruction files after the user changed delivery governance. Historical source-bound reviews remain below. Actual delivery/loading in every supported agent host remains unqualified under P06."
       ],
       "reusePlan": "Retain root entry files and the shared writing rules. Extend their links as implementation contracts gain evidence.",
       "enhancements": [
@@ -26,7 +26,7 @@
       "behaviorChecks": [
         {
           "id": "REPO-01-C01",
-          "description": "Each supported agent host loads or receives the shared rules and the Ryan/Nick merge restriction; add missing host-specific instruction links before qualification.",
+          "description": "Each supported agent host loads or receives the shared rules, autonomous Codex delivery review, one-active-phase subagent restriction and feature-branch-only/no-merge restriction; add missing host-specific instruction links before qualification.",
           "existingTests": [],
           "requiredEnvironment": "Static instruction review and supported agent sessions",
           "baselineStatus": "not-run",
@@ -63,6 +63,35 @@
           "previousQualificationPhase": "P00 (implicit component owner)",
           "qualificationPhase": "P06",
           "reason": "P00 owns static instruction review. Actual host loading must be proved with P06 host integrations; the assertion and final release requirement are unchanged."
+        },
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "sourceCommit": "19e61678a1ec543963a4b327e723d0a5f7737fec",
+          "previous": {
+            "currentBehavior": [
+              "Both AGENTS.md and CLAUDE.md carry the feature-branch restriction, Ryan/Nick real-instance merge gate, local fast-test workflow and repository delivery tracking requirements. Both link the shared plain-language rules.",
+              "Presence and content were statically reviewed at c513ffa0565936916b342ae8ad7a8dc837b4d6e8. Actual delivery/loading in every supported agent host remains unqualified under P06."
+            ],
+            "behaviorChecks": [
+              {
+                "id": "REPO-01-C01",
+                "description": "Each supported agent host loads or receives the shared rules and the Ryan/Nick merge restriction; add missing host-specific instruction links before qualification.",
+                "existingTests": [],
+                "requiredEnvironment": "Static instruction review and supported agent sessions",
+                "baselineStatus": "not-run",
+                "targetStatus": "not-run",
+                "qualificationPhase": "P06"
+              }
+            ]
+          },
+          "reason": "Latest user instruction replaces Ryan/Nick delivery approvals with autonomous Codex review and subagents within one active phase. Feature-branch-only work and no merge remain; qualification still belongs to P06.",
+          "evidence": [
+            "../../../AGENTS.md",
+            "../../../CLAUDE.md",
+            "phases.json:governanceHistory",
+            "implementation-plan.md:MERGE-01"
+          ]
         }
       ]
     },

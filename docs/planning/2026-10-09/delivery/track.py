@@ -13,6 +13,7 @@ PLAN = HERE.parent
 ROOT = PLAN.parents[2]
 STATE = HERE / "tasks.json"
 STATES = ("planned", "ready", "in_progress", "blocked", "verification", "done")
+ACTIVE_STATES = ("ready", "in_progress", "verification")
 
 
 def read(path):
@@ -51,20 +52,20 @@ def make_task(key, phase, kind, title, scope, steps, acceptance, dependencies, *
 
 def final_acceptance_task():
     contract = read(PLAN / 'phases.json')['mergeGate']
-    return make_task('MERGE-01', 'P14', 'final-acceptance', 'Ryan/Nick real-instance acceptance and final merge decision',
+    return make_task('MERGE-01', 'P14', 'final-acceptance', 'Autonomous final feature-branch acceptance and verified push',
         [contract],
         ['Verify every approved phase against the exact candidate and supported environments; collect the phase-by-phase evidence index and resolve every required gap.',
-         'Have Ryan and Nick each install the candidate on their own machine and supported terminal. Demonstrate automatic Compose start and reuse, instance identity, readiness and scoped hub status.',
-         'Connect their independently administered hubs with explicit scoped grants. Run the plan\'s read-only fixture orchestration from Ryan to Nick, then Nick to Ryan, with origin-owned acceptance in each direction.',
+         'Use agent-operated, independently enrolled running hubs with distinct administration identities. Demonstrate automatic Compose start and reuse, instance identity, readiness and scoped hub status.',
+         'Connect those hubs with explicit scoped grants. Run the plan\'s read-only fixture orchestration in both directions, with origin-owned acceptance in each direction.',
          'Preserve fixture checksums, artifact digests, task/delegation/attempt/result identities and terminal/dashboard observations. Verify bounded outputs and unchanged inputs; rerun affected checks after material changes.',
-         'Obtain and record their dated joint review and Ryan\'s subsequent explicit authorization for this exact candidate and target branch. Keep the branch unmerged until that authorization exists.'],
+         'Codex reviews the actual evidence and subagent findings, records its dated final acceptance of this exact candidate and verifies the pushed feature-branch commit. Record mergeAuthorized=false; this acceptance never permits a merge.'],
         ['Every required P00–P14 criterion and environment has reviewed, current evidence with no unresolved required gap.',
-         'Ryan and Nick successfully operate their own real instances and complete the non-destructive orchestration in both directions, including explicit origin acceptance.',
+         'Two agent-operated, independently enrolled real hubs complete the non-destructive orchestration in both directions, including explicit origin acceptance.',
          'The complete finalMergeGate evidence bundle identifies the exact candidate, scopes, operations, artifacts, checksums and before/after observations.',
-         'Ryan and Nick jointly review that evidence, and Ryan explicitly authorizes a merge for the exact candidate and target branch. No automated or inferred approval is accepted.'],
+         'Codex reviews that evidence and accepts the exact candidate after verifying the remote feature-branch commit. No human review is required and no merge is authorized.'],
         [p + '-GATE' for p in contract['requiredPhases']], phaseCriteria=[], catalogRecordIds=[], behaviorCheckIds=[],
         verification=['Execute every step of implementation-plan.md, MERGE-01, on the final candidate.'],
-        deliverables=['Completed finalMergeGate record and linked real-instance evidence', 'Dated joint review and explicit Ryan merge decision'])
+        deliverables=['Completed final acceptance record and linked real-instance evidence', 'Dated Codex review, verified remote commit and mergeAuthorized=false'])
 
 
 def initialize():
@@ -109,7 +110,7 @@ def initialize():
                     "Review the phase-owned components in the preservation matrix and identify every changed caller, command, route, state record, integration and UI action; also include cross-phase callers affected by this work.",
                     "Record retain/wrap/extract/extend/replace decisions with reasons. Map each old assertion and data identity to its target. Capture missing characterization fixtures before refactoring.",
                     "Run the available baseline checks and define the candidate, migration/rollback and added-functionality checks. Candidate execution belongs to the implementation and final phase gate, so this preparation does not depend on future code being finished.",
-                    "Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction."]
+                    "Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Codex reviews any capability change against the complete user-authorized scope; autonomy does not permit silent scope reduction."]
                 task["acceptanceCriteria"] = [{"id": f"{key}-AC{n:02}", "text": text} for n, text in enumerate([
                     "Every phase-owned component and affected cross-phase caller has a recorded scope, existing behavior and owner; no changed source is unmapped.",
                     "Baseline evidence distinguishes passing, failing, unavailable and historical results. Any gap that prevents a safe planned change remains blocking.",
@@ -139,7 +140,7 @@ def initialize():
             [{"id": c["id"], "text": c["text"]} for c in phase["criteria"]],
             ["Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.",
              "Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.",
-             "Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.",
+             "Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.",
              "Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate."],
             [c["text"] for c in phase["criteria"]] + [
                 "All assigned failure scenarios and component checks have reviewed evidence for the candidate; missing or skipped required checks remain blocking.",
@@ -193,11 +194,15 @@ def validate(data):
         assert set(gate['failureScenarioIds']) == {f['id'] for f in failures if phase['id'] in f['phases']}, "failure scenarios missing"
         assert set(gate['dependsOn']) == {t['id'] for t in tasks.values() if t['phase'] == phase['id'] and t['kind'] not in ('phase-verification', 'final-acceptance')}, "gate has unmapped phase work"
     assert tasks['MERGE-01']['kind'] == 'final-acceptance' and set(tasks['MERGE-01']['dependsOn']) == {p['id'] + '-GATE' for p in phases}, 'final acceptance cannot omit phases'
+    active_phases = {t['phase'] for t in tasks.values() if t['status'] in ACTIVE_STATES}
+    assert len(active_phases) <= 1, 'only one phase may have active work'
     for t in tasks.values():
         assert t["status"] in STATES, t["id"]
         assert len(t["implementationPlan"]) >= 3 and len(t["acceptanceCriteria"]) >= 3, t["id"]
         assert set(t["dependsOn"]) <= tasks.keys(), t["id"]
         if t["status"] in ("ready", "in_progress", "verification", "done"):
+            earlier = [p['id'] for p in phases[:next(i for i, p in enumerate(phases) if p['id'] == t['phase'])]]
+            assert all(tasks[p + '-GATE']['status'] == 'done' for p in earlier), f"{t['id']}: prior phase gate incomplete"
             assert all(tasks[d]["status"] == "done" for d in t["dependsOn"]), f"{t['id']}: predecessor incomplete"
         if t["status"] == "blocked":
             assert t.get("blocker"), f"{t['id']}: blocker reason required"
@@ -262,6 +267,38 @@ def render(data):
     (HERE / 'task-details.md').write_text('\n'.join(detail).rstrip() + '\n', encoding='utf-8', newline='\n')
 
 
+def codex_review(record, decision_key, decision):
+    reviewer = record.get('independentReviewer', record.get('reviewer'))
+    if isinstance(reviewer, dict):
+        reviewer = reviewer.get('actor')
+    assert reviewer == 'Codex', 'Codex must review the actual evidence'
+    approval = record.get(decision_key, {})
+    assert approval.get('actor') == 'Codex' and approval.get('date') and approval.get('decision') == decision, 'dated Codex decision required'
+
+
+def final_evidence(record, tasks, commit):
+    """Check final record structure. Codex must also inspect the linked evidence."""
+    assert record.get('sourceCommit') == commit, 'wrong final candidate'
+    assert record.get('mergeAuthorized') is False, 'final acceptance must not authorize merging'
+    codex_review(record, 'decision', 'accepted')
+    expected = {t['id'] for t in tasks.values() if t['kind'] == 'phase-verification'}
+    rows = record.get('phaseGateEvidence', [])
+    assert len(rows) == len(expected) and {r.get('taskId') for r in rows} == expected, 'every phase gate needs final evidence'
+    assert all(tasks[r['taskId']]['status'] == 'done' and r.get('evidence') for r in rows), 'final acceptance requires completed reviewed phase gates'
+    hubs = record.get('hubs', [])
+    assert len(hubs) == 2 and len({h.get('hubId') for h in hubs}) == 2, 'two distinct running hubs required'
+    assert len({h.get('adminIdentity') for h in hubs}) == 2, 'independent hub administration identities required'
+    assert all(h.get('hubId') and h.get('adminIdentity') and h.get('enrollmentEvidence') and h.get('startupEvidence') for h in hubs), 'hub enrollment and startup evidence required'
+    a, b = [h['hubId'] for h in hubs]
+    runs = record.get('bilateralRuns', [])
+    assert len(runs) == 2 and {(r.get('originHubId'), r.get('executorHubId')) for r in runs} == {(a, b), (b, a)}, 'successful orchestration in both directions required'
+    for run in runs:
+        assert run.get('nonDestructive') is True and run.get('inputDigestBefore') and run['inputDigestBefore'] == run.get('inputDigestAfter'), 'non-destructive fixture proof required'
+        assert all(run.get(k) for k in ('taskId', 'delegationId', 'attemptId', 'resultId', 'artifactDigest', 'evidence')), 'correlated execution and artifact evidence required'
+        acceptance = run.get('originAcceptance', {})
+        assert acceptance.get('hubId') == run['originHubId'] and acceptance.get('decision') == 'accepted' and acceptance.get('evidence'), 'origin-owned acceptance evidence required'
+
+
 def update(args):
     data = read(STATE)
     tasks = validate(data)
@@ -272,7 +309,6 @@ def update(args):
     old = task["status"]
     assert old != args.status, "status is unchanged"
     if args.status == "done":
-        assert task['kind'] != 'final-acceptance', 'MERGE-01 requires direct Ryan/Nick review and an explicitly recorded final decision; an ordinary task-update command cannot authorize merging'
         assert args.record, "done requires --record with criterion-level evidence"
         record_path = (ROOT / args.record).resolve()
         assert record_path.is_relative_to(ROOT), "evidence must be in the repository"
@@ -280,7 +316,7 @@ def update(args):
         assert record["taskId"] == task["id"], "evidence belongs to another task"
         required = {a["id"] for a in task["acceptanceCriteria"]}
         results = {a["criterionId"]: a for a in record["acceptanceResults"]}
-        assert set(results) == required, "evidence must cover every task criterion exactly"
+        assert len(record['acceptanceResults']) == len(required) and set(results) == required, "evidence must cover every task criterion exactly"
         assert all(a["status"] == "passed" and a.get("evidence") for a in results.values()), "required evidence incomplete"
         commit = record["sourceCommit"]
         subprocess.run(["git", "rev-parse", "--verify", commit + "^{commit}"], cwd=ROOT, check=True, capture_output=True)
@@ -293,9 +329,14 @@ def update(args):
             expected = set(task['phaseCriteria'])
             actual = {a['criterionId']: a for a in gate['acceptanceResults']}
             assert set(actual) == expected and all(a['status'] == 'passed' and a.get('evidence') for a in actual.values()), "phase criteria evidence incomplete"
-            assert gate.get('independentReviewer'), "independent reviewer required"
-            approval = gate.get('advancementApproval', {})
-            assert approval.get('actor') and approval.get('date') and approval.get('decision') == 'approved', "explicit advancement approval required"
+            assert len(gate['acceptanceResults']) == len(expected), 'duplicate phase criterion evidence'
+            codex_review(gate, 'advancementApproval', 'approved')
+        if task['kind'] == 'final-acceptance':
+            assert record.get('finalAcceptanceRecord') and record.get('remoteCommit') == commit, 'final acceptance needs a reviewed final record and pushed commit'
+            final_path = (ROOT / record['finalAcceptanceRecord']).resolve()
+            assert final_path.is_relative_to(ROOT), 'final evidence must be in the repository'
+            final_evidence(read(final_path), tasks, commit)
+        if task['kind'] in ('phase-verification', 'final-acceptance'):
             remote = subprocess.check_output(['git', 'ls-remote', '--heads', 'origin', data['branch']], cwd=ROOT, text=True).split()
             assert remote and remote[0] == commit, "phase candidate is not the current pushed feature-branch commit"
         task["evidence"].append(args.record)

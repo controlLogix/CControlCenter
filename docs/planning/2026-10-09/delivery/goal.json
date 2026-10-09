@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "active",
+  "objective": "Complete the entire Agentmux implementation plan, P00 through P14, using repository-owned epics and detailed tasks with task/phase acceptance evidence. Work autonomously, with Codex as reviewer. Use subagents in parallel within one active phase at a time. Verify every phase, commit and push phase candidates before advancing, and complete final real-hub safe bilateral orchestration and feature-branch commit/push without requiring Ryan or Nick. Do not merge.",
+  "branch": "feat/agentmux-platform-rearchitecture",
+  "tracking": "Repository delivery/tasks.json replaces Jira/Atlassian; no Jira installation is part of the active scope.",
+  "reviewer": "Codex",
+  "humanDeliveryApprovalRequired": false,
+  "parallelism": "Subagents may work concurrently only on tasks in the current phase. Codex integrates and reviews their work; later-phase implementation waits for the current gate.",
+  "completionBoundary": "All P00–P14 acceptance and required environment checks, task evidence and final agent-operated hub proof are complete and reviewed, final branch commit is pushed and remote identity verified, worktree clean. Merge is outside this objective.",
+  "preservedRequirements": [
+    "All existing capabilities remain in scope; no missing environment or mocked proof is silently counted as a pass.",
+    "Product runtime authorization, tenant isolation, human approval when product policy calls for it, evidence and non-destructive tool restrictions remain enforced.",
+    "NATS backbone and preferred shared authority; protected plugin kernel; language-neutral extension contracts; automatic Docker Compose startup; actual supported client and hub evidence."
+  ],
+  "governanceRevision": {
+    "date": "2026-10-09",
+    "source": "Ryan explicit request in this conversation",
+    "instruction": "update the goal and the task details (including acceptance criteria) to be fully autonomous and you are the reviewer. And to use subagents to parallelize the work across phases (but only work on one phase at a time). Nick and Ryan should not be required for anything throughout this entire plan all the way through completion and final commit to the branch and push.",
+    "supersedes": [
+      "Original Jira/Atlassian goal wording (earlier user instruction switched to repository tracking).",
+      "Required Ryan/Nick implementation, phase, architecture, scope-review and final branch-delivery approvals.",
+      "Required use of Ryan/Nick personally operated machines for final branch acceptance."
+    ],
+    "notAuthorized": "Merging the feature branch into main or another integration/release branch."
+  },
+  "appGoalRecord": "The active app goal tool supports status changes only and cannot rewrite objective text. This version-controlled objective and the latest user instructions govern execution; the older app text is retained as history, not a requirement to install Jira or seek human delivery approvals."
+}

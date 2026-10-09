@@ -1,0 +1,313 @@
+{
+  "status": "passed-draft-contract-checks",
+  "python": "3.14.4",
+  "validator": "jsonschema 4.26.0",
+  "schemas": 7,
+  "stateMachines": 5,
+  "cases": [
+    {
+      "id": "valid-plugin-manifest",
+      "passed": true
+    },
+    {
+      "id": "valid-protected-assembly",
+      "passed": true
+    },
+    {
+      "id": "valid-plugin-context",
+      "passed": true
+    },
+    {
+      "id": "valid-operation-context",
+      "passed": true
+    },
+    {
+      "id": "valid-message-envelope",
+      "passed": true
+    },
+    {
+      "id": "valid-owner-record",
+      "passed": true
+    },
+    {
+      "id": "declared-mode-independent",
+      "passed": true
+    },
+    {
+      "id": "declared-mode-private-child",
+      "passed": true
+    },
+    {
+      "id": "ordinary-plugin-can-subscribe-kernel-status",
+      "passed": true
+    },
+    {
+      "id": "ordinary-cannot-claim-kernel",
+      "passed": true
+    },
+    {
+      "id": "private-mode-must-be-declared",
+      "passed": true
+    },
+    {
+      "id": "no-shell-runtime-kind",
+      "passed": true
+    },
+    {
+      "id": "new-major-is-not-silently-compatible",
+      "passed": true
+    },
+    {
+      "id": "no-ambient-current-user",
+      "passed": true
+    },
+    {
+      "id": "no-raw-secret-value",
+      "passed": true
+    },
+    {
+      "id": "logger-not-optional",
+      "passed": true
+    },
+    {
+      "id": "no-alternate-internal-transport",
+      "passed": true
+    },
+    {
+      "id": "missing-caller-authentication-reference",
+      "passed": true
+    },
+    {
+      "id": "unsafe-large-integer",
+      "passed": true
+    },
+    {
+      "id": "unbounded-time-format",
+      "passed": true
+    },
+    {
+      "id": "no-implicit-human-approval",
+      "passed": true
+    },
+    {
+      "id": "no-caller-kernel-write-flag",
+      "passed": true
+    },
+    {
+      "id": "external-kernel-package-not-in-assembly",
+      "passed": true
+    },
+    {
+      "id": "state-needs-effect-intent-field",
+      "passed": true
+    },
+    {
+      "id": "immutable-artifact-digest-required",
+      "passed": true
+    },
+    {
+      "id": "duplicate-protected-role",
+      "passed": true
+    },
+    {
+      "id": "grant-bound-to-different-instance",
+      "passed": true
+    },
+    {
+      "id": "expired-before-issued",
+      "passed": true
+    },
+    {
+      "id": "inverted-dependency-range",
+      "passed": true
+    },
+    {
+      "id": "impossible-calendar-date",
+      "passed": true
+    },
+    {
+      "id": "private-context-without-parent-grant",
+      "passed": true
+    },
+    {
+      "id": "self-parent-context",
+      "passed": true
+    },
+    {
+      "id": "impossible-grant-date",
+      "passed": true
+    },
+    {
+      "id": "ordinary-package-cannot-control-kernel",
+      "passed": true
+    },
+    {
+      "id": "self-child-package",
+      "passed": true
+    },
+    {
+      "id": "rejected-command-cannot-dispatch-effects",
+      "passed": true
+    },
+    {
+      "id": "private-child-with-attenuated-actions",
+      "passed": true
+    },
+    {
+      "id": "private-child-wrong-parent",
+      "passed": true
+    },
+    {
+      "id": "private-child-cannot-change-organization",
+      "passed": true
+    },
+    {
+      "id": "private-child-cannot-add-action",
+      "passed": true
+    },
+    {
+      "id": "private-child-cannot-add-resource",
+      "passed": true
+    },
+    {
+      "id": "private-child-cannot-outlive-parent",
+      "passed": true
+    },
+    {
+      "id": "private-child-cannot-reference-stale-parent-grant",
+      "passed": true
+    },
+    {
+      "id": "private-child-cannot-reuse-parent-logger",
+      "passed": true
+    },
+    {
+      "id": "private-installation-must-be-declared",
+      "passed": true
+    },
+    {
+      "id": "independent-reference-does-not-inherit-parent-authority",
+      "passed": true
+    },
+    {
+      "id": "offline-reservation-persists",
+      "passed": true
+    },
+    {
+      "id": "timeout-is-not-reassignment",
+      "passed": true
+    },
+    {
+      "id": "jev-cannot-accept",
+      "passed": true
+    },
+    {
+      "id": "provider-exit-not-acceptance",
+      "passed": true
+    },
+    {
+      "id": "owner-accepts-evidence",
+      "passed": true
+    },
+    {
+      "id": "wrong-executor-cannot-submit",
+      "passed": true
+    },
+    {
+      "id": "cancel-request-not-cancelled",
+      "passed": true
+    },
+    {
+      "id": "cancel-needs-remote-stop-evidence",
+      "passed": true
+    },
+    {
+      "id": "approval-cannot-override-denial",
+      "passed": true
+    },
+    {
+      "id": "unknown-acceptance-not-new-offer",
+      "passed": true
+    },
+    {
+      "id": "unknown-acceptance-can-reconcile",
+      "passed": true
+    },
+    {
+      "id": "offline-execution-keeps-state",
+      "passed": true
+    },
+    {
+      "id": "effect-retry-needs-reconciliation",
+      "passed": true
+    },
+    {
+      "id": "safe-effect-retry-keeps-identity",
+      "passed": true
+    },
+    {
+      "id": "invalid-plugin-cannot-start",
+      "passed": true
+    },
+    {
+      "id": "drain-timeout-preserves-uncertainty",
+      "passed": true
+    },
+    {
+      "id": "uncertain-cancel-cannot-resume",
+      "passed": true
+    },
+    {
+      "id": "uncertain-cancel-remains-pending",
+      "passed": true
+    },
+    {
+      "id": "failure-needs-effect-reconciliation",
+      "passed": true
+    },
+    {
+      "id": "late-result-preserves-cancellation",
+      "passed": true
+    },
+    {
+      "id": "late-result-cannot-auto-accept",
+      "passed": true
+    },
+    {
+      "id": "effect-reconciliation-can-complete",
+      "passed": true
+    },
+    {
+      "id": "effect-reconciliation-cannot-blind-retry",
+      "passed": true
+    },
+    {
+      "id": "unexpected-plugin-exit-preserves-work",
+      "passed": true
+    }
+  ],
+  "sourceSha256": {
+    "common.schema.json": "bac0eca18c7c086d3cbb06a58d709e196b417878dd25ad41b69cf2232f2f4187",
+    "invalid-examples.json": "db706090be5047cd8b16f9df586ce1b9dfc2370e72e5fd6a58687bd0d97d022e",
+    "message-envelope.schema.json": "ca17d5b804d16105c32502df4765d573d0fb3de3962becb51c8e4afe7d2b13bc",
+    "model-examples.json": "d7fb26e9250c61178a3f2c3e6fb1331fad075a0e876d66ed9d4dfc5de42fa329",
+    "nesting-examples.json": "2f160b4f1ab64daf05733f728f73473e18f16f127b820a62727686e538366516",
+    "operation-context.schema.json": "03c672e648863d4dcadf9f93ceebfb61ff67d137073d515cf8c28fcb45240944",
+    "owner-record.schema.json": "e897ae1d0cca49b672fb53101ed800233e5f57d23e3708da3c99712e6a3d09e2",
+    "plugin-context.schema.json": "12050a15169169a39248c1b40ca7414c93182eaa7fd7dddfe6175a37999a072f",
+    "plugin-manifest.schema.json": "7fa3b0c4483782f3d10ec238534a9c279e88793dbd07648fae82bdf1665f8d8c",
+    "protected-assembly.schema.json": "22d4e4533eed079e2a5cb57025b812f2c3b5a8bfc8a74b504991903873605efe",
+    "requirements.lock": "5bf6d53930534ae6cbfe3242813b04d60c69599efe0b8bd7b8168ed6330615f0",
+    "semantic-examples.json": "94f9149874d1d31d2e470f58f06b0169b0fbb9c573fe227ce87e934bceade876",
+    "state-machines.json": "607a4a1a89c3a16cff5904d740b3fa21c45130a091a2fd811b88c06007cda8a6",
+    "valid-examples.json": "3f0a030b31f890c3275bbc84bdd4c28f98276d7b6eac1865b7e65ccb146542bc",
+    "verify.py": "1cca9c0b89410ca8f790e8648557e6cbad5de2a5617e17b3374d61292fc1d472"
+  },
+  "limitations": [
+    "One validator/runtime only; independent SDK conformance remains P01.",
+    "Guard labels declare obligations; they do not prove authorization, broker behavior or human approval.",
+    "Payload and state are extension slots; each named domain contract still requires its own closed schema.",
+    "Nesting fixtures use exact scope equality, explicit resources (empty means none), and resolved parent revisions; narrower scope delegation needs an explicit future contract.",
+    "No runtime plugin loading, persistence, migration, host startup or partner execution is tested."
+  ]
+}

@@ -9,8 +9,8 @@ An approved implementation contract with no unresolved decision hidden in code.
 **Epic acceptance criteria**
 
 - **P00-AC01:** Every accepted user decision and all existing functional groups have a named owner phase and verification scenario.
-- **P00-AC02:** Ryan and Nick review the plan and decision log. Ryan explicitly authorizes implementation before P01 starts.
-- **P00-AC03:** All P01â€“P04 blocking choices have recorded alternatives, rationale, and consequences. Later choices have a deadline before their owning phase.
+- **P00-AC02:** Codex reviews the complete plan, decision log, contracts and criterion-level evidence, records its review and advancement decision, and verifies the committed and pushed P00 candidate before P01 starts. Ryan and Nick are not required for delivery approval.
+- **P00-AC03:** All P01–P04 blocking choices have recorded alternatives, rationale, and consequences. Later choices have a deadline before their owning phase.
 - **P00-AC04:** Baseline checks identify passes, failures, missing environments, and historic-only claims separately.
 - **P00-AC05:** The complete source inventory, component reuse decisions and behavior checks are reviewed. Every baseline file and additional governed source file has an owner; unmapped entry points or uncertain behavior are recorded as blocking gaps. No retirement is implied by a launch-scope choice.
 - **P00-AC06:** LOCAL-01 has a reviewed host/platform support matrix, stable instance identity, safe Docker context and credential rules, readiness/status contract, and assigned verification owners. Automatic launch is required for every integration advertised as supporting it.
@@ -140,7 +140,7 @@ An approved implementation contract with no unresolved decision hidden in code.
 
 ### P00-T04: Approve versioned state machines, authority boundaries, plugin manifest/context schemas, migration ownership, and the requirement-to-phase matrix.
 
-**Status:** planned. **Owner:** Codex.
+**Status:** in_progress. **Owner:** Codex.
 
 **Dependencies:** P00-T06.
 
@@ -230,7 +230,7 @@ An approved implementation contract with no unresolved decision hidden in code.
 1. Review the phase-owned components in the preservation matrix and identify every changed caller, command, route, state record, integration and UI action; also include cross-phase callers affected by this work.
 2. Record retain/wrap/extract/extend/replace decisions with reasons. Map each old assertion and data identity to its target. Capture missing characterization fixtures before refactoring.
 3. Run the available baseline checks and define the candidate, migration/rollback and added-functionality checks. Candidate execution belongs to the implementation and final phase gate, so this preparation does not depend on future code being finished.
-4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction.
+4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Codex reviews any capability change against the complete user-authorized scope; autonomy does not permit silent scope reduction.
 
 **Deliverables**
 
@@ -309,7 +309,7 @@ An approved implementation contract with no unresolved decision hidden in code.
 
 1. Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
-3. Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.
+3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
 
 **Deliverables**
@@ -322,8 +322,8 @@ An approved implementation contract with no unresolved decision hidden in code.
 **Acceptance criteria**
 
 1. P00-GATE-AC01: Every accepted user decision and all existing functional groups have a named owner phase and verification scenario.
-2. P00-GATE-AC02: Ryan and Nick review the plan and decision log. Ryan explicitly authorizes implementation before P01 starts.
-3. P00-GATE-AC03: All P01â€“P04 blocking choices have recorded alternatives, rationale, and consequences. Later choices have a deadline before their owning phase.
+2. P00-GATE-AC02: Codex reviews the complete plan, decision log, contracts and criterion-level evidence, records its review and advancement decision, and verifies the committed and pushed P00 candidate before P01 starts. Ryan and Nick are not required for delivery approval.
+3. P00-GATE-AC03: All P01–P04 blocking choices have recorded alternatives, rationale, and consequences. Later choices have a deadline before their owning phase.
 4. P00-GATE-AC04: Baseline checks identify passes, failures, missing environments, and historic-only claims separately.
 5. P00-GATE-AC05: The complete source inventory, component reuse decisions and behavior checks are reviewed. Every baseline file and additional governed source file has an owner; unmapped entry points or uncertain behavior are recorded as blocking gaps. No retirement is implied by a launch-scope choice.
 6. P00-GATE-AC06: LOCAL-01 has a reviewed host/platform support matrix, stable instance identity, safe Docker context and credential rules, readiness/status contract, and assigned verification owners. Automatic launch is required for every integration advertised as supporting it.
@@ -342,7 +342,7 @@ An approved implementation contract with no unresolved decision hidden in code.
 
 **Commits:** not yet recorded
 
-**Blocker:** Complete P00 tasks, resolve architecture decisions, and obtain the required Ryan/Nick review before advancement.
+**Blocker:** Complete the pending P00 contract and decision review, inspect all required criterion evidence, and verify the pushed phase candidate before advancement.
 
 ## P01. Executable contracts, baseline repairs, and verification
 
@@ -659,7 +659,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 1. Review the phase-owned components in the preservation matrix and identify every changed caller, command, route, state record, integration and UI action; also include cross-phase callers affected by this work.
 2. Record retain/wrap/extract/extend/replace decisions with reasons. Map each old assertion and data identity to its target. Capture missing characterization fixtures before refactoring.
 3. Run the available baseline checks and define the candidate, migration/rollback and added-functionality checks. Candidate execution belongs to the implementation and final phase gate, so this preparation does not depend on future code being finished.
-4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction.
+4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Codex reviews any capability change against the complete user-authorized scope; autonomy does not permit silent scope reduction.
 
 **Deliverables**
 
@@ -698,7 +698,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 
 1. Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
-3. Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.
+3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
 
 **Deliverables**
@@ -965,7 +965,7 @@ A local installation boots deterministically with protected kernel plugins.
 1. Review the phase-owned components in the preservation matrix and identify every changed caller, command, route, state record, integration and UI action; also include cross-phase callers affected by this work.
 2. Record retain/wrap/extract/extend/replace decisions with reasons. Map each old assertion and data identity to its target. Capture missing characterization fixtures before refactoring.
 3. Run the available baseline checks and define the candidate, migration/rollback and added-functionality checks. Candidate execution belongs to the implementation and final phase gate, so this preparation does not depend on future code being finished.
-4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction.
+4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Codex reviews any capability change against the complete user-authorized scope; autonomy does not permit silent scope reduction.
 
 **Deliverables**
 
@@ -1045,7 +1045,7 @@ A local installation boots deterministically with protected kernel plugins.
 
 1. Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
-3. Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.
+3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
 
 **Deliverables**
@@ -1346,7 +1346,7 @@ A third-party author can build a compatible trusted plugin without changing the 
 1. Review the phase-owned components in the preservation matrix and identify every changed caller, command, route, state record, integration and UI action; also include cross-phase callers affected by this work.
 2. Record retain/wrap/extract/extend/replace decisions with reasons. Map each old assertion and data identity to its target. Capture missing characterization fixtures before refactoring.
 3. Run the available baseline checks and define the candidate, migration/rollback and added-functionality checks. Candidate execution belongs to the implementation and final phase gate, so this preparation does not depend on future code being finished.
-4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction.
+4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Codex reviews any capability change against the complete user-authorized scope; autonomy does not permit silent scope reduction.
 
 **Deliverables**
 
@@ -1384,7 +1384,7 @@ A third-party author can build a compatible trusted plugin without changing the 
 
 1. Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
-3. Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.
+3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
 
 **Deliverables**
@@ -1429,7 +1429,7 @@ Multiple users and projects share a hub with explicit authority and durable owne
 - **P04-AC05:** Node revocation and secret rotation have tested online behavior and explicit offline limits.
 - **P04-AC06:** Deleting or corrupting an optional SQL index or derived KV view is recoverable from retained authoritative records and validated checkpoints. Rebuild preserves authorized results and cursors, detects missing history, and cannot launch work or replay external effects.
 - **P04-AC07:** Task history and reservations survive work-queue acknowledgment and presence expiry. Storage/API permissions prevent unauthorized reads and raw writes. Stale views expose their revision and cannot authorize a claim, approval or reassignment.
-- **P04-AC08:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+- **P04-AC08:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 
 <a id="P04-T01"></a>
 
@@ -1693,7 +1693,7 @@ Multiple users and projects share a hub with explicit authority and durable owne
 1. Review the phase-owned components in the preservation matrix and identify every changed caller, command, route, state record, integration and UI action; also include cross-phase callers affected by this work.
 2. Record retain/wrap/extract/extend/replace decisions with reasons. Map each old assertion and data identity to its target. Capture missing characterization fixtures before refactoring.
 3. Run the available baseline checks and define the candidate, migration/rollback and added-functionality checks. Candidate execution belongs to the implementation and final phase gate, so this preparation does not depend on future code being finished.
-4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction.
+4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Codex reviews any capability change against the complete user-authorized scope; autonomy does not permit silent scope reduction.
 
 **Deliverables**
 
@@ -1732,7 +1732,7 @@ Multiple users and projects share a hub with explicit authority and durable owne
 
 1. Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
-3. Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.
+3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
 
 **Deliverables**
@@ -1752,7 +1752,7 @@ Multiple users and projects share a hub with explicit authority and durable owne
 5. P04-GATE-AC05: Node revocation and secret rotation have tested online behavior and explicit offline limits.
 6. P04-GATE-AC06: Deleting or corrupting an optional SQL index or derived KV view is recoverable from retained authoritative records and validated checkpoints. Rebuild preserves authorized results and cursors, detects missing history, and cannot launch work or replay external effects.
 7. P04-GATE-AC07: Task history and reservations survive work-queue acknowledgment and presence expiry. Storage/API permissions prevent unauthorized reads and raw writes. Stale views expose their revision and cannot authorize a claim, approval or reassignment.
-8. P04-GATE-AC08: Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+8. P04-GATE-AC08: Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 9. P04-GATE-AC09: All assigned failure scenarios and component checks have reviewed evidence for the candidate; missing or skipped required checks remain blocking.
 10. P04-GATE-AC10: The required reviewer and advancement decision are recorded, and the phase commit is verified on the current remote feature branch. No merge is performed.
 
@@ -1779,7 +1779,7 @@ A developer can finish a reviewable software task through durable coordinated wo
 - **P05-AC03:** No task becomes accepted from terminal text, process exit, or a worker's self-reported done event alone.
 - **P05-AC04:** A crashed or disconnected worker leaves a recoverable known or explicitly unknown attempt. Retry preserves the prior attempt and its effects.
 - **P05-AC05:** Every P05-owned legacy functional group has parity evidence or an explicit replacement and data migration decision. Later client, dashboard, federation, and domain groups have an owned inventory and migration plan, with parity gated in their own phases. Changed artifacts invalidate bound approvals, and migration preserves distinct board, run, hub-work, and shared-board identities.
-- **P05-AC06:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+- **P05-AC06:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 
 <a id="P05-T01"></a>
 
@@ -2116,7 +2116,7 @@ A developer can finish a reviewable software task through durable coordinated wo
 1. Review the phase-owned components in the preservation matrix and identify every changed caller, command, route, state record, integration and UI action; also include cross-phase callers affected by this work.
 2. Record retain/wrap/extract/extend/replace decisions with reasons. Map each old assertion and data identity to its target. Capture missing characterization fixtures before refactoring.
 3. Run the available baseline checks and define the candidate, migration/rollback and added-functionality checks. Candidate execution belongs to the implementation and final phase gate, so this preparation does not depend on future code being finished.
-4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction.
+4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Codex reviews any capability change against the complete user-authorized scope; autonomy does not permit silent scope reduction.
 
 **Deliverables**
 
@@ -2154,7 +2154,7 @@ A developer can finish a reviewable software task through durable coordinated wo
 
 1. Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
-3. Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.
+3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
 
 **Deliverables**
@@ -2171,7 +2171,7 @@ A developer can finish a reviewable software task through durable coordinated wo
 3. P05-GATE-AC03: No task becomes accepted from terminal text, process exit, or a worker's self-reported done event alone.
 4. P05-GATE-AC04: A crashed or disconnected worker leaves a recoverable known or explicitly unknown attempt. Retry preserves the prior attempt and its effects.
 5. P05-GATE-AC05: Every P05-owned legacy functional group has parity evidence or an explicit replacement and data migration decision. Later client, dashboard, federation, and domain groups have an owned inventory and migration plan, with parity gated in their own phases. Changed artifacts invalidate bound approvals, and migration preserves distinct board, run, hub-work, and shared-board identities.
-6. P05-GATE-AC06: Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+6. P05-GATE-AC06: Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 7. P05-GATE-AC07: All assigned failure scenarios and component checks have reviewed evidence for the candidate; missing or skipped required checks remain blocking.
 8. P05-GATE-AC08: The required reviewer and advancement decision are recorded, and the phase commit is verified on the current remote feature branch. No merge is performed.
 
@@ -2460,7 +2460,7 @@ Developers use Agentmux from their preferred supported client.
 1. Review the phase-owned components in the preservation matrix and identify every changed caller, command, route, state record, integration and UI action; also include cross-phase callers affected by this work.
 2. Record retain/wrap/extract/extend/replace decisions with reasons. Map each old assertion and data identity to its target. Capture missing characterization fixtures before refactoring.
 3. Run the available baseline checks and define the candidate, migration/rollback and added-functionality checks. Candidate execution belongs to the implementation and final phase gate, so this preparation does not depend on future code being finished.
-4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction.
+4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Codex reviews any capability change against the complete user-authorized scope; autonomy does not permit silent scope reduction.
 
 **Deliverables**
 
@@ -2588,7 +2588,7 @@ Developers use Agentmux from their preferred supported client.
 
 1. Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
-3. Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.
+3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
 
 **Deliverables**
@@ -2895,7 +2895,7 @@ Authorized users can understand work across agents, projects, and hubs.
 1. Review the phase-owned components in the preservation matrix and identify every changed caller, command, route, state record, integration and UI action; also include cross-phase callers affected by this work.
 2. Record retain/wrap/extract/extend/replace decisions with reasons. Map each old assertion and data identity to its target. Capture missing characterization fixtures before refactoring.
 3. Run the available baseline checks and define the candidate, migration/rollback and added-functionality checks. Candidate execution belongs to the implementation and final phase gate, so this preparation does not depend on future code being finished.
-4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction.
+4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Codex reviews any capability change against the complete user-authorized scope; autonomy does not permit silent scope reduction.
 
 **Deliverables**
 
@@ -2975,7 +2975,7 @@ Authorized users can understand work across agents, projects, and hubs.
 
 1. Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
-3. Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.
+3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
 
 **Deliverables**
@@ -3020,7 +3020,7 @@ Plugins request bounded semantic advice with traceable evidence and safe fallbac
 - **P08-AC03:** Cache keys bind tenant, scope, source/version, definition/model, and policy. Revoked sharing cannot return a cached restricted result.
 - **P08-AC04:** All calls obey size/time/budget limits and account for failed/uncertain attempts. Replay of stored annotations makes no new paid call.
 - **P08-AC05:** Each enabled definition passes its own labeled holdout criteria and workflow non-regression threshold before promotion.
-- **P08-AC06:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+- **P08-AC06:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 
 <a id="P08-T01"></a>
 
@@ -3235,7 +3235,7 @@ Plugins request bounded semantic advice with traceable evidence and safe fallbac
 1. Review the phase-owned components in the preservation matrix and identify every changed caller, command, route, state record, integration and UI action; also include cross-phase callers affected by this work.
 2. Record retain/wrap/extract/extend/replace decisions with reasons. Map each old assertion and data identity to its target. Capture missing characterization fixtures before refactoring.
 3. Run the available baseline checks and define the candidate, migration/rollback and added-functionality checks. Candidate execution belongs to the implementation and final phase gate, so this preparation does not depend on future code being finished.
-4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction.
+4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Codex reviews any capability change against the complete user-authorized scope; autonomy does not permit silent scope reduction.
 
 **Deliverables**
 
@@ -3370,7 +3370,7 @@ Plugins request bounded semantic advice with traceable evidence and safe fallbac
 
 1. Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
-3. Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.
+3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
 
 **Deliverables**
@@ -3387,7 +3387,7 @@ Plugins request bounded semantic advice with traceable evidence and safe fallbac
 3. P08-GATE-AC03: Cache keys bind tenant, scope, source/version, definition/model, and policy. Revoked sharing cannot return a cached restricted result.
 4. P08-GATE-AC04: All calls obey size/time/budget limits and account for failed/uncertain attempts. Replay of stored annotations makes no new paid call.
 5. P08-GATE-AC05: Each enabled definition passes its own labeled holdout criteria and workflow non-regression threshold before promotion.
-6. P08-GATE-AC06: Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+6. P08-GATE-AC06: Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 7. P08-GATE-AC07: All assigned failure scenarios and component checks have reviewed evidence for the candidate; missing or skipped required checks remain blocking.
 8. P08-GATE-AC08: The required reviewer and advancement decision are recorded, and the phase commit is verified on the current remote feature branch. No merge is performed.
 
@@ -3413,7 +3413,7 @@ The same Jev capabilities improve supported clients with host-specific packaging
 - **P09-AC03:** Every claimed host capability passes on that actual host. Unsupported hooks/compaction are declared.
 - **P09-AC04:** Skills preserve counterevidence and required obligations and cannot override system permissions or invent authority.
 - **P09-AC05:** Live semantic and end-to-end cost gates pass before the corresponding skill is enabled by default.
-- **P09-AC06:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+- **P09-AC06:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 
 <a id="P09-T01"></a>
 
@@ -3628,7 +3628,7 @@ The same Jev capabilities improve supported clients with host-specific packaging
 1. Review the phase-owned components in the preservation matrix and identify every changed caller, command, route, state record, integration and UI action; also include cross-phase callers affected by this work.
 2. Record retain/wrap/extract/extend/replace decisions with reasons. Map each old assertion and data identity to its target. Capture missing characterization fixtures before refactoring.
 3. Run the available baseline checks and define the candidate, migration/rollback and added-functionality checks. Candidate execution belongs to the implementation and final phase gate, so this preparation does not depend on future code being finished.
-4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction.
+4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Codex reviews any capability change against the complete user-authorized scope; autonomy does not permit silent scope reduction.
 
 **Deliverables**
 
@@ -5834,7 +5834,7 @@ The same Jev capabilities improve supported clients with host-specific packaging
 
 1. Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
-3. Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.
+3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
 
 **Deliverables**
@@ -5851,7 +5851,7 @@ The same Jev capabilities improve supported clients with host-specific packaging
 3. P09-GATE-AC03: Every claimed host capability passes on that actual host. Unsupported hooks/compaction are declared.
 4. P09-GATE-AC04: Skills preserve counterevidence and required obligations and cannot override system permissions or invent authority.
 5. P09-GATE-AC05: Live semantic and end-to-end cost gates pass before the corresponding skill is enabled by default.
-6. P09-GATE-AC06: Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+6. P09-GATE-AC06: Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 7. P09-GATE-AC07: All assigned failure scenarios and component checks have reviewed evidence for the candidate; missing or skipped required checks remain blocking.
 8. P09-GATE-AC08: The required reviewer and advancement decision are recorded, and the phase commit is verified on the current remote feature branch. No merge is performed.
 
@@ -6243,7 +6243,7 @@ Independent teams share authorized work while retaining their own authority.
 1. Review the phase-owned components in the preservation matrix and identify every changed caller, command, route, state record, integration and UI action; also include cross-phase callers affected by this work.
 2. Record retain/wrap/extract/extend/replace decisions with reasons. Map each old assertion and data identity to its target. Capture missing characterization fixtures before refactoring.
 3. Run the available baseline checks and define the candidate, migration/rollback and added-functionality checks. Candidate execution belongs to the implementation and final phase gate, so this preparation does not depend on future code being finished.
-4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction.
+4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Codex reviews any capability change against the complete user-authorized scope; autonomy does not permit silent scope reduction.
 
 **Deliverables**
 
@@ -6804,7 +6804,7 @@ Independent teams share authorized work while retaining their own authority.
 
 1. Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
-3. Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.
+3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
 
 **Deliverables**
@@ -7109,7 +7109,7 @@ Industrial workflows extend Agentmux through the same contracts as other domains
 1. Review the phase-owned components in the preservation matrix and identify every changed caller, command, route, state record, integration and UI action; also include cross-phase callers affected by this work.
 2. Record retain/wrap/extract/extend/replace decisions with reasons. Map each old assertion and data identity to its target. Capture missing characterization fixtures before refactoring.
 3. Run the available baseline checks and define the candidate, migration/rollback and added-functionality checks. Candidate execution belongs to the implementation and final phase gate, so this preparation does not depend on future code being finished.
-4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction.
+4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Codex reviews any capability change against the complete user-authorized scope; autonomy does not permit silent scope reduction.
 
 **Deliverables**
 
@@ -7892,7 +7892,7 @@ Industrial workflows extend Agentmux through the same contracts as other domains
 
 1. Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
-3. Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.
+3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
 
 **Deliverables**
@@ -7934,7 +7934,7 @@ Customers can install, operate, recover, and support the complete launch product
 - **P12-AC02:** A new developer installs and completes the reference task using only published docs on every supported platform.
 - **P12-AC03:** A team administrator enrolls two organizations, shares a scoped project, delegates work, survives a partition, and restores a backup.
 - **P12-AC04:** The approved capacity/SLO targets and recovery drill pass without losing acknowledged durable records within the tested fault model.
-- **P12-AC05:** Ryan and Nick review the release-readiness evidence and record provisional readiness plus all outstanding MERGE-01 requirements. P12 acceptance does not authorize merge or release; the separate final gate requires the entire approved plan, their real-instance orchestration evidence and Ryan's explicit merge approval.
+- **P12-AC05:** Codex reviews release-readiness evidence and records provisional readiness plus all outstanding MERGE-01 requirements. P12 acceptance does not authorize merge or release; final branch acceptance requires every phase and safe bilateral orchestration between independently enrolled, agent-operated real hubs on the exact candidate.
 - **P12-AC06:** The approved NATS storage profile passes record/checkpoint/artifact restore, projection rebuild, retention-gap and migration rollback drills under the declared process/host/disk/quorum failure model. Published RPO/RTO and capacity claims match observed evidence, and no unreviewed SQL authority remains.
 - **P12-AC07:** Every component and behavior check has a reviewed release disposition. Required baseline/candidate comparisons and migration drills pass on the supported matrix; no skipped check, missing component or unapproved feature removal can be hidden by a successful new reference workflow.
 - **P12-AC08:** Fresh-user and upgrade drills pass LOCAL-01 cold/warm/concurrent startup, actionable Docker failures, explicit stop, persistent data recovery and scoped hub status on the supported platform/client matrix. No launch silently upgrades an incompatible live stack, loses durable work or bypasses a required phase gate.
@@ -7975,7 +7975,7 @@ Customers can install, operate, recover, and support the complete launch product
 4. Run qualified storage failure and recovery drills with pinned disk/sync/replication settings, including capacity exhaustion. Verify restored reservations before processing queued commands.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 6. Repeat FAIL-55–FAIL-62 with the exact packaged release, real federation and each advertised launch integration; record readiness deadlines, versions, volume identity and observed timing.
-7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact merge candidate after all required phases pass.
+7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact final branch candidate after all required phases pass.
 
 **Evidence:** not yet recorded
 
@@ -8018,7 +8018,7 @@ Customers can install, operate, recover, and support the complete launch product
 4. Run qualified storage failure and recovery drills with pinned disk/sync/replication settings, including capacity exhaustion. Verify restored reservations before processing queued commands.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 6. Repeat FAIL-55–FAIL-62 with the exact packaged release, real federation and each advertised launch integration; record readiness deadlines, versions, volume identity and observed timing.
-7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact merge candidate after all required phases pass.
+7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact final branch candidate after all required phases pass.
 
 **Evidence:** not yet recorded
 
@@ -8061,7 +8061,7 @@ Customers can install, operate, recover, and support the complete launch product
 4. Run qualified storage failure and recovery drills with pinned disk/sync/replication settings, including capacity exhaustion. Verify restored reservations before processing queued commands.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 6. Repeat FAIL-55–FAIL-62 with the exact packaged release, real federation and each advertised launch integration; record readiness deadlines, versions, volume identity and observed timing.
-7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact merge candidate after all required phases pass.
+7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact final branch candidate after all required phases pass.
 
 **Evidence:** not yet recorded
 
@@ -8104,7 +8104,7 @@ Customers can install, operate, recover, and support the complete launch product
 4. Run qualified storage failure and recovery drills with pinned disk/sync/replication settings, including capacity exhaustion. Verify restored reservations before processing queued commands.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 6. Repeat FAIL-55–FAIL-62 with the exact packaged release, real federation and each advertised launch integration; record readiness deadlines, versions, volume identity and observed timing.
-7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact merge candidate after all required phases pass.
+7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact final branch candidate after all required phases pass.
 
 **Evidence:** not yet recorded
 
@@ -8147,7 +8147,7 @@ Customers can install, operate, recover, and support the complete launch product
 4. Run qualified storage failure and recovery drills with pinned disk/sync/replication settings, including capacity exhaustion. Verify restored reservations before processing queued commands.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 6. Repeat FAIL-55–FAIL-62 with the exact packaged release, real federation and each advertised launch integration; record readiness deadlines, versions, volume identity and observed timing.
-7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact merge candidate after all required phases pass.
+7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact final branch candidate after all required phases pass.
 
 **Evidence:** not yet recorded
 
@@ -8190,7 +8190,7 @@ Customers can install, operate, recover, and support the complete launch product
 4. Run qualified storage failure and recovery drills with pinned disk/sync/replication settings, including capacity exhaustion. Verify restored reservations before processing queued commands.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 6. Repeat FAIL-55–FAIL-62 with the exact packaged release, real federation and each advertised launch integration; record readiness deadlines, versions, volume identity and observed timing.
-7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact merge candidate after all required phases pass.
+7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact final branch candidate after all required phases pass.
 
 **Evidence:** not yet recorded
 
@@ -8233,7 +8233,7 @@ Customers can install, operate, recover, and support the complete launch product
 4. Run qualified storage failure and recovery drills with pinned disk/sync/replication settings, including capacity exhaustion. Verify restored reservations before processing queued commands.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 6. Repeat FAIL-55–FAIL-62 with the exact packaged release, real federation and each advertised launch integration; record readiness deadlines, versions, volume identity and observed timing.
-7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact merge candidate after all required phases pass.
+7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact final branch candidate after all required phases pass.
 
 **Evidence:** not yet recorded
 
@@ -8253,7 +8253,7 @@ Customers can install, operate, recover, and support the complete launch product
 1. Review the phase-owned components in the preservation matrix and identify every changed caller, command, route, state record, integration and UI action; also include cross-phase callers affected by this work.
 2. Record retain/wrap/extract/extend/replace decisions with reasons. Map each old assertion and data identity to its target. Capture missing characterization fixtures before refactoring.
 3. Run the available baseline checks and define the candidate, migration/rollback and added-functionality checks. Candidate execution belongs to the implementation and final phase gate, so this preparation does not depend on future code being finished.
-4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction.
+4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Codex reviews any capability change against the complete user-authorized scope; autonomy does not permit silent scope reduction.
 
 **Deliverables**
 
@@ -8275,7 +8275,7 @@ Customers can install, operate, recover, and support the complete launch product
 4. Run qualified storage failure and recovery drills with pinned disk/sync/replication settings, including capacity exhaustion. Verify restored reservations before processing queued commands.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 6. Repeat FAIL-55–FAIL-62 with the exact packaged release, real federation and each advertised launch integration; record readiness deadlines, versions, volume identity and observed timing.
-7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact merge candidate after all required phases pass.
+7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact final branch candidate after all required phases pass.
 
 **Evidence:** not yet recorded
 
@@ -8318,7 +8318,7 @@ Customers can install, operate, recover, and support the complete launch product
 4. Run qualified storage failure and recovery drills with pinned disk/sync/replication settings, including capacity exhaustion. Verify restored reservations before processing queued commands.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 6. Repeat FAIL-55–FAIL-62 with the exact packaged release, real federation and each advertised launch integration; record readiness deadlines, versions, volume identity and observed timing.
-7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact merge candidate after all required phases pass.
+7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact final branch candidate after all required phases pass.
 
 **Evidence:** not yet recorded
 
@@ -8327,7 +8327,7 @@ Customers can install, operate, recover, and support the complete launch product
 
 <a id="P12-T10"></a>
 
-### P12-T10: Prepare the MERGE-01 two-person, two-instance rehearsal and evidence package
+### P12-T10: Prepare the MERGE-01 two-instance, agent-operated rehearsal and evidence package
 
 **Status:** planned. **Owner:** Codex.
 
@@ -8335,7 +8335,7 @@ Customers can install, operate, recover, and support the complete launch product
 
 **Implementation plan**
 
-1. Inspect the existing source and callers for this exact work item: Prepare the MERGE-01 two-person, two-instance rehearsal and evidence package. Keep final merge authorization separate from P12 advancement so later approved phases can finish without an early merge.
+1. Inspect the existing source and callers for this exact work item: Prepare the MERGE-01 two-instance, agent-operated rehearsal and evidence package. Final branch acceptance follows all required phases; no phase or final acceptance authorizes merging.
 2. Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
@@ -8343,12 +8343,12 @@ Customers can install, operate, recover, and support the complete launch product
 
 **Deliverables**
 
-1. Prepare the MERGE-01 two-person, two-instance rehearsal and evidence package. Keep final merge authorization separate from P12 advancement so later approved phases can finish without an early merge.
+1. Prepare the MERGE-01 two-instance, agent-operated rehearsal and evidence package. Final branch acceptance follows all required phases; no phase or final acceptance authorizes merging.
 2. Focused regression evidence and affected compatibility/migration records
 
 **Acceptance criteria**
 
-1. P12-T10-AC01: The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Prepare the MERGE-01 two-person, two-instance rehearsal and evidence package. Keep final merge authorization separate from P12 advancement so later approved phases can finish without an early merge.
+1. P12-T10-AC01: The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Prepare the MERGE-01 two-instance, agent-operated rehearsal and evidence package. Final branch acceptance follows all required phases; no phase or final acceptance authorizes merging.
 2. P12-T10-AC02: Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope.
 3. P12-T10-AC03: Affected existing behavior has a baseline/candidate comparison or an approved behavior-change record; no capability, required assertion or stored identity is silently removed.
 4. P12-T10-AC04: Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented.
@@ -8361,7 +8361,7 @@ Customers can install, operate, recover, and support the complete launch product
 4. Run qualified storage failure and recovery drills with pinned disk/sync/replication settings, including capacity exhaustion. Verify restored reservations before processing queued commands.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 6. Repeat FAIL-55–FAIL-62 with the exact packaged release, real federation and each advertised launch integration; record readiness deadlines, versions, volume identity and observed timing.
-7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact merge candidate after all required phases pass.
+7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact final branch candidate after all required phases pass.
 
 **Evidence:** not yet recorded
 
@@ -8380,7 +8380,7 @@ Customers can install, operate, recover, and support the complete launch product
 
 1. Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
-3. Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.
+3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
 5. Preserve the assertions assigned to this task for AMX-BASE-006 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements.
 
@@ -8397,7 +8397,7 @@ Customers can install, operate, recover, and support the complete launch product
 2. P12-GATE-AC02: A new developer installs and completes the reference task using only published docs on every supported platform.
 3. P12-GATE-AC03: A team administrator enrolls two organizations, shares a scoped project, delegates work, survives a partition, and restores a backup.
 4. P12-GATE-AC04: The approved capacity/SLO targets and recovery drill pass without losing acknowledged durable records within the tested fault model.
-5. P12-GATE-AC05: Ryan and Nick review the release-readiness evidence and record provisional readiness plus all outstanding MERGE-01 requirements. P12 acceptance does not authorize merge or release; the separate final gate requires the entire approved plan, their real-instance orchestration evidence and Ryan's explicit merge approval.
+5. P12-GATE-AC05: Codex reviews release-readiness evidence and records provisional readiness plus all outstanding MERGE-01 requirements. P12 acceptance does not authorize merge or release; final branch acceptance requires every phase and safe bilateral orchestration between independently enrolled, agent-operated real hubs on the exact candidate.
 6. P12-GATE-AC06: The approved NATS storage profile passes record/checkpoint/artifact restore, projection rebuild, retention-gap and migration rollback drills under the declared process/host/disk/quorum failure model. Published RPO/RTO and capacity claims match observed evidence, and no unreviewed SQL authority remains.
 7. P12-GATE-AC07: Every component and behavior check has a reviewed release disposition. Required baseline/candidate comparisons and migration drills pass on the supported matrix; no skipped check, missing component or unapproved feature removal can be hidden by a successful new reference workflow.
 8. P12-GATE-AC08: Fresh-user and upgrade drills pass LOCAL-01 cold/warm/concurrent startup, actionable Docker failures, explicit stop, persistent data recovery and scoped hub status on the supported platform/client matrix. No launch silently upgrades an incompatible live stack, loses durable work or bypasses a required phase gate.
@@ -8412,7 +8412,7 @@ Customers can install, operate, recover, and support the complete launch product
 4. Run qualified storage failure and recovery drills with pinned disk/sync/replication settings, including capacity exhaustion. Verify restored reservations before processing queued commands.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 6. Repeat FAIL-55–FAIL-62 with the exact packaged release, real federation and each advertised launch integration; record readiness deadlines, versions, volume identity and observed timing.
-7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact merge candidate after all required phases pass.
+7. Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact final branch candidate after all required phases pass.
 
 **Evidence:** not yet recorded
 
@@ -8428,7 +8428,7 @@ Every remaining research proposal receives a measured implementation decision.
 - **P13-AC02:** Each batch passes schema, access, failure, semantic holdout, host-capability, and end-to-end economic gates.
 - **P13-AC03:** Compaction preserves mandatory obligations and active evidence and runs only on supported hosts.
 - **P13-AC04:** No savings claim relies only on shortened context or a provider's confidence score. Outcome quality and total cost meet approved thresholds.
-- **P13-AC05:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+- **P13-AC05:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 
 <a id="P13-T01"></a>
 
@@ -8603,7 +8603,7 @@ Every remaining research proposal receives a measured implementation decision.
 1. Review the phase-owned components in the preservation matrix and identify every changed caller, command, route, state record, integration and UI action; also include cross-phase callers affected by this work.
 2. Record retain/wrap/extract/extend/replace decisions with reasons. Map each old assertion and data identity to its target. Capture missing characterization fixtures before refactoring.
 3. Run the available baseline checks and define the candidate, migration/rollback and added-functionality checks. Candidate execution belongs to the implementation and final phase gate, so this preparation does not depend on future code being finished.
-4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction.
+4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Codex reviews any capability change against the complete user-authorized scope; autonomy does not permit silent scope reduction.
 
 **Deliverables**
 
@@ -13109,7 +13109,7 @@ Every remaining research proposal receives a measured implementation decision.
 
 1. Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
-3. Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.
+3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
 
 **Deliverables**
@@ -13125,7 +13125,7 @@ Every remaining research proposal receives a measured implementation decision.
 2. P13-GATE-AC02: Each batch passes schema, access, failure, semantic holdout, host-capability, and end-to-end economic gates.
 3. P13-GATE-AC03: Compaction preserves mandatory obligations and active evidence and runs only on supported hosts.
 4. P13-GATE-AC04: No savings claim relies only on shortened context or a provider's confidence score. Outcome quality and total cost meet approved thresholds.
-5. P13-GATE-AC05: Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+5. P13-GATE-AC05: Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 6. P13-GATE-AC06: All assigned failure scenarios and component checks have reviewed evidence for the candidate; missing or skipped required checks remain blocking.
 7. P13-GATE-AC07: The required reviewer and advancement decision are recorded, and the phase commit is verified on the current remote feature branch. No merge is performed.
 
@@ -13150,7 +13150,7 @@ Untrusted third-party plugins gain a tested containment option.
 - **P14-AC02:** Sandboxed and trusted implementations pass the same language-neutral domain contract tests.
 - **P14-AC03:** Required native/device integrations declare and enforce narrower support or an explicitly trusted execution host.
 - **P14-AC04:** Security review and per-platform tests pass before claiming untrusted-plugin support. Marketplace availability requires this gate or a clearly restricted trusted catalog.
-- **P14-AC05:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+- **P14-AC05:** Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 
 <a id="P14-T01"></a>
 
@@ -13325,7 +13325,7 @@ Untrusted third-party plugins gain a tested containment option.
 1. Review the phase-owned components in the preservation matrix and identify every changed caller, command, route, state record, integration and UI action; also include cross-phase callers affected by this work.
 2. Record retain/wrap/extract/extend/replace decisions with reasons. Map each old assertion and data identity to its target. Capture missing characterization fixtures before refactoring.
 3. Run the available baseline checks and define the candidate, migration/rollback and added-functionality checks. Candidate execution belongs to the implementation and final phase gate, so this preparation does not depend on future code being finished.
-4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Obtain the required Ryan/Nick review for a capability removal or reduction.
+4. Maintain the inventory and behavior ownership throughout the phase. Missing environments stay open. Codex reviews any capability change against the complete user-authorized scope; autonomy does not permit silent scope reduction.
 
 **Deliverables**
 
@@ -13363,7 +13363,7 @@ Untrusted third-party plugins gain a tested containment option.
 
 1. Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
-3. Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.
+3. Codex reviews actual deliverables and subagent findings and records the advancement decision. Parallelize bounded subagent work only within this phase. Missing evidence remains blocking; no human approval is required.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
 
 **Deliverables**
@@ -13379,7 +13379,7 @@ Untrusted third-party plugins gain a tested containment option.
 2. P14-GATE-AC02: Sandboxed and trusted implementations pass the same language-neutral domain contract tests.
 3. P14-GATE-AC03: Required native/device integrations declare and enforce narrower support or an explicitly trusted execution host.
 4. P14-GATE-AC04: Security review and per-platform tests pass before claiming untrusted-plugin support. Marketplace availability requires this gate or a clearly restricted trusted catalog.
-5. P14-GATE-AC05: Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick.
+5. P14-GATE-AC05: Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification.
 6. P14-GATE-AC06: All assigned failure scenarios and component checks have reviewed evidence for the candidate; missing or skipped required checks remain blocking.
 7. P14-GATE-AC07: The required reviewer and advancement decision are recorded, and the phase commit is verified on the current remote feature branch. No merge is performed.
 
@@ -13397,7 +13397,7 @@ Untrusted third-party plugins gain a tested containment option.
 
 <a id="MERGE-01"></a>
 
-### MERGE-01: Ryan/Nick real-instance acceptance and final merge decision
+### MERGE-01: Autonomous final feature-branch acceptance and verified push
 
 **Status:** planned. **Owner:** Codex.
 
@@ -13406,22 +13406,22 @@ Untrusted third-party plugins gain a tested containment option.
 **Implementation plan**
 
 1. Verify every approved phase against the exact candidate and supported environments; collect the phase-by-phase evidence index and resolve every required gap.
-2. Have Ryan and Nick each install the candidate on their own machine and supported terminal. Demonstrate automatic Compose start and reuse, instance identity, readiness and scoped hub status.
-3. Connect their independently administered hubs with explicit scoped grants. Run the plan's read-only fixture orchestration from Ryan to Nick, then Nick to Ryan, with origin-owned acceptance in each direction.
+2. Use agent-operated, independently enrolled running hubs with distinct administration identities. Demonstrate automatic Compose start and reuse, instance identity, readiness and scoped hub status.
+3. Connect those hubs with explicit scoped grants. Run the plan's read-only fixture orchestration in both directions, with origin-owned acceptance in each direction.
 4. Preserve fixture checksums, artifact digests, task/delegation/attempt/result identities and terminal/dashboard observations. Verify bounded outputs and unchanged inputs; rerun affected checks after material changes.
-5. Obtain and record their dated joint review and Ryan's subsequent explicit authorization for this exact candidate and target branch. Keep the branch unmerged until that authorization exists.
+5. Codex reviews the actual evidence and subagent findings, records its dated final acceptance of this exact candidate and verifies the pushed feature-branch commit. Record mergeAuthorized=false; this acceptance never permits a merge.
 
 **Deliverables**
 
-1. Completed finalMergeGate record and linked real-instance evidence
-2. Dated joint review and explicit Ryan merge decision
+1. Completed final acceptance record and linked real-instance evidence
+2. Dated Codex review, verified remote commit and mergeAuthorized=false
 
 **Acceptance criteria**
 
 1. MERGE-01-AC01: Every required P00–P14 criterion and environment has reviewed, current evidence with no unresolved required gap.
-2. MERGE-01-AC02: Ryan and Nick successfully operate their own real instances and complete the non-destructive orchestration in both directions, including explicit origin acceptance.
+2. MERGE-01-AC02: Two agent-operated, independently enrolled real hubs complete the non-destructive orchestration in both directions, including explicit origin acceptance.
 3. MERGE-01-AC03: The complete finalMergeGate evidence bundle identifies the exact candidate, scopes, operations, artifacts, checksums and before/after observations.
-4. MERGE-01-AC04: Ryan and Nick jointly review that evidence, and Ryan explicitly authorizes a merge for the exact candidate and target branch. No automated or inferred approval is accepted.
+4. MERGE-01-AC04: Codex reviews that evidence and accepts the exact candidate after verifying the remote feature-branch commit. No human review is required and no merge is authorized.
 
 **Verification**
 

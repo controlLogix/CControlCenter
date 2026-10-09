@@ -1,0 +1,485 @@
+{
+  "baseline": {
+    "parent": {
+      "schemaVersion": "0.1.0",
+      "instanceId": "plugin-parent",
+      "packageId": "example-toolkit",
+      "packageVersion": "1.0.0",
+      "packageDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "hubId": "hub-origin",
+      "parent": null,
+      "effectiveGrant": {
+        "grantId": "grant-parent",
+        "issuerHubId": "hub-origin",
+        "subjectInstanceId": "plugin-parent",
+        "scope": {
+          "organizationId": "org-demo",
+          "projectId": "project-demo",
+          "workspaceId": "ws-demo"
+        },
+        "actions": [
+          "task-read",
+          "task-inspect"
+        ],
+        "resourceIds": [
+          "task-one"
+        ],
+        "issuedAt": "2026-10-09T12:00:00Z",
+        "expiresAt": "2026-10-09T13:00:00Z",
+        "policyRef": {
+          "id": "policy-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "parentGrantRef": null,
+        "revision": 1
+      },
+      "services": {
+        "logger": {
+          "interfaceId": "logger",
+          "apiMajor": 1,
+          "scopeRef": {
+            "id": "scope-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "handleId": "parent-handle-logger",
+          "transport": "nats"
+        },
+        "config": {
+          "interfaceId": "config",
+          "apiMajor": 1,
+          "scopeRef": {
+            "id": "scope-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "handleId": "parent-handle-config",
+          "transport": "nats"
+        },
+        "lifecycle": {
+          "interfaceId": "lifecycle",
+          "apiMajor": 1,
+          "scopeRef": {
+            "id": "scope-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "handleId": "parent-handle-lifecycle",
+          "transport": "nats"
+        },
+        "clock": {
+          "interfaceId": "clock",
+          "apiMajor": 1,
+          "scopeRef": {
+            "id": "scope-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "handleId": "parent-handle-clock",
+          "transport": "nats"
+        },
+        "tracing": {
+          "interfaceId": "tracing",
+          "apiMajor": 1,
+          "scopeRef": {
+            "id": "scope-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "handleId": "parent-handle-tracing",
+          "transport": "nats"
+        },
+        "metrics": {
+          "interfaceId": "metrics",
+          "apiMajor": 1,
+          "scopeRef": {
+            "id": "scope-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "handleId": "parent-handle-metrics",
+          "transport": "nats"
+        },
+        "domainGateway": {
+          "interfaceId": "domain-gateway",
+          "apiMajor": 1,
+          "scopeRef": {
+            "id": "scope-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "handleId": "parent-handle-domain-gateway",
+          "transport": "nats"
+        }
+      },
+      "secretReferences": [
+        {
+          "id": "secret-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        }
+      ],
+      "configurationRevision": 1
+    },
+    "child": {
+      "schemaVersion": "0.1.0",
+      "instanceId": "plugin-child",
+      "packageId": "example-toolkit",
+      "packageVersion": "1.0.0",
+      "packageDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "hubId": "hub-origin",
+      "parent": {
+        "instanceId": "plugin-parent",
+        "relationship": "private"
+      },
+      "effectiveGrant": {
+        "grantId": "grant-child",
+        "issuerHubId": "hub-origin",
+        "subjectInstanceId": "plugin-child",
+        "scope": {
+          "organizationId": "org-demo",
+          "projectId": "project-demo",
+          "workspaceId": "ws-demo"
+        },
+        "actions": [
+          "task-read"
+        ],
+        "resourceIds": [
+          "task-one"
+        ],
+        "issuedAt": "2026-10-09T12:00:00Z",
+        "expiresAt": "2026-10-09T13:00:00Z",
+        "policyRef": {
+          "id": "policy-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "parentGrantRef": {
+          "id": "grant-parent",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "revision": 1
+      },
+      "services": {
+        "logger": {
+          "interfaceId": "logger",
+          "apiMajor": 1,
+          "scopeRef": {
+            "id": "scope-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "handleId": "handle-logger",
+          "transport": "nats"
+        },
+        "config": {
+          "interfaceId": "config",
+          "apiMajor": 1,
+          "scopeRef": {
+            "id": "scope-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "handleId": "handle-config",
+          "transport": "nats"
+        },
+        "lifecycle": {
+          "interfaceId": "lifecycle",
+          "apiMajor": 1,
+          "scopeRef": {
+            "id": "scope-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "handleId": "handle-lifecycle",
+          "transport": "nats"
+        },
+        "clock": {
+          "interfaceId": "clock",
+          "apiMajor": 1,
+          "scopeRef": {
+            "id": "scope-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "handleId": "handle-clock",
+          "transport": "nats"
+        },
+        "tracing": {
+          "interfaceId": "tracing",
+          "apiMajor": 1,
+          "scopeRef": {
+            "id": "scope-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "handleId": "handle-tracing",
+          "transport": "nats"
+        },
+        "metrics": {
+          "interfaceId": "metrics",
+          "apiMajor": 1,
+          "scopeRef": {
+            "id": "scope-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "handleId": "handle-metrics",
+          "transport": "nats"
+        },
+        "domainGateway": {
+          "interfaceId": "domain-gateway",
+          "apiMajor": 1,
+          "scopeRef": {
+            "id": "scope-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "handleId": "handle-domain-gateway",
+          "transport": "nats"
+        }
+      },
+      "secretReferences": [
+        {
+          "id": "secret-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        }
+      ],
+      "configurationRevision": 1
+    },
+    "manifest": {
+      "schemaVersion": "0.1.0",
+      "packageId": "example-toolkit",
+      "version": "1.0.0",
+      "apiMajor": 1,
+      "installationModes": [
+        "independent",
+        "private-child"
+      ],
+      "platforms": [
+        {
+          "os": "linux",
+          "arch": "amd64"
+        },
+        {
+          "os": "darwin",
+          "arch": "arm64"
+        }
+      ],
+      "runtime": {
+        "kind": "process",
+        "executableRef": "bin/plugin",
+        "args": [
+          "--mode",
+          "serve"
+        ],
+        "workingDirectoryPolicy": "assigned-workspace"
+      },
+      "dependencies": [],
+      "children": [
+        {
+          "packageId": "example-modbus",
+          "relationship": "independent-reference",
+          "required": false
+        }
+      ],
+      "requestedCapabilities": [
+        {
+          "action": "task-read",
+          "resourceClass": "task",
+          "required": true
+        }
+      ],
+      "configurationSchemaRef": "schemas/config.json",
+      "contributions": [
+        {
+          "kind": "tool",
+          "id": "inspect-project",
+          "contractRef": "contracts/inspect.json"
+        }
+      ],
+      "lifecycle": {
+        "startDeadlineMs": 10000,
+        "drainDeadlineMs": 30000,
+        "restartLimit": 3
+      },
+      "migrations": []
+    }
+  },
+  "cases": [
+    {
+      "id": "private-child-with-attenuated-actions",
+      "errors": []
+    },
+    {
+      "id": "private-child-wrong-parent",
+      "changes": [
+        {
+          "path": [
+            "child",
+            "parent",
+            "instanceId"
+          ],
+          "value": "other-parent"
+        }
+      ],
+      "errors": [
+        "parent_instance_binding"
+      ]
+    },
+    {
+      "id": "private-child-cannot-change-organization",
+      "changes": [
+        {
+          "path": [
+            "child",
+            "effectiveGrant",
+            "scope",
+            "organizationId"
+          ],
+          "value": "other-org"
+        }
+      ],
+      "errors": [
+        "scope_escalation"
+      ]
+    },
+    {
+      "id": "private-child-cannot-add-action",
+      "changes": [
+        {
+          "path": [
+            "child",
+            "effectiveGrant",
+            "actions"
+          ],
+          "value": [
+            "task-write"
+          ]
+        }
+      ],
+      "errors": [
+        "capability_escalation"
+      ]
+    },
+    {
+      "id": "private-child-cannot-add-resource",
+      "changes": [
+        {
+          "path": [
+            "child",
+            "effectiveGrant",
+            "resourceIds"
+          ],
+          "value": [
+            "task-two"
+          ]
+        }
+      ],
+      "errors": [
+        "capability_escalation"
+      ]
+    },
+    {
+      "id": "private-child-cannot-outlive-parent",
+      "changes": [
+        {
+          "path": [
+            "child",
+            "effectiveGrant",
+            "expiresAt"
+          ],
+          "value": "2026-10-09T14:00:00Z"
+        }
+      ],
+      "errors": [
+        "grant_lifetime_escalation"
+      ]
+    },
+    {
+      "id": "private-child-cannot-reference-stale-parent-grant",
+      "changes": [
+        {
+          "path": [
+            "child",
+            "effectiveGrant",
+            "parentGrantRef",
+            "revision"
+          ],
+          "value": 0
+        }
+      ],
+      "errors": [
+        "parent_grant_binding"
+      ]
+    },
+    {
+      "id": "private-child-cannot-reuse-parent-logger",
+      "changes": [
+        {
+          "path": [
+            "child",
+            "services",
+            "logger",
+            "handleId"
+          ],
+          "value": "parent-handle-logger"
+        }
+      ],
+      "errors": [
+        "parent_service_handle_reused"
+      ]
+    },
+    {
+      "id": "private-installation-must-be-declared",
+      "changes": [
+        {
+          "path": [
+            "manifest",
+            "installationModes"
+          ],
+          "value": [
+            "independent"
+          ]
+        }
+      ],
+      "errors": [
+        "installation_mode_or_package"
+      ]
+    },
+    {
+      "id": "independent-reference-does-not-inherit-parent-authority",
+      "changes": [
+        {
+          "path": [
+            "child",
+            "parent",
+            "relationship"
+          ],
+          "value": "independent-reference"
+        },
+        {
+          "path": [
+            "child",
+            "effectiveGrant",
+            "parentGrantRef"
+          ],
+          "value": null
+        },
+        {
+          "path": [
+            "child",
+            "effectiveGrant",
+            "scope",
+            "projectId"
+          ],
+          "value": "other-project"
+        }
+      ],
+      "errors": []
+    }
+  ]
+}

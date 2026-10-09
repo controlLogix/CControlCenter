@@ -1,0 +1,158 @@
+[
+  {
+    "id": "ordinary-cannot-claim-kernel",
+    "schema": "plugin-manifest",
+    "path": [
+      "protected"
+    ],
+    "value": true,
+    "keyword": "additionalProperties"
+  },
+  {
+    "id": "private-mode-must-be-declared",
+    "schema": "plugin-manifest",
+    "path": [
+      "installationModes"
+    ],
+    "value": [],
+    "keyword": "minItems"
+  },
+  {
+    "id": "no-shell-runtime-kind",
+    "schema": "plugin-manifest",
+    "path": [
+      "runtime",
+      "kind"
+    ],
+    "value": "shell",
+    "keyword": "enum"
+  },
+  {
+    "id": "new-major-is-not-silently-compatible",
+    "schema": "plugin-manifest",
+    "path": [
+      "apiMajor"
+    ],
+    "value": 2,
+    "keyword": "const"
+  },
+  {
+    "id": "no-ambient-current-user",
+    "schema": "plugin-context",
+    "path": [
+      "currentUser"
+    ],
+    "value": "other-user",
+    "keyword": "additionalProperties"
+  },
+  {
+    "id": "no-raw-secret-value",
+    "schema": "plugin-context",
+    "path": [
+      "secretReferences",
+      0,
+      "value"
+    ],
+    "value": "fixture-secret",
+    "keyword": "additionalProperties"
+  },
+  {
+    "id": "logger-not-optional",
+    "schema": "plugin-context",
+    "path": [
+      "services",
+      "logger"
+    ],
+    "remove": true,
+    "keyword": "required"
+  },
+  {
+    "id": "no-alternate-internal-transport",
+    "schema": "plugin-context",
+    "path": [
+      "services",
+      "logger",
+      "transport"
+    ],
+    "value": "http",
+    "keyword": "const"
+  },
+  {
+    "id": "missing-caller-authentication-reference",
+    "schema": "operation-context",
+    "path": [
+      "caller",
+      "authenticatedIdentityRef"
+    ],
+    "remove": true,
+    "keyword": "required"
+  },
+  {
+    "id": "unsafe-large-integer",
+    "schema": "operation-context",
+    "path": [
+      "expectedVersion"
+    ],
+    "value": 9007199254740992,
+    "keyword": "maximum"
+  },
+  {
+    "id": "unbounded-time-format",
+    "schema": "operation-context",
+    "path": [
+      "deadline"
+    ],
+    "value": "tomorrow",
+    "keyword": "pattern"
+  },
+  {
+    "id": "no-implicit-human-approval",
+    "schema": "operation-context",
+    "path": [
+      "approved"
+    ],
+    "value": true,
+    "keyword": "additionalProperties"
+  },
+  {
+    "id": "no-caller-kernel-write-flag",
+    "schema": "message-envelope",
+    "path": [
+      "operation",
+      "kernelWrite"
+    ],
+    "value": true,
+    "keyword": "additionalProperties"
+  },
+  {
+    "id": "external-kernel-package-not-in-assembly",
+    "schema": "protected-assembly",
+    "path": [
+      "plugins",
+      0,
+      "id"
+    ],
+    "value": "third-party-kernel",
+    "keyword": "enum"
+  },
+  {
+    "id": "state-needs-effect-intent-field",
+    "schema": "owner-record",
+    "path": [
+      "effects"
+    ],
+    "remove": true,
+    "keyword": "required"
+  },
+  {
+    "id": "immutable-artifact-digest-required",
+    "schema": "owner-record",
+    "path": [
+      "artifacts",
+      0,
+      "digest"
+    ],
+    "remove": true,
+    "keyword": "required"
+  }
+]

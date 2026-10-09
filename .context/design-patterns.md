@@ -583,7 +583,8 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
         "docs/planning/2026-10-09/implementation-plan.md",
         "docs/planning/2026-10-09/phases.json",
         "docs/planning/2026-10-09/component-preservation.md",
-        "docs/planning/2026-10-09/delivery/decisions/README.md"
+        "docs/planning/2026-10-09/delivery/decisions/README.md",
+        "docs/planning/2026-10-09/delivery/contracts/README.md"
       ],
       "planningRevisions": [
         {
@@ -655,7 +656,8 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
         "docs/planning/2026-10-09/phases.json",
-        "docs/planning/2026-10-09/delivery/decisions/README.md"
+        "docs/planning/2026-10-09/delivery/decisions/README.md",
+        "docs/planning/2026-10-09/delivery/contracts/README.md"
       ],
       "planningRevisions": [
         {
@@ -691,7 +693,8 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
         "docs/planning/2026-10-09/phases.json",
-        "docs/planning/2026-10-09/delivery/decisions/README.md"
+        "docs/planning/2026-10-09/delivery/decisions/README.md",
+        "docs/planning/2026-10-09/delivery/contracts/README.md"
       ],
       "planningRevisions": [
         {
@@ -736,7 +739,8 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
         "docs/planning/2026-10-09/phases.json",
-        "docs/planning/2026-10-09/delivery/decisions/README.md"
+        "docs/planning/2026-10-09/delivery/decisions/README.md",
+        "docs/planning/2026-10-09/delivery/contracts/README.md"
       ],
       "planningRevisions": [
         {
@@ -788,7 +792,8 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
         "docs/planning/2026-10-09/phases.json",
-        "docs/planning/2026-10-09/delivery/decisions/README.md"
+        "docs/planning/2026-10-09/delivery/decisions/README.md",
+        "docs/planning/2026-10-09/delivery/contracts/README.md"
       ],
       "planningRevisions": [
         {
@@ -824,7 +829,8 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
         "docs/planning/2026-10-09/phases.json",
-        "docs/planning/2026-10-09/delivery/decisions/README.md"
+        "docs/planning/2026-10-09/delivery/decisions/README.md",
+        "docs/planning/2026-10-09/delivery/contracts/README.md"
       ],
       "planningRevisions": [
         {
@@ -877,7 +883,8 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
         "docs/planning/2026-10-09/phases.json",
-        "docs/planning/2026-10-09/delivery/decisions/README.md"
+        "docs/planning/2026-10-09/delivery/decisions/README.md",
+        "docs/planning/2026-10-09/delivery/contracts/README.md"
       ],
       "planningRevisions": [
         {
@@ -913,7 +920,8 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
         "docs/planning/2026-10-09/phases.json",
-        "docs/planning/2026-10-09/delivery/decisions/README.md"
+        "docs/planning/2026-10-09/delivery/decisions/README.md",
+        "docs/planning/2026-10-09/delivery/contracts/README.md"
       ],
       "planningRevisions": [
         {
@@ -949,7 +957,8 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
         "docs/planning/2026-10-09/phases.json",
-        "docs/planning/2026-10-09/delivery/decisions/README.md"
+        "docs/planning/2026-10-09/delivery/decisions/README.md",
+        "docs/planning/2026-10-09/delivery/contracts/README.md"
       ],
       "planningRevisions": [
         {

@@ -1,0 +1,127 @@
+[
+  {
+    "id": "duplicate-protected-role",
+    "schema": "protected-assembly",
+    "path": [
+      "plugins",
+      1,
+      "id"
+    ],
+    "value": "boot",
+    "error": "protected_membership"
+  },
+  {
+    "id": "grant-bound-to-different-instance",
+    "schema": "plugin-context",
+    "path": [
+      "effectiveGrant",
+      "subjectInstanceId"
+    ],
+    "value": "plugin-other",
+    "error": "grant_instance_binding"
+  },
+  {
+    "id": "expired-before-issued",
+    "schema": "plugin-context",
+    "path": [
+      "effectiveGrant",
+      "expiresAt"
+    ],
+    "value": "2026-10-09T11:00:00Z",
+    "error": "grant_interval"
+  },
+  {
+    "id": "inverted-dependency-range",
+    "schema": "plugin-manifest",
+    "path": [
+      "dependencies"
+    ],
+    "value": [
+      {
+        "packageId": "service-other",
+        "minimumVersion": "2.0.0",
+        "exclusiveMaximumVersion": "1.0.0",
+        "optional": false
+      }
+    ],
+    "error": "dependency_interval"
+  },
+  {
+    "id": "impossible-calendar-date",
+    "schema": "operation-context",
+    "path": [
+      "deadline"
+    ],
+    "value": "2026-02-30T12:00:00Z",
+    "error": "calendar_date"
+  },
+  {
+    "id": "private-context-without-parent-grant",
+    "schema": "plugin-context",
+    "path": [
+      "effectiveGrant",
+      "parentGrantRef"
+    ],
+    "value": null,
+    "error": "private_parent_grant_required"
+  },
+  {
+    "id": "self-parent-context",
+    "schema": "plugin-context",
+    "path": [
+      "parent",
+      "instanceId"
+    ],
+    "value": "plugin-child",
+    "error": "self_parent"
+  },
+  {
+    "id": "impossible-grant-date",
+    "schema": "plugin-context",
+    "path": [
+      "effectiveGrant",
+      "issuedAt"
+    ],
+    "value": "2026-02-30T12:00:00Z",
+    "error": "calendar_date"
+  },
+  {
+    "id": "ordinary-package-cannot-control-kernel",
+    "schema": "plugin-manifest",
+    "path": [
+      "requestedCapabilities"
+    ],
+    "value": [
+      {
+        "action": "write",
+        "resourceClass": "kernel-lifecycle",
+        "required": true
+      }
+    ],
+    "error": "protected_kernel_access"
+  },
+  {
+    "id": "self-child-package",
+    "schema": "plugin-manifest",
+    "path": [
+      "children"
+    ],
+    "value": [
+      {
+        "packageId": "example-toolkit",
+        "relationship": "private",
+        "required": true
+      }
+    ],
+    "error": "self_dependency"
+  },
+  {
+    "id": "rejected-command-cannot-dispatch-effects",
+    "schema": "owner-record",
+    "path": [
+      "outcome"
+    ],
+    "value": "rejected",
+    "error": "rejected_operation_has_effects"
+  }
+]

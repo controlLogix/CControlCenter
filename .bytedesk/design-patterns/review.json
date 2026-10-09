@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, P00 runtime comparison and decision-package review, 2026-10-09; approval gates remain open",
-  "sourceDigest": "c05ca0084a5977291bf6b3d101565804a4729b2e04976307d73579ca023db20e",
+  "reviewer": "Codex, autonomous governance and P00 draft-contract review, 2026-10-09; P00 gate remains open",
+  "sourceDigest": "685b728452ad460f68b59c7904b5b4e56284e5b7ecb8bfb7a9bf534fe460ac01",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -262,6 +262,20 @@
         "docs/planning/2026-10-09/review-site/verification.json"
       ],
       "rationale": "Compared locked Go, Python and TypeScript Core NATS clients against a disposable loopback token-protected broker; three exchanges and three absent-service failures pass, with four Go cross-builds and Linux/amd64 execution only. Retained source hashes match. The recommendation uses a narrow Go foundation without replacing existing Python domain code. Concrete NATS ownership/retention/recovery and Compose startup/status/host contracts retain accepted requirements and current dashboard controls. Proposed patterns retain their previous rationale, gain precise decision references and a proposed account/process diagram; no product runtime implementation or full SDK is claimed. Eight tracker tests, three presentation component tests, source coverage, artifact checks and rebuilt exact-plan/image/script checks pass. Docker unavailable in current WSL; actual Compose/host/macOS/partner qualification remains open. P00-T02/T05/T07 are in verification, P00-T04 contract work remains; no human approval, phase pass or merge."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "previousReviewer": "Codex, P00 runtime comparison and decision-package review, 2026-10-09; approval gates remain open",
+      "previousSourceDigest": "c05ca0084a5977291bf6b3d101565804a4729b2e04976307d73579ca023db20e",
+      "scope": "Autonomous delivery governance and P00 draft contracts",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/contracts/verification.json",
+        "docs/planning/2026-10-09/delivery/contracts/README.md",
+        "docs/planning/2026-10-09/delivery/test_track.py",
+        "docs/planning/2026-10-09/delivery/requirements-coverage.json"
+      ],
+      "rationale": "Reviewed phase-local delegation, preserved task history and full criteria, and explicit no-merge boundary. Draft contract review corrected cancellation uncertainty and child permission limits; follow-up source review added federation tables and CLI receipts to migration ownership. Seventy draft fixtures passed. Existing planned patterns gain concrete contract evidence; no product runtime implementation, phase acceptance or broker security proof is claimed. Existing pattern and review history retained."
     }
   ],
   "rules": {

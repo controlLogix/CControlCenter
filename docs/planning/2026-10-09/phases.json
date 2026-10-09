@@ -4,7 +4,7 @@
   "date": "2026-10-09",
   "branch": "feat/agentmux-platform-rearchitecture",
   "baseline": "df46e94570fadf78ef67a75a692dd48b968a10f7",
-  "sequence": "Sequential promotion. Independent preparation may overlap only after its required contracts are approved; no later phase claims acceptance before its predecessor.",
+  "sequence": "Execute one phase at a time in P00–P14 order. Use subagents to parallelize bounded implementation, tests and independent review within the active phase only. Codex integrates and reviews their evidence, commits and pushes the candidate, verifies the remote commit, and records the gate before starting the next phase.",
   "phases": [
     {
       "id": "P00",
@@ -28,11 +28,11 @@
         },
         {
           "id": "P00-AC02",
-          "text": "Ryan and Nick review the plan and decision log. Ryan explicitly authorizes implementation before P01 starts."
+          "text": "Codex reviews the complete plan, decision log, contracts and criterion-level evidence, records its review and advancement decision, and verifies the committed and pushed P00 candidate before P01 starts. Ryan and Nick are not required for delivery approval."
         },
         {
           "id": "P00-AC03",
-          "text": "All P01â€“P04 blocking choices have recorded alternatives, rationale, and consequences. Later choices have a deadline before their owning phase."
+          "text": "All P01–P04 blocking choices have recorded alternatives, rationale, and consequences. Later choices have a deadline before their owning phase."
         },
         {
           "id": "P00-AC04",
@@ -62,7 +62,8 @@
       ],
       "rollback": "Planning only. Preserve current checkout behavior and the existing review history.",
       "dependsOn": [],
-      "status": "proposed"
+      "status": "proposed",
+      "deliveryOwner": "Codex with bounded subagents in the active phase"
     },
     {
       "id": "P01",
@@ -124,7 +125,8 @@
       "dependsOn": [
         "P00"
       ],
-      "status": "proposed"
+      "status": "proposed",
+      "deliveryOwner": "Codex with bounded subagents in the active phase"
     },
     {
       "id": "P02",
@@ -192,7 +194,8 @@
       "dependsOn": [
         "P01"
       ],
-      "status": "proposed"
+      "status": "proposed",
+      "deliveryOwner": "Codex with bounded subagents in the active phase"
     },
     {
       "id": "P03",
@@ -251,7 +254,8 @@
       "dependsOn": [
         "P02"
       ],
-      "status": "proposed"
+      "status": "proposed",
+      "deliveryOwner": "Codex with bounded subagents in the active phase"
     },
     {
       "id": "P04",
@@ -299,7 +303,7 @@
         },
         {
           "id": "P04-AC08",
-          "text": "Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick."
+          "text": "Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification."
         }
       ],
       "verify": [
@@ -320,7 +324,8 @@
       "dependsOn": [
         "P03"
       ],
-      "status": "proposed"
+      "status": "proposed",
+      "deliveryOwner": "Codex with bounded subagents in the active phase"
     },
     {
       "id": "P05",
@@ -362,7 +367,7 @@
         },
         {
           "id": "P05-AC06",
-          "text": "Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick."
+          "text": "Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification."
         }
       ],
       "verify": [
@@ -381,7 +386,8 @@
       "dependsOn": [
         "P04"
       ],
-      "status": "proposed"
+      "status": "proposed",
+      "deliveryOwner": "Codex with bounded subagents in the active phase"
     },
     {
       "id": "P06",
@@ -446,7 +452,8 @@
       "dependsOn": [
         "P05"
       ],
-      "status": "proposed"
+      "status": "proposed",
+      "deliveryOwner": "Codex with bounded subagents in the active phase"
     },
     {
       "id": "P07",
@@ -511,7 +518,8 @@
       "dependsOn": [
         "P06"
       ],
-      "status": "proposed"
+      "status": "proposed",
+      "deliveryOwner": "Codex with bounded subagents in the active phase"
     },
     {
       "id": "P08",
@@ -550,7 +558,7 @@
         },
         {
           "id": "P08-AC06",
-          "text": "Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick."
+          "text": "Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification."
         }
       ],
       "verify": [
@@ -569,7 +577,8 @@
       "dependsOn": [
         "P07"
       ],
-      "status": "proposed"
+      "status": "proposed",
+      "deliveryOwner": "Codex with bounded subagents in the active phase"
     },
     {
       "id": "P09",
@@ -608,7 +617,7 @@
         },
         {
           "id": "P09-AC06",
-          "text": "Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick."
+          "text": "Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification."
         }
       ],
       "verify": [
@@ -627,7 +636,8 @@
       "dependsOn": [
         "P08"
       ],
-      "status": "proposed"
+      "status": "proposed",
+      "deliveryOwner": "Codex with bounded subagents in the active phase"
     },
     {
       "id": "P10",
@@ -705,7 +715,8 @@
       "dependsOn": [
         "P09"
       ],
-      "status": "proposed"
+      "status": "proposed",
+      "deliveryOwner": "Codex with bounded subagents in the active phase"
     },
     {
       "id": "P11",
@@ -764,7 +775,8 @@
       "dependsOn": [
         "P10"
       ],
-      "status": "proposed"
+      "status": "proposed",
+      "deliveryOwner": "Codex with bounded subagents in the active phase"
     },
     {
       "id": "P12",
@@ -782,7 +794,7 @@
         "Qualify NATS storage capacity, retention, immutable artifact lifecycle, snapshot/archive integrity, sync policy and recovery time for solo and team profiles. Document every remaining SQL component as a rebuildable projection or an explicitly reviewed exception.",
         "Apply ADD-01 and the component preservation matrix to every changed source file and affected caller. Record reuse, intentional behavior changes, migration needs and the specific added functionality before editing implementation.",
         "Qualify LOCAL-01 installation, automatic launch, upgrade compatibility, data retention and recovery using the pinned Docker/Compose/OS/client matrix. Document setup prerequisites, diagnosis, explicit stop and backup/restore without making runtime Docker socket access a general plugin capability.",
-        "Prepare the MERGE-01 two-person, two-instance rehearsal and evidence package. Keep final merge authorization separate from P12 advancement so later approved phases can finish without an early merge."
+        "Prepare the MERGE-01 two-instance, agent-operated rehearsal and evidence package. Final branch acceptance follows all required phases; no phase or final acceptance authorizes merging."
       ],
       "criteria": [
         {
@@ -803,7 +815,7 @@
         },
         {
           "id": "P12-AC05",
-          "text": "Ryan and Nick review the release-readiness evidence and record provisional readiness plus all outstanding MERGE-01 requirements. P12 acceptance does not authorize merge or release; the separate final gate requires the entire approved plan, their real-instance orchestration evidence and Ryan's explicit merge approval."
+          "text": "Codex reviews release-readiness evidence and records provisional readiness plus all outstanding MERGE-01 requirements. P12 acceptance does not authorize merge or release; final branch acceptance requires every phase and safe bilateral orchestration between independently enrolled, agent-operated real hubs on the exact candidate."
         },
         {
           "id": "P12-AC06",
@@ -825,7 +837,7 @@
         "Run qualified storage failure and recovery drills with pinned disk/sync/replication settings, including capacity exhaustion. Verify restored reservations before processing queued commands.",
         "Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.",
         "Repeat FAIL-55–FAIL-62 with the exact packaged release, real federation and each advertised launch integration; record readiness deadlines, versions, volume identity and observed timing.",
-        "Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact merge candidate after all required phases pass."
+        "Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact final branch candidate after all required phases pass."
       ],
       "evidence": [
         "Release readiness dossier",
@@ -837,12 +849,13 @@
       "dependsOn": [
         "P11"
       ],
-      "status": "proposed"
+      "status": "proposed",
+      "deliveryOwner": "Codex with bounded subagents in the active phase"
     },
     {
       "id": "P13",
       "name": "Remaining Jev catalog and skill expansion",
-      "size": "Lâ€“XL per batch",
+      "size": "L–XL per batch",
       "owner": "Decision platform + domain owners",
       "outcome": "Every remaining research proposal receives a measured implementation decision.",
       "work": [
@@ -871,7 +884,7 @@
         },
         {
           "id": "P13-AC05",
-          "text": "Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick."
+          "text": "Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification."
         }
       ],
       "verify": [
@@ -890,7 +903,8 @@
       "dependsOn": [
         "P12"
       ],
-      "status": "proposed"
+      "status": "proposed",
+      "deliveryOwner": "Codex with bounded subagents in the active phase"
     },
     {
       "id": "P14",
@@ -924,7 +938,7 @@
         },
         {
           "id": "P14-AC05",
-          "text": "Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick."
+          "text": "Every affected existing component retains its documented behavior through reused code or a justified replacement. Its baseline and candidate checks, migration checks, and added capability evidence are reviewed before advancement. Missing environments remain open. Codex reviews intended behavior and migration changes against the full user scope; autonomous delivery does not authorize capability removal, reduced scope or weaker verification."
         }
       ],
       "verify": [
@@ -943,7 +957,8 @@
       "dependsOn": [
         "P13"
       ],
-      "status": "proposed"
+      "status": "proposed",
+      "deliveryOwner": "Codex with bounded subagents in the active phase"
     }
   ],
   "storageDecision": {
@@ -994,10 +1009,10 @@
       "FAIL-62"
     ]
   },
-  "authorizationNote": "Ryan requested proceeding toward phased implementation after committing and pushing this package. No phase evidence or Nick review is attested here. P00 exit, sequential promotion and explicit Ryan/Nick merge review remain required. Ryan later explicitly authorized autonomous implementation decisions for the six baseline governance findings. That bounded repair is verified; it does not pass a complete phase gate or authorize later promotion.",
+  "authorizationNote": "The user authorizes autonomous completion of all phases through final commit and push on feat/agentmux-platform-rearchitecture. Codex is the delivery reviewer and advancement authority; Ryan and Nick are not required. All verification, preservation, security and evidence requirements remain. No merge or release is authorized.",
   "mergeGate": {
     "id": "MERGE-01",
-    "status": "not-run-not-approved",
+    "status": "not-run",
     "branch": "feat/agentmux-platform-rearchitecture",
     "requiredPhases": [
       "P00",
@@ -1016,18 +1031,20 @@
       "P13",
       "P14"
     ],
-    "scopeRule": "All phases in the approved plan are required. P12 is a release-readiness milestone, not permission to merge while P13/P14 remain outstanding. Only Ryan may explicitly revise scope after review with Nick; no such revision is recorded.",
+    "scopeRule": "All P00-P14 phases and complete user scope remain required. Codex reviews implementation decisions and evidence; no capability removal, scope reduction or weaker qualification is authorized.",
     "realInstanceOwners": [
-      "Ryan",
-      "Nick"
+      "Agent-operated hub A",
+      "Agent-operated hub B"
     ],
     "directions": [
-      "Ryan origin to Nick executor",
-      "Nick origin to Ryan executor"
+      "Hub A origin to hub B executor",
+      "Hub B origin to hub A executor"
     ],
     "evidenceRecord": "gate-record.template.json:finalMergeGate",
-    "requiredApproval": "Ryan explicitly authorizes merge after joint review with Nick of exact-candidate phase and real-instance evidence.",
-    "autoMergeAllowed": false
+    "requiredApproval": "Codex reviews exact-candidate phase evidence and real bilateral orchestration, records final branch acceptance, and verifies the final commit is pushed. No Ryan/Nick action is required.",
+    "autoMergeAllowed": false,
+    "purpose": "Final branch acceptance; historical MERGE-01 identifier retained, never merge permission.",
+    "mergeAuthorized": false
   },
   "baselineRepair": {
     "date": "2026-10-09",
@@ -1037,5 +1054,62 @@
     "evidence": "governance-repair-evidence.json",
     "completePhaseGatePassed": false,
     "mergeApproved": false
+  },
+  "governanceHistory": [
+    {
+      "date": "2026-10-09",
+      "reason": "User explicitly requests fully autonomous delivery with Codex as reviewer, subagents within one active phase, and no Ryan/Nick dependency through final commit and push.",
+      "previousAuthorizationNote": "Ryan requested proceeding toward phased implementation after committing and pushing this package. No phase evidence or Nick review is attested here. P00 exit, sequential promotion and explicit Ryan/Nick merge review remain required. Ryan later explicitly authorized autonomous implementation decisions for the six baseline governance findings. That bounded repair is verified; it does not pass a complete phase gate or authorize later promotion.",
+      "previousSequence": "Sequential promotion. Independent preparation may overlap only after its required contracts are approved; no later phase claims acceptance before its predecessor.",
+      "previousMergeGate": {
+        "id": "MERGE-01",
+        "status": "not-run",
+        "branch": "feat/agentmux-platform-rearchitecture",
+        "requiredPhases": [
+          "P00",
+          "P01",
+          "P02",
+          "P03",
+          "P04",
+          "P05",
+          "P06",
+          "P07",
+          "P08",
+          "P09",
+          "P10",
+          "P11",
+          "P12",
+          "P13",
+          "P14"
+        ],
+        "scopeRule": "All P00–P14 phases and complete user scope remain required. Codex reviews implementation decisions and evidence; no capability removal, scope reduction or weaker qualification is authorized.",
+        "realInstanceOwners": [
+          "Agent-operated hub A",
+          "Agent-operated hub B"
+        ],
+        "directions": [
+          "Hub A origin to hub B executor",
+          "Hub B origin to hub A executor"
+        ],
+        "evidenceRecord": "gate-record.template.json:finalMergeGate",
+        "requiredApproval": "Codex reviews exact-candidate phase evidence and real bilateral orchestration, records final branch acceptance, and verifies the final commit is pushed. No Ryan/Nick action is required.",
+        "autoMergeAllowed": false,
+        "purpose": "Final branch acceptance; historical MERGE-01 identifier retained, never merge permission.",
+        "mergeAuthorized": false
+      },
+      "supersededCriteria": {
+        "P00-AC02": "Ryan and Nick review the plan and decision log. Ryan explicitly authorizes implementation before P01 starts.",
+        "P12-AC05": "Ryan and Nick review the release-readiness evidence and record provisional readiness plus all outstanding MERGE-01 requirements. P12 acceptance does not authorize merge or release; the separate final gate requires the entire approved plan, their real-instance orchestration evidence and Ryan's explicit merge approval.",
+        "preservationApprovalClause": "Missing environments remain open; removal or reduced capability requires Ryan's explicit approval after review with Nick."
+      }
+    }
+  ],
+  "deliveryGovernance": {
+    "reviewer": "Codex",
+    "advancementAuthority": "Codex",
+    "humanDeliveryApprovalRequired": false,
+    "parallelism": "subagents within one active phase only",
+    "mergeAuthorized": false,
+    "scopeReductionAuthorized": false
   }
 }

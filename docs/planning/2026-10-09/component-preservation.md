@@ -6,7 +6,7 @@ ADD-01 accounts for **338 baseline files**, **6 additional governed files**, **9
 
 ## Required preservation rule
 
-Keep all current functionality available. Prefer retaining, wrapping, extracting or extending working code. Each replacement needs a recorded technical reason and equivalent behavior tests. The component records below propose an implementation approach; they do not authorize source deletion, a capability reduction, a narrower supported environment or production cutover. Ryan must approve any such reduction after review with Nick. Correcting a defect requires an explicit intended-behavior change and a regression test.
+Keep all current functionality available. Prefer retaining, wrapping, extracting or extending working code. Each replacement needs a recorded technical reason and equivalent behavior tests. The component records below propose an implementation approach; they do not authorize source deletion, a capability reduction, a narrower supported environment or production cutover. Codex reviews every proposed implementation or migration change against the full user scope; autonomous delivery does not authorize capability reduction or weaker verification. Correcting a defect requires an explicit intended-behavior change and a regression test.
 
 Every changed component needs passing baseline and candidate comparisons, migration/recovery evidence, and evidence of its added capability before its phase advances. New functionality cannot compensate for an unrelated regression. Historical reports and skipped environments cannot count as current passes. All check statuses below remain `not-run`; actual results belong in a completed phase gate record.
 
@@ -3768,8 +3768,8 @@ P00 must reconcile maintainers’ workflows with the declared entry points. Miss
 
 **Current behavior**
 
-- AGENTS.md carries the branch and Ryan/Nick merge restriction. Both root agent instruction files link the shared plain-language rules.
-- Both root instruction files now include the branch restriction, Ryan/Nick merge gate, fast-test workflow and repository task tracking. This supersedes the original audit note that CLAUDE.md lacked the restriction; its original text remains in `component-audit-repository.json` review history. Actual supported-host instruction loading belongs to P06-T01 and remains unqualified.
+- AGENTS.md carries the feature-branch restriction and autonomous Codex delivery review rule. Both root agent instruction files link the shared plain-language rules.
+- Both root instruction files include the branch restriction, autonomous Codex delivery review, final branch acceptance, fast-test workflow and repository task tracking. The latest user instruction supersedes the previous Ryan/Nick delivery gates; their historical wording remains in Git history. This supersedes the original audit note that CLAUDE.md lacked the restriction; its original text remains in `component-audit-repository.json` review history. Actual supported-host instruction loading belongs to P06-T01 and remains unqualified.
 
 **Reuse:** Retain root entry files and the shared writing rules. Extend their links as implementation contracts gain evidence.
 
@@ -3781,7 +3781,7 @@ P00 must reconcile maintainers’ workflows with the declared entry points. Miss
 
 | Check | Required comparison | Existing evidence to reuse | Environment |
 | --- | --- | --- | --- |
-| REPO-01-C01 | Each supported agent host loads or receives the shared rules and the Ryan/Nick merge restriction; add missing host-specific instruction links before qualification. | New fixture/review needed; no existing test claimed | Static instruction review and supported agent sessions |
+| REPO-01-C01 | Each supported agent host loads or receives the shared rules, autonomous Codex review and the no-merge restriction; add missing host-specific instruction links before qualification. | New fixture/review needed; no existing test claimed | Static instruction review and supported agent sessions |
 
 **Migration and compatibility checks**
 
@@ -4067,7 +4067,7 @@ P00 must reconcile maintainers’ workflows with the declared entry points. Miss
 
 ## Review sequence
 
-1. P00 approves the inventory, public contracts and intended behavior with Ryan and Nick.
+1. P00 records Codex review of the inventory, public contracts and intended behavior, with independent subagent findings resolved before advancement.
 2. P01 runs baseline checks and adds missing fixtures before consequential refactoring.
 3. Each owning phase proves its existing behaviors and specific gains on isolated candidate environments.
 4. P04/P10/P12 prove state, delivery, credential and deployment migration at the relevant boundaries.
