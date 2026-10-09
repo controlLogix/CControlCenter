@@ -175,6 +175,13 @@ def main():
         run('python-sdk-units',[sys.executable,'-m','unittest','discover','-s','sdk/python/tests','-v'])
         run('typescript-sdk-units',['npm','test'],builds['contracts'])
         run('cross-language-contracts',[sys.executable,'tests/contracts/run.py','--evidence',str(args.evidence/'contracts.json')])
+        delivery = 'docs/planning/2026-10-09/delivery'
+        run('conformance-evidence-admission',[sys.executable,delivery+'/check_conformance_evidence.py',
+            '--report',str(args.evidence/'contracts.json'),'--candidate',report['sourceCommit'],
+            '--environment','macos' if platform.system() == 'Darwin' else 'linux',
+            '--evidence',str(args.evidence/'conformance-admission.json')])
+        run('conformance-evidence-negative-checks',[sys.executable,delivery+'/test_conformance_evidence.py',
+            '--evidence',str(args.evidence/'conformance-admission-negative.json')])
         run('negative-contract-fixture',[sys.executable,'tests/contracts/ci.py','--negative-fixture','--evidence',str(args.evidence)])
         for suite, output in (('storage','storage-result.json'),('leaf','leaf-result.json'),('leaf/signed','signed-leaf-result.json')):
             source = args.evidence / output
@@ -184,7 +191,6 @@ def main():
             run(suite,[sys.executable,script])
             if not source.is_file():
                 report['checks'].append({'name':suite+'-fresh-evidence','exitCode':1})
-        delivery = 'docs/planning/2026-10-09/delivery'
         run('tracker-tests',[sys.executable,'-m','unittest','discover','-s',delivery,'-p','test_track.py','-v'])
         run('regression-preservation',[sys.executable,delivery+'/check_regressions.py','--self-test'])
         run('component-preservation',[sys.executable,'docs/planning/2026-10-09/verify-component-coverage.py'])

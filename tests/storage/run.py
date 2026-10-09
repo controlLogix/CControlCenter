@@ -32,9 +32,16 @@ def require(condition, message):
         raise AssertionError(message)
 
 
+def fixture_atomic_capability(resources):
+    """Bounded provider-claim admission fixture, not a production plugin registry."""
+    return (bool(resources) and all(set(r) == {'kind', 'stream'} and r['kind'] == 'stream-record'
+                                    and isinstance(r['stream'], str) and bool(r['stream']) for r in resources)
+            and len({r['stream'] for r in resources}) == 1)
+
+
 def hashes():
     files = [p for p in HERE.rglob('*') if p.is_file() and p.suffix in ('.py', '.ts', '.json', '.md') and 'node_modules' not in p.parts and '__pycache__' not in p.parts]
-    files += [ROOT / 'hub/requirements.lock']
+    files += [ROOT / 'hub/requirements.lock', ROOT / 'tests/contracts/fake_execution.py']
     return {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(files)}
 
 
@@ -175,6 +182,42 @@ async def main():
                        loserApiCodes=[o.get('apiCode') for o in outcomes if not o['ok']])
             await case('authoritative-latest-read-both-clients', sequence=winner_seq)
 
+            # FAIL-06: only the retained reservation can cause fixture execution.
+            sys.path.insert(0, str(ROOT / 'tests/contracts'))
+            from fake_execution import FakeProvider, FakeWorker, ResponsePlan
+            provider = FakeProvider()
+            worker = FakeWorker(provider)
+            dispatched = {}
+
+            async def dispatch_reserved(candidate):
+                authority = await broker.client('python', {'op': 'read', 'stream': 'LEDGER', 'subject': subject})
+                require(authority['ok'], 'fixture dispatch could not read owner authority')
+                if authority['result']['record'] != candidate or authority['result']['sequence'] != winner_seq:
+                    return 'denied'
+                identity = candidate['operation']['operationId']
+                if identity in dispatched:
+                    return 'already_dispatched'
+                worker.start(identity, candidate['effects'][0]['effectId'], ResponsePlan(output='one authorized result'))
+                dispatched[identity] = candidate['operation']['payloadDigest']
+                return 'dispatched'
+
+            loser = next(c for c in contenders if c != winner)
+            require(await dispatch_reserved(loser) == 'denied' and not provider.requests,
+                    'losing reservation reached provider execution')
+            require(await dispatch_reserved(winner) == 'dispatched', 'winning reservation did not dispatch')
+            require(await dispatch_reserved(winner) == 'already_dispatched', 'duplicate winning request dispatched again')
+            require(await dispatch_reserved(loser) == 'denied', 'loser became executable after winner dispatch')
+            provider.advance(0)
+            operation = winner['operation']['operationId']
+            provider.deliver(operation)
+            require(worker.snapshot(operation)['output'] == 'one authorized result'
+                    and sum(row['kind'] == 'admitted' for row in provider.history) == 1
+                    and sum(row['kind'] == 'completed' for row in provider.history) == 1,
+                    'conditional winner did not produce exactly one fixture execution')
+            await case('conditional-winner-only-dispatches-once', scenario='FAIL-06',
+                       winnerOperation=operation, providerAdmissions=1, providerCompletions=1,
+                       boundary='real owner reservation; in-memory dispatch deduplication only')
+
             lost = record('lost-ack', 3, winner_seq)
             # Send without a reply inbox: the write may commit, but the publisher cannot receive a PubAck.
             await nc.publish(subject, json.dumps(lost).encode(), headers={'Nats-Expected-Last-Subject-Sequence': str(winner_seq), 'Nats-Msg-Id': 'lost-ack'})
@@ -282,6 +325,89 @@ async def main():
             require('error' in cross and (await js.stream_info('LEDGER')).state.messages == total_before and
                     (await js.stream_info('OTHER')).state.messages == 0, 'cross-stream batch was not rejected')
             await case('cross-stream-atomic-transaction-rejected', apiCode=cross['error'].get('err_code'))
+
+            # FAIL-42: commit without a reply inbox, then recover the complete set from retained authority.
+            lost_subject = 'fixture.ledger.lost-final-batch'
+            lost_records = [record('batch-lost-first', 1), record('batch-lost-final', 2)]
+            batch_before = (await js.stream_info('LEDGER')).state.messages
+            await raw(lost_subject, lost_records[0], {'Nats-Batch-Id': 'lost-final', 'Nats-Batch-Sequence': '1',
+                                                     'Nats-Expected-Last-Subject-Sequence': '0'})
+            require((await js.stream_info('LEDGER')).state.messages == batch_before, 'lost-ack batch leaked staging')
+            await nc.publish(lost_subject, json.dumps(lost_records[1]).encode(),
+                             headers={'Nats-Batch-Id': 'lost-final', 'Nats-Batch-Sequence': '2', 'Nats-Batch-Commit': '1'})
+            await nc.flush()
+            for _ in range(100):
+                if (await js.stream_info('LEDGER')).state.messages == batch_before + 2:
+                    break
+                await asyncio.sleep(.02)
+            else:
+                raise AssertionError('lost final batch acknowledgment did not leave a complete commit')
+            await nc.close(); nc = None
+            broker.stop()
+            await asyncio.sleep(.3)
+            await broker.start()
+            nc = await broker.connect(); js = nc.jetstream(timeout=3)
+            for language in ('python', 'typescript'):
+                recovered = []
+                for expected in lost_records:
+                    answer = await broker.client(language, {'op': 'reconcile', 'stream': 'LEDGER', 'subject': lost_subject,
+                        'operationId': expected['operation']['operationId'], 'payloadDigest': expected['operation']['payloadDigest']})
+                    require(answer['ok'] and answer['result']['record'] == expected, 'atomic unknown outcome was not reconciled')
+                    recovered.append(answer['result']['sequence'])
+                require(recovered[1] == recovered[0] + 1, 'reconciled batch records were not contiguous')
+            retry = await raw(lost_subject, lost_records[0], {'Nats-Batch-Id': 'lost-final-retry', 'Nats-Batch-Sequence': '1',
+                                                            'Nats-Expected-Last-Subject-Sequence': '0'})
+            if 'error' not in retry:
+                retry = await raw(lost_subject, lost_records[1], {'Nats-Batch-Id': 'lost-final-retry', 'Nats-Batch-Sequence': '2', 'Nats-Batch-Commit': '1'})
+            require('error' in retry and (await js.stream_info('LEDGER')).state.messages == batch_before + 2,
+                    'retry after unknown batch outcome created another transition')
+            await case('lost-final-batch-ack-reconciles-after-restart-and-dedup-expiry', scenario='FAIL-42', records=2,
+                       duplicateWindowSeconds=.2, waitSeconds=.3, retryApiCode=retry['error'].get('err_code'))
+
+            # FAIL-43: KV exposes its source revision but never supplies owner authority.
+            projection_subject = 'fixture.ledger.projection-owner'
+            allowed = {'state': 'ready', 'policyRevision': 1}
+            owner_ack = await js.publish(projection_subject, json.dumps(allowed).encode(),
+                                        headers={'Nats-Expected-Last-Subject-Sequence': '0'})
+            kv = await js.create_key_value(bucket='FIXTURE_VIEW')
+            await kv.put('task', json.dumps({'sourceSequence': owner_ack.seq, 'owner': allowed}).encode())
+            def admits(current, current_policy):
+                return current['state'] == 'ready' and current['policyRevision'] == current_policy['revision'] and current_policy['allow']
+            require(admits(allowed, {'revision': 1, 'allow': True}), 'fixture positive policy control failed')
+            require(not admits(allowed, {'revision': 1, 'allow': False}), 'fixture policy denial was ignored')
+            require(not admits(allowed, {'revision': 2, 'allow': True}), 'fixture stale policy revision was ignored')
+            revoked = {'state': 'reserved', 'policyRevision': 2}
+            committed = await js.publish(projection_subject, json.dumps(revoked).encode(),
+                                        headers={'Nats-Expected-Last-Subject-Sequence': str(owner_ack.seq)})
+            view = json.loads((await kv.get('task')).value)
+            require(view['sourceSequence'] == owner_ack.seq and view['sourceSequence'] < committed.seq,
+                    'projection fixture was not observably stale')
+            stale_write = await broker.client('typescript', {'op': 'publish', 'subject': projection_subject,
+                'record': {'state': 'accepted'}, 'expectedSequence': view['sourceSequence']})
+            require(not stale_write['ok'], 'stale projection conditional write was admitted')
+            total = (await js.stream_info('LEDGER')).state.messages
+            for language in ('python', 'typescript'):
+                authoritative = await broker.client(language, {'op': 'read', 'stream': 'LEDGER', 'subject': projection_subject})
+                require(authoritative['ok'] and authoritative['result']['sequence'] == committed.seq,
+                        'owner revalidation did not use current authoritative revision')
+                require(not admits(authoritative['result']['record'], {'revision': 2, 'allow': False}),
+                        'fresh revision bypassed revoked fixture policy')
+            require((await js.stream_info('LEDGER')).state.messages == total, 'policy rejection wrote another owner transition')
+            await case('stale-kv-projection-requires-owner-and-policy-revalidation', scenario='FAIL-43',
+                       projectionSequence=view['sourceSequence'], ownerSequence=committed.seq, policyRevision=2)
+
+            # FAIL-47: reject unsupported declarations before any adapter can perform a side effect.
+            supported = [{'kind': 'stream-record', 'stream': 'LEDGER'}] * 2
+            require(fixture_atomic_capability(supported), 'qualified same-stream claim rejected')
+            rejected_kinds = []
+            for unsupported in ({'kind': 'stream-record', 'stream': 'OTHER'}, {'kind': 'kv', 'bucket': 'FIXTURE_VIEW'},
+                                {'kind': 'object-upload', 'bucket': 'ARTIFACTS'}, {'kind': 'external-tool', 'tool': 'fixture-tool'}):
+                require(not fixture_atomic_capability([supported[0], unsupported]), 'unsupported atomicity claim admitted')
+                rejected_kinds.append(unsupported['kind'])
+            require((await js.stream_info('LEDGER')).state.messages == total, 'rejected capability changed the owner ledger')
+            require(json.loads((await kv.get('task')).value) == view, 'rejected capability changed the projection')
+            await case('fixture-capability-rejects-cross-stream-kv-object-tool-atomicity', scenario='FAIL-47',
+                       rejectedResourceKinds=rejected_kinds, boundary='fixture admission only; no production plugin registry')
 
             # Retention holes must never justify inventing a previously acknowledged operation.
             await js.delete_msg('LEDGER', 1)

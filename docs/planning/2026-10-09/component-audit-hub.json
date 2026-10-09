@@ -1617,8 +1617,11 @@
         "sdk/typescript/tsconfig.json",
         "tests/contracts/README.md",
         "tests/contracts/ci.py",
+        "tests/contracts/fake-execution.md",
+        "tests/contracts/fake_execution.py",
         "tests/contracts/run.py",
         "tests/contracts/test_conformance.py",
+        "tests/contracts/test_fake_execution.py",
         "tests/contracts/test_payloads.py",
         "tests/contracts/test_recovery.py",
         "tests/contracts/test_semantics.py",
@@ -1804,6 +1807,17 @@
         "tests/leaf/signed_run.py"
       ],
       "note": "Existing ownership, baseline behavior and qualification requirements are unchanged; new fixtures do not establish phase acceptance."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "P01 controlled execution and storage recovery qualification",
+      "addedFiles": [
+        "tests/contracts/fake-execution.md",
+        "tests/contracts/fake_execution.py",
+        "tests/contracts/test_fake_execution.py"
+      ],
+      "note": "HUB-26 retains fixture ownership. Existing baseline behavior checks and phase qualification requirements are unchanged; storage fixture extensions remain evidence rather than production cutover."
     }
   ]
 }

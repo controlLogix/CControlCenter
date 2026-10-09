@@ -1,0 +1,56 @@
+{
+  "taskId": "P01-T05",
+  "sourceCommit": "a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41",
+  "reviewer": "Codex",
+  "reviewedOn": "2026-10-09",
+  "scope": "Early signed two-hub leaf spike",
+  "acceptanceResults": [
+    {
+      "criterionId": "P01-T05-AC01",
+      "status": "passed",
+      "evidence": [
+        "tests/leaf/README.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md"
+      ],
+      "rationale": "Nineteen signed and eleven narrow checks cover separate broker accounts/ledgers, leaf reconnect, persisted acceptance before lost reply, retained reservation, nonduplicating reconciliation and origin-owned artifact acceptance. Signed identity mismatches are denied."
+    },
+    {
+      "criterionId": "P01-T05-AC02",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/signed-leaf-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/leaf-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/a2e9ee6/linux/signed-leaf-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/a2e9ee6/macos/signed-leaf-result.json"
+      ],
+      "rationale": "Executed focused evidence covers this task scope. Native reports qualify this committed contract/leaf candidate; WSL reports qualify local execution. Broader phase preservation checks remain on P01-GATE."
+    },
+    {
+      "criterionId": "P01-T05-AC03",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/regression-retention-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/regression-replacement-review.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preflight.md"
+      ],
+      "rationale": "Retained accepted regression files; report-destination-only replacements preserve executable assertions. No existing writer, data identity or runtime entry point was cut over."
+    },
+    {
+      "criterionId": "P01-T05-AC04",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/signed-leaf-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/leaf-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/a2e9ee6/linux/signed-leaf-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/a2e9ee6/macos/signed-leaf-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/a2e9ee6/review.json"
+      ],
+      "rationale": "Reviewed evidence hashes against exact committed Git blobs at a2e9ee6. Reports retain commands, versions, exit codes, fixture limitations and cleanup; no private signing seeds are recorded."
+    }
+  ],
+  "limitations": [
+    "This accepts only the named task, not P01 or any later phase.",
+    "Fixture policy and model evidence do not implement production authorization, enrollment or runtime owners.",
+    "Future changes must revalidate affected evidence. No merge authorized."
+  ]
+}

@@ -468,3 +468,22 @@ flowchart TD
 ```
 
 The runner records source/build identity and command exit codes. Fresh reports go outside the checkout so CI cannot overwrite committed review records. Required checks include the regression guard's deliberately removed-assertion test. A passing native job cannot stand in for WSL evidence, production authorization checks or phase approval; task advancement and merging are not performed by this workflow.
+
+
+## P01 controlled execution and storage boundary extension
+
+These test paths extend PLAN-08/09/10 qualification without creating production owners or plugins.
+
+```mermaid
+flowchart LR
+  Control["Manual clock and response plan"] --> Provider["FakeProvider: execute / retain result"]
+  Provider --> Queue["Delay, drop or reorder callbacks"]
+  Queue --> Worker["FakeWorker: observe deadline and cancellation"]
+  Worker -->|"Explicit lookup; no automatic retry"| Provider
+  View["Stale KV view with source cursor"] --> CAS["Conditional owner write rejects stale revision"]
+  CAS --> Read["Both clients read authoritative owner record"]
+  Read --> Policy["Current fixture policy revalidation"]
+  Policy --> Deny["No new write when policy denies"]
+```
+
+The batch fixture loses the final commit reply, restarts the real broker and reconciles both contiguous records after the duplicate window. Unsupported cross-stream, KV, object and tool atomicity claims are rejected by fixture admission. These checks do not qualify production capability registration, external effects or power-loss durability.

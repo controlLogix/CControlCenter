@@ -1,12 +1,12 @@
 {
   "status": "passed",
-  "recordedAt": "2026-10-09T22:47:05.530057+00:00",
-  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
-  "python": "3.14.4",
+  "recordedAt": "2026-10-09T22:37:56.572439+00:00",
+  "platform": "macOS-15.7.9-arm64-arm-64bit-Mach-O",
+  "python": "3.14.8",
   "natsPy": "2.16.0",
   "natsServer": "nats-server: v2.15.0",
-  "node": "v22.22.1",
-  "seconds": 21.121,
+  "node": "v22.21.1",
+  "seconds": 2.405,
   "cases": [
     {
       "id": "complete-state-provenance-effect-record",
@@ -25,15 +25,6 @@
       "id": "authoritative-latest-read-both-clients",
       "passed": true,
       "sequence": 2
-    },
-    {
-      "id": "conditional-winner-only-dispatches-once",
-      "passed": true,
-      "scenario": "FAIL-06",
-      "winnerOperation": "ts-contender",
-      "providerAdmissions": 1,
-      "providerCompletions": 1,
-      "boundary": "real owner reservation; in-memory dispatch deduplication only"
     },
     {
       "id": "lost-puback-reconciles-after-restart-and-dedup-expiry",
@@ -73,7 +64,7 @@
       "ack": {
         "sequence": 8,
         "stream": "LEDGER",
-        "batch": "kLrcr79zPIZsEyTLLrt8Cm",
+        "batch": "bqz57ChTSzMqIQVuOmc4CB",
         "count": 2,
         "committed": true
       }
@@ -99,45 +90,15 @@
       "apiCode": 10176
     },
     {
-      "id": "lost-final-batch-ack-reconciles-after-restart-and-dedup-expiry",
-      "passed": true,
-      "scenario": "FAIL-42",
-      "records": 2,
-      "duplicateWindowSeconds": 0.2,
-      "waitSeconds": 0.3,
-      "retryApiCode": 10071
-    },
-    {
-      "id": "stale-kv-projection-requires-owner-and-policy-revalidation",
-      "passed": true,
-      "scenario": "FAIL-43",
-      "projectionSequence": 12,
-      "ownerSequence": 13,
-      "policyRevision": 2
-    },
-    {
-      "id": "fixture-capability-rejects-cross-stream-kv-object-tool-atomicity",
-      "passed": true,
-      "scenario": "FAIL-47",
-      "rejectedResourceKinds": [
-        "stream-record",
-        "kv",
-        "object-upload",
-        "external-tool"
-      ],
-      "boundary": "fixture admission only; no production plugin registry"
-    },
-    {
       "id": "retention-hole-requires-reconciliation",
       "passed": true
     }
   ],
   "sourceSha256": {
     "hub/requirements.lock": "3ed79db16ab9b01c1c4f1b2b99443b8952579abd8a85fd38e60aff8c1baa2420",
-    "tests/contracts/fake_execution.py": "5d451dee85a6653869d83d6f38c26540a2fabd8797dad28385dcfe66dc5507c0",
-    "tests/storage/README.md": "e0488e2fa603b62767a10bc4e1a0e46e406e576b186f77f955f1ad401aa26a57",
+    "tests/storage/README.md": "ec4d13a2a6cafc9be91cc1b9f64edf48c60ebdaa322b042642fe47e47a18d98c",
     "tests/storage/python_client.py": "e09951cf4a7237cac16a9b3b2b455dfeecdc3bd904e575343412d471561865c6",
-    "tests/storage/run.py": "8eb26dc9848b63dd6db38a4ebc03f590f79dfacddcf1c8cab59910f871a39dab",
+    "tests/storage/run.py": "f5c4a26ab7b9491c63f32b0f887a0987bbe47f77b1c3373934014407638a14a4",
     "tests/storage/typescript/README.md": "951a9f510f9a117cffd07cf9118a240485e37aea683c6867ae3ffd054b618e88",
     "tests/storage/typescript/package-lock.json": "e0d86aeebaf835fb965ef32ff0925c4f3919fd87b8f41daa2ca90ffe9f291a1d",
     "tests/storage/typescript/package.json": "5df63a73a27894e59288e4ee366e0fa1ff495812a8a2efe7d25efd7e63561a1e",
@@ -152,7 +113,7 @@
     "src/client.ts": "9087215cf5266e2a12e44dee4edd1ed3192d5c94813e65443c8e152b0c0ac43a"
   },
   "typeScriptBuildInputsMatchRepository": true,
-  "brokerBinarySha256": "387ce54e7a0a249d877a579ed641d715bab047d7e061bfa42b4d07f6a0401341",
+  "brokerBinarySha256": "5bc802f2d8216bb05415df93bb7dc30bf818a8284c745919b3bdb524032fcb10",
   "command": "python tests/storage/run.py",
   "sourceCommit": "a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41",
   "limits": [

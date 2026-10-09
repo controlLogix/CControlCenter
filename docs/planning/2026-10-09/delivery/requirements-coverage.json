@@ -22,7 +22,7 @@
     },
     {
       "path": "component-audit-hub.json",
-      "sha256": "c7be78f59b84f2c3654e7ae77e6b53552021eeaa5d7be24a067d95bfea5398a3"
+      "sha256": "b2eb15d467fc12d4099a0a9534184b1be308fa11c55adcd68d6f2533c21a3cca"
     },
     {
       "path": "component-audit-repository.json",
@@ -3174,6 +3174,37 @@
         {
           "path": "component-audit-repository.json",
           "sha256": "39001427bd59e2b0bf45ad6b953a4221c0edf9cdbaaf541179317775e0d29a6f"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "Registered three controllable execution fixture files without removing component scope.",
+      "previousSourceFiles": [
+        {
+          "path": "implementation-plan.md",
+          "sha256": "f2a809c4c7525894376ea3b93ebc11f92c7bd42648606d1cd0b7149721b79465"
+        },
+        {
+          "path": "phases.json",
+          "sha256": "5bb9037937a00621214ad58873c368fdc55b2f8c3722653c97432efa8031a82a"
+        },
+        {
+          "path": "component-audit-dashboard.json",
+          "sha256": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f"
+        },
+        {
+          "path": "component-audit-harness.json",
+          "sha256": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08"
+        },
+        {
+          "path": "component-audit-hub.json",
+          "sha256": "c7be78f59b84f2c3654e7ae77e6b53552021eeaa5d7be24a067d95bfea5398a3"
+        },
+        {
+          "path": "component-audit-repository.json",
+          "sha256": "52a2e7648da7727c260b28764f6fc5817b6776d4e24198bec7a4b8436bf442c2"
         }
       ]
     }

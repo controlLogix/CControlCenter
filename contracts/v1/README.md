@@ -18,7 +18,7 @@ Verification receives an already trusted public key and expected audience from i
 
 P00 draft schemas and model evidence remain in the planning package as history. These promoted schemas do not rewrite those records. Incompatible schema changes require a new contract major version and explicit negotiation; producer and consumer fixtures must demonstrate every advertised compatible change.
 
-Ten core payload schemas and a bounded real NATS persistence fixture are implemented. P01 still requires complete lifecycle and delivery semantics, domain state models, two-hub fault cases, CI rejection checks and supported-platform evidence before its gate. The single-node storage result does not qualify replication or leaf connections. Later phases implement plugin construction, enrollment, domain execution and real runtime authorization. No existing source, stored identity or user action is retired by adding these files.
+Ten core payload schemas, five executable lifecycle models, ordered recovery histories and bounded real NATS storage/leaf fixtures are implemented. The signed leaf fixture verifies both independent SDKs over real transport. Native macOS/Linux CI and separate WSL checks passed at checkpoint `a2e9ee6`; their reports identify exact sources and do not qualify later changes automatically. P01 still requires the complete task, failure and preservation review before its gate. See `recovery.md` for fixture semantics and limits. The single-node storage result does not qualify replication. Later phases implement plugin construction, enrollment, domain execution and real runtime authorization. No existing source, stored identity or user action is retired by adding these files.
 
 ## Registered payload meanings
 

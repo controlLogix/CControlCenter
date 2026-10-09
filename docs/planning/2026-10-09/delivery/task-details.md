@@ -359,7 +359,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 
 ### P01-T01: Publish language-neutral command/event schemas and compatibility rules with organization, project, task, delegation, attempt, operation, schema version, and trace identifiers.
 
-**Status:** in_progress. **Owner:** Codex.
+**Status:** done. **Owner:** Codex.
 
 **Dependencies:** P00-GATE, P01-T08.
 
@@ -391,9 +391,9 @@ Contracts and failure scenarios can be tested before business plugins grow.
 4. Run FAIL-42, FAIL-43 and FAIL-47 with real JetStream. Record which server/API/SDK capabilities provide each guarantee, including batch behavior and authoritative read freshness.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 
-**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/P01-T01.json
 
-**Commits:** 7ef00dcb299c100d6dda45bfffa2b4e127345a50, f19c6473d56335b8eeb28704b02895b9d9ab7fcc
+**Commits:** 7ef00dcb299c100d6dda45bfffa2b4e127345a50, f19c6473d56335b8eeb28704b02895b9d9ab7fcc, a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41
 
 
 <a id="P01-T02"></a>
@@ -441,7 +441,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 
 ### P01-T03: Specify lifecycle, delivery acknowledgment, idempotency, deadline, cancellation, approval, and unavailable/unknown result semantics.
 
-**Status:** in_progress. **Owner:** Codex.
+**Status:** done. **Owner:** Codex.
 
 **Dependencies:** P00-GATE, P01-T08.
 
@@ -473,9 +473,9 @@ Contracts and failure scenarios can be tested before business plugins grow.
 4. Run FAIL-42, FAIL-43 and FAIL-47 with real JetStream. Record which server/API/SDK capabilities provide each guarantee, including batch behavior and authoritative read freshness.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 
-**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/P01-T03.json
 
-**Commits:** 7ef00dcb299c100d6dda45bfffa2b4e127345a50, f19c6473d56335b8eeb28704b02895b9d9ab7fcc
+**Commits:** 7ef00dcb299c100d6dda45bfffa2b4e127345a50, f19c6473d56335b8eeb28704b02895b9d9ab7fcc, a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41
 
 
 <a id="P01-T04"></a>
@@ -523,7 +523,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 
 ### P01-T05: Build an early two-hub contract spike with separate broker accounts and a leaf link
 
-**Status:** in_progress. **Owner:** Codex.
+**Status:** done. **Owner:** Codex.
 
 **Dependencies:** P00-GATE, P01-T08.
 
@@ -555,16 +555,16 @@ Contracts and failure scenarios can be tested before business plugins grow.
 4. Run FAIL-42, FAIL-43 and FAIL-47 with real JetStream. Record which server/API/SDK capabilities provide each guarantee, including batch behavior and authoritative read freshness.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 
-**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/P01-T05.json
 
-**Commits:** f19c6473d56335b8eeb28704b02895b9d9ab7fcc
+**Commits:** f19c6473d56335b8eeb28704b02895b9d9ab7fcc, a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41
 
 
 <a id="P01-T06"></a>
 
 ### P01-T06: Preserve and extend the verified repairs for the six baseline findings
 
-**Status:** in_progress. **Owner:** Codex.
+**Status:** done. **Owner:** Codex.
 
 **Dependencies:** P00-GATE, P01-T08.
 
@@ -597,9 +597,9 @@ Contracts and failure scenarios can be tested before business plugins grow.
 4. Run FAIL-42, FAIL-43 and FAIL-47 with real JetStream. Record which server/API/SDK capabilities provide each guarantee, including batch behavior and authoritative read freshness.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 
-**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/P01-T06.json
 
-**Commits:** f19c6473d56335b8eeb28704b02895b9d9ab7fcc
+**Commits:** f19c6473d56335b8eeb28704b02895b9d9ab7fcc, a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41
 
 
 <a id="P01-T07"></a>

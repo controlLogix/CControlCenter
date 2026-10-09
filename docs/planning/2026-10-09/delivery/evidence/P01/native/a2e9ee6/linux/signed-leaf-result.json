@@ -1,7 +1,7 @@
 {
-  "recordedAt": "2026-10-09T22:42:25.554339+00:00",
+  "recordedAt": "2026-10-09T22:37:31.379101+00:00",
   "sourceHashes": {
-    "contracts/v1/README.md": "4b959c625695c8380883d68a851dec7c88fd7b53d6a891c872da49a851de068c",
+    "contracts/v1/README.md": "5c19dcf2bde9708dee7a31c8f86324d5b888d61d49639c9048d63d0ed5e83826",
     "contracts/v1/models/README.md": "5eb4fc1147c968ba8dad4f0d53aa0fbbc16442ffcb7b3162251888a2ae96eed2",
     "contracts/v1/models/state-machines.json": "b3de8382ae529d7ccf449f88ee567bd6b267e13d8fc3519c2762be718e1bc10d",
     "contracts/v1/recovery.md": "9a2bf74eb17123d349683a8d7b64a20c3126fe65d39e3072a2ec98c1fabcafee",
@@ -131,7 +131,7 @@
     }
   ],
   "command": "python tests/leaf/signed_run.py",
-  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
   "trustedFixtureClock": "2026-10-09T12:01:00Z",
   "limits": [
     "Static pre-enrolled fixture keys and scope, not production enrollment, OIDC, dynamic grants, TLS or a plugin runtime.",
@@ -139,11 +139,11 @@
     "Graceful local broker restarts with independent single-node stores, not R3 or final bilateral release acceptance."
   ],
   "runtimeVersions": {
-    "harnessPython": "3.14.4",
+    "harnessPython": "3.14.8",
     "natsPy": "2.16.0",
     "keyDerivationPyNaCl": "1.6.2",
-    "sdkPython": "Python 3.14.4",
-    "node": "v22.22.1"
+    "sdkPython": "Python 3.14.8",
+    "node": "v22.21.1"
   },
   "brokerVersion": "nats-server: v2.15.0",
   "brokerSha256": "387ce54e7a0a249d877a579ed641d715bab047d7e061bfa42b4d07f6a0401341",
@@ -194,8 +194,8 @@
   },
   "trust": {
     "keyFingerprints": {
-      "hub-origin": "e83041f21843bd0811f2cb7ba3bfc6f40c04b4540e7df6b2197600f28438fa96",
-      "hub-executor": "b1d1fb3aa1cb047f82ad3c64f8ee8bfaf53f0d3e8ee6b89abdb55725d1fc9416"
+      "hub-origin": "8799c96deca2761fa167d1d3ed14341a0a43b8b29a77e30f74608a0f455cb83c",
+      "hub-executor": "ffbc357a0a336704cef4480096c35bb3dd9e6943791df60bbf0d4209e0cf6c26"
     },
     "expectedAudiences": [
       "hub-executor/delegation-owner",
@@ -204,7 +204,7 @@
   },
   "sourceMirror": {
     "inputSha256": {
-      "contracts/v1/README.md": "4b959c625695c8380883d68a851dec7c88fd7b53d6a891c872da49a851de068c",
+      "contracts/v1/README.md": "5c19dcf2bde9708dee7a31c8f86324d5b888d61d49639c9048d63d0ed5e83826",
       "contracts/v1/models/README.md": "5eb4fc1147c968ba8dad4f0d53aa0fbbc16442ffcb7b3162251888a2ae96eed2",
       "contracts/v1/models/state-machines.json": "b3de8382ae529d7ccf449f88ee567bd6b267e13d8fc3519c2762be718e1bc10d",
       "contracts/v1/recovery.md": "9a2bf74eb17123d349683a8d7b64a20c3126fe65d39e3072a2ec98c1fabcafee",
@@ -246,5 +246,5 @@
   "sourceUnchangedDuringRun": true,
   "buildUnchangedDuringRun": true,
   "cleanupComplete": true,
-  "durationSeconds": 41.314
+  "durationSeconds": 9.538
 }

@@ -1,10 +1,9 @@
 {
-  "recordedAt": "2026-10-09T22:42:25.554339+00:00",
+  "recordedAt": "2026-10-09T22:39:53.363232+00:00",
+  "sourceCommit": "a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41",
+  "sourceBinding": "Commit is the checkout base; sourceHashes identify exact working files. Compiled CLI has a separate digest.",
   "sourceHashes": {
-    "contracts/v1/README.md": "4b959c625695c8380883d68a851dec7c88fd7b53d6a891c872da49a851de068c",
-    "contracts/v1/models/README.md": "5eb4fc1147c968ba8dad4f0d53aa0fbbc16442ffcb7b3162251888a2ae96eed2",
     "contracts/v1/models/state-machines.json": "b3de8382ae529d7ccf449f88ee567bd6b267e13d8fc3519c2762be718e1bc10d",
-    "contracts/v1/recovery.md": "9a2bf74eb17123d349683a8d7b64a20c3126fe65d39e3072a2ec98c1fabcafee",
     "contracts/v1/registry.json": "63bdf935623f4b2925592d09a923a5120966b37a33059d9d54aacacce930dc9f",
     "contracts/v1/schemas/cancellation-request.schema.json": "81b797594e094b7acb4c3836bcec9714f2a1f3104bb6105051d438e78e2e19cb",
     "contracts/v1/schemas/common.schema.json": "65e1c256048e311da082a59a592ad2291740863807cebe12f96ecd20f3192ddb",
@@ -24,8 +23,8 @@
     "contracts/v1/schemas/status-query.schema.json": "1602ff586698c26b8f2cc8ab7be90297cd86dbd0d83c41124421b684707f0a2c",
     "contracts/v1/schemas/task-inspect.schema.json": "96f0103ed42e0b8354cdbb7b37631ad93df149e91bcd4ef3c79b3d0072f822f3",
     "contracts/v1/schemas/task-reserve.schema.json": "42e89db4f7661939cda9a97526e0e09e4fe67f0aeea6b6d653adb1bfe04506f2",
-    "hub/requirements.lock": "3ed79db16ab9b01c1c4f1b2b99443b8952579abd8a85fd38e60aff8c1baa2420",
-    "sdk/python/README.md": "34a29603b12e7418219097dfc3ae1690205190e412184a33f424b3ac673db738",
+    "docs/planning/2026-10-09/delivery/contracts/model-examples.json": "d7fb26e9250c61178a3f2c3e6fb1331fad075a0e876d66ed9d4dfc5de42fa329",
+    "docs/planning/2026-10-09/delivery/contracts/state-machines.json": "607a4a1a89c3a16cff5904d740b3fa21c45130a091a2fd811b88c06007cda8a6",
     "sdk/python/agentmux_contracts/__init__.py": "94d4eb1d149b82e405251e3cba9e9186f92e287c91a03dc8d794b12ab2ebd00a",
     "sdk/python/agentmux_contracts/__main__.py": "41951a02453da0bb10febf76cf151aac67a2dd9bdf5fff2fa5efd413b94b22b1",
     "sdk/python/agentmux_contracts/attestation.py": "d7bb81a998c2b3e243177a000f94f97e19dad54ff89090d22c41103a991dc70b",
@@ -36,7 +35,6 @@
     "sdk/python/requirements.lock": "10f1a795ebbc6624f1bb29d484b983781feaf94e178336b87aede0204f50eca6",
     "sdk/python/tests/test_contracts.py": "4e27ba59a2704bda976542686f068b03ae0ad20e2d97c3616a9757f977869c16",
     "sdk/python/tests/test_state_models.py": "7ccf19dbb656b497b796ee771b158cf3a31cc916a4613f9dfca756b0db0835f6",
-    "sdk/typescript/README.md": "c36dc485f8100cd8d8dcc914bd15a47403d584bc1b2fe96485be6030ae911765",
     "sdk/typescript/package-lock.json": "2821dcc8c007574512f63228ba79ddf0e283d76ad9a7c37ee46533e9ebcf5081",
     "sdk/typescript/package.json": "a97ae072561b6f3e05b9583ff0d78830a60a349667a86ede75cdee91ed932c28",
     "sdk/typescript/src/cli.ts": "9764b559e8ef7e806ef96e74803d5125eb2912a9ae38311ba11a3f81637305c9",
@@ -46,110 +44,22 @@
     "sdk/typescript/src/test.ts": "e9268a639ff0e6927839d524d1599777f4ab10d21c1fc641299289696aca1564",
     "sdk/typescript/test-examples.json": "30fc8cdb67a6c056f9a50ddf0c7593016b04ce00d7a1d96fc505a26b2e338226",
     "sdk/typescript/tsconfig.json": "c46cb61f3946e5fc5c84ab49896f889d2bde0478d8f8b0710079d5e17edb79d4",
+    "tests/contracts/ci.py": "74ae3f5c68374982780861609fa357cb4a6b01d493843ea64694738a9105cdaf",
+    "tests/contracts/fake_execution.py": "5d451dee85a6653869d83d6f38c26540a2fabd8797dad28385dcfe66dc5507c0",
+    "tests/contracts/run.py": "979a6c4d3650bc8fa5e8b654d62c88c15f7ba16b6853b6ca14c2823a9cbd040f",
+    "tests/contracts/test_conformance.py": "a1cde5fd3745899e5b062b3f3784be2ed531b170c46f0848bf469099450d7959",
+    "tests/contracts/test_fake_execution.py": "17b8473fdbf5e309a719f5467de5e91238aa829c723710ef9fa1d0217e225610",
+    "tests/contracts/test_payloads.py": "80b273a16da8050565a320d63e2828cec903fc77f584e228e862b4e736dc38ef",
+    "tests/contracts/test_recovery.py": "6020bf7e88896d4847b625483678982f1e91bc636083cefb3cea9e0055bebe23",
+    "tests/contracts/test_semantics.py": "e83efa3a548185d8022ac74906dffaa6a62e8bfae5a72c41ba7233f0f50cde65",
+    "tests/contracts/test_state_models.py": "33eb6bcbcc5242ee361aa203e966e33bd1395199f1264f7803e96e0dc75198b3",
     "tests/contracts/vectors/payload-examples.json": "565db177e76f5cef9ef748a7a3ac0482da138908760d00bae92e61b1e164d4a7",
-    "tests/contracts/vectors/valid-examples.json": "30fc8cdb67a6c056f9a50ddf0c7593016b04ce00d7a1d96fc505a26b2e338226",
-    "tests/leaf/README.md": "01f32039b3eaaa556b8b30a82d9ba2853cd6df6b713de6848de49d025ae487c1",
-    "tests/leaf/run.py": "17fdaf80d25955643c23c246d7477f3324a62cb152bc1ec358416c4914d77063",
-    "tests/leaf/signed_run.py": "240042e1494a2065a8cd5849f0150aa52937e460a22f7e53225cd10cab31ba6d"
+    "tests/contracts/vectors/semantic-examples.json": "bbb47da7030085e25e5465b820c8650f67f9ddf251baf42e9bc8b995b03914ec",
+    "tests/contracts/vectors/valid-examples.json": "30fc8cdb67a6c056f9a50ddf0c7593016b04ce00d7a1d96fc505a26b2e338226"
   },
-  "cases": [
-    {
-      "name": "deny_malformed_before_owner_mutation",
-      "status": "passed"
-    },
-    {
-      "name": "deny_invalid-utf8_before_owner_mutation",
-      "status": "passed"
-    },
-    {
-      "name": "deny_unknown-contract_before_owner_mutation",
-      "status": "passed"
-    },
-    {
-      "name": "deny_wrong-audience_before_owner_mutation",
-      "status": "passed"
-    },
-    {
-      "name": "deny_tampered-payload_before_owner_mutation",
-      "status": "passed"
-    },
-    {
-      "name": "deny_expired_before_owner_mutation",
-      "status": "passed"
-    },
-    {
-      "name": "python_signed_offer_typescript_verified_before_durable_acceptance",
-      "status": "passed"
-    },
-    {
-      "name": "signed_decision_loss_offline_read_and_separate_restart_recovery",
-      "status": "passed"
-    },
-    {
-      "name": "owner_rejects_signed_decision_taskId_mismatch_before_mutation",
-      "status": "passed"
-    },
-    {
-      "name": "owner_rejects_signed_decision_delegationId_mismatch_before_mutation",
-      "status": "passed"
-    },
-    {
-      "name": "owner_rejects_signed_decision_attemptId_mismatch_before_mutation",
-      "status": "passed"
-    },
-    {
-      "name": "signed_replay_reconciles_lost_decision_and_rejects_changed_digest_without_execution",
-      "status": "passed"
-    },
-    {
-      "name": "python_rejects_tampered_result_before_origin_mutation",
-      "status": "passed"
-    },
-    {
-      "name": "owner_rejects_signed_result_executorHubId_mismatch_before_mutation",
-      "status": "passed"
-    },
-    {
-      "name": "owner_rejects_signed_result_taskId_mismatch_before_mutation",
-      "status": "passed"
-    },
-    {
-      "name": "owner_rejects_signed_result_delegationId_mismatch_before_mutation",
-      "status": "passed"
-    },
-    {
-      "name": "owner_rejects_signed_result_attemptId_mismatch_before_mutation",
-      "status": "passed"
-    },
-    {
-      "name": "owner_rejects_signed_result_repositoryRevision_mismatch_before_mutation",
-      "status": "passed"
-    },
-    {
-      "name": "typescript_signed_report_python_verified_then_origin_explicitly_accepts",
-      "status": "passed"
-    }
-  ],
-  "command": "python tests/leaf/signed_run.py",
-  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
-  "trustedFixtureClock": "2026-10-09T12:01:00Z",
-  "limits": [
-    "Static pre-enrolled fixture keys and scope, not production enrollment, OIDC, dynamic grants, TLS or a plugin runtime.",
-    "Real Ed25519/JCS SDK admission and NATS leaf bytes; owner policy and acceptance remain explicit fixture code.",
-    "Graceful local broker restarts with independent single-node stores, not R3 or final bilateral release acceptance."
-  ],
-  "runtimeVersions": {
-    "harnessPython": "3.14.4",
-    "natsPy": "2.16.0",
-    "keyDerivationPyNaCl": "1.6.2",
-    "sdkPython": "Python 3.14.4",
-    "node": "v22.22.1"
-  },
-  "brokerVersion": "nats-server: v2.15.0",
-  "brokerSha256": "387ce54e7a0a249d877a579ed641d715bab047d7e061bfa42b4d07f6a0401341",
-  "sourceCommit": "a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41",
+  "sourceUnchangedDuringRun": true,
   "typescriptBuild": {
-    "sources": {
+    "sourceComparison": {
       "package.json": {
         "repository": "a97ae072561b6f3e05b9583ff0d78830a60a349667a86ede75cdee91ed932c28",
         "buildSource": "a97ae072561b6f3e05b9583ff0d78830a60a349667a86ede75cdee91ed932c28"
@@ -184,27 +94,20 @@
       }
     },
     "allSourcesMatch": true,
-    "compiled": {
+    "compiledJavaScriptHashes": {
       "cli.js": "ca8d0c527228a6436c773196389130c16b8d6ff4febbce9087575bb67817ad09",
       "index.js": "1123413139da1be100de8e57b944461abf094269b73ffe1252a913abf18b1526",
       "state-models.js": "bc06716ef6ba424f554f03eabab5af7080c8e7e445d862bf4789c6754d91d773",
       "state-models.test.js": "4c4d71963410aa24b37a7cc8f76568a250c81810790beb4eca8b522ee0b02ad6",
       "test.js": "243e073a36bd42464976e12446d804c066d4f0964f01d7cee461b3fca929f923"
-    }
-  },
-  "trust": {
-    "keyFingerprints": {
-      "hub-origin": "e83041f21843bd0811f2cb7ba3bfc6f40c04b4540e7df6b2197600f28438fa96",
-      "hub-executor": "b1d1fb3aa1cb047f82ad3c64f8ee8bfaf53f0d3e8ee6b89abdb55725d1fc9416"
     },
-    "expectedAudiences": [
-      "hub-executor/delegation-owner",
-      "hub-origin/task-owner"
-    ]
+    "cliPresent": true
   },
+  "typescriptBuildUnchangedDuringRun": true,
   "sourceMirror": {
+    "root": "/tmp/agentmux-contract-inputs-yqnqe3sq",
     "inputSha256": {
-      "contracts/v1/README.md": "4b959c625695c8380883d68a851dec7c88fd7b53d6a891c872da49a851de068c",
+      "contracts/v1/README.md": "5c19dcf2bde9708dee7a31c8f86324d5b888d61d49639c9048d63d0ed5e83826",
       "contracts/v1/models/README.md": "5eb4fc1147c968ba8dad4f0d53aa0fbbc16442ffcb7b3162251888a2ae96eed2",
       "contracts/v1/models/state-machines.json": "b3de8382ae529d7ccf449f88ee567bd6b267e13d8fc3519c2762be718e1bc10d",
       "contracts/v1/recovery.md": "9a2bf74eb17123d349683a8d7b64a20c3126fe65d39e3072a2ec98c1fabcafee",
@@ -239,12 +142,76 @@
       "sdk/python/tests/test_contracts.py": "4e27ba59a2704bda976542686f068b03ae0ad20e2d97c3616a9757f977869c16",
       "sdk/python/tests/test_state_models.py": "7ccf19dbb656b497b796ee771b158cf3a31cc916a4613f9dfca756b0db0835f6"
     },
-    "matchesRepositoryBeforeAndAfter": true,
-    "unchangedDuringRun": true
+    "matchesRepositoryBefore": true,
+    "matchesRepositoryAfter": true,
+    "unchangedDuringRun": true,
+    "lifetime": "Owned TemporaryDirectory; removed after the report is saved."
   },
+  "environment": {
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "harnessPython": "3.14.4",
+    "clientPython": "Python 3.14.4",
+    "node": "v22.22.1"
+  },
+  "command": "python tests/contracts/run.py --evidence <output>",
+  "selection": {
+    "pattern": "test_*.py",
+    "match": "ControlledExecution",
+    "fullSuite": false
+  },
+  "durationSeconds": 2.157,
   "exitCode": 0,
-  "sourceUnchangedDuringRun": true,
-  "buildUnchangedDuringRun": true,
-  "cleanupComplete": true,
-  "durationSeconds": 41.314
+  "testsRun": 10,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "expectedFailures": 0,
+  "results": [
+    {
+      "test": "test_fake_execution.ControlledExecution.test_confirmed_cancel_stops_output_and_requires_reconciliation",
+      "status": "passed"
+    },
+    {
+      "test": "test_fake_execution.ControlledExecution.test_delay_and_explicit_reordering_preserve_each_operation",
+      "status": "passed"
+    },
+    {
+      "test": "test_fake_execution.ControlledExecution.test_histories_and_snapshots_are_detached_from_delivered_objects",
+      "status": "passed"
+    },
+    {
+      "test": "test_fake_execution.ControlledExecution.test_invalid_controls_and_duplicate_dispatch_have_no_second_effect",
+      "status": "passed"
+    },
+    {
+      "test": "test_fake_execution.ControlledExecution.test_lost_reply_is_unknown_despite_completed_provider",
+      "status": "passed"
+    },
+    {
+      "test": "test_fake_execution.ControlledExecution.test_provider_unavailable_proves_no_dispatch",
+      "status": "passed"
+    },
+    {
+      "test": "test_fake_execution.ControlledExecution.test_reply_at_deadline_is_unknown_without_polling",
+      "status": "passed"
+    },
+    {
+      "test": "test_fake_execution.ControlledExecution.test_success_uses_real_callback_and_separate_output_history",
+      "status": "passed"
+    },
+    {
+      "test": "test_fake_execution.ControlledExecution.test_timeout_before_execution_does_not_retry_and_late_reply_needs_lookup",
+      "status": "passed"
+    },
+    {
+      "test": "test_fake_execution.ControlledExecution.test_unconfirmed_cancel_retains_intent_after_late_completion",
+      "status": "passed"
+    }
+  ],
+  "limitations": [
+    "Local subprocess protocol, schema, canonical-byte and signature fixtures only; no live NATS, enrollment, current-grant lookup or production authorization qualification.",
+    "Ephemeral test signing seeds and request bodies are not stored in this record.",
+    "Strict raw UTF-8 is tested at the CLI byte boundary. Payload-size unit checks belong to each SDK because nested JSON escaping changes outer CLI frame size.",
+    "A passing local environment does not qualify unexecuted macOS, CI, provider or terminal environments."
+  ]
 }

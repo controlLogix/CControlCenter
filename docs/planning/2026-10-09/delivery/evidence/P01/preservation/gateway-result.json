@@ -1,0 +1,40 @@
+{
+  "executionHarnessSha256": "1d2b7294f9d88ec83fdb9457c184b2a3f3a72e4fd2b64c918c68a4f2df020d14",
+  "recordedAtUnix": 1791585910.668732,
+  "candidateCommit": "a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41",
+  "environment": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]"
+  },
+  "checks": [
+    {
+      "command": [
+        "C:\\Users\\RyanHelms\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+        "dashboard/test_gateway.py"
+      ],
+      "exitCode": 0,
+      "seconds": 0.328,
+      "log": "gateway.log",
+      "logSha256": "55ec468004a18382e07b096ac24623c16a04c30b6df977d2901afdcf0ed36fee",
+      "summary": [
+        "  ok    relay_once matches (8 cases)                         '0'",
+        "  ok    relay_stream matches (15 cases)                      '0'",
+        "",
+        "passed 66, failed 0"
+      ],
+      "skipLines": []
+    }
+  ],
+  "limits": [
+    "Windows CPython 3.12 pure translation and archived-bytecode comparison only; no Bedrock service or credential used."
+  ],
+  "sourceHashes": {
+    "dashboard/test_gateway.py": "95b9d183bc94ddea031d2e3272036019967f6a0eb55795bfa55573149950e133",
+    "taskmgmt/bedrock_gateway.py": "9c80a0bb673707a96d085280abd77b06e20f00b85e56f51903a7b922cfa2785b",
+    "taskmgmt/recovered/bedrock_gateway.cpython-312.pyc.bin": "fedba136c42822aed1e8bcb430c2f6eba48b63c392d2cc1a3b6da1487a83400f"
+  },
+  "copiedSourceMatches": true,
+  "cleanupComplete": true,
+  "sourceUnchanged": true,
+  "ok": true
+}

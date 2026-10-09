@@ -131,10 +131,19 @@
     "tests/storage/run.py": {
       "path": "tests/storage/run.py",
       "originalSha256": "c0b9ec17212029fdfebf1ac56d4399f71ed4539587234bf3f60ee00017043624",
-      "replacementSha256": "f5c4a26ab7b9491c63f32b0f887a0987bbe47f77b1c3373934014407638a14a4",
+      "replacementSha256": "8eb26dc9848b63dd6db38a4ebc03f590f79dfacddcf1c8cab59910f871a39dab",
       "reviewer": "Codex",
       "reviewedAt": "2026-10-09",
-      "reason": "Report destination only; all executable assertions preserved.",
+      "reason": "Preserved all original assertions and documentation; added four fixture storage cases and their limitations.",
+      "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/regression-replacement-review.md"
+    },
+    "tests/storage/README.md": {
+      "path": "tests/storage/README.md",
+      "originalSha256": "ec4d13a2a6cafc9be91cc1b9f64edf48c60ebdaa322b042642fe47e47a18d98c",
+      "replacementSha256": "e0488e2fa603b62767a10bc4e1a0e46e406e576b186f77f955f1ad401aa26a57",
+      "reviewer": "Codex",
+      "reviewedAt": "2026-10-09",
+      "reason": "Preserved all original assertions and documentation; added four fixture storage cases and their limitations.",
       "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/regression-replacement-review.md"
     }
   }

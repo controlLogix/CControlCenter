@@ -2756,6 +2756,20 @@
       ]
     },
     {
+      "path": "tests/contracts/fake-execution.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/contracts/fake_execution.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
       "path": "tests/contracts/run.py",
       "baselineBlob": null,
       "componentIds": [
@@ -2764,6 +2778,13 @@
     },
     {
       "path": "tests/contracts/test_conformance.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/contracts/test_fake_execution.py",
       "baselineBlob": null,
       "componentIds": [
         "HUB-26"
@@ -3002,6 +3023,17 @@
         "tests/leaf/signed_run.py"
       ],
       "note": "Preserves all baseline blobs, component identities and behavior checks. Fixture and CI source coverage is not production authority or phase acceptance."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "P01 controlled worker/provider fixture ownership",
+      "addedFiles": [
+        "tests/contracts/fake-execution.md",
+        "tests/contracts/fake_execution.py",
+        "tests/contracts/test_fake_execution.py"
+      ],
+      "note": "Reusable in-memory execution fixtures extend qualification coverage without changing baseline identities, component ownership or behavior checks. They do not establish production authority, persistence or phase acceptance."
     }
   ]
 }

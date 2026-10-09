@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "characterized-with-findings",
+  "components": [
+    "HAR-19",
+    "HAR-20"
+  ],
+  "sourceSha256": {
+    ".gitignore": "a888b9df89402a815bdb15d30c5280b090be11655ab4cc2299ce748d44cd6ed4",
+    "correlate.py": "9513e32863d64f2c5cd83f977748885c2cb0f24d05ec26e4024b005f494c74a1",
+    "determinism.sh": "3c04514c28311990cddbc0e5067946ee27522ad11d1ea8eca02764fb829bbf86",
+    "extract_courier.py": "e9116d64ee66adfd05ebd91213ce8e0aa63869accf1333f8fec8a8fc722fe10e",
+    "extract_panes.py": "5bd4ccae82fc77d00d4eed8ca6ddeef3ecdbb882be1714013d3f84a85ea2c914",
+    "extract_receipts.py": "c989ee53ebcda84d7878dbb2288270fc400733100ec2a8c6552114c76021eda9",
+    "extract_transcripts.py": "a3705cea5e0ed4cc5017b214164f73c80ccb070678dd6bb9396cc991df02cbe2",
+    "README.md": "d80290d2bee0023e4f9d5e672c69e8edfcd7c23abbcfdc1690bed3b8a81af7b2",
+    "spotcheck.judgments.json": "1d6b32d65828fb82c82ff896f887b20c8092c3bafa99b244c9fb8674b316a133",
+    "spotcheck.pass1.judgments.json": "f033729edcce658c538ae1f9f90b136b2365cc19bcf875803b71a9e7918d1a41",
+    "spotcheck.py": "92b27c0facf9239f61be9a76cfd14334ab171298cbbbc66ea7befa1d1e3bd8a2"
+  },
+  "harnessSha256": "ff93e1f3ca71f5c9530c576c0567f969166d6e04fa2016874044cb97a58698f4",
+  "cases": [
+    "courier/transcript ANSI, paste, envelope and whitespace normalization with exact body hash",
+    "explicit CDT conversion and unzoned timestamp uncertainty",
+    "receipt partial final line counted and missing source returns no fabricated record",
+    "courier torn queue record retains byte offset and bad-record marker",
+    "pane missing clocks remain unknown or explicit mtime upper bound",
+    "actual pane scan respects frozen byte cutoff and flags a log shortened after indexing",
+    "transcript exact cutoff included, later intent excluded, torn line counted, absent time unknown",
+    "full correlator wrong-recipient, inclusive two-minute skew, four-hour overflow unknown, truncation, duplicate send and absent-source unknown",
+    "duplicate rescued receipt removed without adding a turn",
+    "two complete correlation runs yield identical three output hashes and retain both original judgment datasets"
+  ],
+  "findings": [
+    {
+      "id": "COMMS-01",
+      "behavior": "Courier read_lines raises FileNotFoundError for a missing required log; receipt jsonl silently returns no rows. Missing-source diagnostics are inconsistent.",
+      "source": "extract_courier.py:read_lines / extract_receipts.py:jsonl"
+    }
+  ],
+  "determinism": [
+    {
+      "outcomes.jsonl": "d81ad537c96ccd63f33e33a9780065691992c5589820cc1281351ed80594e2dc",
+      "spotcheck.sample.jsonl": "342b2f728dd5fcd6f4687076cb10087fcfc12d7bb8cccbedac1086f84ddefa47",
+      "summary.md": "5130f02045c55de4d1841b163eb59f09ea0d9df45434f226d352bd497ae89242"
+    },
+    {
+      "outcomes.jsonl": "d81ad537c96ccd63f33e33a9780065691992c5589820cc1281351ed80594e2dc",
+      "spotcheck.sample.jsonl": "342b2f728dd5fcd6f4687076cb10087fcfc12d7bb8cccbedac1086f84ddefa47",
+      "summary.md": "5130f02045c55de4d1841b163eb59f09ea0d9df45434f226d352bd497ae89242"
+    }
+  ],
+  "writeAudit": {
+    "allWritesWithinDisposableRoot": true,
+    "paths": [
+      "beta.log",
+      "correlate.py",
+      "duplicate.jsonl",
+      "extract_courier.py",
+      "extract_panes.py",
+      "extract_receipts.py",
+      "extract_transcripts.py",
+      "late.jsonl",
+      "out/courier.jsonl",
+      "out/outcomes.jsonl",
+      "out/panes.jsonl",
+      "out/receipts.jsonl",
+      "out/receipts.rescued-claude-config.jsonl",
+      "out/spotcheck.sample.jsonl",
+      "out/summary.md",
+      "out/transcripts.jsonl",
+      "queue/alpha.jsonl",
+      "skew.jsonl",
+      "spotcheck.judgments.json",
+      "spotcheck.pass1.judgments.json",
+      "torn.jsonl",
+      "transcript.jsonl",
+      "truncated.jsonl",
+      "unknown.jsonl",
+      "wrong.jsonl"
+    ]
+  },
+  "sourceUnchanged": true,
+  "limits": [
+    "Synthetic bounded characterization, not reanalysis of private historical logs.",
+    "No messaging, network access, shell commands or historical hardcoded paths invoked.",
+    "Extractor functions tested narrowly; not every historical format or complete extractor main is qualified.",
+    "Both historical judgment datasets retained unchanged; historical agreement is not current acceptance."
+  ],
+  "historicalJudgmentComparison": {
+    "pass1": {
+      "agree": 49,
+      "disagree": 10,
+      "unverifiable": 2
+    },
+    "pass2": {
+      "agree": 49,
+      "unverifiable": 2
+    },
+    "sharedIds": 35,
+    "changedSharedVerdicts": {},
+    "basis": "Retained historical judgments, not newly verified raw-source conclusions."
+  },
+  "recordedAt": "2026-10-09T22:47:40.237441+00:00",
+  "sourceCommit": "a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41",
+  "command": [
+    "/usr/bin/python3",
+    "docs/planning/2026-10-09/delivery/evidence/P01/preservation/comms_characterization.py"
+  ],
+  "environment": {
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]"
+  },
+  "sourceDirectory": "analysis/comms-2026-09",
+  "exitCode": 0,
+  "sourceBinding": "Commit is the checkout base; sourceSha256 identifies exact original files. Disposable copies redirect only path literals."
+}

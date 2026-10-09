@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, P01 recovery and CI checkpoint review, 2026-10-09; native evidence and phase gate remain open",
-  "sourceDigest": "2290b5e3f3be10fd517f624af5182e6b5bffdf384d476eb1b230d62d7904b166",
+  "reviewer": "Codex, P01 controlled execution and preservation checkpoint review, 2026-10-09; phase gate remains open",
+  "sourceDigest": "0126686213714f0c366edcc9f9617ae09f062f70a0a9a69c31b9b2e49f33c82d",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -395,6 +395,23 @@
         ".context/design-patterns-diagrams.md"
       ],
       "rationale": "Reviewed independent digest/evaluator agreement, replay identity, current fixture authorization and cancellation recovery. All 35 conformance tests pass. Signed two-broker integration passes 19 cases after review fixes for decision and result owner binding; malformed, expired and validly signed mismatches fail before mutation. Original leaf/storage assertions are unchanged; their report-path-only edits permit fresh external CI evidence. AST comparison excluding REPORT confirms no other executable change in either runner. Existing 125 hub tests pass. Regression manifest is independently derived from accepted Git blobs, explicit replacements bind exact files and removed assertions are rejected. Existing pattern statuses and history remain intact. Native CI execution remains pending; fixture logic is not production authority, enrollment or final bilateral proof. No phase transition or merge authorized."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "P01 controlled execution, storage failure boundaries, conformance admission and preservation evidence",
+      "previousReviewer": "Codex, P01 recovery and CI checkpoint review, 2026-10-09; native evidence and phase gate remain open",
+      "previousSourceDigest": "2290b5e3f3be10fd517f624af5182e6b5bffdf384d476eb1b230d62d7904b166",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/controlled-conformance-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/storage-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/conformance-admission-negative-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/a2e9ee6/review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/comms-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/historical-scoreboard.json"
+      ],
+      "rationale": "Inspected all controlled provider/worker paths, actual callback histories and timeout/cancellation limits; full45test suite passes. Storage18cases preserve every original assertion and add lost final batch acknowledgment reconciliation, staleKV owner/policy revalidation, unsupported atomicity rejection and actual conditional winner dispatch exactly once. Reviewed evidence admission against Git-derived inventory and test method IDs; fixed omitted-method scope gap and12negative/positive tests pass. Native a2e9ee6 Linux/macOS reports were independently bound to156 committed source hashes each. Later extensions need new native evidence. Preservation retains historical failures; communication diagnostic inconsistency COMMS-01 stays open with Codex owner, no full-phase claim. Inventory preserves338baseline files,93components,198checks; no production migration, later phase or merge."
     }
   ],
   "rules": {

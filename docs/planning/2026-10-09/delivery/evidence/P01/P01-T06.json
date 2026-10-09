@@ -1,0 +1,52 @@
+{
+  "taskId": "P01-T06",
+  "sourceCommit": "a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41",
+  "reviewer": "Codex",
+  "reviewedOn": "2026-10-09",
+  "scope": "Six baseline repair regressions",
+  "acceptanceResults": [
+    {
+      "criterionId": "P01-T06-AC01",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/governance-repairs.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md"
+      ],
+      "rationale": "All 125 existing hub tests pass, including route binding, atomic incoming provenance, durable result intent, same-peer distinct nodes, selected executor/result identity and unique no-replace backups. Full P01 acceptance remains required before P02."
+    },
+    {
+      "criterionId": "P01-T06-AC02",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/baseline-full-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/regression-retention-result.json"
+      ],
+      "rationale": "Executed focused evidence covers this task scope. Native reports qualify this committed contract/leaf candidate; WSL reports qualify local execution. Broader phase preservation checks remain on P01-GATE."
+    },
+    {
+      "criterionId": "P01-T06-AC03",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/regression-retention-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/regression-replacement-review.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preflight.md"
+      ],
+      "rationale": "Retained accepted regression files; report-destination-only replacements preserve executable assertions. No existing writer, data identity or runtime entry point was cut over."
+    },
+    {
+      "criterionId": "P01-T06-AC04",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/baseline-full-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/regression-retention-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/a2e9ee6/review.json"
+      ],
+      "rationale": "Reviewed evidence hashes against exact committed Git blobs at a2e9ee6. Reports retain commands, versions, exit codes, fixture limitations and cleanup; no private signing seeds are recorded."
+    }
+  ],
+  "limitations": [
+    "This accepts only the named task, not P01 or any later phase.",
+    "Fixture policy and model evidence do not implement production authorization, enrollment or runtime owners.",
+    "Future changes must revalidate affected evidence. No merge authorized."
+  ]
+}

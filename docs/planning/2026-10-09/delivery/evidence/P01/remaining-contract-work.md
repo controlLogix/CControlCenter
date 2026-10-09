@@ -2,6 +2,8 @@
 
 ## Current implementation follow-up
 
+At checkpoint `a2e9ee6`, the remaining model and recovery gaps described in this historical audit have executable coverage: 35 conformance tests, 19 signed leaf checks and native macOS/Linux CI all pass, with separate WSL evidence. `recovery-ci-checkpoint.md` and `native/a2e9ee6/review.json` record those results and their exact candidate. The leaf now carries promoted signed envelopes and checks both decision and result ownership after signature verification. The current follow-up adds controllable worker/provider callbacks and the remaining batch-acknowledgment, stale-projection and atomicity-boundary cases. Those additions need their own reviewed candidate evidence. Full P01 preservation and phase acceptance remain open. The paragraphs below describe earlier states and are retained as audit history.
+
 The audit below is retained as an earlier snapshot. The later `model-leaf-checkpoint.md` records promoted five-model/68-transition evaluators, guarded cancellation handling, independent language boundary fixes and passing shared histories. The separate real leaf fixture now proves scoped transport and bounded reservation recovery, but does not yet carry the promoted signed envelopes. Durable replay decisions, complete deadline/approval/unavailable histories and integration of current wire contracts with real transport remain open. These updates do not accept P01.
 
 Reviewed base: `421d18b26227cb1233e362627fc7de75064ea3b0`, plus the current uncommitted ten payload schemas and `contracts/v1/registry.json` supplied during this review. This is a bounded source audit for P01-T01/T03, not phase acceptance. No implementation or task status was changed.

@@ -10809,7 +10809,7 @@
       "componentIds": [
         "HUB-26"
       ],
-      "workingFileSha256": "74ae3f5c68374982780861609fa357cb4a6b01d493843ea64694738a9105cdaf",
+      "workingFileSha256": "714169584757c4f228acf260c4e16c244c7af3bbe5f9c3d111e6ffb278163a26",
       "declarations": [
         {
           "name": "digest",
@@ -10849,6 +10849,112 @@
       ],
       "httpPathLiterals": [],
       "reviewStatus": "owned-by-component; fixture source indexed; runtime qualification recorded separately"
+    },
+    {
+      "path": "tests/contracts/fake_execution.py",
+      "componentIds": [
+        "HUB-26"
+      ],
+      "workingFileSha256": "5d451dee85a6653869d83d6f38c26540a2fabd8797dad28385dcfe66dc5507c0",
+      "declarations": [
+        {
+          "name": "ResponsePlan",
+          "line": 8,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "FakeProvider",
+          "line": 24,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "FakeWorker",
+          "line": 95,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__post_init__",
+          "line": 15,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 26,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_record",
+          "line": 33,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "submit",
+          "line": 36,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "advance",
+          "line": 52,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "deliver",
+          "line": 68,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "cancel",
+          "line": 76,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "inspect",
+          "line": 87,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 97,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_record",
+          "line": 102,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "start",
+          "line": 106,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "snapshot",
+          "line": 118,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_receive",
+          "line": 121,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "poll_timeouts",
+          "line": 134,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "cancel",
+          "line": 140,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "reconcile",
+          "line": 149,
+          "kind": "FunctionDef"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "owned-by-component; controlled execution fixture source indexed; runtime qualification recorded separately"
     },
     {
       "path": "tests/contracts/run.py",
@@ -11164,7 +11270,7 @@
       "componentIds": [
         "HUB-26"
       ],
-      "workingFileSha256": "f5c4a26ab7b9491c63f32b0f887a0987bbe47f77b1c3373934014407638a14a4",
+      "workingFileSha256": "8eb26dc9848b63dd6db38a4ebc03f590f79dfacddcf1c8cab59910f871a39dab",
       "declarations": [
         {
           "name": "require",
@@ -11172,59 +11278,74 @@
           "kind": "FunctionDef"
         },
         {
-          "name": "hashes",
+          "name": "fixture_atomic_capability",
           "line": 35,
           "kind": "FunctionDef"
         },
         {
+          "name": "hashes",
+          "line": 42,
+          "kind": "FunctionDef"
+        },
+        {
           "name": "record",
-          "line": 41,
+          "line": 48,
           "kind": "FunctionDef"
         },
         {
           "name": "Broker",
-          "line": 61,
+          "line": 68,
           "kind": "ClassDef"
         },
         {
           "name": "main",
-          "line": 121,
+          "line": 128,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "__init__",
-          "line": 62,
+          "line": 69,
           "kind": "FunctionDef"
         },
         {
           "name": "start",
-          "line": 75,
+          "line": 82,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "stop",
-          "line": 92,
+          "line": 99,
           "kind": "FunctionDef"
         },
         {
           "name": "connect",
-          "line": 103,
+          "line": 110,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "client",
-          "line": 106,
+          "line": 113,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "case",
-          "line": 140,
+          "line": 147,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "dispatch_reserved",
+          "line": 192,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "raw",
-          "line": 211,
+          "line": 254,
           "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "admits",
+          "line": 374,
+          "kind": "FunctionDef"
         }
       ],
       "httpPathLiterals": [],
@@ -12450,6 +12571,227 @@
           ],
           "httpPathLiterals": [],
           "reviewStatus": "owned-by-component; signed leaf fixture source indexed; runtime qualification recorded separately"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "reason": "P01 controlled worker/provider fixtures and storage recovery, stale projection and capability-boundary checks; retain previous declarations and source hashes.",
+      "changes": [
+        {
+          "path": "tests/contracts/fake_execution.py",
+          "previous": null,
+          "currentSha256": "5d451dee85a6653869d83d6f38c26540a2fabd8797dad28385dcfe66dc5507c0"
+        },
+        {
+          "path": "tests/storage/run.py",
+          "previous": {
+            "path": "tests/storage/run.py",
+            "componentIds": [
+              "HUB-26"
+            ],
+            "workingFileSha256": "f5c4a26ab7b9491c63f32b0f887a0987bbe47f77b1c3373934014407638a14a4",
+            "declarations": [
+              {
+                "name": "require",
+                "line": 30,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "hashes",
+                "line": 35,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "record",
+                "line": 41,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "Broker",
+                "line": 61,
+                "kind": "ClassDef"
+              },
+              {
+                "name": "main",
+                "line": 121,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "__init__",
+                "line": 62,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "start",
+                "line": 75,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "stop",
+                "line": 92,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "connect",
+                "line": 103,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "client",
+                "line": 106,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "case",
+                "line": 140,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "raw",
+                "line": 211,
+                "kind": "AsyncFunctionDef"
+              }
+            ],
+            "httpPathLiterals": [],
+            "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
+          },
+          "currentSha256": "82f69a7827798a8e501312e381b5deb3d8aa7d7b50051378b326ae470195d163"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "Actual storage winner drives one fake execution; CI now admits exact-candidate evidence and rejects stale or skipped evidence.",
+      "previousFiles": [
+        {
+          "path": "tests/contracts/ci.py",
+          "componentIds": [
+            "HUB-26"
+          ],
+          "workingFileSha256": "74ae3f5c68374982780861609fa357cb4a6b01d493843ea64694738a9105cdaf",
+          "declarations": [
+            {
+              "name": "digest",
+              "line": 30,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "source_hashes",
+              "line": 34,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "download",
+              "line": 48,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "broker",
+              "line": 54,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "negative_fixture",
+              "line": 83,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "main",
+              "line": 114,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "run",
+              "line": 139,
+              "kind": "FunctionDef"
+            }
+          ],
+          "httpPathLiterals": [],
+          "reviewStatus": "owned-by-component; fixture source indexed; runtime qualification recorded separately"
+        },
+        {
+          "path": "tests/storage/run.py",
+          "componentIds": [
+            "HUB-26"
+          ],
+          "workingFileSha256": "82f69a7827798a8e501312e381b5deb3d8aa7d7b50051378b326ae470195d163",
+          "declarations": [
+            {
+              "name": "require",
+              "line": 30,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "fixture_atomic_capability",
+              "line": 35,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "hashes",
+              "line": 42,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "record",
+              "line": 48,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Broker",
+              "line": 68,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "main",
+              "line": 128,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "__init__",
+              "line": 69,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "start",
+              "line": 82,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "stop",
+              "line": 99,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "connect",
+              "line": 110,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "client",
+              "line": 113,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "case",
+              "line": 147,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "raw",
+              "line": 218,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "admits",
+              "line": 338,
+              "kind": "FunctionDef"
+            }
+          ],
+          "httpPathLiterals": [],
+          "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
         }
       ]
     }

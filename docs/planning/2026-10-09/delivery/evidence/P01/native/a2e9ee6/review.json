@@ -1,0 +1,43 @@
+{
+  "sourceCommit": "a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41",
+  "workflowRun": 38000141506,
+  "url": "https://github.com/controlLogix/agentmux/actions/runs/38000141506",
+  "reviewer": "Codex",
+  "platforms": [
+    {
+      "platform": "macos",
+      "report": "docs/planning/2026-10-09/delivery/evidence/P01/native/a2e9ee6/macos/ci-result.json",
+      "checks": 16,
+      "allChecksPassed": true,
+      "sourceHashesMatchedCommit": 156,
+      "artifacts": {
+        "ci-result.json": "d43ee7727aa2d44713d52e5203e6ae96d8f8ca17d34567cd4387712960f039ad",
+        "contracts.json": "eebdaabd7f8840730e1430a5cc5dce53a1da3575bbda783e989c3cbadf73e29d",
+        "leaf-result.json": "0bdc601e7e18d79c38a67253db851a6b7237997a6f33263cd88325bd37acdaeb",
+        "negative-fixture.json": "7d7a91af767bdc62e69390aeb7f26c761f56c3ec04acc920ae4fe891e029fac6",
+        "signed-leaf-result.json": "7b349933b6a2192b9d047b2e0caa5db48a449e4d25ab32a6349f294614447d13",
+        "storage-result.json": "07c66ce45e82e67aec1ab9d6f2683b40100fc3f82f1ad5a5634385ab818b62ae"
+      }
+    },
+    {
+      "platform": "linux",
+      "report": "docs/planning/2026-10-09/delivery/evidence/P01/native/a2e9ee6/linux/ci-result.json",
+      "checks": 16,
+      "allChecksPassed": true,
+      "sourceHashesMatchedCommit": 156,
+      "artifacts": {
+        "ci-result.json": "df001b673fdfa607a34b51571e81a352ec30271d35d6cd98db0d40217cfb6cd9",
+        "contracts.json": "47fc8c8887504c08e21634137f29c372838dafc0ef1927743858604475815af6",
+        "leaf-result.json": "b940ed970c1a18653d963c9897029065dae24db22e04420dce7f3d7433f501cb",
+        "negative-fixture.json": "7d7a91af767bdc62e69390aeb7f26c761f56c3ec04acc920ae4fe891e029fac6",
+        "signed-leaf-result.json": "1fa73e938d3d056a031372cf0527057a3d0ba54c4633f77db029aa1f0f43c123",
+        "storage-result.json": "c0481a5d7f08a2160127a59a6da7ea31e36814ff56a86386232f50ab9a391a06"
+      }
+    }
+  ],
+  "phaseAccepted": false,
+  "limitations": [
+    "Native jobs do not qualify WSL; separate local reports cover WSL.",
+    "All reported checks passed; remaining task and preservation obligations keep P01 open."
+  ]
+}

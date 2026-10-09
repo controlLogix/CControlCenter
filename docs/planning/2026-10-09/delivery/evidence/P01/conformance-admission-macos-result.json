@@ -1,0 +1,27 @@
+{
+  "recordedAt": "2026-10-09T22:47:28.134334+00:00",
+  "candidateCommit": "a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41",
+  "command": [
+    "C:\\Users\\RyanHelms\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+    "docs/planning/2026-10-09/delivery/check_conformance_evidence.py",
+    "--report",
+    "docs/planning/2026-10-09/delivery/evidence/P01/native/a2e9ee6/macos/contracts.json",
+    "--candidate",
+    "a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41",
+    "--environment",
+    "macos",
+    "--evidence",
+    "docs/planning/2026-10-09/delivery/evidence/P01/conformance-admission-macos-result.json"
+  ],
+  "environmentRequired": "macos",
+  "report": "docs\\planning\\2026-10-09\\delivery\\evidence\\P01\\native\\a2e9ee6\\macos\\contracts.json",
+  "reportSha256": "eebdaabd7f8840730e1430a5cc5dce53a1da3575bbda783e989c3cbadf73e29d",
+  "checkerSha256": "2f1508894c5fccd9ee1d4f44d11171f959529e2b1fa55621d76757f866129dc6",
+  "exitCode": 0,
+  "errors": [],
+  "limits": [
+    "Conformance-format evidence admission only; not authenticity proof, other suite acceptance or phase approval.",
+    "Compiled hashes record tested output identity; this tool does not rebuild or authenticate binaries.",
+    "Candidate comparison reads committed Git blobs, never working-tree files."
+  ]
+}

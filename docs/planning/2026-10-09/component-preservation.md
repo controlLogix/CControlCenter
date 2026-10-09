@@ -2,7 +2,7 @@
 
 **Status: static inventory checked during P00; full baseline/candidate qualification remains open.** The [live task board](implementation-status.md) records current work. The [P00 preflight](delivery/evidence/P00/preflight.md) and [baseline defect reconciliation](delivery/evidence/P00/baseline-findings.md) distinguish executed focused tests, retained historical results and missing environments. No phase acceptance is implied.
 
-ADD-01 accounts for **338 baseline files**, **73 additional governed files**, **93 components**, and **198 behavior checks**. The [exact inventory](component-inventory.json) pins file ownership and Git blob identities. The [source surface index](source-surface-index.json) lists code declarations and literal HTTP paths for review. File coverage does not prove runtime correctness or complete behavioral coverage.
+ADD-01 accounts for **338 baseline files**, **76 additional governed files**, **93 components**, and **198 behavior checks**. The [exact inventory](component-inventory.json) pins file ownership and Git blob identities. The [source surface index](source-surface-index.json) lists code declarations and literal HTTP paths for review. File coverage does not prove runtime correctness or complete behavioral coverage.
 
 ## Required preservation rule
 
@@ -4107,3 +4107,9 @@ These additions improve executable contract and recovery evidence without removi
 The inventory adds five files under the existing contract, test and repository CI components. Ordered recovery fixtures compare both independent SDKs before accepting transitions and cover replay, current authorization, deadlines, cancellation and uncertain outcomes. Their in-memory owner is a test fixture; it does not prove durable storage or production authority. The recovery contract records that boundary.
 
 The signed leaf fixture adds contract validation and signature checks to real disposable broker exchanges, while retaining the earlier leaf and storage fixtures. The CI workflow and runner prepare pinned dependencies and collect fresh source-bound evidence. Broker report paths can be selected for each run. Adding CI source does not establish that remote CI or every supported platform has passed. All 338 baseline file identities, 93 components and 198 behavior checks remain preserved; phase verification and acceptance remain separate.
+
+## P01 controlled execution and storage recovery fixtures
+
+Three additional files under HUB-26 provide reusable worker/provider fixtures, ordered tests and their usage guide. They control completion, delivery order, unavailable providers, lost replies, timeouts and cancellation without external model tokens or wall-clock races. These in-memory helpers do not replace real broker recovery tests or establish production identity, persistence or external-effect safety.
+
+The existing storage fixture now also checks recovery after a lost final atomic-batch acknowledgment, rejection of writes based on a stale KV projection, and rejection of capability declarations that cross the qualified transaction boundary. The storage guide explains the evidence and limits. These additions preserve all 338 baseline file identities, 93 components and 198 behavior checks; phase acceptance still requires its separate evidence review.

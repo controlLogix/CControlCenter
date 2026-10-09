@@ -1,0 +1,7 @@
+{
+  "recordedAtUnix": 1791586154.1780303,
+  "ownedRoot": "/home/ryan/.cache/agentmux-governance/p01-preservation-8yy5za5q",
+  "rootRemoved": true,
+  "residualOwnedProcessIds": [],
+  "method": "Read process environments and retain only PIDs whose variables contain the exact owned disposable root; no environment values recorded."
+}

@@ -729,7 +729,7 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Message Bus",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageBus.html",
       "referenceDepth": "full-public-reference",
-      "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01–P12. Implementation locations will be recorded when implemented. P00 proposes NATS for every inter-plugin exchange across the fixed protected assembly and ordinary scoped accounts. A bounded three-language request/reply spike proves client interoperability only; it does not qualify lifecycle, security or persistence. See delivery/spikes/runtime/comparison-result.json. This is a recommendation pending P00 review. A P01 fixture now links two independently stored NATS domains through dedicated federation accounts and restricted leaf credentials. Actual commands and observations traverse only the approved subjects; unrelated account and subject traffic is denied. This qualifies static broker boundaries on loopback, not production enrollment, TLS or dynamic trust agreements. The additional signed leaf fixture transports versioned delegation-offer, delegation-decision and execution-report envelopes through the same restricted NATS link. It checks byte preservation and receiving SDK admission before fixture owner mutation. Transport tests use real local brokers and fixed test trust; production hub connection management remains planned.",
+      "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01\u2013P12. Implementation locations will be recorded when implemented. P00 proposes NATS for every inter-plugin exchange across the fixed protected assembly and ordinary scoped accounts. A bounded three-language request/reply spike proves client interoperability only; it does not qualify lifecycle, security or persistence. See delivery/spikes/runtime/comparison-result.json. This is a recommendation pending P00 review. A P01 fixture now links two independently stored NATS domains through dedicated federation accounts and restricted leaf credentials. Actual commands and observations traverse only the approved subjects; unrelated account and subject traffic is denied. This qualifies static broker boundaries on loopback, not production enrollment, TLS or dynamic trust agreements. The additional signed leaf fixture transports versioned delegation-offer, delegation-decision and execution-report envelopes through the same restricted NATS link. It checks byte preservation and receiving SDK admission before fixture owner mutation. Transport tests use real local brokers and fixed test trust; production hub connection management remains planned.",
       "why": "Accepted requirement mandates NATS locally and across connected systems.",
       "tradeoffs": "Direct local calls are simpler/faster but contradict scope; message contracts add latency, retry, schema and operational cost.",
       "locations": [
@@ -758,7 +758,7 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
         {
           "date": "2026-10-09",
           "decision": "P00 concrete implementation recommendation; pending review",
-          "previousHow": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01–P12. Implementation locations will be recorded when implemented.",
+          "previousHow": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01\u2013P12. Implementation locations will be recorded when implemented.",
           "evidence": "docs/planning/2026-10-09/delivery/decisions/README.md"
         }
       ],
@@ -768,7 +768,7 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
           "reason": "P01 pure transition and scoped leaf fixture qualification; production scope remains unchanged.",
           "previous": {
             "status": "planned",
-            "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01–P12. Implementation locations will be recorded when implemented. P00 proposes NATS for every inter-plugin exchange across the fixed protected assembly and ordinary scoped accounts. A bounded three-language request/reply spike proves client interoperability only; it does not qualify lifecycle, security or persistence. See delivery/spikes/runtime/comparison-result.json. This is a recommendation pending P00 review.",
+            "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01\u2013P12. Implementation locations will be recorded when implemented. P00 proposes NATS for every inter-plugin exchange across the fixed protected assembly and ordinary scoped accounts. A bounded three-language request/reply spike proves client interoperability only; it does not qualify lifecycle, security or persistence. See delivery/spikes/runtime/comparison-result.json. This is a recommendation pending P00 review.",
             "locations": [],
             "verificationEvidence": [
               "docs/planning/2026-10-09/delivery/spikes/runtime/comparison-result.json"
@@ -780,7 +780,7 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
           "reason": "P01 ordered recovery and signed leaf qualification; production scope and status are unchanged.",
           "previous": {
             "status": "planned",
-            "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01–P12. Implementation locations will be recorded when implemented. P00 proposes NATS for every inter-plugin exchange across the fixed protected assembly and ordinary scoped accounts. A bounded three-language request/reply spike proves client interoperability only; it does not qualify lifecycle, security or persistence. See delivery/spikes/runtime/comparison-result.json. This is a recommendation pending P00 review. A P01 fixture now links two independently stored NATS domains through dedicated federation accounts and restricted leaf credentials. Actual commands and observations traverse only the approved subjects; unrelated account and subject traffic is denied. This qualifies static broker boundaries on loopback, not production enrollment, TLS or dynamic trust agreements.",
+            "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01\u2013P12. Implementation locations will be recorded when implemented. P00 proposes NATS for every inter-plugin exchange across the fixed protected assembly and ordinary scoped accounts. A bounded three-language request/reply spike proves client interoperability only; it does not qualify lifecycle, security or persistence. See delivery/spikes/runtime/comparison-result.json. This is a recommendation pending P00 review. A P01 fixture now links two independently stored NATS domains through dedicated federation accounts and restricted leaf credentials. Actual commands and observations traverse only the approved subjects; unrelated account and subject traffic is denied. This qualifies static broker boundaries on loopback, not production enrollment, TLS or dynamic trust agreements.",
             "locations": [
               {
                 "path": "tests/leaf/run.py",
@@ -803,7 +803,7 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Canonical Data Model",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/CanonicalDataModel.html",
       "referenceDepth": "full-public-reference",
-      "how": "The separate contracts/v1 package defines closed versioned infrastructure and domain payload schemas. registry.json binds ten contract IDs to their major version, message kind, payload schema and destination service. Independent Python and TypeScript SDK validation checks those bindings, payload/context identity agreement and explicit semantic invariants for manifests, protected assembly, contexts, owner records and attestations. Full envelope verification validates the registered payload plus RFC 8785 payload bytes, Ed25519 claims, signed audience and every duplicated envelope field. The legacy runtime does not import this package. Enrolled-key resolution, live grants, authoritative domain state schemas and full plugin runtime integration remain separate obligations; validated structure and signatures do not authorize execution. P01 now also promotes five lifecycle tables with 68 unchanged edges. Independent Python and TypeScript pure evaluators bind owner snapshot, requested revision, actor evidence and required guard evidence before proposing the next state. Cancellation remains explicit through uncertain execution. These supplied fixture observations are not authenticated authority and the evaluator does not persist, deduplicate or execute work. Ordered recovery fixtures compare full outputs and canonical digests from both SDKs. A separate signed leaf fixture signs offers with Python and decisions/results with TypeScript, then verifies them in the other SDK after transport. Fixture keys are resolved from an explicit issuer/key/revision map and time comes from a trusted test clock. Successful envelope verification still requires the fixture owner to match the retained reservation; five validly signed result mismatches test that separate boundary. Native CI invokes the same conformance harness and deliberately removes a required field from a copied positive fixture, requiring both SDK assertions to fail without changing repository fixtures.",
+      "how": "The separate contracts/v1 package defines closed versioned infrastructure and domain payload schemas. registry.json binds ten contract IDs to their major version, message kind, payload schema and destination service. Independent Python and TypeScript SDK validation checks those bindings, payload/context identity agreement and explicit semantic invariants for manifests, protected assembly, contexts, owner records and attestations. Full envelope verification validates the registered payload plus RFC 8785 payload bytes, Ed25519 claims, signed audience and every duplicated envelope field. The legacy runtime does not import this package. Enrolled-key resolution, live grants, authoritative domain state schemas and full plugin runtime integration remain separate obligations; validated structure and signatures do not authorize execution. P01 now also promotes five lifecycle tables with 68 unchanged edges. Independent Python and TypeScript pure evaluators bind owner snapshot, requested revision, actor evidence and required guard evidence before proposing the next state. Cancellation remains explicit through uncertain execution. These supplied fixture observations are not authenticated authority and the evaluator does not persist, deduplicate or execute work. Ordered recovery fixtures compare full outputs and canonical digests from both SDKs. A separate signed leaf fixture signs offers with Python and decisions/results with TypeScript, then verifies them in the other SDK after transport. Fixture keys are resolved from an explicit issuer/key/revision map and time comes from a trusted test clock. Successful envelope verification still requires the fixture owner to match the retained reservation; five validly signed result mismatches test that separate boundary. Native CI invokes the same conformance harness and deliberately removes a required field from a copied positive fixture, requiring both SDK assertions to fail without changing repository fixtures. Deterministic fake worker/provider fixtures now separate provider execution from callback observation using a manual clock. Explicit delayed, reordered, dropped and cancelled responses exercise unknown outcomes and reconciliation without external tools. These controls are test infrastructure, not production plugin lifecycle or authorization.",
       "why": "Client/provider diversity must not obscure ownership or schema compatibility.",
       "tradeoffs": "Pairwise translation is simpler for two plugins; shared contracts require coordinated version evolution and independent conformance tests. Closed registration makes unsupported commands explicit, but every added domain operation needs a reviewed schema and mapping. Semantic invariants cannot all be expressed by JSON Schema and therefore require matching language implementations. Content-bound validator caches avoid repeated compilation while hashing current schema bytes prevents stale reuse; neither caches nor a supplied valid signature establish authority.",
       "locations": [
@@ -862,6 +862,14 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
         {
           "path": "tests/contracts/ci.py",
           "symbol": "negative_fixture"
+        },
+        {
+          "path": "tests/contracts/fake_execution.py",
+          "symbol": "FakeProvider"
+        },
+        {
+          "path": "tests/contracts/fake_execution.py",
+          "symbol": "FakeWorker"
         }
       ],
       "verificationEvidence": [
@@ -872,7 +880,8 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
         "tests/contracts/test_semantics.py",
         "tests/contracts/test_state_models.py",
         "docs/planning/2026-10-09/delivery/evidence/P01/recovery-conformance-result.json",
-        "docs/planning/2026-10-09/delivery/evidence/P01/signed-leaf-result.json"
+        "docs/planning/2026-10-09/delivery/evidence/P01/signed-leaf-result.json",
+        "tests/contracts/test_fake_execution.py"
       ],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
@@ -898,6 +907,82 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
           "previousHow": "Define versioned envelopes and identity/state vocabulary across languages and hubs. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01, P10. Implementation locations will be recorded when implemented. P00 proposes shared versioned identities and transition/status fields across languages. Canonical JSON hashing and executable schemas remain P01/P00-T04 work; the spike checks decoded equality only. See delivery/decisions/storage-contract.md and startup-contract.md. This is a recommendation pending P00 review. P00 selects RFC 8785 JCS and an enrolled-ingress Ed25519 attestation binding the full operation, payload digest, source, contract and destination. Owners verify enrolled keys, recomputed digests, grants and durable replay state; P00 shapes do not implement this verification.",
           "previousStatus": "planned",
           "reason": "P01 initial executable wire contracts; broader domain/runtime work remains incomplete."
+        },
+        {
+          "date": "2026-10-09",
+          "reason": "P01 controlled execution and remaining storage failure qualification; statuses unchanged.",
+          "previous": {
+            "how": "The separate contracts/v1 package defines closed versioned infrastructure and domain payload schemas. registry.json binds ten contract IDs to their major version, message kind, payload schema and destination service. Independent Python and TypeScript SDK validation checks those bindings, payload/context identity agreement and explicit semantic invariants for manifests, protected assembly, contexts, owner records and attestations. Full envelope verification validates the registered payload plus RFC 8785 payload bytes, Ed25519 claims, signed audience and every duplicated envelope field. The legacy runtime does not import this package. Enrolled-key resolution, live grants, authoritative domain state schemas and full plugin runtime integration remain separate obligations; validated structure and signatures do not authorize execution. P01 now also promotes five lifecycle tables with 68 unchanged edges. Independent Python and TypeScript pure evaluators bind owner snapshot, requested revision, actor evidence and required guard evidence before proposing the next state. Cancellation remains explicit through uncertain execution. These supplied fixture observations are not authenticated authority and the evaluator does not persist, deduplicate or execute work. Ordered recovery fixtures compare full outputs and canonical digests from both SDKs. A separate signed leaf fixture signs offers with Python and decisions/results with TypeScript, then verifies them in the other SDK after transport. Fixture keys are resolved from an explicit issuer/key/revision map and time comes from a trusted test clock. Successful envelope verification still requires the fixture owner to match the retained reservation; five validly signed result mismatches test that separate boundary. Native CI invokes the same conformance harness and deliberately removes a required field from a copied positive fixture, requiring both SDK assertions to fail without changing repository fixtures.",
+            "tradeoffs": "Pairwise translation is simpler for two plugins; shared contracts require coordinated version evolution and independent conformance tests. Closed registration makes unsupported commands explicit, but every added domain operation needs a reviewed schema and mapping. Semantic invariants cannot all be expressed by JSON Schema and therefore require matching language implementations. Content-bound validator caches avoid repeated compilation while hashing current schema bytes prevents stale reuse; neither caches nor a supplied valid signature establish authority.",
+            "locations": [
+              {
+                "path": "contracts/v1/schemas/message-envelope.schema.json",
+                "symbol": "message-envelope"
+              },
+              {
+                "path": "sdk/python/agentmux_contracts/wire.py",
+                "symbol": "canonical_bytes"
+              },
+              {
+                "path": "sdk/typescript/src/index.ts",
+                "symbol": "canonicalBytes"
+              },
+              {
+                "path": "contracts/v1/registry.json",
+                "symbol": "contracts"
+              },
+              {
+                "path": "sdk/python/agentmux_contracts/validation.py",
+                "symbol": "validate_payload"
+              },
+              {
+                "path": "sdk/python/agentmux_contracts/validation.py",
+                "symbol": "semantic_errors"
+              },
+              {
+                "path": "sdk/python/agentmux_contracts/attestation.py",
+                "symbol": "verify_envelope"
+              },
+              {
+                "path": "sdk/typescript/src/index.ts",
+                "symbol": "validatePayload"
+              },
+              {
+                "path": "sdk/typescript/src/index.ts",
+                "symbol": "verifyEnvelope"
+              },
+              {
+                "path": "sdk/python/agentmux_contracts/state_models.py",
+                "symbol": "evaluate_transition"
+              },
+              {
+                "path": "sdk/typescript/src/state-models.ts",
+                "symbol": "evaluateTransition"
+              },
+              {
+                "path": "tests/contracts/test_recovery.py",
+                "symbol": "FixtureOwner.both"
+              },
+              {
+                "path": "tests/leaf/signed_run.py",
+                "symbol": "Contracts.verify"
+              },
+              {
+                "path": "tests/contracts/ci.py",
+                "symbol": "negative_fixture"
+              }
+            ],
+            "verificationEvidence": [
+              "tests/contracts/test_conformance.py",
+              "sdk/python/tests/test_contracts.py",
+              "sdk/typescript/src/test.ts",
+              "tests/contracts/test_payloads.py",
+              "tests/contracts/test_semantics.py",
+              "tests/contracts/test_state_models.py",
+              "docs/planning/2026-10-09/delivery/evidence/P01/recovery-conformance-result.json",
+              "docs/planning/2026-10-09/delivery/evidence/P01/signed-leaf-result.json"
+            ]
+          }
         }
       ],
       "implementationRevisions": [
@@ -1053,9 +1138,9 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Transactional Client",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/TransactionalClient.html",
       "referenceDepth": "full-public-reference",
-      "how": "Apply a bounded transaction boundary at the owning JetStream record or qualified atomic batch within one stream: state, provenance, operation outcome and recoverable outgoing intent commit together. Consumer acknowledgment, projection updates, cross-stream/hub transfer and external tool actions remain separate recoverable steps. Legacy SQL plus outbox repairs remain relevant to P01 baseline work; STATE-01 supersedes SQL as the preferred new authority. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P05, P10. Implementation locations will be recorded when implemented. P00 prefers one conditional complete entity transition including state, provenance, outcome and effect intent. Same-stream batching requires the P01 SDK/concurrency proof; cross-boundary work remains recoverable. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. Configuration and registry changes also commit to their owner ledger first; KV is a cursor-bearing projection, never a second authoritative write. P01 tests/storage/run.py now qualifies this boundary only in disposable fixture owners: Python and TypeScript conditional publishes append a complete state/provenance/effect-intent record, and a two-client race admits one subject revision. Raw Python and native TypeScript atomic batches are exercised on one file-backed R1 stream. Tests reject sequence gaps, stale conditions (including an intervening ordinary commit), uncommitted batches across graceful restart and attempted cross-stream batches. The opening staging reply is not a durable acknowledgment; only a final commit acknowledgment confirms the batch. Production domain owners remain planned for P04/P05/P10; no legacy authority moved.",
+      "how": "Apply a bounded transaction boundary at the owning JetStream record or qualified atomic batch within one stream: state, provenance, operation outcome and recoverable outgoing intent commit together. Consumer acknowledgment, projection updates, cross-stream/hub transfer and external tool actions remain separate recoverable steps. Legacy SQL plus outbox repairs remain relevant to P01 baseline work; STATE-01 supersedes SQL as the preferred new authority. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P05, P10. Implementation locations will be recorded when implemented. P00 prefers one conditional complete entity transition including state, provenance, outcome and effect intent. Same-stream batching requires the P01 SDK/concurrency proof; cross-boundary work remains recoverable. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. Configuration and registry changes also commit to their owner ledger first; KV is a cursor-bearing projection, never a second authoritative write. P01 tests/storage/run.py now qualifies this boundary only in disposable fixture owners: Python and TypeScript conditional publishes append a complete state/provenance/effect-intent record, and a two-client race admits one subject revision. Raw Python and native TypeScript atomic batches are exercised on one file-backed R1 stream. Tests reject sequence gaps, stale conditions (including an intervening ordinary commit), uncommitted batches across graceful restart and attempted cross-stream batches. The opening staging reply is not a durable acknowledgment; only a final commit acknowledgment confirms the batch. Production domain owners remain planned for P04/P05/P10; no legacy authority moved. The next bounded storage extension recovers a complete two-record batch after losing its final acknowledgment and restarting beyond the deduplication window. It also rejects fixture capability declarations spanning another stream, KV, object upload or an external tool before dispatch. Production capability registration and staged artifact recovery remain later work.",
       "why": "Crash windows must not lose results or create unattributed executable work.",
-      "tradeoffs": "One complete record is simpler than a batch and is preferred when it preserves the invariant. Same-stream atomic batches require pinned server/client qualification and do not create a distributed database/broker/hub/tool transaction. SQL authority is an explicit exception requiring evidence and review. Fixture qualification uses NATS Server 2.15.0 on WSL/Linux only. It does not prove native macOS, replication availability, power-loss durability, account permissions or business-level authorization. Full aggregate records remain preferred over batch coordination.",
+      "tradeoffs": "One complete record is simpler than a batch and is preferred when it preserves the invariant. Same-stream atomic batches require pinned server/client qualification and do not create a distributed database/broker/hub/tool transaction. SQL authority is an explicit exception requiring evidence and review. Fixture qualification uses NATS Server 2.15.0 on WSL/Linux only. It does not prove native macOS, replication availability, power-loss durability, account permissions or business-level authorization. Full aggregate records remain preferred over batch coordination. The earlier native-platform exclusion describes the original report. Native macOS and Linux passed the original 14-case suite at a2e9ee6; the additional 18-case candidate needs its own CI evidence. R3 and power-loss remain unqualified.",
       "locations": [
         {
           "path": "tests/storage/run.py",
@@ -1102,6 +1187,32 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
           "date": "2026-10-09",
           "previousHow": "Apply a bounded transaction boundary at the owning JetStream record or qualified atomic batch within one stream: state, provenance, operation outcome and recoverable outgoing intent commit together. Consumer acknowledgment, projection updates, cross-stream/hub transfer and external tool actions remain separate recoverable steps. Legacy SQL plus outbox repairs remain relevant to P01 baseline work; STATE-01 supersedes SQL as the preferred new authority. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P05, P10. Implementation locations will be recorded when implemented. P00 prefers one conditional complete entity transition including state, provenance, outcome and effect intent. Same-stream batching requires the P01 SDK/concurrency proof; cross-boundary work remains recoverable. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review.",
           "reason": "Removed split config authority."
+        },
+        {
+          "date": "2026-10-09",
+          "reason": "P01 controlled execution and remaining storage failure qualification; statuses unchanged.",
+          "previous": {
+            "how": "Apply a bounded transaction boundary at the owning JetStream record or qualified atomic batch within one stream: state, provenance, operation outcome and recoverable outgoing intent commit together. Consumer acknowledgment, projection updates, cross-stream/hub transfer and external tool actions remain separate recoverable steps. Legacy SQL plus outbox repairs remain relevant to P01 baseline work; STATE-01 supersedes SQL as the preferred new authority. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P05, P10. Implementation locations will be recorded when implemented. P00 prefers one conditional complete entity transition including state, provenance, outcome and effect intent. Same-stream batching requires the P01 SDK/concurrency proof; cross-boundary work remains recoverable. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. Configuration and registry changes also commit to their owner ledger first; KV is a cursor-bearing projection, never a second authoritative write. P01 tests/storage/run.py now qualifies this boundary only in disposable fixture owners: Python and TypeScript conditional publishes append a complete state/provenance/effect-intent record, and a two-client race admits one subject revision. Raw Python and native TypeScript atomic batches are exercised on one file-backed R1 stream. Tests reject sequence gaps, stale conditions (including an intervening ordinary commit), uncommitted batches across graceful restart and attempted cross-stream batches. The opening staging reply is not a durable acknowledgment; only a final commit acknowledgment confirms the batch. Production domain owners remain planned for P04/P05/P10; no legacy authority moved.",
+            "tradeoffs": "One complete record is simpler than a batch and is preferred when it preserves the invariant. Same-stream atomic batches require pinned server/client qualification and do not create a distributed database/broker/hub/tool transaction. SQL authority is an explicit exception requiring evidence and review. Fixture qualification uses NATS Server 2.15.0 on WSL/Linux only. It does not prove native macOS, replication availability, power-loss durability, account permissions or business-level authorization. Full aggregate records remain preferred over batch coordination.",
+            "locations": [
+              {
+                "path": "tests/storage/run.py",
+                "symbol": "main"
+              },
+              {
+                "path": "tests/storage/python_client.py",
+                "symbol": "perform"
+              },
+              {
+                "path": "tests/storage/typescript/src/client.ts",
+                "symbol": "execute"
+              }
+            ],
+            "verificationEvidence": [
+              "tests/storage/run.py",
+              "docs/planning/2026-10-09/delivery/evidence/P01/storage-result.json"
+            ]
+          }
         }
       ],
       "implementationRevisions": [
@@ -1125,7 +1236,7 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Idempotent Receiver",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/IdempotentReceiver.html",
       "referenceDepth": "full-public-reference",
-      "how": "Bind an operation ID, canonical payload hash and expected version to the durable NATS-owned outcome. Reconcile lost acknowledgments, reject changed-payload ID reuse, and retain outcomes/deletion markers across the agreed replay and restore horizon. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P10. Implementation locations will be recorded when implemented. P00 retains operation outcomes and payload digests beyond broker deduplication windows, with reconciliation-required on missing history. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. P01 Python and TypeScript fixture clients independently scan retained authoritative history to recover an older operation ID and matching digest after later writes, a gracefully restarted broker and expiry of its short deduplication window. They return the existing record without republishing, reject changed digests and report missing history as reconciliation-required. The lost-ack fixture deliberately omits the publisher reply inbox. Production duplicate admission, durable indexes and external-effect control remain planned; fixture reconciliation is not a deployed receiver or exactly-once execution promise. The P01 leaf fixture additionally returns retained acceptance for the same offer bytes and rejects a changed digest after disconnection and independent broker restarts. Its durable receiver record remains unchanged and execution count stays one. Fixture dispatch logic is bounded and does not implement the production receiver. Ordered recovery tests add an explicitly in-memory fixture owner. It checks current authorization and deadline before replay or lookup, binds operation identity to event, actor role and canonical input, returns an identical prior outcome and rejects changed input. A fresh authorized lookup may recover an outcome after the original command expires. Unknown transport outcome permits no automatic reassignment; only a fixture-owned before-dispatch observation produces unavailable. The signed leaf test separately retains the accepted decision before deliberately losing its publication, then reconciles the same signed operation/digest after graceful restarts without another execution. These are bounded recovery checks, not a production admission or grant service.",
+      "how": "Bind an operation ID, canonical payload hash and expected version to the durable NATS-owned outcome. Reconcile lost acknowledgments, reject changed-payload ID reuse, and retain outcomes/deletion markers across the agreed replay and restore horizon. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P10. Implementation locations will be recorded when implemented. P00 retains operation outcomes and payload digests beyond broker deduplication windows, with reconciliation-required on missing history. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. P01 Python and TypeScript fixture clients independently scan retained authoritative history to recover an older operation ID and matching digest after later writes, a gracefully restarted broker and expiry of its short deduplication window. They return the existing record without republishing, reject changed digests and report missing history as reconciliation-required. The lost-ack fixture deliberately omits the publisher reply inbox. Production duplicate admission, durable indexes and external-effect control remain planned; fixture reconciliation is not a deployed receiver or exactly-once execution promise. The P01 leaf fixture additionally returns retained acceptance for the same offer bytes and rejects a changed digest after disconnection and independent broker restarts. Its durable receiver record remains unchanged and execution count stays one. Fixture dispatch logic is bounded and does not implement the production receiver. Ordered recovery tests add an explicitly in-memory fixture owner. It checks current authorization and deadline before replay or lookup, binds operation identity to event, actor role and canonical input, returns an identical prior outcome and rejects changed input. A fresh authorized lookup may recover an outcome after the original command expires. Unknown transport outcome permits no automatic reassignment; only a fixture-owned before-dispatch observation produces unavailable. The signed leaf test separately retains the accepted decision before deliberately losing its publication, then reconciles the same signed operation/digest after graceful restarts without another execution. These are bounded recovery checks, not a production admission or grant service. A real KV view deliberately retains an older source cursor. Its conditional write fails; both clients read current owner state, and explicit fixture policy revalidation denies a new write. This qualifies the fixture boundary, not production grant lookup. Lost final batch acknowledgments are reconciled by retained operation identity and digest without another transition.",
       "why": "At-least-once delivery and uncertain replies must not create duplicate task attempts.",
       "tradeoffs": "Broker duplicate windows are simpler but insufficient for business ownership. Durable outcome records and conflict policy cost storage; external actions require their own idempotency or explicit unknown-outcome handling. The fixture scan is bounded to 10,000 retained records and is not a production indexing or retention strategy. Authoritative history costs storage; deterministic recovery requires preserving history or verified checkpoints, rather than interpreting absence as permission to re-execute.",
       "locations": [
@@ -1188,6 +1299,51 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
           "decision": "P00 concrete implementation recommendation; pending review",
           "previousHow": "Bind an operation ID, canonical payload hash and expected version to the durable NATS-owned outcome. Reconcile lost acknowledgments, reject changed-payload ID reuse, and retain outcomes/deletion markers across the agreed replay and restore horizon. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P10. Implementation locations will be recorded when implemented.",
           "evidence": "docs/planning/2026-10-09/delivery/decisions/README.md"
+        },
+        {
+          "date": "2026-10-09",
+          "reason": "P01 controlled execution and remaining storage failure qualification; statuses unchanged.",
+          "previous": {
+            "how": "Bind an operation ID, canonical payload hash and expected version to the durable NATS-owned outcome. Reconcile lost acknowledgments, reject changed-payload ID reuse, and retain outcomes/deletion markers across the agreed replay and restore horizon. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P10. Implementation locations will be recorded when implemented. P00 retains operation outcomes and payload digests beyond broker deduplication windows, with reconciliation-required on missing history. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. P01 Python and TypeScript fixture clients independently scan retained authoritative history to recover an older operation ID and matching digest after later writes, a gracefully restarted broker and expiry of its short deduplication window. They return the existing record without republishing, reject changed digests and report missing history as reconciliation-required. The lost-ack fixture deliberately omits the publisher reply inbox. Production duplicate admission, durable indexes and external-effect control remain planned; fixture reconciliation is not a deployed receiver or exactly-once execution promise. The P01 leaf fixture additionally returns retained acceptance for the same offer bytes and rejects a changed digest after disconnection and independent broker restarts. Its durable receiver record remains unchanged and execution count stays one. Fixture dispatch logic is bounded and does not implement the production receiver. Ordered recovery tests add an explicitly in-memory fixture owner. It checks current authorization and deadline before replay or lookup, binds operation identity to event, actor role and canonical input, returns an identical prior outcome and rejects changed input. A fresh authorized lookup may recover an outcome after the original command expires. Unknown transport outcome permits no automatic reassignment; only a fixture-owned before-dispatch observation produces unavailable. The signed leaf test separately retains the accepted decision before deliberately losing its publication, then reconciles the same signed operation/digest after graceful restarts without another execution. These are bounded recovery checks, not a production admission or grant service.",
+            "tradeoffs": "Broker duplicate windows are simpler but insufficient for business ownership. Durable outcome records and conflict policy cost storage; external actions require their own idempotency or explicit unknown-outcome handling. The fixture scan is bounded to 10,000 retained records and is not a production indexing or retention strategy. Authoritative history costs storage; deterministic recovery requires preserving history or verified checkpoints, rather than interpreting absence as permission to re-execute.",
+            "locations": [
+              {
+                "path": "tests/storage/python_client.py",
+                "symbol": "perform"
+              },
+              {
+                "path": "tests/storage/typescript/src/client.ts",
+                "symbol": "execute"
+              },
+              {
+                "path": "tests/storage/run.py",
+                "symbol": "main"
+              },
+              {
+                "path": "tests/leaf/run.py",
+                "symbol": "exercise"
+              },
+              {
+                "path": "tests/contracts/test_recovery.py",
+                "symbol": "FixtureOwner.submit"
+              },
+              {
+                "path": "tests/contracts/test_recovery.py",
+                "symbol": "FixtureOwner.lookup"
+              },
+              {
+                "path": "tests/leaf/signed_run.py",
+                "symbol": "exercise"
+              }
+            ],
+            "verificationEvidence": [
+              "tests/storage/run.py",
+              "docs/planning/2026-10-09/delivery/evidence/P01/storage-result.json",
+              "docs/planning/2026-10-09/delivery/evidence/P01/leaf-result.json",
+              "docs/planning/2026-10-09/delivery/evidence/P01/recovery-conformance-result.json",
+              "docs/planning/2026-10-09/delivery/evidence/P01/signed-leaf-result.json"
+            ]
+          }
         }
       ],
       "implementationRevisions": [

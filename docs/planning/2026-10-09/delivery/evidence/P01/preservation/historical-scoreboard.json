@@ -1,0 +1,41 @@
+{
+  "sourceCommit": "a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41",
+  "sourceHashes": {
+    "hub/demo/scoreboard.py": "a88cb21230061659b518aa4025fc0bf18f74611ee2967e5d8d66a2090bc1fb59",
+    "evals/orchestrations/20260929-221859-calib.json": "580a133de3b728e6a7a392272a3fd0b44ed9625107a4aa38e25534cd21e05928",
+    "evals/orchestrations/20260929-222043-team.json": "c943beaca7a4521e96ca02783737f50f662de1edd2033ddf1d04dc5a408d8ff2",
+    "evals/orchestrations/20260929-225538-team.json": "6a9bae99b4556e8e45840df705ba8ee04fb75af9c50fbfd26d38667ddebcfa24",
+    "evals/orchestrations/20260929-225924-crossrepo.json": "2be1049d9d26b4961521951605c9e60a517b7863d8ffd9e24022d9caf78c4ada",
+    "evals/orchestrations/20260929-230317-team.json": "afa26e2ce9b4bcb980222f066fc6a50991bad43dffee16af471617e7f28cafa3",
+    "evals/orchestrations/20260929-230742-swarm.json": "50467b7b5c280045684e358bac3c7f792cc98830d6d9b7660b3327bf7d66bec3",
+    "evals/orchestrations/20260929-230935-swarm.json": "9612464014568fa4c06f2b16224941f1a6db844e55629b2beae0e44968474c72",
+    "evals/orchestrations/20260929-231132-crossrepo.json": "02f7daffb81b25f84f0c977945f1d4cd7e57f68a68748c43b8c3e65c05c12342",
+    "evals/orchestrations/20260929-232307-crossrepo.json": "1193b3371f54c942d5490c596db8029897f1e08dac020d2c74c5b9519ddc5c88",
+    "evals/orchestrations/20260930-140310-team.json": "3d23b47c85e550a4d8138c4a3271e0206a5628cb2a0f16db6517b094393ad931",
+    "evals/orchestrations/20260930-142203-team.json": "6e6d96f6e509801349a9ff476e0ef1e59fdcb323960a60b716761c52e99c2ae4",
+    "evals/orchestrations/20261002-094245-calib.json": "f96a89c0f8cb691942b06807a67bf40ff6d5a14354d0a70808aa8c79b2dff67c",
+    "evals/orchestrations/20261002-094337-team.json": "90ea3abb6319af39e793e6c6df3b8e41515be9bfd703e2dc970a3c6b03482827",
+    "evals/orchestrations/20261002-094624-crossrepo.json": "d4b9b41b53285b7c8f7d7c90ba88f92d2bfa994837635e00e7385edf9f821b71",
+    "evals/orchestrations/20261002-094942-swarm.json": "db06ae54ebe5c6d67065bc9f3b34050f1cc167c9eb464f5f7525766344a231ff",
+    "evals/orchestrations/20261002-095139-calib.json": "fbcf29fec20eb19b4e89e73ddefd0d740e9fe906c013e0a27cfc9142c780e813",
+    "evals/orchestrations/20261002-095252-team.json": "747d24b6aee5468b8d21495df19fcdd2429ac21523edecc64d0c98b80f9e4f6a",
+    "evals/orchestrations/20261002-095629-crossrepo.json": "0e68ca18e81328a86d14636f233af241321f4dbb87c2977c40cef1c215cd6f6e",
+    "evals/orchestrations/20261002-095926-swarm.json": "86681bc54d13a2a170291aaf4fd25af14a51f9a6259185dc7002b69a798ed0fc",
+    "evals/orchestrations/20261002-100423-swarm.json": "94b0c5b8250e43681e398307f337bb20aa9604d57013d901dcea2076cad34c8e",
+    "evals/orchestrations/20261002-100651-swarm.json": "4393926653221850a08272b0261c9902c5bc8e145f35702e2c80fc6b04912f26",
+    "evals/orchestrations/SCOREBOARD.md": "3eab17289655dbccb882f0b8644c400254d13bc1225570ff5a24d60f2f8d4074"
+  },
+  "command": "python3 hub/demo/scoreboard.py in a temporary source/record copy",
+  "environment": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "exitCode": 0,
+  "records": 21,
+  "errorFree": 14,
+  "failed": 7,
+  "rowIdentityAndFailureAttributionVerified": true,
+  "originalsUnchanged": true,
+  "derivedScoreboardSha256": "3eab17289655dbccb882f0b8644c400254d13bc1225570ff5a24d60f2f8d4074",
+  "historicalScoreboardMatches": true,
+  "limitations": [
+    "Historical-record preservation only. Actual provider scenario repeats and baseline/target orchestration remain unqualified."
+  ]
+}
