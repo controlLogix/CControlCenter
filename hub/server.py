@@ -31,6 +31,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from hub import deliver, names, profiles  # noqa: E402
 from hub.store import HubError, Store, now  # noqa: E402
 from hub.bridge import Bridge  # noqa: E402
+from hub.fed.runtime import Federation  # noqa: E402
 from hub.receipts import ReceiptScanner  # noqa: E402
 from hub.transport import TmuxTransport  # noqa: E402
 
@@ -126,6 +127,9 @@ class Hub:
         self.awaiting: dict[str, dict] = {}     # session -> first unreceived bell (TM-213)
         self.bridge = Bridge(self, self.cfg["nats_url"], names.check_part(self.cfg["node"], "node"), log) \
             if self.cfg.get("nats_url") else None
+        # EP-032: cross-user federation (docs/FEDERATION.md). Always constructed so its
+        # verbs answer; it only connects when federation.toml says enabled.
+        self.fed = Federation(self, HUBDIR, log)
         self._seed_roles()
 
     def _operator_token(self):
@@ -302,6 +306,8 @@ class Hub:
 
     async def dispatch(self, verb, a, caller):
         s = self.store
+        if verb.startswith("fed_"):
+            return await self.fed.dispatch(verb, a, caller)
         if verb == "ping":
             return {"pong": now(), "caller": caller}
         if verb == "token":
@@ -373,6 +379,10 @@ class Hub:
         if verb == "retire_courier":
             self.need_operator(caller)
             return await self.retire_courier(bool(a.get("dry_run")))
+        if verb == "post" and str(a.get("to", "")).startswith("peer:"):
+            # Another person's agent, role or operator: the federation messages plugin.
+            return await self.fed.guarded(self.fed.plugins["messages"].send(
+                self.fed, caller, a["to"], a.get("kind", "note"), a.get("body", ""), a.get("ref")))
         if verb == "post":
             sender = self.sender_of(caller)
             a = {**a, "to": await self.db(s.canonical_target, a["to"], self.virtual_names())}
@@ -408,6 +418,12 @@ class Hub:
         if verb == "ack":
             who = "virtual:operator" if caller == "operator" else self.need_agent(caller)
             return {"acked": await self.db(s.ack, who, a["ids"])}
+        if verb == "work_add" and a.get("federate") and self.fed.enabled:
+            # EP-032 supersedes the TM-218 queue group when federation is configured.
+            req = a.get("requirements")
+            return await self.fed.guarded(self.fed.plugins["work"].add(
+                self.fed, caller, a["to"], a["title"], a.get("body"), a.get("task_key"), req,
+                int(a.get("priority", 100))))
         if verb == "work_add":
             sender = self.sender_of(caller)
             repo = a.get("repo") or self._repo_of_target(a["to"], caller)
@@ -424,6 +440,7 @@ class Hub:
             me = self.need_agent(caller)
             w = await self.db(s.release, me, a["work_id"], a["outcome"], a.get("result"), self.cfg["node"])
             await self._notify_work_owner(w, me)
+            await self.fed.local_event("work_released", w)
             return w
         if verb == "work_cancel":
             self.need_operator(caller)
@@ -473,6 +490,8 @@ class Hub:
             if p and p.get("claimed_by") and p["claimed_by"] != me:
                 targets.add(f"agent:{p['claimed_by']}")
         for t in targets:
+            if t.startswith("peer:"):
+                continue                    # federated: the work plugin sends the result envelope
             try:
                 await self.db(self.store.post, "virtual:hub", t, "result", body, w["id"], w["id"],
                               f"result:{w['id']}:{w['state']}:{t}")
@@ -890,6 +909,7 @@ class Hub:
         loops = [self.bell_loop(), self.live_loop(), self.lease_loop(), self.receipt_loop()]
         if self.bridge:
             loops.append(self.bridge.run())
+        loops.append(self.fed.run())
         tasks = [asyncio.create_task(c) for c in loops]
         async with server:
             await self.stop.wait()

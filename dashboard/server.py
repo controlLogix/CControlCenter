@@ -6,6 +6,7 @@ import boardagents
 import chatter_feed
 import codesys_panel
 import github_panel
+import fed_panel
 import hub_panel
 import boardteams
 import ccboard
@@ -2370,6 +2371,29 @@ class Handler(BaseHTTPRequestHandler):
                          and 1 <= int(raw) <= 2000 else 200)
                 self.send_json(200, feed_snapshot(limit))
                 return
+            if path.startswith("/api/fed/"):
+                # The Federation view (EP-032). A hub-socket client like /api/hub/,
+                # plus five allowlisted operator actions (fed_panel.WRITE_VERBS) behind
+                # the same POST guards as every other write: JSON content type, own
+                # origin only, bounded body (read_cc_body).
+                op = path[len("/api/fed/"):]
+                if op == "panel":
+                    if self.command not in ("GET", "HEAD"):
+                        self.send_json(405, {"error": "read-only endpoint"})
+                        return
+                    status, body = fed_panel.panel(HOME_DIR)
+                elif op == "action":
+                    if self.command != "POST":
+                        self.send_json(405, {"error": "POST only"})
+                        return
+                    req = self.read_cc_body(2048)
+                    if req is None:
+                        return
+                    status, body = fed_panel.action(req, HOME_DIR)
+                else:
+                    status, body = 404, {"error": "not found"}
+                self.send_json(status, body)
+                return
             if path.startswith("/api/hub/"):
                 # The Hub view (TM-216). Read-only, and a CLIENT of agentmux-hub over
                 # its unix socket - never a reader of hub.db. That database is WAL
@@ -2524,7 +2548,8 @@ class Handler(BaseHTTPRequestHandler):
             content_type = "text/html; charset=utf-8"
         elif path in ("/app.js", "/fitmatrix.js", "/agents.js", "/teams.js", "/iiot.js",
                       "/github.js", "/codesys.js", "/chatter.js", "/mqtt.js",
-                      "/netscan.js", "/runs.js", "/kanban.js", "/hub.js"):
+                      "/netscan.js", "/runs.js", "/kanban.js", "/hub.js",
+                      "/fed.js"):
             # fitmatrix.js is the readability test harness. index.html loads it only
             # when the URL carries ?fit=1, so it is inert on the normal page but can
             # be run against the REAL page rather than a mock.

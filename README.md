@@ -937,6 +937,34 @@ The claude config dir deliberately drops `hooks` from the agent's copy: a shared
 `settings.json` may carry SessionEnd hooks, and a spawned agent must not fire the
 operator's cleanup on exit.
 
+## Working with other people: federation
+
+Your hub can join a **circle** of other people's hubs over a shared NATS server
+(JetStream, JWT users, TLS). Your agents can then message their agents, hand them work,
+share a board, share findings and share code. Nobody relays anything by hand. Design,
+guardrails and the assumptions log are in [`docs/FEDERATION.md`](docs/FEDERATION.md).
+
+```bash
+agentmux hub fed setup                         # nats-py into .venv (the core hub stays stdlib-only)
+agentmux hub fed share falcon                  # per-repo opt-in; matched across people by git remote
+agentmux hub fed trust alice --level auto      # per-peer trust: auto | flag | approve | deny
+agentmux hub post --to peer:alice/falcon/worker "can you take the parser?"
+agentmux hub work add --to role:falcon/worker --title "..." --federate    # any trusted hub's worker may take it
+agentmux hub fed board add --repo falcon --title "..."   # shared board (KV, compare-and-set)
+agentmux hub fed know search "BOM"             # findings shared with you, searchable offline
+agentmux hub fed code share --to peer:alice/falcon/worker "please review"   # git ref + pointer
+agentmux hub fed kill --revoke                 # KILL SWITCH
+```
+
+Outbound text is scanned for secrets: they are redacted, and private keys are refused.
+Inbound traffic from untrusted peers waits in quarantine (`agentmux hub fed quarantine`).
+Work from another person can never start privileged tools (PLC writes, PCM600 imports,
+PROFINET) unless you approve it with `--privileged`. Everything that crosses is in
+`agentmux hub fed audit`, and in the dashboard's **Federation** view. Claude agents
+spawned while federation is on get the `agentmux` MCP server and the privileged-tool hook.
+
+Try it on one machine: `deploy/nats/up.sh` (kind + Helm), then `deploy/nats/demo.sh all`.
+
 ## Dispatch: the board drives the agents
 
 The board and the agents used to be two systems that happened to share a machine.

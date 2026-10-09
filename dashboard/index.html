@@ -93,6 +93,11 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="4.5" cy="5.5" r="1.8"/><circle cx="19.5" cy="5.5" r="1.8"/><circle cx="4.5" cy="18.5" r="1.8"/><circle cx="19.5" cy="18.5" r="1.8"/><path d="M6 7l3.8 3M18 7l-3.8 3M6 17l3.8-3M18 17l-3.8-3"/></svg>
       <span class="nav-label">Hub</span>
     </button>
+    <button class="nav-item" data-view="fed" role="tab" aria-selected="false" title="Federation — other people's hubs: peers, quarantine, the shared board, findings, code, audit and the kill switch">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><path d="M2 20v-1a5 5 0 0110 0v1M12 20v-1a5 5 0 0110 0v1"/><path d="M10 8h4"/></svg>
+      <span class="nav-label">Federation</span>
+      <span class="nav-badge alert" id="badgeFed" hidden></span>
+    </button>
     <button class="nav-item" data-view="organization" role="tab" aria-selected="false" title="Organization — agent definitions and task teams">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="7" r="3"/><circle cx="18" cy="8" r="2"/><path d="M2 21v-3a6 6 0 0112 0v3M16 13a5 5 0 016 5v3"/></svg>
       <span class="nav-label">Organization</span>
@@ -120,6 +125,7 @@
     <section id="viewGithub" class="view pad" role="tabpanel" aria-label="GitHub" hidden></section>
     <section id="viewRuns" class="view pad" role="tabpanel" aria-label="Runs" hidden></section>
     <section id="viewHub" class="view pad" role="tabpanel" aria-label="Hub" hidden></section>
+    <section id="viewFed" class="view pad" role="tabpanel" aria-label="Federation" hidden></section>
     <!-- ═══ Terminals ═══ -->
     <section id="viewTerminals" class="view" role="tabpanel" aria-label="Terminals">
       <section id="ribbon" class="ribbon" aria-label="Terminal configuration">
@@ -559,6 +565,7 @@
 <script src="mqtt.js"></script>
 <script src="netscan.js"></script><script src="runs.js"></script>
 <script src="hub.js"></script>
+<script src="fed.js"></script>
 <script src="app.js"></script>
 <script>
   // Readability matrix, on demand only: open 127.0.0.1:8787/?fit=1 and run

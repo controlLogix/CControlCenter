@@ -1,0 +1,11 @@
+# Local stand-in for the hosted cluster (docs/FEDERATION.md section 3). The same Helm
+# values deploy to AKS/EKS/k3s; only this file and the NodePort mapping are kind-specific.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: agentmux-nats
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30422   # nats client (TLS)
+        hostPort: 4222
+        listenAddress: "127.0.0.1"

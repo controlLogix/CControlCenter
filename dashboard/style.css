@@ -1523,3 +1523,12 @@ table.run-jobs .j-flags { display:flex; gap:5px; flex-wrap:wrap; }
                  background:var(--pane,rgba(128,128,128,.10)); }
 .btn.small { font-size:.72rem; padding:2px 7px; }
 .orch-check.unknown .orch-mark { color:var(--muted); }
+
+/* Federation view (EP-032, fed.js) */
+#viewFed .btn { margin: 2px 6px 2px 0; }
+#viewFed .btn.danger { border-color: var(--danger); color: var(--danger); }
+#viewFed .btn.danger:hover { background: var(--danger); color: var(--bg); }
+#viewFed .btn.primary { border-color: var(--accent); color: var(--accent); }
+#viewFed .fed-quarantine { border-left: 3px solid var(--danger); }
+#viewFed .fed-table td { max-width: 36ch; overflow: hidden; text-overflow: ellipsis; }
+#viewFed .warn { color: var(--danger); }

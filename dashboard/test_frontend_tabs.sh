@@ -510,8 +510,9 @@ test('every view script registers itself without throwing', () => {
   // would have to share the Status column with the feed and cramp the per-run job
   // table, which is the thing you go there to read. The cost is one more rail entry.
   // Hub (TM-216) is a view for the same reason: three tables and a live feed.
-  assert.deepEqual(registered.views.sort(), ['github', 'hub', 'runs'],
-                   'GitHub, Hub and Runs are the views registered by their own scripts');
+  // Federation (EP-032) is a view too: status, quarantine, peers and one card per plugin.
+  assert.deepEqual(registered.views.sort(), ['fed', 'github', 'hub', 'runs'],
+                   'Federation, GitHub, Hub and Runs are the views registered by their own scripts');
   // Five IIOT field cards plus the Settings > Orchestration card, which runs.js
   // registers so that app.js and teams.js do not have to change to gain it.
   assert.deepEqual(registered.cards.slice().sort(),

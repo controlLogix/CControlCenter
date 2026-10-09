@@ -35,9 +35,13 @@ USAGE = """usage: agentmux hub <verb> [args]
              kill <session> | agents [--live] | events [--since N] [--entity E] | resolve ADDR
              adopt <legacy-session> <repo> <role> <agent> [--cli C]    bring a pre-hub agent under the hub
              retire-courier [--dry-run]   import the courier's backlog, stop it; post goes via the hub
+  federation fed help | fed setup | fed status | fed peers | fed share|unshare|trust | fed kill [--revoke] | fed resume
+             fed quarantine | fed approve|deny <id> | fed audit | fed <plugin> <verb> ...   (docs/FEDERATION.md)
+             mcp          stdio MCP server exposing the agent and federation verbs (for claude/codex)
   global     --json   --as SESSION (operator only; testing)
 addresses: agent:<repo>-<role>-<agent>  role:<repo>/<role>  role:*/<role>  role:group:<g>/<role>
-           role:team:<repo>/<team>/<role>  team:<repo>/<team>  virtual:operator"""
+           role:team:<repo>/<team>/<role>  team:<repo>/<team>  virtual:operator
+           peer:<peer>[/<repo>/<role>[/<agent>]]   (another person's hub, via federation)"""
 
 
 class Fail(SystemExit):
@@ -160,6 +164,16 @@ def show_work(w):
     return "\n".join(out)
 
 
+def python():
+    """The interpreter for the hub: the repo's .venv when it exists (federation needs
+    nats-py, hub/requirements.txt), else this one. AGENTMUX_PYTHON overrides."""
+    env = os.environ.get("AGENTMUX_PYTHON")
+    if env:
+        return env
+    venv = os.path.join(REPO, ".venv", "bin", "python")
+    return venv if os.path.exists(venv) else sys.executable
+
+
 def start():
     try:
         call("ping", timeout=3)
@@ -169,7 +183,7 @@ def start():
         pass
     os.makedirs(os.path.join(ROOT, "hub"), exist_ok=True)
     logf = open(os.path.join(ROOT, "hub", "hub.log"), "a")
-    subprocess.Popen([sys.executable, os.path.join(REPO, "hub", "server.py")], stdout=logf, stderr=logf,
+    subprocess.Popen([python(), os.path.join(REPO, "hub", "server.py")], stdout=logf, stderr=logf,
                      stdin=subprocess.DEVNULL, start_new_session=True, cwd=ROOT)
     for _ in range(50):
         time.sleep(0.2)
@@ -195,6 +209,12 @@ def main(argv):
         else:
             print(text if text is not None else json.dumps(resp["result"], indent=2, default=str))
 
+    if verb == "fed":
+        return fed_main(rest, as_, js)
+    if verb == "mcp":
+        sys.path.insert(0, REPO)
+        from hub.fed import mcp
+        return mcp.main()
     if verb == "start":
         return start()
     if verb == "stop":
@@ -366,6 +386,111 @@ def main(argv):
     if verb == "resolve":
         return out(call("resolve", {"address": rest[0]}, as_=as_))
     raise Fail(f"unknown verb {verb!r}\n{USAGE}")
+
+
+# -- federation (docs/FEDERATION.md 10): verbs come from the hub's registry ---------------
+FED_HELP = """usage: agentmux hub fed <verb> [args]      (docs/FEDERATION.md)
+  setup                          create .venv with nats-py (hub/requirements.txt), then restart the hub
+  status | peers                 connection and identity | who is online in the circle
+  share <repo> [--peers a,b]     opt a repo in (default: the whole circle)    unshare <repo>
+  trust <peer|*> --level auto|flag|approve|deny
+  kill [--revoke] | resume       KILL SWITCH: disconnect and stay disconnected (--revoke: withdraw + tell peers)
+  quarantine | approve <id> [--privileged] | deny <id>
+  audit [--peer P] [--limit N]
+  <plugin> <verb> ...            e.g. board add --repo R --title T, know search "q", code share --to peer:alice
+Run `agentmux hub fed verbs` for every verb and its parameters."""
+
+
+def fed_parse(argv, params):
+    args, words, i = {}, [], 0
+    while i < len(argv):
+        t = argv[i]
+        if t.startswith("--") and len(t) > 2:
+            name = t[2:].replace("-", "_")
+            p = params.get(name, {})
+            if p.get("type") == "boolean":
+                args[name] = True
+                i += 1
+                continue
+            if i + 1 >= len(argv):
+                raise Fail(f"{t} needs a value")
+            v = argv[i + 1]
+            if p.get("type") == "array":
+                args.setdefault(name, []).extend(x for x in v.split(",") if x)
+            elif p.get("type") == "integer":
+                args[name] = int(v)
+            else:
+                args[name] = v
+            i += 2
+            continue
+        words.append(t)
+        i += 1
+    pos = [n for n, p in params.items() if p.get("positional")]
+    if words:
+        if not pos:
+            raise Fail(f"unexpected words: {' '.join(words)}")
+        text = " ".join(words)
+        if text == "-":
+            text = sys.stdin.read()
+        if params[pos[0]].get("type") == "array":
+            args.setdefault(pos[0], []).extend(words)
+        else:
+            args.setdefault(pos[0], text)
+    return args
+
+
+def fed_text(verb, res):
+    if isinstance(res, list):
+        if not res:
+            return "(none)"
+        keys = [k for k in ("key", "id", "seq", "at", "peer", "node", "repo", "dir", "plane", "from_peer", "status",
+                            "state", "decision", "title", "summary", "reason", "assignee", "snippet") if k in res[0]]
+        return "\n".join("  ".join(str(r.get(k) if r.get(k) is not None else "-")[:70] for k in keys) for r in res)
+    if isinstance(res, dict):
+        return "\n".join(f"{k}: {json.dumps(v, default=str) if isinstance(v, (dict, list)) else v}"
+                         for k, v in res.items())
+    return str(res)
+
+
+def fed_setup():
+    venv = os.path.join(REPO, ".venv")
+    if not os.path.exists(os.path.join(venv, "bin", "python")):
+        subprocess.run([sys.executable, "-m", "venv", venv], check=True)
+    subprocess.run([os.path.join(venv, "bin", "pip"), "install", "-q", "-r",
+                    os.path.join(REPO, "hub", "requirements.txt")], check=True)
+    print(f"federation dependencies installed in {venv}; restart the hub (agentmux hub stop; agentmux hub start)")
+
+
+def fed_main(rest, as_, js):
+    if not rest or rest[0] in ("help", "-h", "--help"):
+        print(FED_HELP)
+        return
+    if rest[0] == "setup":
+        return fed_setup()
+    reg = {v["verb"]: v for v in call("fed_verbs", as_=as_)["result"]}
+    if rest[0] == "verbs":
+        for name, v in reg.items():
+            ps = " ".join((f"<{k}>" if p["positional"] else f"--{k.replace('_', '-')}" +
+                           ("" if p["type"] == "boolean" else f" {p['type'][:3].upper()}")) +
+                          ("" if p["required"] else "?") for k, p in v["params"].items())
+            print(f"{name.removeprefix('fed_').replace('_', ' ', 1):<22} {ps}\n    {v['help']}"
+                  f"{'  (operator)' if v['operator_only'] else ''}")
+        return
+    if len(rest) >= 2 and f"fed_{rest[0]}_{rest[1]}" in reg:
+        verb, argv = f"fed_{rest[0]}_{rest[1]}", rest[2:]
+    elif f"fed_{rest[0]}" in reg:
+        verb, argv = f"fed_{rest[0]}", rest[1:]
+    elif rest[0] == "know" and len(rest) >= 2 and f"fed_knowledge_{rest[1]}" in reg:
+        verb, argv = f"fed_knowledge_{rest[1]}", rest[2:]
+    else:
+        raise Fail(f"unknown federation verb: {' '.join(rest[:2])}\n{FED_HELP}")
+    args = fed_parse(argv, reg[verb]["params"])
+    args["cwd"] = os.getcwd()
+    r = call(verb, args, as_=as_, timeout=90)
+    if js:
+        print(json.dumps(r["result"], indent=2, default=str))
+    else:
+        print(fed_text(verb, r["result"]))
 
 
 if __name__ == "__main__":

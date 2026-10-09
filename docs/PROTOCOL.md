@@ -563,6 +563,11 @@ COMMIT;
 
 ## 11. Network readiness (NATS, later)
 
+> **Superseded for cross-user traffic by [`FEDERATION.md`](FEDERATION.md) (EP-032, 2026-10-07):**
+> JetStream streams (`AM_MSG`, `AM_WORK`, `AM_SHARE`), KV (`am_board`, `am_presence`), JWT
+> users per person, sender-in-subject anti-spoofing, and hubs as clients rather than leaf
+> nodes. The table below still describes the single-operator TM-218 bridge (`nats_url`).
+
 | Protocol | NATS |
 |---|---|
 | direct `agent:R/X/A` | subject `am.agent.R.X.A`: node-agnostic, because a sender cannot know which node hosts the recipient. Every hub subscribes to `am.agent.>` and only the hub that has the agent ingests it (idempotent on the message id) |

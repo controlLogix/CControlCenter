@@ -1,0 +1,62 @@
+# agentmux federation - the central NATS cluster (docs/FEDERATION.md section 3).
+# Chart: nats/nats 2.15.0 (https://nats-io.github.io/k8s/helm/charts/).
+#
+# Static, committed. The operator JWT, system account and preloaded account JWTs are
+# NOT in this file: `circle.sh helm-values` renders them into .generated/auth-values.yaml,
+# which is passed as a second -f. They are public keys and signed claims, not secrets,
+# but they are per-deployment.
+config:
+  cluster:
+    enabled: true
+    replicas: 3
+  jetstream:
+    enabled: true
+    fileStore:
+      enabled: true
+      pvc:
+        enabled: true
+        size: 2Gi
+    memoryStore:
+      enabled: true
+      maxSize: 256Mi
+  nats:
+    port: 4222
+    tls:
+      enabled: true
+      secretName: nats-tls          # tls.crt / tls.key; up.sh makes it from a self-signed CA (A3)
+  resolver:
+    enabled: true                   # full resolver: accounts can be pushed and revoked live
+    dir: /data/resolver
+    pvc:
+      enabled: true
+      size: 256Mi
+    merge:
+      type: full                    # the chart does not set it; the server refuses without one
+      allow_delete: false
+      interval: "2m"
+  monitor:
+    enabled: true
+  merge:
+    max_payload: << 2MB >>
+    # Clients reconnect across pod restarts; JetStream R3 keeps streams through one loss.
+    write_deadline: << 10s >>
+
+podTemplate:
+  topologySpreadConstraints:
+    kubernetes.io/hostname:
+      maxSkew: 1
+      whenUnsatisfiable: ScheduleAnyway
+
+# The client port is reached through deploy/nats/nodeport.yaml on kind, and through a
+# LoadBalancer (set service.merge.spec.type) on a hosted cluster.
+service:
+  ports:
+    leafnodes:
+      enabled: false
+    websocket:
+      enabled: false
+    mqtt:
+      enabled: false
+
+natsBox:
+  enabled: true

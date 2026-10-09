@@ -1,0 +1,910 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedBy": "scripts/generate-pattern-references.mjs",
+  "sources": [
+    {
+      "name": "Dofactory",
+      "catalogUrl": "https://www.dofactory.com/net/design-patterns",
+      "javascriptCatalogUrl": "https://www.dofactory.com/products/dofactory-js",
+      "scope": "The 23 GoF patterns in Dofactory's public C# reference; language and surface adaptations in this plugin are original guidance."
+    },
+    {
+      "name": "Enterprise Integration Patterns",
+      "catalogUrl": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/",
+      "tocUrl": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/toc.html",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "scope": "The 65-pattern catalog named by the official messaging overview. Intent summaries, scenarios and diagrams here are original adaptations; pattern names and source links are attributed to EIP."
+    }
+  ],
+  "patterns": [
+    {
+      "name": "Abstract Factory",
+      "catalog": "dofactory",
+      "family": "GoF/Creational",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/abstract-factory-design-pattern"
+    },
+    {
+      "name": "Builder",
+      "catalog": "dofactory",
+      "family": "GoF/Creational",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/builder-design-pattern"
+    },
+    {
+      "name": "Factory Method",
+      "catalog": "dofactory",
+      "family": "GoF/Creational",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/factory-method-design-pattern"
+    },
+    {
+      "name": "Prototype",
+      "catalog": "dofactory",
+      "family": "GoF/Creational",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/prototype-design-pattern"
+    },
+    {
+      "name": "Singleton",
+      "catalog": "dofactory",
+      "family": "GoF/Creational",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/singleton-design-pattern"
+    },
+    {
+      "name": "Adapter",
+      "catalog": "dofactory",
+      "family": "GoF/Structural",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/adapter-design-pattern"
+    },
+    {
+      "name": "Bridge",
+      "catalog": "dofactory",
+      "family": "GoF/Structural",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/bridge-design-pattern"
+    },
+    {
+      "name": "Composite",
+      "catalog": "dofactory",
+      "family": "GoF/Structural",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/composite-design-pattern"
+    },
+    {
+      "name": "Decorator",
+      "catalog": "dofactory",
+      "family": "GoF/Structural",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/decorator-design-pattern"
+    },
+    {
+      "name": "Facade",
+      "catalog": "dofactory",
+      "family": "GoF/Structural",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/facade-design-pattern"
+    },
+    {
+      "name": "Flyweight",
+      "catalog": "dofactory",
+      "family": "GoF/Structural",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/flyweight-design-pattern"
+    },
+    {
+      "name": "Proxy",
+      "catalog": "dofactory",
+      "family": "GoF/Structural",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/proxy-design-pattern"
+    },
+    {
+      "name": "Chain of Responsibility",
+      "catalog": "dofactory",
+      "family": "GoF/Behavioral",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/chain-of-responsibility-design-pattern"
+    },
+    {
+      "name": "Command",
+      "catalog": "dofactory",
+      "family": "GoF/Behavioral",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/command-design-pattern"
+    },
+    {
+      "name": "Interpreter",
+      "catalog": "dofactory",
+      "family": "GoF/Behavioral",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/interpreter-design-pattern"
+    },
+    {
+      "name": "Iterator",
+      "catalog": "dofactory",
+      "family": "GoF/Behavioral",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/iterator-design-pattern"
+    },
+    {
+      "name": "Mediator",
+      "catalog": "dofactory",
+      "family": "GoF/Behavioral",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/mediator-design-pattern"
+    },
+    {
+      "name": "Memento",
+      "catalog": "dofactory",
+      "family": "GoF/Behavioral",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/memento-design-pattern"
+    },
+    {
+      "name": "Observer",
+      "catalog": "dofactory",
+      "family": "GoF/Behavioral",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/observer-design-pattern"
+    },
+    {
+      "name": "State",
+      "catalog": "dofactory",
+      "family": "GoF/Behavioral",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/state-design-pattern"
+    },
+    {
+      "name": "Strategy",
+      "catalog": "dofactory",
+      "family": "GoF/Behavioral",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/strategy-design-pattern"
+    },
+    {
+      "name": "Template Method",
+      "catalog": "dofactory",
+      "family": "GoF/Behavioral",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/template-method-design-pattern"
+    },
+    {
+      "name": "Visitor",
+      "catalog": "dofactory",
+      "family": "GoF/Behavioral",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.dofactory.com/net/visitor-design-pattern"
+    },
+    {
+      "name": "Constructor",
+      "catalog": "dofactory",
+      "family": "JavaScript/Modern",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "Namespace",
+      "catalog": "dofactory",
+      "family": "JavaScript/Modern",
+      "variants": [
+        "Bookmarklet"
+      ],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "Module",
+      "catalog": "dofactory",
+      "family": "JavaScript/Modern",
+      "variants": [
+        "Revealing Module",
+        "Partial Module"
+      ],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "Chaining",
+      "catalog": "dofactory",
+      "family": "JavaScript/Modern",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "Invocation",
+      "catalog": "dofactory",
+      "family": "JavaScript/Modern",
+      "variants": [
+        "Function Invocation",
+        "Method Invocation",
+        "Constructor Invocation",
+        "Apply Invocation"
+      ],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "Mixin",
+      "catalog": "dofactory",
+      "family": "JavaScript/Modern",
+      "variants": [
+        "Prototypal Inheritance",
+        "Extend",
+        "Functional Mixin"
+      ],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "Monkey Patch",
+      "catalog": "dofactory",
+      "family": "JavaScript/Modern",
+      "variants": [
+        "Duck Punching"
+      ],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "Multiton",
+      "catalog": "dofactory",
+      "family": "JavaScript/Modern",
+      "variants": [
+        "N-ton",
+        "Registry of Singletons"
+      ],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "Partial",
+      "catalog": "dofactory",
+      "family": "JavaScript/Modern",
+      "variants": [
+        "Partial Function",
+        "Partial Object",
+        "Partial Application"
+      ],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "Model View Controller",
+      "catalog": "dofactory",
+      "family": "JavaScript/Model-View",
+      "variants": [
+        "MVC"
+      ],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "Model View Presenter",
+      "catalog": "dofactory",
+      "family": "JavaScript/Model-View",
+      "variants": [
+        "MVP"
+      ],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "Model View ViewModel",
+      "catalog": "dofactory",
+      "family": "JavaScript/Model-View",
+      "variants": [
+        "MVVM"
+      ],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Module",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Single Var",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Double Exclamation",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Overload Idiom",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Placeholder Idiom",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Short Walk Idiom",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Options Hash",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Chaining",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Namespace",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Lazy Load",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Zero Timeout",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Singleton",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Iterator",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Observer",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Proxy",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Facade",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Adapter",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "jQuery Plugin",
+      "catalog": "dofactory",
+      "family": "JavaScript/jQuery Legacy",
+      "variants": [
+        "Function Plugin",
+        "Extend Plugin",
+        "Constructor Plugin"
+      ],
+      "referenceDepth": "catalog-only",
+      "source": "https://www.dofactory.com/products/dofactory-js"
+    },
+    {
+      "name": "File Transfer",
+      "catalog": "eip",
+      "family": "EIP/Integration Styles",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/FileTransferIntegration.html"
+    },
+    {
+      "name": "Shared Database",
+      "catalog": "eip",
+      "family": "EIP/Integration Styles",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/SharedDataBaseIntegration.html"
+    },
+    {
+      "name": "Remote Procedure Invocation",
+      "catalog": "eip",
+      "family": "EIP/Integration Styles",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/EncapsulatedSynchronousIntegration.html"
+    },
+    {
+      "name": "Messaging",
+      "catalog": "eip",
+      "family": "EIP/Integration Styles",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/Messaging.html"
+    },
+    {
+      "name": "Message Channel",
+      "catalog": "eip",
+      "family": "EIP/Messaging Systems",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageChannel.html"
+    },
+    {
+      "name": "Message",
+      "catalog": "eip",
+      "family": "EIP/Messaging Systems",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/Message.html"
+    },
+    {
+      "name": "Pipes and Filters",
+      "catalog": "eip",
+      "family": "EIP/Messaging Systems",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/PipesAndFilters.html"
+    },
+    {
+      "name": "Message Router",
+      "catalog": "eip",
+      "family": "EIP/Messaging Systems",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageRouter.html"
+    },
+    {
+      "name": "Message Translator",
+      "catalog": "eip",
+      "family": "EIP/Messaging Systems",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageTranslator.html"
+    },
+    {
+      "name": "Message Endpoint",
+      "catalog": "eip",
+      "family": "EIP/Messaging Systems",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageEndpoint.html"
+    },
+    {
+      "name": "Point-to-Point Channel",
+      "catalog": "eip",
+      "family": "EIP/Messaging Channels",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/PointToPointChannel.html"
+    },
+    {
+      "name": "Publish-Subscribe Channel",
+      "catalog": "eip",
+      "family": "EIP/Messaging Channels",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/PublishSubscribeChannel.html"
+    },
+    {
+      "name": "Datatype Channel",
+      "catalog": "eip",
+      "family": "EIP/Messaging Channels",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/DatatypeChannel.html"
+    },
+    {
+      "name": "Invalid Message Channel",
+      "catalog": "eip",
+      "family": "EIP/Messaging Channels",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/InvalidMessageChannel.html"
+    },
+    {
+      "name": "Dead Letter Channel",
+      "catalog": "eip",
+      "family": "EIP/Messaging Channels",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/DeadLetterChannel.html"
+    },
+    {
+      "name": "Guaranteed Delivery",
+      "catalog": "eip",
+      "family": "EIP/Messaging Channels",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/GuaranteedMessaging.html"
+    },
+    {
+      "name": "Channel Adapter",
+      "catalog": "eip",
+      "family": "EIP/Messaging Channels",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/ChannelAdapter.html"
+    },
+    {
+      "name": "Messaging Bridge",
+      "catalog": "eip",
+      "family": "EIP/Messaging Channels",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessagingBridge.html"
+    },
+    {
+      "name": "Message Bus",
+      "catalog": "eip",
+      "family": "EIP/Messaging Channels",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageBus.html"
+    },
+    {
+      "name": "Command Message",
+      "catalog": "eip",
+      "family": "EIP/Message Construction",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/CommandMessage.html"
+    },
+    {
+      "name": "Document Message",
+      "catalog": "eip",
+      "family": "EIP/Message Construction",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/DocumentMessage.html"
+    },
+    {
+      "name": "Event Message",
+      "catalog": "eip",
+      "family": "EIP/Message Construction",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/EventMessage.html"
+    },
+    {
+      "name": "Request-Reply",
+      "catalog": "eip",
+      "family": "EIP/Message Construction",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/RequestReply.html"
+    },
+    {
+      "name": "Return Address",
+      "catalog": "eip",
+      "family": "EIP/Message Construction",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/ReturnAddress.html"
+    },
+    {
+      "name": "Correlation Identifier",
+      "catalog": "eip",
+      "family": "EIP/Message Construction",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/CorrelationIdentifier.html"
+    },
+    {
+      "name": "Message Sequence",
+      "catalog": "eip",
+      "family": "EIP/Message Construction",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageSequence.html"
+    },
+    {
+      "name": "Message Expiration",
+      "catalog": "eip",
+      "family": "EIP/Message Construction",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageExpiration.html"
+    },
+    {
+      "name": "Format Indicator",
+      "catalog": "eip",
+      "family": "EIP/Message Construction",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/FormatIndicator.html"
+    },
+    {
+      "name": "Content-Based Router",
+      "catalog": "eip",
+      "family": "EIP/Message Routing",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/ContentBasedRouter.html"
+    },
+    {
+      "name": "Message Filter",
+      "catalog": "eip",
+      "family": "EIP/Message Routing",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/Filter.html"
+    },
+    {
+      "name": "Dynamic Router",
+      "catalog": "eip",
+      "family": "EIP/Message Routing",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/DynamicRouter.html"
+    },
+    {
+      "name": "Recipient List",
+      "catalog": "eip",
+      "family": "EIP/Message Routing",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/RecipientList.html"
+    },
+    {
+      "name": "Splitter",
+      "catalog": "eip",
+      "family": "EIP/Message Routing",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/Sequencer.html"
+    },
+    {
+      "name": "Aggregator",
+      "catalog": "eip",
+      "family": "EIP/Message Routing",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/Aggregator.html"
+    },
+    {
+      "name": "Resequencer",
+      "catalog": "eip",
+      "family": "EIP/Message Routing",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/Resequencer.html"
+    },
+    {
+      "name": "Composed Message Processor",
+      "catalog": "eip",
+      "family": "EIP/Message Routing",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/DistributionAggregate.html"
+    },
+    {
+      "name": "Scatter-Gather",
+      "catalog": "eip",
+      "family": "EIP/Message Routing",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/BroadcastAggregate.html"
+    },
+    {
+      "name": "Routing Slip",
+      "catalog": "eip",
+      "family": "EIP/Message Routing",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/RoutingTable.html"
+    },
+    {
+      "name": "Process Manager",
+      "catalog": "eip",
+      "family": "EIP/Message Routing",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/ProcessManager.html"
+    },
+    {
+      "name": "Message Broker",
+      "catalog": "eip",
+      "family": "EIP/Message Routing",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageBroker.html"
+    },
+    {
+      "name": "Envelope Wrapper",
+      "catalog": "eip",
+      "family": "EIP/Message Transformation",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/EnvelopeWrapper.html"
+    },
+    {
+      "name": "Content Enricher",
+      "catalog": "eip",
+      "family": "EIP/Message Transformation",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/DataEnricher.html"
+    },
+    {
+      "name": "Content Filter",
+      "catalog": "eip",
+      "family": "EIP/Message Transformation",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/ContentFilter.html"
+    },
+    {
+      "name": "Claim Check",
+      "catalog": "eip",
+      "family": "EIP/Message Transformation",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/StoreInLibrary.html"
+    },
+    {
+      "name": "Normalizer",
+      "catalog": "eip",
+      "family": "EIP/Message Transformation",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/Normalizer.html"
+    },
+    {
+      "name": "Canonical Data Model",
+      "catalog": "eip",
+      "family": "EIP/Message Transformation",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/CanonicalDataModel.html"
+    },
+    {
+      "name": "Messaging Gateway",
+      "catalog": "eip",
+      "family": "EIP/Messaging Endpoints",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessagingGateway.html"
+    },
+    {
+      "name": "Messaging Mapper",
+      "catalog": "eip",
+      "family": "EIP/Messaging Endpoints",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessagingMapper.html"
+    },
+    {
+      "name": "Transactional Client",
+      "catalog": "eip",
+      "family": "EIP/Messaging Endpoints",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/TransactionalClient.html"
+    },
+    {
+      "name": "Polling Consumer",
+      "catalog": "eip",
+      "family": "EIP/Messaging Endpoints",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/PollingConsumer.html"
+    },
+    {
+      "name": "Event-Driven Consumer",
+      "catalog": "eip",
+      "family": "EIP/Messaging Endpoints",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/EventDrivenConsumer.html"
+    },
+    {
+      "name": "Competing Consumers",
+      "catalog": "eip",
+      "family": "EIP/Messaging Endpoints",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/CompetingConsumers.html"
+    },
+    {
+      "name": "Message Dispatcher",
+      "catalog": "eip",
+      "family": "EIP/Messaging Endpoints",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageDispatcher.html"
+    },
+    {
+      "name": "Selective Consumer",
+      "catalog": "eip",
+      "family": "EIP/Messaging Endpoints",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageSelector.html"
+    },
+    {
+      "name": "Durable Subscriber",
+      "catalog": "eip",
+      "family": "EIP/Messaging Endpoints",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/DurableSubscription.html"
+    },
+    {
+      "name": "Idempotent Receiver",
+      "catalog": "eip",
+      "family": "EIP/Messaging Endpoints",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/IdempotentReceiver.html"
+    },
+    {
+      "name": "Service Activator",
+      "catalog": "eip",
+      "family": "EIP/Messaging Endpoints",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessagingAdapter.html"
+    },
+    {
+      "name": "Control Bus",
+      "catalog": "eip",
+      "family": "EIP/System Management",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/ControlBus.html"
+    },
+    {
+      "name": "Detour",
+      "catalog": "eip",
+      "family": "EIP/System Management",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/Detour.html"
+    },
+    {
+      "name": "Wire Tap",
+      "catalog": "eip",
+      "family": "EIP/System Management",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/WireTap.html"
+    },
+    {
+      "name": "Message History",
+      "catalog": "eip",
+      "family": "EIP/System Management",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageHistory.html"
+    },
+    {
+      "name": "Message Store",
+      "catalog": "eip",
+      "family": "EIP/System Management",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageStore.html"
+    },
+    {
+      "name": "Smart Proxy",
+      "catalog": "eip",
+      "family": "EIP/System Management",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/SmartProxy.html"
+    },
+    {
+      "name": "Test Message",
+      "catalog": "eip",
+      "family": "EIP/System Management",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/TestMessage.html"
+    },
+    {
+      "name": "Channel Purger",
+      "catalog": "eip",
+      "family": "EIP/System Management",
+      "referenceDepth": "full-public-reference",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/ChannelPurger.html"
+    }
+  ]
+}

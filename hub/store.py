@@ -168,6 +168,28 @@ MIGRATIONS = [
     ALTER TABLE work_items ADD COLUMN origin TEXT;
     CREATE INDEX outbox_unsent ON nats_outbox (seq) WHERE sent IS NULL;
     """,
+    # 4 (EP-032): cross-user federation, docs/FEDERATION.md. The JetStream outbox, the
+    # idempotency ledger, the audit log, the quarantine and the kill-switch state. Plugin
+    # tables (p_<plugin>_*) are created by hub/fed/runtime.py, not here.
+    """
+    CREATE TABLE fed_outbox (seq INTEGER PRIMARY KEY, msg_id TEXT NOT NULL UNIQUE, subject TEXT NOT NULL,
+      payload TEXT NOT NULL CHECK (json_valid(payload)), created TEXT NOT NULL, sent TEXT,
+      attempts INTEGER NOT NULL DEFAULT 0, last_error TEXT) STRICT;
+    CREATE INDEX fed_outbox_unsent ON fed_outbox (seq) WHERE sent IS NULL;
+    CREATE TABLE fed_seen (msg_id TEXT PRIMARY KEY, at TEXT NOT NULL) STRICT;
+    CREATE TABLE fed_audit (seq INTEGER PRIMARY KEY, at TEXT NOT NULL,
+      dir TEXT NOT NULL CHECK (dir IN ('in','out','local')), plane TEXT NOT NULL, peer TEXT, rid TEXT,
+      subject TEXT, msg_id TEXT, sha TEXT, size INTEGER, decision TEXT NOT NULL,
+      detail TEXT CHECK (detail IS NULL OR json_valid(detail))) STRICT;
+    CREATE INDEX fed_audit_peer ON fed_audit (peer, seq);
+    CREATE TABLE fed_quarantine (id TEXT PRIMARY KEY, at TEXT NOT NULL, peer TEXT NOT NULL, plane TEXT NOT NULL,
+      reason TEXT NOT NULL, subject TEXT NOT NULL, envelope TEXT NOT NULL CHECK (json_valid(envelope)),
+      state TEXT NOT NULL DEFAULT 'held' CHECK (state IN ('held','approved','denied')),
+      decided TEXT, decided_by TEXT) STRICT;
+    CREATE TABLE fed_state (k TEXT PRIMARY KEY, v TEXT NOT NULL) STRICT;
+    ALTER TABLE work_items ADD COLUMN origin_peer TEXT;
+    ALTER TABLE work_items ADD COLUMN fed_flags TEXT CHECK (fed_flags IS NULL OR json_valid(fed_flags));
+    """,
 ]
 
 

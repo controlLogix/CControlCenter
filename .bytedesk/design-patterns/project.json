@@ -1,0 +1,21 @@
+{
+  "baselineVersion": "1.1.0",
+  "initializedBy": "session-start",
+  "owner": "",
+  "surfaces": [],
+  "languages": [],
+  "frontendRoots": [],
+  "architecture": {
+    "decision": "",
+    "rationale": "",
+    "alternatives": [],
+    "constraints": []
+  },
+  "toolchains": [],
+  "verification": {
+    "build": [],
+    "test": []
+  },
+  "decisionEvidence": [],
+  "adoptionCommit": "f4c84b09b187f7e895d1406fb5a8f885d5845e35"
+}

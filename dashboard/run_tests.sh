@@ -305,6 +305,7 @@ run test_github_panel.py python3 dashboard/test_github_panel.py
 # its own HTTP server on an ephemeral port, so it touches neither the operator's hub
 # nor the shared server this suite brought up.
 run test_hub_panel.py python3 dashboard/test_hub_panel.py
+run test_fed_panel.py sh -c "cd dashboard && python3 test_fed_panel.py"
 run test_codesys_panel.py python3 dashboard/test_codesys_panel.py
 run test_logix.py python3 dashboard/test_logix.py
 run test_ads.py python3 dashboard/test_ads.py

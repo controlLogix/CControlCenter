@@ -414,9 +414,26 @@ claude_credentials_sync_locked() {
   ) 9>"$ROOT/.spawn.lock" || true
 }
 
+# EP-032 (docs/FEDERATION.md 7.2, 10): when this hub federates with other people,
+# an unrestricted claude agent gets the agentmux MCP server and the privileged-tool
+# gate hook. Restricted postures already deny mcp__* and disable hooks.
+federation_on() {
+  python3 - "$ROOT/hub/federation.toml" 2>/dev/null <<'PYFED'
+import sys, tomllib
+try:
+    c = tomllib.load(open(sys.argv[1], 'rb'))
+except (OSError, ValueError):
+    sys.exit(1)
+sys.exit(0 if c.get('federation', {}).get('enabled') else 1)
+PYFED
+}
+
 claude_config_dir() {
   local name="$1" posture="$2" tools="$3" deny_tools="$4"
-  local d="$ROOT/claude-config/$name" src entry base tmp
+  local d="$ROOT/claude-config/$name" src entry base tmp gate=""
+  if [ "$posture" = unrestricted ] && federation_on; then
+    local _self; _self="$(agentmux_self)" && gate="python3 $(dirname "$_self")/hub/fed/hooks/privileged_gate.py"
+  fi
   src="$(effective_claude_dir)"
   [ ! -L "$ROOT/claude-config" ] && [ ! -L "$d" ] || return 1
   mkdir -p "$d" || return 1
@@ -432,12 +449,15 @@ claude_config_dir() {
     done
   fi
   tmp="$(mktemp "$d/.settings.XXXXXX")" || return 1
-  if ! python3 - "$src/settings.json" "$tmp" "$posture" "$tools" "$deny_tools" <<'PYCFG'
+  if ! python3 - "$src/settings.json" "$tmp" "$posture" "$tools" "$deny_tools" "$gate" <<'PYCFG'
 import json, pathlib, sys
-src, dst, posture, tools, deny = sys.argv[1:]
+src, dst, posture, tools, deny, gate = sys.argv[1:]
 cfg = json.loads(pathlib.Path(src).read_text()) if pathlib.Path(src).is_file() else {}
 for key in ('hooks', 'statusLine', 'permissions', 'enabledPlugins', 'mcpServers'):
     cfg.pop(key, None)
+if gate:
+    # The ONLY hook a spawned agent gets: remote work never triggers privileged tools.
+    cfg['hooks'] = {'PreToolUse': [{'matcher': 'Bash|mcp__.*', 'hooks': [{'type': 'command', 'command': gate}]}]}
 # Replace inherited permissions: operator allow rules/additionalDirectories must
 # never reopen a bounded agent's filesystem or permission modes.
 mode = {'unrestricted': 'bypassPermissions', 'workspace-write': 'acceptEdits',
@@ -1017,6 +1037,12 @@ except Exception:
       fi
       [ -z "$tools" ] || launch="$launch --tools '$tools'"
       [ -z "$deny_tools" ] || launch="$launch --disallowedTools '$deny_tools'"
+      if [ "$bypass" = 1 ] && federation_on; then
+        local _mself _mcp
+        _mself="$(agentmux_self)" && _mcp="{\"mcpServers\":{\"agentmux\":{\"command\":\"python3\",\"args\":[\"$(dirname "$_mself")/hub/cli.py\",\"mcp\"]}}}"
+        printf -v quoted_path '%q' "$_mcp"
+        [ -n "${_mcp:-}" ] && launch="$launch --mcp-config $quoted_path"
+      fi
       ;;
     grok) launch="grok --permission-mode bypassPermissions${model:+ -m $quoted_model}" ;;
     shell) launch="${SHELL:-/bin/bash}" ;;

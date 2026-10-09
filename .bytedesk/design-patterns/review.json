@@ -1,0 +1,62 @@
+{
+  "reviewer": "",
+  "sourceDigest": "",
+  "rules": {
+    "DP001": {
+      "status": "unreviewed",
+      "rationale": "",
+      "evidence": []
+    },
+    "DP002": {
+      "status": "unreviewed",
+      "rationale": "",
+      "evidence": []
+    },
+    "DP003": {
+      "status": "unreviewed",
+      "rationale": "",
+      "evidence": []
+    },
+    "DP004": {
+      "status": "unreviewed",
+      "rationale": "",
+      "evidence": []
+    },
+    "DP005": {
+      "status": "unreviewed",
+      "rationale": "",
+      "evidence": []
+    },
+    "DP006": {
+      "status": "unreviewed",
+      "rationale": "",
+      "evidence": []
+    },
+    "DP007": {
+      "status": "unreviewed",
+      "rationale": "",
+      "evidence": []
+    },
+    "DP008": {
+      "status": "unreviewed",
+      "rationale": "",
+      "evidence": []
+    },
+    "DP009": {
+      "status": "unreviewed",
+      "rationale": "",
+      "evidence": []
+    },
+    "DP010": {
+      "status": "unreviewed",
+      "rationale": "",
+      "evidence": []
+    },
+    "DP011": {
+      "status": "unreviewed",
+      "rationale": "",
+      "evidence": []
+    }
+  },
+  "findings": []
+}
