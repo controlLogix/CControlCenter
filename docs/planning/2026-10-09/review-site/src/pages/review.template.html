@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data: blob:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="dark">
+<title>Agentmux visual review · Six proposed scenes · October 9, 2026</title>
+<link rel="icon" href="{{LOGO_DATA_URI}}">
+<style>
+:root{color-scheme:dark;--bg:#1b2027;--bg-deep:#15191f;--stage:#101317;--panel:#22272e;--panel-2:#2a313a;--line:#3b4654;--line-soft:#2d3540;--text:#d8dee6;--bright:#f5f7fa;--muted:#aeb9c7;--accent:#ff9b4c;--accent-strong:#ffb57a;--accent-ink:#1b2027;--accent-soft:rgba(255,155,76,.08);--accent-line:rgba(255,155,76,.45);--ok:#8fc2a0;--warn:#e9b65c;--sans:'Segoe UI Variable Text','Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;--display:'Segoe UI Variable Display','Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;--mono:'Cascadia Mono',Consolas,'SF Mono',Menlo,'DejaVu Sans Mono',monospace;--gutter:clamp(16px,4vw,48px);--measure:1120px;--wide:1480px;--bar-h:64px;--radius:8px;--radius-lg:14px}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--bg);scroll-padding-top:calc(var(--bar-h) + 12px);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html.is-viewing{overflow:hidden}
+body{margin:0;background:var(--bg);color:var(--text);font:400 17px/1.6 var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+img{max-width:100%;height:auto}
+p{margin:0 0 16px}
+a{color:var(--bright);text-decoration-line:underline;text-decoration-color:var(--accent);text-decoration-thickness:1px;text-underline-offset:3px}
+a:hover{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+strong{color:var(--bright);font-weight:600}
+code{padding:.1em .38em;font:500 .86em/1.4 var(--mono);color:var(--bright);background:var(--panel);border:1px solid var(--line-soft);border-radius:4px;overflow-wrap:anywhere}
+.vh{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skip{position:absolute;left:16px;top:-64px;z-index:100;padding:10px 16px;font-weight:600;color:var(--accent-ink);background:var(--accent);border-radius:var(--radius);text-decoration:none}
+.skip:focus{top:12px;color:var(--accent-ink)}
+.wrap{width:min(100% - 2*var(--gutter),var(--measure));margin-inline:auto}
+.eyebrow{margin:0 0 16px;font:600 12px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+
+.topbar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.topbar__inner{display:flex;align-items:center;gap:24px;width:min(100% - 2*var(--gutter),var(--wide));height:var(--bar-h);margin-inline:auto}
+.brand{display:flex;flex:none;align-items:center;gap:10px;color:var(--bright);text-decoration:none}
+.brand:hover{color:var(--bright)}
+.brand-mark{display:block;flex:none}
+.brand__name{font:600 16px/1 var(--display);letter-spacing:-.01em}
+.brand__sub{padding-left:10px;border-left:1px solid var(--line);font:600 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.scene-nav{position:relative;flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none}
+.scene-nav::-webkit-scrollbar{display:none}
+.scene-nav__list{display:flex;gap:4px;width:max-content;margin:0 0 0 auto;padding:4px 2px;list-style:none}
+.scene-nav__link{display:flex;align-items:center;gap:8px;min-height:40px;padding:8px 12px;font-size:14px;line-height:1;color:var(--muted);white-space:nowrap;text-decoration:none;border:1px solid transparent;border-radius:var(--radius);transition:color .12s,background-color .12s,border-color .12s}
+.scene-nav__link:hover{color:var(--bright);background:var(--panel)}
+.scene-nav__link[aria-current]{color:var(--bright);background:var(--panel);border-color:var(--line);box-shadow:inset 0 -2px 0 var(--accent)}
+.scene-nav__num{font:600 12px/1 var(--mono);color:var(--accent)}
+.scene-nav__link[data-noted]::after{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.scene-nav__link--notes{color:var(--bright);border-color:var(--line)}
+.topbar__status{flex:none;padding:7px 10px;font:700 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent-line);border-radius:999px}
+
+.hero{padding:clamp(56px,9vw,128px) 0 clamp(56px,7vw,96px)}
+.hero h1{max-width:17ch;margin:0 0 28px;font:600 clamp(40px,6.6vw,84px)/1.02 var(--display);letter-spacing:-.035em;color:var(--bright);text-wrap:balance}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.lede{max-width:58ch;margin:0;font-size:clamp(18px,1.6vw,22px);line-height:1.55;color:var(--muted)}
+.hero__grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);align-items:start;gap:clamp(24px,4vw,48px);margin-top:clamp(40px,5vw,64px)}
+.notice{padding:24px 26px;background:var(--accent-soft);border:1px solid var(--accent-line);border-left:4px solid var(--accent);border-radius:var(--radius)}
+.notice__label{margin:0 0 8px;font:700 12px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.notice__title{margin:0 0 14px;font:600 21px/1.35 var(--display);color:var(--bright)}
+.notice__list{display:grid;gap:8px;margin:0;padding-left:20px;font-size:16px}
+.notice__list li::marker{color:var(--accent)}
+.meta{margin:0;border-top:1px solid var(--line)}
+.meta__row{display:grid;grid-template-columns:8.5rem minmax(0,1fr);gap:4px 16px;padding:14px 0;border-bottom:1px solid var(--line-soft)}
+.meta dt{padding-top:3px;font:600 12px/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.meta dd{margin:0;font-size:16px}
+.meta__note{display:block;margin-top:4px;font-size:13px;color:var(--muted)}
+.download-link{font-weight:600}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:clamp(40px,5vw,56px) 0 0;padding:0;list-style:none;counter-reset:step}
+.steps li{padding:20px 22px;font-size:15px;line-height:1.55;color:var(--muted);background:var(--panel);border:1px solid var(--line-soft);border-radius:var(--radius);counter-increment:step}
+.steps li::before{content:'Step ' counter(step);display:block;margin-bottom:10px;font:600 12px/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.steps strong{display:block;margin-bottom:4px;font-size:17px}
+
+.section{padding:clamp(64px,9vw,112px) 0;border-top:1px solid var(--line-soft)}
+.section__title{max-width:26ch;margin:0 0 16px;font:600 clamp(28px,3.6vw,44px)/1.1 var(--display);letter-spacing:-.025em;color:var(--bright);text-wrap:balance}
+.section__lede{max-width:64ch;margin:0 0 40px;font-size:18px;color:var(--muted)}
+.toc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:32px 0 0;padding:0;list-style:none}
+.toc__card{display:grid;grid-template-rows:auto auto 1fr auto;gap:8px;height:100%;padding:22px 22px 18px;color:var(--text);text-decoration:none;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-lg);transition:border-color .12s,background-color .12s}
+.toc__card:hover{color:var(--text);background:var(--panel-2);border-color:var(--accent)}
+.toc__num{font:300 40px/1 var(--mono);letter-spacing:-.04em;color:var(--accent)}
+.toc__title{font:600 19px/1.3 var(--display);color:var(--bright)}
+.toc__text{font-size:15px;line-height:1.5;color:var(--muted)}
+.toc__phase{margin-top:8px;padding-top:12px;font:600 12px/1.4 var(--mono);letter-spacing:.06em;color:var(--muted);border-top:1px solid var(--line-soft)}
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin:0;padding:0;list-style:none;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-lg)}
+.flow__step{position:relative;padding:24px 22px 22px;border-left:1px solid var(--line-soft)}
+.flow__step:first-child{border-left:0}
+.flow__step:not(:last-child)::after{content:'';position:absolute;top:30px;right:-7px;z-index:1;width:12px;height:12px;background:var(--panel);border-top:1px solid var(--accent);border-right:1px solid var(--accent);transform:rotate(45deg)}
+.flow__index{display:block;margin-bottom:10px;font:600 12px/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.flow__name{display:block;margin-bottom:8px;font:600 22px/1.2 var(--display);color:var(--bright)}
+.flow__text{margin:0 0 14px;font-size:15px;line-height:1.55;color:var(--muted)}
+.flow__refs{margin:0;font:500 12px/1.5 var(--mono);color:var(--muted)}
+.flow__refs a{color:var(--text)}
+.facts{margin:0;border-top:1px solid var(--line)}
+.facts__row{display:grid;grid-template-columns:minmax(160px,15rem) minmax(0,1fr);gap:6px 32px;padding:18px 0;border-bottom:1px solid var(--line-soft)}
+.facts dt{font:600 18px/1.4 var(--display);color:var(--bright)}
+.facts dd{max-width:64ch;margin:0}
+.facts__row--merge dt{color:var(--muted)}
+.split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(40px,6vw,88px)}
+.subhead{margin:0 0 20px;font:600 24px/1.25 var(--display);letter-spacing:-.015em;color:var(--bright)}
+.path{display:grid;gap:16px;margin:0;padding:0;list-style:none;counter-reset:path}
+.path li{display:grid;grid-template-columns:32px minmax(0,1fr);gap:14px;font-size:16px;counter-increment:path}
+.path li::before{content:counter(path);display:grid;place-items:center;width:28px;height:28px;font:600 13px/1 var(--mono);color:var(--accent);border:1px solid var(--accent-line);border-radius:50%}
+.aside-note{margin:24px 0 0;padding:14px 16px;font-size:15px;color:var(--muted);background:var(--panel);border-left:3px solid var(--line);border-radius:0 var(--radius) var(--radius) 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px;padding:0;list-style:none}
+.chips li{padding:9px 12px;font:500 13px/1 var(--mono);color:var(--bright);background:var(--panel);border:1px solid var(--line);border-radius:999px}
+.scenes{outline:none}
+
+.notes{padding:clamp(64px,9vw,120px) 0;background:var(--bg-deep);border-top:1px solid var(--line)}
+.notes__lede{max-width:62ch;margin:0 0 40px;font-size:18px;color:var(--muted)}
+.notes__grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);align-items:start;gap:clamp(32px,5vw,64px)}
+.form-field{margin-bottom:28px}
+.form-label{display:block;margin:0 0 8px;font-weight:600;color:var(--bright)}
+.form-question{display:block;margin:0 0 14px;font:600 20px/1.45 var(--display);color:var(--bright)}
+.notes__panel{padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-lg)}
+.panel__title{margin:0 0 16px;font:600 20px/1.3 var(--display);color:var(--bright)}
+.notes__actions{display:grid;gap:10px;margin:0 0 16px}
+.notes__status{min-height:3.2em;margin:0 0 8px;padding:6px 0 6px 14px;font-size:15px;line-height:1.5;color:var(--text);border-left:3px solid var(--line)}
+.notes__status:empty{display:none}
+.notes__status[data-tone=ok]{border-color:var(--ok)}
+.notes__status[data-tone=warn]{color:var(--bright);border-color:var(--warn)}
+.notes__saved{margin:0;font:500 12px/1.5 var(--mono);color:var(--muted)}
+.notes__saved:empty{display:none}
+.notes__noscript{margin:0 0 16px;padding:14px 16px;font-size:15px;background:var(--bg);border-left:3px solid var(--warn)}
+.notes__facts{display:grid;gap:6px;margin:20px 0 0;padding:16px 0 0 18px;font-size:14px;color:var(--muted);border-top:1px solid var(--line-soft)}
+.notes__export{margin-top:20px}
+.notes__export textarea{min-height:240px;font:13px/1.5 var(--mono)}
+.notes__boundary{margin:48px 0 0;padding:18px 20px;font-size:16px;color:var(--bright);background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:var(--radius)}
+.notes textarea,.notes input[type=text]{background:var(--bg)}
+.print-mirror{display:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:12px 16px;font:600 15px/1.2 var(--sans);color:var(--bright);text-align:center;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius);cursor:pointer;transition:border-color .12s,background-color .12s}
+.btn:hover{border-color:var(--accent)}
+.btn--primary{color:var(--accent-ink);background:var(--accent);border-color:var(--accent)}
+.btn--primary:hover{background:var(--accent-strong);border-color:var(--accent-strong)}
+.btn--quiet{color:var(--muted);background:transparent}
+textarea,input[type=text]{display:block;width:100%;padding:12px 14px;font:inherit;font-size:16px;line-height:1.55;color:var(--bright);background:var(--bg-deep);border:1px solid var(--line);border-radius:var(--radius)}
+textarea{min-height:120px;resize:vertical}
+textarea::placeholder,input::placeholder{color:#8794a3}
+textarea:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.sources__list{display:grid;gap:10px;max-width:72ch;margin:0;padding-left:20px}
+.sources__list li::marker{color:var(--accent)}
+.footer{padding:40px 0 56px;font-size:14px;color:var(--muted);border-top:1px solid var(--line)}
+.footer__inner{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:16px}
+.footer p{margin:0 0 6px}
+
+.viewer{inset:0;width:100vw;max-width:none;height:100vh;height:100dvh;max-height:none;margin:0;padding:0;color:var(--text);background:var(--bg-deep);border:0}
+.viewer[open]{display:flex;flex-direction:column}
+.viewer::backdrop{background:rgba(10,12,15,.88)}
+.viewer__bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding:12px var(--gutter);background:var(--bg);border-bottom:1px solid var(--line)}
+.viewer__id{flex:1 1 320px;min-width:0}
+.viewer__title{margin:6px 0 0;font:600 18px/1.3 var(--display);color:var(--bright)}
+.viewer__group{display:flex;flex-wrap:wrap;gap:6px}
+.viewer__btn{min-height:38px;padding:8px 12px;font:600 14px/1 var(--sans);color:var(--bright);background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);cursor:pointer}
+.viewer__btn:hover{border-color:var(--accent)}
+.viewer__btn[aria-pressed=true]{color:var(--accent-ink);background:var(--accent);border-color:var(--accent)}
+.viewer__btn:disabled{opacity:.4;cursor:default;border-color:var(--line)}
+.viewer__btn--close{color:var(--accent-ink);background:var(--bright);border-color:var(--bright)}
+.viewer__stage{position:relative;display:flex;flex:1 1 auto;min-height:0;padding:16px;overflow:auto;overscroll-behavior:contain;background:var(--stage)}
+.viewer__stage:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
+.viewer__stage.is-zoomed{cursor:grab}
+.viewer__stage.is-dragging{cursor:grabbing}
+.viewer__img{display:block;flex:none;max-width:none;height:auto;margin:auto;border-radius:6px;box-shadow:0 0 0 1px var(--line);user-select:none;-webkit-user-drag:none}
+.viewer__img.is-fit{flex:0 1 auto;width:auto;max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in}
+.viewer__foot{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 24px;padding:12px var(--gutter) 16px;background:var(--bg);border-top:1px solid var(--line)}
+.viewer__caption{flex:1 1 480px;margin:0;font-size:15px;line-height:1.5;color:var(--text)}
+.viewer__hint{flex:0 1 auto;margin:0;font-size:13px;color:var(--muted)}
+
+@media (max-width:1199px){.topbar__status{display:none}}
+@media (max-width:900px){
+:root{--bar-h:56px}
+.brand__name,.brand__sub{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.topbar__inner{gap:12px}
+.hero__grid,.split,.notes__grid{grid-template-columns:minmax(0,1fr)}
+.toc{grid-template-columns:repeat(2,minmax(0,1fr))}
+.flow{grid-template-columns:minmax(0,1fr)}
+.flow__step{border-top:1px solid var(--line-soft);border-left:0}
+.flow__step:first-child{border-top:0}
+.flow__step:not(:last-child)::after{top:auto;right:auto;bottom:-7px;left:28px;transform:rotate(135deg)}
+}
+@media (max-width:640px){
+body{font-size:16px}
+.steps,.toc{grid-template-columns:minmax(0,1fr)}
+.facts__row,.meta__row{grid-template-columns:minmax(0,1fr)}
+.scene-nav__link{padding:8px 10px}
+.viewer__hint{display:none}
+.viewer__stage{padding:8px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;scroll-behavior:auto!important}}
+@media print{
+@page{margin:14mm}
+*,*::before,*::after{color:#000!important;background:transparent!important;box-shadow:none!important;text-shadow:none!important}
+html,body{font-size:11pt;background:#fff!important}
+.topbar,.skip,.viewer,.steps,.notes__actions,.notes__status,.notes__saved,.notes__export,.notes__facts,noscript{display:none!important}
+.wrap{width:100%}
+.hero{padding:0 0 18pt}
+.hero h1{max-width:none;font-size:26pt}
+.hero__grid,.split,.notes__grid{grid-template-columns:1fr}
+.section,.notes{padding:18pt 0;border-top:1px solid #000}
+.section__title{font-size:18pt}
+.notice,.notes__boundary,.notes__panel,.toc__card,.flow,.aside-note,.chips li,.meta__row,.facts__row{border-color:#000!important}
+.toc{grid-template-columns:repeat(2,1fr)}
+.toc__card,.facts__row,.flow__step{break-inside:avoid}
+.flow{grid-template-columns:1fr}
+.flow__step{border-top:1px solid #999;border-left:0}
+.flow__step::after{display:none!important}
+.brand-mark{filter:invert(1) hue-rotate(180deg)}
+.notes textarea,.notes input{display:none}
+.print-mirror{display:block;min-height:2em;padding-top:6pt;white-space:pre-wrap;border-top:1px solid #999}
+a{text-decoration:none}
+img{break-inside:avoid}
+}
+{{SCENE_CSS}}
+</style>
+<script>document.documentElement.className = 'js';</script>
+</head>
+<body>
+<a class="skip" href="#scenes">Skip to the six scenes</a>
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <a class="brand" href="#overview">
+      <img class="brand-mark" src="{{LOGO_DATA_URI}}" alt="" width="28" height="28">
+      <span class="brand__name">Agentmux</span>
+      <span class="brand__sub">Visual review</span>
+    </a>
+    <nav class="scene-nav" aria-label="Scenes and notes">
+      <ol class="scene-nav__list">
+        <li><a class="scene-nav__link" href="#01-workspace-and-terminal" data-nav="01-workspace-and-terminal"><span class="scene-nav__num">01</span><span class="scene-nav__label">Workspace</span><span class="scene-nav__flag vh"></span></a></li>
+        <li><a class="scene-nav__link" href="#02-planning-and-board" data-nav="02-planning-and-board"><span class="scene-nav__num">02</span><span class="scene-nav__label">Planning</span><span class="scene-nav__flag vh"></span></a></li>
+        <li><a class="scene-nav__link" href="#03-agent-conversations" data-nav="03-agent-conversations"><span class="scene-nav__num">03</span><span class="scene-nav__label">Agents</span><span class="scene-nav__flag vh"></span></a></li>
+        <li><a class="scene-nav__link" href="#04-connected-hubs" data-nav="04-connected-hubs"><span class="scene-nav__num">04</span><span class="scene-nav__label">Hubs</span><span class="scene-nav__flag vh"></span></a></li>
+        <li><a class="scene-nav__link" href="#05-review-and-acceptance" data-nav="05-review-and-acceptance"><span class="scene-nav__num">05</span><span class="scene-nav__label">Acceptance</span><span class="scene-nav__flag vh"></span></a></li>
+        <li><a class="scene-nav__link" href="#06-plugins-and-industrial-tools" data-nav="06-plugins-and-industrial-tools"><span class="scene-nav__num">06</span><span class="scene-nav__label">Plugins</span><span class="scene-nav__flag vh"></span></a></li>
+        <li><a class="scene-nav__link scene-nav__link--notes" href="#notes" data-nav="notes"><span class="scene-nav__label">Your notes</span><span class="scene-nav__flag vh"></span></a></li>
+      </ol>
+    </nav>
+    <span class="topbar__status">Proposal · sample data</span>
+  </div>
+</header>
+
+<main id="main">
+<section class="hero" id="overview" aria-labelledby="page-title" data-nav-section>
+  <div class="wrap">
+    <p class="eyebrow">Agentmux · Visual design review · October 9, 2026</p>
+    <h1 id="page-title">How the terminal and dashboard <em>could</em> work together</h1>
+    <p class="lede">Six proposed scenes pair an enhanced Agentmux dashboard with an illustrative Claude Code terminal. Each one starts from the current dashboard and maps to phases in the implementation plan.</p>
+    <div class="hero__grid">
+      <aside class="notice" aria-labelledby="notice-title">
+        <p class="notice__label">Status</p>
+        <h2 class="notice__title" id="notice-title">A proposal for review. These changes are not implemented.</h2>
+        <ul class="notice__list">
+          <li>Every image is a proposed interface with fictional sample data. None is a screenshot of an implemented or tested feature.</li>
+          <li>Names, dates, counts, code and commit IDs are placeholders. Each scene shows a separate possible state, not one continuous run.</li>
+          <li>Your notes are feedback. They do not approve the plan, start implementation or authorize a merge.</li>
+        </ul>
+      </aside>
+      <dl class="meta">
+        <div class="meta__row"><dt>Reviewers</dt><dd>Nick and Ryan</dd></div>
+        <div class="meta__row"><dt>Branch</dt><dd><code>feat/agentmux-platform-rearchitecture</code></dd></div>
+        <div class="meta__row"><dt>Baseline</dt><dd><code>df46e94</code> · Agentmux 0.32.0</dd></div>
+        <div class="meta__row" id="source-plan"><dt>Source plan</dt><dd><a class="download-link" href="{{PLAN_DATA_URI}}" download="agentmux-implementation-plan-2026-10-09.md" type="text/markdown">Download the full implementation plan</a><span class="meta__note">A Markdown file stored inside this page. No connection needed.</span></dd></div>
+      </dl>
+    </div>
+    <ol class="steps" aria-label="How to review">
+      <li><strong>Read each scene.</strong> See what it keeps, what it adds and where the concept stops.</li>
+      <li><strong>Look closely at the image.</strong> Enlarge it to read the dashboard and the terminal side by side.</li>
+      <li><strong>Answer the question.</strong> Then download all your notes as one Markdown file for Ryan.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="section" id="contents" aria-labelledby="contents-title" data-nav-section>
+  <div class="wrap">
+    <p class="eyebrow">Contents</p>
+    <h2 class="section__title" id="contents-title">Six scenes, one workflow</h2>
+    <ol class="toc">
+      <li><a class="toc__card" href="#01-workspace-and-terminal"><span class="toc__num">01</span><span class="toc__title">Workspace and AI terminal</span><span class="toc__text">Work started in the terminal appears in Status. One task runs; two wait.</span><span class="toc__phase">Plan P05–P07</span></a></li>
+      <li><a class="toc__card" href="#02-planning-and-board"><span class="toc__num">02</span><span class="toc__title">Planning and the task board</span><span class="toc__text">Plan v3 waits for approval. Every acceptance criterion is unchecked.</span><span class="toc__phase">Plan P05–P07</span></a></li>
+      <li><a class="toc__card" href="#03-agent-conversations"><span class="toc__num">03</span><span class="toc__title">Agent collaboration and evidence</span><span class="toc__text">Agents share project messages. A failed test log stays visible.</span><span class="toc__phase">Plan P05–P07</span></a></li>
+      <li><a class="toc__card" href="#04-connected-hubs"><span class="toc__num">04</span><span class="toc__title">Connected teams and routing decisions</span><span class="toc__text">Work stays reserved at a disconnected partner hub. Jev only advises.</span><span class="toc__phase">Plan P08 and P10</span></a></li>
+      <li><a class="toc__card" href="#05-review-and-acceptance"><span class="toc__num">05</span><span class="toc__title">Result review and acceptance</span><span class="toc__text">Evidence is tied to one commit. Origin acceptance is still pending.</span><span class="toc__phase">Plan P05–P07 and P10</span></a></li>
+      <li><a class="toc__card" href="#06-plugins-and-industrial-tools"><span class="toc__num">06</span><span class="toc__title">Plugin tools and industrial operations</span><span class="toc__text">Nested plugins inspect a simulated controller, read-only.</span><span class="toc__phase">Plan P03, P06–P07 and P11</span></a></li>
+    </ol>
+  </div>
+</section>
+
+<section class="section" id="workflow" aria-labelledby="workflow-title" data-nav-section>
+  <div class="wrap">
+    <p class="eyebrow">Read this first</p>
+    <h2 class="section__title" id="workflow-title">The path every scene follows: terminal, plan, work, evidence, review</h2>
+    <p class="section__lede">The developer leads from an AI client. The dashboard shows the same tasks, plan versions, evidence and acceptance state. Review question 2 asks whether ownership and the next step stay clear at each stage.</p>
+    <ol class="flow">
+      <li class="flow__step"><span class="flow__index">Stage 1</span><span class="flow__name">Terminal</span><p class="flow__text">The developer asks for work or reviews a result in a supported AI client, such as Claude Code, Codex or Pi.</p><p class="flow__refs">Scenes <a href="#01-workspace-and-terminal">01</a>, <a href="#05-review-and-acceptance">05</a></p></li>
+      <li class="flow__step"><span class="flow__index">Stage 2</span><span class="flow__name">Plan</span><p class="flow__text">A versioned plan lists tasks and acceptance criteria. Work waits until the plan is approved.</p><p class="flow__refs">Scene <a href="#02-planning-and-board">02</a></p></li>
+      <li class="flow__step"><span class="flow__index">Stage 3</span><span class="flow__name">Work</span><p class="flow__text">Workers run tasks in dependency order, locally or at a partner hub. The origin hub keeps ownership.</p><p class="flow__refs">Scenes <a href="#01-workspace-and-terminal">01</a>, <a href="#03-agent-conversations">03</a>, <a href="#04-connected-hubs">04</a></p></li>
+      <li class="flow__step"><span class="flow__index">Stage 4</span><span class="flow__name">Evidence</span><p class="flow__text">Tests, logs and reports attach to the task and to a specific commit or artifact. Failed evidence stays visible.</p><p class="flow__refs">Scenes <a href="#03-agent-conversations">03</a>, <a href="#05-review-and-acceptance">05</a>, <a href="#06-plugins-and-industrial-tools">06</a></p></li>
+      <li class="flow__step"><span class="flow__index">Stage 5</span><span class="flow__name">Review</span><p class="flow__text">The origin hub decides whether to accept the result. Accepting a result does not merge its branch.</p><p class="flow__refs">Scene <a href="#05-review-and-acceptance">05</a></p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="section" id="separate-facts" aria-labelledby="facts-title" data-nav-section>
+  <div class="wrap">
+    <p class="eyebrow">Terms used in every scene</p>
+    <h2 class="section__title" id="facts-title">Five facts the design keeps separate</h2>
+    <p class="section__lede">The overall review question asks whether the scenes keep these apart. Scene 05 shows most of them side by side.</p>
+    <dl class="facts">
+      <div class="facts__row"><dt>Worker completion</dt><dd>A worker reports that it has finished its part. That is not acceptance.</dd></div>
+      <div class="facts__row"><dt>Evidence</dt><dd>Tests, logs, reviews and reports linked to the task and to a specific commit or artifact. Failed evidence stays visible.</dd></div>
+      <div class="facts__row"><dt>Result submission</dt><dd>The executing hub submits a result. It references the delegation, the task version, the commit or artifact digest and the validation evidence.</dd></div>
+      <div class="facts__row"><dt>Origin acceptance</dt><dd>The origin hub owns the task and makes the final acceptance decision. A transport acknowledgment or a worker completion never counts as acceptance.</dd></div>
+      <div class="facts__row facts__row--merge"><dt>Repository merge</dt><dd>A separate repository decision. Accepting a result does not merge its branch.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section class="section" id="context" aria-label="How the parts connect and what stays" data-nav-section>
+  <div class="wrap split">
+    <div>
+      <p class="eyebrow">Planned, not built</p>
+      <h2 class="subhead">How a request reaches the dashboard</h2>
+      <ol class="path">
+        <li><span>A developer asks for work or reviews a result in a supported AI client, such as Claude Code, Codex or Pi.</span></li>
+        <li><span>The client integration calls Agentmux services. The services check access, own the work records and exchange commands and events through NATS. The planned shared persistence uses NATS JetStream behind those services.</span></li>
+        <li><span>Authorized activity reaches the dashboard through the planned AG-UI integration and CopilotKit components. The dashboard shows the same task IDs, plan versions, evidence and acceptance state as the client.</span></li>
+        <li><span>Review decisions return through an authorized service operation. Plan approval, task acceptance and repository merge remain separate decisions.</span></li>
+      </ol>
+      <p class="aside-note">The terminal panels illustrate this interaction. They are not exact screenshots of a particular client or documentation of real commands. Available hooks, controls and conversation visibility depend on what each host supports.</p>
+    </div>
+    <div>
+      <p class="eyebrow">Starting point</p>
+      <h2 class="subhead">The ten current views stay</h2>
+      <ul class="chips" aria-label="Current dashboard views">
+        <li>Terminals</li><li>Status</li><li>Board</li><li>Runs</li><li>Hub</li><li>Federation</li><li>Organization</li><li>IIOT</li><li>GitHub</li><li>Settings</li>
+      </ul>
+      <p>Every scene keeps the current dashboard’s ten views and its dark slate and orange styling. Review question 1 asks whether today’s views and useful actions can still be traced and reached.</p>
+      <p class="aside-note">The component preservation review defines the full duty to keep existing functionality. These six scenes do not replace that inventory.</p>
+    </div>
+  </div>
+</section>
+
+<div class="scenes" id="scenes" tabindex="-1">
+{{SCENES}}
+</div>
+
+<section class="notes" id="notes" aria-labelledby="notes-title" data-nav-section>
+  <div class="wrap">
+    <p class="eyebrow">Send feedback</p>
+    <h2 class="section__title" id="notes-title">Your review notes</h2>
+    <p class="notes__lede">Answer the overall question below, then download one Markdown file with every note from this page. Send that file to Ryan.</p>
+    <div class="notes__grid">
+      <div>
+        <div class="form-field">
+          <label class="form-label" for="reviewer-name">Your name (optional)</label>
+          <input type="text" id="reviewer-name" name="reviewer-name" autocomplete="name" maxlength="120">
+          <div class="print-mirror" data-print-for="reviewer-name" aria-hidden="true"></div>
+        </div>
+        <div class="form-field">
+          <p class="eyebrow">Review question 7 · Overall</p>
+          <label class="form-question" for="global-note">Do the scenes keep worker completion, evidence, result submission and origin acceptance clearly separate? Note anything that blurs them, and any other overall feedback.</label>
+          <textarea id="global-note" name="global-note" data-note="global" rows="8" maxlength="20000" placeholder="Overall concerns, gaps or suggested changes"></textarea>
+          <div class="print-mirror" data-print-for="global-note" aria-hidden="true"></div>
+        </div>
+      </div>
+      <aside class="notes__panel" aria-labelledby="save-title">
+        <h3 class="panel__title" id="save-title">Save and share</h3>
+        <noscript><p class="notes__noscript">Scripts are turned off. You can read the whole review and type in the boxes, but this page cannot save or download notes. Copy your notes into an email to Ryan before you close the page.</p></noscript>
+        <div class="notes__actions" data-js-only hidden>
+          <button type="button" class="btn btn--primary" data-action="download">Download notes (.md)</button>
+          <button type="button" class="btn" data-action="save">Save draft in this browser</button>
+          <button type="button" class="btn" data-action="show">Show notes as text</button>
+          <button type="button" class="btn btn--quiet" data-action="clear">Clear all notes</button>
+        </div>
+        <p class="notes__status" id="notes-status" role="status" aria-live="polite"></p>
+        <p class="notes__saved" id="notes-saved"></p>
+        <ul class="notes__facts">
+          <li>Nothing on this page sends data anywhere.</li>
+          <li>Drafts save only in this browser on this computer. Some browsers block saving for files opened from disk.</li>
+          <li>Downloading is the reliable way to keep and share your notes.</li>
+        </ul>
+        <div class="notes__export" id="notes-export" hidden>
+          <label class="form-label" for="notes-export-text">Your notes as Markdown. Select all and copy.</label>
+          <textarea id="notes-export-text" rows="12" readonly></textarea>
+        </div>
+      </aside>
+    </div>
+    <p class="notes__boundary">Notes are review feedback. They do not authorize implementation or merging. Phase work must pass its acceptance and verification gates. Merging requires Ryan’s review with Nick and Ryan’s explicit authorization.</p>
+  </div>
+</section>
+
+<section class="section" id="sources" aria-labelledby="sources-title" data-nav-section>
+  <div class="wrap">
+    <p class="eyebrow">About this document</p>
+    <h2 class="section__title" id="sources-title">Where the images come from and what this file does</h2>
+    <ul class="sources__list">
+      <li>All six images were made with built-in image generation, then edited with the same tool to refine the terminal panels and workflow states.</li>
+      <li>The prompt manifest, <code>concept-images/prompts.json</code>, records the exact prompts, source references, phase mappings, image sizes and SHA-256 hashes.</li>
+      <li>The images are embedded in this file unchanged, at 1672 × 941 pixels each.</li>
+      <li>This file works offline. It loads no fonts, scripts or images from elsewhere and sends no data. Its content security policy blocks any attempt to load content from the network.</li>
+      <li>The updated plan adds automatic Docker Compose startup when an Agentmux-enabled terminal launches. A healthy existing instance is reused; otherwise the selected stack starts and waits for readiness. Both paths show instance details and authorized hub status. This is a planned requirement; these concept images predate this update.</li>
+      <li>The full source plan is available from the <a href="#source-plan">download link at the top of the page</a>.</li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer__inner">
+    <img class="brand-mark" src="{{LOGO_DATA_URI}}" alt="" width="32" height="32">
+    <div>
+      <p><strong>Agentmux visual review</strong> · October 9, 2026 · <code>feat/agentmux-platform-rearchitecture</code></p>
+      <p>This document adds no runtime implementation. Phase work must pass its acceptance and verification gates. Merging requires Ryan’s review with Nick and Ryan’s explicit authorization.</p>
+      <p>The mark is the existing Agentmux dashboard logo, unchanged.</p>
+    </div>
+  </div>
+</footer>
+
+<dialog class="viewer" id="viewer" aria-labelledby="viewer-title" aria-describedby="viewer-caption">
+  <div class="viewer__bar">
+    <div class="viewer__id">
+      <span class="concept-tag">Proposed interface · fictional sample data</span>
+      <h2 class="viewer__title" id="viewer-title">Scene image</h2>
+    </div>
+    <div class="viewer__group" role="group" aria-label="Zoom level">
+      <button type="button" class="viewer__btn" data-zoom="fit" aria-pressed="true">Fit</button>
+      <button type="button" class="viewer__btn" data-zoom="1" aria-pressed="false">100%</button>
+      <button type="button" class="viewer__btn" data-zoom="1.5" aria-pressed="false">150%</button>
+      <button type="button" class="viewer__btn" data-zoom="2" aria-pressed="false">200%</button>
+    </div>
+    <div class="viewer__group" role="group" aria-label="Scene navigation">
+      <button type="button" class="viewer__btn viewer__prev">Previous<span class="vh"> scene</span></button>
+      <button type="button" class="viewer__btn viewer__next">Next<span class="vh"> scene</span></button>
+      <button type="button" class="viewer__btn viewer__btn--close viewer__close">Close<span class="vh"> enlarged image</span></button>
+    </div>
+  </div>
+  <div class="viewer__stage" tabindex="0" role="region" aria-label="Enlarged image. Scroll, drag or use the arrow keys to move around.">
+    <img class="viewer__img is-fit" alt="" draggable="false">
+  </div>
+  <div class="viewer__foot">
+    <p class="viewer__caption" id="viewer-caption"></p>
+    <p class="viewer__hint">Click the image to zoom to 100%. Double-click to fit again. Press + or − to zoom, 0 to fit and Esc to close.</p>
+  </div>
+</dialog>
+
+<script>
+{{REVIEW_SCRIPT}}
+</script>
+</body>
+</html>

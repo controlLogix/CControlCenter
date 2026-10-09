@@ -82,3 +82,6 @@ docs/vendor/*.pdf
 .claude/settings.local.json
 .venv/
 deploy/nats/.generated/
+
+# PowerPoint owner locks are transient local files, not planning deliverables.
+/docs/planning/**/~$*.pptx

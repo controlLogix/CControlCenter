@@ -138,3 +138,115 @@ Mcp --> Federation : hub socket verbs
 | FED-15 | Messaging Gateway | CLI + MCP over the hub socket | `hub/fed/mcp.py` handle, `hub/cli.py` fed_main | `hub/tests/test_fed_unit.py` |
 | FED-16 | Correlation Identifier | result -> origin item | `hub/fed/plugins/work.py` Work._on_result | `hub/tests/test_fed_live.py` |
 | FED-17 | Facade | runtime as plugin ctx | `hub/fed/runtime.py` Federation, `hub/fed/plugin.py` Plugin | `hub/tests/test_fed_live.py` |
+
+## Planned platform rearchitecture (proposal, October 9, 2026)
+
+This section records the proposed destination for review. Existing FED diagrams above describe the current implementation and remain unchanged. PLAN entries have status `planned` and do not claim implemented or approved behavior.
+
+```mermaid
+flowchart TB
+  Clients["Client / vendor / AG-UI adapters (PLAN-02)"] <--> Bus["NATS message contracts (PLAN-07, PLAN-08, PLAN-11)"]
+  Runtime["Plugin construction and scoped clients (PLAN-01, PLAN-04)"] <--> Bus
+  Runtime -->|Constructs scoped instances| Assembly["Nested assembly (PLAN-03)"]
+  Assembly -->|Owns private child instance| Private["Parent-owned child"]
+  Assembly -.->|References reusable package| Independent["Independent child package"]
+  Boot["Protected kernel"] -->|Published information only, PLAN-05| Bus
+  Bus <--> Work["Task / attempt owners and routing (PLAN-06, PLAN-15)"]
+  Bus <--> State["Domain-owned conditional commits (PLAN-09, PLAN-10)"]
+  State -->|NATS storage contracts| Records[("Authoritative JetStream records (PLAN-13)")]
+  Records -->|Scoped replay| Views["View-building plugins"]
+  Views -->|NATS KV API| KV[("Derived current views")]
+  Views --> SQL[("Optional rebuildable SQL indexes")]
+  Views <--> Bus
+  Bus <--> Artifacts["Artifact reference service (PLAN-12)"]
+  Bus <--> History["Scoped history and recovery (PLAN-13)"]
+  History --> Records
+  Bus <--> Control["Surrounding runtime controls (PLAN-14)"]
+```
+
+```plantuml
+@startuml
+component "Protected kernel" as Kernel
+component "Client / vendor / AG-UI adapters\nPLAN-02" as Adapters
+component "NATS contracts\nPLAN-07, PLAN-08, PLAN-11" as Bus
+component "Plugin construction and scoped clients\nPLAN-01, PLAN-04" as Runtime
+component "Nested assembly\nPLAN-03" as Assembly
+component "Parent-owned child instance" as Private
+component "Independent child package" as Independent
+component "Task / attempt owners and routing\nPLAN-06, PLAN-15" as Work
+component "Domain-owned conditional commits\nPLAN-09, PLAN-10" as State
+database "Authoritative JetStream records\nPLAN-13" as Records
+component "View-building plugins" as Views
+database "Derived NATS KV views" as KV
+database "Optional rebuildable SQL indexes" as SQL
+component "Artifact reference service\nPLAN-12" as Artifact
+database "Required event store\nPLAN-13" as History
+component "Surrounding runtime controls\nPLAN-14" as Control
+Kernel --> Bus : published information only (PLAN-05)
+Adapters <--> Bus
+Runtime <--> Bus
+Runtime --> Assembly : constructs scoped instances
+Assembly *-- Private : owns instance
+Assembly ..> Independent : references reusable package
+Bus <--> Work
+Bus <--> State
+State --> Records : NATS storage contracts
+Records --> Views : scoped replay
+Views --> KV : NATS KV API
+Views --> SQL : local index
+Views <--> Bus
+Bus <--> Artifact
+Bus <--> History
+History --> Records
+Bus <--> Control
+@enduml
+```
+
+### Proposed contract ownership
+
+| Proposed contract / component | Owning phases | Recorded patterns |
+| --- | --- | --- |
+| Plugin construction, nested lifecycle, scoped context | P02–P04 | PLAN-01, PLAN-03, PLAN-04, PLAN-05 |
+| Client, worker, vendor and UI interfaces | P06, P07, P11 | PLAN-02 |
+| Provider and eligible-work policy selection | P05, P08, P10 | PLAN-06, PLAN-15 |
+| Shared envelopes and NATS communication | P01–P12 | PLAN-07, PLAN-08, PLAN-11 |
+| NATS-owned records, durable intent and duplicate handling | P01, P04, P05, P10 | PLAN-09, PLAN-10, PLAN-13 |
+| Scoped replay, derived KV and optional SQL indexes | P04, P07, P12 | PLAN-04, PLAN-13 |
+| Artifact exchange, event history, authorized controls | P04, P07, P10, P12 | PLAN-12, PLAN-13, PLAN-14 |
+
+Implementation symbols and files will be registered in the owning phases. The proposal is [docs/planning/2026-10-09/implementation-plan.md](../docs/planning/2026-10-09/implementation-plan.md).
+
+STATE-01 updates only the planned destination. Configuration/registry KV records have their own owner; task-summary KV and SQL views are derived. Same-stream atomic persistence does not make cross-stream transfers, projection updates or tool actions atomic. Separate hubs preserve origin-task and receiver-execution authority. Historical FED diagrams above remain unchanged.
+
+
+### ADD-01: Existing implementations through reviewed boundaries
+
+This proposal refines PLAN-02. Historical FED diagrams above remain unchanged. Existing behavior stays available until its owning phase proves compatibility and migration. Replacing implementation does not authorize removing capability.
+
+```mermaid
+flowchart LR
+  Existing["Existing harness, hub plugins, dashboard and tools"] --> Boundary["Retained or extracted code behind PLAN-02 interfaces"]
+  Boundary --> Contracts["Scoped NATS contracts"]
+  Tests["Existing assertions and new behavior fixtures"] --> Compare["Baseline and candidate evidence"]
+  Existing --> Compare
+  Boundary --> Compare
+  Compare --> Gate["Owning phase review before cutover"]
+```
+
+See [component preservation](../docs/planning/2026-10-09/component-preservation.md) for concrete source ownership, tests, gains and migration requirements. This is a verification and migration view; it introduces no new pattern catalog entry.
+
+### LOCAL-01: Planned automatic startup and status
+
+This refines planned PLAN-02 client interfaces and PLAN-14 status/control boundaries. Existing implementation diagrams remain historical. Bootstrap coordination runs before NATS is available and grants no general kernel write access.
+
+```mermaid
+flowchart LR
+  Client["Installed client startup adapter: PLAN-02"] --> Inspect["Resolve owned instance and local Docker context"]
+  Inspect -->|"Healthy compatible instance"| Status["Scoped status through NATS: PLAN-14"]
+  Inspect -->|"Absent or stopped"| Compose["Single startup owner: Docker Compose"]
+  Compose --> Ready["Bounded readiness and persistence checks"]
+  Ready --> Status
+  Status --> Views["Same instance and authorized hub details in terminal and dashboard"]
+```
+
+P02 verifies bootstrap with explicit later-service fixtures; P06 verifies actual client launch; P07 verifies dashboard consistency; P10 verifies real hub visibility; P12 repeats the packaged workflow. The current plan defines conflict, timeout and recovery handling. No new pattern catalog entry or implemented relationship is claimed.

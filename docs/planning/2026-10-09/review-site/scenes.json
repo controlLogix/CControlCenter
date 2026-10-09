@@ -1,0 +1,74 @@
+[
+  {
+    "id": "01-workspace-and-terminal",
+    "number": "01",
+    "title": "Workspace and AI terminal",
+    "phase": "P05–P07",
+    "summary": "A developer starts work in an AI client and follows the same task in the proposed Status view.",
+    "preserves": "Terminal observation, status feeds, worker roles, task dependencies and work visibility remain available within the existing ten-view dashboard.",
+    "enhancement": "The client and dashboard share task identities and origin ownership, making prerequisites and waiting work easier to follow.",
+    "limit": "Client hooks, controls and conversation visibility depend on the supported host integration. The terminal is illustrative, and worker activity does not mean that a result has been accepted.",
+    "question": "Can you follow the terminal request through assigned work and waiting tasks while still finding the existing dashboard views and actions you use?",
+    "alt": "Proposed Status view beside an illustrative Claude Code terminal, showing one running task, two waiting tasks and visible origin ownership."
+  },
+  {
+    "id": "02-planning-and-board",
+    "number": "02",
+    "title": "Planning and the task board",
+    "phase": "P05–P07",
+    "summary": "The terminal proposes plan version three while the Board shows its tasks and pending approval.",
+    "preserves": "The existing board, task history, work controls and readiness gates remain part of the workflow.",
+    "enhancement": "A unified view connects plan versions, linked evidence and explicit approval state so a reviewer can inspect the proposed work before it starts.",
+    "limit": "All acceptance criteria in this example remain unchecked. Ready tasks still await this plan's approval, and the scope of dashboard approval controls remains open for review.",
+    "question": "Does the plan make dependencies, approval state and the next step clear without losing existing board controls or task history?",
+    "alt": "Proposed Board view beside a terminal plan proposal, with plan version three awaiting approval and all acceptance criteria unchecked."
+  },
+  {
+    "id": "03-agent-conversations",
+    "number": "03",
+    "title": "Agent collaboration and evidence",
+    "phase": "P05–P07",
+    "summary": "Shared task messages explain why work is blocked, with failed test evidence visible in Runs.",
+    "preserves": "Run inspection, message feeds and existing review evidence remain available.",
+    "enhancement": "Shared task identities, attributed messages and scoped visibility connect an agent's progress report to the evidence behind it.",
+    "limit": "These are authorized project messages, not model-internal reasoning or unrestricted private conversations. Failed evidence remains visible and task acceptance stays pending.",
+    "question": "Can you distinguish an agent's report from verified evidence, understand the block and tell which messages the current user may see?",
+    "alt": "Proposed Runs conversation view beside a terminal explanation, showing shared agent messages, a failed test log and review waiting for evidence."
+  },
+  {
+    "id": "04-connected-hubs",
+    "number": "04",
+    "title": "Connected teams and routing decisions",
+    "phase": "P08 and P10",
+    "summary": "North Hub owns TM-413 while its execution stays reserved at a disconnected Partner Hub.",
+    "preserves": "Federation visibility and existing cross-hub work capabilities remain part of the product.",
+    "enhancement": "Scoped cross-organization delegation separates origin ownership from partner execution, with optional Jev advice explaining routing suitability after eligibility checks.",
+    "limit": "Current partner progress is unknown; disconnection cannot release the reservation or authorize duplicate execution. Jev cannot grant access, reassign work or accept a result. Its absence requires a documented fallback, and no measured savings or accuracy are claimed.",
+    "question": "Are ownership, reserved work and unknown progress clear, and does the design explain Jev's advisory role and what happens when it abstains or is unavailable?",
+    "alt": "Proposed Federation view beside a terminal, showing TM-413 owned by North Hub, reserved at disconnected Partner Hub and accompanied by advisory Jev guidance."
+  },
+  {
+    "id": "05-review-and-acceptance",
+    "number": "05",
+    "title": "Result review and acceptance",
+    "phase": "P05–P07 and P10",
+    "summary": "A finished worker supplies commit-linked evidence while origin-owned task acceptance remains pending.",
+    "preserves": "Run details, review information and existing evidence remain available to the reviewer.",
+    "enhancement": "Consistent commit binding and explicit acceptance state carry the same review facts across clients and hubs.",
+    "limit": "The terminal acceptance request is an unsubmitted draft. The disabled dashboard button marks an open design decision, not a permanent restriction. Authorized services own acceptance; accepting a result does not merge its branch. Test counts and code are fictional.",
+    "question": "Can you distinguish worker completion, evidence review and origin acceptance, and which dashboard review actions should be available through authorized services?",
+    "alt": "Proposed Runs result review beside a draft terminal acceptance request, with commit-linked evidence, a finished worker, pending task acceptance and a disabled Accept button."
+  },
+  {
+    "id": "06-plugins-and-industrial-tools",
+    "number": "06",
+    "title": "Plugin tools and industrial operations",
+    "phase": "P03, P06–P07 and P11",
+    "summary": "A declared industrial package provides read-only inspection of a simulated controller and attaches its report.",
+    "preserves": "The IIOT views and existing protocol capabilities remain supported through the planned migration.",
+    "enhancement": "Nested packages declare dependencies, installation rules and permissions while contributing domain tools and dashboard content. This example permits independent installation of its components.",
+    "limit": "Other packages may declare different child ownership rules. Start, Stop and Write value require separate grants. This is a simulation, not hardware qualification. Trusted plugins come first; vendor and platform support and later untrusted-plugin containment need separate proof.",
+    "question": "Are package relationships and read-only permissions clear, including the separate authorization and environment checks needed before equipment changes?",
+    "alt": "Proposed IIOT view beside a terminal inspection, showing nested industrial plugins, a simulated controller, an attached report and disabled Start, Stop and Write value controls."
+  }
+]

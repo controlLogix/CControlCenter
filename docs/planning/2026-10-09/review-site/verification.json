@@ -1,0 +1,17 @@
+{
+  "status": "passed-static-checks",
+  "imagesVerified": 6,
+  "imageIntegrity": "Exact source bytes preserved",
+  "sourcePlan": "Exact source bytes embedded",
+  "duplicateIds": false,
+  "brokenInternalLinks": false,
+  "externalResourceReferences": 0,
+  "javascriptNetworkCalls": 0,
+  "bytes": 12950483,
+  "browserInspection": "Not run: browser tool policy rejected local file URL; no alternate route attempted.",
+  "runtimeImplementationVerified": false,
+  "componentTests": "3 passed",
+  "javascriptSyntax": "passed",
+  "planSha256": "97e51b74cd65c1e1709a7806fa77ff70784d734de063d6aefc43b363138ad4d1",
+  "scope": "Static recheck after LOCAL-01 plan update; browser interaction qualification remains incomplete."
+}

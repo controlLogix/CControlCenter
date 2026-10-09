@@ -1,0 +1,33 @@
+# Agentmux implementation review package
+
+Prepared October 9, 2026. Status: planning baseline for gated implementation. Ryan requested this commit and push before phased work starts; no phase pass or Nick review is recorded.
+
+Start with the revised presentation, then review the full plan and individual gate criteria. STATE-01 records the approved NATS-backed shared-persistence direction, with optional rebuildable SQL views and qualification gates. The original presentation remains preserved as the earlier review version.
+
+- [Before/after and phase presentation](agentmux-implementation-review-v3.pptx)
+- [Dashboard and AI terminal concept images](concept-images/README.md)
+- [Single-file HTML visual review for Nick](agentmux-visual-review.html) · [Sharing and review instructions](review-site/README.md)
+- [Component preservation and gains](component-preservation.md)
+- [Complete source file inventory](component-inventory.json)
+- [Phased implementation plan](implementation-plan.md)
+- [Structured phases and 99 acceptance criteria](phases.json)
+- [Complete functionality, Jev, video, and skill coverage](coverage.md)
+- [Structured Jev coverage and evaluation gates](jev-coverage.json)
+- [62 failure scenarios and verification procedure](verification-matrix.md)
+- [Structured failure scenarios](verification-matrix.json)
+- [Blank evidence record for a future phase gate](gate-record.template.json)
+- [Known baseline blockers and P01 repair gate](known-baseline-blockers.md)
+
+P00 resolves and approves the implementation contract. P01–P12 form the proposed first sellable release, including same- and cross-organization federation. P13 expands the remaining evaluated Jev/skill catalog. P14 adds separately qualified untrusted-plugin confinement.
+
+The launch worker execution boundary is part of P04. Deferring third-party plugin sandboxing does not defer isolation between users and projects.
+
+All product changes belong on `feat/agentmux-platform-rearchitecture`. A passing phase gate authorizes only the agreed progression. Merging still requires Ryan's review with Nick and Ryan's explicit authorization.
+
+This package describes future work. Historical tests, synthetic examples, and documentation checks do not prove that the planned platform is already implemented or qualified.
+
+The required repository governance gate remains blocked by six recorded baseline findings. P01 includes their repair after implementation approval. No runtime code was changed during planning to clear this gate.
+
+ADD-01 requires preservation of current functionality and justified code reuse decisions in every phase. Run `python docs/planning/2026-10-09/verify-component-coverage.py` from the repository root to check inventory and planning links. Static coverage is not runtime qualification. Both earlier deck versions remain preserved.
+
+LOCAL-01 requires automatic Docker Compose startup or verified reuse when a configured Agentmux-enabled terminal launches, followed by a consistent instance and authorized hub summary. See the updated plan and FAIL-55–FAIL-62. Existing slide decks and concept images are preserved dated snapshots from before LOCAL-01; the current plan and rebuilt HTML contain the newer requirement. Image provenance hashes remain those of their original generation inputs.

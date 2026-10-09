@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "not-started",
+  "phaseId": "PXX",
+  "planRevision": null,
+  "sourceCommit": null,
+  "dependencies": [],
+  "acceptanceResults": [
+    {
+      "criterionId": "PXX-AC01",
+      "status": "not-run",
+      "environment": null,
+      "command": null,
+      "exitCode": null,
+      "evidence": [],
+      "limitations": []
+    }
+  ],
+  "failureScenarios": [],
+  "rollbackEvidence": [],
+  "independentReviewer": null,
+  "advancementApproval": {
+    "actor": null,
+    "date": null,
+    "decision": null
+  },
+  "mergeAuthorization": null,
+  "componentPreservation": {
+    "inventoryRevision": null,
+    "components": [],
+    "changedSourceFiles": [],
+    "newOrChangedEntryPoints": [],
+    "assertionMappings": [],
+    "behaviorResults": [
+      {
+        "checkId": null,
+        "baseline": {
+          "status": "not-run",
+          "sourceDigest": null,
+          "environment": null,
+          "command": null,
+          "evidence": []
+        },
+        "candidate": {
+          "status": "not-run",
+          "sourceDigest": null,
+          "environment": null,
+          "command": null,
+          "evidence": []
+        },
+        "intendedDifference": null
+      }
+    ],
+    "gainEvidence": [],
+    "migrationAndRecoveryEvidence": [],
+    "unmappedItems": [],
+    "openVerificationGaps": [],
+    "capabilityChanges": [
+      {
+        "componentId": null,
+        "change": null,
+        "reason": null,
+        "alternatives": [],
+        "dataAndContractImpact": null,
+        "ryanApproval": null,
+        "nickReview": null
+      }
+    ],
+    "reviewer": null
+  }
+}

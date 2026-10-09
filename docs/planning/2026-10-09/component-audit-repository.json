@@ -1,0 +1,381 @@
+{
+  "scope": "Repository instructions, governance, CI, documentation and packaging metadata",
+  "reviewMethod": "Static source and documentation review; no runtime tests run",
+  "components": [
+    {
+      "id": "REPO-01",
+      "name": "Repository instructions and writing rules",
+      "files": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        ".claude/rules/plain-language.md"
+      ],
+      "role": "configuration",
+      "baselineGroups": [],
+      "ownerPhase": "P00",
+      "disposition": "extend",
+      "currentBehavior": [
+        "AGENTS.md carries the branch and Ryan/Nick merge restriction. Both root agent instruction files link the shared plain-language rules.",
+        "CLAUDE.md does not currently repeat the branch restriction or link AGENTS.md; host-specific loading of all required rules needs verification."
+      ],
+      "reusePlan": "Retain root entry files and the shared writing rules. Extend their links as implementation contracts gain evidence.",
+      "enhancements": [
+        "Consistent contributor and agent instructions for every language and plugin."
+      ],
+      "replacementReason": null,
+      "behaviorChecks": [
+        {
+          "id": "REPO-01-C01",
+          "description": "Each supported agent host loads or receives the shared rules and the Ryan/Nick merge restriction; add missing host-specific instruction links before qualification.",
+          "existingTests": [],
+          "requiredEnvironment": "Static instruction review and supported agent sessions",
+          "baselineStatus": "not-run",
+          "targetStatus": "not-run"
+        }
+      ],
+      "migrationChecks": [
+        "Do not overwrite user instructions while installing plugins; preserve managed markers and user-authored sections."
+      ],
+      "limitations": [
+        "Tool-specific instruction loading has not been tested; CLAUDE.md alone does not include every AGENTS.md restriction."
+      ]
+    },
+    {
+      "id": "REPO-02",
+      "name": "Design-pattern governance and recorded history",
+      "files": [
+        ".bytedesk/design-patterns/README.md",
+        ".bytedesk/design-patterns/agent-rules.md",
+        ".bytedesk/design-patterns/baseline.md",
+        ".bytedesk/design-patterns/catalog.json",
+        ".bytedesk/design-patterns/check.mjs",
+        ".bytedesk/design-patterns/frontend-rules.md",
+        ".bytedesk/design-patterns/project.json",
+        ".bytedesk/design-patterns/remediation.json",
+        ".bytedesk/design-patterns/review.json",
+        ".context/design-patterns-diagrams.md",
+        ".context/design-patterns.md",
+        ".claude/rules/design-patterns.md",
+        ".claude/rules/frontend-components.md"
+      ],
+      "role": "configuration",
+      "baselineGroups": [
+        "BASE-37"
+      ],
+      "ownerPhase": "P01",
+      "disposition": "extend",
+      "currentBehavior": [
+        "Pinned catalog, baseline rules, project scope, registry, diagrams and source-digest review records form the existing governance gate.",
+        "Six active baseline findings remain recorded; current backend scope is not a qualification of the future frontend."
+      ],
+      "reusePlan": "Retain checker, approved sources and historical records. Extend registry entries and change declared product surfaces explicitly when the frontend is introduced.",
+      "enhancements": [
+        "Evidence for reused components and future plugin boundaries stays traceable."
+      ],
+      "replacementReason": null,
+      "behaviorChecks": [
+        {
+          "id": "REPO-02-C01",
+          "description": "The gate rejects stale reviews, missing pattern evidence and unresolved findings; prior records remain readable.",
+          "existingTests": [
+            ".bytedesk/design-patterns/check.mjs"
+          ],
+          "requiredEnvironment": "Node and Git; read-only checker",
+          "baselineStatus": "not-run",
+          "targetStatus": "not-run"
+        }
+      ],
+      "migrationChecks": [
+        "Never reset adoption or erase findings to admit the new design; qualify new web surfaces before release."
+      ],
+      "limitations": [
+        "Current check fails on six recorded baseline findings."
+      ]
+    },
+    {
+      "id": "REPO-03",
+      "name": "Continuous integration workflows",
+      "files": [
+        ".github/workflows/design-patterns.yml",
+        ".github/workflows/tests.yml"
+      ],
+      "role": "configuration",
+      "baselineGroups": [
+        "BASE-37"
+      ],
+      "ownerPhase": "P01",
+      "disposition": "extend",
+      "currentBehavior": [
+        "CI performs syntax, selected hub/federation and dashboard suites, plus pattern governance.",
+        "A green selected job does not prove the tmux, browser, broker or hardware matrices."
+      ],
+      "reusePlan": "Retain existing jobs and assertions; add isolated compatibility and migration jobs without replacing them with narrower tests.",
+      "enhancements": [
+        "Baseline and candidate comparisons on supported platforms with explicit skip reasons."
+      ],
+      "replacementReason": null,
+      "behaviorChecks": [
+        {
+          "id": "REPO-03-C01",
+          "description": "Deliberately failing an existing assertion blocks the relevant gate; skipped environments cannot count as passes.",
+          "existingTests": [
+            ".github/workflows/tests.yml",
+            ".github/workflows/design-patterns.yml"
+          ],
+          "requiredEnvironment": "CI with declared Node, Python and supported OS jobs",
+          "baselineStatus": "not-run",
+          "targetStatus": "not-run"
+        }
+      ],
+      "migrationChecks": [
+        "Preserve test identities, environment requirements and logs across pipeline changes."
+      ],
+      "limitations": []
+    },
+    {
+      "id": "REPO-04",
+      "name": "Git text, binary and privacy rules",
+      "files": [
+        ".gitattributes",
+        ".gitignore"
+      ],
+      "role": "configuration",
+      "baselineGroups": [
+        "BASE-16",
+        "BASE-36"
+      ],
+      "ownerPhase": "P12",
+      "disposition": "extend",
+      "currentBehavior": [
+        "LF rules protect sourced shell scripts; explicit binary rules protect recovered bytecode, captures and images.",
+        "Ignore rules keep credentials, machine state, downloaded vendor manuals, caches and presentation locks out of source control."
+      ],
+      "reusePlan": "Retain rules and add narrowly scoped entries only when new outputs require them.",
+      "enhancements": [
+        "New plugins and release packaging preserve binary fixtures and exclude private state."
+      ],
+      "replacementReason": null,
+      "behaviorChecks": [
+        {
+          "id": "REPO-04-C01",
+          "description": "A fresh supported-platform checkout preserves binary digests and executable shell line endings; packaging excludes private runtime files.",
+          "existingTests": [],
+          "requiredEnvironment": "Git checkout and release-package inspection on macOS, Linux and WSL",
+          "baselineStatus": "not-run",
+          "targetStatus": "not-run"
+        }
+      ],
+      "migrationChecks": [
+        "Keep source fixtures, agent definitions and license records versioned; never run text conversion over captures or recovered bytecode."
+      ],
+      "limitations": []
+    },
+    {
+      "id": "REPO-05",
+      "name": "Product version and main user guide",
+      "files": [
+        "VERSION",
+        "README.md"
+      ],
+      "role": "configuration",
+      "baselineGroups": [
+        "BASE-01",
+        "BASE-19",
+        "BASE-36"
+      ],
+      "ownerPhase": "P12",
+      "disposition": "extend",
+      "currentBehavior": [
+        "The version file identifies the release; README lists entry points, installation, authentication and operational workflows."
+      ],
+      "reusePlan": "Preserve working commands while updating examples to the qualified plugin product. Keep compatibility instructions during transition.",
+      "enhancements": [
+        "A new user can complete existing workflows and the added team workflow from published instructions."
+      ],
+      "replacementReason": null,
+      "behaviorChecks": [
+        {
+          "id": "REPO-05-C01",
+          "description": "Every advertised command and setup method resolves to shipped code or an explicit supported replacement.",
+          "existingTests": [
+            "dashboard/test_launch.sh",
+            "dashboard/test_auth.py"
+          ],
+          "requiredEnvironment": "Clean supported host with documented prerequisites",
+          "baselineStatus": "not-run",
+          "targetStatus": "not-run"
+        }
+      ],
+      "migrationChecks": [
+        "Label historical setup gaps rather than copying them into a supported product claim."
+      ],
+      "limitations": []
+    },
+    {
+      "id": "REPO-06",
+      "name": "Harness contracts and known operational limits",
+      "files": [
+        "docs/CONTRACTS_agents.md",
+        "docs/TM-068-sandbox-dispatch.md",
+        "docs/USING_THE_HARNESS.md"
+      ],
+      "role": "configuration",
+      "baselineGroups": [
+        "BASE-01",
+        "BASE-02",
+        "BASE-03",
+        "BASE-06"
+      ],
+      "ownerPhase": "P06",
+      "disposition": "extend",
+      "currentBehavior": [
+        "Documents preserve agent definition schemas, roster/worktree conventions and dispatch sandbox limitations.",
+        "Older contract text says the full gate repoints the live dashboard; current test runner uses an isolated server."
+      ],
+      "reusePlan": "Retain amendment history; add dated corrections tied to code and link versioned replacement contracts.",
+      "enhancements": [
+        "Instructions match actual isolation and supported client capabilities."
+      ],
+      "replacementReason": null,
+      "behaviorChecks": [
+        {
+          "id": "REPO-06-C01",
+          "description": "Run every advertised workflow in isolated fixtures; stale operational warnings are corrected with code evidence.",
+          "existingTests": [
+            "dashboard/test_sandbox_coordination.py",
+            "dashboard/run_tests.sh"
+          ],
+          "requiredEnvironment": "Supported client/tmux test host; isolated data root",
+          "baselineStatus": "not-run",
+          "targetStatus": "not-run"
+        }
+      ],
+      "migrationChecks": [
+        "Do not treat old documentation as current test evidence; preserve source and amendment dates."
+      ],
+      "limitations": [
+        "These documents contain historical claims requiring reconciliation with current implementation."
+      ]
+    },
+    {
+      "id": "REPO-07",
+      "name": "Hub, federation and transport specifications",
+      "files": [
+        "docs/PROTOCOL.md",
+        "docs/FEDERATION.md",
+        "docs/TRANSPORT.md"
+      ],
+      "role": "configuration",
+      "baselineGroups": [
+        "BASE-11",
+        "BASE-12",
+        "BASE-13",
+        "BASE-14"
+      ],
+      "ownerPhase": "P10",
+      "disposition": "extend",
+      "currentBehavior": [
+        "Current verb, envelope, identity, account and terminal-delivery contracts document the existing installed system."
+      ],
+      "reusePlan": "Retain old contract versions; add an explicit old-to-new command, event, permission and state mapping.",
+      "enhancements": [
+        "Operators can move from shared-circle deployments to independent hubs without losing delivery evidence."
+      ],
+      "replacementReason": null,
+      "behaviorChecks": [
+        {
+          "id": "REPO-07-C01",
+          "description": "Every documented public verb and protocol field has a retained contract or reviewed migration entry.",
+          "existingTests": [
+            "hub/tests/test_hub_offline.py",
+            "hub/tests/test_fed_unit.py",
+            "hub/tests/test_fed_live.py"
+          ],
+          "requiredEnvironment": "Isolated hub and NATS environments; pinned clients",
+          "baselineStatus": "not-run",
+          "targetStatus": "not-run"
+        }
+      ],
+      "migrationChecks": [
+        "Keep prior behavior and topology decisions attributed to their version; publish mixed-version compatibility limits."
+      ],
+      "limitations": []
+    },
+    {
+      "id": "REPO-08",
+      "name": "Historical handover and reference screenshots",
+      "files": [
+        "HANDOVER.md",
+        "docs/images/board.png",
+        "docs/images/iiot.png",
+        "docs/images/runs-view.png",
+        "docs/images/settings-orchestration.png",
+        "docs/images/status-feed.png"
+      ],
+      "role": "historical-evidence",
+      "baselineGroups": [
+        "BASE-17",
+        "BASE-37"
+      ],
+      "ownerPhase": "P07",
+      "disposition": "retain-evidence",
+      "currentBehavior": [
+        "Handover and five screenshots preserve prior UI, implementation decisions and reported test outcomes."
+      ],
+      "reusePlan": "Retain original evidence with dates; add current before/after captures using controlled fixture data.",
+      "enhancements": [
+        "Reviewers can compare navigation, controls and meaningful display states across migration."
+      ],
+      "replacementReason": null,
+      "behaviorChecks": [
+        {
+          "id": "REPO-08-C01",
+          "description": "Each retained screenshot has provenance; new screenshots use the exact candidate and contain no private operator data.",
+          "existingTests": [],
+          "requiredEnvironment": "Static review and isolated browser captures",
+          "baselineStatus": "not-run",
+          "targetStatus": "not-run"
+        }
+      ],
+      "migrationChecks": [
+        "Do not overwrite historical screenshots or turn old reported test counts into current pass claims."
+      ],
+      "limitations": []
+    },
+    {
+      "id": "REPO-09",
+      "name": "Vendor documentation references",
+      "files": [
+        "docs/vendor/README.md"
+      ],
+      "role": "configuration",
+      "baselineGroups": [
+        "BASE-30"
+      ],
+      "ownerPhase": "P11",
+      "disposition": "extend",
+      "currentBehavior": [
+        "Vendor links distinguish open Logix data-access protocols from licensed Windows engineering SDKs."
+      ],
+      "reusePlan": "Retain references and redistribution limits; version references when qualified adapters change.",
+      "enhancements": [
+        "Tool prerequisites and supported operations remain accurate for industrial plugins."
+      ],
+      "replacementReason": null,
+      "behaviorChecks": [
+        {
+          "id": "REPO-09-C01",
+          "description": "Each claimed vendor operation has a source/tool version and simulator or hardware evidence, with redistribution rights checked.",
+          "existingTests": [],
+          "requiredEnvironment": "Vendor documentation review and approved integration environment",
+          "baselineStatus": "not-run",
+          "targetStatus": "not-run"
+        }
+      ],
+      "migrationChecks": [
+        "Do not bundle ignored vendor manuals or imply an SDK integration from a protocol library."
+      ],
+      "limitations": []
+    }
+  ]
+}

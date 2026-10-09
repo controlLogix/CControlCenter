@@ -6,7 +6,7 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
 ```json
 {
   "schemaVersion": "1.0.0",
-  "lastReviewed": "2026-10-08",
+  "lastReviewed": "2026-10-09",
   "entries": [
     {
       "id": "FED-01",
@@ -450,6 +450,356 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       ],
       "decisionEvidence": [
         "docs/FEDERATION.md"
+      ]
+    },
+    {
+      "id": "PLAN-01",
+      "status": "planned",
+      "catalog": "dofactory",
+      "pattern": "Abstract Factory",
+      "source": "https://www.dofactory.com/net/abstract-factory-design-pattern",
+      "referenceDepth": "full-public-reference",
+      "how": "Create approved families of scoped service clients when constructing a plugin in each SDK. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03. Implementation locations will be recorded when implemented.",
+      "why": "Independent SDKs must receive compatible service contracts and explicit lifetimes.",
+      "tradeoffs": "A hand-written factory is simpler initially; factory APIs add abstraction and must not become a global service locator.",
+      "locations": [],
+      "verificationEvidence": [],
+      "decisionEvidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json"
+      ]
+    },
+    {
+      "id": "PLAN-02",
+      "status": "planned",
+      "catalog": "dofactory",
+      "pattern": "Adapter",
+      "source": "https://www.dofactory.com/net/adapter-design-pattern",
+      "referenceDepth": "full-public-reference",
+      "how": "Translate client, worker, vendor, storage and AG-UI protocols at owning plugin boundaries. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03, P06, P07, P11. Implementation locations will be recorded when implemented. ADD-01 first maps existing CLI, hub plugin, dashboard and protocol implementations to retained or extracted code. A new boundary may wrap that code; any replacement needs behavior and migration evidence before cutover. LOCAL-01 client startup adapters invoke an idempotent local Compose bootstrap and expose the same authorized instance/hub status after start or reuse. Actual host hooks are qualified in P06; the dashboard uses the same contract in P07.",
+      "why": "External interfaces differ while internal operations must remain language-neutral and NATS-based.",
+      "tradeoffs": "A single bespoke integration is simpler; adapters add translation/version upkeep and cannot invent unsupported host capabilities. Maintaining transition paths and equivalent behavior adds testing cost. Reuse is preferred where contracts and authority permit it; a new framework or language alone is not a replacement justification. Host-specific automatic launch needs actual-host tests and protocol-clean output; manual launch is simpler but does not satisfy the accepted automatic-start requirement.",
+      "locations": [],
+      "verificationEvidence": [],
+      "decisionEvidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json",
+        "docs/planning/2026-10-09/component-preservation.md"
+      ],
+      "planningRevisions": [
+        {
+          "date": "2026-10-09",
+          "decision": "ADD-01 preserve and extend existing functionality",
+          "previous": {
+            "how": "Translate client, worker, vendor, storage and AG-UI protocols at owning plugin boundaries. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03, P06, P07, P11. Implementation locations will be recorded when implemented.",
+            "why": "External interfaces differ while internal operations must remain language-neutral and NATS-based.",
+            "tradeoffs": "A single bespoke integration is simpler; adapters add translation/version upkeep and cannot invent unsupported host capabilities."
+          },
+          "reason": "Record explicit reuse obligations without changing historical FED entries or claiming implementation."
+        },
+        {
+          "date": "2026-10-09",
+          "decision": "LOCAL-01 approved automatic Compose startup direction",
+          "previous": {
+            "how": "Translate client, worker, vendor, storage and AG-UI protocols at owning plugin boundaries. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03, P06, P07, P11. Implementation locations will be recorded when implemented. ADD-01 first maps existing CLI, hub plugin, dashboard and protocol implementations to retained or extracted code. A new boundary may wrap that code; any replacement needs behavior and migration evidence before cutover.",
+            "why": "External interfaces differ while internal operations must remain language-neutral and NATS-based.",
+            "tradeoffs": "A single bespoke integration is simpler; adapters add translation/version upkeep and cannot invent unsupported host capabilities. Maintaining transition paths and equivalent behavior adds testing cost. Reuse is preferred where contracts and authority permit it; a new framework or language alone is not a replacement justification."
+          },
+          "reason": "Retain earlier rationale; clarify bootstrap versus runtime control and client status. Planned only, not implementation evidence."
+        }
+      ]
+    },
+    {
+      "id": "PLAN-03",
+      "status": "planned",
+      "catalog": "dofactory",
+      "pattern": "Composite",
+      "source": "https://www.dofactory.com/net/composite-design-pattern",
+      "referenceDepth": "full-public-reference",
+      "how": "Leaf plugins and assemblies expose the same declared lifecycle/inspection component contract. Represent nesting with private-child ownership and independent-child references kept distinct, with explicit instance lifecycles and all inter-plugin calls over NATS. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03. Implementation locations will be recorded when implemented.",
+      "why": "Assemblies must install and operate together without erasing independent child identity.",
+      "tradeoffs": "A flat dependency list is simpler; nesting increases lifecycle/version resolution complexity and must not imply inherited authority.",
+      "locations": [],
+      "verificationEvidence": [],
+      "decisionEvidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json"
+      ]
+    },
+    {
+      "id": "PLAN-04",
+      "status": "planned",
+      "catalog": "dofactory",
+      "pattern": "Facade",
+      "source": "https://www.dofactory.com/net/facade-design-pattern",
+      "referenceDepth": "full-public-reference",
+      "how": "Expose small scoped context clients for domain commands, approved NATS reads, configuration and artifacts. Injected handles do not expose unrestricted JetStream management or another project's data. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P03, P04, P08. Implementation locations will be recorded when implemented.",
+      "why": "Plugin authors need common logging, config and approved services without coupling to implementations.",
+      "tradeoffs": "Direct shared-runtime access is simpler but violates the accepted scopes. Narrow clients add schema/version maintenance; typed handles alone do not sandbox trusted native plugins.",
+      "locations": [],
+      "verificationEvidence": [],
+      "decisionEvidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json"
+      ],
+      "planningRevisions": [
+        {
+          "date": "2026-10-09",
+          "decision": "STATE-01 approved NATS persistence direction",
+          "previous": {
+            "how": "Expose small scoped context service clients instead of broad runtime/database objects. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03, P04, P08. Implementation locations will be recorded when implemented.",
+            "why": "Plugin authors need common logging, config and approved services without coupling to implementations.",
+            "tradeoffs": "Direct access is simpler but violates the accepted boundary; facades can grow too wide and require explicit contract ownership."
+          },
+          "reason": "Preserve the original planning rationale while updating storage placement and recovery boundaries. This is a design revision, not implementation evidence."
+        }
+      ]
+    },
+    {
+      "id": "PLAN-05",
+      "status": "planned",
+      "catalog": "dofactory",
+      "pattern": "Observer",
+      "source": "https://www.dofactory.com/net/observer-design-pattern",
+      "referenceDepth": "full-public-reference",
+      "how": "Deliver approved kernel information and versioned status updates over NATS subscriptions. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P02, P07. Implementation locations will be recorded when implemented.",
+      "why": "Outside plugins need readiness information while kernel writes remain disallowed.",
+      "tradeoffs": "Polling snapshots is simpler; subscriptions require replay/snapshot gap handling and bounded slow consumers.",
+      "locations": [],
+      "verificationEvidence": [],
+      "decisionEvidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json"
+      ]
+    },
+    {
+      "id": "PLAN-06",
+      "status": "planned",
+      "catalog": "dofactory",
+      "pattern": "Strategy",
+      "source": "https://www.dofactory.com/net/strategy-design-pattern",
+      "referenceDepth": "full-public-reference",
+      "how": "Select compatible provider, routing, evaluation and execution policies by explicit declared contracts. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03, P08, P10. Implementation locations will be recorded when implemented.",
+      "why": "Customers need replaceable surrounding behavior without kernel replacement.",
+      "tradeoffs": "One implementation is simpler; policy/provider compatibility and behavior drift require conformance tests.",
+      "locations": [],
+      "verificationEvidence": [],
+      "decisionEvidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json"
+      ]
+    },
+    {
+      "id": "PLAN-07",
+      "status": "planned",
+      "catalog": "eip",
+      "pattern": "Message Bus",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageBus.html",
+      "referenceDepth": "full-public-reference",
+      "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01–P12. Implementation locations will be recorded when implemented.",
+      "why": "Accepted requirement mandates NATS locally and across connected systems.",
+      "tradeoffs": "Direct local calls are simpler/faster but contradict scope; message contracts add latency, retry, schema and operational cost.",
+      "locations": [],
+      "verificationEvidence": [],
+      "decisionEvidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json"
+      ]
+    },
+    {
+      "id": "PLAN-08",
+      "status": "planned",
+      "catalog": "eip",
+      "pattern": "Canonical Data Model",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/CanonicalDataModel.html",
+      "referenceDepth": "full-public-reference",
+      "how": "Define versioned envelopes and identity/state vocabulary across languages and hubs. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01, P10. Implementation locations will be recorded when implemented.",
+      "why": "Client/provider diversity must not obscure ownership or schema compatibility.",
+      "tradeoffs": "Pairwise translation is simpler for two plugins; shared contracts need careful evolution and must not become a universal domain schema.",
+      "locations": [],
+      "verificationEvidence": [],
+      "decisionEvidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json"
+      ]
+    },
+    {
+      "id": "PLAN-09",
+      "status": "planned",
+      "catalog": "eip",
+      "pattern": "Transactional Client",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/TransactionalClient.html",
+      "referenceDepth": "full-public-reference",
+      "how": "Apply a bounded transaction boundary at the owning JetStream record or qualified atomic batch within one stream: state, provenance, operation outcome and recoverable outgoing intent commit together. Consumer acknowledgment, projection updates, cross-stream/hub transfer and external tool actions remain separate recoverable steps. Legacy SQL plus outbox repairs remain relevant to P01 baseline work; STATE-01 supersedes SQL as the preferred new authority. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P05, P10. Implementation locations will be recorded when implemented.",
+      "why": "Crash windows must not lose results or create unattributed executable work.",
+      "tradeoffs": "One complete record is simpler than a batch and is preferred when it preserves the invariant. Same-stream atomic batches require pinned server/client qualification and do not create a distributed database/broker/hub/tool transaction. SQL authority is an explicit exception requiring evidence and review.",
+      "locations": [],
+      "verificationEvidence": [],
+      "decisionEvidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json"
+      ],
+      "planningRevisions": [
+        {
+          "date": "2026-10-09",
+          "decision": "STATE-01 approved NATS persistence direction",
+          "previous": {
+            "how": "Use a bounded application/local-storage adaptation: authoritative state, provenance and durable outgoing intent commit at one owning storage boundary. NATS publication and consumer acknowledgement remain separate recoverable steps; this does not claim a transactional messaging session spanning the business database and broker. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P04, P05, P10. Implementation locations will be recorded when implemented.",
+            "why": "Crash windows must not lose results or create unattributed executable work.",
+            "tradeoffs": "Separate writes are simpler but reproduce known defects; atomic local intent does not transact external tool effects or multiple hubs."
+          },
+          "reason": "Preserve the original planning rationale while updating storage placement and recovery boundaries. This is a design revision, not implementation evidence."
+        }
+      ]
+    },
+    {
+      "id": "PLAN-10",
+      "status": "planned",
+      "catalog": "eip",
+      "pattern": "Idempotent Receiver",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/IdempotentReceiver.html",
+      "referenceDepth": "full-public-reference",
+      "how": "Bind an operation ID, canonical payload hash and expected version to the durable NATS-owned outcome. Reconcile lost acknowledgments, reject changed-payload ID reuse, and retain outcomes/deletion markers across the agreed replay and restore horizon. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P10. Implementation locations will be recorded when implemented.",
+      "why": "At-least-once delivery and uncertain replies must not create duplicate task attempts.",
+      "tradeoffs": "Broker duplicate windows are simpler but insufficient for business ownership. Durable outcome records and conflict policy cost storage; external actions require their own idempotency or explicit unknown-outcome handling.",
+      "locations": [],
+      "verificationEvidence": [],
+      "decisionEvidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json"
+      ],
+      "planningRevisions": [
+        {
+          "date": "2026-10-09",
+          "decision": "STATE-01 approved NATS persistence direction",
+          "previous": {
+            "how": "Bind duplicate command/event IDs to a durable prior outcome under the authoritative owner. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P04, P10. Implementation locations will be recorded when implemented.",
+            "why": "At-least-once delivery and uncertain replies must not create duplicate task attempts.",
+            "tradeoffs": "Best-effort duplicate windows are simpler but inadequate for business ownership; durable retention and conflict policy cost storage."
+          },
+          "reason": "Preserve the original planning rationale while updating storage placement and recovery boundaries. This is a design revision, not implementation evidence."
+        }
+      ]
+    },
+    {
+      "id": "PLAN-11",
+      "status": "planned",
+      "catalog": "eip",
+      "pattern": "Correlation Identifier",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/CorrelationIdentifier.html",
+      "referenceDepth": "full-public-reference",
+      "how": "Keep task, delegation, attempt, message, operation and artifact identities linked but distinct. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01, P05, P10. Implementation locations will be recorded when implemented.",
+      "why": "Progress and results must bind to the selected executor and correct task version.",
+      "tradeoffs": "One overloaded task ID is simpler but loses provenance; more IDs need disciplined propagation and do not authenticate a sender.",
+      "locations": [],
+      "verificationEvidence": [],
+      "decisionEvidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json"
+      ]
+    },
+    {
+      "id": "PLAN-12",
+      "status": "planned",
+      "catalog": "eip",
+      "pattern": "Claim Check",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/StoreInLibrary.html",
+      "referenceDepth": "full-public-reference",
+      "how": "Send authorized immutable artifact references and digests while owning providers retain the bytes in NATS Object Store where size/retention fit, or an approved external artifact store. Use version/digest names and recheck access on retrieval. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P04, P10, P11. Implementation locations will be recorded when implemented.",
+      "why": "Code and engineering evidence can exceed safe message sizes and have separate access policies.",
+      "tradeoffs": "Inline small evidence is simpler. References require coordinated retention and backups; uploading bytes and committing a task record are separate steps, with incomplete/orphan objects handled explicitly.",
+      "locations": [],
+      "verificationEvidence": [],
+      "decisionEvidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json"
+      ],
+      "planningRevisions": [
+        {
+          "date": "2026-10-09",
+          "decision": "STATE-01 approved NATS persistence direction",
+          "previous": {
+            "how": "Send authorized immutable artifact references/digests rather than large payloads in control messages. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P04, P10, P11. Implementation locations will be recorded when implemented.",
+            "why": "Code and engineering evidence can exceed safe message sizes and have separate access policies.",
+            "tradeoffs": "Inline small payloads are simpler; referenced content requires access rechecks, partial-transfer handling and retention coordination."
+          },
+          "reason": "Preserve the original planning rationale while updating storage placement and recovery boundaries. This is a design revision, not implementation evidence."
+        }
+      ]
+    },
+    {
+      "id": "PLAN-13",
+      "status": "planned",
+      "catalog": "eip",
+      "pattern": "Message Store",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageStore.html",
+      "referenceDepth": "full-public-reference",
+      "how": "Retain authoritative validated JetStream records with scoped replay, versioned checkpoints and explicit retention. Derive current KV views and optional SQL query indexes without replaying effects. Keep task/audit history separate from acknowledged work queues and bounded presence records. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P04, P07, P10, P12. Implementation locations will be recorded when implemented.",
+      "why": "Recovery, audits and authorized dashboard history must survive disconnected viewers and hubs.",
+      "tradeoffs": "A local relational authority simplifies joins and multi-row constraints, but the accepted direction prefers shared NATS persistence. Rebuildable views add lag and recovery complexity; quotas, snapshots, schema evolution, privacy deletion and retention gaps require explicit evidence.",
+      "locations": [],
+      "verificationEvidence": [],
+      "decisionEvidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json"
+      ],
+      "planningRevisions": [
+        {
+          "date": "2026-10-09",
+          "decision": "STATE-01 approved NATS persistence direction",
+          "previous": {
+            "how": "Retain durable required events/evidence with scoped replay and retention policy. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P04, P07, P12. Implementation locations will be recorded when implemented.",
+            "why": "Recovery, audits and authorized dashboard history must survive disconnected viewers and hubs.",
+            "tradeoffs": "Ephemeral logs are simpler but cannot support these guarantees; retention, deletion and sensitive data create operating cost."
+          },
+          "reason": "Preserve the original planning rationale while updating storage placement and recovery boundaries. This is a design revision, not implementation evidence."
+        }
+      ]
+    },
+    {
+      "id": "PLAN-14",
+      "status": "planned",
+      "catalog": "eip",
+      "pattern": "Control Bus",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/ControlBus.html",
+      "referenceDepth": "full-public-reference",
+      "how": "Expose surrounding runtime operations for allowed drain, pause, cancellation and recovery over authorized NATS contracts. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03, P05, P07, P10. Implementation locations will be recorded when implemented. LOCAL-01 startup reads scoped instance/hub status after readiness; P10 supplies real hub observations. Starting local infrastructure before NATS exists remains a bounded host bootstrap operation, not a kernel command channel.",
+      "why": "Operators need observable action control without opening protected kernel command channels.",
+      "tradeoffs": "Local shell procedures are simpler but harder to govern; controls need authority, durable intent and honest unknown outcomes. Cached status must disclose age and unavailable services; it cannot authorize work, widen hub trust or prove partner capacity.",
+      "locations": [],
+      "verificationEvidence": [],
+      "decisionEvidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json"
+      ],
+      "planningRevisions": [
+        {
+          "date": "2026-10-09",
+          "decision": "LOCAL-01 approved automatic Compose startup direction",
+          "previous": {
+            "how": "Expose surrounding runtime operations for allowed drain, pause, cancellation and recovery over authorized NATS contracts. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P03, P05, P07, P10. Implementation locations will be recorded when implemented.",
+            "why": "Operators need observable action control without opening protected kernel command channels.",
+            "tradeoffs": "Local shell procedures are simpler but harder to govern; controls need authority, durable intent and honest unknown outcomes."
+          },
+          "reason": "Retain earlier rationale; clarify bootstrap versus runtime control and client status. Planned only, not implementation evidence."
+        }
+      ]
+    },
+    {
+      "id": "PLAN-15",
+      "status": "planned",
+      "catalog": "eip",
+      "pattern": "Content-Based Router",
+      "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/ContentBasedRouter.html",
+      "referenceDepth": "full-public-reference",
+      "how": "Route eligible work using explicit task requirements and current approved capabilities, with optional Jev advice. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P05, P08, P10. Implementation locations will be recorded when implemented.",
+      "why": "Connected teams need purposeful work distribution while preserving grants and origin ownership.",
+      "tradeoffs": "Manual destination choice is simpler; semantic ranking adds cost/uncertainty and must never replace deterministic eligibility or receiver acceptance.",
+      "locations": [],
+      "verificationEvidence": [],
+      "decisionEvidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json"
       ]
     }
   ]

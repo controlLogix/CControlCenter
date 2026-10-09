@@ -1,6 +1,165 @@
 {
-  "reviewer": "Claude Opus 5.5 for Nick Klute (owners: Nick Klute, Ryan Helms), 2026-10-08",
-  "sourceDigest": "116e0eb0cf7dcd9e776d32084e4efcef2e994fe50568eb80d0b99037eb3a97f1",
+  "reviewer": "Codex, scoped LOCAL-01 planning and accumulated artifact review, 2026-10-09; six baseline findings remain active",
+  "sourceDigest": "b66a7cd5dc53eb4835f5202532f27c6181e35872731ad63cd9cfa300d467112b",
+  "incrementalReviews": [
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "previousReviewer": "Claude Opus 5.5 for Nick Klute (owners: Nick Klute, Ryan Helms), 2026-10-08",
+      "previousSourceDigest": "116e0eb0cf7dcd9e776d32084e4efcef2e994fe50568eb80d0b99037eb3a97f1",
+      "evidence": [
+        "AGENTS.md"
+      ],
+      "rationale": "Inspected the complete working-tree diff from the clean branch starting point. AGENTS.md only adds the user-requested branch scope and the requirement for Ryan to review with Nick before authorizing a merge. No runtime code, pattern usage, relationships, diagrams, or remediation changed. Existing rule assessments and historical test results remain attributed to the prior review; application tests were not rerun for this documentation-only change. This review does not authorize a merge."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "previousSourceDigest": "5b3e5e5a762680c09dba6a0eb31901263e9029f4e2cdc7fea07694445abc0020",
+      "evidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json",
+        "docs/planning/2026-10-09/coverage.md",
+        "docs/planning/2026-10-09/verification-matrix.md",
+        "docs/planning/2026-10-09/known-baseline-blockers.md",
+        ".context/design-patterns.md",
+        ".context/design-patterns-diagrams.md"
+      ],
+      "rationale": "Reviewed planning-only changes, complete scope/criteria, proposed pattern applicability and tradeoffs, separate proposal diagrams, and failure scenarios. Preserved all 17 historical FED entries and their diagrams. No proposed implementation or future test result is claimed. Recorded six known baseline authorization, consistency and recovery findings, distinguishing prior reproductions from code-backed concerns. Their post-adoption provenance prevents unchanged adoption-era deferral. No runtime code or adoption policy was changed. This review does not establish repository-wide compliance or authorize implementation or merge."
+    },
+    {
+      "date": "2026-10-09",
+      "scope": "STATE-01 storage revision",
+      "reviewer": "Codex; independent storage review completed with no substantive findings",
+      "previousSourceDigest": "d148516935f7e2e5a1c9551480b35f82c5b477b4e0becd9279c44db266856e65",
+      "previousReviewer": "Codex, planning documentation and known-baseline reconciliation review, 2026-10-09; independent proposal reviews recorded in conversation artifacts",
+      "evidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json",
+        "docs/planning/2026-10-09/verification-matrix.md",
+        "docs/planning/2026-10-09/verification-matrix.json",
+        "docs/planning/2026-10-09/coverage.md",
+        "docs/planning/2026-10-09/jev-coverage.json",
+        "docs/planning/2026-10-09/agentmux-implementation-review-v2.pptx",
+        "docs/planning/2026-10-09/README.md",
+        ".context/design-patterns.md",
+        ".context/design-patterns-diagrams.md",
+        ".gitignore"
+      ],
+      "rationale": "Reviewed the user-approved NATS shared-persistence direction and its storage ownership, qualified same-stream commits, freshness, replay, retention, artifact and independent-hub recovery boundaries. Verified all 75 proposed criteria and 48 not-run scenarios, preserved 132 source proposals and source hashes, and retained all 17 historical FED entries/diagrams. Five planned entries preserve previous rationale in planningRevisions. The revised deck has 42 editable slides with exact criteria in notes and matching final source digests; the original open deck is unchanged. The narrow docs/planning PowerPoint owner-lock ignore prevents transient local lock files from entering source review; a read-only comparison proved that the earlier freshness mismatch was solely that lock file. This review covers planning, artifact and metadata changes only. No runtime behavior, adoption policy, baseline finding, or test result was changed. Existing runtime assessments remain historical and six active findings still block governance; no implementation or merge is authorized."
+    },
+    {
+      "date": "2026-10-09",
+      "scope": "plain-language instructions",
+      "reviewer": "Codex; public ISO source research independently cross-checked",
+      "previousReviewer": "Codex, scoped STATE-01 planning/presentation review, 2026-10-09; historical runtime assessments retained and six baseline findings remain active",
+      "previousSourceDigest": "dfed48e90f979cd00794242c8cf5bf33a5aeef328dbc25016a19dce945fe6cb3",
+      "evidence": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        ".claude/rules/plain-language.md"
+      ],
+      "rationale": "Reviewed the new shared writing rules and matching root instructions. They apply publicly documented ISO 24495-1 principles to chat and generated human-readable content, preserve exact code and data formats, and cover delegated work. Source access limits are explicit: the full purchased Part 1 was not reviewed and no certification or complete conformity claim is made. Existing managed instruction sections and branch review restrictions are unchanged. This scoped instruction review introduces no runtime or architecture change; application tests were not rerun. All six baseline findings and all prior assessments and history remain unchanged. This review does not establish repository-wide compliance or authorize implementation or merge."
+    },
+    {
+      "date": "2026-10-09",
+      "scope": "ADD-01 component preservation and gains",
+      "reviewer": "Codex; parallel source audits and independent plan/inventory review",
+      "previousReviewer": "Codex, scoped plain-language instruction review, 2026-10-09; prior reviews retained and six baseline findings remain active",
+      "previousSourceDigest": "c8b64ab56581fac5600205f1beb932a0f5f6c79903fd813f2a98f8a9036dacb3",
+      "evidence": [
+        "docs/planning/2026-10-09/component-preservation.md",
+        "docs/planning/2026-10-09/component-inventory.json",
+        "docs/planning/2026-10-09/component-audit-harness.json",
+        "docs/planning/2026-10-09/component-audit-hub.json",
+        "docs/planning/2026-10-09/component-audit-dashboard.json",
+        "docs/planning/2026-10-09/component-audit-repository.json",
+        "docs/planning/2026-10-09/source-surface-index.json",
+        "docs/planning/2026-10-09/verify-component-coverage.py",
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json",
+        "docs/planning/2026-10-09/verification-matrix.json",
+        "docs/planning/2026-10-09/verification-matrix.md",
+        "docs/planning/2026-10-09/gate-record.template.json",
+        "docs/planning/2026-10-09/coverage.md",
+        "docs/planning/2026-10-09/README.md",
+        "docs/planning/2026-10-09/agentmux-implementation-review-v3.pptx",
+        ".context/design-patterns.md",
+        ".context/design-patterns-diagrams.md"
+      ],
+      "rationale": "Reviewed all 338 baseline file assignments plus one shared instruction file across 93 component/support groups. Static source audits map current behavior, reuse, planned gains, migration and 198 proposed comparison checks; all runtime results remain not-run. The surface index covers 120 source files with current hashes. The coverage validator passed and five negative fixtures rejected an omitted file, missing surface list, stale source, fabricated pass and missing criterion. Independent review corrections addressed source-index completeness, stale counts, claimed test coverage and tool-specific instruction scope. All 37 baseline groups and the existing Jev catalog remain preserved. ADD-01 adds a preservation criterion to each phase, totaling 90 criteria and 54 future failure scenarios. PLAN-02 retains prior rationale in history; existing FED entries and diagrams remain intact. The 46-slide editable deck contains all exact criteria in notes, matches final source digests, passed package/layout/import checks and all final slides rendered identically to inspected previews. No runtime source, adoption policy or baseline finding was changed. Six active baseline findings remain governance blockers. Static coverage is not proof of complete runtime behavior or vendor security. No implementation, feature retirement or merge is authorized."
+    },
+    {
+      "date": "2026-10-09",
+      "scope": "Dashboard and AI terminal concept images",
+      "reviewer": "Codex; independent caption review against implementation-plan.md",
+      "previousReviewer": "Codex, scoped ADD-01 component preservation review, 2026-10-09; historical evidence retained and six baseline findings remain active",
+      "previousSourceDigest": "a7f82948e1f13167a17cd11af016a78c0529cc02352cffe78eaad1307b105975",
+      "evidence": [
+        "docs/planning/2026-10-09/README.md",
+        "docs/planning/2026-10-09/concept-images/README.md",
+        "docs/planning/2026-10-09/concept-images/prompts.json",
+        "docs/planning/2026-10-09/concept-images/01-workspace-and-terminal.png",
+        "docs/planning/2026-10-09/concept-images/02-planning-and-board.png",
+        "docs/planning/2026-10-09/concept-images/03-agent-conversations.png",
+        "docs/planning/2026-10-09/concept-images/04-connected-hubs.png",
+        "docs/planning/2026-10-09/concept-images/05-review-and-acceptance.png",
+        "docs/planning/2026-10-09/concept-images/06-plugins-and-industrial-tools.png"
+      ],
+      "rationale": "Reviewed six generated interface concepts and their captions against the existing dashboard styling, implementation plan and preservation requirements. Final images show illustrative terminal interactions, pending approvals and acceptance, failed evidence, reserved disconnected execution, advisory Jev and read-only industrial simulation. Independent caption review corrected wording that could imply existing roles, dependencies, messages and review evidence were net-new. Each image is labeled proposed UI/sample data/not implemented. PNG integrity, exact saved copies, dimensions, source hashes and local links were checked; the component coverage validator still passes. The prompt manifest preserves exact generation/edit inputs. These assets add no runtime code, executable terminal commands, new pattern relationships or verified feature claims. No application tests were needed for this asset-only scope. All historical reviews, runtime assessments, remediation and six active baseline findings remain unchanged. This review does not establish repository-wide compliance or authorize implementation or merge."
+    },
+    {
+      "date": "2026-10-09",
+      "scope": "Portable HTML visual review, designed by Claude Opus through WSL",
+      "reviewer": "Codex; Claude Opus 5.5 design author; independent static content and interaction review",
+      "previousReviewer": "Codex, scoped dashboard/terminal concept asset review, 2026-10-09; historical evidence retained and six baseline findings remain active",
+      "previousSourceDigest": "94ae55db48517eee7c7a077040d674876b3f005c95091ea563ed3f2c0ebf6435",
+      "evidence": [
+        "docs/planning/2026-10-09/agentmux-visual-review.html",
+        "docs/planning/2026-10-09/README.md",
+        "docs/planning/2026-10-09/concept-images/README.md",
+        "docs/planning/2026-10-09/review-site/README.md",
+        "docs/planning/2026-10-09/review-site/brand-spec.md",
+        "docs/planning/2026-10-09/review-site/build-report.json",
+        "docs/planning/2026-10-09/review-site/design-provenance.json",
+        "docs/planning/2026-10-09/review-site/scenes.json",
+        "docs/planning/2026-10-09/review-site/src/components/atoms/index.mjs",
+        "docs/planning/2026-10-09/review-site/src/components/molecules/index.mjs",
+        "docs/planning/2026-10-09/review-site/src/components/organisms/Scene/Scene.mjs",
+        "docs/planning/2026-10-09/review-site/src/components/organisms/Scene/Scene.test.mjs",
+        "docs/planning/2026-10-09/review-site/src/components/organisms/Scene/index.mjs",
+        "docs/planning/2026-10-09/review-site/src/components/organisms/Scene/scene.css",
+        "docs/planning/2026-10-09/review-site/src/components/organisms/index.mjs",
+        "docs/planning/2026-10-09/review-site/src/components/templates/index.mjs",
+        "docs/planning/2026-10-09/review-site/src/features/review.js",
+        "docs/planning/2026-10-09/review-site/src/pages/build.mjs",
+        "docs/planning/2026-10-09/review-site/src/pages/review.template.html",
+        "docs/planning/2026-10-09/review-site/verification.json"
+      ],
+      "rationale": "Reviewed the Opus-authored document layout, scene renderer, embedded-asset builder and local-only interaction code. Repeated scene markup is an organism with a public export and focused tests; page assembly owns file I/O and feature code owns input state, storage, image viewing and export. No runtime product code or new GoF/EIP relationship was introduced. Preserved the existing six images byte-for-byte and embedded the exact source plan. Three focused component tests, JavaScript syntax, internal anchors/labels, source hashes, external-resource checks and the 339-file/93-component preservation validator passed. Independent review corrected a claim that all shown functionality was unbuilt, distinguished commit/artifact evidence, and retained the data-loss warning after a potentially canceled download. Browser inspection is explicitly incomplete because the browser tool rejected file URLs; no alternate browser or URL workaround was attempted. The delivered HTML is review feedback infrastructure, not authorization to implement, advance a phase or merge. No original planning or image assets were deleted. Historical assessments, all existing registry/diagram history and all six baseline findings remain unchanged; this scoped review does not establish repository-wide compliance."
+    },
+    {
+      "date": "2026-10-09",
+      "scope": "LOCAL-01 automatic Compose startup plan and accumulated planning commit",
+      "reviewer": "Codex, scoped documentation and artifact verification",
+      "previousReviewer": "Codex, scoped portable HTML review, 2026-10-09; Claude Opus 5.5 design through WSL; browser inspection unavailable and six baseline findings remain active",
+      "previousSourceDigest": "b238f8e3c66366ff05c7b9e083d1c33c825dfc3d79c04d965e97767bbb84d926",
+      "evidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json",
+        "docs/planning/2026-10-09/coverage.md",
+        "docs/planning/2026-10-09/verification-matrix.json",
+        "docs/planning/2026-10-09/verification-matrix.md",
+        "docs/planning/2026-10-09/README.md",
+        "docs/planning/2026-10-09/review-site/src/pages/review.template.html",
+        "docs/planning/2026-10-09/review-site/build-report.json",
+        "docs/planning/2026-10-09/review-site/verification.json",
+        ".context/design-patterns.md",
+        ".context/design-patterns-diagrams.md"
+      ],
+      "rationale": "Reviewed the accepted automatic local Docker Compose startup requirement, healthy-instance reuse, explicit instance ownership, concurrent startup, bounded readiness, persistent data, clean client protocol output and scoped connected-hub status. Added nine acceptance criteria and eight future failure cases while preserving all prior criteria and source/component coverage. Coverage validation passes for 339 files, 93 groups, 198 behavior checks, 99 criteria and 62 scenarios. Three HTML component tests, JavaScript syntax and static anchors/labels/embedded-asset checks pass; the six images remain unchanged and the current plan is embedded exactly. All 16 dirty JSON files parse and three PPTX packages pass archive integrity checks. Reviewed the complete 53-file dirty inventory, size limits and high-confidence credential scan. Historical decks and image provenance remain dated snapshots; browser inspection remains incomplete. Existing PLAN-02 and PLAN-14 rationale is preserved in history and the planned bootstrap relationship is diagrammed. Ryan requested commit and push before gated phase work; this records neither a passed phase nor Nick review nor merge approval. No runtime implementation, governance rule or baseline finding was changed. The six known active findings remain unresolved and prevent a passing repository governance check. Normalized changed text to the repository LF policy and rebuilt the HTML so committed source bytes match its embedded plan and recorded hashes."
+    }
+  ],
   "rules": {
     "DP001": {
       "status": "pass",
@@ -23,25 +182,27 @@
       ]
     },
     "DP003": {
-      "status": "pass",
-      "rationale": "External effects are bounded. Federation connect uses wait_for(20) and connect_timeout=5 with backoff capped at 30 s; JetStream publish has timeout=5 and the outbox row is marked sent only after the ack; consumers use explicit ack, ack_wait=60 and max_deliver=20, and ingest is idempotent on the message id. git calls have timeout=60 and tmux calls timeout=10. The review found that the single-operator Bridge's NatsClient.connect had no timeout on the TCP connect or the INFO line; this change bounds both (CONNECT_TIMEOUT_S=5, a TimeoutError that run()'s backoff loop catches), covered by BridgeConnectBounded in hub/tests/test_hub_offline.py.",
+      "status": "findings",
+      "rationale": "Current planning review records unresolved baseline findings AMX-BASE-002, AMX-BASE-003, AMX-BASE-004. Prior pass rationale is preserved in historicalRuleAssessments. Source was reread and the earlier analysis was reconciled, but runtime tests were not rerun in this planning task. Findings must be repaired or disproved with evidence under approved P01 implementation. The source provenance does not qualify for unchanged adoption-era remediation.",
       "evidence": [
         "hub/bridge.py",
         "hub/fed/runtime.py",
         "hub/fed/conn.py",
         "hub/transport.py",
-        "hub/tests/test_hub_offline.py"
+        "hub/tests/test_hub_offline.py",
+        "docs/planning/2026-10-09/known-baseline-blockers.md"
       ]
     },
     "DP004": {
-      "status": "pass",
-      "rationale": "The hub socket identifies callers by peer uid (SO_PEERCRED/LOCAL_PEERCRED) and process ancestry; the TCP listener is loopback-only, needs a token compared with hmac.compare_digest, and ignores a claimed 'as'. Secrets are written 0600 under umask 077. Federation takes the sender from subject token 3 and the server enforces it with per-user publish ACLs; redact.scrub blocks or redacts secrets outbound and privileged_gate fails closed. The review found that the dashboard checked Origin on writes but not Host on any request, so a DNS-rebinding page could read /api/stream/<agent> terminal content; this change adds Handler.host_allowed (421 for any Host other than its own 127.0.0.1/localhost port), covered by dashboard/test_host_guard.py. The hub/fed/demo.py and test strings that look like keys are fake redaction inputs.",
+      "status": "findings",
+      "rationale": "Current planning review records unresolved baseline findings AMX-BASE-001, AMX-BASE-005. Prior pass rationale is preserved in historicalRuleAssessments. Source was reread and the earlier analysis was reconciled, but runtime tests were not rerun in this planning task. Findings must be repaired or disproved with evidence under approved P01 implementation. The source provenance does not qualify for unchanged adoption-era remediation.",
       "evidence": [
         "hub/server.py",
         "hub/fed/guard.py",
         "hub/fed/redact.py",
         "dashboard/server.py",
-        "dashboard/test_host_guard.py"
+        "dashboard/test_host_guard.py",
+        "docs/planning/2026-10-09/known-baseline-blockers.md"
       ]
     },
     "DP005": {
@@ -57,13 +218,14 @@
       ]
     },
     "DP006": {
-      "status": "pass",
-      "rationale": "Operators see federation state through 'agentmux hub fed status/audit/quarantine'; Runtime.last_error records connect failures and every guard decision lands in fed_audit. The dashboard Federation panel shows peers, holds (alert after hold_alert_s=300) and a kill switch that survives restarts, with 'resume' to recover. Store._migrate takes a pre-migration backup. Targets are measurable: ack_wait 60 s, presence TTL 90 s, and orchestration scoreboards in evals/orchestrations/SCOREBOARD.md.",
+      "status": "findings",
+      "rationale": "Current planning review records unresolved baseline findings AMX-BASE-006. Prior pass rationale is preserved in historicalRuleAssessments. Source was reread and the earlier analysis was reconciled, but runtime tests were not rerun in this planning task. Findings must be repaired or disproved with evidence under approved P01 implementation. The source provenance does not qualify for unchanged adoption-era remediation.",
       "evidence": [
         "hub/fed/runtime.py",
         "hub/fed/ledger.py",
         "dashboard/fed_panel.py",
-        "evals/orchestrations/SCOREBOARD.md"
+        "evals/orchestrations/SCOREBOARD.md",
+        "docs/planning/2026-10-09/known-baseline-blockers.md"
       ]
     },
     "DP007": {
@@ -106,5 +268,126 @@
       "evidence": []
     }
   },
-  "findings": []
+  "findings": [
+    {
+      "id": "AMX-BASE-001",
+      "rule": "DP004",
+      "summary": "Subject plane and envelope type can select different authorization/dispatch paths",
+      "symbol": "inbound",
+      "path": "hub/fed/guard.py",
+      "firstReported": "2026-10-08",
+      "recordedOn": "2026-10-09",
+      "evidenceScope": "Reproduced in the earlier repository analysis with an authenticated shared peer. Source reread in this planning pass confirms that the guard uses subject plane while dispatch selects env.type.",
+      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-001",
+      "repairGate": "P01",
+      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)"
+    },
+    {
+      "id": "AMX-BASE-002",
+      "rule": "DP003",
+      "summary": "Incoming work creation and remote provenance commit separately",
+      "symbol": "Work.on_envelope",
+      "path": "hub/fed/plugins/work.py",
+      "firstReported": "2026-10-08",
+      "recordedOn": "2026-10-09",
+      "evidenceScope": "Earlier interruption test left a ready work item without origin metadata and allowed duplicate creation on redelivery. Source reread confirms separate work_create and mark transactions.",
+      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-002",
+      "repairGate": "P01",
+      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)"
+    },
+    {
+      "id": "AMX-BASE-003",
+      "rule": "DP003",
+      "summary": "Completed work can lose its return-result publication",
+      "symbol": "Work.on_local_event",
+      "path": "hub/fed/plugins/work.py",
+      "firstReported": "2026-10-08",
+      "recordedOn": "2026-10-09",
+      "evidenceScope": "Earlier injected failure after local completion and before result staging left the origin pending with no recoverable result record. Current release dispatch and callback paths still separate those steps.",
+      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-003",
+      "repairGate": "P01",
+      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)"
+    },
+    {
+      "id": "AMX-BASE-004",
+      "rule": "DP003",
+      "summary": "Same-peer work consumed by a different node can be acknowledged as stale",
+      "symbol": "Work.on_envelope",
+      "path": "hub/fed/plugins/work.py",
+      "firstReported": "2026-10-08",
+      "recordedOn": "2026-10-09",
+      "evidenceScope": "Code-backed finding, not a claimed live-cluster reproduction. The same-peer branch reopens origin_id in the consuming node's database without a full origin-node ownership check.",
+      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-004",
+      "repairGate": "P01",
+      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)"
+    },
+    {
+      "id": "AMX-BASE-005",
+      "rule": "DP004",
+      "summary": "Result processing lacks binding to the selected executor and original repository",
+      "symbol": "Work._on_result",
+      "path": "hub/fed/plugins/work.py",
+      "firstReported": "2026-10-08",
+      "recordedOn": "2026-10-09",
+      "evidenceScope": "Code-backed finding from the repository analysis, confirmed by source reread. The result path checks an origin work ID and pending state but does not bind the result to a recorded selected executor/repository contract.",
+      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-005",
+      "repairGate": "P01",
+      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)"
+    },
+    {
+      "id": "AMX-BASE-006",
+      "rule": "DP006",
+      "summary": "Backup names can collide and replace a retained snapshot",
+      "symbol": "Store.backup_to",
+      "path": "hub/store.py",
+      "firstReported": "2026-10-08",
+      "recordedOn": "2026-10-09",
+      "evidenceScope": "Earlier offline retention test and frozen-clock reproduction identified millisecond timestamp filename collisions. Current code uses that stamp plus os.replace for the final backup path.",
+      "planningIssue": "docs/planning/2026-10-09/known-baseline-blockers.md#amx-base-006",
+      "repairGate": "P01",
+      "triageOwner": "Nick Klute; Ryan Helms (existing repository owners; implementation assignment pending P00)"
+    }
+  ],
+  "historicalRuleAssessments": [
+    {
+      "recordedOn": "2026-10-09",
+      "reviewer": "Codex, incremental documentation review, 2026-10-09; prior rule assessments retained from Claude Opus 5.5 for Nick Klute, 2026-10-08",
+      "sourceDigest": "5b3e5e5a762680c09dba6a0eb31901263e9029f4e2cdc7fea07694445abc0020",
+      "note": "Preserved original rule assessments before recording known baseline findings during planning review.",
+      "rules": {
+        "DP003": {
+          "status": "pass",
+          "rationale": "External effects are bounded. Federation connect uses wait_for(20) and connect_timeout=5 with backoff capped at 30 s; JetStream publish has timeout=5 and the outbox row is marked sent only after the ack; consumers use explicit ack, ack_wait=60 and max_deliver=20, and ingest is idempotent on the message id. git calls have timeout=60 and tmux calls timeout=10. The review found that the single-operator Bridge's NatsClient.connect had no timeout on the TCP connect or the INFO line; this change bounds both (CONNECT_TIMEOUT_S=5, a TimeoutError that run()'s backoff loop catches), covered by BridgeConnectBounded in hub/tests/test_hub_offline.py.",
+          "evidence": [
+            "hub/bridge.py",
+            "hub/fed/runtime.py",
+            "hub/fed/conn.py",
+            "hub/transport.py",
+            "hub/tests/test_hub_offline.py"
+          ]
+        },
+        "DP004": {
+          "status": "pass",
+          "rationale": "The hub socket identifies callers by peer uid (SO_PEERCRED/LOCAL_PEERCRED) and process ancestry; the TCP listener is loopback-only, needs a token compared with hmac.compare_digest, and ignores a claimed 'as'. Secrets are written 0600 under umask 077. Federation takes the sender from subject token 3 and the server enforces it with per-user publish ACLs; redact.scrub blocks or redacts secrets outbound and privileged_gate fails closed. The review found that the dashboard checked Origin on writes but not Host on any request, so a DNS-rebinding page could read /api/stream/<agent> terminal content; this change adds Handler.host_allowed (421 for any Host other than its own 127.0.0.1/localhost port), covered by dashboard/test_host_guard.py. The hub/fed/demo.py and test strings that look like keys are fake redaction inputs.",
+          "evidence": [
+            "hub/server.py",
+            "hub/fed/guard.py",
+            "hub/fed/redact.py",
+            "dashboard/server.py",
+            "dashboard/test_host_guard.py"
+          ]
+        },
+        "DP006": {
+          "status": "pass",
+          "rationale": "Operators see federation state through 'agentmux hub fed status/audit/quarantine'; Runtime.last_error records connect failures and every guard decision lands in fed_audit. The dashboard Federation panel shows peers, holds (alert after hold_alert_s=300) and a kill switch that survives restarts, with 'resume' to recover. Store._migrate takes a pre-migration backup. Targets are measurable: ack_wait 60 s, presence TTL 90 s, and orchestration scoreboards in evals/orchestrations/SCOREBOARD.md.",
+          "evidence": [
+            "hub/fed/runtime.py",
+            "hub/fed/ledger.py",
+            "dashboard/fed_panel.py",
+            "evals/orchestrations/SCOREBOARD.md"
+          ]
+        }
+      }
+    }
+  ]
 }
