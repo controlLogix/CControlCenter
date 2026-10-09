@@ -1429,7 +1429,7 @@
           "text": "LOCAL-01 has a reviewed host/platform support matrix, stable instance identity, safe Docker context and credential rules, readiness/status contract, and assigned verification owners. Automatic launch is required for every integration advertised as supporting it."
         }
       ],
-      "status": "verification",
+      "status": "done",
       "owner": "Codex",
       "dependsOn": [
         "P00-T01",
@@ -1480,8 +1480,12 @@
           "text": "The required reviewer and advancement decision are recorded, and the phase commit is verified on the current remote feature branch. No merge is performed."
         }
       ],
-      "evidence": [],
-      "commits": [],
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/P00-GATE.json"
+      ],
+      "commits": [
+        "605e96d495b4763997a13f3935245efb77e6ba84"
+      ],
       "blocker": null,
       "history": [
         {
@@ -1640,6 +1644,13 @@
           "from": "blocked",
           "to": "verification",
           "note": "All seven P00 tasks accepted; review and commit the complete P00 design evidence, then verify remote before recording advancement."
+        },
+        {
+          "at": "2026-10-09T21:09:51.961862+00:00",
+          "actor": "Codex",
+          "from": "verification",
+          "to": "done",
+          "note": "Codex approved P00 after full design/inventory review and verified remote candidate 605e96d; P01 may begin after gate record push."
         }
       ],
       "phaseCriteria": [
@@ -32847,6 +32858,14 @@
       "from": "blocked",
       "to": "verification",
       "note": "All seven P00 tasks accepted; review and commit the complete P00 design evidence, then verify remote before recording advancement.",
+      "taskId": "P00-GATE"
+    },
+    {
+      "at": "2026-10-09T21:09:51.961862+00:00",
+      "actor": "Codex",
+      "from": "verification",
+      "to": "done",
+      "note": "Codex approved P00 after full design/inventory review and verified remote candidate 605e96d; P01 may begin after gate record push.",
       "taskId": "P00-GATE"
     }
   ],

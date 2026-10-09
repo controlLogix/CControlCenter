@@ -301,7 +301,7 @@ An approved implementation contract with no unresolved decision hidden in code.
 
 ### P00-GATE: Verify and accept P00
 
-**Status:** verification. **Owner:** Codex.
+**Status:** done. **Owner:** Codex.
 
 **Dependencies:** P00-T01, P00-T02, P00-T03, P00-T04, P00-T05, P00-T06, P00-T07.
 
@@ -338,9 +338,9 @@ An approved implementation contract with no unresolved decision hidden in code.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Review the LOCAL-01 flow and FAIL-55–FAIL-62 against actual host startup capabilities; distinguish approved behavior from unresolved host/version choices.
 
-**Evidence:** not yet recorded
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P00/P00-GATE.json
 
-**Commits:** not yet recorded
+**Commits:** 605e96d495b4763997a13f3935245efb77e6ba84
 
 ## P01. Executable contracts, baseline repairs, and verification
 

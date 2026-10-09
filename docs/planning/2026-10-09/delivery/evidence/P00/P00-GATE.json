@@ -1,0 +1,69 @@
+{
+  "taskId": "P00-GATE",
+  "sourceCommit": "605e96d495b4763997a13f3935245efb77e6ba84",
+  "gateRecord": "docs/planning/2026-10-09/delivery/evidence/P00/gate.json",
+  "remoteCommit": "605e96d495b4763997a13f3935245efb77e6ba84",
+  "advancementApproval": {
+    "actor": "Codex",
+    "date": "2026-10-09",
+    "decision": "approved"
+  },
+  "acceptanceResults": [
+    {
+      "criterionId": "P00-GATE-AC01",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/gate.json"
+      ]
+    },
+    {
+      "criterionId": "P00-GATE-AC02",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/gate.json"
+      ]
+    },
+    {
+      "criterionId": "P00-GATE-AC03",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/gate.json"
+      ]
+    },
+    {
+      "criterionId": "P00-GATE-AC04",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/gate.json"
+      ]
+    },
+    {
+      "criterionId": "P00-GATE-AC05",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/gate.json"
+      ]
+    },
+    {
+      "criterionId": "P00-GATE-AC06",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/gate.json"
+      ]
+    },
+    {
+      "criterionId": "P00-GATE-AC07",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/gate.json"
+      ]
+    },
+    {
+      "criterionId": "P00-GATE-AC08",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/gate.json"
+      ]
+    }
+  ]
+}

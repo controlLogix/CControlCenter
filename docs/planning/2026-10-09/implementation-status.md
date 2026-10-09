@@ -6,7 +6,7 @@ Branch: `feat/agentmux-platform-rearchitecture`. No phase or merge approval is i
 
 | Phase | Planned | Ready | In progress | Blocked | Verification | Done | Gate |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| P00 | 0 | 0 | 0 | 0 | 1 | 7 | verification |
+| P00 | 0 | 0 | 0 | 0 | 0 | 8 | done |
 | P01 | 9 | 0 | 0 | 0 | 0 | 0 | planned |
 | P02 | 8 | 0 | 0 | 0 | 0 | 0 | planned |
 | P03 | 8 | 0 | 0 | 0 | 0 | 0 | planned |
@@ -24,7 +24,6 @@ Branch: `feat/agentmux-platform-rearchitecture`. No phase or merge approval is i
 
 ## Current work and blockers
 
-- **P00-GATE — verification:** Verify and accept P00
 
 ## P00. Scope, baseline, and architecture decisions
 
@@ -39,7 +38,7 @@ An approved implementation contract with no unresolved decision hidden in code.
 | [P00-T05](delivery/task-details.md#P00-T05) | done | Codex | Record approved storage direction STATE-01 |
 | [P00-T06](delivery/task-details.md#P00-T06) | done | Codex | Apply ADD-01 and the component preservation matrix to every changed source file and affected caller |
 | [P00-T07](delivery/task-details.md#P00-T07) | done | Codex | Record LOCAL-01: automatic Docker Compose startup or verified reuse on supported agent-client launch |
-| [P00-GATE](delivery/task-details.md#P00-GATE) | verification | Codex | Verify and accept P00 |
+| [P00-GATE](delivery/task-details.md#P00-GATE) | done | Codex | Verify and accept P00 |
 
 ## P01. Executable contracts, baseline repairs, and verification
 
