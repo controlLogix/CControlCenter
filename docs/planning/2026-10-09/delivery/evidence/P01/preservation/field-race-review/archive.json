@@ -1,0 +1,31 @@
+{
+  "copies": [
+    {
+      "originalPath": "/home/ryan/.cache/agentmux-governance/field-race-evidence/guard-removed.log",
+      "archivedPath": "guard-removed.log",
+      "sha256": "4fe2e02994c15352b766605572178a21462af6b99fad500fe905ea66f988efd4",
+      "bytesEqual": true
+    },
+    {
+      "originalPath": "/home/ryan/.cache/agentmux-governance/field-race-evidence/result.json",
+      "archivedPath": "result.json",
+      "sha256": "42e68370fde744a8aab48e1e462046092c8caf4f950b885ee6ef35db6819f5c6",
+      "bytesEqual": true
+    },
+    {
+      "originalPath": "/home/ryan/.cache/agentmux-governance/field-race-evidence/positive.log",
+      "archivedPath": "positive.log",
+      "sha256": "9787295a7b5adf9def82bc55290620a5716a45216b61a3f82a9061a6b0d992b3",
+      "bytesEqual": true
+    },
+    {
+      "originalPath": "/mnt/c/Users/RyanHelms/AppData/Local/Temp/agentmux-field-race-check.py",
+      "archivedPath": "agentmux-field-race-check.py",
+      "sha256": "6b8494f0700a983f79a5946cbca1a3c8f0a85a4b212e7c00390a75428614c4eb",
+      "bytesEqual": true
+    }
+  ],
+  "originalTestSha256": "3e82d396f9402e3c3aba4ea41744bcc75335682cd8de70bcbb1d6c4e1d4c4903",
+  "replacementTestSha256": "2834dfd07a87fff812319737fe3398eeeecfba7b448cd03fdadecef4deebb1ce",
+  "review": "Event barrier holds the real scan worker until both HTTP requests complete. Original duplicate-scan rejection assertion is retained; HTTP 400 and cleanup checks are added. Removing only the runtime guard in the isolated copy produces exactly the two intended failures. Runtime source is unchanged."
+}

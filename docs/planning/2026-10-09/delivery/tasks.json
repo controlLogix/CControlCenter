@@ -2051,7 +2051,10 @@
       ],
       "evidence": [
         "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md",
-        "docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md"
+        "docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/37e0d8c/review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/acceptance-map.json"
       ],
       "commits": [
         "f19c6473d56335b8eeb28704b02895b9d9ab7fcc",
@@ -2066,6 +2069,13 @@
           "from": "planned",
           "to": "in_progress",
           "note": "Implementing pinned cross-platform contract and broker CI checks while preserving existing phase gates; actual runner evidence remains required."
+        },
+        {
+          "at": "2026-10-09T23:14:24.160823+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "in_progress",
+          "note": "Native37e candidate passed all 18 checks on macOS/Linux and source-bound artifacts were reviewed. Added original full hub CI qualification; repaired scanner/browser test defects and malformed identity acceptance with negative evidence. Full dashboard has missing external plugin coverage; actual provider repetitions and phase gate remain open."
         }
       ],
       "phaseCriteria": [

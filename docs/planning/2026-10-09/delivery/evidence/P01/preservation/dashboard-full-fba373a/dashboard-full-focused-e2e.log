@@ -1,0 +1,55 @@
+playwright: /home/ryan/.cache/agentmux-governance/p01-dashboard-full-vkqiqkjv/dependencies/node_modules/playwright
+dashboard: 127.0.0.1:51393   broker: 127.0.0.1:60073   home: /home/ryan/.cache/agentmux-governance/p01-dashboard-full-vkqiqkjv/tmp/tmp.vs6jv5X6Iw
+curl: (7) Failed to connect to 127.0.0.1 port 51393 after 0 ms: Could not connect to server
+curl: (7) Failed to connect to 127.0.0.1 port 51393 after 0 ms: Could not connect to server
+PASS the rail has exactly the ten views, in order
+PASS every rail button reveals its view and hides the others
+PASS all five IIOT cards render content, not just CODESYS
+PASS every card title is bold, and they all match
+PASS no card overflows its box
+PASS the cards pack into columns with no dead space between them
+PASS expand all and collapse all drive every card
+PASS the MQTT panel browses a real broker
+PASS a retained value is marked retained and a live one is not
+PASS the tree opens deep enough to show a value without clicking
+PASS clicking a topic inspects it, with its payload pretty-printed
+PASS the log tab shows arrival order and the buffer can be cleared
+PASS the panel names its client and whether this broker has credentials
+PASS a publish goes out on the session the monitor already holds
+PASS stopping the monitor is reported, and it stays stopped
+PASS the scanner finds a host on a port it was told to probe
+PASS a malformed extra port is named, not silently dropped
+PASS the scanner refuses a public range, in the page
+PASS PROFINET reconciles an imported snapshot against the shared schema
+PASS Status carries four tabs and shows exactly one at a time
+PASS the chosen Status tab survives a reload
+PASS the journal appends, filters and exports what is on screen
+PASS the export button names the active tab, not the last one to load
+PASS Board carries Tasks, Atlassian and Kanban, with all six drop columns
+PASS epics are collapsible cards and the choice survives a reload
+PASS dragging a task onto another epic refiles it for real
+PASS Organization carries Agents and Teams, and both render
+PASS the GitHub panel shows an account card and never renders a token
+PASS Settings carries the Atlassian card and the theme importer
+PASS nothing that was removed is reachable any more
+PASS with everything loaded, no banner is shown
+PASS a view script that fails to load is named, and the notice sticks
+PASS a running agent is marked and a finished one is not
+PASS a live name is a button; a finished one is inert text
+PASS clicking a live item opens the pane serving it
+PASS clicking a finished agent does nothing at all
+PASS an agent name never wraps mid-word
+PASS every renderer that names an agent tags it
+PASS Runs lists what is in flight and says what is blocking each one
+PASS an attempt count is always shown against its ceiling
+PASS worker and reviewer cells are tagged for the live-agent marking
+PASS a verified run asks the operator to decide, and shows the diff
+PASS the rail badge says a run is waiting on you
+PASS a rejection with no reason is refused before it is sent
+PASS a half-typed note survives the poll that redraws the view
+PASS approving records the decision and the run stops asking
+PASS the server refuses to approve a run whose jobs are unverified
+PASS runs are read-only over HTTP apart from that one decision
+PASS the page logged no errors while all of that happened
+
+passed 49, failed 0

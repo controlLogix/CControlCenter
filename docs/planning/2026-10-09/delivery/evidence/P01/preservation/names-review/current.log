@@ -1,0 +1,11 @@
+test_addresses_and_subjects (names_preservation_review.Names.test_addresses_and_subjects) ... ok
+test_all_address_forms_roundtrip (names_preservation_review.Names.test_all_address_forms_roundtrip) ... ok
+test_malformed_addresses_rejected (names_preservation_review.Names.test_malformed_addresses_rejected) ... ok
+test_normalize_and_refuse (names_preservation_review.Names.test_normalize_and_refuse) ... ok
+test_session_roundtrip (names_preservation_review.Names.test_session_roundtrip) ... ok
+test_session_spellings_enforce_same_length_limits (names_preservation_review.Names.test_session_spellings_enforce_same_length_limits) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.002s
+
+OK

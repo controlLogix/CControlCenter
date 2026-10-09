@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, P01 controlled execution and preservation checkpoint review, 2026-10-09; phase gate remains open",
-  "sourceDigest": "1a58956aa12e3f3fbd0262c8056c0e605d73ce2ed9e66ab60b5b66dfa382e27f",
+  "reviewer": "Codex, P01 preservation repairs; phase gate remains open",
+  "sourceDigest": "57cbb632d494525a521a53c91bfc0038c00acb3d46ddc23f52eea49011420836",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -451,6 +451,20 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/preservation/shell-smoke-source-check.json"
       ],
       "rationale": "Reviewed exact fba373a snapshot, private HOME/state/tmux isolation, 403 committed source matches, real hub and shell pane delivery/acknowledgments, operator-scoped claim/done, agent death and sidecar removal. Preserved queued operator result rather than claiming every recipient acknowledged. Owned hub and processes stopped, temporary root removed without fallback kills. No provider, NATS or full-dashboard claim. Existing commands and assertions unchanged."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "previousSourceDigest": "1a58956aa12e3f3fbd0262c8056c0e605d73ce2ed9e66ab60b5b66dfa382e27f",
+      "scope": "P01 original functionality preservation repairs",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/names-review/result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/field-race-review/result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/hub-local-repair/review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/37e0d8c/review.json"
+      ],
+      "rationale": "Reviewed all staged changes and independent negative evidence. Fix name validation without changing valid identities, retain exact browser navigation assertion, synchronize actual scanner concurrency test. Add isolated original hub native CI with verified pinned NSC; local full128 test proof and original failures retained. No pattern relationships or architecture changed. Preserve captured evidence bytes including CRLF in captured scripts/reports. Phase remains open; current native candidate verification, external plugin and actual provider evidence remain outstanding."
     }
   ],
   "rules": {

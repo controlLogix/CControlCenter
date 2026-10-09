@@ -36,7 +36,7 @@ def check_part(s: str, kind: str, accept_normalized: bool = False) -> str:
     normalized form - or return that form when the caller explicitly accepts it.
     Suggestive, never silent: a human always sees the name that will be used."""
     limit = LIMITS.get(kind, 32)
-    if isinstance(s, str) and PART_RE.match(s) and len(s) <= limit:
+    if isinstance(s, str) and PART_RE.fullmatch(s) and len(s) <= limit:
         return s
     sug = normalize(s or "", kind) or None
     if accept_normalized and sug:
@@ -50,8 +50,10 @@ def session_name(repo: str, role: str, agent: str) -> str:
 
 def split_session(name: str) -> tuple[str, str, str]:
     parts = name.split("-")
-    if len(parts) != 3 or not all(PART_RE.match(p) for p in parts):
+    if len(parts) != 3:
         raise ValueError(f"not a protocol session name: {name!r}")
+    for part, kind in zip(parts, ("repo", "role", "agent")):
+        check_part(part, kind)
     return parts[0], parts[1], parts[2]
 
 

@@ -59,6 +59,46 @@ class Names(unittest.TestCase):
         with self.assertRaises(ValueError):
             names.parse_address("nobody")
 
+    def test_all_address_forms_roundtrip(self):
+        cases = [
+            ("agent:alpha/worker/w1", "agent:alpha-worker-w1", "am.agent.alpha.worker.w1"),
+            ("agent:alpha-worker-w1", "agent:alpha-worker-w1", "am.agent.alpha.worker.w1"),
+            ("virtual:operator", "virtual:operator", "am.n1.virtual.operator"),
+            ("team:alpha/t1", "team:alpha/t1", "am.team.alpha.t1"),
+            ("role:alpha/worker", "role:alpha/worker", "am.work.alpha.worker"),
+            ("role:group:g1/worker", "role:group:g1/worker", "am.work.g_g1.worker"),
+            ("role:team:alpha/t1/worker", "role:team:alpha/t1/worker", "am.work.t_alpha.t1.worker"),
+            ("role:*/worker", "role:*/worker", "am.work.all.worker"),
+        ]
+        for raw, canonical, subject in cases:
+            with self.subTest(address=raw):
+                parsed = names.parse_address(raw)
+                self.assertEqual(str(parsed), canonical)
+                self.assertEqual(names.parse_address(str(parsed)), parsed)
+                self.assertEqual(names.nats_subject(parsed, "n1"), subject)
+
+    def test_malformed_addresses_rejected(self):
+        cases = ["", "nobody", "unknown:alpha", "agent:alpha/worker", "agent:alpha-worker",
+                 "agent:alpha-worker-w1-extra", "team:alpha", "team:alpha/t1/extra",
+                 "virtual:", "role:worker", "role:team:alpha/worker"]
+        for invalid in ("*", ">", "a.b", "a b", "a\nb", "a\r", "a\t", "a\n", "A", "é"):
+            cases.extend((f"agent:alpha/worker/{invalid}", f"agent:alpha-worker-{invalid}",
+                          f"virtual:{invalid}", f"team:alpha/{invalid}", f"role:alpha/{invalid}",
+                          f"role:group:{invalid}/worker", f"role:team:alpha/{invalid}/worker"))
+        for raw in cases:
+            with self.subTest(address=raw), self.assertRaises(ValueError):
+                names.parse_address(raw)
+
+    def test_session_spellings_enforce_same_length_limits(self):
+        parts = ["r" * names.LIMITS["repo"], "w" * names.LIMITS["role"], "a" * names.LIMITS["agent"]]
+        self.assertEqual(names.split_session(names.session_name(*parts)), tuple(parts))
+        for index in range(3):
+            oversized = list(parts)
+            oversized[index] += "x"
+            for separator in ("/", "-"):
+                with self.subTest(part=index, separator=separator), self.assertRaises(ValueError):
+                    names.parse_address("agent:" + separator.join(oversized))
+
 
 class Messaging(unittest.TestCase):
     def setUp(self):

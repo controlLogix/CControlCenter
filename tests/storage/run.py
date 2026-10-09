@@ -435,7 +435,7 @@ async def main():
               'brokerBinarySha256': hashlib.sha256(SERVER.read_bytes()).hexdigest(),
               'command': 'python tests/storage/run.py',
               'sourceCommit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
-              'limits': ['One file-backed R1 broker on WSL/Linux; no native macOS, R3, network partition or power-loss qualification.',
+              'limits': ['One file-backed R1 broker on the recorded host platform; no R3, network partition or power-loss qualification.',
                          'Fixture owners use trusted synthetic provenance; no authentication/permission or production domain owner claim.',
                          'Lost acknowledgment is deliberately omitted by the publisher; restart is graceful SIGTERM, not a power failure.',
                          'Retained-history scans are fixture implementations bounded to 10000 messages, not production indexes.',

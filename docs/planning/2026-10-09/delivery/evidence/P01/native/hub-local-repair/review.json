@@ -1,0 +1,47 @@
+{
+  "recordedAt": "2026-10-09T23:15:46.820715+00:00",
+  "sourceCommit": "37e0d8cd7439d31a491ac673e73438f7885cd04e",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "nsc": {
+    "version": "nsc version 2.15.0",
+    "archiveUrl": "https://github.com/nats-io/nsc/releases/download/v2.15.0/nsc-linux-amd64.zip",
+    "checksumUrl": "https://github.com/nats-io/nsc/releases/download/v2.15.0/SHA256SUMS-nsc.txt",
+    "archiveSha256": "7d55eda757dc9f233675a3038fcf8779bcda99753b1603f7009fc8537e126b7e",
+    "binarySha256": "4463d74efd49f0027a74fb6600714a3d972031985e9a2b4f7e3e3681af215a56",
+    "checksumVerified": true
+  },
+  "broker": {
+    "version": "nats-server: v2.15.0",
+    "binarySha256": "387ce54e7a0a249d877a579ed641d715bab047d7e061bfa42b4d07f6a0401341",
+    "source": "Reused prepared NATS Server tool cache; this local run did not download the broker archive."
+  },
+  "reviewer": "Codex",
+  "tests": 128,
+  "sourceUnchangedDuringRun": true,
+  "hostileInheritedSelectorsExcluded": true,
+  "testCommand": [
+    "/home/ryan/.cache/agentmux-governance/venv/bin/python",
+    "-m",
+    "hub.tests.run_local",
+    "--profile",
+    "full"
+  ],
+  "phaseAccepted": false,
+  "storageLimitOnlyChange": {
+    "path": "tests/storage/run.py",
+    "oldSha256": "8eb26dc9848b63dd6db38a4ebc03f590f79dfacddcf1c8cab59910f871a39dab",
+    "newSha256": "47d0e4314dc35d6f7cb708bc9b367bc209de79d50535b7af8f72c240828b9a70"
+  },
+  "priorRun": "The retained 125-test run passed its tests but hub_preservation rejected it because parent source changed during execution. Its accepted=false and sourceUnchangedDuringRun=false remain unchanged.",
+  "limits": [
+    "This is WSL execution of the native CI helper, not a completed Linux/macOS CI job for this pending candidate.",
+    "Static synthetic inherited selector values tested the child environment allowlist; no real provider credential was used.",
+    "Existing full hub profile and local broker fixtures do not qualify R3, power loss or final platform bilateral acceptance."
+  ],
+  "artifacts": {
+    "hub-full-result.json": "7109ba396344c412a653659e4b1424fbc10ea03ea94c66ec2944786a2f34980d",
+    "hub-wrapper-result.json": "7c6cd8680452107f452b2da54215d8dfcca6fd7882615110f5e538e320a1e1d6",
+    "rejected-source-change-hub-full-result.json": "8cad598eddb7e3414bb9a0cc2ee0fe0d0027024ac33ed2ef467e5c62883d0e0a",
+    "rejected-source-change-wrapper-result.json": "e2459fcd45f70a0879fe07ea56a2693e67a7a0fc9c1e02a692d0e443facd6344"
+  }
+}

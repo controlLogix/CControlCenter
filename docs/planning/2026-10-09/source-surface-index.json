@@ -7335,7 +7335,7 @@
       "componentIds": [
         "HUB-01"
       ],
-      "workingFileSha256": "43975e5176c59eb254f536dfe1cdc94aa52c2724cd2c820433b21e1c87c6c0ef",
+      "workingFileSha256": "21dd001491fac1e4ecb2df1fa339d30aff7f29f33fb4f6cb9ab9ca9ea4d5635d",
       "declarations": [
         {
           "name": "NameError_",
@@ -7369,27 +7369,27 @@
         },
         {
           "name": "Address",
-          "line": 59,
+          "line": 61,
           "kind": "ClassDef"
         },
         {
           "name": "Address.__str__",
-          "line": 64,
+          "line": 66,
           "kind": "FunctionDef"
         },
         {
           "name": "parse_address",
-          "line": 72,
+          "line": 74,
           "kind": "FunctionDef"
         },
         {
           "name": "nats_subject",
-          "line": 106,
+          "line": 108,
           "kind": "FunctionDef"
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
+      "reviewStatus": "Codex reviewed P01 preservation repair; current verification evidence remains scoped to its recorded sources and environment."
     },
     {
       "path": "hub/profiles.py",
@@ -10809,46 +10809,51 @@
       "componentIds": [
         "HUB-26"
       ],
-      "workingFileSha256": "714169584757c4f228acf260c4e16c244c7af3bbe5f9c3d111e6ffb278163a26",
+      "workingFileSha256": "a0d40390b9534d0fa312ecceb347ed16ce153c0eb4ec05a3d86c7602e6487b39",
       "declarations": [
         {
           "name": "digest",
-          "line": 30,
+          "line": 39,
           "kind": "FunctionDef"
         },
         {
           "name": "source_hashes",
-          "line": 34,
+          "line": 43,
           "kind": "FunctionDef"
         },
         {
           "name": "download",
-          "line": 48,
+          "line": 59,
           "kind": "FunctionDef"
         },
         {
           "name": "broker",
-          "line": 54,
+          "line": 65,
           "kind": "FunctionDef"
         },
         {
           "name": "negative_fixture",
-          "line": 83,
+          "line": 94,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "nsc",
+          "line": 125,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "hub_preservation",
+          "line": 157,
           "kind": "FunctionDef"
         },
         {
           "name": "main",
-          "line": 114,
-          "kind": "FunctionDef"
-        },
-        {
-          "name": "run",
-          "line": 139,
+          "line": 197,
           "kind": "FunctionDef"
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "owned-by-component; fixture source indexed; runtime qualification recorded separately"
+      "reviewStatus": "Codex reviewed P01 preservation repair; current verification evidence remains scoped to its recorded sources and environment."
     },
     {
       "path": "tests/contracts/fake_execution.py",
@@ -11270,7 +11275,7 @@
       "componentIds": [
         "HUB-26"
       ],
-      "workingFileSha256": "8eb26dc9848b63dd6db38a4ebc03f590f79dfacddcf1c8cab59910f871a39dab",
+      "workingFileSha256": "47d0e4314dc35d6f7cb708bc9b367bc209de79d50535b7af8f72c240828b9a70",
       "declarations": [
         {
           "name": "require",
@@ -11298,58 +11303,38 @@
           "kind": "ClassDef"
         },
         {
-          "name": "main",
-          "line": 128,
-          "kind": "AsyncFunctionDef"
-        },
-        {
-          "name": "__init__",
+          "name": "Broker.__init__",
           "line": 69,
           "kind": "FunctionDef"
         },
         {
-          "name": "start",
+          "name": "Broker.start",
           "line": 82,
           "kind": "AsyncFunctionDef"
         },
         {
-          "name": "stop",
+          "name": "Broker.stop",
           "line": 99,
           "kind": "FunctionDef"
         },
         {
-          "name": "connect",
+          "name": "Broker.connect",
           "line": 110,
           "kind": "AsyncFunctionDef"
         },
         {
-          "name": "client",
+          "name": "Broker.client",
           "line": 113,
           "kind": "AsyncFunctionDef"
         },
         {
-          "name": "case",
-          "line": 147,
+          "name": "main",
+          "line": 128,
           "kind": "AsyncFunctionDef"
-        },
-        {
-          "name": "dispatch_reserved",
-          "line": 192,
-          "kind": "AsyncFunctionDef"
-        },
-        {
-          "name": "raw",
-          "line": 254,
-          "kind": "AsyncFunctionDef"
-        },
-        {
-          "name": "admits",
-          "line": 374,
-          "kind": "FunctionDef"
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
+      "reviewStatus": "Codex reviewed P01 preservation repair; current verification evidence remains scoped to its recorded sources and environment."
     },
     {
       "path": "tests/storage/typescript/src/client.ts",
@@ -12787,6 +12772,206 @@
             {
               "name": "admits",
               "line": 338,
+              "kind": "FunctionDef"
+            }
+          ],
+          "httpPathLiterals": [],
+          "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
+        }
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "Reviewed identity validation, deterministic scanner test, actual navigation expectation and original-hub native CI extension.",
+      "previousFiles": [
+        {
+          "path": "hub/names.py",
+          "componentIds": [
+            "HUB-01"
+          ],
+          "workingFileSha256": "43975e5176c59eb254f536dfe1cdc94aa52c2724cd2c820433b21e1c87c6c0ef",
+          "declarations": [
+            {
+              "name": "NameError_",
+              "line": 17,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "NameError_.__init__",
+              "line": 20,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "normalize",
+              "line": 26,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "check_part",
+              "line": 34,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "session_name",
+              "line": 47,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "split_session",
+              "line": 51,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Address",
+              "line": 59,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "Address.__str__",
+              "line": 64,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "parse_address",
+              "line": 72,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "nats_subject",
+              "line": 106,
+              "kind": "FunctionDef"
+            }
+          ],
+          "httpPathLiterals": [],
+          "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
+        },
+        {
+          "path": "tests/contracts/ci.py",
+          "componentIds": [
+            "HUB-26"
+          ],
+          "workingFileSha256": "714169584757c4f228acf260c4e16c244c7af3bbe5f9c3d111e6ffb278163a26",
+          "declarations": [
+            {
+              "name": "digest",
+              "line": 30,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "source_hashes",
+              "line": 34,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "download",
+              "line": 48,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "broker",
+              "line": 54,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "negative_fixture",
+              "line": 83,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "main",
+              "line": 114,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "run",
+              "line": 139,
+              "kind": "FunctionDef"
+            }
+          ],
+          "httpPathLiterals": [],
+          "reviewStatus": "owned-by-component; fixture source indexed; runtime qualification recorded separately"
+        },
+        {
+          "path": "tests/storage/run.py",
+          "componentIds": [
+            "HUB-26"
+          ],
+          "workingFileSha256": "8eb26dc9848b63dd6db38a4ebc03f590f79dfacddcf1c8cab59910f871a39dab",
+          "declarations": [
+            {
+              "name": "require",
+              "line": 30,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "fixture_atomic_capability",
+              "line": 35,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "hashes",
+              "line": 42,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "record",
+              "line": 48,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Broker",
+              "line": 68,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "main",
+              "line": 128,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "__init__",
+              "line": 69,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "start",
+              "line": 82,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "stop",
+              "line": 99,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "connect",
+              "line": 110,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "client",
+              "line": 113,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "case",
+              "line": 147,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "dispatch_reserved",
+              "line": 192,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "raw",
+              "line": 254,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "admits",
+              "line": 374,
               "kind": "FunctionDef"
             }
           ],

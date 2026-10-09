@@ -1,0 +1,56 @@
+{
+  "candidateBase": "37e0d8cd7439d31a491ac673e73438f7885cd04e",
+  "changedSource": "dashboard/test_field_panels.py",
+  "changedSourceSha256": "2834dfd07a87fff812319737fe3398eeeecfba7b448cd03fdadecef4deebb1ce",
+  "environment": {
+    "python": "Python 3.14.4",
+    "platform": "Linux ADAG-LAPTOP01 6.18.33.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026 x86_64 GNU/Linux"
+  },
+  "isolation": {
+    "HOME": "/tmp/p01-field-race-6gavz1kt/home",
+    "AGENTMUX_HOME": "/tmp/p01-field-race-6gavz1kt/state",
+    "TMUX_TMPDIR": "/tmp/p01-field-race-6gavz1kt/tmux",
+    "XDG_CONFIG_HOME": "/tmp/p01-field-race-6gavz1kt/config",
+    "XDG_CACHE_HOME": "/tmp/p01-field-race-6gavz1kt/cache"
+  },
+  "runs": [
+    {
+      "label": "positive",
+      "command": [
+        "python3",
+        "dashboard/test_field_panels.py"
+      ],
+      "exitCode": 0,
+      "seconds": 23.754,
+      "log": "/home/ryan/.cache/agentmux-governance/field-race-evidence/positive.log",
+      "logSha256": "9787295a7b5adf9def82bc55290620a5716a45216b61a3f82a9061a6b0d992b3",
+      "summary": [
+        "  ok    the scan worker has started                          True",
+        "  ok    a concurrent scan is refused -> 400                  400",
+        "  ok    but not two at once                                  True",
+        "  ok    the concurrency fixture leaves no scan worker        True",
+        "passed 213, failed 0"
+      ]
+    },
+    {
+      "label": "guard-removed",
+      "command": [
+        "python3",
+        "dashboard/test_field_panels.py"
+      ],
+      "exitCode": 1,
+      "seconds": 15.658,
+      "log": "/home/ryan/.cache/agentmux-governance/field-race-evidence/guard-removed.log",
+      "logSha256": "4fe2e02994c15352b766605572178a21462af6b99fad500fe905ea66f988efd4",
+      "summary": [
+        "  ok    the scan worker has started                          True",
+        "  FAIL  a concurrent scan is refused -> 400                  got 200 want 400",
+        "  FAIL  but not two at once                                  got False want True",
+        "  ok    the concurrency fixture leaves no scan worker        True",
+        "passed 211, failed 2"
+      ]
+    }
+  ],
+  "cleanupComplete": true,
+  "sourceUnchanged": true
+}

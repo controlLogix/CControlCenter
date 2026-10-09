@@ -445,11 +445,43 @@ check("on exactly the open port", [PORT], [p["port"] for p in result["hosts"][0]
 check("and the closed one is absent", False, 9 in [p["port"] for p in result["hosts"][0]["ports"]])
 check("progress is complete", (1, 1), (result["scanned"], result["total"]))
 
-status, payload = post("/api/netscan/start", {"range": "127.0.0.1/32", "actor": "nick"})
-ok("a second scan is allowed once the first has finished", status == 200)
-ok("but not two at once", post("/api/netscan/start",
-   {"range": "127.0.0.1/32", "actor": "nick"})[1]["error"].startswith("a scan is already"))
-post("/api/netscan/stop", {})
+# Hold the real worker until both HTTP requests have returned. A loopback scan
+# can otherwise finish before the second request and turn this into a speed test.
+scanner = server._scanner
+original_run = scanner._run
+scan_entered = threading.Event()
+release_scan = threading.Event()
+scan_workers = []
+
+
+def held_scan(hosts, ports, cancel):
+    scan_workers.append(threading.current_thread())
+    scan_entered.set()
+    release_scan.wait()
+    original_run(hosts, ports, cancel)
+
+
+scanner._run = held_scan
+try:
+    status, payload = post("/api/netscan/start", {"range": "127.0.0.1/32", "actor": "nick"})
+    ok("a second scan is allowed once the first has finished", status == 200)
+    ok("the scan worker has started", scan_entered.wait(10))
+    status, payload = post("/api/netscan/start",
+                           {"range": "127.0.0.1/32", "actor": "nick"})
+    check("a concurrent scan is refused -> 400", 400, status)
+    error = (payload or {}).get("error")
+    ok("but not two at once", isinstance(error, str) and error.startswith("a scan is already"))
+finally:
+    release_scan.set()
+    post("/api/netscan/stop", {})
+    # Join the latest worker first, including one incorrectly accepted by a
+    # broken guard, then join every worker that entered this fixture.
+    if scanner.thread is not None:
+        scanner.thread.join(10)
+    for worker in scan_workers:
+        worker.join(10)
+    scanner._run = original_run
+ok("the concurrency fixture leaves no scan worker", all(not t.is_alive() for t in scan_workers))
 
 check("the scan reports how many MACs it resolved", True,
       "resolved" in get("/api/netscan")[1])

@@ -514,7 +514,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 4. Run FAIL-42, FAIL-43 and FAIL-47 with real JetStream. Record which server/API/SDK capabilities provide each guarantee, including batch behavior and authoritative read freshness.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 
-**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md, docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md, docs/planning/2026-10-09/delivery/evidence/P01/native/37e0d8c/review.json, docs/planning/2026-10-09/delivery/evidence/P01/preservation/acceptance-map.json
 
 **Commits:** f19c6473d56335b8eeb28704b02895b9d9ab7fcc, a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41, 00353fd0ccb0b4ce34cb4eb45549703430af30d1
 

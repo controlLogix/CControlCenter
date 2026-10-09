@@ -39,3 +39,20 @@ This suite does not prove live NATS delivery, enrollment, key rotation, current-
 ## Native test input mirror
 
 `run.py` copies only `contracts/v1` and `sdk/python` into an owned temporary directory on the test host. It checks every copied input against repository bytes before and after the run, records those hashes, and removes the copy in a finally-protected lifetime. Python imports that exact copy; TypeScript uses its schema directory. This avoids repeated cross-filesystem schema scans on WSL while retaining content-change detection and the same 60-second subprocess bound. Reports remain in the requested persistent evidence directory. A changed or mismatched copy fails the run. The TypeScript compiled build and cache-source comparison remain separate checks.
+
+
+## Native CI preservation checks
+
+`ci.py` keeps the contract and broker checks and also runs the original hub's full profile on native Linux and macOS:
+
+```text
+python -m hub.tests.run_local --profile full
+```
+
+The runner supplies NATS Server 2.15.0 and [NSC 2.15.0](https://github.com/nats-io/nsc/releases/tag/v2.15.0). NSC provisions the existing federation fixtures' real test identities. The installer compares the downloaded [official checksum list](https://github.com/nats-io/nsc/releases/download/v2.15.0/SHA256SUMS-nsc.txt) with reviewed, pinned archive digests, verifies archive bytes, extracts only the expected binary and checks its version. Linux and macOS archive digests for both amd64 and arm64 are pinned. This is checksum verification, not a claim of independent signature verification.
+
+Only the test subprocess receives a disposable home, cache, configuration and data directory. Its PATH selects the verified tools and current Python interpreter. Only locale values and executable search paths are inherited; provider credentials, shell startup variables and all previous Agentmux, NATS and NSC settings are excluded. Codex and Claude configuration paths are private, and Git uses a private global configuration without system configuration. Existing fixtures still create their own temporary hubs, accounts and local brokers. No installed user state is imported.
+
+The original runner's unmodified `result.json` is copied to `hub-full-result.json` in the fresh CI evidence directory. Admission requires the full six-module profile, at least the existing 125 tests, no skipped or expected-failure tests, no failures, and unchanged hub source hashes matching the report. The CI record also binds the shell entry point and circle provisioning script. The report preserves `phaseGatePassed: false`; this check qualifies the original full profile on its actual recorded host, not R3, power-loss recovery or the final bilateral platform demonstration.
+
+The additional checks are `original-hub-full-profile` and `original-hub-evidence`; the preceding 18 checks remain required. Failed or incomplete original-suite output is retained when the runner produces it. A passing workflow does not approve a phase automatically.

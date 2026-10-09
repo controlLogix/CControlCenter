@@ -1,0 +1,28 @@
+{
+  "candidateBase": "fba373a06a7b356b49fc778b96be5d6e5ae387b6",
+  "command": [
+    "bash",
+    "dashboard/test_e2e.sh"
+  ],
+  "exitCode": 0,
+  "seconds": 50.866,
+  "changedSource": "dashboard/test_e2e.mjs",
+  "originalSha256": "435cff1da1cd1191f0b8016adeec8902ba5f632bd88105e35c220d8f52ef3e5a",
+  "replacementSha256": "858d8dc1dc18c3498a01eaf14f7e1985fe05e7ef77e214db0dc094a884f98c08",
+  "copiedSourceMatches": true,
+  "logSha256": "4835e15c17597fde447d892046d4f64430da960d93f5d139e682e424d4beed72",
+  "retention": "Strict deepEqual retained; expected list adds existing Federation view after Hub, introduced by3aec6c03; no product capability removed.",
+  "tail": [
+    "PASS a rejection with no reason is refused before it is sent",
+    "PASS a half-typed note survives the poll that redraws the view",
+    "PASS approving records the decision and the run stops asking",
+    "PASS the server refuses to approve a run whose jobs are unverified",
+    "PASS runs are read-only over HTTP apart from that one decision",
+    "PASS the page logged no errors while all of that happened",
+    "",
+    "passed 49, failed 0"
+  ],
+  "limits": [
+    "Focused browser run; full candidate rerun remains separate."
+  ]
+}

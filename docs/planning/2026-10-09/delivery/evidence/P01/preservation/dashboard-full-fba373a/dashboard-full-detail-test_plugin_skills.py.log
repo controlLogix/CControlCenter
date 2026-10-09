@@ -1,0 +1,10 @@
+test_arbitrary_script_selector_refuses (__main__.InstalledLauncher.test_arbitrary_script_selector_refuses) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_incomplete_runtime_refuses (__main__.InstalledLauncher.test_incomplete_runtime_refuses) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_missing_and_relative_binding_refuse (__main__.InstalledLauncher.test_missing_and_relative_binding_refuse) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_relocated_copy_preserves_arguments_and_refusals (__main__.InstalledLauncher.test_relocated_copy_preserves_arguments_and_refusals) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.002s
+
+OK (skipped=4)
+passed 0, failed 0

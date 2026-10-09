@@ -68,12 +68,12 @@ const text = (sel) => page.textContent(sel);
 
 // ── the rail ────────────────────────────────────────────────────────────────
 
-await test('the rail has exactly the nine views, in order', async () => {
+await test('the rail has exactly the ten views, in order', async () => {
   // Runs sits directly after Board because a run is what a board card becomes once
   // someone starts working on it, and the order is asserted rather than sorted so a
   // new entry has to be placed deliberately instead of landing wherever.
   const labels = await page.$$eval('.nav-item .nav-label', (ns) => ns.map(n => n.textContent));
-  assert.deepEqual(labels, ['Terminals', 'Status', 'Board', 'Runs', 'Hub', 'Organization',
+  assert.deepEqual(labels, ['Terminals', 'Status', 'Board', 'Runs', 'Hub', 'Federation', 'Organization',
                             'IIOT', 'GitHub', 'Settings']);
 });
 

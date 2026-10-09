@@ -131,11 +131,11 @@
     "tests/storage/run.py": {
       "path": "tests/storage/run.py",
       "originalSha256": "c0b9ec17212029fdfebf1ac56d4399f71ed4539587234bf3f60ee00017043624",
-      "replacementSha256": "8eb26dc9848b63dd6db38a4ebc03f590f79dfacddcf1c8cab59910f871a39dab",
+      "replacementSha256": "47d0e4314dc35d6f7cb708bc9b367bc209de79d50535b7af8f72c240828b9a70",
       "reviewer": "Codex",
       "reviewedAt": "2026-10-09",
-      "reason": "Preserved all original assertions and documentation; added four fixture storage cases and their limitations.",
-      "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/regression-replacement-review.md"
+      "reason": "Prior reviewed storage assertions retained; corrects host-platform limitation text only.",
+      "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md"
     },
     "tests/storage/README.md": {
       "path": "tests/storage/README.md",
@@ -145,6 +145,60 @@
       "reviewedAt": "2026-10-09",
       "reason": "Preserved all original assertions and documentation; added four fixture storage cases and their limitations.",
       "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/regression-replacement-review.md"
+    },
+    "dashboard/test_field_panels.py": {
+      "path": "dashboard/test_field_panels.py",
+      "originalSha256": "3e82d396f9402e3c3aba4ea41744bcc75335682cd8de70bcbb1d6c4e1d4c4903",
+      "replacementSha256": "2834dfd07a87fff812319737fe3398eeeecfba7b448cd03fdadecef4deebb1ce",
+      "reviewer": "Codex",
+      "reviewedAt": "2026-10-09",
+      "reason": "Retains concurrent-scan refusal and adds HTTP status/worker cleanup; event synchronization replaces a timing race. Guard removal causes both rejection checks to fail.",
+      "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md"
+    },
+    "dashboard/test_e2e.mjs": {
+      "path": "dashboard/test_e2e.mjs",
+      "originalSha256": "435cff1da1cd1191f0b8016adeec8902ba5f632bd88105e35c220d8f52ef3e5a",
+      "replacementSha256": "858d8dc1dc18c3498a01eaf14f7e1985fe05e7ef77e214db0dc094a884f98c08",
+      "reviewer": "Codex",
+      "reviewedAt": "2026-10-09",
+      "reason": "Retains exact ordered navigation and original views; adds existing Federation view omitted by the stale assertion.",
+      "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md"
+    },
+    "hub/tests/test_hub_offline.py": {
+      "path": "hub/tests/test_hub_offline.py",
+      "originalSha256": "9c86f65a2b76af8b304a65816c6b6a66defec22d85f4fbfc92a3313a92304e70",
+      "replacementSha256": "56fb5359476f012c1a7170829d2d56771c1bd42ba63834e07c9660407495338e",
+      "reviewer": "Codex",
+      "reviewedAt": "2026-10-09",
+      "reason": "All original methods retained; adds address form, malformed identity and per-part length regressions.",
+      "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md"
+    },
+    "tests/contracts/README.md": {
+      "path": "tests/contracts/README.md",
+      "originalSha256": "1d0a3b5128c46ed31fd1744b41345e6445d262138c63bc5eb91c4ab055cb4916",
+      "replacementSha256": "ef707414ec1d1a7892fa4457e71b1efec3ecc80172a172b326c1b06803c5e470",
+      "reviewer": "Codex",
+      "reviewedAt": "2026-10-09",
+      "reason": "Retains prior contract requirements and documents original full hub qualification with pinned NSC.",
+      "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md"
     }
-  }
+  },
+  "history": [
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "P01 preservation repairs; original accepted snapshot and prior replacement reviews retained.",
+      "previousReviewedReplacements": {
+        "tests/storage/run.py": {
+          "path": "tests/storage/run.py",
+          "originalSha256": "c0b9ec17212029fdfebf1ac56d4399f71ed4539587234bf3f60ee00017043624",
+          "replacementSha256": "8eb26dc9848b63dd6db38a4ebc03f590f79dfacddcf1c8cab59910f871a39dab",
+          "reviewer": "Codex",
+          "reviewedAt": "2026-10-09",
+          "reason": "Preserved all original assertions and documentation; added four fixture storage cases and their limitations.",
+          "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/regression-replacement-review.md"
+        }
+      }
+    }
+  ]
 }

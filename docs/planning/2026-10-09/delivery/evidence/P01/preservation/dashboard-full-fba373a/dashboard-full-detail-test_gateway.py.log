@@ -1,0 +1,73 @@
+--- loading ---
+        loaded from source (bedrock_gateway.py)
+  ok    module imports                                       'True'
+--- security posture ---
+  ok    binds loopback only                                  'True'
+  ok    never binds all interfaces                           'False'
+  ok    request bodies are capped                            'True'
+  ok    upstream timeout is bounded                          'True'
+  ok    credential comes from the environment                'True'
+  ok    no long opaque literal in the credential path        '[]'
+--- text_from_content ---
+  ok    a bare string passes through                         'plain'
+  ok    input_text and output_text concatenate               'ab'
+  ok    an unknown part contributes nothing                  ''
+  ok    empty content is empty text                          ''
+--- to_chat_messages ---
+  ok    instructions become the system message               'system'
+  ok    instructions text is carried                         'be terse'
+  ok    every item kind is mapped                            "['system', 'user', 'user', 'assistant', 'tool']"
+  ok    an unrecognised item is skipped, not guessed         '5'
+  ok    a bare string becomes a user turn                    'bare string'
+  ok    a message item is flattened to text                  'hello'
+  ok    a function_call becomes an assistant tool_call       'None'
+  ok    tool_call carries the call id                        'c1'
+  ok    tool_call is typed as a function                     'function'
+  ok    tool name survives verbatim                          'read'
+  ok    arguments are passed as a string                     '{"p":1}'
+  ok    function_call_output becomes a tool message          'tool'
+  ok    the tool result is linked by call id                 'c1'
+  ok    the tool result body is carried                      '365'
+  ok    no instructions means no system message              'user'
+--- to_chat_tools (bug 27: namespace groups must be flattened) ---
+  ok    a namespace is flattened, not dropped                "['shell', 'spawn', 'close']"
+  ok    inner names are kept verbatim                        'True'
+  ok    every tool is nested under 'function'                'True'
+  ok    description survives                                 'run'
+  ok    parameters survive                                   "{'type': 'object'}"
+  ok    a server-hosted tool is dropped                      'False'
+  ok    no tools in means no tools out                       '[]'
+  ok    a nested namespace is still reached                  "['buried']"
+--- ReasoningFilter (bugs 28 and 29: the answer must never be lost) ---
+  ok    a short reply is not emitted early                   ''
+  ok    bug 28: a short reply survives to flush              'MODEL OK'
+  ok    a closed reasoning span is stripped                  'the answer'
+  ok    bug 29: an unterminated span is released, not swallowed 'never closed, and the answer is in here'
+  ok    a tag split across deltas is still matched           'done'
+  ok    long output does emit incrementally                  'True'
+  ok    and loses nothing overall                            'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
+  ok    plain text with no tags is untouched                 'just text'
+--- build_chat_request ---
+  ok    model passes through                                 'openai.gpt-oss-120b-1:0'
+  ok    stream passes through                                'True'
+  ok    messages are built                                   'hi'
+  ok    no tools key when none were sent                     'False'
+--- make_response_object ---
+  ok    object is a Responses object                         'response'
+  ok    id is echoed                                         'resp_1'
+  ok    status is carried                                    'completed'
+  ok    text lands in output content                         'hi'
+  ok    output is typed for codex                            'output_text'
+  ok    prompt tokens map to input_tokens                    '1'
+  ok    completion tokens map to output_tokens               '2'
+  ok    totals are summed                                    '3'
+--- bedrock_url ---
+  ok    url is built from the configured region              'True'
+  ok    url targets chat completions, not responses          'True'
+  ok    region is not hardcoded                              'True'
+--- differential against the original bytecode ---
+        skipped: cannot load the 2026-09-19 bytecode (bad magic number in 'gw_original': b'\xcb\r\r\n')
+        it needs CPython 3.12; this is 3.14.4. Run this file under python3.12 for the differential.
+        the checks above still stand as a specification.
+
+passed 57, failed 0

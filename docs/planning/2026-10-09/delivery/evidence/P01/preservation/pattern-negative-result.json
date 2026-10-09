@@ -1,0 +1,101 @@
+{
+  "recordedAt": "2026-10-09T23:08:17.806969+00:00",
+  "candidate": "37e0d8cd7439d31a491ac673e73438f7885cd04e",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.14.7",
+  "command": "python docs/planning/2026-10-09/delivery/evidence/P01/preservation/pattern-negative-run.py",
+  "runnerSha256": "f3cb7cfda7885564e72603f494e1e2135e7cb1d13f751d3805d10aa84056049d",
+  "sourceHashes": {
+    ".bytedesk/design-patterns/README.md": "dc81e93fa84889cae092d7eebc3b88bc37a44096dafa361bd4db11a2b2ec3249",
+    ".bytedesk/design-patterns/agent-rules.md": "e823e071e5ef983300f02cab780b13da1e893620752612a1bdf0fe20532463e6",
+    ".bytedesk/design-patterns/baseline.md": "8597b503e2f87ab2a1dd2ffc59dafaf5d2c30a10d68f1e1bdbeb4ef612c716cd",
+    ".bytedesk/design-patterns/catalog.json": "8f8679535511ac9fd5a380c5d43835e0aabf215a31c44ff53013e205ebc6bb82",
+    ".bytedesk/design-patterns/check.mjs": "a11c0d2c942662114c95f001ac38aae879b7e1165b25ad43ab07a93be1513180",
+    ".bytedesk/design-patterns/frontend-rules.md": "03092b999be7d07659679c72eb57d86031277767c808bc5ed7f771cf2078fd86",
+    ".bytedesk/design-patterns/project.json": "e4b4d93034ad3bca8f463dfe9de068e12804e025e318455942bd3f8aa0e57266",
+    ".bytedesk/design-patterns/remediation.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    ".bytedesk/design-patterns/review.json": "e6d4d181ed7b6619eb29895d352af57a55f94b06b6fe0277b1e0d6f3d3d63eb0",
+    ".context/design-patterns-diagrams.md": "0d4a17acbfaeaa384efe25901de408d567eb115bd9be85f101f7827b6b527fff",
+    ".context/design-patterns.md": "a960a2f54ec5a26852c579d71f272241100dffa1ac6e74c7fea0f32f13d929ca"
+  },
+  "cases": [
+    {
+      "name": "unchanged committed candidate passes",
+      "exitCode": 0,
+      "expectedDiagnostic": null,
+      "result": {
+        "baselineVersion": "1.1.0",
+        "ok": true,
+        "errors": [],
+        "assurance": "Validates review attestations, source freshness and remediation; does not prove semantic correctness or execute build/tests."
+      },
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "name": "stale review rejected",
+      "exitCode": 1,
+      "expectedDiagnostic": "Review is stale or missing",
+      "result": {
+        "baselineVersion": "1.1.0",
+        "ok": false,
+        "errors": [
+          "Review is stale or missing: inspect changes and refresh sourceDigest"
+        ],
+        "assurance": "Validates review attestations, source freshness and remediation; does not prove semantic correctness or execute build/tests."
+      },
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "name": "missing pattern evidence rejected",
+      "exitCode": 1,
+      "expectedDiagnostic": "FED-01 verification: evidence files required",
+      "result": {
+        "baselineVersion": "1.1.0",
+        "ok": false,
+        "errors": [
+          "FED-01 verification: evidence files required"
+        ],
+        "assurance": "Validates review attestations, source freshness and remediation; does not prove semantic correctness or execute build/tests."
+      },
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "name": "unresolved finding rejected",
+      "exitCode": 1,
+      "expectedDiagnostic": "P01-NEGATIVE-FIXTURE: violation needs repair",
+      "result": {
+        "baselineVersion": "1.1.0",
+        "ok": false,
+        "errors": [
+          "P01-NEGATIVE-FIXTURE: violation needs repair or mandatory legacy remediation"
+        ],
+        "assurance": "Validates review attestations, source freshness and remediation; does not prove semantic correctness or execute build/tests."
+      },
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "name": "restored committed candidate passes",
+      "exitCode": 0,
+      "expectedDiagnostic": null,
+      "result": {
+        "baselineVersion": "1.1.0",
+        "ok": true,
+        "errors": [],
+        "assurance": "Validates review attestations, source freshness and remediation; does not prove semantic correctness or execute build/tests."
+      },
+      "stderr": "",
+      "passed": true
+    }
+  ],
+  "originalRecordsUnchanged": true,
+  "fixtureRemoved": true,
+  "status": "passed",
+  "limits": [
+    "Tests structural rejection and history preservation; not semantic correctness of pattern review.",
+    "Mutations affect only a disposable checkout; no live review digest or findings were changed."
+  ]
+}

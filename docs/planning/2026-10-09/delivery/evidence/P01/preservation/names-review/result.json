@@ -1,0 +1,66 @@
+{
+  "candidateBase": "37e0d8cd7439d31a491ac673e73438f7885cd04e",
+  "workingChangesIncluded": true,
+  "command": "python docs/planning/2026-10-09/delivery/evidence/P01/preservation/names-review/run.py",
+  "environment": {
+    "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43"
+  },
+  "sourceHashes": {
+    "hub/names.py": "21dd001491fac1e4ecb2df1fa339d30aff7f29f33fb4f6cb9ab9ca9ea4d5635d",
+    "hub/tests/test_hub_offline.py": "56fb5359476f012c1a7170829d2d56771c1bd42ba63834e07c9660407495338e"
+  },
+  "originalSourceHashes": {
+    "hub/names.py": "43975e5176c59eb254f536dfe1cdc94aa52c2724cd2c820433b21e1c87c6c0ef",
+    "hub/tests/test_hub_offline.py": "9c86f65a2b76af8b304a65816c6b6a66defec22d85f4fbfc92a3313a92304e70"
+  },
+  "harnessSha256": "b51be39cdcb70b82bec86cd7805ce3c8ca23686f5326d24f420e6d2216682d13",
+  "originalTestMethodsRetainedAST": true,
+  "originalTestMethodCount": 59,
+  "originalNamesMethods": [
+    "test_addresses_and_subjects",
+    "test_normalize_and_refuse",
+    "test_session_roundtrip"
+  ],
+  "runs": [
+    {
+      "source": "original",
+      "testsRun": 6,
+      "failures": 10,
+      "errors": 0,
+      "skips": 0,
+      "successful": false,
+      "log": "original.log",
+      "logSha256": "66049b95bdad4c652bcf95cbcdd0d8771c924e943e3603a3789552d4daf1d21a",
+      "failedSubtests": [
+        "test_malformed_addresses_rejected (names_preservation_review.Names.test_malformed_addresses_rejected) (address='agent:alpha/worker/a\\n')",
+        "test_malformed_addresses_rejected (names_preservation_review.Names.test_malformed_addresses_rejected) (address='agent:alpha-worker-a\\n')",
+        "test_malformed_addresses_rejected (names_preservation_review.Names.test_malformed_addresses_rejected) (address='virtual:a\\n')",
+        "test_malformed_addresses_rejected (names_preservation_review.Names.test_malformed_addresses_rejected) (address='team:alpha/a\\n')",
+        "test_malformed_addresses_rejected (names_preservation_review.Names.test_malformed_addresses_rejected) (address='role:alpha/a\\n')",
+        "test_malformed_addresses_rejected (names_preservation_review.Names.test_malformed_addresses_rejected) (address='role:group:a\\n/worker')",
+        "test_malformed_addresses_rejected (names_preservation_review.Names.test_malformed_addresses_rejected) (address='role:team:alpha/a\\n/worker')",
+        "test_session_spellings_enforce_same_length_limits (names_preservation_review.Names.test_session_spellings_enforce_same_length_limits) (part=0, separator='-')",
+        "test_session_spellings_enforce_same_length_limits (names_preservation_review.Names.test_session_spellings_enforce_same_length_limits) (part=1, separator='-')",
+        "test_session_spellings_enforce_same_length_limits (names_preservation_review.Names.test_session_spellings_enforce_same_length_limits) (part=2, separator='-')"
+      ]
+    },
+    {
+      "source": "current",
+      "testsRun": 6,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "successful": true,
+      "log": "current.log",
+      "logSha256": "16c66a5096bed2e9708f846d19b7b0e3e5da9310d1ae6bc55d79b93d62f5e5dd",
+      "failedSubtests": []
+    }
+  ],
+  "sourceUnchanged": true,
+  "limits": [
+    "Only the extracted six Names unittest methods execute; no store, network or host state is used.",
+    "Original source is a Git blob executed in a separate temporary Python module; repository files are not replaced.",
+    "This focused evidence does not qualify full legacy suites, native macOS/Linux or a phase."
+  ]
+}

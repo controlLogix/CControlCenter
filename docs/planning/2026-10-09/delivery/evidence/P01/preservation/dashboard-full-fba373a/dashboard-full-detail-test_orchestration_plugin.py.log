@@ -1,0 +1,22 @@
+test_direct_file_and_patch_edits_refuse (__main__.PluginTests.test_direct_file_and_patch_edits_refuse) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_duplicate_name_cannot_check_a_different_member (__main__.PluginTests.test_duplicate_name_cannot_check_a_different_member) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_dynamic_and_multiple_hires_refuse (__main__.PluginTests.test_dynamic_and_multiple_hires_refuse) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_edit_service_failure_refuses_but_unrelated_edit_passes (__main__.PluginTests.test_edit_service_failure_refuses_but_unrelated_edit_passes) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_hire_unavailable_fails_closed (__main__.PluginTests.test_hire_unavailable_fails_closed) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_installed_skill_launcher_uses_same_gates (__main__.PluginTests.test_installed_skill_launcher_uses_same_gates) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_irrelevant_bash_exits_before_external_process (__main__.PluginTests.test_irrelevant_bash_exits_before_external_process) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_live_definition_cli_writes_refuse (__main__.PluginTests.test_live_definition_cli_writes_refuse) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_mcp_discovery_without_user_config_or_dashboard (__main__.PluginTests.test_mcp_discovery_without_user_config_or_dashboard) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_mcp_errors_do_not_kill_server (__main__.PluginTests.test_mcp_errors_do_not_kill_server) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_mcp_roster_reads_correct_endpoints (__main__.PluginTests.test_mcp_roster_reads_correct_endpoints) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_no_roster_refuses_hire (__main__.PluginTests.test_no_roster_refuses_hire) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_only_matching_approved_member_allows_hire (__main__.PluginTests.test_only_matching_approved_member_allows_hire) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_raw_api_mutations_refuse (__main__.PluginTests.test_raw_api_mutations_refuse) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_registration_covers_both_harnesses (__main__.PluginTests.test_registration_covers_both_harnesses) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+test_stale_and_unrelated_workers_allow_edit (__main__.PluginTests.test_stale_and_unrelated_workers_allow_edit) ... skipped 'external plugin absent; set AGENTMUX_PLUGIN_ROOT'
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.000s
+
+OK (skipped=16)
+passed 0, failed 0

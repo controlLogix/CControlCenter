@@ -1,0 +1,186 @@
+{
+  "sourceCommit": "37e0d8cd7439d31a491ac673e73438f7885cd04e",
+  "workflowRun": 38002099888,
+  "url": "https://github.com/controlLogix/agentmux/actions/runs/38002099888",
+  "reviewer": "Codex",
+  "reviewedAt": "2026-10-09T23:06:07.682061+00:00",
+  "platforms": [
+    {
+      "platform": "linux",
+      "report": "docs/planning/2026-10-09/delivery/evidence/P01/native/37e0d8c/linux/ci-result.json",
+      "runtimePlatform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+      "python": "3.14.8",
+      "node": "v22.21.1",
+      "checks": 18,
+      "checkNames": [
+        "locked-python-dependencies",
+        "contracts-dependencies",
+        "contracts-build",
+        "storage-dependencies",
+        "storage-build",
+        "python-sdk-units",
+        "typescript-sdk-units",
+        "cross-language-contracts",
+        "conformance-evidence-admission",
+        "conformance-evidence-negative-checks",
+        "negative-contract-fixture",
+        "storage",
+        "leaf",
+        "leaf/signed",
+        "tracker-tests",
+        "regression-preservation",
+        "component-preservation",
+        "pattern-review"
+      ],
+      "allChecksPassed": true,
+      "sourceHashComparisons": {
+        "ci-result.json": {
+          "sourceHashes": 161
+        },
+        "conformance-admission-negative.json": {
+          "inputHashes": 4
+        },
+        "conformance-admission.json": {},
+        "contracts.json": {
+          "sourceHashes": 53
+        },
+        "leaf-result.json": {
+          "sourceHashes": 4
+        },
+        "negative-fixture.json": {
+          "sourceHashes": 161
+        },
+        "signed-leaf-result.json": {
+          "sourceHashes": 50
+        },
+        "storage-result.json": {
+          "sourceSha256": 10
+        }
+      },
+      "conformanceAdmissionRechecked": true,
+      "conformanceTests": 45,
+      "storageCases": 18,
+      "leafCases": 11,
+      "signedLeafCases": 19,
+      "evidenceNegativeTests": 12,
+      "artifacts": {
+        "ci-result.json": "0291baacdd9d5d68518a407cb2ad6c3bb27146b2d17c431580cb17ccb6eb8be6",
+        "conformance-admission-negative.json": "1b229ef70872efb5c0b2f7efa002d72e3769ea2303b6ddf4d6b35a378213da54",
+        "conformance-admission.json": "3ccd7a630a9a625544484a5e9f87e2139d905955af19ba305be21af74c5ecf9a",
+        "contracts.json": "f94d10c74523b451dc117763e600bcb851685e1025160bbf7877332579ec0ace",
+        "leaf-result.json": "1cd2dad997317ec6e59c05f26a7f117e704bf6683e66d21ec3340a48d56a1252",
+        "negative-fixture.json": "5b75e185b08ca249ccc5ca1054545af60504dc3cfd8f258fe808c2f137adc036",
+        "signed-leaf-result.json": "c061fffea2b51fa0cccdb6c3effdfe39a92c1a685899ebdfd1e7f86180c7f00b",
+        "storage-result.json": "a78957d84ac0120d15b096c363230d26d972137d63b9bf8af01decaa5555f341"
+      }
+    },
+    {
+      "platform": "macos",
+      "report": "docs/planning/2026-10-09/delivery/evidence/P01/native/37e0d8c/macos/ci-result.json",
+      "runtimePlatform": "macOS-15.7.9-arm64-arm-64bit-Mach-O",
+      "python": "3.14.8",
+      "node": "v22.21.1",
+      "checks": 18,
+      "checkNames": [
+        "locked-python-dependencies",
+        "contracts-dependencies",
+        "contracts-build",
+        "storage-dependencies",
+        "storage-build",
+        "python-sdk-units",
+        "typescript-sdk-units",
+        "cross-language-contracts",
+        "conformance-evidence-admission",
+        "conformance-evidence-negative-checks",
+        "negative-contract-fixture",
+        "storage",
+        "leaf",
+        "leaf/signed",
+        "tracker-tests",
+        "regression-preservation",
+        "component-preservation",
+        "pattern-review"
+      ],
+      "allChecksPassed": true,
+      "sourceHashComparisons": {
+        "ci-result.json": {
+          "sourceHashes": 161
+        },
+        "conformance-admission-negative.json": {
+          "inputHashes": 4
+        },
+        "conformance-admission.json": {},
+        "contracts.json": {
+          "sourceHashes": 53
+        },
+        "leaf-result.json": {
+          "sourceHashes": 4
+        },
+        "negative-fixture.json": {
+          "sourceHashes": 161
+        },
+        "signed-leaf-result.json": {
+          "sourceHashes": 50
+        },
+        "storage-result.json": {
+          "sourceSha256": 10
+        }
+      },
+      "conformanceAdmissionRechecked": true,
+      "conformanceTests": 45,
+      "storageCases": 18,
+      "leafCases": 11,
+      "signedLeafCases": 19,
+      "evidenceNegativeTests": 12,
+      "artifacts": {
+        "ci-result.json": "2d4a2674ac1193e8ffc278b983d6839ece900d6e93403301e81597beeaa6ae68",
+        "conformance-admission-negative.json": "0de51f046c578164b2f6eedd9dc548fe430a8cf6639d4e314cde0256abe38105",
+        "conformance-admission.json": "4d3088c46c055f0298e04bfe62e8e31c94878475e3c0e4c1e451b332da64ae15",
+        "contracts.json": "b2b3b68a39262793a05239604ea63a93f526b6a63ee5d489889399fcc6a7fb06",
+        "leaf-result.json": "2f38939b02ca2e039dac55b2aa6113673ec9eccf9c6b6a66b9a50bfb7ce94d16",
+        "negative-fixture.json": "5b75e185b08ca249ccc5ca1054545af60504dc3cfd8f258fe808c2f137adc036",
+        "signed-leaf-result.json": "450d2c44fe558f1206934af923194ad99da8fce38347d7b4cba37f83b21facfd",
+        "storage-result.json": "0183dde8641305737770a4d12fe39d5ad904ce36a7574b099accf8e9b05e6a73"
+      }
+    }
+  ],
+  "phaseAccepted": false,
+  "limitations": [
+    "Native jobs do not qualify WSL; separate evidence is required.",
+    "The evidence-admission negative checks intentionally target archived a2e9ee6 reports; fresh conformance admission separately targets this candidate.",
+    "Storage report limitation text still says no native macOS; this is stale boilerplate. The macOS job actually ran the 18 bounded storage checks and records a native macOS platform. No artifact was rewritten to remove the conflicting text.",
+    "Single-node brokers, graceful restart, static fixture trust and synthetic worker/provider controls do not establish R3, power-loss, production enrollment, live grant enforcement or final bilateral hub acceptance.",
+    "This review verifies reported hashes and CI outcomes, not artifact signing or independently rebuilt binary reproducibility. Remaining task, preservation and phase reviews are separate."
+  ],
+  "workflowVerification": {
+    "command": "gh run view 38002099888 --json headSha,status,conclusion,url,jobs",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 114062349000,
+        "name": "P01 native macos-15",
+        "url": "https://github.com/controlLogix/agentmux/actions/runs/38002099888/job/114062349000",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 114062349111,
+        "name": "P01 native ubuntu-24.04",
+        "url": "https://github.com/controlLogix/agentmux/actions/runs/38002099888/job/114062349111",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "sourceVerification": {
+    "candidate": "37e0d8cd7439d31a491ac673e73438f7885cd04e",
+    "gitCommand": [
+      "git",
+      "cat-file",
+      "--batch"
+    ],
+    "uniqueCommittedBlobsCompared": 163,
+    "conformanceAdmission": "check_conformance_evidence.validate(report, candidate, environment) returned no errors for both native reports."
+  }
+}

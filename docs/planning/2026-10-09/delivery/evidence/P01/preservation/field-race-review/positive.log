@@ -1,0 +1,236 @@
+--- MQTT monitor: validation happens before a socket is opened ---
+  ok    no host -> 400                                       400
+  ok    no host says why                                     'invalid host'
+  ok    host with a scheme -> 400                            400
+  ok    host with a scheme says why                          'invalid host'
+  ok    port out of range -> 400                             400
+  ok    port out of range says why                           'invalid port'
+  ok    unknown field -> 400                                 400
+  ok    unknown field says why                               'unknown fields: wat'
+  ok    too many filters -> 400                              400
+  ok    too many filters says why                            'filters must be a list of 1 to 16 topic filters'
+  ok    duplicate filter -> 400                              400
+  ok    duplicate filter says why                            'duplicate topic filter'
+  ok    bad client id -> 400                                 400
+  ok    bad client id says why                               'client_id must be 1-23 characters of A-Z a-z 0-9 . _ : -'
+  ok    wildcards ARE allowed as a monitor filter            '#'
+--- MQTT monitor: a real session, a topic tree, and retained flags ---
+  ok    monitor accepted -> 200                              200
+  ok    the session starts before the request returns        True
+  ok    the broker is reached                                True
+  ok    messages arrive                                      True
+  ok    both topics are in the tree                          2
+  ok    the filter was granted                               {'plant/#': 'qos 0'}
+  ok    a retained publish is reported as retained           True
+  ok    a live publish is not                                False
+  ok    each topic counts its own messages                   True
+  ok    the latest value is the latest one published         True
+  ok    every value carries when it arrived                  True
+  ok    the tree folds on '/'                                'plant'
+  ok    and keeps a count per branch                         2
+  ok    leaves sit under their branch                        ['state', 'temp']
+  ok    a branch node carries no value of its own            None
+  ok    the log is newest first                              True
+  ok    the log filters by topic                             True
+--- MQTT monitor: clearing, stopping, and what a restart does ---
+  ok    clear -> 200                                         200
+  ok    the topic tree is emptied                            0
+  ok    but the session is still up                          'connected'
+  ok    stop -> 200                                          200
+  ok    and the monitor reports it                           'stopped'
+  ok    a stopped monitor opens no further connections       1
+--- MQTT monitor: a broker that refuses is reported, not retried silently ---
+  ok    CONNACK 5 surfaces as the broker's own reason        True
+  ok    and it is reported as a refusal, not a transport error True
+  ok    a refused subscription is reported per filter        True
+--- MQTT monitor: the caps bound the DISPLAY, never the session ---
+  ok    the topic tree stops at the cap                      2000
+  ok    and says how many it refused                         5
+  ok    a 300 KB payload is accepted, not refused            1
+  ok    it is flagged as truncated                           True
+  ok    cut to the display cap                               2048
+  ok    while the real size is still reported                300000
+  ok    and the monitor is still usable afterwards           2
+--- MQTT monitor: QoS and retain survive the round trip ---
+  ok    a live publish is not retained                       False
+  ok    a stored one is                                      True
+  ok    and its QoS is carried through                       1
+--- MQTT monitor: topic filters are checked against MQTT's own rules ---
+  ok    'a/#/b' is refused                                   True
+  ok    'a/#b' is refused                                    True
+  ok    'a/b+/c' is refused                                  True
+  ok    '' is refused                                        True
+  ok    '#' is accepted                                      True
+  ok    'a/#' is accepted                                    True
+  ok    'a/+/b' is accepted                                  True
+  ok    '+/+' is accepted                                    True
+  ok    'plant/line1/temp' is accepted                       True
+--- MQTT monitor: credentials are read from disk, never from a request ---
+  ok    the panel is told a credential EXISTS                True
+  ok    and that a password is set                           True
+  ok    but never its value                                  True
+  ok    the client itself can read it                        'hunter2'
+  ok    an unconfigured broker reports nothing               False
+  ok    a request may not carry credentials at all           400
+  ok    and is told so                                       True
+  ok    a world-readable credential file is refused, not used {}
+  ok    and says how to fix it                               True
+--- scanner: MAC addresses, and saying where they came from ---
+  ok    a neighbour table is readable                        True
+  ok    and its source is named                              True
+  ok    the IEEE registry is loaded from the vendored file   True
+  ok    a consumer OUI resolves                              'CANON'
+  ok    an industrial override still wins over the registry  'WAGO'
+  ok    an unassigned OUI is not guessed at                  None
+  ok    and no MAC means no vendor                           None
+  ok    a short string is not indexed into                   None
+--- scanner: the range guard runs before any socket opens ---
+  ok    a public range -> 400                                400
+  ok    a public range says why                              True
+  ok    a range too large -> 400                             400
+  ok    a range too large says why                           True
+  ok    no actor -> 400                                      400
+  ok    no actor says why                                    True
+  ok    a bad actor -> 400                                   400
+  ok    a bad actor says why                                 True
+  ok    nonsense -> 400                                      400
+  ok    nonsense says why                                    True
+  ok    IPv6 -> 400                                          400
+  ok    IPv6 says why                                        True
+  ok    an unknown field -> 400                              400
+  ok    an unknown field says why                            True
+  ok    a bad port -> 400                                    400
+  ok    a bad port says why                                  True
+  ok    too many ports -> 400                                400
+  ok    too many ports says why                              True
+  ok    10.1.2.0/30 is scannable                             True
+  ok    172.16.5.0/30 is scannable                           True
+  ok    192.168.9.0/30 is scannable                          True
+  ok    169.254.1.0/30 is scannable                          True
+  ok    100.64.0.0/30 is scannable                           True
+  ok    127.0.0.1/32 is scannable                            True
+--- scanner: a real sweep of loopback finds this very server ---
+  ok    scan accepted -> 200                                 200
+  ok    and reports what it was asked to do                  '34827'
+  ok    the scan finishes                                    True
+  ok    one host answered                                    1
+  ok    on exactly the open port                             [34827]
+  ok    and the closed one is absent                         False
+  ok    progress is complete                                 (1, 1)
+  ok    a second scan is allowed once the first has finished True
+  ok    the scan worker has started                          True
+  ok    a concurrent scan is refused -> 400                  400
+  ok    but not two at once                                  True
+  ok    the concurrency fixture leaves no scan worker        True
+  ok    the scan reports how many MACs it resolved           True
+  ok    and whether it is behind a NAT                       True
+--- PROFINET: the schema refuses what it exists to detect ---
+  ok    a station with no MAC -> 400                         400
+  ok    a station with no MAC says why                       True
+  ok    a malformed MAC -> 400                               400
+  ok    a malformed MAC says why                             True
+  ok    an invalid station name -> 400                       400
+  ok    an invalid station name says why                     True
+  ok    a bad IP -> 400                                      400
+  ok    a bad IP says why                                    True
+  ok    a duplicate MAC -> 400                               400
+  ok    a duplicate MAC says why                             True
+  ok    two stations with one name -> 400                    400
+  ok    two stations with one name says why                  True
+  ok    an unknown field -> 400                              400
+  ok    an unknown field says why                            True
+  ok    a valid schema is accepted                           200
+  ok    MACs are normalised to lower case                    '00:1b:1b:00:00:01'
+--- PROFINET: reconciliation joins on MAC, and orders by what needs doing ---
+  ok    the snapshot is accepted                             200
+  ok    counts are per status                                {'mismatch': 1, 'missing': 1, 'unexpected': 1, 'match': 0}
+  ok    what needs attention is first                        ['mismatch', 'missing', 'unexpected']
+  ok    and the differing field is named                     ['ip']
+  ok    the import records who and when                      True
+  ok    a non-DCP record is refused                          400
+  ok    and named by line                                    True
+  ok    a renamed station is one mismatch, not two rows      1
+  ok    and the name is the difference                       ['name']
+--- PROFINET: the schema survives a restart ---
+  ok    stations are persisted                               2
+  ok    and so is the last import                            1
+--- GitHub: reads never carry a credential ---
+  ok    the account endpoint answers                         200
+  ok    no token-shaped string is returned                   True
+  ok    no field is called token                             True
+  ok    the account reports cli                              True
+  ok    the account reports authenticated                    True
+  ok    the account reports can_login                        True
+  ok    the account reports scopes                           True
+  ok    the account reports hostname                         True
+  ok    the sign-in reports state                            True
+  ok    the sign-in reports code                             True
+  ok    the sign-in reports url                              True
+  ok    the sign-in reports available                        True
+  ok    the sign-in reports command                          True
+--- GitHub: writes need an actor and an explicit confirmation ---
+  ok    repo with no actor -> 400                            400
+  ok    repo with no actor says why                          True
+  ok    repo with no confirmation -> 400                     400
+  ok    repo with no confirmation says why                   True
+  ok    repo with a bad name -> 400                          400
+  ok    repo with a bad name says why                        True
+  ok    repo with an injected flag -> 400                    400
+  ok    repo with an injected flag says why                  True
+  ok    repo with a bad owner -> 400                         400
+  ok    repo with a bad owner says why                       True
+  ok    repo with a bad visibility -> 400                    400
+  ok    repo with a bad visibility says why                  True
+  ok    repo with an unknown field -> 400                    400
+  ok    repo with an unknown field says why                  True
+  ok    issue with no repo -> 400                            400
+  ok    issue with no repo says why                          True
+  ok    issue with a bare repo name -> 400                   400
+  ok    issue with a bare repo name says why                 True
+  ok    issue with no title -> 400                           400
+  ok    issue with no title says why                         True
+  ok    issue with a bad label -> 400                        400
+  ok    issue with a bad label says why                      True
+--- GitHub: sign-in needs an actor, and a GET cannot start one ---
+  ok    an unnamed sign-in is refused                        True
+  ok    GET on a write endpoint is 405                       405
+  ok    GET on the scanner's start verb is 405               405
+  ok    GET on the schema write is 405                       405
+--- every write endpoint still enforces the same-origin JSON preflight ---
+  ok    /api/mqtt/monitor rejects a foreign origin           403
+  ok    /api/mqtt/monitor rejects another local port         403
+  ok    /api/netscan/start rejects a foreign origin          403
+  ok    /api/netscan/start rejects another local port        403
+  ok    /api/profinet/schema rejects a foreign origin        403
+  ok    /api/profinet/schema rejects another local port      403
+  ok    /api/github/repo rejects a foreign origin            403
+  ok    /api/github/repo rejects another local port          403
+  ok    but localhost on the same port is the same origin    200
+  ok    and a request with no Origin at all is allowed       200
+--- a refused write still reads the body it refused ---
+  ok    a refused body is consumed to its declared length    9
+  ok    a body shorter than it claims does not hang the handler 4
+  ok    no Content-Length, nothing to drain                  0
+  ok    a chunked body is never drained                      0
+  ok    two Content-Lengths are too malformed to drain       0
+  ok    a non-numeric Content-Length is not drained          0
+  ok    a body past the drain cap is left alone              0
+  ok    a body at the cap is still drained                   16384
+  ok    an accepted write still succeeds                     200
+  ok    and does not wait out the drain timeout (0.01s)      True
+--- the listen queue is bigger than one browser ---
+  ok    the inherited default this overrides                 5
+  ok    the dashboard's server class raises the listen backlog True
+  ok    and it subclasses the threading server               True
+  ok    and it is the class main() binds                     True
+--- a home that has been deleted is not an empty home ---
+  ok    the home is gone                                     False
+  ok    /api/board refuses rather than rebuilding            503
+  ok    /api/dispatch refuses rather than rebuilding         503
+  ok    /api/agents refuses rather than rebuilding           503
+  ok    /api/journal refuses rather than rebuilding          503
+  ok    /api/feed refuses rather than rebuilding             503
+  ok    and the home is still gone                           False
+  ok    the page itself still loads                          200
+
+passed 213, failed 0
