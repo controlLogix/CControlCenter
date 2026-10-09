@@ -1,0 +1,44 @@
+{
+  "taskId": "P01-T08",
+  "sourceCommit": "d337bd509c2e1757c816de2d1dd79afeb31bdc51",
+  "reviewer": "Codex",
+  "scope": "Preparation only, no P01 phase or future runtime qualification. Twenty governance baseline tests passed in WSL before isolated contract additions.",
+  "acceptanceResults": [
+    {
+      "criterionId": "P01-T08-AC01",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/preflight.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/baseline-governance-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/acceptance-source-checks.json"
+      ]
+    },
+    {
+      "criterionId": "P01-T08-AC02",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/preflight.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/baseline-governance-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/acceptance-source-checks.json"
+      ]
+    },
+    {
+      "criterionId": "P01-T08-AC03",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/preflight.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/baseline-governance-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/acceptance-source-checks.json"
+      ]
+    },
+    {
+      "criterionId": "P01-T08-AC04",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/preflight.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/baseline-governance-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/acceptance-source-checks.json"
+      ]
+    }
+  ]
+}

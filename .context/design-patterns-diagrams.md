@@ -319,3 +319,20 @@ flowchart LR
   Ledger -->|After commit, with cursor| View[(Configuration / registry KV view)]
   View --> Reader[Read projection; authorization uses owner revision]
 ```
+
+## P01 implemented contract verification path
+
+PLAN-08 now has independent executable clients. This path verifies supplied keys and wire integrity; it does not implement the proposed ingress enrollment, grant service or NATS domain owner shown above.
+
+```mermaid
+flowchart LR
+  Fixtures[Literal vectors and ephemeral fixture keys] --> Harness[Cross-language conformance harness]
+  Harness --> Python[Python: jsonschema / rfc8785 / PyNaCl]
+  Harness --> TypeScript[TypeScript: Ajv / canonicalize / Node crypto]
+  Schemas[contracts/v1 schemas] --> Python
+  Schemas --> TypeScript
+  Python -->|Signed claims| TypeScript
+  TypeScript -->|Signed claims| Python
+  Python --> Evidence[Results and source/build hashes]
+  TypeScript --> Evidence
+```

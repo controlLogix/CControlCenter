@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agentmux:contract:1:protected-assembly",
+  "title": "Agentmux protected-assembly v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "releaseVersion": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "releaseManifestDigest": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/digest"
+    },
+    "releaseAuthorityRef": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/reference"
+    },
+    "kernelApiMajor": {
+      "const": 1
+    },
+    "plugins": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "enum": [
+              "boot",
+              "kernel-lifecycle",
+              "internal-communication",
+              "exported-status"
+            ]
+          },
+          "binaryDigest": {
+            "$ref": "urn:agentmux:contract:1:common#/$defs/digest"
+          },
+          "entrypoint": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "id",
+          "binaryDigest",
+          "entrypoint"
+        ]
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "releaseVersion",
+    "releaseManifestDigest",
+    "releaseAuthorityRef",
+    "kernelApiMajor",
+    "plugins"
+  ],
+  "description": " Executable P01 contract. Runtime enrollment, authorization and durable ownership remain separate obligations."
+}

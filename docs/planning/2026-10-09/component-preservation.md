@@ -2,7 +2,7 @@
 
 **Status: static inventory checked during P00; full baseline/candidate qualification remains open.** The [live task board](implementation-status.md) records current work. The [P00 preflight](delivery/evidence/P00/preflight.md) and [baseline defect reconciliation](delivery/evidence/P00/baseline-findings.md) distinguish executed focused tests, retained historical results and missing environments. No phase acceptance is implied.
 
-ADD-01 accounts for **338 baseline files**, **6 additional governed files**, **93 components**, and **198 behavior checks**. The [exact inventory](component-inventory.json) pins file ownership and Git blob identities. The [source surface index](source-surface-index.json) lists code declarations and literal HTTP paths for review. File coverage does not prove runtime correctness or complete behavioral coverage.
+ADD-01 accounts for **338 baseline files**, **36 additional governed files**, **93 components**, and **198 behavior checks**. The [exact inventory](component-inventory.json) pins file ownership and Git blob identities. The [source surface index](source-surface-index.json) lists code declarations and literal HTTP paths for review. File coverage does not prove runtime correctness or complete behavioral coverage.
 
 ## Required preservation rule
 
@@ -85,7 +85,7 @@ The same preservation rule applies to later Jev and sandboxing phases even when 
 | [HAR-20 — Communication correlation, spot checks and determinism history](#har-20) | P01 | retain-evidence | 5 | 2 |
 | [HAR-21 — Recorded orchestration demonstration results](#har-21) | P01 | retain-evidence | 22 | 2 |
 | [HAR-22 — Historical test-gate isolation evidence](#har-22) | P01 | retain-evidence | 1 | 2 |
-| [HUB-01 — Protocol names and local addresses](#hub-01) | P01 | retain | 1 | 2 |
+| [HUB-01 — Protocol names and local addresses](#hub-01) | P01 | retain | 10 | 2 |
 | [HUB-02 — Local hub server, identity, lifecycle and legacy adoption](#hub-02) | P05 | extract | 2 | 3 |
 | [HUB-03 — Hub store, work ownership, messaging and recovery](#hub-03) | P04 | extract | 1 | 3 |
 | [HUB-04 — Hub CLI and federation command client](#hub-04) | P06 | wrap | 1 | 2 |
@@ -110,7 +110,7 @@ The same preservation rule applies to later Jev and sandboxing phases even when 
 | [HUB-23 — NATS deployment, account enrollment and credentials](#hub-23) | P10 | extend | 5 | 3 |
 | [HUB-24 — Local live demo, sample repositories and scoring](#hub-24) | P01 | retain-evidence | 5 | 3 |
 | [HUB-25 — Cross-user federation walkthrough and live-agent demo](#hub-25) | P10 | retain-evidence | 2 | 2 |
-| [HUB-26 — Hub regression suites and federation test harness](#hub-26) | P01 | retain | 6 | 3 |
+| [HUB-26 — Hub regression suites and federation test harness](#hub-26) | P01 | retain | 31 | 3 |
 | [REPO-01 — Repository instructions and writing rules](#repo-01) | P00 | extend | 3 | 1 |
 | [REPO-02 — Design-pattern governance and recorded history](#repo-02) | P01 | extend | 13 | 1 |
 | [REPO-03 — Continuous integration workflows](#repo-03) | P01 | extend | 2 | 1 |
@@ -2710,6 +2710,8 @@ P00 must reconcile maintainers’ workflows with the declared entry points. Miss
 - [hub/names.py](../../../hub/names.py)
 
 <a id="hub-02"></a>
+**P01 isolated additions:** `contracts/v1/README.md`, `contracts/v1/schemas/common.schema.json`, `contracts/v1/schemas/ingress-attestation.schema.json`, `contracts/v1/schemas/message-envelope.schema.json`, `contracts/v1/schemas/operation-context.schema.json`, `contracts/v1/schemas/owner-record.schema.json`, `contracts/v1/schemas/plugin-context.schema.json`, `contracts/v1/schemas/plugin-manifest.schema.json`, `contracts/v1/schemas/protected-assembly.schema.json`. These additions preserve the legacy entry points; full phase qualification remains open.
+
 ### HUB-02 — Local hub server, identity, lifecycle and legacy adoption
 
 **Owner:** P05. **Approach:** extract. **Baseline groups:** BASE-09, BASE-10, BASE-11, BASE-16.
@@ -3762,6 +3764,8 @@ P00 must reconcile maintainers’ workflows with the declared entry points. Miss
 - [hub/tests/test_fed_live.py](../../../hub/tests/test_fed_live.py)
 
 <a id="repo-01"></a>
+**P01 isolated additions:** `sdk/python/README.md`, `sdk/python/agentmux_contracts/__init__.py`, `sdk/python/agentmux_contracts/__main__.py`, `sdk/python/agentmux_contracts/attestation.py`, `sdk/python/agentmux_contracts/validation.py`, `sdk/python/agentmux_contracts/wire.py`, `sdk/python/pyproject.toml`, `sdk/python/requirements.lock`, `sdk/python/tests/test_contracts.py`, `sdk/typescript/README.md`, `sdk/typescript/package-lock.json`, `sdk/typescript/package.json`, `sdk/typescript/src/cli.ts`, `sdk/typescript/src/index.ts`, `sdk/typescript/src/test.ts`, `sdk/typescript/test-examples.json`, `sdk/typescript/tsconfig.json`, `tests/contracts/README.md`, `tests/contracts/run.py`, `tests/contracts/test_conformance.py`, `tests/contracts/vectors/valid-examples.json`. These additions preserve the legacy entry points; full phase qualification remains open.
+
 ### REPO-01 — Repository instructions and writing rules
 
 **Owner:** P00. **Approach:** extend. **Baseline groups:** Repository-wide governance/support.

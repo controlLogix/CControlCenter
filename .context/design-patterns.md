@@ -753,16 +753,33 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
     },
     {
       "id": "PLAN-08",
-      "status": "planned",
+      "status": "applied",
       "catalog": "eip",
       "pattern": "Canonical Data Model",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/CanonicalDataModel.html",
       "referenceDepth": "full-public-reference",
-      "how": "Define versioned envelopes and identity/state vocabulary across languages and hubs. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01, P10. Implementation locations will be recorded when implemented. P00 proposes shared versioned identities and transition/status fields across languages. Canonical JSON hashing and executable schemas remain P01/P00-T04 work; the spike checks decoded equality only. See delivery/decisions/storage-contract.md and startup-contract.md. This is a recommendation pending P00 review. P00 selects RFC 8785 JCS and an enrolled-ingress Ed25519 attestation binding the full operation, payload digest, source, contract and destination. Owners verify enrolled keys, recomputed digests, grants and durable replay state; P00 shapes do not implement this verification.",
+      "how": "The isolated contracts/v1 package defines versioned infrastructure shapes. Independent Python and TypeScript libraries parse strict JSON, produce RFC 8785 bytes and verify Ed25519 attestation/envelope bindings against a supplied trusted key and expected audience. The current legacy runtime does not import these libraries. Domain payload registration, broker-backed ownership, enrollment and full SDK/runtime integration remain P01/later-phase obligations; cryptographic verification does not grant authorization.",
       "why": "Client/provider diversity must not obscure ownership or schema compatibility.",
       "tradeoffs": "Pairwise translation is simpler for two plugins; shared contracts need careful evolution and must not become a universal domain schema.",
-      "locations": [],
-      "verificationEvidence": [],
+      "locations": [
+        {
+          "path": "contracts/v1/schemas/message-envelope.schema.json",
+          "symbol": "message-envelope"
+        },
+        {
+          "path": "sdk/python/agentmux_contracts/wire.py",
+          "symbol": "canonical_bytes"
+        },
+        {
+          "path": "sdk/typescript/src/index.ts",
+          "symbol": "canonicalBytes"
+        }
+      ],
+      "verificationEvidence": [
+        "tests/contracts/test_conformance.py",
+        "sdk/python/tests/test_contracts.py",
+        "sdk/typescript/src/test.ts"
+      ],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
         "docs/planning/2026-10-09/phases.json",
@@ -780,6 +797,12 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
           "date": "2026-10-09",
           "previousHow": "Define versioned envelopes and identity/state vocabulary across languages and hubs. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01, P10. Implementation locations will be recorded when implemented. P00 proposes shared versioned identities and transition/status fields across languages. Canonical JSON hashing and executable schemas remain P01/P00-T04 work; the spike checks decoded equality only. See delivery/decisions/storage-contract.md and startup-contract.md. This is a recommendation pending P00 review.",
           "reason": "P00 review resolved canonical bytes and authenticated caller binding."
+        },
+        {
+          "date": "2026-10-09",
+          "previousHow": "Define versioned envelopes and identity/state vocabulary across languages and hubs. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01, P10. Implementation locations will be recorded when implemented. P00 proposes shared versioned identities and transition/status fields across languages. Canonical JSON hashing and executable schemas remain P01/P00-T04 work; the spike checks decoded equality only. See delivery/decisions/storage-contract.md and startup-contract.md. This is a recommendation pending P00 review. P00 selects RFC 8785 JCS and an enrolled-ingress Ed25519 attestation binding the full operation, payload digest, source, contract and destination. Owners verify enrolled keys, recomputed digests, grants and durable replay state; P00 shapes do not implement this verification.",
+          "previousStatus": "planned",
+          "reason": "P01 initial executable wire contracts; broader domain/runtime work remains incomplete."
         }
       ]
     },

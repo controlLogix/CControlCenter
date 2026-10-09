@@ -424,6 +424,69 @@
       ]
     },
     {
+      "path": "contracts/v1/README.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/schemas/common.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/schemas/ingress-attestation.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/schemas/message-envelope.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/schemas/operation-context.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/schemas/owner-record.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/schemas/plugin-context.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/schemas/plugin-manifest.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/schemas/protected-assembly.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
       "path": "dashboard/SPEC.md",
       "baselineBlob": "d0a5ab3363ff65eecbe16b821d1c3ce2f80fa5bd",
       "componentIds": [
@@ -2321,6 +2384,125 @@
       ]
     },
     {
+      "path": "sdk/python/README.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/python/agentmux_contracts/__init__.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/python/agentmux_contracts/__main__.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/python/agentmux_contracts/attestation.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/python/agentmux_contracts/validation.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/python/agentmux_contracts/wire.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/python/pyproject.toml",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/python/requirements.lock",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/python/tests/test_contracts.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/typescript/README.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/typescript/package-lock.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/typescript/package.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/typescript/src/cli.ts",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/typescript/src/index.ts",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/typescript/src/test.ts",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/typescript/test-examples.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/typescript/tsconfig.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
       "path": "taskmgmt/agentdefs.py",
       "baselineBlob": "d80489daa7b0f304dd152c8461b817736ca585ab",
       "componentIds": [
@@ -2427,11 +2609,79 @@
       ]
     },
     {
+      "path": "tests/contracts/README.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/contracts/run.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/contracts/test_conformance.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/contracts/vectors/valid-examples.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
       "path": "verify-grok.sh",
       "baselineBlob": "cc0d1c86afbc0b625510e192b93a69a4aaa6a2fd",
       "componentIds": [
         "HAR-04"
       ]
+    }
+  ],
+  "reviewHistory": [
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "P01 isolated executable contracts",
+      "addedFiles": [
+        "contracts/v1/README.md",
+        "contracts/v1/schemas/common.schema.json",
+        "contracts/v1/schemas/ingress-attestation.schema.json",
+        "contracts/v1/schemas/message-envelope.schema.json",
+        "contracts/v1/schemas/operation-context.schema.json",
+        "contracts/v1/schemas/owner-record.schema.json",
+        "contracts/v1/schemas/plugin-context.schema.json",
+        "contracts/v1/schemas/plugin-manifest.schema.json",
+        "contracts/v1/schemas/protected-assembly.schema.json",
+        "sdk/python/README.md",
+        "sdk/python/agentmux_contracts/__init__.py",
+        "sdk/python/agentmux_contracts/__main__.py",
+        "sdk/python/agentmux_contracts/attestation.py",
+        "sdk/python/agentmux_contracts/validation.py",
+        "sdk/python/agentmux_contracts/wire.py",
+        "sdk/python/pyproject.toml",
+        "sdk/python/requirements.lock",
+        "sdk/python/tests/test_contracts.py",
+        "sdk/typescript/README.md",
+        "sdk/typescript/package-lock.json",
+        "sdk/typescript/package.json",
+        "sdk/typescript/src/cli.ts",
+        "sdk/typescript/src/index.ts",
+        "sdk/typescript/src/test.ts",
+        "sdk/typescript/test-examples.json",
+        "sdk/typescript/tsconfig.json",
+        "tests/contracts/README.md",
+        "tests/contracts/run.py",
+        "tests/contracts/test_conformance.py",
+        "tests/contracts/vectors/valid-examples.json"
+      ],
+      "note": "Retain frozen baseline blobs and all existing checks. New paths do not replace current runtime callers."
     }
   ]
 }

@@ -8842,6 +8842,237 @@
       "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
     },
     {
+      "path": "sdk/python/agentmux_contracts/__init__.py",
+      "componentIds": [
+        "HUB-26"
+      ],
+      "workingFileSha256": "80da9e9c2411f2d8851b61fdf3602a10b0a130d7ddadfe72f086a472d7df9b68",
+      "declarations": [],
+      "httpPathLiterals": [],
+      "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+    },
+    {
+      "path": "sdk/python/agentmux_contracts/__main__.py",
+      "componentIds": [
+        "HUB-26"
+      ],
+      "workingFileSha256": "5b833896a0dc33c52494a6b559437766bb0a61cd6723cae3967d2cb813338b1c",
+      "declarations": [
+        {
+          "name": "request",
+          "line": 11,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "main",
+          "line": 32,
+          "kind": "FunctionDef"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+    },
+    {
+      "path": "sdk/python/agentmux_contracts/attestation.py",
+      "componentIds": [
+        "HUB-26"
+      ],
+      "workingFileSha256": "ea84d8d664e38eff12354dc870e532bf7b2a76cc86bc94e3a2f4afb5f2ff4ada",
+      "declarations": [
+        {
+          "name": "sign_claims",
+          "line": 13,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_timestamp",
+          "line": 20,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "verify_attestation",
+          "line": 30,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "verify_envelope",
+          "line": 58,
+          "kind": "FunctionDef"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+    },
+    {
+      "path": "sdk/python/agentmux_contracts/validation.py",
+      "componentIds": [
+        "HUB-26"
+      ],
+      "workingFileSha256": "33e114fbd8e520dcae6a0a5821a26e8857676b00792030834545bd4064241be3",
+      "declarations": [
+        {
+          "name": "_validators",
+          "line": 18,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "validate",
+          "line": 39,
+          "kind": "FunctionDef"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+    },
+    {
+      "path": "sdk/python/agentmux_contracts/wire.py",
+      "componentIds": [
+        "HUB-26"
+      ],
+      "workingFileSha256": "1de4b46902ed683e01b4734a1cc6db2c1a5edc61dcefaf071c28990a32274b3b",
+      "declarations": [
+        {
+          "name": "ContractError",
+          "line": 13,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "_check",
+          "line": 20,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_pairs",
+          "line": 49,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_constant",
+          "line": 58,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "strict_loads",
+          "line": 62,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "canonical_bytes",
+          "line": 86,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "payload_digest",
+          "line": 98,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 15,
+          "kind": "FunctionDef"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+    },
+    {
+      "path": "sdk/typescript/src/cli.ts",
+      "componentIds": [
+        "HUB-26"
+      ],
+      "workingFileSha256": "2c460350f92565ae39a16389288247c6475908250a5602b513edc9b7a7934320",
+      "declarations": [
+        {
+          "name": "hex",
+          "line": 3,
+          "kind": "function"
+        },
+        {
+          "name": "request",
+          "line": 7,
+          "kind": "function"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+    },
+    {
+      "path": "sdk/typescript/src/index.ts",
+      "componentIds": [
+        "HUB-26"
+      ],
+      "workingFileSha256": "2554802f823fe60afeac8219fc5d74cee77d79822271250118e142766809befb",
+      "declarations": [
+        {
+          "name": "ContractError",
+          "line": 8,
+          "kind": "class"
+        },
+        {
+          "name": "fail",
+          "line": 11,
+          "kind": "function"
+        },
+        {
+          "name": "checkValue",
+          "line": 14,
+          "kind": "function"
+        },
+        {
+          "name": "strictLoads",
+          "line": 42,
+          "kind": "function"
+        },
+        {
+          "name": "canonicalBytes",
+          "line": 65,
+          "kind": "function"
+        },
+        {
+          "name": "payloadDigest",
+          "line": 72,
+          "kind": "function"
+        },
+        {
+          "name": "validate",
+          "line": 75,
+          "kind": "function"
+        },
+        {
+          "name": "privateKey",
+          "line": 93,
+          "kind": "function"
+        },
+        {
+          "name": "signClaims",
+          "line": 97,
+          "kind": "function"
+        },
+        {
+          "name": "publicKeyForSeed",
+          "line": 98,
+          "kind": "function"
+        },
+        {
+          "name": "instant",
+          "line": 100,
+          "kind": "function"
+        },
+        {
+          "name": "verifyAttestation",
+          "line": 108,
+          "kind": "function"
+        },
+        {
+          "name": "verifyEnvelope",
+          "line": 122,
+          "kind": "function"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+    },
+    {
       "path": "taskmgmt/agentdefs.py",
       "componentIds": [
         "HAR-07"
@@ -10446,6 +10677,72 @@
       "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
     },
     {
+      "path": "tests/contracts/run.py",
+      "componentIds": [
+        "HUB-26"
+      ],
+      "workingFileSha256": "ef5c6856edc9a0a3fba6d10d9c681bada694d66511403522c4e53efde18bf956",
+      "declarations": [
+        {
+          "name": "Result",
+          "line": 18,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "version",
+          "line": 44,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "hashes",
+          "line": 48,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "typescript_build",
+          "line": 56,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "main",
+          "line": 73,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 19,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "addSuccess",
+          "line": 23,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "addFailure",
+          "line": 27,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "addError",
+          "line": 31,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "addSkip",
+          "line": 35,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "addSubTest",
+          "line": 39,
+          "kind": "FunctionDef"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+    },
+    {
       "path": "verify-grok.sh",
       "componentIds": [
         "HAR-04"
@@ -10465,6 +10762,17 @@
       ],
       "httpPathLiterals": [],
       "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
+    }
+  ],
+  "history": [
+    {
+      "date": "2026-10-09",
+      "reason": "Extend surface scanner to TypeScript while retaining its existing test-file exclusions; all test files remain in the complete component inventory.",
+      "excludedTestPaths": [
+        "sdk/python/tests/test_contracts.py",
+        "sdk/typescript/src/test.ts",
+        "tests/contracts/test_conformance.py"
+      ]
     }
   ]
 }

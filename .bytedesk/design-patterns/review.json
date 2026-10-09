@@ -1,6 +1,6 @@
 {
   "reviewer": "Codex, autonomous governance and P00 draft-contract review, 2026-10-09; P00 gate remains open",
-  "sourceDigest": "7cd1f2d428bfb28369d2ded8aedf350222502005b1849152e233dae59970d5fb",
+  "sourceDigest": "5469829b5bafb7eb4ee7e31ac6abd18a8d1d3330ae9de49f2a03ef96c8659b83",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -331,6 +331,17 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/preflight.md"
       ],
       "rationale": "P00 gate record is committed and remotely verified at 466496a. P01-T08 is the only active phase task; bounded subagents inspect preservation and implementation preparation. No P01 product implementation or acceptance is claimed. Reviewed the 14-component preservation preflight, retained regression mappings and disposable-state requirements; no new runtime pass claimed."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "previousSourceDigest": "7cd1f2d428bfb28369d2ded8aedf350222502005b1849152e233dae59970d5fb",
+      "scope": "P01 initial executable contract libraries",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/contract-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/conformance-result.json"
+      ],
+      "rationale": "Reviewed independent parsing/canonicalization/signature APIs, complete-envelope binding, bounded framing, byte-keyed validator caching and invalidation tests. Registered PLAN-08 applied only to the isolated executable contract path, retained its historical planning text, and added actual relationship diagram. All new files have preservation owners. No legacy runtime integration or P01 acceptance is claimed."
     }
   ],
   "rules": {

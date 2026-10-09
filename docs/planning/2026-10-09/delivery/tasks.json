@@ -6,8 +6,8 @@
     "phases.json": "5bb9037937a00621214ad58873c368fdc55b2f8c3722653c97432efa8031a82a",
     "verification-matrix.json": "516813fd034d6c73b4b0d6f9eaaf4b1b54798828e137336324605d0b956085bc",
     "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
-    "component-inventory.json": "c197c2e88eca98622b3c4b0bcc673b1de1697f6e5ce7aa2edba770e94c08727a",
-    "component-audit-hub.json": "da50535679a7e2001a71660e7072262139643871f22779d189331419fb17f4aa",
+    "component-inventory.json": "7199353b2b83d4b56c3a340f3fa46a23dcf193f5b115c9cd1a251233c47580a2",
+    "component-audit-hub.json": "529bbddace02526ea4949aac15434ac778536dcec4db1dbc0d274ea9c4ae3579",
     "component-audit-harness.json": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08",
     "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
     "component-audit-repository.json": "39001427bd59e2b0bf45ad6b953a4221c0edf9cdbaaf541179317775e0d29a6f"
@@ -1694,7 +1694,7 @@
           "text": "Publish language-neutral command/event schemas and compatibility rules with organization, project, task, delegation, attempt, operation, schema version, and trace identifiers."
         }
       ],
-      "status": "planned",
+      "status": "in_progress",
       "owner": "Codex",
       "dependsOn": [
         "P00-GATE",
@@ -1728,7 +1728,15 @@
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T21:14:27.843910+00:00",
+          "actor": "Codex",
+          "from": "planned",
+          "to": "in_progress",
+          "note": "Implement v1 closed schemas and independent Python/TypeScript parsing, canonicalization and attestation clients in isolated new paths."
+        }
+      ],
       "phaseCriteria": [
         "P01-AC01",
         "P01-AC02",
@@ -1780,7 +1788,7 @@
           "text": "Create reusable contract fixtures and controllable fake workers/providers plus real NATS integration environments for CI."
         }
       ],
-      "status": "planned",
+      "status": "in_progress",
       "owner": "Codex",
       "dependsOn": [
         "P00-GATE",
@@ -1814,7 +1822,15 @@
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T21:17:19.476898+00:00",
+          "actor": "Codex",
+          "from": "planned",
+          "to": "in_progress",
+          "note": "Build independent cross-language fixtures for strict JSON, schema rejection and bidirectional signed envelopes; broker fault harness remains subsequent work in this task."
+        }
+      ],
       "phaseCriteria": [
         "P01-AC01",
         "P01-AC02",
@@ -1866,7 +1882,7 @@
           "text": "Specify lifecycle, delivery acknowledgment, idempotency, deadline, cancellation, approval, and unavailable/unknown result semantics."
         }
       ],
-      "status": "planned",
+      "status": "in_progress",
       "owner": "Codex",
       "dependsOn": [
         "P00-GATE",
@@ -1900,7 +1916,15 @@
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T21:14:28.487683+00:00",
+          "actor": "Codex",
+          "from": "planned",
+          "to": "in_progress",
+          "note": "Implement shared operation validation and deadline/identity/message semantics alongside v1 contracts, within active P01 only."
+        }
+      ],
       "phaseCriteria": [
         "P01-AC01",
         "P01-AC02",
@@ -2342,7 +2366,7 @@
           "text": "Apply ADD-01 and the component preservation matrix to every changed source file and affected caller. Record reuse, intentional behavior changes, migration needs and the specific added functionality before editing implementation."
         }
       ],
-      "status": "in_progress",
+      "status": "done",
       "owner": "Codex",
       "dependsOn": [
         "P00-GATE"
@@ -2371,8 +2395,12 @@
           "text": "Candidate comparison, added-functionality and migration fixtures are assigned to implementation and phase verification tasks. This preflight does not claim that future candidate tests already passed."
         }
       ],
-      "evidence": [],
-      "commits": [],
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/P01-T08.json"
+      ],
+      "commits": [
+        "d337bd509c2e1757c816de2d1dd79afeb31bdc51"
+      ],
       "blocker": null,
       "history": [
         {
@@ -2395,6 +2423,13 @@
           "from": "planned",
           "to": "in_progress",
           "note": "P00 gate and record pushed; begin P01 preservation preflight before executable contract work."
+        },
+        {
+          "at": "2026-10-09T21:14:27.171622+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "done",
+          "note": "Preservation preflight reviewed; 20 baseline governance tests passed with no skips. Candidate/runtime qualification remains assigned to implementation and gate."
         }
       ],
       "phaseCriteria": [
@@ -32882,6 +32917,54 @@
       "to": "in_progress",
       "note": "P00 gate and record pushed; begin P01 preservation preflight before executable contract work.",
       "taskId": "P01-T08"
+    },
+    {
+      "at": "2026-10-09T21:14:27.171622+00:00",
+      "actor": "Codex",
+      "from": "in_progress",
+      "to": "done",
+      "note": "Preservation preflight reviewed; 20 baseline governance tests passed with no skips. Candidate/runtime qualification remains assigned to implementation and gate.",
+      "taskId": "P01-T08"
+    },
+    {
+      "at": "2026-10-09T21:14:27.843910+00:00",
+      "actor": "Codex",
+      "from": "planned",
+      "to": "in_progress",
+      "note": "Implement v1 closed schemas and independent Python/TypeScript parsing, canonicalization and attestation clients in isolated new paths.",
+      "taskId": "P01-T01"
+    },
+    {
+      "at": "2026-10-09T21:14:28.487683+00:00",
+      "actor": "Codex",
+      "from": "planned",
+      "to": "in_progress",
+      "note": "Implement shared operation validation and deadline/identity/message semantics alongside v1 contracts, within active P01 only.",
+      "taskId": "P01-T03"
+    },
+    {
+      "at": "2026-10-09T21:17:19.476898+00:00",
+      "actor": "Codex",
+      "from": "planned",
+      "to": "in_progress",
+      "note": "Build independent cross-language fixtures for strict JSON, schema rejection and bidirectional signed envelopes; broker fault harness remains subsequent work in this task.",
+      "taskId": "P01-T02"
+    },
+    {
+      "at": "2026-10-09T21:23:16.681014+00:00",
+      "actor": "Codex",
+      "action": "register-P01-isolated-contract-files",
+      "previousSourceHashes": {
+        "phases.json": "5bb9037937a00621214ad58873c368fdc55b2f8c3722653c97432efa8031a82a",
+        "verification-matrix.json": "516813fd034d6c73b4b0d6f9eaaf4b1b54798828e137336324605d0b956085bc",
+        "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
+        "component-inventory.json": "c197c2e88eca98622b3c4b0bcc673b1de1697f6e5ce7aa2edba770e94c08727a",
+        "component-audit-hub.json": "da50535679a7e2001a71660e7072262139643871f22779d189331419fb17f4aa",
+        "component-audit-harness.json": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08",
+        "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
+        "component-audit-repository.json": "39001427bd59e2b0bf45ad6b953a4221c0edf9cdbaaf541179317775e0d29a6f"
+      },
+      "note": "Added schema/client/conformance files to existing HUB-01/HUB-26 owners, preserving every original assertion and baseline blob."
     }
   ],
   "deliveryGovernance": {

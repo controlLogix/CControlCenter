@@ -359,7 +359,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 
 ### P01-T01: Publish language-neutral command/event schemas and compatibility rules with organization, project, task, delegation, attempt, operation, schema version, and trace identifiers.
 
-**Status:** planned. **Owner:** Codex.
+**Status:** in_progress. **Owner:** Codex.
 
 **Dependencies:** P00-GATE, P01-T08.
 
@@ -400,7 +400,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 
 ### P01-T02: Create reusable contract fixtures and controllable fake workers/providers plus real NATS integration environments for CI.
 
-**Status:** planned. **Owner:** Codex.
+**Status:** in_progress. **Owner:** Codex.
 
 **Dependencies:** P00-GATE, P01-T08.
 
@@ -441,7 +441,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 
 ### P01-T03: Specify lifecycle, delivery acknowledgment, idempotency, deadline, cancellation, approval, and unavailable/unknown result semantics.
 
-**Status:** planned. **Owner:** Codex.
+**Status:** in_progress. **Owner:** Codex.
 
 **Dependencies:** P00-GATE, P01-T08.
 
@@ -648,7 +648,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 
 ### P01-T08: Apply ADD-01 and the component preservation matrix to every changed source file and affected caller
 
-**Status:** in_progress. **Owner:** Codex.
+**Status:** done. **Owner:** Codex.
 
 **Dependencies:** P00-GATE.
 
@@ -679,9 +679,9 @@ Contracts and failure scenarios can be tested before business plugins grow.
 4. Run FAIL-42, FAIL-43 and FAIL-47 with real JetStream. Record which server/API/SDK capabilities provide each guarantee, including batch behavior and authoritative read freshness.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 
-**Evidence:** not yet recorded
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/P01-T08.json
 
-**Commits:** not yet recorded
+**Commits:** d337bd509c2e1757c816de2d1dd79afeb31bdc51
 
 
 <a id="P01-GATE"></a>

@@ -1,0 +1,1575 @@
+{
+  "recordedAt": "2026-10-09T21:29:02.967138+00:00",
+  "sourceCommit": "d337bd509c2e1757c816de2d1dd79afeb31bdc51",
+  "sourceBinding": "Commit is the checkout base; sourceHashes identify exact working files. Compiled CLI has a separate digest.",
+  "sourceHashes": {
+    "contracts/v1/schemas/common.schema.json": "65e1c256048e311da082a59a592ad2291740863807cebe12f96ecd20f3192ddb",
+    "contracts/v1/schemas/ingress-attestation.schema.json": "f388117c05f99a8f2a2f7fbfa7275df7522063014e12f41248564ddb7564e09d",
+    "contracts/v1/schemas/message-envelope.schema.json": "de2366fff9b34b85cf8689c890c8f9eedce1da55848af8e7bfe3cfdab3d466e6",
+    "contracts/v1/schemas/operation-context.schema.json": "ce6bae5e685687df4ebc581dcbcc2a191bd089739257ad1558fa732a241343f7",
+    "contracts/v1/schemas/owner-record.schema.json": "bc9d1249ce52a8630ee1dd77b356d3988f30b17ff282d84ad9fac7999ebcde16",
+    "contracts/v1/schemas/plugin-context.schema.json": "2976cb2ece3e6572c9428c08e19d3fe442ef5fed17358ae4cefe27f972e06e5c",
+    "contracts/v1/schemas/plugin-manifest.schema.json": "6514e16035b92ac3edeaf4ea906502ab97c64d5dc2c396f87ab0be723a4163d5",
+    "contracts/v1/schemas/protected-assembly.schema.json": "86a2238a6a81ceffcba378a79b3badf752116090faa5fc9428ad962492052148",
+    "sdk/python/agentmux_contracts/__init__.py": "80da9e9c2411f2d8851b61fdf3602a10b0a130d7ddadfe72f086a472d7df9b68",
+    "sdk/python/agentmux_contracts/__main__.py": "5b833896a0dc33c52494a6b559437766bb0a61cd6723cae3967d2cb813338b1c",
+    "sdk/python/agentmux_contracts/attestation.py": "ea84d8d664e38eff12354dc870e532bf7b2a76cc86bc94e3a2f4afb5f2ff4ada",
+    "sdk/python/agentmux_contracts/validation.py": "33e114fbd8e520dcae6a0a5821a26e8857676b00792030834545bd4064241be3",
+    "sdk/python/agentmux_contracts/wire.py": "1de4b46902ed683e01b4734a1cc6db2c1a5edc61dcefaf071c28990a32274b3b",
+    "sdk/python/pyproject.toml": "d0b333827071711c7f3ffb4be4abc9ebf663d9cfed0edad8f3efbca88bd94743",
+    "sdk/python/requirements.lock": "10f1a795ebbc6624f1bb29d484b983781feaf94e178336b87aede0204f50eca6",
+    "sdk/python/tests/test_contracts.py": "0fb68705c5e8e71a73327f8bb121da51348869b58cc2e2c1901075e911d96fda",
+    "sdk/typescript/package-lock.json": "2821dcc8c007574512f63228ba79ddf0e283d76ad9a7c37ee46533e9ebcf5081",
+    "sdk/typescript/package.json": "a84c64d61999a93e29d24159c880d190b7ee0d2cce2490ddd821f1c4be8066c9",
+    "sdk/typescript/src/cli.ts": "2c460350f92565ae39a16389288247c6475908250a5602b513edc9b7a7934320",
+    "sdk/typescript/src/index.ts": "2554802f823fe60afeac8219fc5d74cee77d79822271250118e142766809befb",
+    "sdk/typescript/src/test.ts": "2fe9276e47d9f68930eee6617cd5d1d43b972b03576d804615c2d61f97be9d8d",
+    "sdk/typescript/test-examples.json": "30fc8cdb67a6c056f9a50ddf0c7593016b04ce00d7a1d96fc505a26b2e338226",
+    "sdk/typescript/tsconfig.json": "c46cb61f3946e5fc5c84ab49896f889d2bde0478d8f8b0710079d5e17edb79d4",
+    "tests/contracts/run.py": "ef5c6856edc9a0a3fba6d10d9c681bada694d66511403522c4e53efde18bf956",
+    "tests/contracts/test_conformance.py": "90eabb2b64bca6cd2361ea7bcedca20ba3d2044f9e1ff7f7e2f1b3d345345df8",
+    "tests/contracts/vectors/valid-examples.json": "30fc8cdb67a6c056f9a50ddf0c7593016b04ce00d7a1d96fc505a26b2e338226"
+  },
+  "sourceUnchangedDuringRun": true,
+  "typescriptBuild": {
+    "sourceComparison": {
+      "package.json": {
+        "repository": "a84c64d61999a93e29d24159c880d190b7ee0d2cce2490ddd821f1c4be8066c9",
+        "buildSource": "a84c64d61999a93e29d24159c880d190b7ee0d2cce2490ddd821f1c4be8066c9"
+      },
+      "package-lock.json": {
+        "repository": "2821dcc8c007574512f63228ba79ddf0e283d76ad9a7c37ee46533e9ebcf5081",
+        "buildSource": "2821dcc8c007574512f63228ba79ddf0e283d76ad9a7c37ee46533e9ebcf5081"
+      },
+      "tsconfig.json": {
+        "repository": "c46cb61f3946e5fc5c84ab49896f889d2bde0478d8f8b0710079d5e17edb79d4",
+        "buildSource": "c46cb61f3946e5fc5c84ab49896f889d2bde0478d8f8b0710079d5e17edb79d4"
+      },
+      "src/cli.ts": {
+        "repository": "2c460350f92565ae39a16389288247c6475908250a5602b513edc9b7a7934320",
+        "buildSource": "2c460350f92565ae39a16389288247c6475908250a5602b513edc9b7a7934320"
+      },
+      "src/index.ts": {
+        "repository": "2554802f823fe60afeac8219fc5d74cee77d79822271250118e142766809befb",
+        "buildSource": "2554802f823fe60afeac8219fc5d74cee77d79822271250118e142766809befb"
+      },
+      "src/test.ts": {
+        "repository": "2fe9276e47d9f68930eee6617cd5d1d43b972b03576d804615c2d61f97be9d8d",
+        "buildSource": "2fe9276e47d9f68930eee6617cd5d1d43b972b03576d804615c2d61f97be9d8d"
+      }
+    },
+    "allSourcesMatch": true,
+    "compiledJavaScriptHashes": {
+      "cli.js": "a828fe90a9b944398f50272ed67ab3677dbbef2514945005263f4a2cffa162a1",
+      "index.js": "c69cc2e3258ce6f17a1fceefe1b3422fa0eec08f93e383a946abbb431dd2b639",
+      "test.js": "875d50fd35fa34eeaddfa9c5bfcf0e6a70cd2b67669ec538237c3a0c663d54dc"
+    },
+    "cliPresent": true
+  },
+  "typescriptBuildUnchangedDuringRun": true,
+  "environment": {
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "harnessPython": "3.14.4",
+    "clientPython": "Python 3.14.4",
+    "node": "v22.22.1"
+  },
+  "command": "python tests/contracts/run.py --evidence <output>",
+  "selection": {
+    "file": "test_conformance.py",
+    "match": null,
+    "fullSuite": true
+  },
+  "durationSeconds": 38.464,
+  "exitCode": 0,
+  "testsRun": 12,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "expectedFailures": 0,
+  "results": [
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-manifest:missing:schemaVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-manifest:missing:packageId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-manifest:missing:version')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-manifest:missing:apiMajor')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-manifest:missing:installationModes')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-manifest:missing:platforms')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-manifest:missing:runtime')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-manifest:missing:dependencies')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-manifest:missing:children')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-manifest:missing:requestedCapabilities')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-manifest:missing:configurationSchemaRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-manifest:missing:contributions')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-manifest:missing:lifecycle')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-manifest:missing:migrations')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-manifest:unknown')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-manifest:version')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='protected-assembly:missing:schemaVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='protected-assembly:missing:releaseVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='protected-assembly:missing:releaseManifestDigest')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='protected-assembly:missing:releaseAuthorityRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='protected-assembly:missing:kernelApiMajor')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='protected-assembly:missing:plugins')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='protected-assembly:unknown')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='protected-assembly:version')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-context:missing:schemaVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-context:missing:instanceId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-context:missing:packageId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-context:missing:packageVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-context:missing:packageDigest')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-context:missing:hubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-context:missing:parent')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-context:missing:effectiveGrant')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-context:missing:services')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-context:missing:secretReferences')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-context:missing:configurationRevision')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-context:unknown')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='plugin-context:version')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:schemaVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:operationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:payloadDigest')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:expectedVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:caller')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:effectiveActorRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:scope')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:taskId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:runId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:attemptId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:delegationRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:grantRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:approvalRefs')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:traceId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:causationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:deadline')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:missing:cancellationRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:unknown')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='operation-context:version')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='message-envelope:missing:schemaVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='message-envelope:missing:messageId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='message-envelope:missing:kind')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='message-envelope:missing:contractId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='message-envelope:missing:contractMajor')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='message-envelope:missing:sourceHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='message-envelope:missing:sourceInstanceId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='message-envelope:missing:destinationHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='message-envelope:missing:sentAt')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='message-envelope:missing:correlationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='message-envelope:missing:operation')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='message-envelope:missing:payload')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='message-envelope:missing:destinationServiceId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='message-envelope:missing:ingressAttestation')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='message-envelope:unknown')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='message-envelope:version')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:missing:schemaVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:missing:recordId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:missing:entityId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:missing:entityKind')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:missing:ownerHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:missing:ownerDomain')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:missing:entityVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:missing:previousRevision')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:missing:operation')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:missing:recordedAt')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:missing:outcome')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:missing:state')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:missing:effects')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:missing:artifacts')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:missing:repository')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:unknown')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='owner-record:version')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='ingress-attestation:missing:schemaVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='ingress-attestation:missing:algorithm')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='ingress-attestation:missing:canonicalization')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='ingress-attestation:missing:claims')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='ingress-attestation:missing:signature')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='ingress-attestation:unknown')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='python', mutation='ingress-attestation:version')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-manifest:missing:schemaVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-manifest:missing:packageId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-manifest:missing:version')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-manifest:missing:apiMajor')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-manifest:missing:installationModes')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-manifest:missing:platforms')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-manifest:missing:runtime')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-manifest:missing:dependencies')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-manifest:missing:children')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-manifest:missing:requestedCapabilities')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-manifest:missing:configurationSchemaRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-manifest:missing:contributions')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-manifest:missing:lifecycle')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-manifest:missing:migrations')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-manifest:unknown')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-manifest:version')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='protected-assembly:missing:schemaVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='protected-assembly:missing:releaseVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='protected-assembly:missing:releaseManifestDigest')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='protected-assembly:missing:releaseAuthorityRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='protected-assembly:missing:kernelApiMajor')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='protected-assembly:missing:plugins')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='protected-assembly:unknown')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='protected-assembly:version')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-context:missing:schemaVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-context:missing:instanceId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-context:missing:packageId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-context:missing:packageVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-context:missing:packageDigest')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-context:missing:hubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-context:missing:parent')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-context:missing:effectiveGrant')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-context:missing:services')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-context:missing:secretReferences')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-context:missing:configurationRevision')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-context:unknown')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='plugin-context:version')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:schemaVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:operationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:payloadDigest')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:expectedVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:caller')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:effectiveActorRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:scope')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:taskId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:runId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:attemptId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:delegationRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:grantRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:approvalRefs')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:traceId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:causationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:deadline')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:missing:cancellationRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:unknown')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='operation-context:version')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='message-envelope:missing:schemaVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='message-envelope:missing:messageId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='message-envelope:missing:kind')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='message-envelope:missing:contractId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='message-envelope:missing:contractMajor')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='message-envelope:missing:sourceHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='message-envelope:missing:sourceInstanceId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='message-envelope:missing:destinationHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='message-envelope:missing:sentAt')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='message-envelope:missing:correlationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='message-envelope:missing:operation')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='message-envelope:missing:payload')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='message-envelope:missing:destinationServiceId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='message-envelope:missing:ingressAttestation')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='message-envelope:unknown')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='message-envelope:version')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:missing:schemaVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:missing:recordId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:missing:entityId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:missing:entityKind')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:missing:ownerHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:missing:ownerDomain')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:missing:entityVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:missing:previousRevision')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:missing:operation')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:missing:recordedAt')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:missing:outcome')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:missing:state')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:missing:effects')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:missing:artifacts')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:missing:repository')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:unknown')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='owner-record:version')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='ingress-attestation:missing:schemaVersion')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='ingress-attestation:missing:algorithm')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='ingress-attestation:missing:canonicalization')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='ingress-attestation:missing:claims')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='ingress-attestation:missing:signature')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='ingress-attestation:unknown')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields (client='typescript', mutation='ingress-attestation:version')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields",
+      "status": "passed"
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_schema_examples (client='python', schema='plugin-manifest')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_schema_examples (client='python', schema='protected-assembly')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_schema_examples (client='python', schema='plugin-context')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_schema_examples (client='python', schema='operation-context')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_schema_examples (client='python', schema='message-envelope')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_schema_examples (client='python', schema='owner-record')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_schema_examples (client='python', schema='ingress-attestation')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_schema_examples (client='typescript', schema='plugin-manifest')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_schema_examples (client='typescript', schema='protected-assembly')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_schema_examples (client='typescript', schema='plugin-context')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_schema_examples (client='typescript', schema='operation-context')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_schema_examples (client='typescript', schema='message-envelope')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_schema_examples (client='typescript', schema='owner-record')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_schema_examples (client='typescript', schema='ingress-attestation')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_all_schema_examples",
+      "status": "passed"
+    },
+    {
+      "test": "test_conformance.Conformance.test_attestation_tampering_and_signed_policy_rejections (signer='python', verifier='typescript', mutation='payload')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_attestation_tampering_and_signed_policy_rejections (signer='python', verifier='typescript', mutation='audience')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_attestation_tampering_and_signed_policy_rejections (signer='python', verifier='typescript', mutation='expiry')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_attestation_tampering_and_signed_policy_rejections (signer='python', verifier='typescript', mutation='signature')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_attestation_tampering_and_signed_policy_rejections (signer='python', verifier='typescript', mutation='signed_issuer')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_attestation_tampering_and_signed_policy_rejections (signer='typescript', verifier='python', mutation='payload')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_attestation_tampering_and_signed_policy_rejections (signer='typescript', verifier='python', mutation='audience')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_attestation_tampering_and_signed_policy_rejections (signer='typescript', verifier='python', mutation='expiry')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_attestation_tampering_and_signed_policy_rejections (signer='typescript', verifier='python', mutation='signature')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_attestation_tampering_and_signed_policy_rejections (signer='typescript', verifier='python', mutation='signed_issuer')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_attestation_tampering_and_signed_policy_rejections",
+      "status": "passed"
+    },
+    {
+      "test": "test_conformance.Conformance.test_cross_signatures_both_directions (signer='python', verifier='typescript', envelope=False)",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_cross_signatures_both_directions (signer='python', verifier='typescript', envelope=True)",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_cross_signatures_both_directions (signer='typescript', verifier='python', envelope=False)",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_cross_signatures_both_directions (signer='typescript', verifier='python', envelope=True)",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_cross_signatures_both_directions",
+      "status": "passed"
+    },
+    {
+      "test": "test_conformance.Conformance.test_depth_boundary (client='python')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_depth_boundary (client='typescript')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_depth_boundary",
+      "status": "passed"
+    },
+    {
+      "test": "test_conformance.Conformance.test_escaped_unicode_valid",
+      "status": "passed"
+    },
+    {
+      "test": "test_conformance.Conformance.test_exact_size_frame_excludes_newline_delimiter (client='python')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_exact_size_frame_excludes_newline_delimiter (client='typescript')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_exact_size_frame_excludes_newline_delimiter",
+      "status": "passed"
+    },
+    {
+      "test": "test_conformance.Conformance.test_independent_canonical_vectors (client='python', vector=0)",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_independent_canonical_vectors (client='python', vector=1)",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_independent_canonical_vectors (client='python', vector=2)",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_independent_canonical_vectors (client='python', vector=3)",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_independent_canonical_vectors (client='python', vector=4)",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_independent_canonical_vectors (client='typescript', vector=0)",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_independent_canonical_vectors (client='typescript', vector=1)",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_independent_canonical_vectors (client='typescript', vector=2)",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_independent_canonical_vectors (client='typescript', vector=3)",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_independent_canonical_vectors (client='typescript', vector=4)",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_independent_canonical_vectors",
+      "status": "passed"
+    },
+    {
+      "test": "test_conformance.Conformance.test_oversized_raw_cli_recovers (client='python')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_oversized_raw_cli_recovers (client='typescript')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_oversized_raw_cli_recovers",
+      "status": "passed"
+    },
+    {
+      "test": "test_conformance.Conformance.test_raw_utf8_and_recovery (client='python')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_raw_utf8_and_recovery (client='typescript')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_raw_utf8_and_recovery",
+      "status": "passed"
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='python', vector='duplicate')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='python', vector='escaped_duplicate')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='python', vector='comment')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='python', vector='trailing')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='python', vector='trailing_comma')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='python', vector='lone_surrogate')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='python', vector='nan')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='python', vector='infinity')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='python', vector='overflow')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='python', vector='unsafe_integer')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='python', vector='depth')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='typescript', vector='duplicate')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='typescript', vector='escaped_duplicate')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='typescript', vector='comment')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='typescript', vector='trailing')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='typescript', vector='trailing_comma')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='typescript', vector='lone_surrogate')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='typescript', vector='nan')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='typescript', vector='infinity')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='typescript', vector='overflow')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='typescript', vector='unsafe_integer')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections (client='typescript', vector='depth')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_strict_parser_rejections",
+      "status": "passed"
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='python', mutation='messageId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='python', mutation='sourceHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='python', mutation='sourceInstanceId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='python', mutation='correlationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='python', mutation='contractId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='python', mutation='kind')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='python', mutation='contractMajor')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='python', mutation='sentAt')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='python', mutation='destinationHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='python', mutation='destinationServiceId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='python', mutation='caller')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='python', mutation='scope')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='python', mutation='grant')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='typescript', mutation='messageId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='typescript', mutation='sourceHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='typescript', mutation='sourceInstanceId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='typescript', mutation='correlationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='typescript', mutation='contractId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='typescript', mutation='kind')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='typescript', mutation='contractMajor')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='typescript', mutation='sentAt')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='typescript', mutation='destinationHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='typescript', mutation='destinationServiceId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='typescript', mutation='caller')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='typescript', mutation='scope')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims (signer='typescript', mutation='grant')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims",
+      "status": "passed"
+    }
+  ],
+  "limitations": [
+    "Local subprocess protocol, schema, canonical-byte and signature fixtures only; no live NATS, enrollment, current-grant lookup or production authorization qualification.",
+    "Ephemeral test signing seeds and request bodies are not stored in this record.",
+    "Strict raw UTF-8 is tested at the CLI byte boundary. Payload-size unit checks belong to each SDK because nested JSON escaping changes outer CLI frame size.",
+    "A passing local environment does not qualify unexecuted macOS, CI, provider or terminal environments."
+  ]
+}

@@ -6,7 +6,16 @@
       "id": "HUB-01",
       "name": "Protocol names and local addresses",
       "files": [
-        "hub/names.py"
+        "hub/names.py",
+        "contracts/v1/README.md",
+        "contracts/v1/schemas/common.schema.json",
+        "contracts/v1/schemas/ingress-attestation.schema.json",
+        "contracts/v1/schemas/message-envelope.schema.json",
+        "contracts/v1/schemas/operation-context.schema.json",
+        "contracts/v1/schemas/owner-record.schema.json",
+        "contracts/v1/schemas/plugin-context.schema.json",
+        "contracts/v1/schemas/plugin-manifest.schema.json",
+        "contracts/v1/schemas/protected-assembly.schema.json"
       ],
       "role": "runtime",
       "baselineGroups": [
@@ -54,6 +63,24 @@
       ],
       "limitations": [
         "Current name and subject grammar is not a tenant security boundary."
+      ],
+      "reviewHistory": [
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "addedFiles": [
+            "contracts/v1/README.md",
+            "contracts/v1/schemas/common.schema.json",
+            "contracts/v1/schemas/ingress-attestation.schema.json",
+            "contracts/v1/schemas/message-envelope.schema.json",
+            "contracts/v1/schemas/operation-context.schema.json",
+            "contracts/v1/schemas/owner-record.schema.json",
+            "contracts/v1/schemas/plugin-context.schema.json",
+            "contracts/v1/schemas/plugin-manifest.schema.json",
+            "contracts/v1/schemas/protected-assembly.schema.json"
+          ],
+          "note": "Own new isolated contract schemas/clients/tests; current behavior and original assertions remain required."
+        }
       ]
     },
     {
@@ -1523,7 +1550,28 @@
         "hub/tests/test_governance.py",
         "hub/tests/run_local.py",
         "hub/tests/local.ps1",
-        "hub/tests/test_local_runner.py"
+        "hub/tests/test_local_runner.py",
+        "sdk/python/README.md",
+        "sdk/python/agentmux_contracts/__init__.py",
+        "sdk/python/agentmux_contracts/__main__.py",
+        "sdk/python/agentmux_contracts/attestation.py",
+        "sdk/python/agentmux_contracts/validation.py",
+        "sdk/python/agentmux_contracts/wire.py",
+        "sdk/python/pyproject.toml",
+        "sdk/python/requirements.lock",
+        "sdk/python/tests/test_contracts.py",
+        "sdk/typescript/README.md",
+        "sdk/typescript/package-lock.json",
+        "sdk/typescript/package.json",
+        "sdk/typescript/src/cli.ts",
+        "sdk/typescript/src/index.ts",
+        "sdk/typescript/src/test.ts",
+        "sdk/typescript/test-examples.json",
+        "sdk/typescript/tsconfig.json",
+        "tests/contracts/README.md",
+        "tests/contracts/run.py",
+        "tests/contracts/test_conformance.py",
+        "tests/contracts/vectors/valid-examples.json"
       ],
       "role": "test-support",
       "baselineGroups": [
@@ -1610,6 +1658,36 @@
           "scope": "User-requested faster local test iteration",
           "change": "Added focused, fast, offline, live and full hub selections; failed-test reruns; local timing and source-hash reports; WSL launcher reuses prepared tools. Existing assertions and phase gates are preserved.",
           "evidence": "docs/LOCAL_TESTING.md"
+        }
+      ],
+      "reviewHistory": [
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "addedFiles": [
+            "sdk/python/README.md",
+            "sdk/python/agentmux_contracts/__init__.py",
+            "sdk/python/agentmux_contracts/__main__.py",
+            "sdk/python/agentmux_contracts/attestation.py",
+            "sdk/python/agentmux_contracts/validation.py",
+            "sdk/python/agentmux_contracts/wire.py",
+            "sdk/python/pyproject.toml",
+            "sdk/python/requirements.lock",
+            "sdk/python/tests/test_contracts.py",
+            "sdk/typescript/README.md",
+            "sdk/typescript/package-lock.json",
+            "sdk/typescript/package.json",
+            "sdk/typescript/src/cli.ts",
+            "sdk/typescript/src/index.ts",
+            "sdk/typescript/src/test.ts",
+            "sdk/typescript/test-examples.json",
+            "sdk/typescript/tsconfig.json",
+            "tests/contracts/README.md",
+            "tests/contracts/run.py",
+            "tests/contracts/test_conformance.py",
+            "tests/contracts/vectors/valid-examples.json"
+          ],
+          "note": "Own new isolated contract schemas/clients/tests; current behavior and original assertions remain required."
         }
       ]
     }
