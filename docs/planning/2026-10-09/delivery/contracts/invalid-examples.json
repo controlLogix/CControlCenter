@@ -154,5 +154,83 @@
     ],
     "remove": true,
     "keyword": "required"
+  },
+  {
+    "id": "unsigned-envelope-rejected",
+    "schema": "message-envelope",
+    "path": [
+      "ingressAttestation"
+    ],
+    "keyword": "required",
+    "remove": true
+  },
+  {
+    "id": "attestation-rejects-algorithm-substitution",
+    "schema": "ingress-attestation",
+    "path": [
+      "algorithm"
+    ],
+    "keyword": "const",
+    "value": "none"
+  },
+  {
+    "id": "attestation-rejects-key-url",
+    "schema": "ingress-attestation",
+    "path": [
+      "claims",
+      "signingKeyUrl"
+    ],
+    "keyword": "additionalProperties",
+    "value": "https://caller.invalid/key"
+  },
+  {
+    "id": "attestation-rejects-unpinned-key-revision",
+    "schema": "ingress-attestation",
+    "path": [
+      "claims",
+      "signingKeyRef",
+      "revision"
+    ],
+    "keyword": "required",
+    "remove": true
+  },
+  {
+    "id": "attestation-rejects-short-signature",
+    "schema": "ingress-attestation",
+    "path": [
+      "signature"
+    ],
+    "keyword": "pattern",
+    "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  },
+  {
+    "id": "attestation-rejects-noncanonical-base64url",
+    "schema": "ingress-attestation",
+    "path": [
+      "signature"
+    ],
+    "keyword": "pattern",
+    "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB"
+  },
+  {
+    "id": "attestation-requires-transport-binding",
+    "schema": "ingress-attestation",
+    "path": [
+      "claims",
+      "authenticatedTransportRef"
+    ],
+    "keyword": "required",
+    "remove": true
+  },
+  {
+    "id": "attestation-requires-audience-service",
+    "schema": "ingress-attestation",
+    "path": [
+      "claims",
+      "audience",
+      "serviceId"
+    ],
+    "keyword": "required",
+    "remove": true
   }
 ]

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:agentmux:planning:0.1:message-envelope",
-  "title": "Agentmux message-envelope — P00 draft, not an approved runtime contract",
+  "title": "Agentmux message-envelope \u00e2\u20ac\u201d P00 draft, not an approved runtime contract",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -51,6 +51,12 @@
     },
     "payload": {
       "type": "object"
+    },
+    "destinationServiceId": {
+      "$ref": "urn:agentmux:planning:0.1:common#/$defs/identifier"
+    },
+    "ingressAttestation": {
+      "$ref": "urn:agentmux:planning:0.1:ingress-attestation"
     }
   },
   "required": [
@@ -65,6 +71,8 @@
     "sentAt",
     "correlationId",
     "operation",
-    "payload"
+    "payload",
+    "destinationServiceId",
+    "ingressAttestation"
   ]
 }

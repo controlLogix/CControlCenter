@@ -123,5 +123,102 @@
     ],
     "value": "rejected",
     "error": "rejected_operation_has_effects"
+  },
+  {
+    "id": "attestation-cannot-outlive-operation",
+    "schema": "ingress-attestation",
+    "path": [
+      "claims",
+      "expiresAt"
+    ],
+    "value": "2026-10-09T12:05:01Z",
+    "error": "attestation_interval"
+  },
+  {
+    "id": "attestation-expiry-after-issuance",
+    "schema": "ingress-attestation",
+    "path": [
+      "claims",
+      "expiresAt"
+    ],
+    "value": "2026-10-09T12:00:00Z",
+    "error": "attestation_interval"
+  },
+  {
+    "id": "attestation-key-owner-must-match-issuer",
+    "schema": "ingress-attestation",
+    "path": [
+      "claims",
+      "signingKeyRef",
+      "ownerHubId"
+    ],
+    "value": "other-hub",
+    "error": "attestation_issuer_binding"
+  },
+  {
+    "id": "attestation-binds-complete-caller",
+    "schema": "message-envelope",
+    "path": [
+      "operation",
+      "caller",
+      "principalId"
+    ],
+    "value": "other-user",
+    "error": "attestation_operation_binding"
+  },
+  {
+    "id": "attestation-binds-payload-digest",
+    "schema": "message-envelope",
+    "path": [
+      "operation",
+      "payloadDigest"
+    ],
+    "value": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "error": "attestation_operation_binding"
+  },
+  {
+    "id": "attestation-binds-contract",
+    "schema": "message-envelope",
+    "path": [
+      "contractId"
+    ],
+    "value": "task-delete",
+    "error": "attestation_envelope_binding"
+  },
+  {
+    "id": "attestation-binds-owner-hub",
+    "schema": "message-envelope",
+    "path": [
+      "destinationHubId"
+    ],
+    "value": "other-hub",
+    "error": "attestation_audience_binding"
+  },
+  {
+    "id": "attestation-binds-owner-service",
+    "schema": "message-envelope",
+    "path": [
+      "destinationServiceId"
+    ],
+    "value": "other-service",
+    "error": "attestation_audience_binding"
+  },
+  {
+    "id": "attestation-binds-event-source",
+    "schema": "message-envelope",
+    "path": [
+      "sourceInstanceId"
+    ],
+    "value": "other-plugin",
+    "error": "attestation_envelope_binding"
+  },
+  {
+    "id": "command-cannot-be-relabeled-reply",
+    "schema": "message-envelope",
+    "path": [
+      "kind"
+    ],
+    "value": "reply",
+    "error": "attestation_envelope_binding"
   }
 ]

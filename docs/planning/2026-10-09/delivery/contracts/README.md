@@ -29,6 +29,18 @@ Each request also receives an operation context: authenticated caller, effective
 
 Pure local operations such as clock reads and logger formatting need no network round trip. Communication between plugins, domains, hubs and UI services uses NATS through the scoped interfaces. Shared state belongs to its NATS-backed domain owner. A logger may buffer within documented bounds but cannot acknowledge a durable audit event before its durable owner accepts it.
 
+## Authenticated message binding
+
+A reference to an identity is not proof of the sender. An enrolled ingress authenticates the client using a mapped scoped transport credential or a verified login session. It discards caller-supplied authoritative context, resolves the effective actor and grants, and issues an Ed25519 attestation. The signed claims bind the complete operation context, contract identity/version, message kind, destination owner/hub and validity interval. Each owner verifies the signature against enrolled issuer keys, checks audience/time/grants, and recomputes the payload digest from received data. Caller-provided key URLs cannot establish trust. Broker permissions also restrict which ingress can reach each owner; neither mechanism replaces the other.
+
+A delegated receiving hub authenticates its partner agreement and validates original actor/grant provenance before issuing a local attestation. Copying an attestation to another payload, command, owner or hub fails. A valid retry still passes the owner's durable operation-ID check. An expired request needs newly authenticated admission with the same business identity, never an automatic new task. Replies and events carry equivalent source binding; correlation alone is not authentication. A later event uses its own bounded operation context and the original causation/task references, so reporting completed work does not reuse an expired command deadline or create another execution. P01 proves signing/verification and replay boundaries in independent implementations; P04 proves credential enrollment, issuer rotation and revocation.
+
+## Canonical bytes and compatibility choice
+
+Use RFC 8785 JCS, encoded as UTF-8, for signed claims and payload hashing. Reject duplicate keys before ordinary object decoding, invalid Unicode and non-finite numbers. Preserve Unicode strings without normalization. Revision/counter integers stay within the existing safe-integer range; exact decimals or larger integers use domain-defined strings. These rules follow the [JCS specification](https://www.rfc-editor.org/rfc/rfc8785); P01 must qualify actual serializers with shared and independent vectors.
+
+Hash the validated domain payload before it is placed in an operation context, avoiding a self-referential digest. Sign the canonical attestation claims, excluding its signature wrapper. Use explicit contract identity/version and destination fields inside the signed claims to prevent substitution. Domain schemas must reject unknown fields unless a versioned extension slot allows them. This chooses the byte contract; it does not claim the P00 validator implements canonicalization or cryptographic verification.
+
 ## Compatibility and ownership
 
 Schemas use closed objects at infrastructure boundaries. Domain `payload` and `state` fields are extension points: P01 must select a registered, versioned domain schema before execution. Unknown commands and unsupported major versions fail explicitly. Minor compatibility needs producer/consumer fixtures before publication. The initial draft uses stable three-part versions; prerelease and build metadata are not yet supported.

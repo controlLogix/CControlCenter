@@ -1,0 +1,49 @@
+{
+  "taskId": "P00-T01",
+  "sourceCommit": "7a9acadf68439abeed5a0768edc5d3f4d08c6a3b",
+  "reviewedBy": "Codex",
+  "date": "2026-10-09",
+  "scope": "Inventory completion only; phase acceptance remains separate. Candidate runtime code unchanged by this review.",
+  "acceptanceResults": [
+    {
+      "criterionId": "P00-T01-AC01",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/inventory-final-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/inventory-review.md",
+        "docs/planning/2026-10-09/component-inventory.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/preflight.md"
+      ]
+    },
+    {
+      "criterionId": "P00-T01-AC02",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/inventory-final-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/inventory-review.md",
+        "docs/planning/2026-10-09/component-inventory.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/preflight.md"
+      ]
+    },
+    {
+      "criterionId": "P00-T01-AC03",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/inventory-final-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/inventory-review.md",
+        "docs/planning/2026-10-09/component-inventory.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/preflight.md"
+      ]
+    },
+    {
+      "criterionId": "P00-T01-AC04",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/inventory-final-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/inventory-review.md",
+        "docs/planning/2026-10-09/component-inventory.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/preflight.md"
+      ]
+    }
+  ]
+}

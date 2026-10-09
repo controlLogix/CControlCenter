@@ -19,7 +19,7 @@ An approved implementation contract with no unresolved decision hidden in code.
 
 ### P00-T01: Freeze df46e94570fadf78ef67a75a692dd48b968a10f7 as the behavioral comparison baseline and inventory every CLI verb, dashboard view, protocol, state store, integration, and evaluation.
 
-**Status:** verification. **Owner:** Codex.
+**Status:** done. **Owner:** Codex.
 
 **Dependencies:** P00-T06.
 
@@ -50,9 +50,9 @@ An approved implementation contract with no unresolved decision hidden in code.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Review the LOCAL-01 flow and FAIL-55–FAIL-62 against actual host startup capabilities; distinguish approved behavior from unresolved host/version choices.
 
-**Evidence:** docs/planning/2026-10-09/delivery/evidence/P00/inventory-review.md
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P00/inventory-review.md, docs/planning/2026-10-09/delivery/evidence/P00/P00-T01.json
 
-**Commits:** c513ffa0565936916b342ae8ad7a8dc837b4d6e8
+**Commits:** c513ffa0565936916b342ae8ad7a8dc837b4d6e8, 7a9acadf68439abeed5a0768edc5d3f4d08c6a3b
 
 
 <a id="P00-T02"></a>

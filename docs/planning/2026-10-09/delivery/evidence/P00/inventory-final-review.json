@@ -1,0 +1,91 @@
+{
+  "sourceCommit": "7a9acadf68439abeed5a0768edc5d3f4d08c6a3b",
+  "date": "2026-10-09",
+  "reviewer": "Codex",
+  "independentReview": "p00_autonomy_tracker",
+  "scope": "P00 inventory and dynamic entrypoint ownership; no runtime parity claim",
+  "coverage": {
+    "ok": true,
+    "baselineFiles": 338,
+    "additionalFiles": 6,
+    "components": 93,
+    "behaviorChecks": 198,
+    "baselineGroups": 37,
+    "phaseCriteria": 99,
+    "failureScenarios": 62,
+    "errors": [],
+    "assurance": "Checks planning coverage and references only; does not prove semantic completeness or execute runtime tests."
+  },
+  "dispatchReview": [
+    {
+      "source": "agentmux.sh:2982; taskmgmt/coordination.py:1549",
+      "owners": [
+        "HAR-01",
+        "HAR-02",
+        "HAR-03",
+        "HAR-09",
+        "HAR-10",
+        "HAR-11",
+        "HAR-12",
+        "HAR-13"
+      ],
+      "finding": "Top-level aliases, dynamic task/board/team wrappers and generated registrations retain named owners."
+    },
+    {
+      "source": "hub/cli.py:199,465; hub/server.py:307",
+      "owners": [
+        "HUB-02",
+        "HUB-03",
+        "HUB-04",
+        "HUB-10"
+      ],
+      "finding": "CLI registry, know alias and fed_ forwarding are covered beyond literal command indexing."
+    },
+    {
+      "source": "hub/fed/runtime.py:40,63,454; hub/fed/mcp.py:59",
+      "owners": [
+        "HUB-09",
+        "HUB-10",
+        "HUB-16",
+        "HUB-17",
+        "HUB-18",
+        "HUB-19",
+        "HUB-20",
+        "HUB-21"
+      ],
+      "finding": "Configured third-party modules and generated CLI/MCP contributions remain explicit preservation obligations."
+    },
+    {
+      "source": "dashboard/server.py:1330,2338",
+      "owners": [
+        "DASH-02",
+        "DASH-03",
+        "DASH-04",
+        "DASH-05",
+        "DASH-06",
+        "DASH-07",
+        "DASH-26"
+      ],
+      "finding": "Table-driven board actions and parameterized run routes have operation-level preservation owners."
+    },
+    {
+      "source": "dashboard/server.py:194,616; resources.json",
+      "owners": [
+        "DASH-12"
+      ],
+      "finding": "Manifest-driven resource probes and bounded execution remain owned."
+    }
+  ],
+  "conclusion": "Inventory review accepted for P00. No unmapped entrypoint found in inspected dynamic dispatch chains. Existing detailed manifests and source index remain the complete file ownership record.",
+  "limitations": [
+    "This review does not execute externally installed plugins or prove future migration/runtime parity.",
+    "Native host and service qualification stays assigned to implementation phase checks; no inventory decision retires those capabilities."
+  ],
+  "commands": [
+    {
+      "command": "python docs/planning/2026-10-09/verify-component-coverage.py",
+      "environment": "Windows PowerShell, repository Python",
+      "result": "passed"
+    }
+  ]
+}

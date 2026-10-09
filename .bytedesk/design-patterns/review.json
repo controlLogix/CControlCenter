@@ -1,6 +1,6 @@
 {
   "reviewer": "Codex, autonomous governance and P00 draft-contract review, 2026-10-09; P00 gate remains open",
-  "sourceDigest": "9ab75f373ec243de09f05c33ebdc4ee19bce0c12398656fb836dc9dd847a73de",
+  "sourceDigest": "1fd06089251e106f7a267571c104b76bb3aa9a5b3aab643caa73718d2919a052",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -286,6 +286,18 @@
         "docs/planning/2026-10-09/delivery/goal.json"
       ],
       "rationale": "Reviewed the goal-only change: file-based tracking explicitly supersedes Atlassian/Rovo/Jira; focused iteration and evidence reuse preserve full verification and sequential phase gates. No runtime code, pattern relationships or task acceptance criteria changed."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "previousSourceDigest": "9ab75f373ec243de09f05c33ebdc4ee19bce0c12398656fb836dc9dd847a73de",
+      "scope": "P00 inventory acceptance and contract ambiguity repairs",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/P00-T01.json",
+        "docs/planning/2026-10-09/delivery/contracts/verification.json",
+        "docs/planning/2026-10-09/delivery/decisions/storage-contract.md"
+      ],
+      "rationale": "Reviewed dynamic dispatch ownership and accepted inventory task only. Independent policy review found split config authority and missing caller binding; resolved through ledger-owned config and canonical signed ingress claims. Updated planned pattern descriptions and proposal diagram, preserving prior how text. Draft checks distinguish shape/semantic examples from cryptography and runtime proof. P00 gate remains open."
     }
   ],
   "rules": {

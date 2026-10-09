@@ -305,3 +305,17 @@ flowchart TB
 ```
 
 No application arrow enters the protected account. The broker is shared infrastructure, while account permissions and domain-owner validation enforce distinct boundaries. A leaf link does not merge persistence or ownership. Proposed separate protected processes add lifecycle overhead; P02 must measure it. No Go implementation replaces current Python business logic through this diagram.
+
+## P00 proposed authenticated ingress and configuration ownership
+
+This refines planned PLAN-07/08/09/10 relationships; no running implementation is claimed.
+
+```mermaid
+flowchart LR
+  Client[Scoped client or verified login] --> Ingress[Enrolled ingress]
+  Ingress -->|NATS: signed canonical claims and payload| Owner[Domain owner]
+  Keys[Enrolled issuer keys] --> Owner
+  Owner -->|Verify identity, scope, digest and replay| Ledger[(Authoritative owner ledger)]
+  Ledger -->|After commit, with cursor| View[(Configuration / registry KV view)]
+  View --> Reader[Read projection; authorization uses owner revision]
+```

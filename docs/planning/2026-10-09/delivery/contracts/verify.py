@@ -59,6 +59,28 @@ def semantic_errors(name, value):
                 errors.append('dependency_interval')
     if name in ('message-envelope', 'owner-record'):
         errors.extend(semantic_errors('operation-context', value['operation']))
+    if name == 'ingress-attestation':
+        claims = value['claims']
+        errors.extend(semantic_errors('operation-context', claims['operation']))
+        if claims['signingKeyRef']['ownerHubId'] != claims['issuerHubId'] or claims['authenticatedTransportRef']['ownerHubId'] != claims['issuerHubId']:
+            errors.append('attestation_issuer_binding')
+        try:
+            issued, expires, deadline = (datetime.fromisoformat(t) for t in (claims['issuedAt'], claims['expiresAt'], claims['operation']['deadline']))
+            if not issued < expires <= deadline:
+                errors.append('attestation_interval')
+            datetime.fromisoformat(claims['sentAt'])
+        except ValueError:
+            errors.append('calendar_date')
+    if name == 'message-envelope':
+        attestation = value['ingressAttestation']
+        claims = attestation['claims']
+        errors.extend(semantic_errors('ingress-attestation', attestation))
+        if claims['operation'] != value['operation']:
+            errors.append('attestation_operation_binding')
+        if any(claims[k] != value[k] for k in ('messageId', 'kind', 'contractId', 'contractMajor', 'sourceHubId', 'sourceInstanceId', 'sentAt', 'correlationId')):
+            errors.append('attestation_envelope_binding')
+        if claims['audience'] != {'hubId': value['destinationHubId'], 'serviceId': value['destinationServiceId']}:
+            errors.append('attestation_audience_binding')
     if name == 'owner-record':
         ids = [effect['effectId'] for effect in value['effects']]
         if len(ids) != len(set(ids)):
@@ -130,6 +152,16 @@ def main():
         validators[name].validate(example)
         require(not semantic_errors(name, example), f'Invalid positive model: {name}')
         results.append({'id': 'valid-' + name, 'passed': True})
+    # These are shape-only signatures; no key or cryptographic verification is used.
+    for kind in ('event', 'reply'):
+        sample = copy.deepcopy(valid['message-envelope'])
+        sample['kind'] = sample['ingressAttestation']['claims']['kind'] = kind
+        validators['message-envelope'].validate(sample)
+        require(not semantic_errors('message-envelope', sample), 'Invalid attested message kind: ' + kind)
+        results.append({'id': 'attested-' + kind + '-shape', 'passed': True})
+        del sample['ingressAttestation']
+        require(any(e.validator == 'required' for e in validators['message-envelope'].iter_errors(sample)), 'Unsigned source accepted: ' + kind)
+        results.append({'id': 'unsigned-' + kind + '-rejected', 'passed': True})
     # The same declared package must remain installable in either explicit mode.
     for mode in ['independent', 'private-child']:
         sample = copy.deepcopy(valid['plugin-manifest'])
@@ -192,6 +224,7 @@ def main():
               'sourceSha256': {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in HERE.iterdir()
                                if p.name.endswith('.schema.json') or p.name in ('verify.py', 'valid-examples.json', 'invalid-examples.json', 'semantic-examples.json', 'model-examples.json', 'state-machines.json', 'nesting-examples.json', 'requirements.lock')},
               'limitations': ['One validator/runtime only; independent SDK conformance remains P01.',
+                             'Ingress signatures are zero-byte shape placeholders, not signed or verified. No JCS digest, live expiry, enrollment, issuer trust, transport identity or replay protection is implemented by these fixtures. P01/P04 must prove them.',
                              'Guard labels declare obligations; they do not prove authorization, broker behavior or human approval.',
                              'Payload and state are extension slots; each named domain contract still requires its own closed schema.',
                              'Nesting fixtures use exact scope equality, explicit resources (empty means none), and resolved parent revisions; narrower scope delegation needs an explicit future contract.',

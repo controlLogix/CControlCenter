@@ -325,6 +325,89 @@
     },
     "payload": {
       "taskId": "task-one"
+    },
+    "destinationServiceId": "task-owner",
+    "ingressAttestation": {
+      "schemaVersion": "0.1.0",
+      "algorithm": "Ed25519",
+      "canonicalization": "RFC8785-JCS-UTF8",
+      "claims": {
+        "messageId": "msg-one",
+        "kind": "command",
+        "contractId": "task-inspect",
+        "contractMajor": 1,
+        "sourceHubId": "hub-origin",
+        "sourceInstanceId": "client-one",
+        "sentAt": "2026-10-09T12:00:01Z",
+        "correlationId": "op-one",
+        "operation": {
+          "schemaVersion": "0.1.0",
+          "operationId": "op-one",
+          "payloadDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "expectedVersion": 1,
+          "caller": {
+            "principalId": "user-ryan",
+            "kind": "human",
+            "authenticatedIdentityRef": {
+              "id": "identity-one",
+              "ownerHubId": "hub-origin",
+              "revision": 1
+            }
+          },
+          "effectiveActorRef": {
+            "id": "actor-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "scope": {
+            "organizationId": "org-demo",
+            "projectId": "project-demo",
+            "workspaceId": "ws-demo"
+          },
+          "taskId": "task-one",
+          "runId": "run-one",
+          "attemptId": "attempt-one",
+          "delegationRef": {
+            "id": "delegation-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "grantRef": {
+            "id": "grant-child",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          },
+          "approvalRefs": [],
+          "traceId": "trace-one",
+          "causationId": "cause-one",
+          "deadline": "2026-10-09T12:05:00Z",
+          "cancellationRef": {
+            "id": "cancel-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          }
+        },
+        "purpose": "agentmux-ingress-v1",
+        "issuerHubId": "hub-origin",
+        "signingKeyRef": {
+          "id": "ingress-key-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "authenticationMethod": "nats-credential-mapping",
+        "authenticatedTransportRef": {
+          "id": "transport-client-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "audience": {
+          "hubId": "hub-origin",
+          "serviceId": "task-owner"
+        },
+        "issuedAt": "2026-10-09T12:00:01Z",
+        "expiresAt": "2026-10-09T12:05:00Z"
+      },
+      "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     }
   },
   "owner-record": {
@@ -425,5 +508,87 @@
       "revision": "fixture-commit",
       "treeDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
     }
+  },
+  "ingress-attestation": {
+    "schemaVersion": "0.1.0",
+    "algorithm": "Ed25519",
+    "canonicalization": "RFC8785-JCS-UTF8",
+    "claims": {
+      "messageId": "msg-one",
+      "kind": "command",
+      "contractId": "task-inspect",
+      "contractMajor": 1,
+      "sourceHubId": "hub-origin",
+      "sourceInstanceId": "client-one",
+      "sentAt": "2026-10-09T12:00:01Z",
+      "correlationId": "op-one",
+      "operation": {
+        "schemaVersion": "0.1.0",
+        "operationId": "op-one",
+        "payloadDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "expectedVersion": 1,
+        "caller": {
+          "principalId": "user-ryan",
+          "kind": "human",
+          "authenticatedIdentityRef": {
+            "id": "identity-one",
+            "ownerHubId": "hub-origin",
+            "revision": 1
+          }
+        },
+        "effectiveActorRef": {
+          "id": "actor-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "scope": {
+          "organizationId": "org-demo",
+          "projectId": "project-demo",
+          "workspaceId": "ws-demo"
+        },
+        "taskId": "task-one",
+        "runId": "run-one",
+        "attemptId": "attempt-one",
+        "delegationRef": {
+          "id": "delegation-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "grantRef": {
+          "id": "grant-child",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        },
+        "approvalRefs": [],
+        "traceId": "trace-one",
+        "causationId": "cause-one",
+        "deadline": "2026-10-09T12:05:00Z",
+        "cancellationRef": {
+          "id": "cancel-one",
+          "ownerHubId": "hub-origin",
+          "revision": 1
+        }
+      },
+      "purpose": "agentmux-ingress-v1",
+      "issuerHubId": "hub-origin",
+      "signingKeyRef": {
+        "id": "ingress-key-one",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      },
+      "authenticationMethod": "nats-credential-mapping",
+      "authenticatedTransportRef": {
+        "id": "transport-client-one",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      },
+      "audience": {
+        "hubId": "hub-origin",
+        "serviceId": "task-owner"
+      },
+      "issuedAt": "2026-10-09T12:00:01Z",
+      "expiresAt": "2026-10-09T12:05:00Z"
+    },
+    "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
   }
 }

@@ -2,7 +2,7 @@
   "status": "passed-draft-contract-checks",
   "python": "3.14.4",
   "validator": "jsonschema 4.26.0",
-  "schemas": 7,
+  "schemas": 8,
   "stateMachines": 5,
   "cases": [
     {
@@ -27,6 +27,26 @@
     },
     {
       "id": "valid-owner-record",
+      "passed": true
+    },
+    {
+      "id": "valid-ingress-attestation",
+      "passed": true
+    },
+    {
+      "id": "attested-event-shape",
+      "passed": true
+    },
+    {
+      "id": "unsigned-event-rejected",
+      "passed": true
+    },
+    {
+      "id": "attested-reply-shape",
+      "passed": true
+    },
+    {
+      "id": "unsigned-reply-rejected",
       "passed": true
     },
     {
@@ -106,6 +126,38 @@
       "passed": true
     },
     {
+      "id": "unsigned-envelope-rejected",
+      "passed": true
+    },
+    {
+      "id": "attestation-rejects-algorithm-substitution",
+      "passed": true
+    },
+    {
+      "id": "attestation-rejects-key-url",
+      "passed": true
+    },
+    {
+      "id": "attestation-rejects-unpinned-key-revision",
+      "passed": true
+    },
+    {
+      "id": "attestation-rejects-short-signature",
+      "passed": true
+    },
+    {
+      "id": "attestation-rejects-noncanonical-base64url",
+      "passed": true
+    },
+    {
+      "id": "attestation-requires-transport-binding",
+      "passed": true
+    },
+    {
+      "id": "attestation-requires-audience-service",
+      "passed": true
+    },
+    {
       "id": "duplicate-protected-role",
       "passed": true
     },
@@ -147,6 +199,46 @@
     },
     {
       "id": "rejected-command-cannot-dispatch-effects",
+      "passed": true
+    },
+    {
+      "id": "attestation-cannot-outlive-operation",
+      "passed": true
+    },
+    {
+      "id": "attestation-expiry-after-issuance",
+      "passed": true
+    },
+    {
+      "id": "attestation-key-owner-must-match-issuer",
+      "passed": true
+    },
+    {
+      "id": "attestation-binds-complete-caller",
+      "passed": true
+    },
+    {
+      "id": "attestation-binds-payload-digest",
+      "passed": true
+    },
+    {
+      "id": "attestation-binds-contract",
+      "passed": true
+    },
+    {
+      "id": "attestation-binds-owner-hub",
+      "passed": true
+    },
+    {
+      "id": "attestation-binds-owner-service",
+      "passed": true
+    },
+    {
+      "id": "attestation-binds-event-source",
+      "passed": true
+    },
+    {
+      "id": "command-cannot-be-relabeled-reply",
       "passed": true
     },
     {
@@ -288,8 +380,9 @@
   ],
   "sourceSha256": {
     "common.schema.json": "bac0eca18c7c086d3cbb06a58d709e196b417878dd25ad41b69cf2232f2f4187",
-    "invalid-examples.json": "db706090be5047cd8b16f9df586ce1b9dfc2370e72e5fd6a58687bd0d97d022e",
-    "message-envelope.schema.json": "ca17d5b804d16105c32502df4765d573d0fb3de3962becb51c8e4afe7d2b13bc",
+    "ingress-attestation.schema.json": "a2dd51369d82a6b56d437d5309d80e788d413931eccb49a23925199c8d8f1209",
+    "invalid-examples.json": "9ac2203424e1f14c1419cb67ad5b56766ffaa3f3f31e7168f7b41714f489e585",
+    "message-envelope.schema.json": "08d2fb49547c6b7f442f00cf90c0fdfae35b50a4bed0cf14a2c9d17ff6c8db3b",
     "model-examples.json": "d7fb26e9250c61178a3f2c3e6fb1331fad075a0e876d66ed9d4dfc5de42fa329",
     "nesting-examples.json": "2f160b4f1ab64daf05733f728f73473e18f16f127b820a62727686e538366516",
     "operation-context.schema.json": "03c672e648863d4dcadf9f93ceebfb61ff67d137073d515cf8c28fcb45240944",
@@ -298,13 +391,14 @@
     "plugin-manifest.schema.json": "7fa3b0c4483782f3d10ec238534a9c279e88793dbd07648fae82bdf1665f8d8c",
     "protected-assembly.schema.json": "22d4e4533eed079e2a5cb57025b812f2c3b5a8bfc8a74b504991903873605efe",
     "requirements.lock": "5bf6d53930534ae6cbfe3242813b04d60c69599efe0b8bd7b8168ed6330615f0",
-    "semantic-examples.json": "94f9149874d1d31d2e470f58f06b0169b0fbb9c573fe227ce87e934bceade876",
+    "semantic-examples.json": "bbb47da7030085e25e5465b820c8650f67f9ddf251baf42e9bc8b995b03914ec",
     "state-machines.json": "607a4a1a89c3a16cff5904d740b3fa21c45130a091a2fd811b88c06007cda8a6",
-    "valid-examples.json": "3f0a030b31f890c3275bbc84bdd4c28f98276d7b6eac1865b7e65ccb146542bc",
-    "verify.py": "1cca9c0b89410ca8f790e8648557e6cbad5de2a5617e17b3374d61292fc1d472"
+    "valid-examples.json": "3309135e7925bd7b927d9fba81701eaa749366f7cb09b8017f8af3de01d4df50",
+    "verify.py": "2b4b9f26e8b974621ce6c91b1e3bb09a29c65b34e5a9856276dfa795222ac97c"
   },
   "limitations": [
     "One validator/runtime only; independent SDK conformance remains P01.",
+    "Ingress signatures are zero-byte shape placeholders, not signed or verified. No JCS digest, live expiry, enrollment, issuer trust, transport identity or replay protection is implemented by these fixtures. P01/P04 must prove them.",
     "Guard labels declare obligations; they do not prove authorization, broker behavior or human approval.",
     "Payload and state are extension slots; each named domain contract still requires its own closed schema.",
     "Nesting fixtures use exact scope equality, explicit resources (empty means none), and resolved parent revisions; narrower scope delegation needs an explicit future contract.",

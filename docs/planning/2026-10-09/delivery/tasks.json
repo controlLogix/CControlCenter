@@ -631,7 +631,7 @@
           "text": "Freeze df46e94570fadf78ef67a75a692dd48b968a10f7 as the behavioral comparison baseline and inventory every CLI verb, dashboard view, protocol, state store, integration, and evaluation."
         }
       ],
-      "status": "verification",
+      "status": "done",
       "owner": "Codex",
       "dependsOn": [
         "P00-T06"
@@ -661,10 +661,12 @@
         }
       ],
       "evidence": [
-        "docs/planning/2026-10-09/delivery/evidence/P00/inventory-review.md"
+        "docs/planning/2026-10-09/delivery/evidence/P00/inventory-review.md",
+        "docs/planning/2026-10-09/delivery/evidence/P00/P00-T01.json"
       ],
       "commits": [
-        "c513ffa0565936916b342ae8ad7a8dc837b4d6e8"
+        "c513ffa0565936916b342ae8ad7a8dc837b4d6e8",
+        "7a9acadf68439abeed5a0768edc5d3f4d08c6a3b"
       ],
       "blocker": null,
       "history": [
@@ -694,6 +696,13 @@
           "from": "in_progress",
           "to": "verification",
           "note": "Pinned baseline and all 344 governed files pass static coverage checks. Surface review package is ready; maintainer review of dynamic entry points and behavioral completeness remains part of P00 acceptance."
+        },
+        {
+          "at": "2026-10-09T21:04:06.573426+00:00",
+          "actor": "Codex",
+          "from": "verification",
+          "to": "done",
+          "note": "Codex accepted pinned inventory and independent dynamic-dispatch ownership review; runtime parity remains assigned to owning phases."
         }
       ],
       "phaseCriteria": [
@@ -32727,6 +32736,14 @@
           "reviewer": "Codex"
         }
       ]
+    },
+    {
+      "at": "2026-10-09T21:04:06.573426+00:00",
+      "actor": "Codex",
+      "from": "verification",
+      "to": "done",
+      "note": "Codex accepted pinned inventory and independent dynamic-dispatch ownership review; runtime parity remains assigned to owning phases.",
+      "taskId": "P00-T01"
     }
   ],
   "deliveryGovernance": {
