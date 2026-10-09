@@ -19,17 +19,16 @@ An approved implementation contract with no unresolved decision hidden in code.
 
 ### P00-T01: Freeze df46e94570fadf78ef67a75a692dd48b968a10f7 as the behavioral comparison baseline and inventory every CLI verb, dashboard view, protocol, state store, integration, and evaluation.
 
-**Status:** planned. **Owner:** Codex.
+**Status:** verification. **Owner:** Codex.
 
 **Dependencies:** P00-T06.
 
 **Implementation plan**
 
-1. Inspect the existing source and callers for this exact work item: Freeze df46e94570fadf78ef67a75a692dd48b968a10f7 as the behavioral comparison baseline and inventory every CLI verb, dashboard view, protocol, state store, integration, and evaluation.
-2. Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.
-3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
-4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
-5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+1. Pin df46e94570fadf78ef67a75a692dd48b968a10f7 and verify all 338 baseline Git blobs against component-inventory.json; retain later files as additional governed scope.
+2. Check each of the four component manifests, the 37 baseline groups, source-surface-index fingerprints, commands, dashboard views/routes, protocols, stores, integrations and evaluation owners. Record uncertain dynamic behavior for maintainer review.
+3. Reconcile historical dashboard specifications and instruction changes against current code without replacing historical evidence. Preserve all behavior-check IDs and distinguish static inventory coverage from runtime qualification.
+4. Attach inventory results and source-bound checks. Submit the public-entry-point and behavior review to P00-GATE; keep any unresolved completeness gap visible before refactoring.
 
 **Deliverables**
 
@@ -51,9 +50,9 @@ An approved implementation contract with no unresolved decision hidden in code.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Review the LOCAL-01 flow and FAIL-55–FAIL-62 against actual host startup capabilities; distinguish approved behavior from unresolved host/version choices.
 
-**Evidence:** not yet recorded
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P00/inventory-review.md
 
-**Commits:** not yet recorded
+**Commits:** c513ffa0565936916b342ae8ad7a8dc837b4d6e8
 
 
 <a id="P00-T02"></a>
@@ -101,17 +100,17 @@ An approved implementation contract with no unresolved decision hidden in code.
 
 ### P00-T03: Reproduce or explicitly scope the previously reported federation correctness defects
 
-**Status:** planned. **Owner:** Codex.
+**Status:** done. **Owner:** Codex.
 
 **Dependencies:** P00-T06.
 
 **Implementation plan**
 
-1. Inspect the existing source and callers for this exact work item: Reproduce or explicitly scope the previously reported federation correctness defects. Turn each into a regression case owned by the replacing phase.
-2. Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.
-3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
-4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
-5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+1. Read AMX-BASE-001 through AMX-BASE-006, their original acceptance text, repair report and upgrade limitations. Verify the old reproduction source is attributable to the frozen baseline.
+2. Check SHA-256 identity for all eight repaired runtime/test files and three historical logs. Retain old-source failures and the 119-test broker run as historical evidence rather than rerunning unchanged broad suites.
+3. Run ./hub/tests/local.ps1 hub.tests.test_governance in the prepared WSL environment. Retain the result, log, source fingerprints, exit code and any missing coverage.
+4. Assign each assertion to P01-T06 and its replacing state, authorization, orchestration or federation task. Keep repository-version, external-artifact and delegated-actor acceptance gaps explicitly open in P05/P10.
+5. Record every task criterion with current evidence. Do not change runtime behavior, failure-matrix status or phase acceptance through this scoping task.
 
 **Deliverables**
 
@@ -133,9 +132,9 @@ An approved implementation contract with no unresolved decision hidden in code.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Review the LOCAL-01 flow and FAIL-55–FAIL-62 against actual host startup capabilities; distinguish approved behavior from unresolved host/version choices.
 
-**Evidence:** not yet recorded
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P00/P00-T03.json
 
-**Commits:** not yet recorded
+**Commits:** c513ffa0565936916b342ae8ad7a8dc837b4d6e8
 
 
 <a id="P00-T04"></a>
@@ -224,7 +223,7 @@ An approved implementation contract with no unresolved decision hidden in code.
 
 ### P00-T06: Apply ADD-01 and the component preservation matrix to every changed source file and affected caller
 
-**Status:** in_progress. **Owner:** Codex.
+**Status:** done. **Owner:** Codex.
 
 **Dependencies:** none.
 
@@ -255,9 +254,9 @@ An approved implementation contract with no unresolved decision hidden in code.
 4. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 5. Review the LOCAL-01 flow and FAIL-55–FAIL-62 against actual host startup capabilities; distinguish approved behavior from unresolved host/version choices.
 
-**Evidence:** not yet recorded
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P00/P00-T06.json
 
-**Commits:** not yet recorded
+**Commits:** c513ffa0565936916b342ae8ad7a8dc837b4d6e8
 
 
 <a id="P00-T07"></a>
@@ -581,6 +580,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Preserve the assertions assigned to this task for AMX-BASE-001, AMX-BASE-002, AMX-BASE-003, AMX-BASE-004, AMX-BASE-005, AMX-BASE-006 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements.
 
 **Deliverables**
 
@@ -622,6 +622,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Preserve the assertions assigned to this task for AMX-BASE-002 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements.
 
 **Deliverables**
 
@@ -1448,6 +1449,7 @@ Multiple users and projects share a hub with explicit authority and durable owne
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Preserve the assertions assigned to this task for AMX-BASE-001 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements.
 
 **Deliverables**
 
@@ -1489,6 +1491,7 @@ Multiple users and projects share a hub with explicit authority and durable owne
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Preserve the assertions assigned to this task for AMX-BASE-002, AMX-BASE-003, AMX-BASE-006 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements.
 
 **Deliverables**
 
@@ -1653,6 +1656,7 @@ Multiple users and projects share a hub with explicit authority and durable owne
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Preserve the assertions assigned to this task for AMX-BASE-006 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements.
 
 **Deliverables**
 
@@ -1915,6 +1919,7 @@ A developer can finish a reviewable software task through durable coordinated wo
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Preserve the assertions assigned to this task for AMX-BASE-005 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements.
 
 **Deliverables**
 
@@ -2075,6 +2080,7 @@ A developer can finish a reviewable software task through durable coordinated wo
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Preserve the assertions assigned to this task for AMX-BASE-002, AMX-BASE-003 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements.
 
 **Deliverables**
 
@@ -2212,6 +2218,7 @@ Developers use Agentmux from their preferred supported client.
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Qualify REPO-01-C01 in actual supported agent hosts: confirm shared instructions and the branch/merge restriction are delivered, preserve user settings, and retain per-host/version evidence. P00 static review is not a substitute.
 
 **Deliverables**
 
@@ -5936,6 +5943,7 @@ Independent teams share authorized work while retaining their own authority.
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Preserve the assertions assigned to this task for AMX-BASE-001 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements.
 
 **Deliverables**
 
@@ -5979,6 +5987,7 @@ Independent teams share authorized work while retaining their own authority.
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Preserve the assertions assigned to this task for AMX-BASE-004 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements.
 
 **Deliverables**
 
@@ -6022,6 +6031,7 @@ Independent teams share authorized work while retaining their own authority.
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Preserve the assertions assigned to this task for AMX-BASE-002, AMX-BASE-003, AMX-BASE-004, AMX-BASE-005 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements.
 
 **Deliverables**
 
@@ -6065,6 +6075,7 @@ Independent teams share authorized work while retaining their own authority.
 3. Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.
 4. Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.
 5. Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.
+6. Preserve the assertions assigned to this task for AMX-BASE-005 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements.
 
 **Deliverables**
 
@@ -8374,6 +8385,7 @@ Customers can install, operate, recover, and support the complete launch product
 2. Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.
 3. Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.
 4. Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.
+5. Preserve the assertions assigned to this task for AMX-BASE-006 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements.
 
 **Deliverables**
 

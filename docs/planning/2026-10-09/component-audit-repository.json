@@ -15,8 +15,8 @@
       "ownerPhase": "P00",
       "disposition": "extend",
       "currentBehavior": [
-        "AGENTS.md carries the branch and Ryan/Nick merge restriction. Both root agent instruction files link the shared plain-language rules.",
-        "CLAUDE.md does not currently repeat the branch restriction or link AGENTS.md; host-specific loading of all required rules needs verification."
+        "Both AGENTS.md and CLAUDE.md carry the feature-branch restriction, Ryan/Nick real-instance merge gate, local fast-test workflow and repository delivery tracking requirements. Both link the shared plain-language rules.",
+        "Presence and content were statically reviewed at c513ffa0565936916b342ae8ad7a8dc837b4d6e8. Actual delivery/loading in every supported agent host remains unqualified under P06."
       ],
       "reusePlan": "Retain root entry files and the shared writing rules. Extend their links as implementation contracts gain evidence.",
       "enhancements": [
@@ -30,14 +30,40 @@
           "existingTests": [],
           "requiredEnvironment": "Static instruction review and supported agent sessions",
           "baselineStatus": "not-run",
-          "targetStatus": "not-run"
+          "targetStatus": "not-run",
+          "qualificationPhase": "P06"
         }
       ],
       "migrationChecks": [
         "Do not overwrite user instructions while installing plugins; preserve managed markers and user-authored sections."
       ],
       "limitations": [
-        "Tool-specific instruction loading has not been tested; CLAUDE.md alone does not include every AGENTS.md restriction."
+        "Static root-file review does not prove tool-specific instruction loading. Qualify supported agent-host versions and installation/upgrade preservation in P06/P12."
+      ],
+      "reviewHistory": [
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "sourceCommit": "c513ffa0565936916b342ae8ad7a8dc837b4d6e8",
+          "previous": {
+            "currentBehavior": [
+              "AGENTS.md carries the branch and Ryan/Nick merge restriction. Both root agent instruction files link the shared plain-language rules.",
+              "CLAUDE.md does not currently repeat the branch restriction or link AGENTS.md; host-specific loading of all required rules needs verification."
+            ],
+            "limitations": [
+              "Tool-specific instruction loading has not been tested; CLAUDE.md alone does not include every AGENTS.md restriction."
+            ]
+          },
+          "reason": "Reconcile the earlier missing-CLAUDE restriction finding with the committed instructions; preserve actual host-loading gap.",
+          "evidence": "delivery/evidence/P00/preflight.md"
+        },
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previousQualificationPhase": "P00 (implicit component owner)",
+          "qualificationPhase": "P06",
+          "reason": "P00 owns static instruction review. Actual host loading must be proved with P06 host integrations; the assertion and final release requirement are unchanged."
+        }
       ]
     },
     {

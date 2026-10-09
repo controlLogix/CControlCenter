@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "baselineFiles": 338,
+  "additionalFiles": 6,
+  "components": 93,
+  "behaviorChecks": 198,
+  "baselineGroups": 37,
+  "phaseCriteria": 99,
+  "failureScenarios": 62,
+  "errors": [],
+  "assurance": "Checks planning coverage and references only; does not prove semantic completeness or execute runtime tests.",
+  "sourceCommit": "c513ffa0565936916b342ae8ad7a8dc837b4d6e8",
+  "command": "python docs\\planning\\2026-10-09\\verify-component-coverage.py",
+  "exitCode": 0,
+  "scope": "Current planning ownership and source fingerprints; no runtime qualification."
+}

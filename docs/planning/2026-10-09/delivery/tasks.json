@@ -10,7 +10,7 @@
     "component-audit-hub.json": "da50535679a7e2001a71660e7072262139643871f22779d189331419fb17f4aa",
     "component-audit-harness.json": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08",
     "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
-    "component-audit-repository.json": "49249992242277c91533c80b83478e1086bda328cfeaace15cacb1d8f6365e62"
+    "component-audit-repository.json": "a006b4831662941ef6136b8b54b0637f9fd479d41a7059ad4fe41af3557d295e"
   },
   "trackingDecision": "Repository tracking replaces Jira at Ryan's request; no Atlassian connection is required.",
   "epics": [
@@ -616,17 +616,16 @@
           "text": "Freeze df46e94570fadf78ef67a75a692dd48b968a10f7 as the behavioral comparison baseline and inventory every CLI verb, dashboard view, protocol, state store, integration, and evaluation."
         }
       ],
-      "status": "planned",
+      "status": "verification",
       "owner": "Codex",
       "dependsOn": [
         "P00-T06"
       ],
       "implementationPlan": [
-        "Inspect the existing source and callers for this exact work item: Freeze df46e94570fadf78ef67a75a692dd48b968a10f7 as the behavioral comparison baseline and inventory every CLI verb, dashboard view, protocol, state store, integration, and evaluation.",
-        "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
-        "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
-        "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Pin df46e94570fadf78ef67a75a692dd48b968a10f7 and verify all 338 baseline Git blobs against component-inventory.json; retain later files as additional governed scope.",
+        "Check each of the four component manifests, the 37 baseline groups, source-surface-index fingerprints, commands, dashboard views/routes, protocols, stores, integrations and evaluation owners. Record uncertain dynamic behavior for maintainer review.",
+        "Reconcile historical dashboard specifications and instruction changes against current code without replacing historical evidence. Preserve all behavior-check IDs and distinguish static inventory coverage from runtime qualification.",
+        "Attach inventory results and source-bound checks. Submit the public-entry-point and behavior review to P00-GATE; keep any unresolved completeness gap visible before refactoring."
       ],
       "acceptanceCriteria": [
         {
@@ -646,10 +645,42 @@
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
         }
       ],
-      "evidence": [],
-      "commits": [],
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/inventory-review.md"
+      ],
+      "commits": [
+        "c513ffa0565936916b342ae8ad7a8dc837b4d6e8"
+      ],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T18:58:59.479822+00:00",
+          "actor": "Codex",
+          "kind": "implementation-plan-refinement",
+          "previousImplementationPlan": [
+            "Inspect the existing source and callers for this exact work item: Freeze df46e94570fadf78ef67a75a692dd48b968a10f7 as the behavioral comparison baseline and inventory every CLI verb, dashboard view, protocol, state store, integration, and evaluation.",
+            "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
+            "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
+            "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
+            "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+          ],
+          "note": "Replace generic execution steps with bounded source/reproduction work. Scope and acceptance criteria remain unchanged."
+        },
+        {
+          "at": "2026-10-09T18:59:02.066168+00:00",
+          "actor": "Codex",
+          "from": "planned",
+          "to": "in_progress",
+          "note": "Inventory static coverage and pinned baseline verified; preparing reviewable surface summary and unresolved behavior review."
+        },
+        {
+          "at": "2026-10-09T19:01:46.556854+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "verification",
+          "note": "Pinned baseline and all 344 governed files pass static coverage checks. Surface review package is ready; maintainer review of dynamic entry points and behavioral completeness remains part of P00 acceptance."
+        }
+      ],
       "phaseCriteria": [
         "P00-AC01",
         "P00-AC02",
@@ -758,17 +789,17 @@
           "text": "Reproduce or explicitly scope the previously reported federation correctness defects. Turn each into a regression case owned by the replacing phase."
         }
       ],
-      "status": "planned",
+      "status": "done",
       "owner": "Codex",
       "dependsOn": [
         "P00-T06"
       ],
       "implementationPlan": [
-        "Inspect the existing source and callers for this exact work item: Reproduce or explicitly scope the previously reported federation correctness defects. Turn each into a regression case owned by the replacing phase.",
-        "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
-        "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
-        "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Read AMX-BASE-001 through AMX-BASE-006, their original acceptance text, repair report and upgrade limitations. Verify the old reproduction source is attributable to the frozen baseline.",
+        "Check SHA-256 identity for all eight repaired runtime/test files and three historical logs. Retain old-source failures and the 119-test broker run as historical evidence rather than rerunning unchanged broad suites.",
+        "Run ./hub/tests/local.ps1 hub.tests.test_governance in the prepared WSL environment. Retain the result, log, source fingerprints, exit code and any missing coverage.",
+        "Assign each assertion to P01-T06 and its replacing state, authorization, orchestration or federation task. Keep repository-version, external-artifact and delegated-actor acceptance gaps explicitly open in P05/P10.",
+        "Record every task criterion with current evidence. Do not change runtime behavior, failure-matrix status or phase acceptance through this scoping task."
       ],
       "acceptanceCriteria": [
         {
@@ -788,10 +819,49 @@
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
         }
       ],
-      "evidence": [],
-      "commits": [],
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/P00-T03.json"
+      ],
+      "commits": [
+        "c513ffa0565936916b342ae8ad7a8dc837b4d6e8"
+      ],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T18:58:59.479822+00:00",
+          "actor": "Codex",
+          "kind": "implementation-plan-refinement",
+          "previousImplementationPlan": [
+            "Inspect the existing source and callers for this exact work item: Reproduce or explicitly scope the previously reported federation correctness defects. Turn each into a regression case owned by the replacing phase.",
+            "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
+            "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
+            "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
+            "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+          ],
+          "note": "Replace generic execution steps with bounded source/reproduction work. Scope and acceptance criteria remain unchanged."
+        },
+        {
+          "at": "2026-10-09T18:59:00.777687+00:00",
+          "actor": "Codex",
+          "from": "planned",
+          "to": "in_progress",
+          "note": "Reconcile six defect reproductions, unchanged repair source, current focused results and replacing-phase regression owners."
+        },
+        {
+          "at": "2026-10-09T18:59:01.152093+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "verification",
+          "note": "All six findings mapped; source/log hashes verified; 20 current focused tests passed without skips."
+        },
+        {
+          "at": "2026-10-09T18:59:01.689319+00:00",
+          "actor": "Codex",
+          "from": "verification",
+          "to": "done",
+          "note": "Baseline reproduction/scoping and future regression ownership recorded. P05/P10 broader acceptance and all phase gates remain open."
+        }
+      ],
       "phaseCriteria": [
         "P00-AC01",
         "P00-AC02",
@@ -971,7 +1041,7 @@
           "text": "Apply ADD-01 and the component preservation matrix to every changed source file and affected caller. Record reuse, intentional behavior changes, migration needs and the specific added functionality before editing implementation."
         }
       ],
-      "status": "in_progress",
+      "status": "done",
       "owner": "Codex",
       "dependsOn": [],
       "implementationPlan": [
@@ -998,8 +1068,12 @@
           "text": "Candidate comparison, added-functionality and migration fixtures are assigned to implementation and phase verification tasks. This preflight does not claim that future candidate tests already passed."
         }
       ],
-      "evidence": [],
-      "commits": [],
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/P00-T06.json"
+      ],
+      "commits": [
+        "c513ffa0565936916b342ae8ad7a8dc837b4d6e8"
+      ],
       "blocker": null,
       "history": [
         {
@@ -1008,6 +1082,31 @@
           "from": "planned",
           "to": "in_progress",
           "note": "Reviewing the phase baseline and source ownership while establishing repository task tracking."
+        },
+        {
+          "at": "2026-10-09T18:58:59.979434+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "verification",
+          "note": "Static preservation review and 20 focused baseline regressions complete; reviewing scoped evidence."
+        },
+        {
+          "at": "2026-10-09T18:59:00.413242+00:00",
+          "actor": "Codex",
+          "from": "verification",
+          "to": "done",
+          "note": "P00 documentation preflight complete: retained source behavior, historical reconciliation, explicit runtime gaps and assigned candidate checks. No phase advancement."
+        },
+        {
+          "at": "2026-10-09T19:00:26.977850+00:00",
+          "actor": "Codex",
+          "kind": "qualification-owner-reconciliation",
+          "behaviorCheckId": "REPO-01-C01",
+          "previousPhase": "P00",
+          "phase": "P06",
+          "previousSourceSha256": "6b9211469b0bbb4550cb270cd8333f42f3be53fbfa2b3cae7673c81037fd1c83",
+          "sourceSha256": "a006b4831662941ef6136b8b54b0637f9fd479d41a7059ad4fe41af3557d295e",
+          "note": "Retain static P00 review; require actual instruction loading at P06. No required check removed or marked passed."
         }
       ],
       "phaseCriteria": [
@@ -1035,8 +1134,7 @@
       ],
       "behaviorCheckIds": [
         "DASH-36-C01",
-        "DASH-36-C02",
-        "REPO-01-C01"
+        "DASH-36-C02"
       ],
       "catalogRecordIds": []
     },
@@ -1675,7 +1773,8 @@
         "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
         "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
         "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
+        "Preserve the assertions assigned to this task for AMX-BASE-001, AMX-BASE-002, AMX-BASE-003, AMX-BASE-004, AMX-BASE-005, AMX-BASE-006 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements."
       ],
       "acceptanceCriteria": [
         {
@@ -1698,7 +1797,22 @@
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T18:58:59.479822+00:00",
+          "actor": "Codex",
+          "kind": "regression-assignment",
+          "findingIds": [
+            "AMX-BASE-001",
+            "AMX-BASE-002",
+            "AMX-BASE-003",
+            "AMX-BASE-004",
+            "AMX-BASE-005",
+            "AMX-BASE-006"
+          ],
+          "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged."
+        }
+      ],
       "phaseCriteria": [
         "P01-AC01",
         "P01-AC02",
@@ -1735,7 +1849,19 @@
         "REPO-03"
       ],
       "behaviorCheckIds": [],
-      "catalogRecordIds": []
+      "catalogRecordIds": [],
+      "regressionObligations": {
+        "findingIds": [
+          "AMX-BASE-001",
+          "AMX-BASE-002",
+          "AMX-BASE-003",
+          "AMX-BASE-004",
+          "AMX-BASE-005",
+          "AMX-BASE-006"
+        ],
+        "evidence": "docs/planning/2026-10-09/delivery/evidence/P00/baseline-findings.md",
+        "status": "required-for-this-task; not qualified by the P00 scoping result"
+      }
     },
     {
       "id": "P01-T07",
@@ -1759,7 +1885,8 @@
         "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
         "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
         "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
+        "Preserve the assertions assigned to this task for AMX-BASE-002 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements."
       ],
       "acceptanceCriteria": [
         {
@@ -1782,7 +1909,17 @@
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T18:58:59.479822+00:00",
+          "actor": "Codex",
+          "kind": "regression-assignment",
+          "findingIds": [
+            "AMX-BASE-002"
+          ],
+          "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged."
+        }
+      ],
       "phaseCriteria": [
         "P01-AC01",
         "P01-AC02",
@@ -1819,7 +1956,14 @@
         "REPO-03"
       ],
       "behaviorCheckIds": [],
-      "catalogRecordIds": []
+      "catalogRecordIds": [],
+      "regressionObligations": {
+        "findingIds": [
+          "AMX-BASE-002"
+        ],
+        "evidence": "docs/planning/2026-10-09/delivery/evidence/P00/baseline-findings.md",
+        "status": "required-for-this-task; not qualified by the P00 scoping result"
+      }
     },
     {
       "id": "P01-T08",
@@ -3361,7 +3505,8 @@
         "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
         "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
         "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
+        "Preserve the assertions assigned to this task for AMX-BASE-001 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements."
       ],
       "acceptanceCriteria": [
         {
@@ -3384,7 +3529,17 @@
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T18:58:59.479822+00:00",
+          "actor": "Codex",
+          "kind": "regression-assignment",
+          "findingIds": [
+            "AMX-BASE-001"
+          ],
+          "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged."
+        }
+      ],
       "phaseCriteria": [
         "P04-AC01",
         "P04-AC02",
@@ -3414,7 +3569,14 @@
         "DASH-02"
       ],
       "behaviorCheckIds": [],
-      "catalogRecordIds": []
+      "catalogRecordIds": [],
+      "regressionObligations": {
+        "findingIds": [
+          "AMX-BASE-001"
+        ],
+        "evidence": "docs/planning/2026-10-09/delivery/evidence/P00/baseline-findings.md",
+        "status": "required-for-this-task; not qualified by the P00 scoping result"
+      }
     },
     {
       "id": "P04-T02",
@@ -3438,7 +3600,8 @@
         "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
         "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
         "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
+        "Preserve the assertions assigned to this task for AMX-BASE-002, AMX-BASE-003, AMX-BASE-006 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements."
       ],
       "acceptanceCriteria": [
         {
@@ -3461,7 +3624,19 @@
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T18:58:59.479822+00:00",
+          "actor": "Codex",
+          "kind": "regression-assignment",
+          "findingIds": [
+            "AMX-BASE-002",
+            "AMX-BASE-003",
+            "AMX-BASE-006"
+          ],
+          "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged."
+        }
+      ],
       "phaseCriteria": [
         "P04-AC01",
         "P04-AC02",
@@ -3491,7 +3666,16 @@
         "DASH-02"
       ],
       "behaviorCheckIds": [],
-      "catalogRecordIds": []
+      "catalogRecordIds": [],
+      "regressionObligations": {
+        "findingIds": [
+          "AMX-BASE-002",
+          "AMX-BASE-003",
+          "AMX-BASE-006"
+        ],
+        "evidence": "docs/planning/2026-10-09/delivery/evidence/P00/baseline-findings.md",
+        "status": "required-for-this-task; not qualified by the P00 scoping result"
+      }
     },
     {
       "id": "P04-T03",
@@ -3746,7 +3930,8 @@
         "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
         "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
         "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
+        "Preserve the assertions assigned to this task for AMX-BASE-006 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements."
       ],
       "acceptanceCriteria": [
         {
@@ -3769,7 +3954,17 @@
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T18:58:59.479822+00:00",
+          "actor": "Codex",
+          "kind": "regression-assignment",
+          "findingIds": [
+            "AMX-BASE-006"
+          ],
+          "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged."
+        }
+      ],
       "phaseCriteria": [
         "P04-AC01",
         "P04-AC02",
@@ -3799,7 +3994,14 @@
         "DASH-02"
       ],
       "behaviorCheckIds": [],
-      "catalogRecordIds": []
+      "catalogRecordIds": [],
+      "regressionObligations": {
+        "findingIds": [
+          "AMX-BASE-006"
+        ],
+        "evidence": "docs/planning/2026-10-09/delivery/evidence/P00/baseline-findings.md",
+        "status": "required-for-this-task; not qualified by the P00 scoping result"
+      }
     },
     {
       "id": "P04-T07",
@@ -4295,7 +4497,8 @@
         "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
         "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
         "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
+        "Preserve the assertions assigned to this task for AMX-BASE-005 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements."
       ],
       "acceptanceCriteria": [
         {
@@ -4318,7 +4521,17 @@
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T18:58:59.479822+00:00",
+          "actor": "Codex",
+          "kind": "regression-assignment",
+          "findingIds": [
+            "AMX-BASE-005"
+          ],
+          "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged."
+        }
+      ],
       "phaseCriteria": [
         "P05-AC01",
         "P05-AC02",
@@ -4350,7 +4563,14 @@
         "DASH-07"
       ],
       "behaviorCheckIds": [],
-      "catalogRecordIds": []
+      "catalogRecordIds": [],
+      "regressionObligations": {
+        "findingIds": [
+          "AMX-BASE-005"
+        ],
+        "evidence": "docs/planning/2026-10-09/delivery/evidence/P00/baseline-findings.md",
+        "status": "required-for-this-task; not qualified by the P00 scoping result"
+      }
     },
     {
       "id": "P05-T05",
@@ -4611,7 +4831,8 @@
         "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
         "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
         "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
+        "Preserve the assertions assigned to this task for AMX-BASE-002, AMX-BASE-003 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements."
       ],
       "acceptanceCriteria": [
         {
@@ -4634,7 +4855,18 @@
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T18:58:59.479822+00:00",
+          "actor": "Codex",
+          "kind": "regression-assignment",
+          "findingIds": [
+            "AMX-BASE-002",
+            "AMX-BASE-003"
+          ],
+          "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged."
+        }
+      ],
       "phaseCriteria": [
         "P05-AC01",
         "P05-AC02",
@@ -4666,7 +4898,15 @@
         "DASH-07"
       ],
       "behaviorCheckIds": [],
-      "catalogRecordIds": []
+      "catalogRecordIds": [],
+      "regressionObligations": {
+        "findingIds": [
+          "AMX-BASE-002",
+          "AMX-BASE-003"
+        ],
+        "evidence": "docs/planning/2026-10-09/delivery/evidence/P00/baseline-findings.md",
+        "status": "required-for-this-task; not qualified by the P00 scoping result"
+      }
     },
     {
       "id": "P05-T09",
@@ -4917,7 +5157,8 @@
         "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
         "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
         "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
+        "Qualify REPO-01-C01 in actual supported agent hosts: confirm shared instructions and the branch/merge restriction are delivered, preserve user settings, and retain per-host/version evidence. P00 static review is not a substitute."
       ],
       "acceptanceCriteria": [
         {
@@ -4940,7 +5181,19 @@
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T19:00:26.977850+00:00",
+          "actor": "Codex",
+          "kind": "qualification-owner-reconciliation",
+          "behaviorCheckId": "REPO-01-C01",
+          "previousPhase": "P00",
+          "phase": "P06",
+          "previousSourceSha256": "6b9211469b0bbb4550cb270cd8333f42f3be53fbfa2b3cae7673c81037fd1c83",
+          "sourceSha256": "a006b4831662941ef6136b8b54b0637f9fd479d41a7059ad4fe41af3557d295e",
+          "note": "Retain static P00 review; require actual instruction loading at P06. No required check removed or marked passed."
+        }
+      ],
       "phaseCriteria": [
         "P06-AC01",
         "P06-AC02",
@@ -4982,7 +5235,9 @@
         "DASH-33",
         "REPO-06"
       ],
-      "behaviorCheckIds": [],
+      "behaviorCheckIds": [
+        "REPO-01-C01"
+      ],
       "catalogRecordIds": []
     },
     {
@@ -12980,7 +13235,8 @@
         "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
         "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
         "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
+        "Preserve the assertions assigned to this task for AMX-BASE-001 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements."
       ],
       "acceptanceCriteria": [
         {
@@ -13003,7 +13259,17 @@
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T18:58:59.479822+00:00",
+          "actor": "Codex",
+          "kind": "regression-assignment",
+          "findingIds": [
+            "AMX-BASE-001"
+          ],
+          "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged."
+        }
+      ],
       "phaseCriteria": [
         "P10-AC01",
         "P10-AC02",
@@ -13042,7 +13308,14 @@
         "REPO-07"
       ],
       "behaviorCheckIds": [],
-      "catalogRecordIds": []
+      "catalogRecordIds": [],
+      "regressionObligations": {
+        "findingIds": [
+          "AMX-BASE-001"
+        ],
+        "evidence": "docs/planning/2026-10-09/delivery/evidence/P00/baseline-findings.md",
+        "status": "required-for-this-task; not qualified by the P00 scoping result"
+      }
     },
     {
       "id": "P10-T03",
@@ -13066,7 +13339,8 @@
         "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
         "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
         "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
+        "Preserve the assertions assigned to this task for AMX-BASE-004 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements."
       ],
       "acceptanceCriteria": [
         {
@@ -13089,7 +13363,17 @@
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T18:58:59.479822+00:00",
+          "actor": "Codex",
+          "kind": "regression-assignment",
+          "findingIds": [
+            "AMX-BASE-004"
+          ],
+          "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged."
+        }
+      ],
       "phaseCriteria": [
         "P10-AC01",
         "P10-AC02",
@@ -13128,7 +13412,14 @@
         "REPO-07"
       ],
       "behaviorCheckIds": [],
-      "catalogRecordIds": []
+      "catalogRecordIds": [],
+      "regressionObligations": {
+        "findingIds": [
+          "AMX-BASE-004"
+        ],
+        "evidence": "docs/planning/2026-10-09/delivery/evidence/P00/baseline-findings.md",
+        "status": "required-for-this-task; not qualified by the P00 scoping result"
+      }
     },
     {
       "id": "P10-T04",
@@ -13152,7 +13443,8 @@
         "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
         "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
         "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
+        "Preserve the assertions assigned to this task for AMX-BASE-002, AMX-BASE-003, AMX-BASE-004, AMX-BASE-005 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements."
       ],
       "acceptanceCriteria": [
         {
@@ -13175,7 +13467,20 @@
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T18:58:59.479822+00:00",
+          "actor": "Codex",
+          "kind": "regression-assignment",
+          "findingIds": [
+            "AMX-BASE-002",
+            "AMX-BASE-003",
+            "AMX-BASE-004",
+            "AMX-BASE-005"
+          ],
+          "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged."
+        }
+      ],
       "phaseCriteria": [
         "P10-AC01",
         "P10-AC02",
@@ -13214,7 +13519,17 @@
         "REPO-07"
       ],
       "behaviorCheckIds": [],
-      "catalogRecordIds": []
+      "catalogRecordIds": [],
+      "regressionObligations": {
+        "findingIds": [
+          "AMX-BASE-002",
+          "AMX-BASE-003",
+          "AMX-BASE-004",
+          "AMX-BASE-005"
+        ],
+        "evidence": "docs/planning/2026-10-09/delivery/evidence/P00/baseline-findings.md",
+        "status": "required-for-this-task; not qualified by the P00 scoping result"
+      }
     },
     {
       "id": "P10-T05",
@@ -13238,7 +13553,8 @@
         "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
         "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
         "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
+        "Preserve the assertions assigned to this task for AMX-BASE-005 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements."
       ],
       "acceptanceCriteria": [
         {
@@ -13261,7 +13577,17 @@
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T18:58:59.479822+00:00",
+          "actor": "Codex",
+          "kind": "regression-assignment",
+          "findingIds": [
+            "AMX-BASE-005"
+          ],
+          "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged."
+        }
+      ],
       "phaseCriteria": [
         "P10-AC01",
         "P10-AC02",
@@ -13300,7 +13626,14 @@
         "REPO-07"
       ],
       "behaviorCheckIds": [],
-      "catalogRecordIds": []
+      "catalogRecordIds": [],
+      "regressionObligations": {
+        "findingIds": [
+          "AMX-BASE-005"
+        ],
+        "evidence": "docs/planning/2026-10-09/delivery/evidence/P00/baseline-findings.md",
+        "status": "required-for-this-task; not qualified by the P00 scoping result"
+      }
     },
     {
       "id": "P10-T06",
@@ -18392,7 +18725,8 @@
         "Confirm every phase task and prerequisite is complete; inspect the actual deliverables and limitations rather than relying on a done label.",
         "Run the phase's full acceptance, failure, preservation and rollback checks on the exact candidate and supported environments. Retain per-criterion evidence using gate-record.template.json.",
         "Obtain the specified independent review and advancement decision. Record missing evidence as a blocker; do not manufacture Nick's review or a human approval.",
-        "Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate."
+        "Commit all phase changes and evidence to feat/agentmux-platform-rearchitecture, push, and verify the remote commit. Record that commit before the next phase starts. MERGE-01 remains separate.",
+        "Preserve the assertions assigned to this task for AMX-BASE-006 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements."
       ],
       "acceptanceCriteria": [
         {
@@ -18439,7 +18773,17 @@
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T18:58:59.479822+00:00",
+          "actor": "Codex",
+          "kind": "regression-assignment",
+          "findingIds": [
+            "AMX-BASE-006"
+          ],
+          "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged."
+        }
+      ],
       "phaseCriteria": [
         "P12-AC01",
         "P12-AC02",
@@ -18494,7 +18838,14 @@
         "Component reuse decisions, baseline/candidate results, gain evidence and approved exceptions for ADD-01"
       ],
       "behaviorCheckIds": [],
-      "catalogRecordIds": []
+      "catalogRecordIds": [],
+      "regressionObligations": {
+        "findingIds": [
+          "AMX-BASE-006"
+        ],
+        "evidence": "docs/planning/2026-10-09/delivery/evidence/P00/baseline-findings.md",
+        "status": "required-for-this-task; not qualified by the P00 scoping result"
+      }
     },
     {
       "id": "P13-T01",
@@ -29395,6 +29746,241 @@
       "actor": "Codex",
       "action": "scope-completion",
       "note": "Added explicit final Ryan/Nick acceptance task after all phase gates; retained all existing tasks and history."
+    },
+    {
+      "at": "2026-10-09T18:58:59.479822+00:00",
+      "actor": "Codex",
+      "kind": "source-reconciliation",
+      "source": "component-audit-repository.json",
+      "previousSha256": "49249992242277c91533c80b83478e1086bda328cfeaace15cacb1d8f6365e62",
+      "sha256": "6b9211469b0bbb4550cb270cd8333f42f3be53fbfa2b3cae7673c81037fd1c83",
+      "note": "REPO-01 current instruction behavior corrected with prior text preserved. Component IDs, behavior IDs, phase scope and acceptance criteria are unchanged."
+    },
+    {
+      "at": "2026-10-09T18:58:59.479822+00:00",
+      "actor": "Codex",
+      "kind": "implementation-plan-refinement",
+      "previousImplementationPlan": [
+        "Inspect the existing source and callers for this exact work item: Freeze df46e94570fadf78ef67a75a692dd48b968a10f7 as the behavioral comparison baseline and inventory every CLI verb, dashboard view, protocol, state store, integration, and evaluation.",
+        "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
+        "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
+        "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+      ],
+      "note": "Replace generic execution steps with bounded source/reproduction work. Scope and acceptance criteria remain unchanged.",
+      "taskId": "P00-T01"
+    },
+    {
+      "at": "2026-10-09T18:58:59.479822+00:00",
+      "actor": "Codex",
+      "kind": "implementation-plan-refinement",
+      "previousImplementationPlan": [
+        "Inspect the existing source and callers for this exact work item: Reproduce or explicitly scope the previously reported federation correctness defects. Turn each into a regression case owned by the replacing phase.",
+        "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
+        "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
+        "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+      ],
+      "note": "Replace generic execution steps with bounded source/reproduction work. Scope and acceptance criteria remain unchanged.",
+      "taskId": "P00-T03"
+    },
+    {
+      "at": "2026-10-09T18:58:59.479822+00:00",
+      "actor": "Codex",
+      "kind": "regression-assignment",
+      "findingIds": [
+        "AMX-BASE-001",
+        "AMX-BASE-002",
+        "AMX-BASE-003",
+        "AMX-BASE-004",
+        "AMX-BASE-005",
+        "AMX-BASE-006"
+      ],
+      "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged.",
+      "taskId": "P01-T06"
+    },
+    {
+      "at": "2026-10-09T18:58:59.479822+00:00",
+      "actor": "Codex",
+      "kind": "regression-assignment",
+      "findingIds": [
+        "AMX-BASE-002"
+      ],
+      "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged.",
+      "taskId": "P01-T07"
+    },
+    {
+      "at": "2026-10-09T18:58:59.479822+00:00",
+      "actor": "Codex",
+      "kind": "regression-assignment",
+      "findingIds": [
+        "AMX-BASE-001"
+      ],
+      "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged.",
+      "taskId": "P04-T01"
+    },
+    {
+      "at": "2026-10-09T18:58:59.479822+00:00",
+      "actor": "Codex",
+      "kind": "regression-assignment",
+      "findingIds": [
+        "AMX-BASE-002",
+        "AMX-BASE-003",
+        "AMX-BASE-006"
+      ],
+      "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged.",
+      "taskId": "P04-T02"
+    },
+    {
+      "at": "2026-10-09T18:58:59.479822+00:00",
+      "actor": "Codex",
+      "kind": "regression-assignment",
+      "findingIds": [
+        "AMX-BASE-006"
+      ],
+      "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged.",
+      "taskId": "P04-T06"
+    },
+    {
+      "at": "2026-10-09T18:58:59.479822+00:00",
+      "actor": "Codex",
+      "kind": "regression-assignment",
+      "findingIds": [
+        "AMX-BASE-005"
+      ],
+      "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged.",
+      "taskId": "P05-T04"
+    },
+    {
+      "at": "2026-10-09T18:58:59.479822+00:00",
+      "actor": "Codex",
+      "kind": "regression-assignment",
+      "findingIds": [
+        "AMX-BASE-002",
+        "AMX-BASE-003"
+      ],
+      "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged.",
+      "taskId": "P05-T08"
+    },
+    {
+      "at": "2026-10-09T18:58:59.479822+00:00",
+      "actor": "Codex",
+      "kind": "regression-assignment",
+      "findingIds": [
+        "AMX-BASE-001"
+      ],
+      "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged.",
+      "taskId": "P10-T02"
+    },
+    {
+      "at": "2026-10-09T18:58:59.479822+00:00",
+      "actor": "Codex",
+      "kind": "regression-assignment",
+      "findingIds": [
+        "AMX-BASE-004"
+      ],
+      "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged.",
+      "taskId": "P10-T03"
+    },
+    {
+      "at": "2026-10-09T18:58:59.479822+00:00",
+      "actor": "Codex",
+      "kind": "regression-assignment",
+      "findingIds": [
+        "AMX-BASE-002",
+        "AMX-BASE-003",
+        "AMX-BASE-004",
+        "AMX-BASE-005"
+      ],
+      "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged.",
+      "taskId": "P10-T04"
+    },
+    {
+      "at": "2026-10-09T18:58:59.479822+00:00",
+      "actor": "Codex",
+      "kind": "regression-assignment",
+      "findingIds": [
+        "AMX-BASE-005"
+      ],
+      "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged.",
+      "taskId": "P10-T05"
+    },
+    {
+      "at": "2026-10-09T18:58:59.479822+00:00",
+      "actor": "Codex",
+      "kind": "regression-assignment",
+      "findingIds": [
+        "AMX-BASE-006"
+      ],
+      "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged.",
+      "taskId": "P12-GATE"
+    },
+    {
+      "at": "2026-10-09T18:58:59.979434+00:00",
+      "actor": "Codex",
+      "from": "in_progress",
+      "to": "verification",
+      "note": "Static preservation review and 20 focused baseline regressions complete; reviewing scoped evidence.",
+      "taskId": "P00-T06"
+    },
+    {
+      "at": "2026-10-09T18:59:00.413242+00:00",
+      "actor": "Codex",
+      "from": "verification",
+      "to": "done",
+      "note": "P00 documentation preflight complete: retained source behavior, historical reconciliation, explicit runtime gaps and assigned candidate checks. No phase advancement.",
+      "taskId": "P00-T06"
+    },
+    {
+      "at": "2026-10-09T18:59:00.777687+00:00",
+      "actor": "Codex",
+      "from": "planned",
+      "to": "in_progress",
+      "note": "Reconcile six defect reproductions, unchanged repair source, current focused results and replacing-phase regression owners.",
+      "taskId": "P00-T03"
+    },
+    {
+      "at": "2026-10-09T18:59:01.152093+00:00",
+      "actor": "Codex",
+      "from": "in_progress",
+      "to": "verification",
+      "note": "All six findings mapped; source/log hashes verified; 20 current focused tests passed without skips.",
+      "taskId": "P00-T03"
+    },
+    {
+      "at": "2026-10-09T18:59:01.689319+00:00",
+      "actor": "Codex",
+      "from": "verification",
+      "to": "done",
+      "note": "Baseline reproduction/scoping and future regression ownership recorded. P05/P10 broader acceptance and all phase gates remain open.",
+      "taskId": "P00-T03"
+    },
+    {
+      "at": "2026-10-09T18:59:02.066168+00:00",
+      "actor": "Codex",
+      "from": "planned",
+      "to": "in_progress",
+      "note": "Inventory static coverage and pinned baseline verified; preparing reviewable surface summary and unresolved behavior review.",
+      "taskId": "P00-T01"
+    },
+    {
+      "at": "2026-10-09T19:00:26.977850+00:00",
+      "actor": "Codex",
+      "kind": "qualification-owner-reconciliation",
+      "behaviorCheckId": "REPO-01-C01",
+      "previousPhase": "P00",
+      "phase": "P06",
+      "previousSourceSha256": "6b9211469b0bbb4550cb270cd8333f42f3be53fbfa2b3cae7673c81037fd1c83",
+      "sourceSha256": "a006b4831662941ef6136b8b54b0637f9fd479d41a7059ad4fe41af3557d295e",
+      "note": "Retain static P00 review; require actual instruction loading at P06. No required check removed or marked passed."
+    },
+    {
+      "at": "2026-10-09T19:01:46.556854+00:00",
+      "actor": "Codex",
+      "from": "in_progress",
+      "to": "verification",
+      "note": "Pinned baseline and all 344 governed files pass static coverage checks. Surface review package is ready; maintainer review of dynamic entry points and behavioral completeness remains part of P00 acceptance.",
+      "taskId": "P00-T01"
     }
   ]
 }

@@ -1,0 +1,457 @@
+{
+  "sourceCommit": "c513ffa0565936916b342ae8ad7a8dc837b4d6e8",
+  "date": "2026-10-09T18:56:37.079213+00:00",
+  "environment": {
+    "host": "Windows-11-10.0.26200-SP0",
+    "verificationPython": "3.14.7",
+    "runtimeTests": "Ubuntu-26.04 WSL; Python 3.14.4; isolated test stores; no live broker in this focused run"
+  },
+  "sourceChecks": [
+    {
+      "kind": "repair-source",
+      "path": "hub/store.py",
+      "expectedSha256": "144cafdc425d73ac420f5762ccd4a6153f8c5f70175226d0504e1040d4526f33",
+      "actualSha256": "144cafdc425d73ac420f5762ccd4a6153f8c5f70175226d0504e1040d4526f33",
+      "passed": true
+    },
+    {
+      "kind": "repair-source",
+      "path": "hub/fed/envelope.py",
+      "expectedSha256": "328d418cfd6517956237cddd3b1c5a4f5221cbd4789a3939b400753808fc91d2",
+      "actualSha256": "328d418cfd6517956237cddd3b1c5a4f5221cbd4789a3939b400753808fc91d2",
+      "passed": true
+    },
+    {
+      "kind": "repair-source",
+      "path": "hub/fed/guard.py",
+      "expectedSha256": "34a4347534eda49fbea2d9facf5e0bb8bf01abc602a28d2dba74b2e98377660f",
+      "actualSha256": "34a4347534eda49fbea2d9facf5e0bb8bf01abc602a28d2dba74b2e98377660f",
+      "passed": true
+    },
+    {
+      "kind": "repair-source",
+      "path": "hub/fed/runtime.py",
+      "expectedSha256": "b4f0a9a57bc5ba1a6895955c91625e6188b40206d35f628d7756e3ddefb89661",
+      "actualSha256": "b4f0a9a57bc5ba1a6895955c91625e6188b40206d35f628d7756e3ddefb89661",
+      "passed": true
+    },
+    {
+      "kind": "repair-source",
+      "path": "hub/fed/plugins/work.py",
+      "expectedSha256": "d52f850b230f1af473e239933114f1566f0e6f792d6e91d749a5b43ee47cbb49",
+      "actualSha256": "d52f850b230f1af473e239933114f1566f0e6f792d6e91d749a5b43ee47cbb49",
+      "passed": true
+    },
+    {
+      "kind": "repair-source",
+      "path": "hub/tests/test_fed_unit.py",
+      "expectedSha256": "b5753215fef5705fdb829078730e5fb14e12bc4c1ec040870e84ff2603772adf",
+      "actualSha256": "b5753215fef5705fdb829078730e5fb14e12bc4c1ec040870e84ff2603772adf",
+      "passed": true
+    },
+    {
+      "kind": "repair-source",
+      "path": "hub/tests/test_fed_live.py",
+      "expectedSha256": "af39ed93f205952f90a9975a7ed7381a7560ee8e0e4278dee220a57b08ad3b0c",
+      "actualSha256": "af39ed93f205952f90a9975a7ed7381a7560ee8e0e4278dee220a57b08ad3b0c",
+      "passed": true
+    },
+    {
+      "kind": "repair-source",
+      "path": "hub/tests/test_governance.py",
+      "expectedSha256": "6c35a7014e10b78a4872a2eb02df214b537f89a7afba7efed56a42d476ac1c61",
+      "actualSha256": "6c35a7014e10b78a4872a2eb02df214b537f89a7afba7efed56a42d476ac1c61",
+      "passed": true
+    },
+    {
+      "kind": "historical-log",
+      "path": "docs/planning/2026-10-09/governance-evidence/baseline-regressions.log",
+      "expectedSha256": "757d539c18a45ba32eb816404e2000bb046f544c7091da2ea2d260e564fcdcd3",
+      "actualSha256": "757d539c18a45ba32eb816404e2000bb046f544c7091da2ea2d260e564fcdcd3",
+      "passed": true
+    },
+    {
+      "kind": "historical-log",
+      "path": "docs/planning/2026-10-09/governance-evidence/full-suite-final.log",
+      "expectedSha256": "d14c3a049b52452b6c3dafe9c44dff63660a5d773aad424120d8b0f40c546ba9",
+      "actualSha256": "d14c3a049b52452b6c3dafe9c44dff63660a5d773aad424120d8b0f40c546ba9",
+      "passed": true
+    },
+    {
+      "kind": "historical-log",
+      "path": "docs/planning/2026-10-09/governance-evidence/dashboard-checks.log",
+      "expectedSha256": "b011dacc7f3456ae1d3c6bed290a0e20c341ba113823a189ff86766622cc7ffb",
+      "actualSha256": "b011dacc7f3456ae1d3c6bed290a0e20c341ba113823a189ff86766622cc7ffb",
+      "passed": true
+    },
+    {
+      "kind": "baseline-equivalence",
+      "path": "hub/store.py",
+      "frozenBaselineBlob": "6aec3a5ab5d8f67dfc2535bd9549d3bd7b75dcfa",
+      "reproductionBaselineBlob": "6aec3a5ab5d8f67dfc2535bd9549d3bd7b75dcfa",
+      "passed": true
+    },
+    {
+      "kind": "baseline-equivalence",
+      "path": "hub/fed/envelope.py",
+      "frozenBaselineBlob": "cbf008d9015ed3ee76ee1d355cce535db36968eb",
+      "reproductionBaselineBlob": "cbf008d9015ed3ee76ee1d355cce535db36968eb",
+      "passed": true
+    },
+    {
+      "kind": "baseline-equivalence",
+      "path": "hub/fed/guard.py",
+      "frozenBaselineBlob": "c5a254197e45b62de0155690cedc382be9bb1661",
+      "reproductionBaselineBlob": "c5a254197e45b62de0155690cedc382be9bb1661",
+      "passed": true
+    },
+    {
+      "kind": "baseline-equivalence",
+      "path": "hub/fed/runtime.py",
+      "frozenBaselineBlob": "632943031c39b2a8a599cdf8535732c0c8dfe70a",
+      "reproductionBaselineBlob": "632943031c39b2a8a599cdf8535732c0c8dfe70a",
+      "passed": true
+    },
+    {
+      "kind": "baseline-equivalence",
+      "path": "hub/fed/plugins/work.py",
+      "frozenBaselineBlob": "77c2a0c9da55cddc511ad42a0a101960fd0d638b",
+      "reproductionBaselineBlob": "77c2a0c9da55cddc511ad42a0a101960fd0d638b",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/__init__.py",
+      "expectedSha256": "2fa2e5fedd0cf0b155aca3ec64c7f0ae8241f7806272c9f1828e280730e1fcfe",
+      "actualSha256": "2fa2e5fedd0cf0b155aca3ec64c7f0ae8241f7806272c9f1828e280730e1fcfe",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/bridge.py",
+      "expectedSha256": "c129386a37e88f8f4f94ebb0247ce39d09638f7e734f8741050de4ecaec5eb2c",
+      "actualSha256": "c129386a37e88f8f4f94ebb0247ce39d09638f7e734f8741050de4ecaec5eb2c",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/cli.py",
+      "expectedSha256": "45e061b6a30cb7654e0104cf46a1100bc87bba48a38e77cee30ea9c7550b3227",
+      "actualSha256": "45e061b6a30cb7654e0104cf46a1100bc87bba48a38e77cee30ea9c7550b3227",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/deliver.py",
+      "expectedSha256": "c39ab9062b797bf7fc2d2769f8d92c4ba57b9e6fdfe7159323e9d9e99c825f48",
+      "actualSha256": "c39ab9062b797bf7fc2d2769f8d92c4ba57b9e6fdfe7159323e9d9e99c825f48",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/demo/orchestrate.py",
+      "expectedSha256": "9e389a227a1407f7aedfe7462a89b88ec1e3e5506d4cf0c0d8b1f7c3c96a2451",
+      "actualSha256": "9e389a227a1407f7aedfe7462a89b88ec1e3e5506d4cf0c0d8b1f7c3c96a2451",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/demo/scoreboard.py",
+      "expectedSha256": "a88cb21230061659b518aa4025fc0bf18f74611ee2967e5d8d66a2090bc1fb59",
+      "actualSha256": "a88cb21230061659b518aa4025fc0bf18f74611ee2967e5d8d66a2090bc1fb59",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/__init__.py",
+      "expectedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "actualSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/admin.py",
+      "expectedSha256": "ce6b0b048a4fcaa5e0b4432ed920ba587bad21d54cb2a84187a09e5022a2b74a",
+      "actualSha256": "ce6b0b048a4fcaa5e0b4432ed920ba587bad21d54cb2a84187a09e5022a2b74a",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/config.py",
+      "expectedSha256": "9fa43b51291d4d41df9ee4bfb66bd40c8c19e6e40473d1e3b8cff5390e31b1a4",
+      "actualSha256": "9fa43b51291d4d41df9ee4bfb66bd40c8c19e6e40473d1e3b8cff5390e31b1a4",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/conn.py",
+      "expectedSha256": "7c4d226c777256c2228ec76254aca526039d7c7c5dc4fb7c61933816397f9bab",
+      "actualSha256": "7c4d226c777256c2228ec76254aca526039d7c7c5dc4fb7c61933816397f9bab",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/demo.py",
+      "expectedSha256": "7d5e1d4b86650e1f6c5faaf812b751ce61d457a1f445e71345a9a2cde6f266d7",
+      "actualSha256": "7d5e1d4b86650e1f6c5faaf812b751ce61d457a1f445e71345a9a2cde6f266d7",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/envelope.py",
+      "expectedSha256": "328d418cfd6517956237cddd3b1c5a4f5221cbd4789a3939b400753808fc91d2",
+      "actualSha256": "328d418cfd6517956237cddd3b1c5a4f5221cbd4789a3939b400753808fc91d2",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/guard.py",
+      "expectedSha256": "34a4347534eda49fbea2d9facf5e0bb8bf01abc602a28d2dba74b2e98377660f",
+      "actualSha256": "34a4347534eda49fbea2d9facf5e0bb8bf01abc602a28d2dba74b2e98377660f",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/hooks/__init__.py",
+      "expectedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "actualSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/hooks/privileged_gate.py",
+      "expectedSha256": "6f3feee0cd7ae1680fe356a31ccdd28bcb475e59f38f9ae101e889e496c031fd",
+      "actualSha256": "6f3feee0cd7ae1680fe356a31ccdd28bcb475e59f38f9ae101e889e496c031fd",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/ledger.py",
+      "expectedSha256": "057de84ff7dfd884f34180dfb7dac98811790be54b3b0ad6d0f85fc62a05dd99",
+      "actualSha256": "057de84ff7dfd884f34180dfb7dac98811790be54b3b0ad6d0f85fc62a05dd99",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/mcp.py",
+      "expectedSha256": "9e69ab50195d64c5a8454138cc767be74888eb54b750c22b97ac4ed113e8c188",
+      "actualSha256": "9e69ab50195d64c5a8454138cc767be74888eb54b750c22b97ac4ed113e8c188",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/plugin.py",
+      "expectedSha256": "aeaf58efd3e369ccac5c7605976bc3183599a1b88bd825680d9ef727df44aea2",
+      "actualSha256": "aeaf58efd3e369ccac5c7605976bc3183599a1b88bd825680d9ef727df44aea2",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/plugins/__init__.py",
+      "expectedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "actualSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/plugins/board.py",
+      "expectedSha256": "4e5ef514e1334d7fd7856f13f334931f00cd3510614d51f23b143dda23f2a5b6",
+      "actualSha256": "4e5ef514e1334d7fd7856f13f334931f00cd3510614d51f23b143dda23f2a5b6",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/plugins/code.py",
+      "expectedSha256": "4c2b560cc136212fba9cf3d524eb14b4941b4fa10cf147bff11dad8859e6dfc9",
+      "actualSha256": "4c2b560cc136212fba9cf3d524eb14b4941b4fa10cf147bff11dad8859e6dfc9",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/plugins/knowledge.py",
+      "expectedSha256": "95dd53657b6c52b61dcc8f7718579cdee18c5ecdec9026e360292fdecd142e85",
+      "actualSha256": "95dd53657b6c52b61dcc8f7718579cdee18c5ecdec9026e360292fdecd142e85",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/plugins/messages.py",
+      "expectedSha256": "e3f8f29fd1c8bb72fdd401f42f75f8438cc289c39053528d82e1c6c9156b5c09",
+      "actualSha256": "e3f8f29fd1c8bb72fdd401f42f75f8438cc289c39053528d82e1c6c9156b5c09",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/plugins/work.py",
+      "expectedSha256": "d52f850b230f1af473e239933114f1566f0e6f792d6e91d749a5b43ee47cbb49",
+      "actualSha256": "d52f850b230f1af473e239933114f1566f0e6f792d6e91d749a5b43ee47cbb49",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/policy.py",
+      "expectedSha256": "0e3ef8d016aea2df561b95bf68d2116482684e5a08f71b17dc58a1c2d9e5623c",
+      "actualSha256": "0e3ef8d016aea2df561b95bf68d2116482684e5a08f71b17dc58a1c2d9e5623c",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/redact.py",
+      "expectedSha256": "65be8b5a3381f73c80e6c2723ec165de6c3dcb2b0b0cd34632be4b832d4d19a4",
+      "actualSha256": "65be8b5a3381f73c80e6c2723ec165de6c3dcb2b0b0cd34632be4b832d4d19a4",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/fed/runtime.py",
+      "expectedSha256": "b4f0a9a57bc5ba1a6895955c91625e6188b40206d35f628d7756e3ddefb89661",
+      "actualSha256": "b4f0a9a57bc5ba1a6895955c91625e6188b40206d35f628d7756e3ddefb89661",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/names.py",
+      "expectedSha256": "43975e5176c59eb254f536dfe1cdc94aa52c2724cd2c820433b21e1c87c6c0ef",
+      "actualSha256": "43975e5176c59eb254f536dfe1cdc94aa52c2724cd2c820433b21e1c87c6c0ef",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/profiles.py",
+      "expectedSha256": "fb1282f9ce4b6dc9361cfc2da36b2c41c01d0ea070a6feaee375a2098340ac25",
+      "actualSha256": "fb1282f9ce4b6dc9361cfc2da36b2c41c01d0ea070a6feaee375a2098340ac25",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/receipts.py",
+      "expectedSha256": "29e9f7f270006d34197e56b119844247ce5c09f9d8493ed3e99c3f04def2ef2d",
+      "actualSha256": "29e9f7f270006d34197e56b119844247ce5c09f9d8493ed3e99c3f04def2ef2d",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/server.py",
+      "expectedSha256": "570f3c4cd778ce1600cf10b4a33d7375cc448818c48e27a8727c4abd1f4a317c",
+      "actualSha256": "570f3c4cd778ce1600cf10b4a33d7375cc448818c48e27a8727c4abd1f4a317c",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/store.py",
+      "expectedSha256": "144cafdc425d73ac420f5762ccd4a6153f8c5f70175226d0504e1040d4526f33",
+      "actualSha256": "144cafdc425d73ac420f5762ccd4a6153f8c5f70175226d0504e1040d4526f33",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/tests/__init__.py",
+      "expectedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "actualSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/tests/fedharness.py",
+      "expectedSha256": "8224930dcc0a031e9333b4f5781f1c0990a3a46f929a9808acc5566deea5595d",
+      "actualSha256": "8224930dcc0a031e9333b4f5781f1c0990a3a46f929a9808acc5566deea5595d",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/tests/run_local.py",
+      "expectedSha256": "2a3f9f0082084bc9e8a082381a0067da5f5f8350451f0f05cb504fee4702b172",
+      "actualSha256": "2a3f9f0082084bc9e8a082381a0067da5f5f8350451f0f05cb504fee4702b172",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/tests/test_fed_live.py",
+      "expectedSha256": "af39ed93f205952f90a9975a7ed7381a7560ee8e0e4278dee220a57b08ad3b0c",
+      "actualSha256": "af39ed93f205952f90a9975a7ed7381a7560ee8e0e4278dee220a57b08ad3b0c",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/tests/test_fed_unit.py",
+      "expectedSha256": "b5753215fef5705fdb829078730e5fb14e12bc4c1ec040870e84ff2603772adf",
+      "actualSha256": "b5753215fef5705fdb829078730e5fb14e12bc4c1ec040870e84ff2603772adf",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/tests/test_governance.py",
+      "expectedSha256": "6c35a7014e10b78a4872a2eb02df214b537f89a7afba7efed56a42d476ac1c61",
+      "actualSha256": "6c35a7014e10b78a4872a2eb02df214b537f89a7afba7efed56a42d476ac1c61",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/tests/test_hub_offline.py",
+      "expectedSha256": "9c86f65a2b76af8b304a65816c6b6a66defec22d85f4fbfc92a3313a92304e70",
+      "actualSha256": "9c86f65a2b76af8b304a65816c6b6a66defec22d85f4fbfc92a3313a92304e70",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/tests/test_local_runner.py",
+      "expectedSha256": "e183314d0397b4ca4fa302fad5afda0aab47985bc2f0ce1140c9dcf6e9f2dc35",
+      "actualSha256": "e183314d0397b4ca4fa302fad5afda0aab47985bc2f0ce1140c9dcf6e9f2dc35",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/tests/test_nats_federation.py",
+      "expectedSha256": "d73d7b00e3e7a06037623d07fc30f3ee7b9dbb580d9fd5c79f2e0675f376226c",
+      "actualSha256": "d73d7b00e3e7a06037623d07fc30f3ee7b9dbb580d9fd5c79f2e0675f376226c",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/transport.py",
+      "expectedSha256": "e33439c76982486f64a985875659420f9b27d7369de4ff24755ff09ddcd59768",
+      "actualSha256": "e33439c76982486f64a985875659420f9b27d7369de4ff24755ff09ddcd59768",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/requirements.txt",
+      "expectedSha256": "bfe65214b3b18cdebdcbb560111113489b4a8bbc5f84b9905a2e5d0edc362b2a",
+      "actualSha256": "bfe65214b3b18cdebdcbb560111113489b4a8bbc5f84b9905a2e5d0edc362b2a",
+      "passed": true
+    },
+    {
+      "kind": "current-run-source",
+      "path": "hub/requirements.lock",
+      "expectedSha256": "3ed79db16ab9b01c1c4f1b2b99443b8952579abd8a85fd38e60aff8c1baa2420",
+      "actualSha256": "3ed79db16ab9b01c1c4f1b2b99443b8952579abd8a85fd38e60aff8c1baa2420",
+      "passed": true
+    }
+  ],
+  "inspectedSource": {
+    "AGENTS.md": "5b1d82877709bc85279774098ad50946e0a343f51b10b7fbc6c3b28c2903197a",
+    "CLAUDE.md": "d4e6f9925e16672b5410eea9574c8863faa6718ecdfdf2207aaae114ca8a165c",
+    ".claude/rules/plain-language.md": "7e2b8b6b328a83559342b7a4569f5fb9252699917ec5a7b7451dfd238b184a50",
+    "dashboard/SPEC.md": "93f5194cc3adbb94165dabcc87b69f3389694f3b5c1d2a8d61178ec8d789abc2",
+    "dashboard/SPEC_CC.md": "59aa1c5bebae48174b9cc7aeb8f0287c6978bba8f33498aed41e2f88460fec9b",
+    "dashboard/server.py": "856adec15cbb491e3fae11ef71bd39105c16d888fea389154fe8e4c85a01bc68"
+  },
+  "focusedCommand": "./hub/tests/local.ps1 hub.tests.test_governance",
+  "focusedExitCode": 0,
+  "focusedResult": {
+    "tests": 20,
+    "seconds": 1.706,
+    "skips": [],
+    "failures": [],
+    "status": "passed"
+  },
+  "focusedArtifacts": {
+    "governance-result.json": "4c0e81c32898fe08ee347cdee1210340bee905d3b735d70f3f2d4860b8f7aa88",
+    "governance-tests.log": "a092e7241c8b57c251f95ccf00e450cfe9bdd3f02dc9eb3b20cde9ed90bb52cf"
+  },
+  "limits": [
+    "Source and log hashes verify evidence identity, not semantic correctness.",
+    "Historical full-suite and old-source failures were not rerun in this checkpoint.",
+    "Future plugin, broker storage, native macOS and real Ryan/Nick acceptance remain unqualified."
+  ]
+}

@@ -1,8 +1,8 @@
 # Component preservation and planned gains
 
-**Status: static source review and proposed verification. Runtime comparisons have not run. Implementation remains paused.**
+**Status: static inventory checked during P00; full baseline/candidate qualification remains open.** The [live task board](implementation-status.md) records current work. The [P00 preflight](delivery/evidence/P00/preflight.md) and [baseline defect reconciliation](delivery/evidence/P00/baseline-findings.md) distinguish executed focused tests, retained historical results and missing environments. No phase acceptance is implied.
 
-ADD-01 accounts for **338 baseline files**, **1 additional instruction file**, **93 components**, and **198 behavior checks**. The [exact inventory](component-inventory.json) pins file ownership and Git blob identities. The [source surface index](source-surface-index.json) lists code declarations and literal HTTP paths for review. File coverage does not prove runtime correctness or complete behavioral coverage.
+ADD-01 accounts for **338 baseline files**, **6 additional governed files**, **93 components**, and **198 behavior checks**. The [exact inventory](component-inventory.json) pins file ownership and Git blob identities. The [source surface index](source-surface-index.json) lists code declarations and literal HTTP paths for review. File coverage does not prove runtime correctness or complete behavioral coverage.
 
 ## Required preservation rule
 
@@ -3769,7 +3769,7 @@ P00 must reconcile maintainers’ workflows with the declared entry points. Miss
 **Current behavior**
 
 - AGENTS.md carries the branch and Ryan/Nick merge restriction. Both root agent instruction files link the shared plain-language rules.
-- CLAUDE.md does not currently repeat the branch restriction or link AGENTS.md; host-specific loading of all required rules needs verification.
+- Both root instruction files now include the branch restriction, Ryan/Nick merge gate, fast-test workflow and repository task tracking. This supersedes the original audit note that CLAUDE.md lacked the restriction; its original text remains in `component-audit-repository.json` review history. Actual supported-host instruction loading belongs to P06-T01 and remains unqualified.
 
 **Reuse:** Retain root entry files and the shared writing rules. Extend their links as implementation contracts gain evidence.
 
@@ -3789,7 +3789,7 @@ P00 must reconcile maintainers’ workflows with the declared entry points. Miss
 
 **Known limits and review gaps**
 
-- Tool-specific instruction loading has not been tested; CLAUDE.md alone does not include every AGENTS.md restriction.
+- Static root-file review does not prove tool-specific instruction loading. REPO-01-C01 must pass with actual supported host versions in P06; installation and upgrades must preserve user-authored settings.
 
 **Files**
 

@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, scoped repository delivery-tracking review, 2026-10-09; product phase and merge gates remain open",
-  "sourceDigest": "2adf3a1c479449c846aee4911c69e7dee01254d33184ea8cebdc1f0fdab7696f",
+  "reviewer": "Codex, P00 preparation and evidence review, 2026-10-09; phase and MERGE-01 gates remain open",
+  "sourceDigest": "157af7cd1919e8ae859718d4f8ec4bb53fd9ecd5edf0a03ff4a8a90db4ebb9bc",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -230,6 +230,24 @@
         "CLAUDE.md"
       ],
       "rationale": "Ryan explicitly chose local tracking instead of Jira while authorization was pending; no external issues or connector installation are claimed. Reviewed one authoritative task JSON with generated board/detail views, history, source hashes, explicit scope and predecessor checks, evidence requirements and phase commit/push checks. The initial breakdown retains 15 epics, 110 phase work items, 132 catalog records, 15 phase gates and MERGE-01: 258 tasks; 99 phase criteria, 62 failure scenarios and 198 behavior checks remain owned. Broad source work may be refined before implementation without dropping scope. Six focused tracker tests pass, the tracker and component coverage checks pass, and the rebuilt HTML embeds the exact plan with unchanged image hashes. No product runtime, runtime store, architecture relationship or pattern changed; existing diagrams remain accurate. Task metadata cannot establish authentic human approval or semantic correctness. P00 preflight is in progress and its gate is blocked on remaining work and required review; no phase or merge is accepted."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "previousReviewer": "Codex, scoped repository delivery-tracking review, 2026-10-09; product phase and merge gates remain open",
+      "previousSourceDigest": "2adf3a1c479449c846aee4911c69e7dee01254d33184ea8cebdc1f0fdab7696f",
+      "scope": "P00 preservation preflight, baseline defect reconciliation, inventory review and behavior qualification ownership",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/preflight.md",
+        "docs/planning/2026-10-09/delivery/evidence/P00/baseline-findings.md",
+        "docs/planning/2026-10-09/delivery/evidence/P00/source-checks.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/governance-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/inventory-review.md",
+        "docs/planning/2026-10-09/component-audit-repository.json",
+        "docs/planning/2026-10-09/delivery/track.py",
+        "docs/planning/2026-10-09/delivery/test_track.py"
+      ],
+      "rationale": "Reviewed historical dashboard constraints against current mutation routes and current root instruction content; corrected stale CLAUDE restriction note with previous text retained. P00-T06 preparation and P00-T03 defect reproduction/scoping have source-bound evidence. Inventory remains in verification pending behavioral completeness review. Twenty current focused governance tests pass in WSL; all recorded repair sources and historical logs match, and five repaired runtime baseline blobs match the frozen comparison. No new broker, native macOS, actual AI-host or Ryan/Nick evidence claimed. Every repaired invariant is assigned to its replacing task. REPO-01-C01 runtime qualification explicitly belongs to P06 while P00 retains static review, avoiding a sequencing dependency on future host code. Eight tracker tests pass, including duplicate-owner and wrong-phase rejection; 344 governed files, 93 components and 198 checks retain coverage. No product runtime, data authority, pattern or architecture relationship changed; existing diagrams remain applicable. No phase acceptance or merge approval."
     }
   ],
   "rules": {

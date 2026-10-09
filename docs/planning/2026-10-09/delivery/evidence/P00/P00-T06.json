@@ -1,0 +1,45 @@
+{
+  "taskId": "P00-T06",
+  "sourceCommit": "c513ffa0565936916b342ae8ad7a8dc837b4d6e8",
+  "reviewedBy": "Codex",
+  "date": "2026-10-09",
+  "scope": "Preparation/scoping only; no phase, human or merge approval. Runtime source unchanged.",
+  "acceptanceResults": [
+    {
+      "criterionId": "P00-T06-AC01",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/preflight.md",
+        "docs/planning/2026-10-09/delivery/evidence/P00/source-checks.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/governance-result.json"
+      ]
+    },
+    {
+      "criterionId": "P00-T06-AC02",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/preflight.md",
+        "docs/planning/2026-10-09/delivery/evidence/P00/source-checks.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/governance-result.json"
+      ]
+    },
+    {
+      "criterionId": "P00-T06-AC03",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/preflight.md",
+        "docs/planning/2026-10-09/delivery/evidence/P00/source-checks.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/governance-result.json"
+      ]
+    },
+    {
+      "criterionId": "P00-T06-AC04",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P00/preflight.md",
+        "docs/planning/2026-10-09/delivery/evidence/P00/source-checks.json",
+        "docs/planning/2026-10-09/delivery/evidence/P00/governance-result.json"
+      ]
+    }
+  ]
+}

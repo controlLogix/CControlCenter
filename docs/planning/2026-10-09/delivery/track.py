@@ -101,7 +101,8 @@ def initialize():
                              phaseCriteria=[c["id"] for c in phase["criteria"]],
                              verification=phase["verify"], deliverables=[work, "Focused regression evidence and affected compatibility/migration records"],
                              componentIds=[c["id"] for c in owned],
-                             behaviorCheckIds=[b["id"] for c in owned for b in c["behaviorChecks"]] if i == preservation else [],
+                             behaviorCheckIds=[b["id"] for c in components for b in c["behaviorChecks"]
+                                               if b.get("qualificationPhase", c["ownerPhase"]) == pid] if i == preservation else [],
                              catalogRecordIds=[])
             if i == preservation:
                 task["implementationPlan"] = [
@@ -178,7 +179,12 @@ def validate(data):
     failures = read(PLAN / "verification-matrix.json")["cases"]
     inventory = read(PLAN / "component-inventory.json")
     components = sum((read(PLAN / name)["components"] for name in inventory["manifests"]), [])
-    assert {b['id'] for c in components for b in c['behaviorChecks']} == {b for t in tasks.values() for b in t.get('behaviorCheckIds', [])}, "component behavior coverage mismatch"
+    expected_checks = {b['id']: b.get('qualificationPhase', c['ownerPhase'])
+                       for c in components for b in c['behaviorChecks']}
+    assigned_checks = [(b, t['phase']) for t in tasks.values() for b in t.get('behaviorCheckIds', [])]
+    assert len(assigned_checks) == len(set(b for b, _ in assigned_checks)), "duplicate component behavior owner"
+    assert set(expected_checks) == {b for b, _ in assigned_checks}, "component behavior coverage mismatch"
+    assert all(expected_checks[b] == phase for b, phase in assigned_checks), "component behavior qualification phase mismatch"
     for phase in phases:
         epic = next(e for e in data['epics'] if e['id'] == phase['id'])
         assert epic['acceptanceCriteria'] == phase['criteria'], "phase criteria changed in tracker"

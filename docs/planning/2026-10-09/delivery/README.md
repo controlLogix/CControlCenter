@@ -13,6 +13,8 @@ Ryan chose repository-based tracking instead of Jira. No Atlassian installation 
 
 This initial decomposition retains all source work. Refine broad tasks into bounded child tasks before starting them when needed, preserving parent scope and coverage. Phase-level verification procedures listed on an individual implementation task provide context: run the checks relevant to that slice, then the complete required matrix at its gate. Only the dedicated preflight task must finish before other implementation work in that phase; ongoing candidate preservation checks finish at the phase gate.
 
+A component's documentation owner can differ from the phase that qualifies its running behavior. A behavior check may declare `qualificationPhase`; otherwise it uses the component's `ownerPhase`. Every check has exactly one qualification owner in the tracker. For example, P00 reviews the repository instructions, while P06 must prove REPO-01-C01 by loading them in supported agent hosts. This changes the verification sequence, not the required assertion. Preflight work must still identify such later checks and any baseline gaps before a safe change proceeds.
+
 ## Status and updates
 
 Allowed states are `planned`, `ready`, `in_progress`, `blocked`, `verification`, and `done`. Record a task as blocked with a specific reason and next action. Do not use done for a partial implementation, skipped environment, unapproved scope reduction, or a worker's self-report.
