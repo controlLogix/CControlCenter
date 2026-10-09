@@ -733,19 +733,22 @@ Each phase below specifies its work, acceptance, verification, evidence, and rol
 - Apply ADD-01 and the component preservation matrix to every changed source file and affected caller. Record reuse, intentional behavior changes, migration needs and the specific added functionality before editing implementation.
 - Qualify LOCAL-01 installation, automatic launch, upgrade compatibility, data retention and recovery using the pinned Docker/Compose/OS/client matrix. Document setup prerequisites, diagnosis, explicit stop and backup/restore without making runtime Docker socket access a general plugin capability.
 
+- Prepare the MERGE-01 two-person, two-instance rehearsal and evidence package. Keep final merge authorization separate from P12 advancement so later approved phases can finish without an early merge.
+
 ### Acceptance criteria
 
 - **P12-AC01:** Every launch requirement is linked to passing evidence for the exact release candidate. Critical correctness/security defects are closed.
 - **P12-AC02:** A new developer installs and completes the reference task using only published docs on every supported platform.
 - **P12-AC03:** A team administrator enrolls two organizations, shares a scoped project, delegates work, survives a partition, and restores a backup.
 - **P12-AC04:** The approved capacity/SLO targets and recovery drill pass without losing acknowledged durable records within the tested fault model.
-- **P12-AC05:** Ryan reviews the release evidence with Nick and explicitly authorizes merge/release. Passing automation alone cannot merge this branch.
+- **P12-AC05:** Ryan and Nick review the release-readiness evidence and record provisional readiness plus all outstanding MERGE-01 requirements. P12 acceptance does not authorize merge or release; the separate final gate requires the entire approved plan, their real-instance orchestration evidence and Ryan's explicit merge approval.
 - **P12-AC06:** The approved NATS storage profile passes record/checkpoint/artifact restore, projection rebuild, retention-gap and migration rollback drills under the declared process/host/disk/quorum failure model. Published RPO/RTO and capacity claims match observed evidence, and no unreviewed SQL authority remains.
 - **P12-AC07:** Every component and behavior check has a reviewed release disposition. Required baseline/candidate comparisons and migration drills pass on the supported matrix; no skipped check, missing component or unapproved feature removal can be hidden by a successful new reference workflow.
 - **P12-AC08:** Fresh-user and upgrade drills pass LOCAL-01 cold/warm/concurrent startup, actionable Docker failures, explicit stop, persistent data recovery and scoped hub status on the supported platform/client matrix. No launch silently upgrades an incompatible live stack, loses durable work or bypasses a required phase gate.
 
 ### Verification
 
+- Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact merge candidate after all required phases pass.
 - Repeat FAIL-55–FAIL-62 with the exact packaged release, real federation and each advertised launch integration; record readiness deadlines, versions, volume identity and observed timing.
 - Run the complete release matrix, independent security review, load/soak tests, upgrade/restore rehearsal, and pilot acceptance.
 - Compare evidence manifests to the exact candidate digest and invalidate stale results after material changes.
@@ -913,7 +916,7 @@ The frontend declaration and governance configuration must reflect the new web s
 | R22 | All 88 opportunities and separate video additions retained | P08–P14 | Catalog coverage appendix with IDs and dispositions. |
 | R23 | Portable jev plugin and Agentmux/domain skills | P09, P11, P13 | All 26 named proposals mapped and host/eval qualified. |
 | R24 | Skill creation after discussion, using skill-creator and evals | P00, P09 | Approved scope then paired/trigger/holdout evaluation records. |
-| R25 | Everything on rearchitecture branch, no merge before review | P00–P14 | Branch evidence and Ryan/Nick merge decision. |
+| R25 | Entire plan on the feature branch; final functional and real-instance evidence before merge | P00–P14 and MERGE-01 | All required phase evidence, Ryan-to-Nick and Nick-to-Ryan safe orchestrations, joint review and Ryan's explicit merge decision. |
 | R29 | Automatic Docker Compose start or reuse on client launch, with scoped instance and hub status (LOCAL-01) | P00, P02, P06, P07, P10, P12 | FAIL-55–FAIL-62 and nine explicit acceptance criteria. |
 | R26 | Phased acceptance and verification before progression | P00–P14 | 99 individual criteria and predecessor gate attestations. |
 | R27 | NATS as preferred shared persistence; optional rebuildable SQL views | P01, P04, P10, P12 | STATE-01, conditional commits, projection rebuild, retention/freshness, scoped access and migration/restore evidence. |
@@ -943,8 +946,31 @@ Primary references: [NATS concepts](https://docs.nats.io/), [leaf nodes](https:/
 
 The current deliverable is planning and presentation only. It does not report that any future acceptance test passed. Existing offline example results and historical product tests remain attributed to their original scope. No paid inference, skill installation, equipment action, merge, or release is part of this work.
 
+## MERGE-01. Final functional and real-instance acceptance
+
+**Ryan's explicit condition, October 9:** Keep this entire plan and its implementation exclusively on `feat/agentmux-platform-rearchitecture` until everything in the approved plan is functional, Ryan and Nick can connect their own instances and successfully orchestrate simple, non-destructive work with evidence, and Ryan explicitly authorizes a merge after reviewing that evidence with Nick.
+
+Do not merge, squash, cherry-pick or otherwise transfer this work into an integration or release branch before this gate. Do not enable automatic merging. Committing, pushing, approving the plan and accepting an individual phase do not authorize a merge.
+
+All required acceptance criteria, preservation checks and verification scenarios must pass for the exact candidate and its supported environments. Missing environments, skipped required tests, unresolved correctness/security blockers or unverified functionality remain open work. P00–P14 remain in the approved-plan checklist; the earlier P12 first-release milestone does not allow an early merge while remaining planned phases are outstanding. A scope change requires Ryan's explicit decision after review with Nick; none is implied here. This final gate is separate from sequential phase advancement, so later phases can be completed on this branch before merging.
+
+### Safe orchestration to demonstrate together
+
+1. Ryan and Nick each run the candidate on their own real instance and machine/environment, using their supported terminal integration. Record exact source commits, installed builds, OS/client/Docker/Compose versions and configuration references without secrets. Show automatic start on a stopped stack and reuse on a running stack, followed by instance identity, readiness and scoped hub status.
+2. Establish an explicit, limited hub trust agreement. Both people must see the authorized connection to the other's instance. A second process or simulated peer on one machine cannot replace this final user acceptance run.
+3. Prepare a small fixture repository containing synthetic text and expected checksums. Restrict the task to reading that fixture and creating a report/evidence artifact inside a dedicated test output directory. Deny deletion, production writes, deployment, equipment access, arbitrary external writes and changes to the source fixture. Preserve fixture hashes before and after.
+4. From Ryan's agent client, submit a short plan that delegates a fixture review to a worker on Nick's hub. The remote agent reads the fixture, produces a concise report and returns the artifact plus checksum/check evidence. Ryan's origin hub validates the selected executor, task/attempt identity and evidence, then records explicit origin acceptance. A broker acknowledgment or completed worker is not an accepted result.
+5. Repeat with Nick as origin and Ryan as executor. Capture visible progress in the terminal and dashboard and the linked durable task, delegation, execution, result and acceptance records in both directions. This proves each person can use the system, not only one-way connectivity.
+6. Together, review the evidence, preserved inputs and bounded output changes. Record failures and rerun after fixes. Run this on the final candidate; material changes invalidate affected evidence. A successful demonstration supplements the full phase suite and does not replace fault, security, preservation or recovery tests.
+
+### Required evidence and decision
+
+Use `finalMergeGate` in [the gate record template](gate-record.template.json). Attach the approved plan revision, candidate commits/builds, both instance identities, the bounded task definition and grants, linked run/attempt IDs, exported durable records, terminal/dashboard captures, fixture checksums before/after, report/artifact digests, verification commands/results and origin acceptance in both directions. Include a phase-by-phase evidence index, all open gaps, Ryan and Nick's dated joint review and Ryan's subsequent explicit merge authorization for that candidate and target branch.
+
+Status: **not run; not approved for merge**. This document is a future acceptance procedure. It does not claim either instance is installed, connected or qualified. These repository instructions guide agents; they do not establish server-enforced GitHub branch protection.
+
 ## 13. Current governance blocker and review decision
 
 The content and coverage checks of this planning package do not establish repository-wide compliance. Current source still contains six [recorded baseline findings](known-baseline-blockers.md). The prior all-pass review omitted them, and their source provenance does not qualify for adoption-era deferral. The current review records active findings, so the required pattern gate remains blocked until approved repairs. No runtime changes were made to clear it during planning. P01 explicitly owns those repairs and regression evidence before subsequent phase progression.
 
-Review the presentation, the phase criteria, and the coverage appendix together. Resolve the P00 choices, approve or revise the proposed release split and performance targets, and name gate reviewers. Record the approved plan revision and explicitly authorize the first implementation phase. Ryan has now requested committing and pushing this package before starting phased work. Begin with the P00 decisions and evidence; this request does not attest that P00 has passed or that Nick has reviewed the plan. P01 and later promotion still require their recorded predecessor gates. The branch stays unmerged until Ryan reviews it with Nick and explicitly authorizes merging.
+Review the presentation, the phase criteria, and the coverage appendix together. Resolve the P00 choices, approve or revise the proposed release split and performance targets, and name gate reviewers. Record the approved plan revision and explicitly authorize the first implementation phase. Ryan has now requested committing and pushing this package before starting phased work. Begin with the P00 decisions and evidence; this request does not attest that P00 has passed or that Nick has reviewed the plan. P01 and later promotion still require their recorded predecessor gates. The branch stays unmerged until MERGE-01 passes and Ryan explicitly authorizes merging after reviewing the complete evidence with Nick.

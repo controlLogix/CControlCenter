@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, scoped LOCAL-01 planning and accumulated artifact review, 2026-10-09; six baseline findings remain active",
-  "sourceDigest": "b66a7cd5dc53eb4835f5202532f27c6181e35872731ad63cd9cfa300d467112b",
+  "reviewer": "Codex, scoped MERGE-01 instruction and planning review, 2026-10-09; six baseline findings remain active",
+  "sourceDigest": "8b01347fcae29fefdfd8788912e71618c3763f862f5d858c1ca675d8a1c8293b",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -158,6 +158,26 @@
         ".context/design-patterns-diagrams.md"
       ],
       "rationale": "Reviewed the accepted automatic local Docker Compose startup requirement, healthy-instance reuse, explicit instance ownership, concurrent startup, bounded readiness, persistent data, clean client protocol output and scoped connected-hub status. Added nine acceptance criteria and eight future failure cases while preserving all prior criteria and source/component coverage. Coverage validation passes for 339 files, 93 groups, 198 behavior checks, 99 criteria and 62 scenarios. Three HTML component tests, JavaScript syntax and static anchors/labels/embedded-asset checks pass; the six images remain unchanged and the current plan is embedded exactly. All 16 dirty JSON files parse and three PPTX packages pass archive integrity checks. Reviewed the complete 53-file dirty inventory, size limits and high-confidence credential scan. Historical decks and image provenance remain dated snapshots; browser inspection remains incomplete. Existing PLAN-02 and PLAN-14 rationale is preserved in history and the planned bootstrap relationship is diagrammed. Ryan requested commit and push before gated phase work; this records neither a passed phase nor Nick review nor merge approval. No runtime implementation, governance rule or baseline finding was changed. The six known active findings remain unresolved and prevent a passing repository governance check. Normalized changed text to the repository LF policy and rebuilt the HTML so committed source bytes match its embedded plan and recorded hashes."
+    },
+    {
+      "date": "2026-10-09",
+      "scope": "MERGE-01 final branch and real-instance acceptance rule",
+      "reviewer": "Codex, scoped instruction and planning review",
+      "previousReviewer": "Codex, scoped LOCAL-01 planning and accumulated artifact review, 2026-10-09; six baseline findings remain active",
+      "previousSourceDigest": "b66a7cd5dc53eb4835f5202532f27c6181e35872731ad63cd9cfa300d467112b",
+      "evidence": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/phases.json",
+        "docs/planning/2026-10-09/gate-record.template.json",
+        "docs/planning/2026-10-09/README.md",
+        "docs/planning/2026-10-09/coverage.md",
+        "docs/planning/2026-10-09/review-site/src/pages/review.template.html",
+        "docs/planning/2026-10-09/review-site/build-report.json",
+        "docs/planning/2026-10-09/review-site/verification.json"
+      ],
+      "rationale": "Recorded Ryan's stricter branch-only merge condition in both agent instruction files and the canonical plan. All required phases and functional checks must pass before Ryan and Nick review successful safe orchestration evidence from both of their own real instances and Ryan explicitly authorizes merge. P12 readiness is separate from final merge authorization, avoiding a circular dependency on P13/P14. The blank evidence template captures exact candidates, both directions, immutable fixture hashes, restricted effects, artifacts, durable records, origin acceptance and joint review without fabricating a pass. No runtime, architecture pattern relationship or phase count changed. Fresh remote refs showed the original planning commit only on origin/feat/agentmux-platform-rearchitecture, and origin/main contained none of this planning package. Coverage validation passed for 339 files, 93 components, 198 behavior checks, 99 criteria and 62 future scenarios. HTML static anchor/label, exact source-plan and six unchanged image checks passed; browser inspection remains incomplete. Existing assessments and six active baseline findings remain intact. These instructions do not claim server-enforced branch protection or a passing repository governance gate."
     }
   ],
   "rules": {

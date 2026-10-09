@@ -67,5 +67,78 @@
       }
     ],
     "reviewer": null
+  },
+  "finalMergeGate": {
+    "id": "MERGE-01",
+    "status": "not-run",
+    "branch": "feat/agentmux-platform-rearchitecture",
+    "targetBranch": null,
+    "planRevision": null,
+    "candidateCommits": [],
+    "candidateBuilds": [],
+    "phaseEvidenceIndex": [],
+    "allRequiredPhaseChecksPassed": false,
+    "openGaps": [],
+    "instances": [
+      {
+        "owner": "Ryan",
+        "instanceId": null,
+        "hubId": null,
+        "environment": null,
+        "versions": {},
+        "startupAndConnectionEvidence": []
+      },
+      {
+        "owner": "Nick",
+        "instanceId": null,
+        "hubId": null,
+        "environment": null,
+        "versions": {},
+        "startupAndConnectionEvidence": []
+      }
+    ],
+    "safeTaskDefinition": null,
+    "allowedEffects": [],
+    "trustAndGrantReferences": [],
+    "runs": [
+      {
+        "origin": "Ryan",
+        "executor": "Nick",
+        "status": "not-run",
+        "taskId": null,
+        "delegationId": null,
+        "attemptId": null,
+        "inputDigestsBefore": {},
+        "inputDigestsAfter": {},
+        "artifactDigests": {},
+        "durableRecordEvidence": [],
+        "terminalAndDashboardEvidence": [],
+        "verificationCommandsAndResults": [],
+        "originAcceptanceEvidence": []
+      },
+      {
+        "origin": "Nick",
+        "executor": "Ryan",
+        "status": "not-run",
+        "taskId": null,
+        "delegationId": null,
+        "attemptId": null,
+        "inputDigestsBefore": {},
+        "inputDigestsAfter": {},
+        "artifactDigests": {},
+        "durableRecordEvidence": [],
+        "terminalAndDashboardEvidence": [],
+        "verificationCommandsAndResults": [],
+        "originAcceptanceEvidence": []
+      }
+    ],
+    "jointReview": {
+      "ryan": null,
+      "nick": null,
+      "date": null,
+      "decision": null
+    },
+    "ryanExplicitMergeAuthorization": null,
+    "evidenceInvalidatedByLaterChanges": null
   }
 }

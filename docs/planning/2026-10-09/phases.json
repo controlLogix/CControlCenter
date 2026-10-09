@@ -781,7 +781,8 @@
         "Restore an origin hub while a receiver continues accepted work and reconcile outstanding reservations before admitting replacements. Test backup-name collisions, JetStream/checkpoint restore, and local filesystem requirements for any remaining SQLite indexes or legacy migration inputs.",
         "Qualify NATS storage capacity, retention, immutable artifact lifecycle, snapshot/archive integrity, sync policy and recovery time for solo and team profiles. Document every remaining SQL component as a rebuildable projection or an explicitly reviewed exception.",
         "Apply ADD-01 and the component preservation matrix to every changed source file and affected caller. Record reuse, intentional behavior changes, migration needs and the specific added functionality before editing implementation.",
-        "Qualify LOCAL-01 installation, automatic launch, upgrade compatibility, data retention and recovery using the pinned Docker/Compose/OS/client matrix. Document setup prerequisites, diagnosis, explicit stop and backup/restore without making runtime Docker socket access a general plugin capability."
+        "Qualify LOCAL-01 installation, automatic launch, upgrade compatibility, data retention and recovery using the pinned Docker/Compose/OS/client matrix. Document setup prerequisites, diagnosis, explicit stop and backup/restore without making runtime Docker socket access a general plugin capability.",
+        "Prepare the MERGE-01 two-person, two-instance rehearsal and evidence package. Keep final merge authorization separate from P12 advancement so later approved phases can finish without an early merge."
       ],
       "criteria": [
         {
@@ -802,7 +803,7 @@
         },
         {
           "id": "P12-AC05",
-          "text": "Ryan reviews the release evidence with Nick and explicitly authorizes merge/release. Passing automation alone cannot merge this branch."
+          "text": "Ryan and Nick review the release-readiness evidence and record provisional readiness plus all outstanding MERGE-01 requirements. P12 acceptance does not authorize merge or release; the separate final gate requires the entire approved plan, their real-instance orchestration evidence and Ryan's explicit merge approval."
         },
         {
           "id": "P12-AC06",
@@ -823,7 +824,8 @@
         "Review support and commercial readiness with accountable owners.",
         "Run qualified storage failure and recovery drills with pinned disk/sync/replication settings, including capacity exhaustion. Verify restored reservations before processing queued commands.",
         "Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.",
-        "Repeat FAIL-55–FAIL-62 with the exact packaged release, real federation and each advertised launch integration; record readiness deadlines, versions, volume identity and observed timing."
+        "Repeat FAIL-55–FAIL-62 with the exact packaged release, real federation and each advertised launch integration; record readiness deadlines, versions, volume identity and observed timing.",
+        "Review MERGE-01 evidence completeness and remaining required phases. Rehearsals may happen here, but repeat the final run on the exact merge candidate after all required phases pass."
       ],
       "evidence": [
         "Release readiness dossier",
@@ -992,5 +994,39 @@
       "FAIL-62"
     ]
   },
-  "authorizationNote": "Ryan requested proceeding toward phased implementation after committing and pushing this package. No phase evidence or Nick review is attested here. P00 exit, sequential promotion and explicit Ryan/Nick merge review remain required."
+  "authorizationNote": "Ryan requested proceeding toward phased implementation after committing and pushing this package. No phase evidence or Nick review is attested here. P00 exit, sequential promotion and explicit Ryan/Nick merge review remain required.",
+  "mergeGate": {
+    "id": "MERGE-01",
+    "status": "not-run-not-approved",
+    "branch": "feat/agentmux-platform-rearchitecture",
+    "requiredPhases": [
+      "P00",
+      "P01",
+      "P02",
+      "P03",
+      "P04",
+      "P05",
+      "P06",
+      "P07",
+      "P08",
+      "P09",
+      "P10",
+      "P11",
+      "P12",
+      "P13",
+      "P14"
+    ],
+    "scopeRule": "All phases in the approved plan are required. P12 is a release-readiness milestone, not permission to merge while P13/P14 remain outstanding. Only Ryan may explicitly revise scope after review with Nick; no such revision is recorded.",
+    "realInstanceOwners": [
+      "Ryan",
+      "Nick"
+    ],
+    "directions": [
+      "Ryan origin to Nick executor",
+      "Nick origin to Ryan executor"
+    ],
+    "evidenceRecord": "gate-record.template.json:finalMergeGate",
+    "requiredApproval": "Ryan explicitly authorizes merge after joint review with Nick of exact-candidate phase and real-instance evidence.",
+    "autoMergeAllowed": false
+  }
 }
