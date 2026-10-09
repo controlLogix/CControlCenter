@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agentmux:contract:1:execution-report",
+  "title": "Agentmux execution-report payload v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "taskId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "delegationId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "attemptId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "reportId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "executorHubId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "repositoryRevision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048
+    },
+    "status": {
+      "enum": [
+        "completion_reported",
+        "failed",
+        "cancelled",
+        "effect_uncertain"
+      ]
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:agentmux:contract:1:common#/$defs/artifact"
+      },
+      "maxItems": 256
+    },
+    "reportRecordRef": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/reference"
+    }
+  },
+  "required": [
+    "taskId",
+    "delegationId",
+    "attemptId",
+    "reportId",
+    "executorHubId",
+    "repositoryRevision",
+    "status",
+    "artifacts",
+    "reportRecordRef"
+  ]
+}

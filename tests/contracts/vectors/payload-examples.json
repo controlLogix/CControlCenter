@@ -1,0 +1,139 @@
+{
+  "task-inspect": {
+    "kind": "command",
+    "destinationServiceId": "task-owner",
+    "payload": {
+      "taskId": "task-one"
+    }
+  },
+  "task-reserve": {
+    "kind": "command",
+    "destinationServiceId": "task-owner",
+    "payload": {
+      "taskId": "task-one",
+      "delegationId": "delegation-one",
+      "attemptId": "attempt-one",
+      "executorHubId": "hub-executor",
+      "grantRef": {
+        "id": "execution-grant",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      },
+      "repositoryRevision": "commit-a",
+      "assignmentEpoch": 1
+    }
+  },
+  "delegation-offer": {
+    "kind": "command",
+    "destinationServiceId": "delegation-owner",
+    "payload": {
+      "taskId": "task-one",
+      "delegationId": "delegation-one",
+      "attemptId": "attempt-one",
+      "originHubId": "hub-origin",
+      "executorHubId": "hub-executor",
+      "assignmentEpoch": 1,
+      "grantRef": {
+        "id": "execution-grant",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      },
+      "repositoryRevision": "commit-a",
+      "taskInputRef": {
+        "id": "input-one",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      },
+      "acceptBefore": "2026-10-09T12:04:00Z"
+    }
+  },
+  "delegation-decision": {
+    "kind": "event",
+    "destinationServiceId": "task-owner",
+    "payload": {
+      "taskId": "task-one",
+      "delegationId": "delegation-one",
+      "attemptId": "attempt-one",
+      "decision": "accepted_reserved",
+      "decisionRecordRef": {
+        "id": "acceptance-one",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      },
+      "reason": null
+    }
+  },
+  "execution-report": {
+    "kind": "event",
+    "destinationServiceId": "task-owner",
+    "payload": {
+      "taskId": "task-one",
+      "delegationId": "delegation-one",
+      "attemptId": "attempt-one",
+      "reportId": "report-one",
+      "executorHubId": "hub-executor",
+      "repositoryRevision": "commit-a",
+      "status": "completion_reported",
+      "artifacts": [],
+      "reportRecordRef": {
+        "id": "report-record-one",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      }
+    }
+  },
+  "cancellation-request": {
+    "kind": "command",
+    "destinationServiceId": "task-owner",
+    "payload": {
+      "taskId": "task-one",
+      "attemptId": "attempt-one",
+      "delegationId": "delegation-one",
+      "reason": "Fixture cancellation"
+    }
+  },
+  "delivery-receipt": {
+    "kind": "event",
+    "destinationServiceId": "delivery-owner",
+    "payload": {
+      "originalMessageId": "msg-original",
+      "deliveryId": "delivery-one",
+      "deliveryAttempt": 1,
+      "status": "received",
+      "receivedAt": "2026-10-09T12:00:02Z"
+    }
+  },
+  "plugin-lifecycle": {
+    "kind": "event",
+    "destinationServiceId": "lifecycle-owner",
+    "payload": {
+      "instanceId": "plugin-one",
+      "generation": 1,
+      "status": "ready",
+      "observedAt": "2026-10-09T12:00:02Z",
+      "reason": null
+    }
+  },
+  "operation-outcome": {
+    "kind": "reply",
+    "destinationServiceId": "requesting-client",
+    "payload": {
+      "operationId": "op-one",
+      "outcome": "committed",
+      "recordRef": {
+        "id": "record-one",
+        "ownerHubId": "hub-origin",
+        "revision": 1
+      },
+      "reason": null,
+      "retryable": false
+    }
+  },
+  "status-query": {
+    "kind": "command",
+    "destinationServiceId": "status-owner",
+    "payload": {
+      "includeHubs": true
+    }
+  }
+}

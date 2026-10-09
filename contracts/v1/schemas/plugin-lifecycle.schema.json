@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agentmux:contract:1:plugin-lifecycle",
+  "title": "Agentmux plugin-lifecycle payload v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "instanceId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "generation": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/revision"
+    },
+    "status": {
+      "enum": [
+        "registered",
+        "validated",
+        "starting",
+        "ready",
+        "degraded",
+        "draining",
+        "stopped",
+        "failed"
+      ]
+    },
+    "observedAt": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/timestamp"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "instanceId",
+    "generation",
+    "status",
+    "observedAt",
+    "reason"
+  ]
+}

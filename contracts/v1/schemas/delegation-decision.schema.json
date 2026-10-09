@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agentmux:contract:1:delegation-decision",
+  "title": "Agentmux delegation-decision payload v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "taskId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "delegationId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "attemptId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "decision": {
+      "enum": [
+        "accepted_reserved",
+        "approval_pending",
+        "rejected"
+      ]
+    },
+    "decisionRecordRef": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/reference"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "taskId",
+    "delegationId",
+    "attemptId",
+    "decision",
+    "decisionRecordRef",
+    "reason"
+  ]
+}

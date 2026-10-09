@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agentmux:contract:1:delegation-offer",
+  "title": "Agentmux delegation-offer payload v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "taskId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "delegationId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "attemptId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "originHubId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "executorHubId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "assignmentEpoch": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/revision"
+    },
+    "grantRef": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/reference"
+    },
+    "repositoryRevision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048
+    },
+    "taskInputRef": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/reference"
+    },
+    "acceptBefore": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/timestamp"
+    }
+  },
+  "required": [
+    "taskId",
+    "delegationId",
+    "attemptId",
+    "originHubId",
+    "executorHubId",
+    "assignmentEpoch",
+    "grantRef",
+    "repositoryRevision",
+    "taskInputRef",
+    "acceptBefore"
+  ]
+}

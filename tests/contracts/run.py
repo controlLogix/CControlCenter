@@ -6,8 +6,10 @@ import json
 import os
 from pathlib import Path
 import platform
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import unittest
 
@@ -70,23 +72,31 @@ def typescript_build():
             'compiledJavaScriptHashes': compiled, 'cliPresent': cli.is_file()}
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--evidence', type=Path)
-    parser.add_argument('--match', help='Run test names containing this text; partial evidence stays labeled.')
-    args = parser.parse_args()
+def mirror_hashes(root):
+    paths = []
+    for directory in ('contracts/v1', 'sdk/python'):
+        paths.extend(p for p in (root / directory).rglob('*') if p.is_file()
+                     and '__pycache__' not in p.parts and p.suffix != '.pyc')
+    return {str(p.relative_to(root)).replace('\\', '/'): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(paths)}
+
+
+def run(args, mirror, mirror_before):
     before = hashes()
     build_before = typescript_build()
+    mirror_matches_before = mirror_before == mirror_hashes(ROOT)
     started = time.monotonic()
     loader = unittest.TestLoader()
     if args.match:
         loader.testNamePatterns = ['*' + args.match + '*']
-    suite = loader.discover(str(HERE), pattern='test_conformance.py')
+    suite = loader.discover(str(HERE), pattern='test_*.py')
     result = unittest.TextTestRunner(verbosity=2, resultclass=Result).run(suite)
     unchanged = before == hashes()
     build_unchanged = build_before == typescript_build()
+    mirror_unchanged = mirror_before == mirror_hashes(mirror)
+    mirror_matches_after = mirror_before == mirror_hashes(ROOT)
     ok = (result.wasSuccessful() and result.testsRun > 0 and not result.skipped and not result.expectedFailures and unchanged
-          and build_unchanged and build_before['allSourcesMatch'] and build_before['cliPresent'])
+          and build_unchanged and build_before['allSourcesMatch'] and build_before['cliPresent']
+          and mirror_matches_before and mirror_matches_after and mirror_unchanged)
     if args.evidence:
         python = os.environ.get('AGENTMUX_CONTRACT_PYTHON', sys.executable)
         node = os.environ.get('AGENTMUX_CONTRACT_NODE', 'node')
@@ -96,10 +106,14 @@ def main():
             'sourceBinding': 'Commit is the checkout base; sourceHashes identify exact working files. Compiled CLI has a separate digest.',
             'sourceHashes': before, 'sourceUnchangedDuringRun': unchanged,
             'typescriptBuild': build_before, 'typescriptBuildUnchangedDuringRun': build_unchanged,
+            'sourceMirror': {'root': str(mirror), 'inputSha256': mirror_before,
+                             'matchesRepositoryBefore': mirror_matches_before,
+                             'matchesRepositoryAfter': mirror_matches_after, 'unchangedDuringRun': mirror_unchanged,
+                             'lifetime': 'Owned TemporaryDirectory; removed after the report is saved.'},
             'environment': {'platform': platform.platform(), 'harnessPython': platform.python_version(),
                             'clientPython': version([python, '--version']), 'node': version([node, '--version'])},
             'command': 'python tests/contracts/run.py --evidence <output>',
-            'selection': {'file': 'test_conformance.py', 'match': args.match, 'fullSuite': args.match is None},
+            'selection': {'pattern': 'test_*.py', 'match': args.match, 'fullSuite': args.match is None},
             'durationSeconds': round(time.monotonic() - started, 3), 'exitCode': 0 if ok else 1,
             'testsRun': result.testsRun, 'failures': len(result.failures), 'errors': len(result.errors),
             'skips': len(result.skipped), 'expectedFailures': len(result.expectedFailures), 'results': result.records,
@@ -112,6 +126,31 @@ def main():
         args.evidence.parent.mkdir(parents=True, exist_ok=True)
         args.evidence.write_text(json.dumps(record, indent=2) + '\n', encoding='utf-8', newline='\n')
     return 0 if ok else 1
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--evidence', type=Path)
+    parser.add_argument('--match', help='Run test names containing this text; partial evidence stays labeled.')
+    args = parser.parse_args()
+    saved = {key: os.environ.get(key) for key in ('AGENTMUX_CONTRACT_SOURCE_ROOT', 'AGENTMUX_SCHEMA_DIR')}
+    try:
+        with tempfile.TemporaryDirectory(prefix='agentmux-contract-inputs-') as directory:
+            mirror = Path(directory)
+            for relative in ('contracts/v1', 'sdk/python'):
+                shutil.copytree(ROOT / relative, mirror / relative, ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+            copied = mirror_hashes(mirror)
+            if copied != mirror_hashes(ROOT):
+                raise RuntimeError('Native fixture source copy does not match the repository')
+            os.environ['AGENTMUX_CONTRACT_SOURCE_ROOT'] = str(mirror)
+            os.environ['AGENTMUX_SCHEMA_DIR'] = str(mirror / 'contracts/v1/schemas')
+            return run(args, mirror, copied)
+    finally:
+        for key, value in saved.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
 
 
 if __name__ == '__main__':

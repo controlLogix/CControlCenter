@@ -758,9 +758,9 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Canonical Data Model",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/CanonicalDataModel.html",
       "referenceDepth": "full-public-reference",
-      "how": "The isolated contracts/v1 package defines versioned infrastructure shapes. Independent Python and TypeScript libraries parse strict JSON, produce RFC 8785 bytes and verify Ed25519 attestation/envelope bindings against a supplied trusted key and expected audience. The current legacy runtime does not import these libraries. Domain payload registration, broker-backed ownership, enrollment and full SDK/runtime integration remain P01/later-phase obligations; cryptographic verification does not grant authorization.",
+      "how": "The separate contracts/v1 package defines closed versioned infrastructure and domain payload schemas. registry.json binds ten contract IDs to their major version, message kind, payload schema and destination service. Independent Python and TypeScript SDK validation checks those bindings, payload/context identity agreement and explicit semantic invariants for manifests, protected assembly, contexts, owner records and attestations. Full envelope verification validates the registered payload plus RFC 8785 payload bytes, Ed25519 claims, signed audience and every duplicated envelope field. The legacy runtime does not import this package. Enrolled-key resolution, live grants, authoritative domain state schemas and full plugin runtime integration remain separate obligations; validated structure and signatures do not authorize execution.",
       "why": "Client/provider diversity must not obscure ownership or schema compatibility.",
-      "tradeoffs": "Pairwise translation is simpler for two plugins; shared contracts need careful evolution and must not become a universal domain schema.",
+      "tradeoffs": "Pairwise translation is simpler for two plugins; shared contracts require coordinated version evolution and independent conformance tests. Closed registration makes unsupported commands explicit, but every added domain operation needs a reviewed schema and mapping. Semantic invariants cannot all be expressed by JSON Schema and therefore require matching language implementations. Content-bound validator caches avoid repeated compilation while hashing current schema bytes prevents stale reuse; neither caches nor a supplied valid signature establish authority.",
       "locations": [
         {
           "path": "contracts/v1/schemas/message-envelope.schema.json",
@@ -773,18 +773,45 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
         {
           "path": "sdk/typescript/src/index.ts",
           "symbol": "canonicalBytes"
+        },
+        {
+          "path": "contracts/v1/registry.json",
+          "symbol": "contracts"
+        },
+        {
+          "path": "sdk/python/agentmux_contracts/validation.py",
+          "symbol": "validate_payload"
+        },
+        {
+          "path": "sdk/python/agentmux_contracts/validation.py",
+          "symbol": "semantic_errors"
+        },
+        {
+          "path": "sdk/python/agentmux_contracts/attestation.py",
+          "symbol": "verify_envelope"
+        },
+        {
+          "path": "sdk/typescript/src/index.ts",
+          "symbol": "validatePayload"
+        },
+        {
+          "path": "sdk/typescript/src/index.ts",
+          "symbol": "verifyEnvelope"
         }
       ],
       "verificationEvidence": [
         "tests/contracts/test_conformance.py",
         "sdk/python/tests/test_contracts.py",
-        "sdk/typescript/src/test.ts"
+        "sdk/typescript/src/test.ts",
+        "tests/contracts/test_payloads.py",
+        "tests/contracts/test_semantics.py"
       ],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
         "docs/planning/2026-10-09/phases.json",
         "docs/planning/2026-10-09/delivery/decisions/README.md",
-        "docs/planning/2026-10-09/delivery/contracts/README.md"
+        "docs/planning/2026-10-09/delivery/contracts/README.md",
+        "contracts/v1/README.md"
       ],
       "planningRevisions": [
         {
@@ -804,6 +831,36 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
           "previousStatus": "planned",
           "reason": "P01 initial executable wire contracts; broader domain/runtime work remains incomplete."
         }
+      ],
+      "implementationRevisions": [
+        {
+          "date": "2026-10-09",
+          "reason": "P01 closed payload registry and independent semantic checks; bounded storage fixture qualification does not implement production ownership.",
+          "previous": {
+            "status": "applied",
+            "how": "The isolated contracts/v1 package defines versioned infrastructure shapes. Independent Python and TypeScript libraries parse strict JSON, produce RFC 8785 bytes and verify Ed25519 attestation/envelope bindings against a supplied trusted key and expected audience. The current legacy runtime does not import these libraries. Domain payload registration, broker-backed ownership, enrollment and full SDK/runtime integration remain P01/later-phase obligations; cryptographic verification does not grant authorization.",
+            "tradeoffs": "Pairwise translation is simpler for two plugins; shared contracts need careful evolution and must not become a universal domain schema.",
+            "locations": [
+              {
+                "path": "contracts/v1/schemas/message-envelope.schema.json",
+                "symbol": "message-envelope"
+              },
+              {
+                "path": "sdk/python/agentmux_contracts/wire.py",
+                "symbol": "canonical_bytes"
+              },
+              {
+                "path": "sdk/typescript/src/index.ts",
+                "symbol": "canonicalBytes"
+              }
+            ],
+            "verificationEvidence": [
+              "tests/contracts/test_conformance.py",
+              "sdk/python/tests/test_contracts.py",
+              "sdk/typescript/src/test.ts"
+            ]
+          }
+        }
       ]
     },
     {
@@ -813,16 +870,33 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Transactional Client",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/TransactionalClient.html",
       "referenceDepth": "full-public-reference",
-      "how": "Apply a bounded transaction boundary at the owning JetStream record or qualified atomic batch within one stream: state, provenance, operation outcome and recoverable outgoing intent commit together. Consumer acknowledgment, projection updates, cross-stream/hub transfer and external tool actions remain separate recoverable steps. Legacy SQL plus outbox repairs remain relevant to P01 baseline work; STATE-01 supersedes SQL as the preferred new authority. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P05, P10. Implementation locations will be recorded when implemented. P00 prefers one conditional complete entity transition including state, provenance, outcome and effect intent. Same-stream batching requires the P01 SDK/concurrency proof; cross-boundary work remains recoverable. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. Configuration and registry changes also commit to their owner ledger first; KV is a cursor-bearing projection, never a second authoritative write.",
+      "how": "Apply a bounded transaction boundary at the owning JetStream record or qualified atomic batch within one stream: state, provenance, operation outcome and recoverable outgoing intent commit together. Consumer acknowledgment, projection updates, cross-stream/hub transfer and external tool actions remain separate recoverable steps. Legacy SQL plus outbox repairs remain relevant to P01 baseline work; STATE-01 supersedes SQL as the preferred new authority. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P05, P10. Implementation locations will be recorded when implemented. P00 prefers one conditional complete entity transition including state, provenance, outcome and effect intent. Same-stream batching requires the P01 SDK/concurrency proof; cross-boundary work remains recoverable. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. Configuration and registry changes also commit to their owner ledger first; KV is a cursor-bearing projection, never a second authoritative write. P01 tests/storage/run.py now qualifies this boundary only in disposable fixture owners: Python and TypeScript conditional publishes append a complete state/provenance/effect-intent record, and a two-client race admits one subject revision. Raw Python and native TypeScript atomic batches are exercised on one file-backed R1 stream. Tests reject sequence gaps, stale conditions (including an intervening ordinary commit), uncommitted batches across graceful restart and attempted cross-stream batches. The opening staging reply is not a durable acknowledgment; only a final commit acknowledgment confirms the batch. Production domain owners remain planned for P04/P05/P10; no legacy authority moved.",
       "why": "Crash windows must not lose results or create unattributed executable work.",
-      "tradeoffs": "One complete record is simpler than a batch and is preferred when it preserves the invariant. Same-stream atomic batches require pinned server/client qualification and do not create a distributed database/broker/hub/tool transaction. SQL authority is an explicit exception requiring evidence and review.",
-      "locations": [],
-      "verificationEvidence": [],
+      "tradeoffs": "One complete record is simpler than a batch and is preferred when it preserves the invariant. Same-stream atomic batches require pinned server/client qualification and do not create a distributed database/broker/hub/tool transaction. SQL authority is an explicit exception requiring evidence and review. Fixture qualification uses NATS Server 2.15.0 on WSL/Linux only. It does not prove native macOS, replication availability, power-loss durability, account permissions or business-level authorization. Full aggregate records remain preferred over batch coordination.",
+      "locations": [
+        {
+          "path": "tests/storage/run.py",
+          "symbol": "main"
+        },
+        {
+          "path": "tests/storage/python_client.py",
+          "symbol": "perform"
+        },
+        {
+          "path": "tests/storage/typescript/src/client.ts",
+          "symbol": "execute"
+        }
+      ],
+      "verificationEvidence": [
+        "tests/storage/run.py",
+        "docs/planning/2026-10-09/delivery/evidence/P01/storage-result.json"
+      ],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
         "docs/planning/2026-10-09/phases.json",
         "docs/planning/2026-10-09/delivery/decisions/README.md",
-        "docs/planning/2026-10-09/delivery/contracts/README.md"
+        "docs/planning/2026-10-09/delivery/contracts/README.md",
+        "tests/storage/README.md"
       ],
       "planningRevisions": [
         {
@@ -846,6 +920,19 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
           "previousHow": "Apply a bounded transaction boundary at the owning JetStream record or qualified atomic batch within one stream: state, provenance, operation outcome and recoverable outgoing intent commit together. Consumer acknowledgment, projection updates, cross-stream/hub transfer and external tool actions remain separate recoverable steps. Legacy SQL plus outbox repairs remain relevant to P01 baseline work; STATE-01 supersedes SQL as the preferred new authority. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P05, P10. Implementation locations will be recorded when implemented. P00 prefers one conditional complete entity transition including state, provenance, outcome and effect intent. Same-stream batching requires the P01 SDK/concurrency proof; cross-boundary work remains recoverable. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review.",
           "reason": "Removed split config authority."
         }
+      ],
+      "implementationRevisions": [
+        {
+          "date": "2026-10-09",
+          "reason": "P01 closed payload registry and independent semantic checks; bounded storage fixture qualification does not implement production ownership.",
+          "previous": {
+            "status": "planned",
+            "how": "Apply a bounded transaction boundary at the owning JetStream record or qualified atomic batch within one stream: state, provenance, operation outcome and recoverable outgoing intent commit together. Consumer acknowledgment, projection updates, cross-stream/hub transfer and external tool actions remain separate recoverable steps. Legacy SQL plus outbox repairs remain relevant to P01 baseline work; STATE-01 supersedes SQL as the preferred new authority. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P05, P10. Implementation locations will be recorded when implemented. P00 prefers one conditional complete entity transition including state, provenance, outcome and effect intent. Same-stream batching requires the P01 SDK/concurrency proof; cross-boundary work remains recoverable. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. Configuration and registry changes also commit to their owner ledger first; KV is a cursor-bearing projection, never a second authoritative write.",
+            "tradeoffs": "One complete record is simpler than a batch and is preferred when it preserves the invariant. Same-stream atomic batches require pinned server/client qualification and do not create a distributed database/broker/hub/tool transaction. SQL authority is an explicit exception requiring evidence and review.",
+            "locations": [],
+            "verificationEvidence": []
+          }
+        }
       ]
     },
     {
@@ -855,16 +942,33 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Idempotent Receiver",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/IdempotentReceiver.html",
       "referenceDepth": "full-public-reference",
-      "how": "Bind an operation ID, canonical payload hash and expected version to the durable NATS-owned outcome. Reconcile lost acknowledgments, reject changed-payload ID reuse, and retain outcomes/deletion markers across the agreed replay and restore horizon. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P10. Implementation locations will be recorded when implemented. P00 retains operation outcomes and payload digests beyond broker deduplication windows, with reconciliation-required on missing history. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review.",
+      "how": "Bind an operation ID, canonical payload hash and expected version to the durable NATS-owned outcome. Reconcile lost acknowledgments, reject changed-payload ID reuse, and retain outcomes/deletion markers across the agreed replay and restore horizon. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P10. Implementation locations will be recorded when implemented. P00 retains operation outcomes and payload digests beyond broker deduplication windows, with reconciliation-required on missing history. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. P01 Python and TypeScript fixture clients independently scan retained authoritative history to recover an older operation ID and matching digest after later writes, a gracefully restarted broker and expiry of its short deduplication window. They return the existing record without republishing, reject changed digests and report missing history as reconciliation-required. The lost-ack fixture deliberately omits the publisher reply inbox. Production duplicate admission, durable indexes and external-effect control remain planned; fixture reconciliation is not a deployed receiver or exactly-once execution promise.",
       "why": "At-least-once delivery and uncertain replies must not create duplicate task attempts.",
-      "tradeoffs": "Broker duplicate windows are simpler but insufficient for business ownership. Durable outcome records and conflict policy cost storage; external actions require their own idempotency or explicit unknown-outcome handling.",
-      "locations": [],
-      "verificationEvidence": [],
+      "tradeoffs": "Broker duplicate windows are simpler but insufficient for business ownership. Durable outcome records and conflict policy cost storage; external actions require their own idempotency or explicit unknown-outcome handling. The fixture scan is bounded to 10,000 retained records and is not a production indexing or retention strategy. Authoritative history costs storage; deterministic recovery requires preserving history or verified checkpoints, rather than interpreting absence as permission to re-execute.",
+      "locations": [
+        {
+          "path": "tests/storage/python_client.py",
+          "symbol": "perform"
+        },
+        {
+          "path": "tests/storage/typescript/src/client.ts",
+          "symbol": "execute"
+        },
+        {
+          "path": "tests/storage/run.py",
+          "symbol": "main"
+        }
+      ],
+      "verificationEvidence": [
+        "tests/storage/run.py",
+        "docs/planning/2026-10-09/delivery/evidence/P01/storage-result.json"
+      ],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
         "docs/planning/2026-10-09/phases.json",
         "docs/planning/2026-10-09/delivery/decisions/README.md",
-        "docs/planning/2026-10-09/delivery/contracts/README.md"
+        "docs/planning/2026-10-09/delivery/contracts/README.md",
+        "tests/storage/README.md"
       ],
       "planningRevisions": [
         {
@@ -882,6 +986,19 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
           "decision": "P00 concrete implementation recommendation; pending review",
           "previousHow": "Bind an operation ID, canonical payload hash and expected version to the durable NATS-owned outcome. Reconcile lost acknowledgments, reject changed-payload ID reuse, and retain outcomes/deletion markers across the agreed replay and restore horizon. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P10. Implementation locations will be recorded when implemented.",
           "evidence": "docs/planning/2026-10-09/delivery/decisions/README.md"
+        }
+      ],
+      "implementationRevisions": [
+        {
+          "date": "2026-10-09",
+          "reason": "P01 closed payload registry and independent semantic checks; bounded storage fixture qualification does not implement production ownership.",
+          "previous": {
+            "status": "planned",
+            "how": "Bind an operation ID, canonical payload hash and expected version to the durable NATS-owned outcome. Reconcile lost acknowledgments, reject changed-payload ID reuse, and retain outcomes/deletion markers across the agreed replay and restore horizon. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P10. Implementation locations will be recorded when implemented. P00 retains operation outcomes and payload digests beyond broker deduplication windows, with reconciliation-required on missing history. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review.",
+            "tradeoffs": "Broker duplicate windows are simpler but insufficient for business ownership. Durable outcome records and conflict policy cost storage; external actions require their own idempotency or explicit unknown-outcome handling.",
+            "locations": [],
+            "verificationEvidence": []
+          }
         }
       ]
     },

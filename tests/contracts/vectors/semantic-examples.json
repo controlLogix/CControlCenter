@@ -1,0 +1,224 @@
+[
+  {
+    "id": "duplicate-protected-role",
+    "schema": "protected-assembly",
+    "path": [
+      "plugins",
+      1,
+      "id"
+    ],
+    "value": "boot",
+    "error": "protected_membership"
+  },
+  {
+    "id": "grant-bound-to-different-instance",
+    "schema": "plugin-context",
+    "path": [
+      "effectiveGrant",
+      "subjectInstanceId"
+    ],
+    "value": "plugin-other",
+    "error": "grant_instance_binding"
+  },
+  {
+    "id": "expired-before-issued",
+    "schema": "plugin-context",
+    "path": [
+      "effectiveGrant",
+      "expiresAt"
+    ],
+    "value": "2026-10-09T11:00:00Z",
+    "error": "grant_interval"
+  },
+  {
+    "id": "inverted-dependency-range",
+    "schema": "plugin-manifest",
+    "path": [
+      "dependencies"
+    ],
+    "value": [
+      {
+        "packageId": "service-other",
+        "minimumVersion": "2.0.0",
+        "exclusiveMaximumVersion": "1.0.0",
+        "optional": false
+      }
+    ],
+    "error": "dependency_interval"
+  },
+  {
+    "id": "impossible-calendar-date",
+    "schema": "operation-context",
+    "path": [
+      "deadline"
+    ],
+    "value": "2026-02-30T12:00:00Z",
+    "error": "calendar_date"
+  },
+  {
+    "id": "private-context-without-parent-grant",
+    "schema": "plugin-context",
+    "path": [
+      "effectiveGrant",
+      "parentGrantRef"
+    ],
+    "value": null,
+    "error": "private_parent_grant_required"
+  },
+  {
+    "id": "self-parent-context",
+    "schema": "plugin-context",
+    "path": [
+      "parent",
+      "instanceId"
+    ],
+    "value": "plugin-child",
+    "error": "self_parent"
+  },
+  {
+    "id": "impossible-grant-date",
+    "schema": "plugin-context",
+    "path": [
+      "effectiveGrant",
+      "issuedAt"
+    ],
+    "value": "2026-02-30T12:00:00Z",
+    "error": "calendar_date"
+  },
+  {
+    "id": "ordinary-package-cannot-control-kernel",
+    "schema": "plugin-manifest",
+    "path": [
+      "requestedCapabilities"
+    ],
+    "value": [
+      {
+        "action": "write",
+        "resourceClass": "kernel-lifecycle",
+        "required": true
+      }
+    ],
+    "error": "protected_kernel_access"
+  },
+  {
+    "id": "self-child-package",
+    "schema": "plugin-manifest",
+    "path": [
+      "children"
+    ],
+    "value": [
+      {
+        "packageId": "example-toolkit",
+        "relationship": "private",
+        "required": true
+      }
+    ],
+    "error": "self_dependency"
+  },
+  {
+    "id": "rejected-command-cannot-dispatch-effects",
+    "schema": "owner-record",
+    "path": [
+      "outcome"
+    ],
+    "value": "rejected",
+    "error": "rejected_operation_has_effects"
+  },
+  {
+    "id": "attestation-cannot-outlive-operation",
+    "schema": "ingress-attestation",
+    "path": [
+      "claims",
+      "expiresAt"
+    ],
+    "value": "2026-10-09T12:05:01Z",
+    "error": "attestation_interval"
+  },
+  {
+    "id": "attestation-expiry-after-issuance",
+    "schema": "ingress-attestation",
+    "path": [
+      "claims",
+      "expiresAt"
+    ],
+    "value": "2026-10-09T12:00:00Z",
+    "error": "attestation_interval"
+  },
+  {
+    "id": "attestation-key-owner-must-match-issuer",
+    "schema": "ingress-attestation",
+    "path": [
+      "claims",
+      "signingKeyRef",
+      "ownerHubId"
+    ],
+    "value": "other-hub",
+    "error": "attestation_issuer_binding"
+  },
+  {
+    "id": "attestation-binds-complete-caller",
+    "schema": "message-envelope",
+    "path": [
+      "operation",
+      "caller",
+      "principalId"
+    ],
+    "value": "other-user",
+    "error": "attestation_operation_binding"
+  },
+  {
+    "id": "attestation-binds-payload-digest",
+    "schema": "message-envelope",
+    "path": [
+      "operation",
+      "payloadDigest"
+    ],
+    "value": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "error": "attestation_operation_binding"
+  },
+  {
+    "id": "attestation-binds-contract",
+    "schema": "message-envelope",
+    "path": [
+      "contractId"
+    ],
+    "value": "task-delete",
+    "error": "attestation_envelope_binding"
+  },
+  {
+    "id": "attestation-binds-owner-hub",
+    "schema": "message-envelope",
+    "path": [
+      "destinationHubId"
+    ],
+    "value": "other-hub",
+    "error": "attestation_audience_binding"
+  },
+  {
+    "id": "attestation-binds-owner-service",
+    "schema": "message-envelope",
+    "path": [
+      "destinationServiceId"
+    ],
+    "value": "other-service",
+    "error": "attestation_audience_binding"
+  },
+  {
+    "id": "attestation-binds-event-source",
+    "schema": "message-envelope",
+    "path": [
+      "sourceInstanceId"
+    ],
+    "value": "other-plugin",
+    "error": "attestation_envelope_binding"
+  },
+  {
+    "id": "command-cannot-be-relabeled-reply",
+    "schema": "message-envelope",
+    "path": [
+      "kind"
+    ],
+    "value": "reply",
+    "error": "attestation_envelope_binding"
+  }
+]

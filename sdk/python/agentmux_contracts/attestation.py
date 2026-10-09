@@ -7,7 +7,7 @@ from nacl.exceptions import BadSignatureError
 from nacl.signing import SigningKey, VerifyKey
 
 from .wire import ContractError, canonical_bytes, payload_digest
-from .validation import validate
+from .validation import validate, validate_payload
 
 
 def sign_claims(claims, seed32bytes):
@@ -66,4 +66,5 @@ def verify_envelope(envelope, public_key32bytes, expected_audience, now):
     if claims["audience"] != {"hubId": envelope["destinationHubId"],
                               "serviceId": envelope["destinationServiceId"]}:
         raise ContractError("audience_mismatch")
+    validate_payload(envelope)
     return claims

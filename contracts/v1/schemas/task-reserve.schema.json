@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agentmux:contract:1:task-reserve",
+  "title": "Agentmux task-reserve payload v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "taskId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "delegationId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "attemptId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "executorHubId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "grantRef": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/reference"
+    },
+    "repositoryRevision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048
+    },
+    "assignmentEpoch": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/revision"
+    }
+  },
+  "required": [
+    "taskId",
+    "delegationId",
+    "attemptId",
+    "executorHubId",
+    "grantRef",
+    "repositoryRevision",
+    "assignmentEpoch"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0.0",
+  "contracts": {
+    "task-inspect": {
+      "major": 1,
+      "kind": "command",
+      "payloadSchema": "task-inspect",
+      "destinationServiceId": "task-owner"
+    },
+    "task-reserve": {
+      "major": 1,
+      "kind": "command",
+      "payloadSchema": "task-reserve",
+      "destinationServiceId": "task-owner"
+    },
+    "delegation-offer": {
+      "major": 1,
+      "kind": "command",
+      "payloadSchema": "delegation-offer",
+      "destinationServiceId": "delegation-owner"
+    },
+    "delegation-decision": {
+      "major": 1,
+      "kind": "event",
+      "payloadSchema": "delegation-decision",
+      "destinationServiceId": "task-owner"
+    },
+    "execution-report": {
+      "major": 1,
+      "kind": "event",
+      "payloadSchema": "execution-report",
+      "destinationServiceId": "task-owner"
+    },
+    "cancellation-request": {
+      "major": 1,
+      "kind": "command",
+      "payloadSchema": "cancellation-request",
+      "destinationServiceId": "task-owner"
+    },
+    "delivery-receipt": {
+      "major": 1,
+      "kind": "event",
+      "payloadSchema": "delivery-receipt",
+      "destinationServiceId": "delivery-owner"
+    },
+    "plugin-lifecycle": {
+      "major": 1,
+      "kind": "event",
+      "payloadSchema": "plugin-lifecycle",
+      "destinationServiceId": "lifecycle-owner"
+    },
+    "operation-outcome": {
+      "major": 1,
+      "kind": "reply",
+      "payloadSchema": "operation-outcome",
+      "destinationServiceId": null
+    },
+    "status-query": {
+      "major": 1,
+      "kind": "command",
+      "payloadSchema": "status-query",
+      "destinationServiceId": "status-owner"
+    }
+  }
+}

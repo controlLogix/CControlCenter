@@ -25,3 +25,7 @@ The caller must resolve the supplied public key from its enrolled issuer/key rev
 Responses contain `ok` and either `result` or a stable error code. Errors never echo payloads, secrets or stack traces. The CLI is a conformance harness; do not pass production seeds through shell arguments or retain its input in logs.
 
 Run `python -m unittest discover -s sdk/python/tests -v` with `PYTHONPATH=sdk/python`. Cross-language and real-broker tests live separately under `tests/contracts`.
+
+## Registered domain payloads
+
+Complete-envelope verification also checks the trusted `contracts/v1/registry.json`: known contract/version, message kind, destination, closed payload shape and task/attempt/delegation correlation. The CLI `validatePayload` operation accepts an `envelope` and performs these structural checks without signature verification. It does not resolve grants or authorize execution. Production owners still check current authority and durable operation history.

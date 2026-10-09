@@ -20,7 +20,8 @@ class Client:
         self.env = os.environ.copy()
         if language == 'python':
             self.command = [os.environ.get('AGENTMUX_CONTRACT_PYTHON', sys.executable), '-m', 'agentmux_contracts']
-            self.env['PYTHONPATH'] = str(ROOT / 'sdk/python')
+            source_root = Path(os.environ.get('AGENTMUX_CONTRACT_SOURCE_ROOT', str(ROOT)))
+            self.env['PYTHONPATH'] = str(source_root / 'sdk/python')
         else:
             self.command = [os.environ.get('AGENTMUX_CONTRACT_NODE', 'node'),
                             os.environ.get('AGENTMUX_CONTRACT_TS_CLI', str(ROOT / 'sdk/typescript/dist/cli.js'))]

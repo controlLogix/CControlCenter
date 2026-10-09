@@ -7,7 +7,7 @@ Branch: `feat/agentmux-platform-rearchitecture`. No phase or merge approval is i
 | Phase | Planned | Ready | In progress | Blocked | Verification | Done | Gate |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
 | P00 | 0 | 0 | 0 | 0 | 0 | 8 | done |
-| P01 | 5 | 0 | 3 | 0 | 0 | 1 | planned |
+| P01 | 4 | 0 | 4 | 0 | 0 | 1 | planned |
 | P02 | 8 | 0 | 0 | 0 | 0 | 0 | planned |
 | P03 | 8 | 0 | 0 | 0 | 0 | 0 | planned |
 | P04 | 8 | 0 | 0 | 0 | 0 | 0 | planned |
@@ -27,6 +27,7 @@ Branch: `feat/agentmux-platform-rearchitecture`. No phase or merge approval is i
 - **P01-T01 — in_progress:** Publish language-neutral command/event schemas and compatibility rules with organization, project, task, delegation, attempt, operation, schema version, and trace identifiers.
 - **P01-T02 — in_progress:** Create reusable contract fixtures and controllable fake workers/providers plus real NATS integration environments for CI.
 - **P01-T03 — in_progress:** Specify lifecycle, delivery acknowledgment, idempotency, deadline, cancellation, approval, and unavailable/unknown result semantics.
+- **P01-T07 — in_progress:** Build a bounded NATS persistence spike before production storage code: one owning task record, persistent operation identity, conditional competing writes, complete provenance/effect intent, lost acknowledgments and replay
 
 ## P00. Scope, baseline, and architecture decisions
 
@@ -55,7 +56,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 | [P01-T04](delivery/task-details.md#P01-T04) | planned | Codex | Establish per-phase evidence records, dependency gates, migration fixtures, and security/quality regression jobs. |
 | [P01-T05](delivery/task-details.md#P01-T05) | planned | Codex | Build an early two-hub contract spike with separate broker accounts and a leaf link |
 | [P01-T06](delivery/task-details.md#P01-T06) | planned | Codex | Preserve and extend the verified repairs for the six baseline findings |
-| [P01-T07](delivery/task-details.md#P01-T07) | planned | Codex | Build a bounded NATS persistence spike before production storage code: one owning task record, persistent operation identity, conditional competing writes, complete provenance/effect intent, lost acknowledgments and replay |
+| [P01-T07](delivery/task-details.md#P01-T07) | in_progress | Codex | Build a bounded NATS persistence spike before production storage code: one owning task record, persistent operation identity, conditional competing writes, complete provenance/effect intent, lost acknowledgments and replay |
 | [P01-T08](delivery/task-details.md#P01-T08) | done | Codex | Apply ADD-01 and the component preservation matrix to every changed source file and affected caller |
 | [P01-GATE](delivery/task-details.md#P01-GATE) | planned | Codex | Verify and accept P01 |
 

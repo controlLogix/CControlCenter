@@ -88,7 +88,49 @@ export function validate(schemaName:string,value:unknown,schemaDir=process.env.A
   const ajv=compiledBundle.ajv;
   const validator=ajv.getSchema('urn:agentmux:contract:1:'+schemaName);
   if(!validator || !validator(value)) fail('invalid_schema');
+  semanticCheck(schemaName,value);
   return true;
+}
+// Local cross-field invariants only; these do not authenticate grants or owners.
+function semanticCheck(name:string,v:any):void {
+  const require=(condition:boolean)=>{if(!condition)fail('invalid_semantics');};
+  const distinct=(values:string[])=>new Set(values).size===values.length;
+  if(name==='protected-assembly')require(v.plugins.length===4 && distinct(v.plugins.map((p:any)=>p.id)) && v.plugins.every((p:any)=>['boot','kernel-lifecycle','internal-communication','exported-status'].includes(p.id)));
+  if(name==='plugin-manifest'){
+    for(const [collection,key] of [['dependencies','packageId'],['children','packageId'],['contributions','id']])require(distinct(v[collection].map((item:any)=>item[key])));
+    require([...v.dependencies,...v.children].every((d:any)=>d.packageId!==v.packageId));
+    for(const c of v.requestedCapabilities)require(!c.resourceClass.startsWith('kernel') || (c.resourceClass==='kernel-status' && c.action==='subscribe'));
+    for(const d of v.dependencies){
+      const low=d.minimumVersion.split('.').map(BigInt),high=d.exclusiveMaximumVersion.split('.').map(BigInt);
+      let cmp=0;for(let i=0;i<3 && cmp===0;i++)cmp=low[i]<high[i]?-1:low[i]>high[i]?1:0;
+      require(cmp<0);
+    }
+  }
+  if(name==='plugin-context'){
+    const g=v.effectiveGrant;
+    require(!v.parent || v.parent.instanceId!==v.instanceId);
+    require(!v.parent || v.parent.relationship!=='private' || g.parentGrantRef!==null);
+    require(g.subjectInstanceId===v.instanceId);
+    require(instant(g.issuedAt)<instant(g.expiresAt));
+  }
+  if(['message-envelope','owner-record'].includes(name))semanticCheck('operation-context',v.operation);
+  if(name==='operation-context')instant(v.deadline);
+  if(name==='owner-record'){
+    require(distinct(v.effects.map((e:any)=>e.effectId)));
+    require(v.outcome!=='rejected' || v.effects.length===0);
+  }
+  if(name==='ingress-attestation'){
+    const c=v.claims;semanticCheck('operation-context',c.operation);
+    require(c.signingKeyRef.ownerHubId===c.issuerHubId && c.authenticatedTransportRef.ownerHubId===c.issuerHubId);
+    require(instant(c.issuedAt)<instant(c.expiresAt) && instant(c.expiresAt)<=instant(c.operation.deadline));
+    instant(c.sentAt);
+  }
+  if(name==='message-envelope'){
+    semanticCheck('ingress-attestation',v.ingressAttestation);
+    const c=v.ingressAttestation.claims;
+    for(const key of ['operation','messageId','kind','contractId','contractMajor','sourceHubId','sourceInstanceId','sentAt','correlationId'])require(canonicalBytes(c[key]).equals(canonicalBytes(v[key])));
+    require(c.audience.hubId===v.destinationHubId && c.audience.serviceId===v.destinationServiceId);
+  }
 }
 function privateKey(seed:Uint8Array) {
   if(seed.length!==32) fail('invalid_key');
@@ -100,7 +142,7 @@ export function publicKeyForSeed(seed32:Uint8Array):Buffer {return createPublicK
 function instant(value:unknown):bigint {
   if(typeof value!=='string') fail('invalid_time');
   const m=/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d{1,6}))?Z$/.exec(value);
-  if(!m) fail('invalid_time');
+  if(!m || m[1].startsWith('0000-')) fail('invalid_time');
   const ms=Date.parse(m[1]+'Z');
   if(!Number.isFinite(ms) || new Date(ms).toISOString().slice(0,19)!==m[1]) fail('invalid_time');
   return BigInt(ms)*1000n+BigInt((m[2]??'').padEnd(6,'0'));
@@ -126,5 +168,23 @@ export function verifyEnvelope(envelope:any,publicKey32:Uint8Array,expectedAudie
     if(!canonicalBytes(envelope[field]).equals(canonicalBytes(c[field]))) fail('invalid_binding');
   }
   if(envelope.destinationHubId!==c.audience.hubId || envelope.destinationServiceId!==c.audience.serviceId) fail('invalid_binding');
+  validatePayload(envelope);
   return c;
+}
+
+
+export function validatePayload(envelope:any,registryPath=resolve(process.env.AGENTMUX_SCHEMA_DIR ?? 'contracts/v1/schemas','../registry.json')):true {
+  validate('message-envelope',envelope);
+  const registry=strictLoads(readFileSync(registryPath)) as any;
+  if(registry.schemaVersion!=='1.0.0')fail('invalid_registry');
+  const entry=Object.hasOwn(registry.contracts,envelope.contractId)?registry.contracts[envelope.contractId]:undefined;
+  if(!entry || entry.major!==envelope.contractMajor)fail('unknown_contract');
+  if(entry.kind!==envelope.kind)fail('invalid_kind');
+  if(entry.destinationServiceId!==null && entry.destinationServiceId!==envelope.destinationServiceId)fail('invalid_destination');
+  validate(entry.payloadSchema,envelope.payload,resolve(registryPath,'../schemas'));
+  const p=envelope.payload,o=envelope.operation;
+  for(const field of ['taskId','attemptId'])if(p[field]!=null && p[field]!==o[field])fail('invalid_payload_context');
+  if(p.delegationId!=null && (!o.delegationRef || p.delegationId!==o.delegationRef.id))fail('invalid_payload_context');
+  if(envelope.contractId==='operation-outcome' && p.operationId!==envelope.correlationId)fail('invalid_payload_context');
+  return true;
 }

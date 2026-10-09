@@ -22,7 +22,7 @@
     },
     {
       "path": "component-audit-hub.json",
-      "sha256": "529bbddace02526ea4949aac15434ac778536dcec4db1dbc0d274ea9c4ae3579"
+      "sha256": "3b35ead4eaa32202dd6d5106bc9d30424b9ec9115c9b7512b46b818ff4f64844"
     },
     {
       "path": "component-audit-repository.json",
@@ -3059,6 +3059,36 @@
     {
       "date": "2026-10-09",
       "reason": "P01 isolated additions retain requirement IDs and behavior ownership. Refresh source fingerprints without claiming qualification.",
+      "previousSourceFiles": [
+        {
+          "path": "implementation-plan.md",
+          "sha256": "f2a809c4c7525894376ea3b93ebc11f92c7bd42648606d1cd0b7149721b79465"
+        },
+        {
+          "path": "phases.json",
+          "sha256": "5bb9037937a00621214ad58873c368fdc55b2f8c3722653c97432efa8031a82a"
+        },
+        {
+          "path": "component-audit-dashboard.json",
+          "sha256": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f"
+        },
+        {
+          "path": "component-audit-harness.json",
+          "sha256": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08"
+        },
+        {
+          "path": "component-audit-hub.json",
+          "sha256": "529bbddace02526ea4949aac15434ac778536dcec4db1dbc0d274ea9c4ae3579"
+        },
+        {
+          "path": "component-audit-repository.json",
+          "sha256": "39001427bd59e2b0bf45ad6b953a4221c0edf9cdbaaf541179317775e0d29a6f"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "reason": "P01 payload and storage additions preserve all existing component obligations; refresh manifest fingerprints without claiming phase acceptance.",
       "previousSourceFiles": [
         {
           "path": "implementation-plan.md",

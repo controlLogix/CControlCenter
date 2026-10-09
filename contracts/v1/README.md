@@ -2,7 +2,7 @@
 
 These contracts are the separate P01 implementation path. The existing hub and federation protocols continue using their own decoders and namespaces. A matching version number does not make legacy v2/v3 traffic compatible with this format.
 
-The JSON Schema identifiers begin with `urn:agentmux:contract:1:`. Every wire object with a schema version declares `1.0.0`. Resolve schema references locally from this package; an incoming message cannot supply a schema URL to download. `common` supplies referenced definitions only; callers must select a concrete message/object schema, never use the definitions document as an admission check. Closed infrastructure objects reject unknown fields. Payload and state extension slots still require a registered domain-specific schema before a production owner executes them.
+The JSON Schema identifiers begin with `urn:agentmux:contract:1:`. Every wire object with a schema version declares `1.0.0`. Resolve schema references locally from this package; an incoming message cannot supply a schema URL to download. `common` supplies referenced definitions only; callers must select a concrete message/object schema, never use the definitions document as an admission check. Closed infrastructure objects reject unknown fields. `registry.json` binds each supported contract ID/major to its message kind, payload schema and destination service. Complete-envelope verification rejects unknown contracts and validates their closed payload before returning verified claims. Owner state extension slots still need domain-specific state schemas before production execution.
 
 The initial Python and TypeScript libraries implement strict JSON parsing, schema checks, canonical bytes and Ed25519 attestations independently. The cross-language harness verifies interoperability rather than calling one library from both clients. This package is under implementation; it is not a complete plugin SDK or production domain service.
 
@@ -18,4 +18,21 @@ Verification receives an already trusted public key and expected audience from i
 
 P00 draft schemas and model evidence remain in the planning package as history. These promoted schemas do not rewrite those records. Incompatible schema changes require a new contract major version and explicit negotiation; producer and consumer fixtures must demonstrate every advertised compatible change.
 
-P01 still requires named domain payload schemas, lifecycle and delivery semantics, a real NATS persistence spike, two-hub fault cases, CI rejection checks and supported-platform evidence before its gate. Later phases implement plugin construction, enrollment, domain execution and real runtime authorization. No existing source, stored identity or user action is retired by adding these files.
+Ten core payload schemas and a bounded real NATS persistence fixture are implemented. P01 still requires complete lifecycle and delivery semantics, domain state models, two-hub fault cases, CI rejection checks and supported-platform evidence before its gate. The single-node storage result does not qualify replication or leaf connections. Later phases implement plugin construction, enrollment, domain execution and real runtime authorization. No existing source, stored identity or user action is retired by adding these files.
+
+## Registered payload meanings
+
+| Contract | Meaning |
+| --- | --- |
+| task-inspect / task-reserve | Inspect a task or request an origin-owned reservation with an explicit executor, assignment epoch and execution grant. |
+| delegation-offer / delegation-decision | Offer scoped execution; report a durable accepted reservation, pending approval or rejection. Delivery alone is never acceptance. |
+| execution-report | Report an attempt and artifact references. `completion_reported` is not origin acceptance; `effect_uncertain` requires reconciliation. |
+| cancellation-request | Request cancellation, optionally targeting an attempt/delegation. This command never proves execution stopped. |
+| delivery-receipt | Report receipt/redelivery only. Its schema excludes result, completion and task-acceptance fields. |
+| plugin-lifecycle | Report a bounded lifecycle observation. Its source still needs supervisor/plugin authorization. |
+| operation-outcome | Reply with committed, rejected, unavailable or unknown. Committed requires an owner record reference; unavailable/unknown cannot invent one. |
+| status-query | Request scoped status and optional visible hubs; no request can widen the authenticated scope. |
+
+Task and attempt IDs in payloads must match operation context. A delegation ID must match its context reference. An outcome identifies the original operation through the envelope's correlation ID. A reply may target its authenticated recipient rather than a fixed service; its signed audience is still checked. A delegation's execution grant is a distinct reference from the requesting actor's authority grant, so comparing those two for equality would be incorrect.
+
+`retryable` is only advice about repeating the same operation identity and digest after re-authentication. It never permits a new task, executor reassignment or repetition of an uncertain external effect. Unknown/unavailable outcomes retain reservations until the authoritative owner reconciles them. These schemas do not resolve referenced grants, fetch artifact bytes or execute state transitions; those are owner responsibilities.

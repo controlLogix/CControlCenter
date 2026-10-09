@@ -66,6 +66,23 @@ test('compiled schema cache invalidates when trusted schema bytes change',()=>{
     validate('operation-context',value,root);
   }finally{rmSync(copy,{recursive:true,force:true});}
 });
+test('rejects cross-field manifest, context and owner contradictions',()=>{
+  const path=process.env.AGENTMUX_CONTRACT_EXAMPLES;assert.ok(path);
+  const values=JSON.parse(readFileSync(path,'utf8'));
+  values['plugin-manifest'].dependencies=[{packageId:'dependency-one',minimumVersion:'1.0.0',exclusiveMaximumVersion:'2.0.0',optional:false}];
+  const mutations:[string,(v:any)=>void][]=[
+    ['plugin-manifest',v=>{v.dependencies[0].packageId=v.packageId;}],
+    ['plugin-manifest',v=>{v.dependencies[0].exclusiveMaximumVersion=v.dependencies[0].minimumVersion;}],
+    ['plugin-manifest',v=>{v.requestedCapabilities[0]={resourceClass:'kernel-status',action:'publish'};}],
+    ['plugin-context',v=>{v.effectiveGrant.subjectInstanceId='other-instance';}],
+    ['plugin-context',v=>{v.effectiveGrant.expiresAt=v.effectiveGrant.issuedAt;}],
+    ['operation-context',v=>{v.deadline='2026-02-30T12:00:00Z';}],
+    ['owner-record',v=>{v.outcome='rejected';}],
+    ['owner-record',v=>{v.effects.push({...v.effects[0],contractId:'other-effect'});}],
+    ['protected-assembly',v=>{v.plugins[0].id='other-plugin';}]
+  ];
+  for(const [name,mutate] of mutations){const v=structuredClone(values[name]);validate(name,v);mutate(v);assert.throws(()=>validate(name,v),name);}
+});
 test('validates promoted schemas and rejects unsigned outer changes',()=>{
   const fixturePath=process.env.AGENTMUX_CONTRACT_EXAMPLES;
   assert.ok(fixturePath,'Set AGENTMUX_CONTRACT_EXAMPLES to promoted valid-examples.json');

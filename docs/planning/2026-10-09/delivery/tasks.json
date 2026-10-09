@@ -6,8 +6,8 @@
     "phases.json": "5bb9037937a00621214ad58873c368fdc55b2f8c3722653c97432efa8031a82a",
     "verification-matrix.json": "516813fd034d6c73b4b0d6f9eaaf4b1b54798828e137336324605d0b956085bc",
     "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
-    "component-inventory.json": "7199353b2b83d4b56c3a340f3fa46a23dcf193f5b115c9cd1a251233c47580a2",
-    "component-audit-hub.json": "529bbddace02526ea4949aac15434ac778536dcec4db1dbc0d274ea9c4ae3579",
+    "component-inventory.json": "f5641f7553e746d695f042a937e8c8399f9dd69c7dad10eb6f90162e80dab0d9",
+    "component-audit-hub.json": "3b35ead4eaa32202dd6d5106bc9d30424b9ec9115c9b7512b46b818ff4f64844",
     "component-audit-harness.json": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08",
     "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
     "component-audit-repository.json": "39001427bd59e2b0bf45ad6b953a4221c0edf9cdbaaf541179317775e0d29a6f"
@@ -1725,7 +1725,9 @@
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
         }
       ],
-      "evidence": [],
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md"
+      ],
       "commits": [],
       "blocker": null,
       "history": [
@@ -1819,7 +1821,9 @@
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
         }
       ],
-      "evidence": [],
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md"
+      ],
       "commits": [],
       "blocker": null,
       "history": [
@@ -1913,7 +1917,9 @@
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
         }
       ],
-      "evidence": [],
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md"
+      ],
       "commits": [],
       "blocker": null,
       "history": [
@@ -2262,7 +2268,7 @@
           "text": "Build a bounded NATS persistence spike before production storage code: one owning task record, persistent operation identity, conditional competing writes, complete provenance/effect intent, lost acknowledgments and replay. Exercise single-record commits and any required atomic batch inside one stream."
         }
       ],
-      "status": "planned",
+      "status": "in_progress",
       "owner": "Codex",
       "dependsOn": [
         "P00-GATE",
@@ -2294,7 +2300,9 @@
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
         }
       ],
-      "evidence": [],
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md"
+      ],
       "commits": [],
       "blocker": null,
       "history": [
@@ -2306,6 +2314,13 @@
             "AMX-BASE-002"
           ],
           "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged."
+        },
+        {
+          "at": "2026-10-09T21:32:11.407518+00:00",
+          "actor": "Codex",
+          "from": "planned",
+          "to": "in_progress",
+          "note": "Begin real NATS persistence fixtures with independently implemented clients; preserve single-owner records and explicit transaction limits."
         }
       ],
       "phaseCriteria": [
@@ -32965,6 +32980,30 @@
         "component-audit-repository.json": "39001427bd59e2b0bf45ad6b953a4221c0edf9cdbaaf541179317775e0d29a6f"
       },
       "note": "Added schema/client/conformance files to existing HUB-01/HUB-26 owners, preserving every original assertion and baseline blob."
+    },
+    {
+      "at": "2026-10-09T21:32:11.407518+00:00",
+      "actor": "Codex",
+      "from": "planned",
+      "to": "in_progress",
+      "note": "Begin real NATS persistence fixtures with independently implemented clients; preserve single-owner records and explicit transaction limits.",
+      "taskId": "P01-T07"
+    },
+    {
+      "at": "2026-10-09T21:45:47.838400+00:00",
+      "actor": "Codex",
+      "action": "source-reconciliation",
+      "note": "Registered isolated P01 payload, SDK semantics and real broker fixtures; preserved all phase criteria and behavior checks.",
+      "previousSourceHashes": {
+        "phases.json": "5bb9037937a00621214ad58873c368fdc55b2f8c3722653c97432efa8031a82a",
+        "verification-matrix.json": "516813fd034d6c73b4b0d6f9eaaf4b1b54798828e137336324605d0b956085bc",
+        "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
+        "component-inventory.json": "7199353b2b83d4b56c3a340f3fa46a23dcf193f5b115c9cd1a251233c47580a2",
+        "component-audit-hub.json": "529bbddace02526ea4949aac15434ac778536dcec4db1dbc0d274ea9c4ae3579",
+        "component-audit-harness.json": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08",
+        "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
+        "component-audit-repository.json": "39001427bd59e2b0bf45ad6b953a4221c0edf9cdbaaf541179317775e0d29a6f"
+      }
     }
   ],
   "deliveryGovernance": {

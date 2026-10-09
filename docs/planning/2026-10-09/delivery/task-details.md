@@ -391,7 +391,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 4. Run FAIL-42, FAIL-43 and FAIL-47 with real JetStream. Record which server/API/SDK capabilities provide each guarantee, including batch behavior and authoritative read freshness.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 
-**Evidence:** not yet recorded
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md
 
 **Commits:** not yet recorded
 
@@ -432,7 +432,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 4. Run FAIL-42, FAIL-43 and FAIL-47 with real JetStream. Record which server/API/SDK capabilities provide each guarantee, including batch behavior and authoritative read freshness.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 
-**Evidence:** not yet recorded
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md
 
 **Commits:** not yet recorded
 
@@ -473,7 +473,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 4. Run FAIL-42, FAIL-43 and FAIL-47 with real JetStream. Record which server/API/SDK capabilities provide each guarantee, including batch behavior and authoritative read freshness.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 
-**Evidence:** not yet recorded
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md
 
 **Commits:** not yet recorded
 
@@ -606,7 +606,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 
 ### P01-T07: Build a bounded NATS persistence spike before production storage code: one owning task record, persistent operation identity, conditional competing writes, complete provenance/effect intent, lost acknowledgments and replay
 
-**Status:** planned. **Owner:** Codex.
+**Status:** in_progress. **Owner:** Codex.
 
 **Dependencies:** P00-GATE, P01-T08.
 
@@ -639,7 +639,7 @@ Contracts and failure scenarios can be tested before business plugins grow.
 4. Run FAIL-42, FAIL-43 and FAIL-47 with real JetStream. Record which server/API/SDK capabilities provide each guarantee, including batch behavior and authoritative read freshness.
 5. Run the component coverage validator, review newly added or changed entry points, and attach the owning component checks to the phase gate. Compare existing and candidate behavior in isolated environments; do not run old and new writers against the same live records.
 
-**Evidence:** not yet recorded
+**Evidence:** docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md
 
 **Commits:** not yet recorded
 

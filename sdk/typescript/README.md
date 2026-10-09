@@ -31,3 +31,7 @@ Run the built `dist/cli.js` with Node. Requests use `op`:
 Every response is `{ok:true,result:...}` or `{ok:false,error:...}`. Errors omit source payloads and credentials. Error names are implementation diagnostics, not cross-language protocol enums. The CLI is a conformance tool; never pass real signing seeds in routine task records or logs.
 
 Exact dependency versions and integrity hashes are in `package-lock.json`. Parser visitor/error handling follows [jsonc-parser](https://github.com/microsoft/node-jsonc-parser); schema validation uses [Ajv Draft 2020-12](https://ajv.js.org/json-schema.html); canonicalization uses [canonicalize](https://github.com/erdtman/canonicalize).
+
+## Registered domain payloads
+
+Complete-envelope verification also checks the trusted `contracts/v1/registry.json`: known contract/version, message kind, destination, closed payload shape and task/attempt/delegation correlation. The CLI `validatePayload` operation accepts an `envelope` and performs these structural checks without signature verification. It does not resolve grants or authorize execution. Production owners still check current authority and durable operation history.

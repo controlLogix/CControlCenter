@@ -431,7 +431,49 @@
       ]
     },
     {
+      "path": "contracts/v1/registry.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/schemas/cancellation-request.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
       "path": "contracts/v1/schemas/common.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/schemas/delegation-decision.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/schemas/delegation-offer.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/schemas/delivery-receipt.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/schemas/execution-report.schema.json",
       "baselineBlob": null,
       "componentIds": [
         "HUB-01"
@@ -459,6 +501,13 @@
       ]
     },
     {
+      "path": "contracts/v1/schemas/operation-outcome.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
       "path": "contracts/v1/schemas/owner-record.schema.json",
       "baselineBlob": null,
       "componentIds": [
@@ -473,6 +522,13 @@
       ]
     },
     {
+      "path": "contracts/v1/schemas/plugin-lifecycle.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
       "path": "contracts/v1/schemas/plugin-manifest.schema.json",
       "baselineBlob": null,
       "componentIds": [
@@ -481,6 +537,27 @@
     },
     {
       "path": "contracts/v1/schemas/protected-assembly.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/schemas/status-query.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/schemas/task-inspect.schema.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/schemas/task-reserve.schema.json",
       "baselineBlob": null,
       "componentIds": [
         "HUB-01"
@@ -2630,7 +2707,91 @@
       ]
     },
     {
+      "path": "tests/contracts/test_payloads.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/contracts/test_semantics.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/contracts/vectors/payload-examples.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/contracts/vectors/semantic-examples.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
       "path": "tests/contracts/vectors/valid-examples.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/storage/README.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/storage/python_client.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/storage/run.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/storage/typescript/README.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/storage/typescript/package-lock.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/storage/typescript/package.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/storage/typescript/src/client.ts",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/storage/typescript/tsconfig.json",
       "baselineBlob": null,
       "componentIds": [
         "HUB-26"
@@ -2682,6 +2843,37 @@
         "tests/contracts/vectors/valid-examples.json"
       ],
       "note": "Retain frozen baseline blobs and all existing checks. New paths do not replace current runtime callers."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "P01 registered payload contracts, semantic validation and two-language storage fixtures",
+      "addedFiles": [
+        "contracts/v1/registry.json",
+        "contracts/v1/schemas/cancellation-request.schema.json",
+        "contracts/v1/schemas/delegation-decision.schema.json",
+        "contracts/v1/schemas/delegation-offer.schema.json",
+        "contracts/v1/schemas/delivery-receipt.schema.json",
+        "contracts/v1/schemas/execution-report.schema.json",
+        "contracts/v1/schemas/operation-outcome.schema.json",
+        "contracts/v1/schemas/plugin-lifecycle.schema.json",
+        "contracts/v1/schemas/status-query.schema.json",
+        "contracts/v1/schemas/task-inspect.schema.json",
+        "contracts/v1/schemas/task-reserve.schema.json",
+        "tests/contracts/test_payloads.py",
+        "tests/contracts/test_semantics.py",
+        "tests/contracts/vectors/payload-examples.json",
+        "tests/contracts/vectors/semantic-examples.json",
+        "tests/storage/README.md",
+        "tests/storage/python_client.py",
+        "tests/storage/run.py",
+        "tests/storage/typescript/README.md",
+        "tests/storage/typescript/package-lock.json",
+        "tests/storage/typescript/package.json",
+        "tests/storage/typescript/src/client.ts",
+        "tests/storage/typescript/tsconfig.json"
+      ],
+      "note": "All 338 original baseline blobs and 198 existing behavior checks retained. These additions provide bounded fixture evidence, not complete phase or legacy migration acceptance."
     }
   ]
 }

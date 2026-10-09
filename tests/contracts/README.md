@@ -1,6 +1,6 @@
 # Two-language contract conformance
 
-This suite sends the same wire requests to the independent Python and TypeScript CLIs. It checks canonical bytes against literal expected vectors, strict JSON admission, every public schema example and required field, cross-language Ed25519 verification, admission constraints, and binding between signed claims and the outer envelope.
+This suite sends the same wire requests to the independent Python and TypeScript CLIs. It checks canonical bytes against literal expected vectors, strict JSON admission, every public schema example and required field, cross-language Ed25519 verification, admission constraints, and binding between signed claims and the outer envelope. Registered payload tests cover all ten core IDs and semantic tests retain the 21 P00 rejection vectors plus identity-uniqueness cases.
 
 Install the pinned dependencies and build the TypeScript client using each SDK's setup instructions. Run from the repository root. Missing dependencies, absent executables, timeouts, empty selections and skipped tests fail the run; they never count as qualification.
 
@@ -33,3 +33,9 @@ The valid examples are schema fixtures, not real authority records. The harness 
 Strict invalid UTF-8 is sent as actual malformed bytes to the outer CLI stream. Escaped duplicate keys and lone surrogates are also tested inside a raw JSON string passed to `parse`. JSON has no standard nonfinite number syntax, so all nonfinite cases must be refused. Depth tests count the root container as depth one. Canonical vectors cover UTF-16 key ordering, escapes, negative zero, small exponential notation and safe integer limits. The 1 MiB outer framing limit excludes its newline delimiter. Both exact-limit acceptance and oversized-frame recovery of the following request are tested. Focused evidence records its match and fullSuite=false; it never substitutes for the complete conformance run. Each SDK's unit suite must separately verify payload/canonical size limits because nested CLI string escaping changes the frame's byte size.
 
 This suite does not prove live NATS delivery, enrollment, key rotation, current-grant authorization, revocation, remote-host isolation or production storage recovery. P01's real-broker and persistence fixtures remain separate. Local success does not qualify an unexecuted platform or terminal host.
+
+`test_payloads.py` separates valid signed-message structure from registry rejection: kind, target and identity mutations keep inner/outer claim bindings consistent. Correctly signed unknown contracts and confused delivery receipts are also refused. Payload shape acceptance does not prove a legal state transition or grant authority; the five state models and real-broker recovery remain separate fixtures.
+
+## Native test input mirror
+
+`run.py` copies only `contracts/v1` and `sdk/python` into an owned temporary directory on the test host. It checks every copied input against repository bytes before and after the run, records those hashes, and removes the copy in a finally-protected lifetime. Python imports that exact copy; TypeScript uses its schema directory. This avoids repeated cross-filesystem schema scans on WSL while retaining content-change detection and the same 60-second subprocess bound. Reports remain in the requested persistent evidence directory. A changed or mismatched copy fails the run. The TypeScript compiled build and cache-source comparison remain separate checks.

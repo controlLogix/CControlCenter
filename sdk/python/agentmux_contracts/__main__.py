@@ -4,7 +4,7 @@ import json
 import sys
 
 from . import (ContractError, canonical_bytes, payload_digest, sign_claims,
-               strict_loads, validate, verify_attestation, verify_envelope)
+               strict_loads, validate, validate_payload, verify_attestation, verify_envelope)
 from .wire import MAX_BYTES
 
 
@@ -22,6 +22,9 @@ def request(value):
                                   value["expectedAudience"], datetime.fromisoformat(value["now"]), value["payload"])
     if op == "validate":
         validate(value["schema"], value["value"])
+        return True
+    if op == "validatePayload":
+        validate_payload(value["envelope"])
         return True
     if op == "verifyEnvelope":
         return verify_envelope(value["envelope"], bytes.fromhex(value["publicKeyHex"]),

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agentmux:contract:1:operation-outcome",
+  "title": "Agentmux operation-outcome payload v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "operationId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "outcome": {
+      "enum": [
+        "committed",
+        "rejected",
+        "unavailable",
+        "unknown"
+      ]
+    },
+    "recordRef": {
+      "anyOf": [
+        {
+          "$ref": "urn:agentmux:contract:1:common#/$defs/reference"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retryable": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "operationId",
+    "outcome",
+    "recordRef",
+    "reason",
+    "retryable"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "committed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "recordRef": {
+            "$ref": "urn:agentmux:contract:1:common#/$defs/reference"
+          }
+        }
+      },
+      "else": {}
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "enum": [
+              "unavailable",
+              "unknown"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "recordRef": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {}
+    }
+  ]
+}

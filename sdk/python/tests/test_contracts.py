@@ -23,10 +23,10 @@ def example():
     ref = {"id": "fixture-ref", "ownerHubId": "hub-one", "revision": 1}
     operation = {
         "schemaVersion": "1.0.0", "operationId": "operation-one",
-        "payloadDigest": payload_digest({"query": "fixture"}), "expectedVersion": 1,
+        "payloadDigest": payload_digest({"taskId": "task-one"}), "expectedVersion": 1,
         "caller": {"principalId": "user-one", "kind": "human", "authenticatedIdentityRef": ref},
         "effectiveActorRef": ref, "scope": {"organizationId": "org-one", "projectId": "project-one", "workspaceId": None},
-        "taskId": None, "runId": None, "attemptId": None, "delegationRef": None,
+        "taskId": "task-one", "runId": None, "attemptId": None, "delegationRef": None,
         "grantRef": ref, "approvalRefs": [], "traceId": "trace-one", "causationId": "cause-one",
         "deadline": "2026-10-09T12:05:00Z", "cancellationRef": ref,
     }
@@ -35,7 +35,7 @@ def example():
         "authenticationMethod": "nats-credential-mapping", "authenticatedTransportRef": ref,
         "audience": {"hubId": "hub-one", "serviceId": "task-owner"},
         "issuedAt": "2026-10-09T12:00:01Z", "expiresAt": "2026-10-09T12:05:00Z",
-        "messageId": "message-one", "kind": "command", "contractId": "task-read", "contractMajor": 1,
+        "messageId": "message-one", "kind": "command", "contractId": "task-inspect", "contractMajor": 1,
         "sourceHubId": "hub-one", "sourceInstanceId": "ingress-one", "sentAt": "2026-10-09T12:00:01Z",
         "correlationId": "operation-one", "operation": operation,
     }
@@ -46,7 +46,7 @@ def example():
         "messageId", "kind", "contractId", "contractMajor", "sourceHubId",
         "sourceInstanceId", "sentAt", "correlationId", "operation")}
     envelope.update(schemaVersion="1.0.0", destinationHubId="hub-one", destinationServiceId="task-owner",
-                    ingressAttestation=attestation, payload={"query": "fixture"})
+                    ingressAttestation=attestation, payload={"taskId": "task-one"})
     return envelope
 
 
@@ -167,6 +167,31 @@ class AttestationTests(unittest.TestCase):
             path.write_text('{', encoding='utf-8')
             with self.assertRaisesRegex(ContractError, 'schema_configuration_error'):
                 validate('copied', 'changed', directory)
+
+
+class SemanticTests(unittest.TestCase):
+    def test_cross_field_invariants(self):
+        fixture = Path(__file__).resolve().parents[2] / "typescript" / "test-examples.json"
+        values = json.loads(fixture.read_text(encoding="utf-8"))
+        values["plugin-manifest"]["dependencies"] = [{"packageId": "dependency-one", "minimumVersion": "1.0.0", "exclusiveMaximumVersion": "2.0.0", "optional": False}]
+        mutations = [
+            ("plugin-manifest", lambda v: v["dependencies"][0].update(packageId=v["packageId"])),
+            ("plugin-manifest", lambda v: v["dependencies"][0].update(exclusiveMaximumVersion=v["dependencies"][0]["minimumVersion"])),
+            ("plugin-manifest", lambda v: v["requestedCapabilities"][0].update(resourceClass="kernel-status", action="publish")),
+            ("plugin-context", lambda v: v["effectiveGrant"].update(subjectInstanceId="other-instance")),
+            ("plugin-context", lambda v: v["effectiveGrant"].update(expiresAt=v["effectiveGrant"]["issuedAt"])),
+            ("operation-context", lambda v: v.update(deadline="2026-02-30T12:00:00Z")),
+            ("owner-record", lambda v: v.update(outcome="rejected")),
+            ("owner-record", lambda v: v["effects"].append(dict(v["effects"][0], contractId="other-effect"))),
+            ("protected-assembly", lambda v: v["plugins"][0].update(id="other-plugin")),
+        ]
+        for name, mutate in mutations:
+            with self.subTest(name=name, mutate=mutate):
+                value = copy.deepcopy(values[name])
+                validate(name, value)
+                mutate(value)
+                with self.assertRaises(ContractError):
+                    validate(name, value)
 
 
 if __name__ == "__main__":

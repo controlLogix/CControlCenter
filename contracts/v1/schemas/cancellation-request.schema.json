@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agentmux:contract:1:cancellation-request",
+  "title": "Agentmux cancellation-request payload v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "taskId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "attemptId": {
+      "anyOf": [
+        {
+          "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "delegationId": {
+      "anyOf": [
+        {
+          "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048
+    }
+  },
+  "required": [
+    "taskId",
+    "attemptId",
+    "delegationId",
+    "reason"
+  ]
+}

@@ -1,0 +1,1 @@
+{"name":"agentmux-storage-fixture","version":"1.0.0","private":true,"type":"module","scripts":{"build":"tsc"},"dependencies":{"@nats-io/transport-node":"3.4.0","@nats-io/jetstream":"3.4.0"},"devDependencies":{"typescript":"7.0.2","@types/node":"22.19.15"}}

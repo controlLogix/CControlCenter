@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agentmux:contract:1:delivery-receipt",
+  "title": "Agentmux delivery-receipt payload v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "originalMessageId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "deliveryId": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/identifier"
+    },
+    "deliveryAttempt": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "status": {
+      "enum": [
+        "received",
+        "redelivered"
+      ]
+    },
+    "receivedAt": {
+      "$ref": "urn:agentmux:contract:1:common#/$defs/timestamp"
+    }
+  },
+  "required": [
+    "originalMessageId",
+    "deliveryId",
+    "deliveryAttempt",
+    "status",
+    "receivedAt"
+  ]
+}

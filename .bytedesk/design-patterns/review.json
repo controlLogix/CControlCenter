@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, autonomous governance and P00 draft-contract review, 2026-10-09; P00 gate remains open",
-  "sourceDigest": "5469829b5bafb7eb4ee7e31ac6abd18a8d1d3330ae9de49f2a03ef96c8659b83",
+  "reviewer": "Codex, P01 payload and bounded storage checkpoint review, 2026-10-09; P01 gate remains open",
+  "sourceDigest": "1ad976e2eedd5a3f961f63641d4fa4fa71cab903cc0893f936dde402616edb53",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -342,6 +342,24 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/conformance-result.json"
       ],
       "rationale": "Reviewed independent parsing/canonicalization/signature APIs, complete-envelope binding, bounded framing, byte-keyed validator caching and invalidation tests. Registered PLAN-08 applied only to the isolated executable contract path, retained its historical planning text, and added actual relationship diagram. All new files have preservation owners. No legacy runtime integration or P01 acceptance is claimed."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "P01 closed payload admission, semantic contracts and bounded JetStream fixture checkpoint",
+      "previousReviewer": "Codex, autonomous governance and P00 draft-contract review, 2026-10-09; P00 gate remains open",
+      "previousSourceDigest": "5469829b5bafb7eb4ee7e31ac6abd18a8d1d3330ae9de49f2a03ef96c8659b83",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/conformance-payload-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/conformance-payload-before-mirror.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/storage-result.json",
+        "tests/contracts/test_payloads.py",
+        "tests/contracts/test_semantics.py",
+        ".context/design-patterns.md",
+        ".context/design-patterns-diagrams.md"
+      ],
+      "rationale": "Reviewed the ten-entry payload registry, full signed-envelope admission and independent structural semantic checks. Reviewed real R1 JetStream conditional writes, replay reconciliation and atomic batch fixture assertions and explicit limitations. Resolved empty staging acknowledgment handling and missing cached-build input identity checks. Reviewed the temporary native-filesystem conformance mirror: exact input equality before/after, source/build stability, environment restoration and owned cleanup retain all vectors and timeout bounds. Final conformance passed 21 tests and 622 subtests; storage passed 14 scenarios. Existing P00 retained sources still match; inventory retains all 338 baseline files, 93 components and 198 checks. Tracker22tests and coverage pass. Pattern history is preserved; production ownership remains planned. No legacy runtime source changed, no later phase started, no phase acceptance or merge authorization is claimed. Remaining executable models, topology and environment qualifications stay open."
     }
   ],
   "rules": {

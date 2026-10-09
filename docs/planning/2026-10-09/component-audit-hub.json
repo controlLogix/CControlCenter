@@ -6,16 +6,27 @@
       "id": "HUB-01",
       "name": "Protocol names and local addresses",
       "files": [
-        "hub/names.py",
         "contracts/v1/README.md",
+        "contracts/v1/registry.json",
+        "contracts/v1/schemas/cancellation-request.schema.json",
         "contracts/v1/schemas/common.schema.json",
+        "contracts/v1/schemas/delegation-decision.schema.json",
+        "contracts/v1/schemas/delegation-offer.schema.json",
+        "contracts/v1/schemas/delivery-receipt.schema.json",
+        "contracts/v1/schemas/execution-report.schema.json",
         "contracts/v1/schemas/ingress-attestation.schema.json",
         "contracts/v1/schemas/message-envelope.schema.json",
         "contracts/v1/schemas/operation-context.schema.json",
+        "contracts/v1/schemas/operation-outcome.schema.json",
         "contracts/v1/schemas/owner-record.schema.json",
         "contracts/v1/schemas/plugin-context.schema.json",
+        "contracts/v1/schemas/plugin-lifecycle.schema.json",
         "contracts/v1/schemas/plugin-manifest.schema.json",
-        "contracts/v1/schemas/protected-assembly.schema.json"
+        "contracts/v1/schemas/protected-assembly.schema.json",
+        "contracts/v1/schemas/status-query.schema.json",
+        "contracts/v1/schemas/task-inspect.schema.json",
+        "contracts/v1/schemas/task-reserve.schema.json",
+        "hub/names.py"
       ],
       "role": "runtime",
       "baselineGroups": [
@@ -80,6 +91,25 @@
             "contracts/v1/schemas/protected-assembly.schema.json"
           ],
           "note": "Own new isolated contract schemas/clients/tests; current behavior and original assertions remain required."
+        },
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "scope": "P01 payload registry, semantic checks and isolated storage qualification",
+          "addedFiles": [
+            "contracts/v1/registry.json",
+            "contracts/v1/schemas/cancellation-request.schema.json",
+            "contracts/v1/schemas/delegation-decision.schema.json",
+            "contracts/v1/schemas/delegation-offer.schema.json",
+            "contracts/v1/schemas/delivery-receipt.schema.json",
+            "contracts/v1/schemas/execution-report.schema.json",
+            "contracts/v1/schemas/operation-outcome.schema.json",
+            "contracts/v1/schemas/plugin-lifecycle.schema.json",
+            "contracts/v1/schemas/status-query.schema.json",
+            "contracts/v1/schemas/task-inspect.schema.json",
+            "contracts/v1/schemas/task-reserve.schema.json"
+          ],
+          "note": "Preserve legacy behavior, assertions and qualification phases. SDK files remain HUB-26-owned conformance primitives; no production runtime path is replaced."
         }
       ]
     },
@@ -1543,14 +1573,14 @@
       "files": [
         "hub/tests/__init__.py",
         "hub/tests/fedharness.py",
-        "hub/tests/test_hub_offline.py",
-        "hub/tests/test_nats_federation.py",
-        "hub/tests/test_fed_unit.py",
-        "hub/tests/test_fed_live.py",
-        "hub/tests/test_governance.py",
-        "hub/tests/run_local.py",
         "hub/tests/local.ps1",
+        "hub/tests/run_local.py",
+        "hub/tests/test_fed_live.py",
+        "hub/tests/test_fed_unit.py",
+        "hub/tests/test_governance.py",
+        "hub/tests/test_hub_offline.py",
         "hub/tests/test_local_runner.py",
+        "hub/tests/test_nats_federation.py",
         "sdk/python/README.md",
         "sdk/python/agentmux_contracts/__init__.py",
         "sdk/python/agentmux_contracts/__main__.py",
@@ -1571,7 +1601,19 @@
         "tests/contracts/README.md",
         "tests/contracts/run.py",
         "tests/contracts/test_conformance.py",
-        "tests/contracts/vectors/valid-examples.json"
+        "tests/contracts/test_payloads.py",
+        "tests/contracts/test_semantics.py",
+        "tests/contracts/vectors/payload-examples.json",
+        "tests/contracts/vectors/semantic-examples.json",
+        "tests/contracts/vectors/valid-examples.json",
+        "tests/storage/README.md",
+        "tests/storage/python_client.py",
+        "tests/storage/run.py",
+        "tests/storage/typescript/README.md",
+        "tests/storage/typescript/package-lock.json",
+        "tests/storage/typescript/package.json",
+        "tests/storage/typescript/src/client.ts",
+        "tests/storage/typescript/tsconfig.json"
       ],
       "role": "test-support",
       "baselineGroups": [
@@ -1688,6 +1730,26 @@
             "tests/contracts/vectors/valid-examples.json"
           ],
           "note": "Own new isolated contract schemas/clients/tests; current behavior and original assertions remain required."
+        },
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "scope": "P01 payload registry, semantic checks and isolated storage qualification",
+          "addedFiles": [
+            "tests/contracts/test_payloads.py",
+            "tests/contracts/test_semantics.py",
+            "tests/contracts/vectors/payload-examples.json",
+            "tests/contracts/vectors/semantic-examples.json",
+            "tests/storage/README.md",
+            "tests/storage/python_client.py",
+            "tests/storage/run.py",
+            "tests/storage/typescript/README.md",
+            "tests/storage/typescript/package-lock.json",
+            "tests/storage/typescript/package.json",
+            "tests/storage/typescript/src/client.ts",
+            "tests/storage/typescript/tsconfig.json"
+          ],
+          "note": "Preserve legacy behavior, assertions and qualification phases. SDK files remain HUB-26-owned conformance primitives; no production runtime path is replaced."
         }
       ]
     }

@@ -336,3 +336,46 @@ flowchart LR
   Python --> Evidence[Results and source/build hashes]
   TypeScript --> Evidence
 ```
+
+## P01 closed payloads and semantic verification
+
+This extends the executable PLAN-08 path above. The local registry selects the closed payload schema and expected message kind/service. Each SDK also checks payload/context agreement and semantic invariants; a successful check still requires the caller to resolve trusted keys and enforce current grants. The legacy runtime is unchanged.
+
+```mermaid
+flowchart LR
+  Envelope["Received versioned envelope"] --> Python["Python verify_envelope / validate_payload"]
+  Envelope --> TypeScript["TypeScript verifyEnvelope / validatePayload"]
+  Registry["contracts/v1/registry.json: PLAN-08"] --> Python
+  Registry --> TypeScript
+  Shapes["Closed payload and infrastructure schemas"] --> Python
+  Shapes --> TypeScript
+  Python --> Checks["Signed audience, digest, context IDs and semantic checks"]
+  TypeScript --> Checks
+  Checks --> Claims["Verified claims; caller authorization still required"]
+```
+
+## P01 storage qualification fixtures
+
+PLAN-09 and PLAN-10 remain planned for production. These concrete locations qualify selected broker primitives and bounded recovery logic in disposable tests only. The fixture does not create a production owner, move SQLite authority or authorize external work.
+
+```mermaid
+sequenceDiagram
+  participant H as tests/storage/run.py
+  participant P as Python fixture client
+  participant T as TypeScript fixture client
+  participant J as Owned R1 JetStream broker
+  H->>P: Complete record and expected subject revision
+  H->>T: Competing complete record and same expected revision
+  P->>J: Conditional state + provenance + effect intent (PLAN-09)
+  T->>J: Conditional competing record (PLAN-09)
+  J-->>H: Exactly one accepted revision, one conflict
+  H->>J: Publish another record without a reply inbox
+  H->>J: Add later record; restart broker after deduplication window
+  H->>P: Reconcile original operation ID and digest (PLAN-10)
+  H->>T: Reconcile same retained operation independently (PLAN-10)
+  P->>J: Authoritative retained-history read
+  T->>J: Authoritative retained-history read
+  J-->>H: Same earlier outcome, no new publish
+```
+
+The same harness stages and commits same-stream atomic batches. A staging reply alone is insufficient. Sequence gaps, stale conditions, an intervening ordinary write and cross-stream attempts must not leave partial batches. An uncommitted batch remains absent after graceful restart. The executed [storage report](../docs/planning/2026-10-09/delivery/evidence/P01/storage-result.json) identifies exact sources/builds and exclusions: native macOS, R3 availability, power loss, production permissions and external-effect execution are not qualified here. Phase acceptance is not implied by this diagram.

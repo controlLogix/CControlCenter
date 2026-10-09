@@ -8846,17 +8846,17 @@
       "componentIds": [
         "HUB-26"
       ],
-      "workingFileSha256": "80da9e9c2411f2d8851b61fdf3602a10b0a130d7ddadfe72f086a472d7df9b68",
+      "workingFileSha256": "1ed277447a520deff4292e3b0120fef0c628df549e6ea2fb17d4b2d328fd169c",
       "declarations": [],
       "httpPathLiterals": [],
-      "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+      "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
     },
     {
       "path": "sdk/python/agentmux_contracts/__main__.py",
       "componentIds": [
         "HUB-26"
       ],
-      "workingFileSha256": "5b833896a0dc33c52494a6b559437766bb0a61cd6723cae3967d2cb813338b1c",
+      "workingFileSha256": "959c25c6285c6b0c17699c065a5252e764a56e38a524e4f46a8e8c1d440bca0f",
       "declarations": [
         {
           "name": "request",
@@ -8865,19 +8865,19 @@
         },
         {
           "name": "main",
-          "line": 32,
+          "line": 35,
           "kind": "FunctionDef"
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+      "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
     },
     {
       "path": "sdk/python/agentmux_contracts/attestation.py",
       "componentIds": [
         "HUB-26"
       ],
-      "workingFileSha256": "ea84d8d664e38eff12354dc870e532bf7b2a76cc86bc94e3a2f4afb5f2ff4ada",
+      "workingFileSha256": "d7bb81a998c2b3e243177a000f94f97e19dad54ff89090d22c41103a991dc70b",
       "declarations": [
         {
           "name": "sign_claims",
@@ -8901,28 +8901,38 @@
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+      "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
     },
     {
       "path": "sdk/python/agentmux_contracts/validation.py",
       "componentIds": [
         "HUB-26"
       ],
-      "workingFileSha256": "33e114fbd8e520dcae6a0a5821a26e8857676b00792030834545bd4064241be3",
+      "workingFileSha256": "54b3e233ab3cc3e6f3350872897fd3f2b5ba651f6a9c26741e367af017030242",
       "declarations": [
         {
           "name": "_validators",
-          "line": 18,
+          "line": 19,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "semantic_errors",
+          "line": 40,
           "kind": "FunctionDef"
         },
         {
           "name": "validate",
-          "line": 39,
+          "line": 111,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "validate_payload",
+          "line": 132,
           "kind": "FunctionDef"
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+      "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
     },
     {
       "path": "sdk/python/agentmux_contracts/wire.py",
@@ -8980,7 +8990,7 @@
       "componentIds": [
         "HUB-26"
       ],
-      "workingFileSha256": "2c460350f92565ae39a16389288247c6475908250a5602b513edc9b7a7934320",
+      "workingFileSha256": "fdfdf3cd86f0b0b4776eb22873b486f01cbc4f05dd372c65095c5cdac8e1947b",
       "declarations": [
         {
           "name": "hex",
@@ -8994,14 +9004,14 @@
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+      "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
     },
     {
       "path": "sdk/typescript/src/index.ts",
       "componentIds": [
         "HUB-26"
       ],
-      "workingFileSha256": "2554802f823fe60afeac8219fc5d74cee77d79822271250118e142766809befb",
+      "workingFileSha256": "3370cb91c9d8aca43ff0169f337c516e696d477adb90fdf803ffcfd6238775b7",
       "declarations": [
         {
           "name": "ContractError",
@@ -9039,38 +9049,48 @@
           "kind": "function"
         },
         {
+          "name": "semanticCheck",
+          "line": 95,
+          "kind": "function"
+        },
+        {
           "name": "privateKey",
-          "line": 93,
+          "line": 135,
           "kind": "function"
         },
         {
           "name": "signClaims",
-          "line": 97,
+          "line": 139,
           "kind": "function"
         },
         {
           "name": "publicKeyForSeed",
-          "line": 98,
+          "line": 140,
           "kind": "function"
         },
         {
           "name": "instant",
-          "line": 100,
+          "line": 142,
           "kind": "function"
         },
         {
           "name": "verifyAttestation",
-          "line": 108,
+          "line": 150,
           "kind": "function"
         },
         {
           "name": "verifyEnvelope",
-          "line": 122,
+          "line": 164,
+          "kind": "function"
+        },
+        {
+          "name": "validatePayload",
+          "line": 176,
           "kind": "function"
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+      "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
     },
     {
       "path": "taskmgmt/agentdefs.py",
@@ -10681,66 +10701,199 @@
       "componentIds": [
         "HUB-26"
       ],
-      "workingFileSha256": "ef5c6856edc9a0a3fba6d10d9c681bada694d66511403522c4e53efde18bf956",
+      "workingFileSha256": "cc1689b0f14a7b1cca5acd29f4e04a944a17aadf6ea88ea2997fabb44602df20",
       "declarations": [
         {
           "name": "Result",
-          "line": 18,
+          "line": 20,
           "kind": "ClassDef"
         },
         {
           "name": "version",
-          "line": 44,
+          "line": 46,
           "kind": "FunctionDef"
         },
         {
           "name": "hashes",
-          "line": 48,
+          "line": 50,
           "kind": "FunctionDef"
         },
         {
           "name": "typescript_build",
-          "line": 56,
+          "line": 58,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "mirror_hashes",
+          "line": 75,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "run",
+          "line": 83,
           "kind": "FunctionDef"
         },
         {
           "name": "main",
-          "line": 73,
+          "line": 131,
           "kind": "FunctionDef"
         },
         {
           "name": "__init__",
-          "line": 19,
+          "line": 21,
           "kind": "FunctionDef"
         },
         {
           "name": "addSuccess",
-          "line": 23,
+          "line": 25,
           "kind": "FunctionDef"
         },
         {
           "name": "addFailure",
-          "line": 27,
+          "line": 29,
           "kind": "FunctionDef"
         },
         {
           "name": "addError",
-          "line": 31,
+          "line": 33,
           "kind": "FunctionDef"
         },
         {
           "name": "addSkip",
-          "line": 35,
+          "line": 37,
           "kind": "FunctionDef"
         },
         {
           "name": "addSubTest",
-          "line": 39,
+          "line": 41,
           "kind": "FunctionDef"
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+      "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
+    },
+    {
+      "path": "tests/storage/python_client.py",
+      "componentIds": [
+        "HUB-26"
+      ],
+      "workingFileSha256": "e09951cf4a7237cac16a9b3b2b455dfeecdc3bd904e575343412d471561865c6",
+      "declarations": [
+        {
+          "name": "perform",
+          "line": 12,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "main",
+          "line": 57,
+          "kind": "AsyncFunctionDef"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
+    },
+    {
+      "path": "tests/storage/run.py",
+      "componentIds": [
+        "HUB-26"
+      ],
+      "workingFileSha256": "c0b9ec17212029fdfebf1ac56d4399f71ed4539587234bf3f60ee00017043624",
+      "declarations": [
+        {
+          "name": "require",
+          "line": 30,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "hashes",
+          "line": 35,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "record",
+          "line": 41,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "Broker",
+          "line": 61,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "main",
+          "line": 121,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 62,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "start",
+          "line": 75,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "stop",
+          "line": 92,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "connect",
+          "line": 103,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "client",
+          "line": 106,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "case",
+          "line": 140,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "raw",
+          "line": 211,
+          "kind": "AsyncFunctionDef"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
+    },
+    {
+      "path": "tests/storage/typescript/src/client.ts",
+      "componentIds": [
+        "HUB-26"
+      ],
+      "workingFileSha256": "9087215cf5266e2a12e44dee4edd1ed3192d5c94813e65443c8e152b0c0ac43a",
+      "declarations": [
+        {
+          "name": "bytes",
+          "line": 5,
+          "kind": "function"
+        },
+        {
+          "name": "headerMap",
+          "line": 6,
+          "kind": "function"
+        },
+        {
+          "name": "safeError",
+          "line": 7,
+          "kind": "function"
+        },
+        {
+          "name": "execute",
+          "line": 13,
+          "kind": "function"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
     },
     {
       "path": "verify-grok.sh",
@@ -10772,6 +10925,461 @@
         "sdk/python/tests/test_contracts.py",
         "sdk/typescript/src/test.ts",
         "tests/contracts/test_conformance.py"
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "reason": "P01 registry payload validation, local cross-field invariants and isolated real-broker storage fixtures; prior declaration/hash records preserved.",
+      "changes": [
+        {
+          "path": "sdk/python/agentmux_contracts/__init__.py",
+          "previous": {
+            "path": "sdk/python/agentmux_contracts/__init__.py",
+            "componentIds": [
+              "HUB-26"
+            ],
+            "workingFileSha256": "80da9e9c2411f2d8851b61fdf3602a10b0a130d7ddadfe72f086a472d7df9b68",
+            "declarations": [],
+            "httpPathLiterals": [],
+            "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+          },
+          "currentSha256": "1ed277447a520deff4292e3b0120fef0c628df549e6ea2fb17d4b2d328fd169c"
+        },
+        {
+          "path": "sdk/python/agentmux_contracts/__main__.py",
+          "previous": {
+            "path": "sdk/python/agentmux_contracts/__main__.py",
+            "componentIds": [
+              "HUB-26"
+            ],
+            "workingFileSha256": "5b833896a0dc33c52494a6b559437766bb0a61cd6723cae3967d2cb813338b1c",
+            "declarations": [
+              {
+                "name": "request",
+                "line": 11,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "main",
+                "line": 32,
+                "kind": "FunctionDef"
+              }
+            ],
+            "httpPathLiterals": [],
+            "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+          },
+          "currentSha256": "959c25c6285c6b0c17699c065a5252e764a56e38a524e4f46a8e8c1d440bca0f"
+        },
+        {
+          "path": "sdk/python/agentmux_contracts/attestation.py",
+          "previous": {
+            "path": "sdk/python/agentmux_contracts/attestation.py",
+            "componentIds": [
+              "HUB-26"
+            ],
+            "workingFileSha256": "ea84d8d664e38eff12354dc870e532bf7b2a76cc86bc94e3a2f4afb5f2ff4ada",
+            "declarations": [
+              {
+                "name": "sign_claims",
+                "line": 13,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "_timestamp",
+                "line": 20,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "verify_attestation",
+                "line": 30,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "verify_envelope",
+                "line": 58,
+                "kind": "FunctionDef"
+              }
+            ],
+            "httpPathLiterals": [],
+            "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+          },
+          "currentSha256": "d7bb81a998c2b3e243177a000f94f97e19dad54ff89090d22c41103a991dc70b"
+        },
+        {
+          "path": "sdk/python/agentmux_contracts/validation.py",
+          "previous": {
+            "path": "sdk/python/agentmux_contracts/validation.py",
+            "componentIds": [
+              "HUB-26"
+            ],
+            "workingFileSha256": "33e114fbd8e520dcae6a0a5821a26e8857676b00792030834545bd4064241be3",
+            "declarations": [
+              {
+                "name": "_validators",
+                "line": 18,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "validate",
+                "line": 39,
+                "kind": "FunctionDef"
+              }
+            ],
+            "httpPathLiterals": [],
+            "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+          },
+          "currentSha256": "54b3e233ab3cc3e6f3350872897fd3f2b5ba651f6a9c26741e367af017030242"
+        },
+        {
+          "path": "sdk/typescript/src/cli.ts",
+          "previous": {
+            "path": "sdk/typescript/src/cli.ts",
+            "componentIds": [
+              "HUB-26"
+            ],
+            "workingFileSha256": "2c460350f92565ae39a16389288247c6475908250a5602b513edc9b7a7934320",
+            "declarations": [
+              {
+                "name": "hex",
+                "line": 3,
+                "kind": "function"
+              },
+              {
+                "name": "request",
+                "line": 7,
+                "kind": "function"
+              }
+            ],
+            "httpPathLiterals": [],
+            "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+          },
+          "currentSha256": "fdfdf3cd86f0b0b4776eb22873b486f01cbc4f05dd372c65095c5cdac8e1947b"
+        },
+        {
+          "path": "sdk/typescript/src/index.ts",
+          "previous": {
+            "path": "sdk/typescript/src/index.ts",
+            "componentIds": [
+              "HUB-26"
+            ],
+            "workingFileSha256": "2554802f823fe60afeac8219fc5d74cee77d79822271250118e142766809befb",
+            "declarations": [
+              {
+                "name": "ContractError",
+                "line": 8,
+                "kind": "class"
+              },
+              {
+                "name": "fail",
+                "line": 11,
+                "kind": "function"
+              },
+              {
+                "name": "checkValue",
+                "line": 14,
+                "kind": "function"
+              },
+              {
+                "name": "strictLoads",
+                "line": 42,
+                "kind": "function"
+              },
+              {
+                "name": "canonicalBytes",
+                "line": 65,
+                "kind": "function"
+              },
+              {
+                "name": "payloadDigest",
+                "line": 72,
+                "kind": "function"
+              },
+              {
+                "name": "validate",
+                "line": 75,
+                "kind": "function"
+              },
+              {
+                "name": "privateKey",
+                "line": 93,
+                "kind": "function"
+              },
+              {
+                "name": "signClaims",
+                "line": 97,
+                "kind": "function"
+              },
+              {
+                "name": "publicKeyForSeed",
+                "line": 98,
+                "kind": "function"
+              },
+              {
+                "name": "instant",
+                "line": 100,
+                "kind": "function"
+              },
+              {
+                "name": "verifyAttestation",
+                "line": 108,
+                "kind": "function"
+              },
+              {
+                "name": "verifyEnvelope",
+                "line": 122,
+                "kind": "function"
+              }
+            ],
+            "httpPathLiterals": [],
+            "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+          },
+          "currentSha256": "3370cb91c9d8aca43ff0169f337c516e696d477adb90fdf803ffcfd6238775b7"
+        },
+        {
+          "path": "tests/contracts/run.py",
+          "previous": {
+            "path": "tests/contracts/run.py",
+            "componentIds": [
+              "HUB-26"
+            ],
+            "workingFileSha256": "ef5c6856edc9a0a3fba6d10d9c681bada694d66511403522c4e53efde18bf956",
+            "declarations": [
+              {
+                "name": "Result",
+                "line": 18,
+                "kind": "ClassDef"
+              },
+              {
+                "name": "version",
+                "line": 44,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "hashes",
+                "line": 48,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "typescript_build",
+                "line": 56,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "main",
+                "line": 73,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "__init__",
+                "line": 19,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "addSuccess",
+                "line": 23,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "addFailure",
+                "line": 27,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "addError",
+                "line": 31,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "addSkip",
+                "line": 35,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "addSubTest",
+                "line": 39,
+                "kind": "FunctionDef"
+              }
+            ],
+            "httpPathLiterals": [],
+            "reviewStatus": "P01 isolated wire/CLI/test surface; no legacy entrypoint replaced; full phase verification pending"
+          },
+          "currentSha256": "0a03b783b03467c656af3e1862c4b771db1bf3697148257d0c8a25f5a5dbbe12"
+        },
+        {
+          "path": "tests/storage/python_client.py",
+          "previous": null,
+          "currentSha256": "e09951cf4a7237cac16a9b3b2b455dfeecdc3bd904e575343412d471561865c6"
+        },
+        {
+          "path": "tests/storage/run.py",
+          "previous": null,
+          "currentSha256": "c0b9ec17212029fdfebf1ac56d4399f71ed4539587234bf3f60ee00017043624"
+        },
+        {
+          "path": "tests/storage/typescript/src/client.ts",
+          "previous": null,
+          "currentSha256": "9087215cf5266e2a12e44dee4edd1ed3192d5c94813e65443c8e152b0c0ac43a"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "reason": "Storage harness now binds cache build inputs to repository sources and records before/after integrity; preserve previous fixture runner surface.",
+      "changes": [
+        {
+          "path": "tests/storage/run.py",
+          "previous": {
+            "path": "tests/storage/run.py",
+            "componentIds": [
+              "HUB-26"
+            ],
+            "workingFileSha256": "c0b9ec17212029fdfebf1ac56d4399f71ed4539587234bf3f60ee00017043624",
+            "declarations": [
+              {
+                "name": "require",
+                "line": 30,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "hashes",
+                "line": 35,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "record",
+                "line": 41,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "Broker",
+                "line": 61,
+                "kind": "ClassDef"
+              },
+              {
+                "name": "main",
+                "line": 121,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "__init__",
+                "line": 62,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "start",
+                "line": 75,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "stop",
+                "line": 92,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "connect",
+                "line": 103,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "client",
+                "line": 106,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "case",
+                "line": 140,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "raw",
+                "line": 211,
+                "kind": "AsyncFunctionDef"
+              }
+            ],
+            "httpPathLiterals": [],
+            "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
+          },
+          "currentSha256": "c0b9ec17212029fdfebf1ac56d4399f71ed4539587234bf3f60ee00017043624"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "reason": "Conformance runner uses a disposable native-filesystem source mirror with input integrity checks to reduce WSL-mounted filesystem overhead. Test modules remain excluded from the declaration index under its existing rule, but all files retain component inventory ownership.",
+      "changes": [
+        {
+          "path": "tests/contracts/run.py",
+          "previous": {
+            "path": "tests/contracts/run.py",
+            "componentIds": [
+              "HUB-26"
+            ],
+            "workingFileSha256": "0a03b783b03467c656af3e1862c4b771db1bf3697148257d0c8a25f5a5dbbe12",
+            "declarations": [
+              {
+                "name": "Result",
+                "line": 18,
+                "kind": "ClassDef"
+              },
+              {
+                "name": "version",
+                "line": 44,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "hashes",
+                "line": 48,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "typescript_build",
+                "line": 56,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "main",
+                "line": 73,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "__init__",
+                "line": 19,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "addSuccess",
+                "line": 23,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "addFailure",
+                "line": 27,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "addError",
+                "line": 31,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "addSkip",
+                "line": 35,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "addSubTest",
+                "line": 39,
+                "kind": "FunctionDef"
+              }
+            ],
+            "httpPathLiterals": [],
+            "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
+          },
+          "currentSha256": "cc1689b0f14a7b1cca5acd29f4e04a944a17aadf6ea88ea2997fabb44602df20"
+        }
       ]
     }
   ]

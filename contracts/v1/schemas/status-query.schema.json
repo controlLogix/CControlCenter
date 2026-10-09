@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agentmux:contract:1:status-query",
+  "title": "Agentmux status-query payload v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "includeHubs": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "includeHubs"
+  ]
+}

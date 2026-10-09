@@ -1,0 +1,784 @@
+{
+  "recordedAt": "2026-10-09T21:48:51.061300+00:00",
+  "sourceCommit": "421d18b26227cb1233e362627fc7de75064ea3b0",
+  "sourceBinding": "Commit is the checkout base; sourceHashes identify exact working files. Compiled CLI has a separate digest.",
+  "sourceHashes": {
+    "contracts/v1/registry.json": "63bdf935623f4b2925592d09a923a5120966b37a33059d9d54aacacce930dc9f",
+    "contracts/v1/schemas/cancellation-request.schema.json": "81b797594e094b7acb4c3836bcec9714f2a1f3104bb6105051d438e78e2e19cb",
+    "contracts/v1/schemas/common.schema.json": "65e1c256048e311da082a59a592ad2291740863807cebe12f96ecd20f3192ddb",
+    "contracts/v1/schemas/delegation-decision.schema.json": "e11c9904e873a805327664c14641b17bf4a65622bba8849ff959d165f3b698ed",
+    "contracts/v1/schemas/delegation-offer.schema.json": "faa29cff84f21d02b04c1af7d380dcb8bd28d56b7c55fde061052055fb842748",
+    "contracts/v1/schemas/delivery-receipt.schema.json": "8d2915c592ee2ea7631a46b36c8a8a78d47126507990c67d1ae3dde4c1eba903",
+    "contracts/v1/schemas/execution-report.schema.json": "a15213506f2ac3e6d02816c225e58fb82c61f55e0f0fe108e534285b55a0f736",
+    "contracts/v1/schemas/ingress-attestation.schema.json": "f388117c05f99a8f2a2f7fbfa7275df7522063014e12f41248564ddb7564e09d",
+    "contracts/v1/schemas/message-envelope.schema.json": "de2366fff9b34b85cf8689c890c8f9eedce1da55848af8e7bfe3cfdab3d466e6",
+    "contracts/v1/schemas/operation-context.schema.json": "ce6bae5e685687df4ebc581dcbcc2a191bd089739257ad1558fa732a241343f7",
+    "contracts/v1/schemas/operation-outcome.schema.json": "9f09ed1e73622d5d07e67e863f209a1be0c77fe56d59b20e066d5b5089a9c019",
+    "contracts/v1/schemas/owner-record.schema.json": "bc9d1249ce52a8630ee1dd77b356d3988f30b17ff282d84ad9fac7999ebcde16",
+    "contracts/v1/schemas/plugin-context.schema.json": "2976cb2ece3e6572c9428c08e19d3fe442ef5fed17358ae4cefe27f972e06e5c",
+    "contracts/v1/schemas/plugin-lifecycle.schema.json": "cb8a5afd734c1a32d67998b527e1aec5602ee976c9de70610ad98988dfae216f",
+    "contracts/v1/schemas/plugin-manifest.schema.json": "6514e16035b92ac3edeaf4ea906502ab97c64d5dc2c396f87ab0be723a4163d5",
+    "contracts/v1/schemas/protected-assembly.schema.json": "86a2238a6a81ceffcba378a79b3badf752116090faa5fc9428ad962492052148",
+    "contracts/v1/schemas/status-query.schema.json": "1602ff586698c26b8f2cc8ab7be90297cd86dbd0d83c41124421b684707f0a2c",
+    "contracts/v1/schemas/task-inspect.schema.json": "96f0103ed42e0b8354cdbb7b37631ad93df149e91bcd4ef3c79b3d0072f822f3",
+    "contracts/v1/schemas/task-reserve.schema.json": "42e89db4f7661939cda9a97526e0e09e4fe67f0aeea6b6d653adb1bfe04506f2",
+    "sdk/python/agentmux_contracts/__init__.py": "1ed277447a520deff4292e3b0120fef0c628df549e6ea2fb17d4b2d328fd169c",
+    "sdk/python/agentmux_contracts/__main__.py": "959c25c6285c6b0c17699c065a5252e764a56e38a524e4f46a8e8c1d440bca0f",
+    "sdk/python/agentmux_contracts/attestation.py": "d7bb81a998c2b3e243177a000f94f97e19dad54ff89090d22c41103a991dc70b",
+    "sdk/python/agentmux_contracts/validation.py": "54b3e233ab3cc3e6f3350872897fd3f2b5ba651f6a9c26741e367af017030242",
+    "sdk/python/agentmux_contracts/wire.py": "1de4b46902ed683e01b4734a1cc6db2c1a5edc61dcefaf071c28990a32274b3b",
+    "sdk/python/pyproject.toml": "d0b333827071711c7f3ffb4be4abc9ebf663d9cfed0edad8f3efbca88bd94743",
+    "sdk/python/requirements.lock": "10f1a795ebbc6624f1bb29d484b983781feaf94e178336b87aede0204f50eca6",
+    "sdk/python/tests/test_contracts.py": "4e27ba59a2704bda976542686f068b03ae0ad20e2d97c3616a9757f977869c16",
+    "sdk/typescript/package-lock.json": "2821dcc8c007574512f63228ba79ddf0e283d76ad9a7c37ee46533e9ebcf5081",
+    "sdk/typescript/package.json": "a84c64d61999a93e29d24159c880d190b7ee0d2cce2490ddd821f1c4be8066c9",
+    "sdk/typescript/src/cli.ts": "fdfdf3cd86f0b0b4776eb22873b486f01cbc4f05dd372c65095c5cdac8e1947b",
+    "sdk/typescript/src/index.ts": "3370cb91c9d8aca43ff0169f337c516e696d477adb90fdf803ffcfd6238775b7",
+    "sdk/typescript/src/test.ts": "e9268a639ff0e6927839d524d1599777f4ab10d21c1fc641299289696aca1564",
+    "sdk/typescript/test-examples.json": "30fc8cdb67a6c056f9a50ddf0c7593016b04ce00d7a1d96fc505a26b2e338226",
+    "sdk/typescript/tsconfig.json": "c46cb61f3946e5fc5c84ab49896f889d2bde0478d8f8b0710079d5e17edb79d4",
+    "tests/contracts/run.py": "cc1689b0f14a7b1cca5acd29f4e04a944a17aadf6ea88ea2997fabb44602df20",
+    "tests/contracts/test_conformance.py": "a1cde5fd3745899e5b062b3f3784be2ed531b170c46f0848bf469099450d7959",
+    "tests/contracts/test_payloads.py": "80b273a16da8050565a320d63e2828cec903fc77f584e228e862b4e736dc38ef",
+    "tests/contracts/test_semantics.py": "e83efa3a548185d8022ac74906dffaa6a62e8bfae5a72c41ba7233f0f50cde65",
+    "tests/contracts/vectors/payload-examples.json": "565db177e76f5cef9ef748a7a3ac0482da138908760d00bae92e61b1e164d4a7",
+    "tests/contracts/vectors/semantic-examples.json": "bbb47da7030085e25e5465b820c8650f67f9ddf251baf42e9bc8b995b03914ec",
+    "tests/contracts/vectors/valid-examples.json": "30fc8cdb67a6c056f9a50ddf0c7593016b04ce00d7a1d96fc505a26b2e338226"
+  },
+  "sourceUnchangedDuringRun": true,
+  "typescriptBuild": {
+    "sourceComparison": {
+      "package.json": {
+        "repository": "a84c64d61999a93e29d24159c880d190b7ee0d2cce2490ddd821f1c4be8066c9",
+        "buildSource": "a84c64d61999a93e29d24159c880d190b7ee0d2cce2490ddd821f1c4be8066c9"
+      },
+      "package-lock.json": {
+        "repository": "2821dcc8c007574512f63228ba79ddf0e283d76ad9a7c37ee46533e9ebcf5081",
+        "buildSource": "2821dcc8c007574512f63228ba79ddf0e283d76ad9a7c37ee46533e9ebcf5081"
+      },
+      "tsconfig.json": {
+        "repository": "c46cb61f3946e5fc5c84ab49896f889d2bde0478d8f8b0710079d5e17edb79d4",
+        "buildSource": "c46cb61f3946e5fc5c84ab49896f889d2bde0478d8f8b0710079d5e17edb79d4"
+      },
+      "src/cli.ts": {
+        "repository": "fdfdf3cd86f0b0b4776eb22873b486f01cbc4f05dd372c65095c5cdac8e1947b",
+        "buildSource": "fdfdf3cd86f0b0b4776eb22873b486f01cbc4f05dd372c65095c5cdac8e1947b"
+      },
+      "src/index.ts": {
+        "repository": "3370cb91c9d8aca43ff0169f337c516e696d477adb90fdf803ffcfd6238775b7",
+        "buildSource": "3370cb91c9d8aca43ff0169f337c516e696d477adb90fdf803ffcfd6238775b7"
+      },
+      "src/test.ts": {
+        "repository": "e9268a639ff0e6927839d524d1599777f4ab10d21c1fc641299289696aca1564",
+        "buildSource": "e9268a639ff0e6927839d524d1599777f4ab10d21c1fc641299289696aca1564"
+      }
+    },
+    "allSourcesMatch": true,
+    "compiledJavaScriptHashes": {
+      "cli.js": "259c1413c7eae33949fd30b2a926af0838d1088de79bc96abc5b0bc76685ed78",
+      "index.js": "99696179614446b559ef1a45af0f98d7f13404b9d918cc6ae144c24bae2b372a",
+      "test.js": "243e073a36bd42464976e12446d804c066d4f0964f01d7cee461b3fca929f923"
+    },
+    "cliPresent": true
+  },
+  "typescriptBuildUnchangedDuringRun": true,
+  "sourceMirror": {
+    "root": "/tmp/agentmux-contract-inputs-bdpt1txi",
+    "inputSha256": {
+      "contracts/v1/README.md": "5c19dcf2bde9708dee7a31c8f86324d5b888d61d49639c9048d63d0ed5e83826",
+      "contracts/v1/registry.json": "63bdf935623f4b2925592d09a923a5120966b37a33059d9d54aacacce930dc9f",
+      "contracts/v1/schemas/cancellation-request.schema.json": "81b797594e094b7acb4c3836bcec9714f2a1f3104bb6105051d438e78e2e19cb",
+      "contracts/v1/schemas/common.schema.json": "65e1c256048e311da082a59a592ad2291740863807cebe12f96ecd20f3192ddb",
+      "contracts/v1/schemas/delegation-decision.schema.json": "e11c9904e873a805327664c14641b17bf4a65622bba8849ff959d165f3b698ed",
+      "contracts/v1/schemas/delegation-offer.schema.json": "faa29cff84f21d02b04c1af7d380dcb8bd28d56b7c55fde061052055fb842748",
+      "contracts/v1/schemas/delivery-receipt.schema.json": "8d2915c592ee2ea7631a46b36c8a8a78d47126507990c67d1ae3dde4c1eba903",
+      "contracts/v1/schemas/execution-report.schema.json": "a15213506f2ac3e6d02816c225e58fb82c61f55e0f0fe108e534285b55a0f736",
+      "contracts/v1/schemas/ingress-attestation.schema.json": "f388117c05f99a8f2a2f7fbfa7275df7522063014e12f41248564ddb7564e09d",
+      "contracts/v1/schemas/message-envelope.schema.json": "de2366fff9b34b85cf8689c890c8f9eedce1da55848af8e7bfe3cfdab3d466e6",
+      "contracts/v1/schemas/operation-context.schema.json": "ce6bae5e685687df4ebc581dcbcc2a191bd089739257ad1558fa732a241343f7",
+      "contracts/v1/schemas/operation-outcome.schema.json": "9f09ed1e73622d5d07e67e863f209a1be0c77fe56d59b20e066d5b5089a9c019",
+      "contracts/v1/schemas/owner-record.schema.json": "bc9d1249ce52a8630ee1dd77b356d3988f30b17ff282d84ad9fac7999ebcde16",
+      "contracts/v1/schemas/plugin-context.schema.json": "2976cb2ece3e6572c9428c08e19d3fe442ef5fed17358ae4cefe27f972e06e5c",
+      "contracts/v1/schemas/plugin-lifecycle.schema.json": "cb8a5afd734c1a32d67998b527e1aec5602ee976c9de70610ad98988dfae216f",
+      "contracts/v1/schemas/plugin-manifest.schema.json": "6514e16035b92ac3edeaf4ea906502ab97c64d5dc2c396f87ab0be723a4163d5",
+      "contracts/v1/schemas/protected-assembly.schema.json": "86a2238a6a81ceffcba378a79b3badf752116090faa5fc9428ad962492052148",
+      "contracts/v1/schemas/status-query.schema.json": "1602ff586698c26b8f2cc8ab7be90297cd86dbd0d83c41124421b684707f0a2c",
+      "contracts/v1/schemas/task-inspect.schema.json": "96f0103ed42e0b8354cdbb7b37631ad93df149e91bcd4ef3c79b3d0072f822f3",
+      "contracts/v1/schemas/task-reserve.schema.json": "42e89db4f7661939cda9a97526e0e09e4fe67f0aeea6b6d653adb1bfe04506f2",
+      "sdk/python/README.md": "34a29603b12e7418219097dfc3ae1690205190e412184a33f424b3ac673db738",
+      "sdk/python/agentmux_contracts/__init__.py": "1ed277447a520deff4292e3b0120fef0c628df549e6ea2fb17d4b2d328fd169c",
+      "sdk/python/agentmux_contracts/__main__.py": "959c25c6285c6b0c17699c065a5252e764a56e38a524e4f46a8e8c1d440bca0f",
+      "sdk/python/agentmux_contracts/attestation.py": "d7bb81a998c2b3e243177a000f94f97e19dad54ff89090d22c41103a991dc70b",
+      "sdk/python/agentmux_contracts/validation.py": "54b3e233ab3cc3e6f3350872897fd3f2b5ba651f6a9c26741e367af017030242",
+      "sdk/python/agentmux_contracts/wire.py": "1de4b46902ed683e01b4734a1cc6db2c1a5edc61dcefaf071c28990a32274b3b",
+      "sdk/python/pyproject.toml": "d0b333827071711c7f3ffb4be4abc9ebf663d9cfed0edad8f3efbca88bd94743",
+      "sdk/python/requirements.lock": "10f1a795ebbc6624f1bb29d484b983781feaf94e178336b87aede0204f50eca6",
+      "sdk/python/tests/test_contracts.py": "4e27ba59a2704bda976542686f068b03ae0ad20e2d97c3616a9757f977869c16"
+    },
+    "matchesRepositoryBefore": true,
+    "matchesRepositoryAfter": true,
+    "unchangedDuringRun": true,
+    "lifetime": "Owned TemporaryDirectory; removed after the report is saved."
+  },
+  "environment": {
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "harnessPython": "3.14.4",
+    "clientPython": "Python 3.14.4",
+    "node": "v22.22.1"
+  },
+  "command": "python tests/contracts/run.py --evidence <output>",
+  "selection": {
+    "pattern": "test_*.py",
+    "match": "missing_and_unknown_payload_fields",
+    "fullSuite": false
+  },
+  "durationSeconds": 6.09,
+  "exitCode": 0,
+  "testsRun": 1,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "expectedFailures": 0,
+  "results": [
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='task-inspect:missing:taskId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='task-inspect:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='task-reserve:missing:taskId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='task-reserve:missing:delegationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='task-reserve:missing:attemptId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='task-reserve:missing:executorHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='task-reserve:missing:grantRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='task-reserve:missing:repositoryRevision')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='task-reserve:missing:assignmentEpoch')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='task-reserve:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-offer:missing:taskId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-offer:missing:delegationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-offer:missing:attemptId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-offer:missing:originHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-offer:missing:executorHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-offer:missing:assignmentEpoch')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-offer:missing:grantRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-offer:missing:repositoryRevision')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-offer:missing:taskInputRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-offer:missing:acceptBefore')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-offer:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-decision:missing:taskId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-decision:missing:delegationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-decision:missing:attemptId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-decision:missing:decision')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-decision:missing:decisionRecordRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-decision:missing:reason')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delegation-decision:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='execution-report:missing:taskId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='execution-report:missing:delegationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='execution-report:missing:attemptId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='execution-report:missing:reportId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='execution-report:missing:executorHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='execution-report:missing:repositoryRevision')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='execution-report:missing:status')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='execution-report:missing:artifacts')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='execution-report:missing:reportRecordRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='execution-report:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='cancellation-request:missing:taskId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='cancellation-request:missing:attemptId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='cancellation-request:missing:delegationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='cancellation-request:missing:reason')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='cancellation-request:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delivery-receipt:missing:originalMessageId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delivery-receipt:missing:deliveryId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delivery-receipt:missing:deliveryAttempt')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delivery-receipt:missing:status')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delivery-receipt:missing:receivedAt')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='delivery-receipt:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='plugin-lifecycle:missing:instanceId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='plugin-lifecycle:missing:generation')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='plugin-lifecycle:missing:status')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='plugin-lifecycle:missing:observedAt')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='plugin-lifecycle:missing:reason')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='plugin-lifecycle:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='operation-outcome:missing:operationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='operation-outcome:missing:outcome')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='operation-outcome:missing:recordRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='operation-outcome:missing:reason')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='operation-outcome:missing:retryable')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='operation-outcome:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='status-query:missing:includeHubs')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='python', case='status-query:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='task-inspect:missing:taskId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='task-inspect:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='task-reserve:missing:taskId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='task-reserve:missing:delegationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='task-reserve:missing:attemptId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='task-reserve:missing:executorHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='task-reserve:missing:grantRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='task-reserve:missing:repositoryRevision')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='task-reserve:missing:assignmentEpoch')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='task-reserve:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-offer:missing:taskId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-offer:missing:delegationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-offer:missing:attemptId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-offer:missing:originHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-offer:missing:executorHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-offer:missing:assignmentEpoch')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-offer:missing:grantRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-offer:missing:repositoryRevision')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-offer:missing:taskInputRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-offer:missing:acceptBefore')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-offer:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-decision:missing:taskId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-decision:missing:delegationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-decision:missing:attemptId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-decision:missing:decision')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-decision:missing:decisionRecordRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-decision:missing:reason')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delegation-decision:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='execution-report:missing:taskId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='execution-report:missing:delegationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='execution-report:missing:attemptId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='execution-report:missing:reportId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='execution-report:missing:executorHubId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='execution-report:missing:repositoryRevision')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='execution-report:missing:status')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='execution-report:missing:artifacts')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='execution-report:missing:reportRecordRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='execution-report:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='cancellation-request:missing:taskId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='cancellation-request:missing:attemptId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='cancellation-request:missing:delegationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='cancellation-request:missing:reason')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='cancellation-request:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delivery-receipt:missing:originalMessageId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delivery-receipt:missing:deliveryId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delivery-receipt:missing:deliveryAttempt')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delivery-receipt:missing:status')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delivery-receipt:missing:receivedAt')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='delivery-receipt:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='plugin-lifecycle:missing:instanceId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='plugin-lifecycle:missing:generation')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='plugin-lifecycle:missing:status')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='plugin-lifecycle:missing:observedAt')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='plugin-lifecycle:missing:reason')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='plugin-lifecycle:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='operation-outcome:missing:operationId')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='operation-outcome:missing:outcome')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='operation-outcome:missing:recordRef')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='operation-outcome:missing:reason')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='operation-outcome:missing:retryable')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='operation-outcome:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='status-query:missing:includeHubs')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields (client='typescript', case='status-query:extra')",
+      "status": "passed",
+      "subtest": true
+    },
+    {
+      "test": "test_payloads.Payloads.test_missing_and_unknown_payload_fields",
+      "status": "passed"
+    }
+  ],
+  "limitations": [
+    "Local subprocess protocol, schema, canonical-byte and signature fixtures only; no live NATS, enrollment, current-grant lookup or production authorization qualification.",
+    "Ephemeral test signing seeds and request bodies are not stored in this record.",
+    "Strict raw UTF-8 is tested at the CLI byte boundary. Payload-size unit checks belong to each SDK because nested JSON escaping changes outer CLI frame size.",
+    "A passing local environment does not qualify unexecuted macOS, CI, provider or terminal environments."
+  ]
+}

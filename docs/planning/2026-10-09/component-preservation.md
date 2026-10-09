@@ -2,7 +2,7 @@
 
 **Status: static inventory checked during P00; full baseline/candidate qualification remains open.** The [live task board](implementation-status.md) records current work. The [P00 preflight](delivery/evidence/P00/preflight.md) and [baseline defect reconciliation](delivery/evidence/P00/baseline-findings.md) distinguish executed focused tests, retained historical results and missing environments. No phase acceptance is implied.
 
-ADD-01 accounts for **338 baseline files**, **36 additional governed files**, **93 components**, and **198 behavior checks**. The [exact inventory](component-inventory.json) pins file ownership and Git blob identities. The [source surface index](source-surface-index.json) lists code declarations and literal HTTP paths for review. File coverage does not prove runtime correctness or complete behavioral coverage.
+ADD-01 accounts for **338 baseline files**, **59 additional governed files**, **93 components**, and **198 behavior checks**. The [exact inventory](component-inventory.json) pins file ownership and Git blob identities. The [source surface index](source-surface-index.json) lists code declarations and literal HTTP paths for review. File coverage does not prove runtime correctness or complete behavioral coverage.
 
 ## Required preservation rule
 
@@ -4081,3 +4081,13 @@ P00 must reconcile maintainers’ workflows with the declared entry points. Miss
 ## Scoped P01 baseline repair update, October 9
 
 Ryan authorized autonomous repair of all six governance findings. HUB-03 retains the store API while adding schema migration 5 and collision-safe snapshots. HUB-17 gains origin-owned reservations and bound v3 results over NATS. HUB-26 owns the added `hub/tests/test_governance.py` and expanded real-broker tests. The source index preserves its previous hashes/declarations in history and records the reviewed current code. The inventory now covers 338 baseline files plus two added files (340 total), still across 93 components and 198 future comparison checks. See [repair evidence](governance-repairs.md); these targeted results do not qualify every planned replacement or phase.
+
+## P01 contract and storage fixture integration
+
+This increment adds registered domain payload schemas and their operation/context correlations under HUB-01. HUB-26 continues to own the independent Python and TypeScript contract primitives, cross-language tests and new disposable-broker storage fixtures. The complete file inventory records each added path; the source index preserves previous declarations and hashes. All 338 baseline files, 93 components and 198 original behavior checks remain.
+
+The SDK checks now reject inconsistent manifest dependencies, protected membership, context/grant bindings, invalid calendar timestamps, rejected-operation effects and unsigned envelope substitutions. These checks validate structure and signed-message consistency; they do not construct trusted contexts, resolve current grants or implement production domain ownership. Existing plugin lifecycle and migration comparisons remain required in their owning phases.
+
+The isolated storage clients exercise real conditional JetStream appends, complete owner records, retained-operation reconciliation and same-stream atomic batches. Their harness uses disposable authenticated local brokers and retains missing/failure outcomes. The pinned storage report records executed results and limits; this inventory is not a pass attestation. The fixtures do not replace existing SQLite/NATS runtime owners, claim cross-stream transactions, or qualify multi-host durability, production admission or full migration recovery.
+
+Added tests retain the earlier conformance vectors and legacy assertions. No command, dashboard control, state table or supported integration is removed. Phase evidence must still establish preservation and added capability before any existing entry point changes.
