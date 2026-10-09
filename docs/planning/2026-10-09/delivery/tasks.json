@@ -6,8 +6,8 @@
     "phases.json": "5bb9037937a00621214ad58873c368fdc55b2f8c3722653c97432efa8031a82a",
     "verification-matrix.json": "516813fd034d6c73b4b0d6f9eaaf4b1b54798828e137336324605d0b956085bc",
     "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
-    "component-inventory.json": "f5641f7553e746d695f042a937e8c8399f9dd69c7dad10eb6f90162e80dab0d9",
-    "component-audit-hub.json": "3b35ead4eaa32202dd6d5106bc9d30424b9ec9115c9b7512b46b818ff4f64844",
+    "component-inventory.json": "f602361b8866bab2463b38a8d6804b529e41e7cf60ddb2f7c5d473a07a3235b0",
+    "component-audit-hub.json": "a66de75d1f8e2070d08f543ff61432c203f162f62a2170b5c8fe576631b4738e",
     "component-audit-harness.json": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08",
     "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
     "component-audit-repository.json": "39001427bd59e2b0bf45ad6b953a4221c0edf9cdbaaf541179317775e0d29a6f"
@@ -1726,9 +1726,12 @@
         }
       ],
       "evidence": [
-        "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md"
+        "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md"
       ],
-      "commits": [],
+      "commits": [
+        "7ef00dcb299c100d6dda45bfffa2b4e127345a50"
+      ],
       "blocker": null,
       "history": [
         {
@@ -1822,9 +1825,12 @@
         }
       ],
       "evidence": [
-        "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md"
+        "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md"
       ],
-      "commits": [],
+      "commits": [
+        "7ef00dcb299c100d6dda45bfffa2b4e127345a50"
+      ],
       "blocker": null,
       "history": [
         {
@@ -1918,9 +1924,12 @@
         }
       ],
       "evidence": [
-        "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md"
+        "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md"
       ],
-      "commits": [],
+      "commits": [
+        "7ef00dcb299c100d6dda45bfffa2b4e127345a50"
+      ],
       "blocker": null,
       "history": [
         {
@@ -2068,7 +2077,7 @@
           "text": "Build an early two-hub contract spike with separate broker accounts and a leaf link. Exercise lost acceptance acknowledgment and reservation reconciliation before the later production federation phase."
         }
       ],
-      "status": "planned",
+      "status": "in_progress",
       "owner": "Codex",
       "dependsOn": [
         "P00-GATE",
@@ -2099,10 +2108,20 @@
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
         }
       ],
-      "evidence": [],
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md"
+      ],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T21:55:45.103951+00:00",
+          "actor": "Codex",
+          "from": "planned",
+          "to": "in_progress",
+          "note": "Implementing the P01 two-hub leaf-account fixture, including lost acceptance acknowledgment and reservation reconciliation; no production federation or phase acceptance claim."
+        }
+      ],
       "phaseCriteria": [
         "P01-AC01",
         "P01-AC02",
@@ -2303,7 +2322,9 @@
       "evidence": [
         "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md"
       ],
-      "commits": [],
+      "commits": [
+        "7ef00dcb299c100d6dda45bfffa2b4e127345a50"
+      ],
       "blocker": null,
       "history": [
         {
@@ -33000,6 +33021,30 @@
         "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
         "component-inventory.json": "7199353b2b83d4b56c3a340f3fa46a23dcf193f5b115c9cd1a251233c47580a2",
         "component-audit-hub.json": "529bbddace02526ea4949aac15434ac778536dcec4db1dbc0d274ea9c4ae3579",
+        "component-audit-harness.json": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08",
+        "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
+        "component-audit-repository.json": "39001427bd59e2b0bf45ad6b953a4221c0edf9cdbaaf541179317775e0d29a6f"
+      }
+    },
+    {
+      "at": "2026-10-09T21:55:45.103951+00:00",
+      "actor": "Codex",
+      "from": "planned",
+      "to": "in_progress",
+      "note": "Implementing the P01 two-hub leaf-account fixture, including lost acceptance acknowledgment and reservation reconciliation; no production federation or phase acceptance claim.",
+      "taskId": "P01-T05"
+    },
+    {
+      "at": "2026-10-09T22:12:16.972826+00:00",
+      "actor": "Codex",
+      "action": "source-reconciliation",
+      "note": "Nine isolated model/SDK/leaf additions; preserved full phase scope and prior evidence.",
+      "previousSourceHashes": {
+        "phases.json": "5bb9037937a00621214ad58873c368fdc55b2f8c3722653c97432efa8031a82a",
+        "verification-matrix.json": "516813fd034d6c73b4b0d6f9eaaf4b1b54798828e137336324605d0b956085bc",
+        "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
+        "component-inventory.json": "f5641f7553e746d695f042a937e8c8399f9dd69c7dad10eb6f90162e80dab0d9",
+        "component-audit-hub.json": "3b35ead4eaa32202dd6d5106bc9d30424b9ec9115c9b7512b46b818ff4f64844",
         "component-audit-harness.json": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08",
         "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
         "component-audit-repository.json": "39001427bd59e2b0bf45ad6b953a4221c0edf9cdbaaf541179317775e0d29a6f"

@@ -7,6 +7,8 @@
       "name": "Protocol names and local addresses",
       "files": [
         "contracts/v1/README.md",
+        "contracts/v1/models/README.md",
+        "contracts/v1/models/state-machines.json",
         "contracts/v1/registry.json",
         "contracts/v1/schemas/cancellation-request.schema.json",
         "contracts/v1/schemas/common.schema.json",
@@ -110,6 +112,16 @@
             "contracts/v1/schemas/task-reserve.schema.json"
           ],
           "note": "Preserve legacy behavior, assertions and qualification phases. SDK files remain HUB-26-owned conformance primitives; no production runtime path is replaced."
+        },
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "scope": "P01 pure state model oracles and isolated two-broker leaf fixture",
+          "addedFiles": [
+            "contracts/v1/models/README.md",
+            "contracts/v1/models/state-machines.json"
+          ],
+          "note": "Preserve five P00 tables/68 edges, add explicit cancellation context and test missing guard/role/revision rejection. Leaf fixture does not replace production federation or final bilateral acceptance."
         }
       ]
     },
@@ -1585,16 +1597,20 @@
         "sdk/python/agentmux_contracts/__init__.py",
         "sdk/python/agentmux_contracts/__main__.py",
         "sdk/python/agentmux_contracts/attestation.py",
+        "sdk/python/agentmux_contracts/state_models.py",
         "sdk/python/agentmux_contracts/validation.py",
         "sdk/python/agentmux_contracts/wire.py",
         "sdk/python/pyproject.toml",
         "sdk/python/requirements.lock",
         "sdk/python/tests/test_contracts.py",
+        "sdk/python/tests/test_state_models.py",
         "sdk/typescript/README.md",
         "sdk/typescript/package-lock.json",
         "sdk/typescript/package.json",
         "sdk/typescript/src/cli.ts",
         "sdk/typescript/src/index.ts",
+        "sdk/typescript/src/state-models.test.ts",
+        "sdk/typescript/src/state-models.ts",
         "sdk/typescript/src/test.ts",
         "sdk/typescript/test-examples.json",
         "sdk/typescript/tsconfig.json",
@@ -1603,9 +1619,12 @@
         "tests/contracts/test_conformance.py",
         "tests/contracts/test_payloads.py",
         "tests/contracts/test_semantics.py",
+        "tests/contracts/test_state_models.py",
         "tests/contracts/vectors/payload-examples.json",
         "tests/contracts/vectors/semantic-examples.json",
         "tests/contracts/vectors/valid-examples.json",
+        "tests/leaf/README.md",
+        "tests/leaf/run.py",
         "tests/storage/README.md",
         "tests/storage/python_client.py",
         "tests/storage/run.py",
@@ -1750,6 +1769,21 @@
             "tests/storage/typescript/tsconfig.json"
           ],
           "note": "Preserve legacy behavior, assertions and qualification phases. SDK files remain HUB-26-owned conformance primitives; no production runtime path is replaced."
+        },
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "scope": "P01 pure state model oracles and isolated two-broker leaf fixture",
+          "addedFiles": [
+            "sdk/python/agentmux_contracts/state_models.py",
+            "sdk/python/tests/test_state_models.py",
+            "sdk/typescript/src/state-models.test.ts",
+            "sdk/typescript/src/state-models.ts",
+            "tests/contracts/test_state_models.py",
+            "tests/leaf/README.md",
+            "tests/leaf/run.py"
+          ],
+          "note": "Preserve five P00 tables/68 edges, add explicit cancellation context and test missing guard/role/revision rejection. Leaf fixture does not replace production federation or final bilateral acceptance."
         }
       ]
     }

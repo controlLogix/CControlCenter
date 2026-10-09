@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "test": "node --test dist/test.js"
+    "test": "node --test dist/test.js dist/state-models.test.js"
   },
   "dependencies": {
     "ajv": "8.20.0",

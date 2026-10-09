@@ -4,6 +4,7 @@ import {resolve} from 'node:path';
 import {visit} from 'jsonc-parser';
 import canonicalize from 'canonicalize';
 import {Ajv2020} from 'ajv/dist/2020.js';
+export {evaluateTransition} from './state-models.js';
 
 export class ContractError extends Error {
   constructor(public readonly code: string) { super(code); }

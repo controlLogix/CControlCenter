@@ -2,7 +2,7 @@
 
 **Status: static inventory checked during P00; full baseline/candidate qualification remains open.** The [live task board](implementation-status.md) records current work. The [P00 preflight](delivery/evidence/P00/preflight.md) and [baseline defect reconciliation](delivery/evidence/P00/baseline-findings.md) distinguish executed focused tests, retained historical results and missing environments. No phase acceptance is implied.
 
-ADD-01 accounts for **338 baseline files**, **59 additional governed files**, **93 components**, and **198 behavior checks**. The [exact inventory](component-inventory.json) pins file ownership and Git blob identities. The [source surface index](source-surface-index.json) lists code declarations and literal HTTP paths for review. File coverage does not prove runtime correctness or complete behavioral coverage.
+ADD-01 accounts for **338 baseline files**, **68 additional governed files**, **93 components**, and **198 behavior checks**. The [exact inventory](component-inventory.json) pins file ownership and Git blob identities. The [source surface index](source-surface-index.json) lists code declarations and literal HTTP paths for review. File coverage does not prove runtime correctness or complete behavioral coverage.
 
 ## Required preservation rule
 
@@ -4091,3 +4091,13 @@ The SDK checks now reject inconsistent manifest dependencies, protected membersh
 The isolated storage clients exercise real conditional JetStream appends, complete owner records, retained-operation reconciliation and same-stream atomic batches. Their harness uses disposable authenticated local brokers and retains missing/failure outcomes. The pinned storage report records executed results and limits; this inventory is not a pass attestation. The fixtures do not replace existing SQLite/NATS runtime owners, claim cross-stream transactions, or qualify multi-host durability, production admission or full migration recovery.
 
 Added tests retain the earlier conformance vectors and legacy assertions. No command, dashboard control, state table or supported integration is removed. Phase evidence must still establish preservation and added capability before any existing entry point changes.
+
+## P01 state models and leaf recovery fixtures
+
+HUB-01 owns the promoted five model tables and their 68 unchanged transitions. HUB-26 owns the independent Python/TypeScript pure evaluators, unit tests, shared transition histories and isolated two-broker leaf fixture. Every new path is assigned in the file inventory, and the source index retains prior declarations and hashes. Original components, baseline blobs and behavior checks are unchanged.
+
+Pure evaluation binds a fixture-owned snapshot, revision, actor role and nonempty evidence references to an exact model edge. Cancellation remains pending through uncertain execution and rejects terminal/resume shortcuts; only confirmed cancellation clears the pending flag. The evaluator does not authenticate supplied evidence, persist a transition or establish live worker behavior. Shared tests compare the immutable P00 tables and ordered cancellation histories rather than treating generated values as proof.
+
+The leaf fixture uses separate private owner accounts, restricted link accounts, independent file-backed JetStream domains and local process restarts. It exercises a lost acceptance acknowledgment, reserved offline work, retained result return and origin-owned acceptance. Its real broker permission checks are distinct from fixture-owned task and scope decisions. Native platform, TLS/enrollment, production federation, replica durability and final bilateral acceptance remain separate requirements. Existing federation commands, plugins and stores are untouched.
+
+These additions improve executable contract and recovery evidence without removing any legacy capability. Passing fixture results remain source-bound in their evidence reports; they do not attest a complete P01 gate or later-phase preservation.

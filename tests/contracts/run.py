@@ -52,6 +52,9 @@ def hashes():
     for directory in ('contracts/v1', 'sdk/python', 'sdk/typescript', 'tests/contracts'):
         paths.extend(p for p in (ROOT / directory).rglob('*') if p.is_file() and p.suffix in ('.py', '.ts', '.json', '.toml', '.lock')
                      and not set(p.relative_to(ROOT).parts) & {'node_modules', 'dist', '__pycache__'})
+    # The model suite compares against the accepted draft, not the promoted table alone.
+    draft = ROOT / 'docs/planning/2026-10-09/delivery/contracts'
+    paths.extend(draft / name for name in ('state-machines.json', 'model-examples.json'))
     return {str(p.relative_to(ROOT)).replace('\\', '/'): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(paths)}
 
 
@@ -133,7 +136,7 @@ def main():
     parser.add_argument('--evidence', type=Path)
     parser.add_argument('--match', help='Run test names containing this text; partial evidence stays labeled.')
     args = parser.parse_args()
-    saved = {key: os.environ.get(key) for key in ('AGENTMUX_CONTRACT_SOURCE_ROOT', 'AGENTMUX_SCHEMA_DIR')}
+    saved = {key: os.environ.get(key) for key in ('AGENTMUX_CONTRACT_SOURCE_ROOT', 'AGENTMUX_SCHEMA_DIR', 'AGENTMUX_STATE_MODELS')}
     try:
         with tempfile.TemporaryDirectory(prefix='agentmux-contract-inputs-') as directory:
             mirror = Path(directory)
@@ -144,6 +147,7 @@ def main():
                 raise RuntimeError('Native fixture source copy does not match the repository')
             os.environ['AGENTMUX_CONTRACT_SOURCE_ROOT'] = str(mirror)
             os.environ['AGENTMUX_SCHEMA_DIR'] = str(mirror / 'contracts/v1/schemas')
+            os.environ['AGENTMUX_STATE_MODELS'] = str(mirror / 'contracts/v1/models/state-machines.json')
             return run(args, mirror, copied)
     finally:
         for key, value in saved.items():

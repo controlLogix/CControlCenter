@@ -1,0 +1,25 @@
+{
+  "recordedAt": "2026-10-09T22:04:10.507120+00:00",
+  "sourceHashes": {
+    "hub/requirements.lock": "3ed79db16ab9b01c1c4f1b2b99443b8952579abd8a85fd38e60aff8c1baa2420",
+    "tests/leaf/README.md": "a4204da1c7ecb374f574f880fcc56cd9d985a576fc489796f8aa1587040a5810",
+    "tests/leaf/run.py": "13885a90d5dab258d22e2484469772d0e6b2310113638e9e4dc051dc04731013"
+  },
+  "sourceUnchangedDuringRun": true,
+  "mutation": "Only generated ORIGIN leaf user permissions widened to publish/subscribe > inside an owned temporary fixture.",
+  "expectedFailure": "leaf credentials carried unrelated subject",
+  "observedFailure": "leaf credentials carried unrelated subject",
+  "failedCase": "leaf_credentials_filter_both_directions_independently_of_client_permissions",
+  "precedingPassedCases": [
+    {
+      "name": "authenticated_leaf_transfers_scoped_command",
+      "status": "passed"
+    }
+  ],
+  "regressionDetected": true,
+  "cleanupComplete": true,
+  "brokerSha256": "387ce54e7a0a249d877a579ed641d715bab047d7e061bfa42b4d07f6a0401341",
+  "limits": [
+    "Negative test proves existing subject-isolation assertion detects widened leaf permissions; no production source or user configuration changed."
+  ]
+}

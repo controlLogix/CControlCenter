@@ -4,12 +4,14 @@ import json
 import sys
 
 from . import (ContractError, canonical_bytes, payload_digest, sign_claims,
-               strict_loads, validate, validate_payload, verify_attestation, verify_envelope)
+               strict_loads, validate, validate_payload, verify_attestation, verify_envelope, evaluate_transition)
 from .wire import MAX_BYTES
 
 
 def request(value):
     op = value["op"]
+    if op == "evaluateTransition":
+        return evaluate_transition(value["request"])
     if op == "parse":
         return strict_loads(value["raw"])
     if op == "canonical":

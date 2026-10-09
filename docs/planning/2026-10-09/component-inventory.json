@@ -431,6 +431,20 @@
       ]
     },
     {
+      "path": "contracts/v1/models/README.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/models/state-machines.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
       "path": "contracts/v1/registry.json",
       "baselineBlob": null,
       "componentIds": [
@@ -2489,6 +2503,13 @@
       ]
     },
     {
+      "path": "sdk/python/agentmux_contracts/state_models.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
       "path": "sdk/python/agentmux_contracts/validation.py",
       "baselineBlob": null,
       "componentIds": [
@@ -2524,6 +2545,13 @@
       ]
     },
     {
+      "path": "sdk/python/tests/test_state_models.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
       "path": "sdk/typescript/README.md",
       "baselineBlob": null,
       "componentIds": [
@@ -2553,6 +2581,20 @@
     },
     {
       "path": "sdk/typescript/src/index.ts",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/typescript/src/state-models.test.ts",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "sdk/typescript/src/state-models.ts",
       "baselineBlob": null,
       "componentIds": [
         "HUB-26"
@@ -2721,6 +2763,13 @@
       ]
     },
     {
+      "path": "tests/contracts/test_state_models.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
       "path": "tests/contracts/vectors/payload-examples.json",
       "baselineBlob": null,
       "componentIds": [
@@ -2736,6 +2785,20 @@
     },
     {
       "path": "tests/contracts/vectors/valid-examples.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/leaf/README.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/leaf/run.py",
       "baselineBlob": null,
       "componentIds": [
         "HUB-26"
@@ -2874,6 +2937,23 @@
         "tests/storage/typescript/tsconfig.json"
       ],
       "note": "All 338 original baseline blobs and 198 existing behavior checks retained. These additions provide bounded fixture evidence, not complete phase or legacy migration acceptance."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "P01 state semantics and two-hub leaf recovery fixture",
+      "addedFiles": [
+        "contracts/v1/models/README.md",
+        "contracts/v1/models/state-machines.json",
+        "sdk/python/agentmux_contracts/state_models.py",
+        "sdk/python/tests/test_state_models.py",
+        "sdk/typescript/src/state-models.test.ts",
+        "sdk/typescript/src/state-models.ts",
+        "tests/contracts/test_state_models.py",
+        "tests/leaf/README.md",
+        "tests/leaf/run.py"
+      ],
+      "note": "Baseline and behavior-check counts unchanged; additions are bounded executable evidence, not phase acceptance."
     }
   ]
 }

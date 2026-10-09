@@ -379,3 +379,43 @@ sequenceDiagram
 ```
 
 The same harness stages and commits same-stream atomic batches. A staging reply alone is insufficient. Sequence gaps, stale conditions, an intervening ordinary write and cross-stream attempts must not leave partial batches. An uncommitted batch remains absent after graceful restart. The executed [storage report](../docs/planning/2026-10-09/delivery/evidence/P01/storage-result.json) identifies exact sources/builds and exclusions: native macOS, R3 availability, power loss, production permissions and external-effect execution are not qualified here. Phase acceptance is not implied by this diagram.
+
+## P01 model oracle and scoped leaf qualification
+
+The PLAN-08 model oracle proposes transitions from trusted fixture observations. It does not authenticate evidence or commit state. The separate leaf fixture qualifies PLAN-07/10/11/13 primitives using real brokers and a narrow fixture protocol, not the production plugin runtime.
+
+```mermaid
+flowchart LR
+  Tables["Five versioned tables / 68 edges"] --> Python["Python transition evaluator"]
+  Tables --> TS["TypeScript transition evaluator"]
+  Snapshot["Owner state, revision and pending cancellation"] --> Python
+  Snapshot --> TS
+  Evidence["Supplied authority and guard references"] --> Python
+  Evidence --> TS
+  Python --> Candidate["Candidate next state; no persistence or execution"]
+  TS --> Candidate
+```
+
+```mermaid
+sequenceDiagram
+  participant O as Origin fixture owner / private ledger
+  participant A as Origin scoped federation account
+  participant B as Receiver scoped federation account
+  participant R as Receiver fixture owner / private ledger
+  O->>O: Commit reservation and stable offer identity
+  O->>A: Scoped offer
+  A->>B: Restricted authenticated leaf
+  B->>R: Offer
+  R->>R: Commit accepted reservation
+  R--xO: Acceptance observation deliberately lost
+  Note over O,R: Origin stops; receiver retains reservation and hashes read-only input
+  R->>R: Commit result; restart receiver
+  Note over O,R: Origin restarts; independent ledgers retain different owner states
+  O->>A: Reconcile same operation / digest
+  A->>B: Restored leaf
+  B->>R: Lookup retained acceptance
+  R-->>O: Same acceptance and retained result; no second execution
+  O->>O: Verify fixture result and record origin acceptance
+```
+
+Unrelated accounts cannot observe linked traffic. Bridge credentials cannot access private owner storage or origin acceptance subjects. A negative test widens only generated leaf credentials and confirms that the isolation assertion fails on unrelated traffic. These tests do not qualify real ingress signatures, dynamic grants, cross-host transport security or the final bilateral release demonstration.

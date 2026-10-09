@@ -1,4 +1,4 @@
-import {ContractError,strictLoads,canonicalBytes,payloadDigest,signClaims,verifyAttestation,verifyEnvelope,validate,validatePayload} from './index.js';
+import {ContractError,strictLoads,canonicalBytes,payloadDigest,signClaims,verifyAttestation,verifyEnvelope,validate,validatePayload,evaluateTransition} from './index.js';
 
 function hex(raw:unknown):Buffer {
   if(typeof raw!=='string' || !/^[0-9a-fA-F]{64}$/.test(raw)) throw new ContractError('invalid_key');
@@ -15,6 +15,7 @@ function request(raw:Buffer):object {
       case 'verify':result=verifyAttestation(r.attestation,hex(r.publicKeyHex),r.expectedAudience,r.now,r.payload);break;
       case 'verifyEnvelope':result=verifyEnvelope(r.envelope,hex(r.publicKeyHex),r.expectedAudience,r.now);break;
       case 'validatePayload':result=validatePayload(r.envelope);break;
+      case 'evaluateTransition':result=evaluateTransition(r.request);break;
       case 'validate':result=validate(r.schema,r.value);break;
       default:throw new ContractError('unknown_operation');
     }
