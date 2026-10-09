@@ -1572,6 +1572,13 @@
       ]
     },
     {
+      "path": "docs/LOCAL_TESTING.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "REPO-07"
+      ]
+    },
+    {
       "path": "docs/PROTOCOL.md",
       "baselineBlob": "d7ace494a7c3f5f66612dd8e0bc1a5b4af006d48",
       "componentIds": [
@@ -2083,6 +2090,20 @@
       ]
     },
     {
+      "path": "hub/tests/local.ps1",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "hub/tests/run_local.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
       "path": "hub/tests/test_fed_live.py",
       "baselineBlob": "6f91fc97f788b5e2fc4de3fd84c9730e587eb44b",
       "componentIds": [
@@ -2106,6 +2127,13 @@
     {
       "path": "hub/tests/test_hub_offline.py",
       "baselineBlob": "4468ba015aec4fa7d82f6eab95b24e246d9af045",
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "hub/tests/test_local_runner.py",
+      "baselineBlob": null,
       "componentIds": [
         "HUB-26"
       ]

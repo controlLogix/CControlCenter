@@ -12,6 +12,8 @@ Preserve technical meaning and exact code, commands, identifiers, schemas, and s
 
 ## Platform Rearchitecture Branch and Merge Gate
 
+Follow [the local testing workflow](docs/LOCAL_TESTING.md): focused fail-fast tests while editing, failed-test reruns while fixing, then affected integration suites and required phase verification on the stable candidate. Reuse prepared dependencies and disposable fixtures. Do not rerun unrelated full suites or rebuild presentations after each edit. A fast pass never substitutes for phase acceptance.
+
 All planning and implementation work stays on `feat/agentmux-platform-rearchitecture`. Do not merge, squash, cherry-pick or otherwise transfer it into `main` or another integration or release branch until MERGE-01 in [the implementation plan](docs/planning/2026-10-09/implementation-plan.md) is satisfied. Do not enable automatic merging.
 
 Before merging, the entire approved plan must be functional and its required phase acceptance and verification checks must pass. Ryan and Nick must connect their own real instances, each successfully delegate a simple, non-destructive orchestration to the other, and review the recorded execution and acceptance evidence together. A local simulation or worker completion alone is insufficient. Ryan must then explicitly authorize the merge. No phase pass, commit, push or earlier plan approval substitutes for this final approval.

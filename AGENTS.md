@@ -14,6 +14,10 @@ Always use plain English for human-readable chat responses and generated content
 
 Preserve technical meaning and exact code, commands, identifiers, schemas, and source quotations. Apply the same rules to delegated work. Use the language the user requests while keeping the writing clear.
 
+## Local test iteration
+
+Follow [the local testing workflow](docs/LOCAL_TESTING.md). During debugging, use an explicit test or `hub/tests/local.ps1` (WSL) / `python -m hub.tests.run_local` (Linux/macOS). Rerun failures before broadening the selection. Run affected integration suites and required phase checks on the stable candidate; a fast pass never substitutes for them. Reuse prepared local dependencies, preserve disposable fixtures, and avoid unrelated full-suite runs or presentation rebuilds during each edit.
+
 ## Platform Rearchitecture Branch and Review
 
 All work for the platform rearchitecture, including the plugin framework, NATS hub federation, Jev integration, and related skills, belongs on `feat/agentmux-platform-rearchitecture`.

@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, evidence-backed six-finding baseline repair review, 2026-10-09; phase and MERGE-01 gates remain open",
-  "sourceDigest": "cbb80f7b63b073f30c48955f38bc75d8c452137df91b201ca02a931aee5f2b0f",
+  "reviewer": "Codex, scoped local test-loop review, 2026-10-09; phase and MERGE-01 gates remain open",
+  "sourceDigest": "073ee657a73adbcaa9aa9978214b97080dc99de51e9f387ef9f6414103e9cd10",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -194,6 +194,24 @@
         ".github/workflows/tests.yml"
       ],
       "rationale": "Reviewed runtime transaction/authorization boundaries, v3 upgrade isolation and backup publication; reproduced old-source failures and verified repaired source. Preserved original finding and rule history, registered changed pattern behavior and diagrams, retained every future phase criterion and scenario, and updated source/component coverage. The HTML is rebuilt only to embed the current plan. No adoption reset, legacy debt reclassification, phase promotion, merge or full-product acceptance is claimed."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "previousReviewer": "Codex, evidence-backed six-finding baseline repair review, 2026-10-09; phase and MERGE-01 gates remain open",
+      "previousSourceDigest": "cbb80f7b63b073f30c48955f38bc75d8c452137df91b201ca02a931aee5f2b0f",
+      "scope": "User-requested faster local test/debug/fix loop",
+      "evidence": [
+        "hub/tests/run_local.py",
+        "hub/tests/local.ps1",
+        "hub/tests/test_local_runner.py",
+        "docs/LOCAL_TESTING.md",
+        "docs/planning/2026-10-09/local-test-runner-evidence.json",
+        "AGENTS.md",
+        "CLAUDE.md",
+        ".github/workflows/tests.yml"
+      ],
+      "rationale": "Added a small unittest entry point and WSL launcher, explicit profiles, fail-fast focused runs, failed/incomplete selection retries, local evidence and timings. Verified subtest and setup failures, import-error retries, skips and empty selections. Full hub profile passed 124 tests; after a retry-metadata correction the final fast profile passed 44 and a focused regression passed. Product runtime and existing test assertions are unchanged. This adds test-support code, not a new product architecture or design pattern; existing diagrams remain accurate. Component ownership is updated, and phase/full-platform acceptance remains separate. Prepared tools are reused, while mutable fixture data remains isolated."
     }
   ],
   "rules": {
@@ -244,12 +262,14 @@
     },
     "DP005": {
       "status": "pass",
-      "rationale": "For the exact changed runtime/test source hashes recorded in evidence, 119 hub tests passed without skips on Ubuntu WSL / Python 3.14.4 using NATS Server and nsc 2.15.0 and the repository dependency lock. Nine selected dashboard tests and dashboard syntax checks passed. Against an isolated archive of 5ee428b, nine focused regressions fail with 13 failed assertions/subtests and one concurrent-backup error. The invariant assertions are unchanged; only the unavailable new offer-digest fixture helper is omitted on old source. The new offline suite is added to CI. Full dashboard/tmux, native macOS, actual AI workers, R3 and real Ryan/Nick qualification were not run in this repair pass; historical results remain separately attributed.",
+      "rationale": "For the exact changed runtime/test source hashes recorded in evidence, 119 hub tests passed without skips on Ubuntu WSL / Python 3.14.4 using NATS Server and nsc 2.15.0 and the repository dependency lock. Nine selected dashboard tests and dashboard syntax checks passed. Against an isolated archive of 5ee428b, nine focused regressions fail with 13 failed assertions/subtests and one concurrent-backup error. The invariant assertions are unchanged; only the unavailable new offer-digest fixture helper is omitted on old source. The new offline suite is added to CI. Full dashboard/tmux, native macOS, actual AI workers, R3 and real Ryan/Nick qualification were not run in this repair pass; historical results remain separately attributed. The subsequent local-runner verification is recorded separately: full 124 tests, then final fast 44 tests and one focused test after the final retry-metadata correction. No product runtime or existing assertion changed.",
       "evidence": [
         "hub/tests/test_governance.py",
         "hub/tests/test_fed_live.py",
         ".github/workflows/tests.yml",
-        "docs/planning/2026-10-09/governance-repair-evidence.json"
+        "docs/planning/2026-10-09/governance-repair-evidence.json",
+        "hub/tests/test_local_runner.py",
+        "docs/planning/2026-10-09/local-test-runner-evidence.json"
       ]
     },
     "DP006": {

@@ -285,7 +285,8 @@
       "files": [
         "docs/PROTOCOL.md",
         "docs/FEDERATION.md",
-        "docs/TRANSPORT.md"
+        "docs/TRANSPORT.md",
+        "docs/LOCAL_TESTING.md"
       ],
       "role": "configuration",
       "baselineGroups": [
@@ -321,7 +322,15 @@
       "migrationChecks": [
         "Keep prior behavior and topology decisions attributed to their version; publish mixed-version compatibility limits."
       ],
-      "limitations": []
+      "limitations": [],
+      "incrementalReviews": [
+        {
+          "date": "2026-10-09",
+          "scope": "User-requested faster local test iteration",
+          "change": "Added focused, fast, offline, live and full hub selections; failed-test reruns; local timing and source-hash reports; WSL launcher reuses prepared tools. Existing assertions and phase gates are preserved.",
+          "evidence": "docs/LOCAL_TESTING.md"
+        }
+      ]
     },
     {
       "id": "REPO-08",

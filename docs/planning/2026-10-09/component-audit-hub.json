@@ -1520,7 +1520,10 @@
         "hub/tests/test_nats_federation.py",
         "hub/tests/test_fed_unit.py",
         "hub/tests/test_fed_live.py",
-        "hub/tests/test_governance.py"
+        "hub/tests/test_governance.py",
+        "hub/tests/run_local.py",
+        "hub/tests/local.ps1",
+        "hub/tests/test_local_runner.py"
       ],
       "role": "test-support",
       "baselineGroups": [
@@ -1550,7 +1553,8 @@
             "hub/tests/test_nats_federation.py",
             "hub/tests/test_fed_unit.py",
             "hub/tests/test_fed_live.py",
-            "hub/tests/test_governance.py"
+            "hub/tests/test_governance.py",
+            "hub/tests/test_local_runner.py"
           ],
           "requiredEnvironment": "Pinned Python and SQLite with FTS5 on native macOS/Linux and Linux filesystems in WSL; isolated temporary homes. Bash; real NATS/nsc/nats-py/Git for broker suites; disposable kind only when requested.",
           "baselineStatus": "not-run",
@@ -1564,7 +1568,8 @@
             "hub/tests/test_nats_federation.py",
             "hub/tests/test_fed_unit.py",
             "hub/tests/test_fed_live.py",
-            "hub/tests/test_governance.py"
+            "hub/tests/test_governance.py",
+            "hub/tests/test_local_runner.py"
           ],
           "requiredEnvironment": "P01 verification harness plus each component's target environment.",
           "baselineStatus": "not-run",
@@ -1574,7 +1579,8 @@
           "id": "HUB-26-C03",
           "description": "Check fixture isolation, cleanup, account boundaries and repeatability; a skipped broker suite cannot satisfy a phase's live gate.",
           "existingTests": [
-            "hub/tests/test_governance.py"
+            "hub/tests/test_governance.py",
+            "hub/tests/test_local_runner.py"
           ],
           "requiredEnvironment": "P01 harness validation in disposable local and cluster test installations.",
           "baselineStatus": "not-run",
@@ -1598,6 +1604,12 @@
           "change": "Added test_governance.py for all six findings, plus real NATS tests in test_fed_live.py. Original invariant assertions are retained; the approval test now waits for the explicitly required grant before claiming.",
           "evidence": "docs/planning/2026-10-09/governance-repairs.md",
           "targetPhaseStatus": "not-qualified-by-this-incremental-repair"
+        },
+        {
+          "date": "2026-10-09",
+          "scope": "User-requested faster local test iteration",
+          "change": "Added focused, fast, offline, live and full hub selections; failed-test reruns; local timing and source-hash reports; WSL launcher reuses prepared tools. Existing assertions and phase gates are preserved.",
+          "evidence": "docs/LOCAL_TESTING.md"
         }
       ]
     }
