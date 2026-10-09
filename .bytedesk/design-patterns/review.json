@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, P01 lifecycle and leaf fixture checkpoint review, 2026-10-09; P01 gate remains open",
-  "sourceDigest": "dfb4afef23f3106a2da65f7271ce23c5263414edc4f7365c2d044f8601ff3485",
+  "reviewer": "Codex, P01 recovery and CI checkpoint review, 2026-10-09; native evidence and phase gate remain open",
+  "sourceDigest": "2290b5e3f3be10fd517f624af5182e6b5bffdf384d476eb1b230d62d7904b166",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -378,6 +378,23 @@
         ".context/design-patterns-diagrams.md"
       ],
       "rationale": "Reviewed the five promoted tables with 68 preserved transitions, both independent evaluators, explicit owner/revision/evidence bindings and cancellation persistence. Closed the uncertain-terminal cancellation gap without deleting historical edges. Independent review found integer and Unicode length/blank-set differences; shared boundary fixtures now verify the fixes. Full conformance passes 29 tests and 1,452 subtests with exact source/build/mirror binding, 17 Python unit tests and 13 TypeScript unit tests pass. Real independent broker ledgers and restricted leaf accounts pass 11 recovery and isolation checks; deliberately broadening temporary leaf credentials triggers the isolation assertion. Reviewed cleanup and secret-free reporting. Leaf protocol remains a bounded fixture and does not claim promoted signed-envelope integration or production authority. All 33 retained P00 source hashes match. Inventory retains 338 baseline files, 93 components and 198 checks; 22 tracker tests pass. Pattern history preserved; no phase transition, production migration or merge authorized."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "P01 recovery histories, signed leaf owner binding and native CI qualification",
+      "previousReviewer": "Codex, P01 lifecycle and leaf fixture checkpoint review, 2026-10-09; P01 gate remains open",
+      "previousSourceDigest": "dfb4afef23f3106a2da65f7271ce23c5263414edc4f7365c2d044f8601ff3485",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-conformance-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/signed-leaf-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/baseline-full-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/regression-replacement-review.md",
+        ".context/design-patterns.md",
+        ".context/design-patterns-diagrams.md"
+      ],
+      "rationale": "Reviewed independent digest/evaluator agreement, replay identity, current fixture authorization and cancellation recovery. All 35 conformance tests pass. Signed two-broker integration passes 19 cases after review fixes for decision and result owner binding; malformed, expired and validly signed mismatches fail before mutation. Original leaf/storage assertions are unchanged; their report-path-only edits permit fresh external CI evidence. AST comparison excluding REPORT confirms no other executable change in either runner. Existing 125 hub tests pass. Regression manifest is independently derived from accepted Git blobs, explicit replacements bind exact files and removed assertions are rejected. Existing pattern statuses and history remain intact. Native CI execution remains pending; fixture logic is not production authority, enrollment or final bilateral proof. No phase transition or merge authorized."
     }
   ],
   "rules": {

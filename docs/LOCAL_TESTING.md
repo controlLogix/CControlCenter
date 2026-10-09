@@ -33,7 +33,7 @@ On macOS/Linux or inside WSL, use the same arguments with `python -m hub.tests.r
 | `live` | Broker, subjects, identity, delivery, reconnection or work protocol changes | Existing Core NATS and JWT federation suites using disposable brokers and hubs |
 | `full` | Stable hub candidate before its verification handoff | Every existing hub suite plus runner checks; all tests run even after failures |
 
-These profiles select tests; they do not weaken assertions, shorten correctness timeouts or replace live checks with mocks. A full hub run is only one part of a phase gate. Dashboard, harness, platform and Ryan/Nick acceptance requirements remain separate. Use existing targeted dashboard tests for dashboard edits, and `dashboard/run_tests.sh` when that component's full environment is needed. Preserve its lock and isolated server behavior; do not parallelize its shared tmux fixtures.
+These profiles select tests; they do not weaken assertions, shorten correctness timeouts or replace live checks with mocks. A full hub run is only one part of a phase gate. Dashboard, harness, platform and autonomous final hub acceptance requirements remain separate. Codex reviews delivery evidence; Ryan and Nick are not required for phase advancement. Use existing targeted dashboard tests for dashboard edits, and `dashboard/run_tests.sh` when that component's full environment is needed. Preserve its lock and isolated server behavior; do not parallelize its shared tmux fixtures.
 
 ## Environment and evidence
 

@@ -24,7 +24,7 @@ CACHE = Path.home() / '.cache/agentmux-governance'
 SERVER = Path(os.environ.get('AGENTMUX_STORAGE_SERVER', str(CACHE / 'tools/nats-server')))
 TS = Path(os.environ.get('AGENTMUX_STORAGE_TS_CLIENT', str(CACHE / 'typescript-storage/dist/client.js')))
 NODE = os.environ.get('AGENTMUX_STORAGE_NODE', 'node')
-REPORT = ROOT / 'docs/planning/2026-10-09/delivery/evidence/P01/storage-result.json'
+REPORT = Path(os.environ.get('AGENTMUX_EVIDENCE_DIR', str(ROOT / 'docs/planning/2026-10-09/delivery/evidence/P01'))) / 'storage-result.json'
 
 
 def require(condition, message):

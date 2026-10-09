@@ -729,19 +729,24 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Message Bus",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageBus.html",
       "referenceDepth": "full-public-reference",
-      "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01–P12. Implementation locations will be recorded when implemented. P00 proposes NATS for every inter-plugin exchange across the fixed protected assembly and ordinary scoped accounts. A bounded three-language request/reply spike proves client interoperability only; it does not qualify lifecycle, security or persistence. See delivery/spikes/runtime/comparison-result.json. This is a recommendation pending P00 review. A P01 fixture now links two independently stored NATS domains through dedicated federation accounts and restricted leaf credentials. Actual commands and observations traverse only the approved subjects; unrelated account and subject traffic is denied. This qualifies static broker boundaries on loopback, not production enrollment, TLS or dynamic trust agreements.",
+      "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01–P12. Implementation locations will be recorded when implemented. P00 proposes NATS for every inter-plugin exchange across the fixed protected assembly and ordinary scoped accounts. A bounded three-language request/reply spike proves client interoperability only; it does not qualify lifecycle, security or persistence. See delivery/spikes/runtime/comparison-result.json. This is a recommendation pending P00 review. A P01 fixture now links two independently stored NATS domains through dedicated federation accounts and restricted leaf credentials. Actual commands and observations traverse only the approved subjects; unrelated account and subject traffic is denied. This qualifies static broker boundaries on loopback, not production enrollment, TLS or dynamic trust agreements. The additional signed leaf fixture transports versioned delegation-offer, delegation-decision and execution-report envelopes through the same restricted NATS link. It checks byte preservation and receiving SDK admission before fixture owner mutation. Transport tests use real local brokers and fixed test trust; production hub connection management remains planned.",
       "why": "Accepted requirement mandates NATS locally and across connected systems.",
       "tradeoffs": "Direct local calls are simpler/faster but contradict scope; message contracts add latency, retry, schema and operational cost.",
       "locations": [
         {
           "path": "tests/leaf/run.py",
           "symbol": "Broker"
+        },
+        {
+          "path": "tests/leaf/signed_run.py",
+          "symbol": "transfer"
         }
       ],
       "verificationEvidence": [
         "docs/planning/2026-10-09/delivery/spikes/runtime/comparison-result.json",
         "docs/planning/2026-10-09/delivery/evidence/P01/leaf-result.json",
-        "docs/planning/2026-10-09/delivery/evidence/P01/leaf-denial-negative.json"
+        "docs/planning/2026-10-09/delivery/evidence/P01/leaf-denial-negative.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/signed-leaf-result.json"
       ],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
@@ -769,6 +774,25 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
               "docs/planning/2026-10-09/delivery/spikes/runtime/comparison-result.json"
             ]
           }
+        },
+        {
+          "date": "2026-10-09",
+          "reason": "P01 ordered recovery and signed leaf qualification; production scope and status are unchanged.",
+          "previous": {
+            "status": "planned",
+            "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01–P12. Implementation locations will be recorded when implemented. P00 proposes NATS for every inter-plugin exchange across the fixed protected assembly and ordinary scoped accounts. A bounded three-language request/reply spike proves client interoperability only; it does not qualify lifecycle, security or persistence. See delivery/spikes/runtime/comparison-result.json. This is a recommendation pending P00 review. A P01 fixture now links two independently stored NATS domains through dedicated federation accounts and restricted leaf credentials. Actual commands and observations traverse only the approved subjects; unrelated account and subject traffic is denied. This qualifies static broker boundaries on loopback, not production enrollment, TLS or dynamic trust agreements.",
+            "locations": [
+              {
+                "path": "tests/leaf/run.py",
+                "symbol": "Broker"
+              }
+            ],
+            "verificationEvidence": [
+              "docs/planning/2026-10-09/delivery/spikes/runtime/comparison-result.json",
+              "docs/planning/2026-10-09/delivery/evidence/P01/leaf-result.json",
+              "docs/planning/2026-10-09/delivery/evidence/P01/leaf-denial-negative.json"
+            ]
+          }
         }
       ]
     },
@@ -779,7 +803,7 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Canonical Data Model",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/CanonicalDataModel.html",
       "referenceDepth": "full-public-reference",
-      "how": "The separate contracts/v1 package defines closed versioned infrastructure and domain payload schemas. registry.json binds ten contract IDs to their major version, message kind, payload schema and destination service. Independent Python and TypeScript SDK validation checks those bindings, payload/context identity agreement and explicit semantic invariants for manifests, protected assembly, contexts, owner records and attestations. Full envelope verification validates the registered payload plus RFC 8785 payload bytes, Ed25519 claims, signed audience and every duplicated envelope field. The legacy runtime does not import this package. Enrolled-key resolution, live grants, authoritative domain state schemas and full plugin runtime integration remain separate obligations; validated structure and signatures do not authorize execution. P01 now also promotes five lifecycle tables with 68 unchanged edges. Independent Python and TypeScript pure evaluators bind owner snapshot, requested revision, actor evidence and required guard evidence before proposing the next state. Cancellation remains explicit through uncertain execution. These supplied fixture observations are not authenticated authority and the evaluator does not persist, deduplicate or execute work.",
+      "how": "The separate contracts/v1 package defines closed versioned infrastructure and domain payload schemas. registry.json binds ten contract IDs to their major version, message kind, payload schema and destination service. Independent Python and TypeScript SDK validation checks those bindings, payload/context identity agreement and explicit semantic invariants for manifests, protected assembly, contexts, owner records and attestations. Full envelope verification validates the registered payload plus RFC 8785 payload bytes, Ed25519 claims, signed audience and every duplicated envelope field. The legacy runtime does not import this package. Enrolled-key resolution, live grants, authoritative domain state schemas and full plugin runtime integration remain separate obligations; validated structure and signatures do not authorize execution. P01 now also promotes five lifecycle tables with 68 unchanged edges. Independent Python and TypeScript pure evaluators bind owner snapshot, requested revision, actor evidence and required guard evidence before proposing the next state. Cancellation remains explicit through uncertain execution. These supplied fixture observations are not authenticated authority and the evaluator does not persist, deduplicate or execute work. Ordered recovery fixtures compare full outputs and canonical digests from both SDKs. A separate signed leaf fixture signs offers with Python and decisions/results with TypeScript, then verifies them in the other SDK after transport. Fixture keys are resolved from an explicit issuer/key/revision map and time comes from a trusted test clock. Successful envelope verification still requires the fixture owner to match the retained reservation; five validly signed result mismatches test that separate boundary. Native CI invokes the same conformance harness and deliberately removes a required field from a copied positive fixture, requiring both SDK assertions to fail without changing repository fixtures.",
       "why": "Client/provider diversity must not obscure ownership or schema compatibility.",
       "tradeoffs": "Pairwise translation is simpler for two plugins; shared contracts require coordinated version evolution and independent conformance tests. Closed registration makes unsupported commands explicit, but every added domain operation needs a reviewed schema and mapping. Semantic invariants cannot all be expressed by JSON Schema and therefore require matching language implementations. Content-bound validator caches avoid repeated compilation while hashing current schema bytes prevents stale reuse; neither caches nor a supplied valid signature establish authority.",
       "locations": [
@@ -826,6 +850,18 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
         {
           "path": "sdk/typescript/src/state-models.ts",
           "symbol": "evaluateTransition"
+        },
+        {
+          "path": "tests/contracts/test_recovery.py",
+          "symbol": "FixtureOwner.both"
+        },
+        {
+          "path": "tests/leaf/signed_run.py",
+          "symbol": "Contracts.verify"
+        },
+        {
+          "path": "tests/contracts/ci.py",
+          "symbol": "negative_fixture"
         }
       ],
       "verificationEvidence": [
@@ -834,7 +870,9 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
         "sdk/typescript/src/test.ts",
         "tests/contracts/test_payloads.py",
         "tests/contracts/test_semantics.py",
-        "tests/contracts/test_state_models.py"
+        "tests/contracts/test_state_models.py",
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-conformance-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/signed-leaf-result.json"
       ],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
@@ -943,6 +981,68 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
               "tests/contracts/test_semantics.py"
             ]
           }
+        },
+        {
+          "date": "2026-10-09",
+          "reason": "P01 ordered recovery and signed leaf qualification; production scope and status are unchanged.",
+          "previous": {
+            "status": "applied",
+            "how": "The separate contracts/v1 package defines closed versioned infrastructure and domain payload schemas. registry.json binds ten contract IDs to their major version, message kind, payload schema and destination service. Independent Python and TypeScript SDK validation checks those bindings, payload/context identity agreement and explicit semantic invariants for manifests, protected assembly, contexts, owner records and attestations. Full envelope verification validates the registered payload plus RFC 8785 payload bytes, Ed25519 claims, signed audience and every duplicated envelope field. The legacy runtime does not import this package. Enrolled-key resolution, live grants, authoritative domain state schemas and full plugin runtime integration remain separate obligations; validated structure and signatures do not authorize execution. P01 now also promotes five lifecycle tables with 68 unchanged edges. Independent Python and TypeScript pure evaluators bind owner snapshot, requested revision, actor evidence and required guard evidence before proposing the next state. Cancellation remains explicit through uncertain execution. These supplied fixture observations are not authenticated authority and the evaluator does not persist, deduplicate or execute work.",
+            "locations": [
+              {
+                "path": "contracts/v1/schemas/message-envelope.schema.json",
+                "symbol": "message-envelope"
+              },
+              {
+                "path": "sdk/python/agentmux_contracts/wire.py",
+                "symbol": "canonical_bytes"
+              },
+              {
+                "path": "sdk/typescript/src/index.ts",
+                "symbol": "canonicalBytes"
+              },
+              {
+                "path": "contracts/v1/registry.json",
+                "symbol": "contracts"
+              },
+              {
+                "path": "sdk/python/agentmux_contracts/validation.py",
+                "symbol": "validate_payload"
+              },
+              {
+                "path": "sdk/python/agentmux_contracts/validation.py",
+                "symbol": "semantic_errors"
+              },
+              {
+                "path": "sdk/python/agentmux_contracts/attestation.py",
+                "symbol": "verify_envelope"
+              },
+              {
+                "path": "sdk/typescript/src/index.ts",
+                "symbol": "validatePayload"
+              },
+              {
+                "path": "sdk/typescript/src/index.ts",
+                "symbol": "verifyEnvelope"
+              },
+              {
+                "path": "sdk/python/agentmux_contracts/state_models.py",
+                "symbol": "evaluate_transition"
+              },
+              {
+                "path": "sdk/typescript/src/state-models.ts",
+                "symbol": "evaluateTransition"
+              }
+            ],
+            "verificationEvidence": [
+              "tests/contracts/test_conformance.py",
+              "sdk/python/tests/test_contracts.py",
+              "sdk/typescript/src/test.ts",
+              "tests/contracts/test_payloads.py",
+              "tests/contracts/test_semantics.py",
+              "tests/contracts/test_state_models.py"
+            ]
+          }
         }
       ]
     },
@@ -1025,7 +1125,7 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Idempotent Receiver",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/IdempotentReceiver.html",
       "referenceDepth": "full-public-reference",
-      "how": "Bind an operation ID, canonical payload hash and expected version to the durable NATS-owned outcome. Reconcile lost acknowledgments, reject changed-payload ID reuse, and retain outcomes/deletion markers across the agreed replay and restore horizon. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P10. Implementation locations will be recorded when implemented. P00 retains operation outcomes and payload digests beyond broker deduplication windows, with reconciliation-required on missing history. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. P01 Python and TypeScript fixture clients independently scan retained authoritative history to recover an older operation ID and matching digest after later writes, a gracefully restarted broker and expiry of its short deduplication window. They return the existing record without republishing, reject changed digests and report missing history as reconciliation-required. The lost-ack fixture deliberately omits the publisher reply inbox. Production duplicate admission, durable indexes and external-effect control remain planned; fixture reconciliation is not a deployed receiver or exactly-once execution promise. The P01 leaf fixture additionally returns retained acceptance for the same offer bytes and rejects a changed digest after disconnection and independent broker restarts. Its durable receiver record remains unchanged and execution count stays one. Fixture dispatch logic is bounded and does not implement the production receiver.",
+      "how": "Bind an operation ID, canonical payload hash and expected version to the durable NATS-owned outcome. Reconcile lost acknowledgments, reject changed-payload ID reuse, and retain outcomes/deletion markers across the agreed replay and restore horizon. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P10. Implementation locations will be recorded when implemented. P00 retains operation outcomes and payload digests beyond broker deduplication windows, with reconciliation-required on missing history. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. P01 Python and TypeScript fixture clients independently scan retained authoritative history to recover an older operation ID and matching digest after later writes, a gracefully restarted broker and expiry of its short deduplication window. They return the existing record without republishing, reject changed digests and report missing history as reconciliation-required. The lost-ack fixture deliberately omits the publisher reply inbox. Production duplicate admission, durable indexes and external-effect control remain planned; fixture reconciliation is not a deployed receiver or exactly-once execution promise. The P01 leaf fixture additionally returns retained acceptance for the same offer bytes and rejects a changed digest after disconnection and independent broker restarts. Its durable receiver record remains unchanged and execution count stays one. Fixture dispatch logic is bounded and does not implement the production receiver. Ordered recovery tests add an explicitly in-memory fixture owner. It checks current authorization and deadline before replay or lookup, binds operation identity to event, actor role and canonical input, returns an identical prior outcome and rejects changed input. A fresh authorized lookup may recover an outcome after the original command expires. Unknown transport outcome permits no automatic reassignment; only a fixture-owned before-dispatch observation produces unavailable. The signed leaf test separately retains the accepted decision before deliberately losing its publication, then reconciles the same signed operation/digest after graceful restarts without another execution. These are bounded recovery checks, not a production admission or grant service.",
       "why": "At-least-once delivery and uncertain replies must not create duplicate task attempts.",
       "tradeoffs": "Broker duplicate windows are simpler but insufficient for business ownership. Durable outcome records and conflict policy cost storage; external actions require their own idempotency or explicit unknown-outcome handling. The fixture scan is bounded to 10,000 retained records and is not a production indexing or retention strategy. Authoritative history costs storage; deterministic recovery requires preserving history or verified checkpoints, rather than interpreting absence as permission to re-execute.",
       "locations": [
@@ -1044,12 +1144,26 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
         {
           "path": "tests/leaf/run.py",
           "symbol": "exercise"
+        },
+        {
+          "path": "tests/contracts/test_recovery.py",
+          "symbol": "FixtureOwner.submit"
+        },
+        {
+          "path": "tests/contracts/test_recovery.py",
+          "symbol": "FixtureOwner.lookup"
+        },
+        {
+          "path": "tests/leaf/signed_run.py",
+          "symbol": "exercise"
         }
       ],
       "verificationEvidence": [
         "tests/storage/run.py",
         "docs/planning/2026-10-09/delivery/evidence/P01/storage-result.json",
-        "docs/planning/2026-10-09/delivery/evidence/P01/leaf-result.json"
+        "docs/planning/2026-10-09/delivery/evidence/P01/leaf-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-conformance-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/signed-leaf-result.json"
       ],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
@@ -1113,6 +1227,37 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
               "docs/planning/2026-10-09/delivery/evidence/P01/storage-result.json"
             ]
           }
+        },
+        {
+          "date": "2026-10-09",
+          "reason": "P01 ordered recovery and signed leaf qualification; production scope and status are unchanged.",
+          "previous": {
+            "status": "planned",
+            "how": "Bind an operation ID, canonical payload hash and expected version to the durable NATS-owned outcome. Reconcile lost acknowledgments, reject changed-payload ID reuse, and retain outcomes/deletion markers across the agreed replay and restore horizon. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P10. Implementation locations will be recorded when implemented. P00 retains operation outcomes and payload digests beyond broker deduplication windows, with reconciliation-required on missing history. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. P01 Python and TypeScript fixture clients independently scan retained authoritative history to recover an older operation ID and matching digest after later writes, a gracefully restarted broker and expiry of its short deduplication window. They return the existing record without republishing, reject changed digests and report missing history as reconciliation-required. The lost-ack fixture deliberately omits the publisher reply inbox. Production duplicate admission, durable indexes and external-effect control remain planned; fixture reconciliation is not a deployed receiver or exactly-once execution promise. The P01 leaf fixture additionally returns retained acceptance for the same offer bytes and rejects a changed digest after disconnection and independent broker restarts. Its durable receiver record remains unchanged and execution count stays one. Fixture dispatch logic is bounded and does not implement the production receiver.",
+            "locations": [
+              {
+                "path": "tests/storage/python_client.py",
+                "symbol": "perform"
+              },
+              {
+                "path": "tests/storage/typescript/src/client.ts",
+                "symbol": "execute"
+              },
+              {
+                "path": "tests/storage/run.py",
+                "symbol": "main"
+              },
+              {
+                "path": "tests/leaf/run.py",
+                "symbol": "exercise"
+              }
+            ],
+            "verificationEvidence": [
+              "tests/storage/run.py",
+              "docs/planning/2026-10-09/delivery/evidence/P01/storage-result.json",
+              "docs/planning/2026-10-09/delivery/evidence/P01/leaf-result.json"
+            ]
+          }
         }
       ]
     },
@@ -1123,17 +1268,26 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Correlation Identifier",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/CorrelationIdentifier.html",
       "referenceDepth": "full-public-reference",
-      "how": "Keep task, delegation, attempt, message, operation and artifact identities linked but distinct. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01, P05, P10. Implementation locations will be recorded when implemented. The P01 leaf fixture correlates an offer, lost acknowledgment lookup and retained result with stable operation identity and digest. Correlation alone never grants authority or accepts a task; only the separate origin owner writes acceptance.",
+      "how": "Keep task, delegation, attempt, message, operation and artifact identities linked but distinct. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01, P05, P10. Implementation locations will be recorded when implemented. The P01 leaf fixture correlates an offer, lost acknowledgment lookup and retained result with stable operation identity and digest. Correlation alone never grants authority or accepts a task; only the separate origin owner writes acceptance. The signed leaf owner additionally binds executor hub, task, delegation, attempt and repository revision in a verified execution report to its retained offer. Each negative report is validly re-signed and passes SDK admission before the owner rejects the mismatch. Artifact bytes and digest are checked before origin acceptance; a receiving completion report alone cannot accept the task. Reconciled signed acceptance decisions must also match the reserved sender, destination, task, delegation and attempt. Three SDK-valid task/delegation/attempt mismatches are rejected by the owner without ledger mutation.",
       "why": "Progress and results must bind to the selected executor and correct task version.",
       "tradeoffs": "One overloaded task ID is simpler but loses provenance; more IDs need disciplined propagation and do not authenticate a sender.",
       "locations": [
         {
           "path": "tests/leaf/run.py",
           "symbol": "exercise"
+        },
+        {
+          "path": "tests/leaf/signed_run.py",
+          "symbol": "result_matches_offer"
+        },
+        {
+          "path": "tests/leaf/signed_run.py",
+          "symbol": "decision_matches_offer"
         }
       ],
       "verificationEvidence": [
-        "docs/planning/2026-10-09/delivery/evidence/P01/leaf-result.json"
+        "docs/planning/2026-10-09/delivery/evidence/P01/leaf-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/signed-leaf-result.json"
       ],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
@@ -1148,6 +1302,23 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
             "how": "Keep task, delegation, attempt, message, operation and artifact identities linked but distinct. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01, P05, P10. Implementation locations will be recorded when implemented.",
             "locations": [],
             "verificationEvidence": []
+          }
+        },
+        {
+          "date": "2026-10-09",
+          "reason": "P01 ordered recovery and signed leaf qualification; production scope and status are unchanged.",
+          "previous": {
+            "status": "planned",
+            "how": "Keep task, delegation, attempt, message, operation and artifact identities linked but distinct. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01, P05, P10. Implementation locations will be recorded when implemented. The P01 leaf fixture correlates an offer, lost acknowledgment lookup and retained result with stable operation identity and digest. Correlation alone never grants authority or accepts a task; only the separate origin owner writes acceptance.",
+            "locations": [
+              {
+                "path": "tests/leaf/run.py",
+                "symbol": "exercise"
+              }
+            ],
+            "verificationEvidence": [
+              "docs/planning/2026-10-09/delivery/evidence/P01/leaf-result.json"
+            ]
           }
         }
       ]
@@ -1196,7 +1367,7 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Message Store",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageStore.html",
       "referenceDepth": "full-public-reference",
-      "how": "Retain authoritative validated JetStream records with scoped replay, versioned checkpoints and explicit retention. Derive current KV views and optional SQL query indexes without replaying effects. Keep task/audit history separate from acknowledged work queues and bounded presence records. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P04, P07, P10, P12. Implementation locations will be recorded when implemented. P00 proposes non-expiring authoritative history by default, explicit quota rejection, verified checkpoints and fenced restore, with optional rebuildable SQL views. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. The P01 leaf fixture uses distinct private owner-account JetStream ledgers for origin reservation and receiver acceptance/result. Restart restores each record independently; the federation account cannot access the owner stream. No shared global store or production retention guarantee is implied.",
+      "how": "Retain authoritative validated JetStream records with scoped replay, versioned checkpoints and explicit retention. Derive current KV views and optional SQL query indexes without replaying effects. Keep task/audit history separate from acknowledged work queues and bounded presence records. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P04, P07, P10, P12. Implementation locations will be recorded when implemented. P00 proposes non-expiring authoritative history by default, explicit quota rejection, verified checkpoints and fenced restore, with optional rebuildable SQL views. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. The P01 leaf fixture uses distinct private owner-account JetStream ledgers for origin reservation and receiver acceptance/result. Restart restores each record independently; the federation account cannot access the owner stream. No shared global store or production retention guarantee is implied. The signed leaf fixture stores the verified offer, signed acceptance decision and signed result in the receiver private ledger. The origin keeps its own reservation and acceptance record. Restart checks compare retained records before replay; test reports contain public-key fingerprints rather than private seeds. This remains independent local single-node persistence with graceful restarts, not production retention or disaster-recovery qualification.",
       "why": "Recovery, audits and authorized dashboard history must survive disconnected viewers and hubs.",
       "tradeoffs": "A local relational authority simplifies joins and multi-row constraints, but the accepted direction prefers shared NATS persistence. Rebuildable views add lag and recovery complexity; quotas, snapshots, schema evolution, privacy deletion and retention gaps require explicit evidence.",
       "locations": [
@@ -1207,10 +1378,15 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
         {
           "path": "tests/leaf/run.py",
           "symbol": "latest"
+        },
+        {
+          "path": "tests/leaf/signed_run.py",
+          "symbol": "exercise"
         }
       ],
       "verificationEvidence": [
-        "docs/planning/2026-10-09/delivery/evidence/P01/leaf-result.json"
+        "docs/planning/2026-10-09/delivery/evidence/P01/leaf-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/signed-leaf-result.json"
       ],
       "decisionEvidence": [
         "docs/planning/2026-10-09/implementation-plan.md",
@@ -1245,6 +1421,27 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
             "how": "Retain authoritative validated JetStream records with scoped replay, versioned checkpoints and explicit retention. Derive current KV views and optional SQL query indexes without replaying effects. Keep task/audit history separate from acknowledged work queues and bounded presence records. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P04, P07, P10, P12. Implementation locations will be recorded when implemented. P00 proposes non-expiring authoritative history by default, explicit quota rejection, verified checkpoints and fenced restore, with optional rebuildable SQL views. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review.",
             "locations": [],
             "verificationEvidence": []
+          }
+        },
+        {
+          "date": "2026-10-09",
+          "reason": "P01 ordered recovery and signed leaf qualification; production scope and status are unchanged.",
+          "previous": {
+            "status": "planned",
+            "how": "Retain authoritative validated JetStream records with scoped replay, versioned checkpoints and explicit retention. Derive current KV views and optional SQL query indexes without replaying effects. Keep task/audit history separate from acknowledged work queues and bounded presence records. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P04, P07, P10, P12. Implementation locations will be recorded when implemented. P00 proposes non-expiring authoritative history by default, explicit quota rejection, verified checkpoints and fenced restore, with optional rebuildable SQL views. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. The P01 leaf fixture uses distinct private owner-account JetStream ledgers for origin reservation and receiver acceptance/result. Restart restores each record independently; the federation account cannot access the owner stream. No shared global store or production retention guarantee is implied.",
+            "locations": [
+              {
+                "path": "tests/leaf/run.py",
+                "symbol": "append"
+              },
+              {
+                "path": "tests/leaf/run.py",
+                "symbol": "latest"
+              }
+            ],
+            "verificationEvidence": [
+              "docs/planning/2026-10-09/delivery/evidence/P01/leaf-result.json"
+            ]
           }
         }
       ]

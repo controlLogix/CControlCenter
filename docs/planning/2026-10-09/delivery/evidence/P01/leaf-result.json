@@ -1,9 +1,10 @@
 {
-  "recordedAt": "2026-10-09T22:02:03.203252+00:00",
+  "recordedAt": "2026-10-09T22:33:48.962346+00:00",
   "sourceHashes": {
     "hub/requirements.lock": "3ed79db16ab9b01c1c4f1b2b99443b8952579abd8a85fd38e60aff8c1baa2420",
-    "tests/leaf/README.md": "a4204da1c7ecb374f574f880fcc56cd9d985a576fc489796f8aa1587040a5810",
-    "tests/leaf/run.py": "13885a90d5dab258d22e2484469772d0e6b2310113638e9e4dc051dc04731013"
+    "tests/leaf/README.md": "01f32039b3eaaa556b8b30a82d9ba2853cd6df6b713de6848de49d025ae487c1",
+    "tests/leaf/run.py": "17fdaf80d25955643c23c246d7477f3324a62cb152bc1ec358416c4914d77063",
+    "tests/leaf/signed_run.py": "240042e1494a2065a8cd5849f0150aa52937e460a22f7e53225cd10cab31ba6d"
   },
   "cases": [
     {
@@ -62,7 +63,7 @@
     "Single-node independent stores and graceful process restarts; no R3, power-loss, network adversary or host-failure durability claim.",
     "Static broker account permissions are real; offline scope checks and origin acceptance are explicit fixture logic."
   ],
-  "sourceCommit": "7ef00dcb299c100d6dda45bfffa2b4e127345a50",
+  "sourceCommit": "f19c6473d56335b8eeb28704b02895b9d9ab7fcc",
   "sourceBinding": "Checkout base commit plus exact fixture and dependency-lock hashes; no legacy application import.",
   "brokerVersion": "nats-server: v2.15.0",
   "brokerSha256": "387ce54e7a0a249d877a579ed641d715bab047d7e061bfa42b4d07f6a0401341",
@@ -80,5 +81,5 @@
   "cleanupComplete": true,
   "exitCode": 0,
   "sourceUnchangedDuringRun": true,
-  "durationSeconds": 3.826
+  "durationSeconds": 3.272
 }

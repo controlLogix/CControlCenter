@@ -2,7 +2,7 @@
 
 **Status: static inventory checked during P00; full baseline/candidate qualification remains open.** The [live task board](implementation-status.md) records current work. The [P00 preflight](delivery/evidence/P00/preflight.md) and [baseline defect reconciliation](delivery/evidence/P00/baseline-findings.md) distinguish executed focused tests, retained historical results and missing environments. No phase acceptance is implied.
 
-ADD-01 accounts for **338 baseline files**, **68 additional governed files**, **93 components**, and **198 behavior checks**. The [exact inventory](component-inventory.json) pins file ownership and Git blob identities. The [source surface index](source-surface-index.json) lists code declarations and literal HTTP paths for review. File coverage does not prove runtime correctness or complete behavioral coverage.
+ADD-01 accounts for **338 baseline files**, **73 additional governed files**, **93 components**, and **198 behavior checks**. The [exact inventory](component-inventory.json) pins file ownership and Git blob identities. The [source surface index](source-surface-index.json) lists code declarations and literal HTTP paths for review. File coverage does not prove runtime correctness or complete behavioral coverage.
 
 ## Required preservation rule
 
@@ -4101,3 +4101,9 @@ Pure evaluation binds a fixture-owned snapshot, revision, actor role and nonempt
 The leaf fixture uses separate private owner accounts, restricted link accounts, independent file-backed JetStream domains and local process restarts. It exercises a lost acceptance acknowledgment, reserved offline work, retained result return and origin-owned acceptance. Its real broker permission checks are distinct from fixture-owned task and scope decisions. Native platform, TLS/enrollment, production federation, replica durability and final bilateral acceptance remain separate requirements. Existing federation commands, plugins and stores are untouched.
 
 These additions improve executable contract and recovery evidence without removing any legacy capability. Passing fixture results remain source-bound in their evidence reports; they do not attest a complete P01 gate or later-phase preservation.
+
+## P01 recovery, signed hub exchange and CI fixtures
+
+The inventory adds five files under the existing contract, test and repository CI components. Ordered recovery fixtures compare both independent SDKs before accepting transitions and cover replay, current authorization, deadlines, cancellation and uncertain outcomes. Their in-memory owner is a test fixture; it does not prove durable storage or production authority. The recovery contract records that boundary.
+
+The signed leaf fixture adds contract validation and signature checks to real disposable broker exchanges, while retaining the earlier leaf and storage fixtures. The CI workflow and runner prepare pinned dependencies and collect fresh source-bound evidence. Broker report paths can be selected for each run. Adding CI source does not establish that remote CI or every supported platform has passed. All 338 baseline file identities, 93 components and 198 behavior checks remain preserved; phase verification and acceptance remain separate.

@@ -221,6 +221,13 @@
       ]
     },
     {
+      "path": ".github/workflows/contracts.yml",
+      "baselineBlob": null,
+      "componentIds": [
+        "REPO-03"
+      ]
+    },
+    {
       "path": ".github/workflows/design-patterns.yml",
       "baselineBlob": "c5835cf33a360a5e660106623f9cb12a6f123ce9",
       "componentIds": [
@@ -439,6 +446,13 @@
     },
     {
       "path": "contracts/v1/models/state-machines.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-01"
+      ]
+    },
+    {
+      "path": "contracts/v1/recovery.md",
       "baselineBlob": null,
       "componentIds": [
         "HUB-01"
@@ -2735,6 +2749,13 @@
       ]
     },
     {
+      "path": "tests/contracts/ci.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
       "path": "tests/contracts/run.py",
       "baselineBlob": null,
       "componentIds": [
@@ -2750,6 +2771,13 @@
     },
     {
       "path": "tests/contracts/test_payloads.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/contracts/test_recovery.py",
       "baselineBlob": null,
       "componentIds": [
         "HUB-26"
@@ -2799,6 +2827,13 @@
     },
     {
       "path": "tests/leaf/run.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/leaf/signed_run.py",
       "baselineBlob": null,
       "componentIds": [
         "HUB-26"
@@ -2954,6 +2989,19 @@
         "tests/leaf/run.py"
       ],
       "note": "Baseline and behavior-check counts unchanged; additions are bounded executable evidence, not phase acceptance."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "P01 recovery, signed leaf exchange and portable CI fixtures",
+      "addedFiles": [
+        ".github/workflows/contracts.yml",
+        "contracts/v1/recovery.md",
+        "tests/contracts/ci.py",
+        "tests/contracts/test_recovery.py",
+        "tests/leaf/signed_run.py"
+      ],
+      "note": "Preserves all baseline blobs, component identities and behavior checks. Fixture and CI source coverage is not production authority or phase acceptance."
     }
   ]
 }

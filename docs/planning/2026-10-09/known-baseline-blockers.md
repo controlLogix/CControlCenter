@@ -2,7 +2,7 @@
 
 Status: all six baseline defects repaired and verified on October 9, 2026, on `feat/agentmux-platform-rearchitecture`. The [repair record](governance-repairs.md) explains the decisions, compatibility changes and limits. The [evidence record](governance-repair-evidence.json) contains the exact commands, source hashes and logs: 119 hub tests passed without skips, including real-broker cases; nine selected dashboard tests and syntax checks passed.
 
-Ryan authorized autonomous implementation decisions for these six findings. Codex implemented and verified the repairs. Nick Klute and Ryan Helms remain the repository owners; their complete phase and final acceptance reviews remain outstanding. This scoped repair does not pass all of P00/P01, advance to P02 or authorize merging.
+Ryan authorized autonomous implementation decisions for these six findings. Codex implemented and verified the repairs. Nick Klute and Ryan Helms remain the repository owners. The later autonomous-delivery instruction makes Codex responsible for phase and final delivery review; their personal approval is no longer a delivery prerequisite. The repair evidence alone does not pass the P00/P01 gates, advance to P02 or authorize merging.
 
 The original findings and their repair criteria are preserved below. Each historical evidence statement describes the source before this repair. The defects could not be deferred as unchanged adoption-era debt: federation files did not exist at adoption commit `f4c84b09b187f7e895d1406fb5a8f885d5845e35`, and `hub/store.py` had changed. Adoption history and the remediation ledger remain intact. The review retains the original findings as resolved records with new evidence rather than deleting their history.
 

@@ -162,6 +162,7 @@
       "id": "REPO-03",
       "name": "Continuous integration workflows",
       "files": [
+        ".github/workflows/contracts.yml",
         ".github/workflows/design-patterns.yml",
         ".github/workflows/tests.yml"
       ],
@@ -462,6 +463,17 @@
         "Do not bundle ignored vendor manuals or imply an SDK integration from a protocol library."
       ],
       "limitations": []
+    }
+  ],
+  "reviewHistory": [
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "P01 recovery, signed leaf exchange and portable CI fixture ownership",
+      "addedFiles": [
+        ".github/workflows/contracts.yml"
+      ],
+      "note": "Existing ownership, baseline behavior and qualification requirements are unchanged; new fixtures do not establish phase acceptance."
     }
   ]
 }

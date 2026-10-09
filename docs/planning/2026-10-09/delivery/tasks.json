@@ -6,11 +6,11 @@
     "phases.json": "5bb9037937a00621214ad58873c368fdc55b2f8c3722653c97432efa8031a82a",
     "verification-matrix.json": "516813fd034d6c73b4b0d6f9eaaf4b1b54798828e137336324605d0b956085bc",
     "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
-    "component-inventory.json": "f602361b8866bab2463b38a8d6804b529e41e7cf60ddb2f7c5d473a07a3235b0",
-    "component-audit-hub.json": "a66de75d1f8e2070d08f543ff61432c203f162f62a2170b5c8fe576631b4738e",
+    "component-inventory.json": "a49922500882496e3930cd0359064bb4beb3b7d8fcbd213d3a5849e24e29903a",
+    "component-audit-hub.json": "c7be78f59b84f2c3654e7ae77e6b53552021eeaa5d7be24a067d95bfea5398a3",
     "component-audit-harness.json": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08",
     "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
-    "component-audit-repository.json": "39001427bd59e2b0bf45ad6b953a4221c0edf9cdbaaf541179317775e0d29a6f"
+    "component-audit-repository.json": "52a2e7648da7727c260b28764f6fc5817b6776d4e24198bec7a4b8436bf442c2"
   },
   "trackingDecision": "Repository tracking replaces Jira at Ryan's request; no Atlassian connection is required.",
   "epics": [
@@ -1727,10 +1727,12 @@
       ],
       "evidence": [
         "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md",
-        "docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md"
+        "docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md"
       ],
       "commits": [
-        "7ef00dcb299c100d6dda45bfffa2b4e127345a50"
+        "7ef00dcb299c100d6dda45bfffa2b4e127345a50",
+        "f19c6473d56335b8eeb28704b02895b9d9ab7fcc"
       ],
       "blocker": null,
       "history": [
@@ -1826,10 +1828,12 @@
       ],
       "evidence": [
         "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md",
-        "docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md"
+        "docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md"
       ],
       "commits": [
-        "7ef00dcb299c100d6dda45bfffa2b4e127345a50"
+        "7ef00dcb299c100d6dda45bfffa2b4e127345a50",
+        "f19c6473d56335b8eeb28704b02895b9d9ab7fcc"
       ],
       "blocker": null,
       "history": [
@@ -1925,10 +1929,12 @@
       ],
       "evidence": [
         "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md",
-        "docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md"
+        "docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md"
       ],
       "commits": [
-        "7ef00dcb299c100d6dda45bfffa2b4e127345a50"
+        "7ef00dcb299c100d6dda45bfffa2b4e127345a50",
+        "f19c6473d56335b8eeb28704b02895b9d9ab7fcc"
       ],
       "blocker": null,
       "history": [
@@ -1991,7 +1997,7 @@
           "text": "Establish per-phase evidence records, dependency gates, migration fixtures, and security/quality regression jobs."
         }
       ],
-      "status": "planned",
+      "status": "in_progress",
       "owner": "Codex",
       "dependsOn": [
         "P00-GATE",
@@ -2022,10 +2028,22 @@
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
         }
       ],
-      "evidence": [],
-      "commits": [],
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md"
+      ],
+      "commits": [
+        "f19c6473d56335b8eeb28704b02895b9d9ab7fcc"
+      ],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "at": "2026-10-09T22:15:02.344871+00:00",
+          "actor": "Codex",
+          "from": "planned",
+          "to": "in_progress",
+          "note": "Implementing pinned cross-platform contract and broker CI checks while preserving existing phase gates; actual runner evidence remains required."
+        }
+      ],
       "phaseCriteria": [
         "P01-AC01",
         "P01-AC02",
@@ -2109,9 +2127,12 @@
         }
       ],
       "evidence": [
-        "docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md"
+        "docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md"
       ],
-      "commits": [],
+      "commits": [
+        "f19c6473d56335b8eeb28704b02895b9d9ab7fcc"
+      ],
       "blocker": null,
       "history": [
         {
@@ -2173,7 +2194,7 @@
           "text": "Preserve and extend the verified repairs for the six baseline findings. Ryan authorized this bounded repair pass; its source hashes and executed regressions are in governance-repair-evidence.json. Complete every other P01 criterion before advancing to P02."
         }
       ],
-      "status": "planned",
+      "status": "in_progress",
       "owner": "Codex",
       "dependsOn": [
         "P00-GATE",
@@ -2205,8 +2226,12 @@
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
         }
       ],
-      "evidence": [],
-      "commits": [],
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md"
+      ],
+      "commits": [
+        "f19c6473d56335b8eeb28704b02895b9d9ab7fcc"
+      ],
       "blocker": null,
       "history": [
         {
@@ -2222,6 +2247,13 @@
             "AMX-BASE-006"
           ],
           "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged."
+        },
+        {
+          "at": "2026-10-09T22:15:53.581380+00:00",
+          "actor": "Codex",
+          "from": "planned",
+          "to": "in_progress",
+          "note": "Rechecking the retained six governance repairs on the current feature candidate with the full prepared local hub profile; no legacy assertion is removed."
         }
       ],
       "phaseCriteria": [
@@ -2320,10 +2352,12 @@
         }
       ],
       "evidence": [
-        "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md"
+        "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md"
       ],
       "commits": [
-        "7ef00dcb299c100d6dda45bfffa2b4e127345a50"
+        "7ef00dcb299c100d6dda45bfffa2b4e127345a50",
+        "f19c6473d56335b8eeb28704b02895b9d9ab7fcc"
       ],
       "blocker": null,
       "history": [
@@ -33045,6 +33079,38 @@
         "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
         "component-inventory.json": "f5641f7553e746d695f042a937e8c8399f9dd69c7dad10eb6f90162e80dab0d9",
         "component-audit-hub.json": "3b35ead4eaa32202dd6d5106bc9d30424b9ec9115c9b7512b46b818ff4f64844",
+        "component-audit-harness.json": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08",
+        "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
+        "component-audit-repository.json": "39001427bd59e2b0bf45ad6b953a4221c0edf9cdbaaf541179317775e0d29a6f"
+      }
+    },
+    {
+      "at": "2026-10-09T22:15:02.344871+00:00",
+      "actor": "Codex",
+      "from": "planned",
+      "to": "in_progress",
+      "note": "Implementing pinned cross-platform contract and broker CI checks while preserving existing phase gates; actual runner evidence remains required.",
+      "taskId": "P01-T04"
+    },
+    {
+      "at": "2026-10-09T22:15:53.581380+00:00",
+      "actor": "Codex",
+      "from": "planned",
+      "to": "in_progress",
+      "note": "Rechecking the retained six governance repairs on the current feature candidate with the full prepared local hub profile; no legacy assertion is removed.",
+      "taskId": "P01-T06"
+    },
+    {
+      "at": "2026-10-09T22:34:47.264225+00:00",
+      "actor": "Codex",
+      "type": "source-reconciliation",
+      "note": "P01 recovery, signed leaf and native CI additions preserve all baseline components and checks.",
+      "previousSourceHashes": {
+        "phases.json": "5bb9037937a00621214ad58873c368fdc55b2f8c3722653c97432efa8031a82a",
+        "verification-matrix.json": "516813fd034d6c73b4b0d6f9eaaf4b1b54798828e137336324605d0b956085bc",
+        "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
+        "component-inventory.json": "f602361b8866bab2463b38a8d6804b529e41e7cf60ddb2f7c5d473a07a3235b0",
+        "component-audit-hub.json": "a66de75d1f8e2070d08f543ff61432c203f162f62a2170b5c8fe576631b4738e",
         "component-audit-harness.json": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08",
         "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
         "component-audit-repository.json": "39001427bd59e2b0bf45ad6b953a4221c0edf9cdbaaf541179317775e0d29a6f"

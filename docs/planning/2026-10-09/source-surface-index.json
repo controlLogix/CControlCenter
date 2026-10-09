@@ -10805,6 +10805,52 @@
       "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
     },
     {
+      "path": "tests/contracts/ci.py",
+      "componentIds": [
+        "HUB-26"
+      ],
+      "workingFileSha256": "74ae3f5c68374982780861609fa357cb4a6b01d493843ea64694738a9105cdaf",
+      "declarations": [
+        {
+          "name": "digest",
+          "line": 30,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "source_hashes",
+          "line": 34,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "download",
+          "line": 48,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "broker",
+          "line": 54,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "negative_fixture",
+          "line": 83,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "main",
+          "line": 114,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "run",
+          "line": 139,
+          "kind": "FunctionDef"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "owned-by-component; fixture source indexed; runtime qualification recorded separately"
+    },
+    {
       "path": "tests/contracts/run.py",
       "componentIds": [
         "HUB-26"
@@ -10885,7 +10931,7 @@
       "componentIds": [
         "HUB-26"
       ],
-      "workingFileSha256": "13885a90d5dab258d22e2484469772d0e6b2310113638e9e4dc051dc04731013",
+      "workingFileSha256": "17fdaf80d25955643c23c246d7477f3324a62cb152bc1ec358416c4914d77063",
       "declarations": [
         {
           "name": "require",
@@ -10992,6 +11038,107 @@
       "reviewStatus": "P01 pure model/fixture surface reviewed. Evidence references remain supplied by trusted fixture owners; no production authority, migration or final release acceptance implied."
     },
     {
+      "path": "tests/leaf/signed_run.py",
+      "componentIds": [
+        "HUB-26"
+      ],
+      "workingFileSha256": "240042e1494a2065a8cd5849f0150aa52937e460a22f7e53225cd10cab31ba6d",
+      "declarations": [
+        {
+          "name": "hashes",
+          "line": 32,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "mirror_hashes",
+          "line": 42,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "build_hashes",
+          "line": 48,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "SDK",
+          "line": 59,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "Contracts",
+          "line": 82,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "decision_matches_offer",
+          "line": 145,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "result_matches_offer",
+          "line": 156,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "transfer",
+          "line": 167,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "exercise",
+          "line": 175,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "main",
+          "line": 313,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 60,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "call",
+          "line": 64,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "accepted",
+          "line": 76,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 83,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "envelope",
+          "line": 91,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "sign",
+          "line": 102,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "verify",
+          "line": 114,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "passed",
+          "line": 177,
+          "kind": "FunctionDef"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "owned-by-component; signed leaf fixture source indexed; runtime qualification recorded separately"
+    },
+    {
       "path": "tests/storage/python_client.py",
       "componentIds": [
         "HUB-26"
@@ -11017,7 +11164,7 @@
       "componentIds": [
         "HUB-26"
       ],
-      "workingFileSha256": "c0b9ec17212029fdfebf1ac56d4399f71ed4539587234bf3f60ee00017043624",
+      "workingFileSha256": "f5c4a26ab7b9491c63f32b0f887a0987bbe47f77b1c3373934014407638a14a4",
       "declarations": [
         {
           "name": "require",
@@ -11986,6 +12133,323 @@
             "reviewStatus": "P01 pure model/fixture surface reviewed. Evidence references remain supplied by trusted fixture owners; no production authority, migration or final release acceptance implied."
           },
           "currentSha256": "87f25edd9ff99a9d82380e9ffaf2c3ae72753deb577c9edfa01973dda24bc013"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "reason": "P01 portable CI fixture and selectable broker evidence report paths; preserve prior declaration and hash records.",
+      "changes": [
+        {
+          "path": "tests/contracts/ci.py",
+          "previous": null,
+          "currentSha256": "74ae3f5c68374982780861609fa357cb4a6b01d493843ea64694738a9105cdaf"
+        },
+        {
+          "path": "tests/storage/run.py",
+          "previous": {
+            "path": "tests/storage/run.py",
+            "componentIds": [
+              "HUB-26"
+            ],
+            "workingFileSha256": "c0b9ec17212029fdfebf1ac56d4399f71ed4539587234bf3f60ee00017043624",
+            "declarations": [
+              {
+                "name": "require",
+                "line": 30,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "hashes",
+                "line": 35,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "record",
+                "line": 41,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "Broker",
+                "line": 61,
+                "kind": "ClassDef"
+              },
+              {
+                "name": "main",
+                "line": 121,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "__init__",
+                "line": 62,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "start",
+                "line": 75,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "stop",
+                "line": 92,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "connect",
+                "line": 103,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "client",
+                "line": 106,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "case",
+                "line": 140,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "raw",
+                "line": 211,
+                "kind": "AsyncFunctionDef"
+              }
+            ],
+            "httpPathLiterals": [],
+            "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
+          },
+          "currentSha256": "f5c4a26ab7b9491c63f32b0f887a0987bbe47f77b1c3373934014407638a14a4"
+        },
+        {
+          "path": "tests/leaf/run.py",
+          "previous": {
+            "path": "tests/leaf/run.py",
+            "componentIds": [
+              "HUB-26"
+            ],
+            "workingFileSha256": "13885a90d5dab258d22e2484469772d0e6b2310113638e9e4dc051dc04731013",
+            "declarations": [
+              {
+                "name": "require",
+                "line": 28,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "encode",
+                "line": 33,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "digest",
+                "line": 37,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "hashes",
+                "line": 41,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "port",
+                "line": 47,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "Broker",
+                "line": 53,
+                "kind": "ClassDef"
+              },
+              {
+                "name": "append",
+                "line": 126,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "latest",
+                "line": 131,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "exchange",
+                "line": 136,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "link_ready",
+                "line": 144,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "forbidden",
+                "line": 156,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "execute_read_only",
+                "line": 172,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "exercise",
+                "line": 177,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "main",
+                "line": 315,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "__init__",
+                "line": 54,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "start",
+                "line": 85,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "connect",
+                "line": 102,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "stop",
+                "line": 111,
+                "kind": "AsyncFunctionDef"
+              },
+              {
+                "name": "passed",
+                "line": 180,
+                "kind": "FunctionDef"
+              },
+              {
+                "name": "error",
+                "line": 103,
+                "kind": "AsyncFunctionDef"
+              }
+            ],
+            "httpPathLiterals": [],
+            "reviewStatus": "P01 pure model/fixture surface reviewed. Evidence references remain supplied by trusted fixture owners; no production authority, migration or final release acceptance implied."
+          },
+          "currentSha256": "17fdaf80d25955643c23c246d7477f3324a62cb152bc1ec358416c4914d77063"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "reason": "P01 signed leaf fixture with owner result binding and malformed/unauthorized input checks; fixture identity and evidence do not establish production enrollment.",
+      "changes": [
+        {
+          "path": "tests/leaf/signed_run.py",
+          "previous": null,
+          "currentSha256": "2abec364178382cb632574fa83b3ffb8b1fab1096766d1ee0d331ad990fe18ed"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "Review added decision owner binding and three signed mismatch tests; preserved existing checks.",
+      "previousFiles": [
+        {
+          "path": "tests/leaf/signed_run.py",
+          "componentIds": [
+            "HUB-26"
+          ],
+          "workingFileSha256": "2abec364178382cb632574fa83b3ffb8b1fab1096766d1ee0d331ad990fe18ed",
+          "declarations": [
+            {
+              "name": "hashes",
+              "line": 32,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "mirror_hashes",
+              "line": 42,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "build_hashes",
+              "line": 48,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "SDK",
+              "line": 59,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "Contracts",
+              "line": 82,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "result_matches_offer",
+              "line": 145,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "transfer",
+              "line": 156,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "exercise",
+              "line": 164,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "main",
+              "line": 287,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "__init__",
+              "line": 60,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "call",
+              "line": 64,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "accepted",
+              "line": 76,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "__init__",
+              "line": 83,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "envelope",
+              "line": 91,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "sign",
+              "line": 102,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "verify",
+              "line": 114,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "passed",
+              "line": 166,
+              "kind": "FunctionDef"
+            }
+          ],
+          "httpPathLiterals": [],
+          "reviewStatus": "owned-by-component; signed leaf fixture source indexed; runtime qualification recorded separately"
         }
       ]
     }

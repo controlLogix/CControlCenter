@@ -419,3 +419,52 @@ sequenceDiagram
 ```
 
 Unrelated accounts cannot observe linked traffic. Bridge credentials cannot access private owner storage or origin acceptance subjects. A negative test widens only generated leaf credentials and confirms that the isolation assertion fails on unrelated traffic. These tests do not qualify real ingress signatures, dynamic grants, cross-host transport security or the final bilateral release demonstration.
+
+
+## P01 ordered recovery and signed leaf admission
+
+This extends PLAN-07/08/10/11/13 fixture coverage. The earlier narrow leaf protocol remains a separate test. The signed fixture uses the versioned SDK contracts, real local NATS brokers, fixed test keys and a trusted test clock. It does not implement production enrollment, live grants, transport security or the final independently enrolled hub demonstration.
+
+```mermaid
+sequenceDiagram
+  participant O as Origin fixture / Python SDK
+  participant N as Restricted NATS leaf
+  participant R as Receiver fixture / TypeScript SDK
+  O->>N: Signed delegation-offer (PLAN-07/08)
+  N->>R: Preserve envelope bytes
+  R->>R: Decode, resolve fixture key, verify audience/signature/scope
+  R->>R: Retain offer and signed decision in private ledger (PLAN-13)
+  R--xO: Decision publication deliberately lost
+  Note over O,R: Receiver reads approved input; both independent brokers restart
+  O->>N: Retry same operation and digest (PLAN-10)
+  N->>R: Verify replay before retained-outcome lookup
+  R->>N: Retained signed decision and execution-report
+  N->>O: Python verifies TypeScript signature
+  O->>O: Bind decision sender/destination/task/delegation/attempt to offer
+  O->>O: Bind result executor/task/delegation/attempt/revision to offer (PLAN-11)
+  O->>O: Check artifact bytes and digest; explicitly accept
+```
+
+Malformed input, invalid UTF-8, unknown contracts, wrong audience, altered payload and expiry are rejected before fixture owner mutation. Three separately signed decision mismatches and five signed result mismatches pass SDK verification and fail owner binding. Changed replay input cannot cause another execution. Static fixture authorization and fixed payload checks are deliberately limited; valid wire claims do not establish production permission.
+
+The separate `tests/contracts/test_recovery.py` sequence compares both independent evaluators. Its in-memory owner checks current authorization before replay, requires a fresh authorized lookup after command expiry, retains pending cancellation through uncertainty and prevents approval from overriding a hard denial. These observations support PLAN-08/10 contract qualification. They do not establish durable ownership or prove non-admission from a schema alone.
+
+## P01 native evidence runner
+
+This is a delivery verification view of existing PLAN-08 conformance obligations, not an additional runtime design pattern. `tests/contracts/ci.py` and `.github/workflows/contracts.yml` define the following execution. A configured workflow is not evidence of a completed run.
+
+```mermaid
+flowchart TD
+  Candidate["Feature branch candidate"] --> Hosts["Native Linux and macOS jobs"]
+  Hosts --> Build["Locked dependencies and fresh SDK builds"]
+  Build --> Broker["Pinned broker archive and checksum verification"]
+  Broker --> Suites["SDK, contracts, storage and both leaf fixtures"]
+  Build --> Negative["Copied positive fixture with required field removed"]
+  Negative --> Failures["Require both SDK assertions to reject it"]
+  Suites --> Gates["Tracker, regression retention, component coverage and pattern checks"]
+  Failures --> Evidence["Fresh external evidence directory"]
+  Gates --> Evidence
+  Evidence --> Review["Codex reviews actual results before phase acceptance"]
+```
+
+The runner records source/build identity and command exit codes. Fresh reports go outside the checkout so CI cannot overwrite committed review records. Required checks include the regression guard's deliberately removed-assertion test. A passing native job cannot stand in for WSL evidence, production authorization checks or phase approval; task advancement and merging are not performed by this workflow.

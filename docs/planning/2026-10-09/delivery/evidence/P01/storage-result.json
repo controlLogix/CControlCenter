@@ -1,12 +1,12 @@
 {
   "status": "passed",
-  "recordedAt": "2026-10-09T21:52:42.456640+00:00",
+  "recordedAt": "2026-10-09T22:21:05.811606+00:00",
   "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
   "python": "3.14.4",
   "natsPy": "2.16.0",
   "natsServer": "nats-server: v2.15.0",
   "node": "v22.22.1",
-  "seconds": 8.677,
+  "seconds": 9.405,
   "cases": [
     {
       "id": "complete-state-provenance-effect-record",
@@ -64,7 +64,7 @@
       "ack": {
         "sequence": 8,
         "stream": "LEDGER",
-        "batch": "52PKAshCHqlAwRkzRyXo3E",
+        "batch": "oaA69Kqb54CqPB8oQGInxa",
         "count": 2,
         "committed": true
       }
@@ -98,7 +98,7 @@
     "hub/requirements.lock": "3ed79db16ab9b01c1c4f1b2b99443b8952579abd8a85fd38e60aff8c1baa2420",
     "tests/storage/README.md": "ec4d13a2a6cafc9be91cc1b9f64edf48c60ebdaa322b042642fe47e47a18d98c",
     "tests/storage/python_client.py": "e09951cf4a7237cac16a9b3b2b455dfeecdc3bd904e575343412d471561865c6",
-    "tests/storage/run.py": "c0b9ec17212029fdfebf1ac56d4399f71ed4539587234bf3f60ee00017043624",
+    "tests/storage/run.py": "f5c4a26ab7b9491c63f32b0f887a0987bbe47f77b1c3373934014407638a14a4",
     "tests/storage/typescript/README.md": "951a9f510f9a117cffd07cf9118a240485e37aea683c6867ae3ffd054b618e88",
     "tests/storage/typescript/package-lock.json": "e0d86aeebaf835fb965ef32ff0925c4f3919fd87b8f41daa2ca90ffe9f291a1d",
     "tests/storage/typescript/package.json": "5df63a73a27894e59288e4ee366e0fa1ff495812a8a2efe7d25efd7e63561a1e",
@@ -115,7 +115,7 @@
   "typeScriptBuildInputsMatchRepository": true,
   "brokerBinarySha256": "387ce54e7a0a249d877a579ed641d715bab047d7e061bfa42b4d07f6a0401341",
   "command": "python tests/storage/run.py",
-  "sourceCommit": "421d18b26227cb1233e362627fc7de75064ea3b0",
+  "sourceCommit": "f19c6473d56335b8eeb28704b02895b9d9ab7fcc",
   "limits": [
     "One file-backed R1 broker on WSL/Linux; no native macOS, R3, network partition or power-loss qualification.",
     "Fixture owners use trusted synthetic provenance; no authentication/permission or production domain owner claim.",

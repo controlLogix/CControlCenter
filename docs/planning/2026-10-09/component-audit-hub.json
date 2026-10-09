@@ -9,6 +9,7 @@
         "contracts/v1/README.md",
         "contracts/v1/models/README.md",
         "contracts/v1/models/state-machines.json",
+        "contracts/v1/recovery.md",
         "contracts/v1/registry.json",
         "contracts/v1/schemas/cancellation-request.schema.json",
         "contracts/v1/schemas/common.schema.json",
@@ -1615,9 +1616,11 @@
         "sdk/typescript/test-examples.json",
         "sdk/typescript/tsconfig.json",
         "tests/contracts/README.md",
+        "tests/contracts/ci.py",
         "tests/contracts/run.py",
         "tests/contracts/test_conformance.py",
         "tests/contracts/test_payloads.py",
+        "tests/contracts/test_recovery.py",
         "tests/contracts/test_semantics.py",
         "tests/contracts/test_state_models.py",
         "tests/contracts/vectors/payload-examples.json",
@@ -1625,6 +1628,7 @@
         "tests/contracts/vectors/valid-examples.json",
         "tests/leaf/README.md",
         "tests/leaf/run.py",
+        "tests/leaf/signed_run.py",
         "tests/storage/README.md",
         "tests/storage/python_client.py",
         "tests/storage/run.py",
@@ -1786,6 +1790,20 @@
           "note": "Preserve five P00 tables/68 edges, add explicit cancellation context and test missing guard/role/revision rejection. Leaf fixture does not replace production federation or final bilateral acceptance."
         }
       ]
+    }
+  ],
+  "reviewHistory": [
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "P01 recovery, signed leaf exchange and portable CI fixture ownership",
+      "addedFiles": [
+        "contracts/v1/recovery.md",
+        "tests/contracts/ci.py",
+        "tests/contracts/test_recovery.py",
+        "tests/leaf/signed_run.py"
+      ],
+      "note": "Existing ownership, baseline behavior and qualification requirements are unchanged; new fixtures do not establish phase acceptance."
     }
   ]
 }

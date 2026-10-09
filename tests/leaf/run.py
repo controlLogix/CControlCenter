@@ -20,7 +20,7 @@ from nats.js.api import StreamConfig, StorageType
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 SERVER = Path(os.environ.get('AGENTMUX_LEAF_SERVER', str(Path.home() / '.cache/agentmux-governance/tools/nats-server')))
-REPORT = ROOT / 'docs/planning/2026-10-09/delivery/evidence/P01/leaf-result.json'
+REPORT = Path(os.environ.get('AGENTMUX_EVIDENCE_DIR', str(ROOT / 'docs/planning/2026-10-09/delivery/evidence/P01'))) / 'leaf-result.json'
 COMMAND = 'fixture.project.one.command'
 EVENT = 'fixture.project.one.event'
 
