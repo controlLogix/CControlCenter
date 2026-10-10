@@ -1,0 +1,8 @@
+{
+  "files": {
+    "probe.py": "e20b2ea3993ae4cb1b206bbd6553a4feef10f5ac6d50e0744fc4efdc2f2f79ab",
+    "result.json": "5010380cf6b1db75a9958b3066bbb9964d128d340b2e838c7fc736f8f4f1a89c",
+    "codex-symlink-refinement.md": "81f44eb3e51e11237c6b9f7c9b92d3e9180d18f0a6e026921a325acf235fdf2e"
+  },
+  "scope": "Actual Windows-native link creation failsWinError1314 before any client persistence command; constructed fixture environment only, no real credentials/model/network/elevation. Source unchanged. Persistence/source inference remains unexecuted."
+}

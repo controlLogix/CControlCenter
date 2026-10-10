@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, scoped P01 characterization/evidence review; four real-provider repetitions remain open",
-  "sourceDigest": "64b765a823cf0f8b8477334c94177bcf337b9f0bafb252bf4ccdcf6b4f60ead8",
+  "reviewer": "Codex, scoped Windows-owned client link contract and P01 prerequisite evidence review",
+  "sourceDigest": "f1d402a1f0e55fbad9dc195f0145b4caadc4656b9f23c1250d060ebb9b523d24",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -551,6 +551,20 @@
         "docs/planning/2026-10-09/delivery/tasks.json"
       ],
       "rationale": "No runtime source or design-pattern implementation changed. Reviewed actual pusheda21f native23checks on Linux/macOS,747source references each, plugin36/hub129/conformance45 with no skips and exact log/source admission. Seven isolated runtime faults trigger intended original assertions; repository source unchanged, mutation diffs/line-ending adaptation and logs retained. Actual WSL alpha/beta same-name shell identities route seven forms with acknowledgements, refuse cross-repo claim, execute unchangedorchtest28 and return actual revision/log digest through production release/done to operator retrieval; initial external loader failure retained. Independent2122source references and13sanitized artifact hashes matcha21f. Current-boundary mapping qualifies26/28 within declared recorded environments; production adapters remain unaccepted with explicit added P04/P10 task criteria and every later task AC03 retained. Dashboard fullrun62 and every historical skip/empty-operator-state limitation are preserved, with unchanged-source/supplemental callback/backup and restoredplugin evidence distinguished. Workflow negative has four tests/one intentional failure/zeroerrors, python3 vs workflowpython equivalence limit and prior setup failure retained. Provider readiness documents absent Grok authentication and unresolved privateWindows state/tool paths; no inference/auth changes, no reduced provider mix, task/phase remain open. File tracker22, coverage338baseline/94components/201checks and regression105/assertion-removal negative pass. Registry, diagrams, baseline and remediation history unchanged. No P02 advance, P06 acceptance, merge or final delivery claim."
+    },
+    {
+      "date": "2026-10-10T01:49:02.239697+00:00",
+      "reviewer": "Codex; independent read-only WSL ownership scope review",
+      "scope": "WSL-CLIENT-01 link-contract clarification and P01 failed prerequisite evidence",
+      "previousReviewer": "Codex, scoped P01 characterization/evidence review; four real-provider repetitions remain open",
+      "previousSourceDigest": "64b765a823cf0f8b8477334c94177bcf337b9f0bafb252bf4ccdcf6b4f60ead8",
+      "evidence": [
+        "docs/planning/2026-10-09/implementation-plan.md",
+        "docs/planning/2026-10-09/delivery/goal.json",
+        "docs/planning/2026-10-09/delivery/tasks.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/provider-readiness/windows-link-failure/archive.json"
+      ],
+      "rationale": "Reviewed documentation and tracker changes only. Stable WSL command symlinks resolve a Windows entry point or forwarding launcher; native Windows profile lookup or qualified links share Windows-owned auth/config without credential copying. Added explicit P06-T03/P06-T05 acceptance criteria, preserved previous scope in history and kept both tasks planned. Independent scope review confirms existing phase ownership and that failed Windows credential-file links do not disprove WSL executable forwarding. Archived actual synthetic Windows WinError1314 before any CLI persistence command; no links, credentials or installed client settings changed. P01 remains active with four required real-provider repetitions open. Tracker check and 22 tracker tests pass. No runtime source, registered pattern relationship, diagram, baseline or remediation changed. No later-phase implementation, client workflow acceptance or merge is claimed."
     }
   ],
   "rules": {

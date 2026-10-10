@@ -1,0 +1,48 @@
+{
+  "fixture": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-links-knjnsb31",
+  "started": 1791596249.0826402,
+  "scope": "Installed Windows binary; synthetic file persistence only; no real credentials, authentication-service validation, refresh or inference.",
+  "environment": {
+    "SystemRoot": "C:\\windows",
+    "WINDIR": "C:\\windows",
+    "COMSPEC": "C:\\windows\\system32\\cmd.exe",
+    "PATHEXT": ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.CPL",
+    "PATH": "C:\\nvm4w\\nodejs;C:\\windows\\System32",
+    "CODEX_HOME": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-links-knjnsb31\\profile",
+    "USERPROFILE": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-links-knjnsb31",
+    "HOME": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-links-knjnsb31",
+    "APPDATA": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-links-knjnsb31\\roaming",
+    "LOCALAPPDATA": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-links-knjnsb31\\local",
+    "TEMP": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-links-knjnsb31\\tmp",
+    "TMP": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-links-knjnsb31\\tmp",
+    "HTTP_PROXY": "http://127.0.0.1:9",
+    "HTTPS_PROXY": "http://127.0.0.1:9",
+    "ALL_PROXY": "http://127.0.0.1:9"
+  },
+  "sourceBefore": {
+    "C:\\nvm4w\\nodejs\\node.exe": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237",
+    "C:\\nvm4w\\nodejs\\node_modules\\@openai\\codex\\bin\\codex.js": "61b0194f3bb6534439c8d26a3ed57d0805f84b884588b761795323eeb92fcf70",
+    "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux-provider-readiness\\synthetic-links-probe.py": "e20b2ea3993ae4cb1b206bbd6553a4feef10f5ac6d50e0744fc4efdc2f2f79ab"
+  },
+  "commands": [],
+  "checks": [],
+  "passed": false,
+  "failure": "Traceback (most recent call last):\n  File \"C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux-provider-readiness\\synthetic-links-probe.py\", line 22, in <module>\n    for n in ('auth.json','config.toml'):os.symlink(str(targets/n),str(home/n),target_is_directory=False)\n                                         ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nOSError: [WinError 1314] A required privilege is not held by the client: 'C:\\\\Users\\\\RYANHE~1\\\\AppData\\\\Local\\\\Temp\\\\agentmux-codex-links-knjnsb31\\\\synthetic-targets\\\\auth.json' -> 'C:\\\\Users\\\\RYANHE~1\\\\AppData\\\\Local\\\\Temp\\\\agentmux-codex-links-knjnsb31\\\\profile\\\\auth.json'\n",
+  "sourceUnchanged": true,
+  "linksAfter": {
+    "auth.json": {
+      "isLink": false,
+      "target": null
+    },
+    "config.toml": {
+      "isLink": false,
+      "target": null
+    }
+  },
+  "fixtureRetained": true,
+  "files": {
+    "probe.py": "e20b2ea3993ae4cb1b206bbd6553a4feef10f5ac6d50e0744fc4efdc2f2f79ab",
+    "synthetic-targets\\auth.json": "3a4a54dfc86e63fd7fdd2d1421a2999c224e20f45ec476e3912b71973725195a",
+    "synthetic-targets\\config.toml": "ea15635af41980148993bdf0fb3e7b647de10b97178a5839565f09a295d90706"
+  }
+}

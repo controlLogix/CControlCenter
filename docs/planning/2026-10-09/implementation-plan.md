@@ -48,11 +48,14 @@ Dashboard scope and workflow priorities were asked during preparation. Unanswere
 
 Windows owns every AI terminal client installed on Windows, including its updates, authentication and configuration. WSL invokes that same installation through a durable symlink or wrapper. Only the Windows installation needs updating. Do not install a separate Linux copy, hard-code a version-specific binary path or copy credentials into WSL to make the connection work.
 
+Every Windows-installed client exposed in WSL must have a stable command symlink. Point it directly at a supported Windows entry point, or at a forwarding launcher when that client needs Windows executable, script, argument or path handling. The launcher must resolve the Windows-managed installation after updates. Authentication and configuration must resolve to the same Windows-owned files, either through the client's native Windows profile lookup or supported links; do not copy them into a Linux profile. Keep a per-client record of command links, resolved installation, configuration locations, ownership and supported limits. A Windows file-link permission failure is an unresolved prerequisite for that method, not evidence that sharing works.
+
 This requirement leaves the Agentmux runtime native on macOS/Linux. On Windows, Agentmux, Docker Compose integration and tmux remain in WSL/Linux. Client ownership and runtime placement are separate decisions.
 
 Acceptance requires evidence for all of the following:
 
 - Direct Windows and WSL/tmux launches resolve the same client installation and version. Repeat after a Windows-only update without changing the launcher.
+- Inspect each WSL command symlink and its resolved target. Verify that installation updates and supported auth/config changes made on Windows are visible from WSL without reinstalling, copying credentials or manually resynchronizing files. Installation and removal must preserve unrelated files and must not overwrite an existing user command without detecting the conflict.
 - Windows authentication and configuration remain authoritative. Do not duplicate secrets, expose them in logs or silently create a second login/configuration store.
 - Preserve exact arguments and working directories, including quoting, spaces, mounted Windows paths and WSL UNC paths. Report unsupported path or interop behavior explicitly.
 - Route client callbacks and CLI/MCP traffic to the correct WSL hub. Preserve LOCAL-01 startup/reuse, authorized status and protocol framing.

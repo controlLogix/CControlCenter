@@ -2153,7 +2153,8 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/preservation/fault-sensitivity/archive.json",
         "docs/planning/2026-10-09/delivery/evidence/P01/preservation/legacy-step-negative/archive.json",
         "docs/planning/2026-10-09/delivery/evidence/P01/preservation/assertion-mapping/archive.json",
-        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/identity-shell/archive.json"
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/identity-shell/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/provider-readiness/windows-link-failure/archive.json"
       ],
       "commits": [
         "f19c6473d56335b8eeb28704b02895b9d9ab7fcc",
@@ -2161,7 +2162,7 @@
         "00353fd0ccb0b4ce34cb4eb45549703430af30d1",
         "7a7d47ae6830f86b8fed318ee64da6a5aac52701"
       ],
-      "blocker": "The four required real-provider repetitions (calib/team/crossrepo/swarm) remain unrun. Windows and WSL Grok auth caches are absent and no configured API credential is available; a Windows-owned credential source is requested. Windows-owned client session/state and tool-path prerequisites remain under investigation. No fake worker, reduced provider mix or source-only review can replace these executions.",
+      "blocker": "The four required real-provider repetitions (calib/team/crossrepo/swarm) remain unrun. Windows and WSL Grok auth caches are absent and no configured API credential is available; a Windows-owned credential source is requested. Windows-owned client session/state and tool-path prerequisites remain under investigation. No fake worker, reduced provider mix or source-only review can replace these executions. A disposable Windows-native file-link probe also failed WinError1314 before login/config commands; link-based private profile sharing remains unqualified.",
       "history": [
         {
           "at": "2026-10-09T22:15:02.344871+00:00",
@@ -2292,6 +2293,13 @@
             "partial": 0,
             "missing": 2
           }
+        },
+        {
+          "date": "2026-10-09",
+          "actor": "Codex",
+          "reason": "Record actual Windows link prerequisite failure; no elevation, real credential or model operation. Preserve earlier readiness gap.",
+          "previousBlocker": "The four required real-provider repetitions (calib/team/crossrepo/swarm) remain unrun. Windows and WSL Grok auth caches are absent and no configured API credential is available; a Windows-owned credential source is requested. Windows-owned client session/state and tool-path prerequisites remain under investigation. No fake worker, reduced provider mix or source-only review can replace these executions.",
+          "sourceCommit": "6e448d1a05e4698c86f6b42b95eab66da57ef10a"
         }
       ],
       "phaseCriteria": [
@@ -6656,7 +6664,8 @@
         "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
         "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
         "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
-        "Execute supported-client workflows from Windows and WSL/tmux against the same installation, compare version identity, perform a Windows-only update and repeat without editing version-specific paths. Record actual interop limitations and recovery steps."
+        "Execute supported-client workflows from Windows and WSL/tmux against the same installation, compare version identity, perform a Windows-only update and repeat without editing version-specific paths. Record actual interop limitations and recovery steps.",
+        "Create and inspect stable WSL command symlinks for every supported Windows-installed client. Link to a supported Windows entry point or a forwarding launcher; resolve Windows-managed installation paths after updates and detect conflicting existing commands."
       ],
       "acceptanceCriteria": [
         {
@@ -6674,6 +6683,10 @@
         {
           "id": "P06-T03-AC04",
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
+        },
+        {
+          "id": "P06-T03-AC05",
+          "text": "Actual-host evidence identifies each WSL symlink and resolved Windows installation. A Windows-only update is visible through the unchanged link/launcher; no duplicate Linux client or version-pinned replacement is installed. Conflicting user commands are detected and preserved."
         }
       ],
       "evidence": [],
@@ -6729,6 +6742,38 @@
             ]
           },
           "statusUnchanged": "planned"
+        },
+        {
+          "date": "2026-10-10T01:48:25.532339+00:00",
+          "actor": "Codex",
+          "reason": "WSL-CLIENT-01 command-link and shared-file acceptance clarified from latest user instruction.",
+          "previousImplementationPlan": [
+            "Inspect the existing source and callers for this exact work item: Package and test integrations for Claude Code, Codex CLI, Pi, and Claude Desktop using each host's documented capabilities.",
+            "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
+            "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
+            "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
+            "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
+            "Execute supported-client workflows from Windows and WSL/tmux against the same installation, compare version identity, perform a Windows-only update and repeat without editing version-specific paths. Record actual interop limitations and recovery steps."
+          ],
+          "previousAcceptanceCriteria": [
+            {
+              "id": "P06-T03-AC01",
+              "text": "The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Package and test integrations for Claude Code, Codex CLI, Pi, and Claude Desktop using each host's documented capabilities. WSL-CLIENT-01: Execute supported-client workflows from Windows and WSL/tmux against the same installation, compare version identity, perform a Windows-only update and repeat without editing version-specific paths. Record actual interop limitations and recovery steps."
+            },
+            {
+              "id": "P06-T03-AC02",
+              "text": "Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope. WSL-CLIENT-01 requires actual Windows/WSL workflow evidence; a version-only check, Linux-client substitution or skipped interop case cannot count as success."
+            },
+            {
+              "id": "P06-T03-AC03",
+              "text": "Affected existing behavior has a baseline/candidate comparison or an approved behavior-change record; no capability, required assertion or stored identity is silently removed."
+            },
+            {
+              "id": "P06-T03-AC04",
+              "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
+            }
+          ],
+          "scopeLimit": "Task remains planned in P06; P01 remains the only active phase."
         }
       ],
       "phaseCriteria": [
@@ -6948,7 +6993,8 @@
         "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
         "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
         "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
-        "Keep authentication and configuration in their Windows-owned locations. Reference them through the Windows client without copying credentials or printing secrets; preserve unrelated settings during install, update and uninstall."
+        "Keep authentication and configuration in their Windows-owned locations. Reference them through the Windows client without copying credentials or printing secrets; preserve unrelated settings during install, update and uninstall.",
+        "Record per-client Windows-owned auth/config locations and their native lookup or supported link mechanism. Verify Windows-side changes are visible from WSL without copying secrets or manual synchronization; record link permission failures and preserve unrelated files on removal."
       ],
       "acceptanceCriteria": [
         {
@@ -6966,6 +7012,10 @@
         {
           "id": "P06-T05-AC04",
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
+        },
+        {
+          "id": "P06-T05-AC05",
+          "text": "Windows and WSL use the same Windows-owned authentication/configuration files through native Windows lookup or supported links. Actual-host tests demonstrate change visibility without copying credentials or manual synchronization, preserve unrelated files, and record unsupported link mechanisms as unresolved rather than passing."
         }
       ],
       "evidence": [],
@@ -7021,6 +7071,38 @@
             ]
           },
           "statusUnchanged": "planned"
+        },
+        {
+          "date": "2026-10-10T01:48:25.532339+00:00",
+          "actor": "Codex",
+          "reason": "WSL-CLIENT-01 command-link and shared-file acceptance clarified from latest user instruction.",
+          "previousImplementationPlan": [
+            "Inspect the existing source and callers for this exact work item: Add setup, credential references, diagnostics, install checks, and client-specific documentation without silently replacing user configuration.",
+            "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
+            "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
+            "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
+            "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
+            "Keep authentication and configuration in their Windows-owned locations. Reference them through the Windows client without copying credentials or printing secrets; preserve unrelated settings during install, update and uninstall."
+          ],
+          "previousAcceptanceCriteria": [
+            {
+              "id": "P06-T05-AC01",
+              "text": "The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Add setup, credential references, diagnostics, install checks, and client-specific documentation without silently replacing user configuration. WSL-CLIENT-01: Keep authentication and configuration in their Windows-owned locations. Reference them through the Windows client without copying credentials or printing secrets; preserve unrelated settings during install, update and uninstall."
+            },
+            {
+              "id": "P06-T05-AC02",
+              "text": "Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope. WSL-CLIENT-01 requires actual Windows/WSL workflow evidence; a version-only check, Linux-client substitution or skipped interop case cannot count as success."
+            },
+            {
+              "id": "P06-T05-AC03",
+              "text": "Affected existing behavior has a baseline/candidate comparison or an approved behavior-change record; no capability, required assertion or stored identity is silently removed."
+            },
+            {
+              "id": "P06-T05-AC04",
+              "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
+            }
+          ],
+          "scopeLimit": "Task remains planned in P06; P01 remains the only active phase."
         }
       ],
       "phaseCriteria": [
@@ -34147,6 +34229,11 @@
         "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
         "component-audit-repository.json": "52a2e7648da7727c260b28764f6fc5817b6776d4e24198bec7a4b8436bf442c2"
       }
+    },
+    {
+      "date": "2026-10-10T01:48:25.532339+00:00",
+      "actor": "Codex",
+      "reason": "Clarify stable WSL command links and shared Windows-owned auth/config for P06-T03/P06-T05; retain all prior scope and evidence."
     }
   ],
   "deliveryGovernance": {
