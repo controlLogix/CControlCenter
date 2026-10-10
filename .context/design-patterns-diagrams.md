@@ -534,3 +534,23 @@ sequenceDiagram
 ```
 
 The callback review preserves the original findings and records their closure against fresh repaired-source evidence, including a native pane after callbacks on the same tmux server. The diagram describes the repaired gateway contract; no automatic model-provider forwarding or P06 acceptance is claimed.
+
+
+## Planned legacy orchestration package restoration
+
+This is the bounded FED-15 legacy gateway restoration approved in `delivery/evidence/P01/plugin-restoration-spec.md`; P06 framework work stays planned.
+
+```mermaid
+flowchart LR
+  Host[Existing terminal host] --> Hook[Relevant pre-tool policy check]
+  Hook -->|read current roster/live definitions| API[Existing dashboard API]
+  Hook -->|allow or clear refusal| Host
+  Host --> Skills[Nine reconstructed skill guides]
+  Skills --> Binding[Explicit installed runtime binding]
+  Binding --> CLI[Existing coordination/dispatch/setup-auth]
+  CLI --> API
+  Host --> MCP[Roster MCP gateway]
+  MCP -->|read only| API
+```
+
+Unrelated shell commands bypass external processing. Current runtime identity, checksum and approval checks remain authoritative. The restored host hook adds the live-definition check; direct dashboard HTTP mutation does not enforce that check and remains a documented limitation. New source, maintained provenance and unchanged baseline tests must be reviewed before any restoration acceptance; no historical source equivalence is asserted.

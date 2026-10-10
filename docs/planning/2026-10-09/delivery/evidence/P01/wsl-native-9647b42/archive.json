@@ -1,0 +1,12 @@
+{
+  "externalSource": "/home/ryan/.cache/agentmux-governance/native-qualification-amxqual-wadrpvng",
+  "sha256": {
+    "callbacks.log": "30ab8540504a8b92753c3f42ad717cc4c31c775bf655cb39845e513ccd0b43aa",
+    "setup.json": "88ac6d91c1acb674aaed4748f722c0eb7f79604e03311373153b4bc268c9f560",
+    "callbacks-result.json": "9bee67bf7e797370bcbb0984bc8e8809459d6158ad6b5e2778d9e8f5ae541ec0",
+    "full-result.json": "7dfea1dcb0848b5f7615d146bf7f90e19e66214cb02d1c1d7e498092f643b0ac",
+    "full.log": "4ad625a9ed83a7e0797b58c91a1fe3858e5730d87740fb9a8862d4964df5659c",
+    "qualification.json": "c8385c52da89cefb9c3af826075feb22e1ba5aae2eed14124b9ed78c1978b87c"
+  },
+  "scope": "Bounded P01 source-bound proof. Native checkout qualifies9647; Bash focused20qualifies repaired sources. No repaired macOS/phase acceptance."
+}

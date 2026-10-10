@@ -41,7 +41,7 @@
         "HAR-12",
         "HAR-13"
       ],
-      "workingFileSha256": "8fd501e6733798b7abdb3eb9e7f10dbe691e094aed9af5f27e5c9f3888bb5551",
+      "workingFileSha256": "310d538866f29478ef01bfd77c782dd62ead2a09eb1a244fe890bf96b1b36867",
       "declarations": [
         {
           "name": "attach_prefix",
@@ -15256,6 +15256,456 @@
           ],
           "httpPathLiterals": [],
           "reviewStatus": "Scoped P01 inventory and preservation repair review; source freshness does not grant phase or P06 acceptance."
+        }
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "Preserved source rows before callback admission follow-up.",
+      "previousFiles": [
+        {
+          "path": "agentmux.sh",
+          "componentIds": [
+            "HAR-01",
+            "HAR-02",
+            "HAR-03",
+            "HAR-09",
+            "HAR-10",
+            "HAR-11",
+            "HAR-12",
+            "HAR-13"
+          ],
+          "workingFileSha256": "8fd501e6733798b7abdb3eb9e7f10dbe691e094aed9af5f27e5c9f3888bb5551",
+          "declarations": [
+            {
+              "name": "attach_prefix",
+              "line": 64,
+              "kind": "shell-function"
+            },
+            {
+              "name": "mv_T",
+              "line": 68,
+              "kind": "shell-function"
+            },
+            {
+              "name": "file_mode",
+              "line": 74,
+              "kind": "shell-function"
+            },
+            {
+              "name": "iso_now",
+              "line": 77,
+              "kind": "shell-function"
+            },
+            {
+              "name": "agentmux_self",
+              "line": 88,
+              "kind": "shell-function"
+            },
+            {
+              "name": "tm",
+              "line": 116,
+              "kind": "shell-function"
+            },
+            {
+              "name": "die",
+              "line": 118,
+              "kind": "shell-function"
+            },
+            {
+              "name": "have",
+              "line": 119,
+              "kind": "shell-function"
+            },
+            {
+              "name": "need",
+              "line": 120,
+              "kind": "shell-function"
+            },
+            {
+              "name": "strip_ansi",
+              "line": 123,
+              "kind": "shell-function"
+            },
+            {
+              "name": "trim_edges",
+              "line": 132,
+              "kind": "shell-function"
+            },
+            {
+              "name": "to_wsl_path",
+              "line": 135,
+              "kind": "shell-function"
+            },
+            {
+              "name": "node_bin",
+              "line": 145,
+              "kind": "shell-function"
+            },
+            {
+              "name": "effective_claude_dir",
+              "line": 160,
+              "kind": "shell-function"
+            },
+            {
+              "name": "claude_config_gc",
+              "line": 197,
+              "kind": "shell-function"
+            },
+            {
+              "name": "strip_credentials",
+              "line": 228,
+              "kind": "shell-function"
+            },
+            {
+              "name": "archive_log",
+              "line": 240,
+              "kind": "shell-function"
+            },
+            {
+              "name": "archive_dest",
+              "line": 256,
+              "kind": "shell-function"
+            },
+            {
+              "name": "archive_prune",
+              "line": 271,
+              "kind": "shell-function"
+            },
+            {
+              "name": "claude_credentials_sync",
+              "line": 341,
+              "kind": "shell-function"
+            },
+            {
+              "name": "claude_credentials_sync_locked",
+              "line": 409,
+              "kind": "shell-function"
+            },
+            {
+              "name": "federation_on",
+              "line": 420,
+              "kind": "shell-function"
+            },
+            {
+              "name": "claude_config_dir",
+              "line": 430,
+              "kind": "shell-function"
+            },
+            {
+              "name": "task_cli",
+              "line": 507,
+              "kind": "shell-function"
+            },
+            {
+              "name": "task_try",
+              "line": 518,
+              "kind": "shell-function"
+            },
+            {
+              "name": "pane_of",
+              "line": 525,
+              "kind": "shell-function"
+            },
+            {
+              "name": "pane_hash",
+              "line": 534,
+              "kind": "shell-function"
+            },
+            {
+              "name": "usage",
+              "line": 538,
+              "kind": "shell-function"
+            },
+            {
+              "name": "auth_resolve",
+              "line": 689,
+              "kind": "shell-function"
+            },
+            {
+              "name": "auth_default_for",
+              "line": 792,
+              "kind": "shell-function"
+            },
+            {
+              "name": "modal_text",
+              "line": 1225,
+              "kind": "shell-function"
+            },
+            {
+              "name": "modal_prompt",
+              "line": 1229,
+              "kind": "shell-function"
+            },
+            {
+              "name": "modal_answer",
+              "line": 1259,
+              "kind": "shell-function"
+            },
+            {
+              "name": "modal_decision",
+              "line": 1273,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_unblock",
+              "line": 1285,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_send",
+              "line": 1334,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_key",
+              "line": 1413,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_read",
+              "line": 1462,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_tail",
+              "line": 1485,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_wait",
+              "line": 1501,
+              "kind": "shell-function"
+            },
+            {
+              "name": "busy_marker",
+              "line": 1541,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_ask",
+              "line": 1577,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_post",
+              "line": 1639,
+              "kind": "shell-function"
+            },
+            {
+              "name": "coord_py",
+              "line": 1748,
+              "kind": "shell-function"
+            },
+            {
+              "name": "dispatch_py",
+              "line": 1755,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_dispatch",
+              "line": 1768,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_collect",
+              "line": 1772,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_pool",
+              "line": 1777,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_claim",
+              "line": 1782,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_release",
+              "line": 1795,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_claims",
+              "line": 1804,
+              "kind": "shell-function"
+            },
+            {
+              "name": "run_py",
+              "line": 1819,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_run",
+              "line": 1826,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_run_teardown",
+              "line": 1899,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_tasks",
+              "line": 1988,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_task",
+              "line": 1990,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_epic",
+              "line": 2041,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_board",
+              "line": 2062,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_team",
+              "line": 2094,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_journal",
+              "line": 2107,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_courier",
+              "line": 2122,
+              "kind": "shell-function"
+            },
+            {
+              "name": "observed_perms",
+              "line": 2165,
+              "kind": "shell-function"
+            },
+            {
+              "name": "report_stale",
+              "line": 2181,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_inbox",
+              "line": 2193,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_list",
+              "line": 2327,
+              "kind": "shell-function"
+            },
+            {
+              "name": "claim_reported",
+              "line": 2392,
+              "kind": "shell-function"
+            },
+            {
+              "name": "sweep_sidecars",
+              "line": 2405,
+              "kind": "shell-function"
+            },
+            {
+              "name": "stop_courier_if_idle",
+              "line": 2416,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_kill",
+              "line": 2451,
+              "kind": "shell-function"
+            },
+            {
+              "name": "sidecar_names",
+              "line": 2503,
+              "kind": "shell-function"
+            },
+            {
+              "name": "stale_count",
+              "line": 2510,
+              "kind": "shell-function"
+            },
+            {
+              "name": "idle_candidates",
+              "line": 2560,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_idle",
+              "line": 2573,
+              "kind": "shell-function"
+            },
+            {
+              "name": "idle_watchdog_running",
+              "line": 2646,
+              "kind": "shell-function"
+            },
+            {
+              "name": "start_idle_watchdog",
+              "line": 2650,
+              "kind": "shell-function"
+            },
+            {
+              "name": "stop_idle_watchdog_if_no_agents",
+              "line": 2720,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_reap",
+              "line": 2729,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_attach",
+              "line": 2799,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_exec",
+              "line": 2807,
+              "kind": "shell-function"
+            },
+            {
+              "name": "orchestrator_live",
+              "line": 2853,
+              "kind": "shell-function"
+            },
+            {
+              "name": "orchestrator_warranted_name",
+              "line": 2861,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_orchestrator",
+              "line": 2870,
+              "kind": "shell-function"
+            },
+            {
+              "name": "orchestrator_status",
+              "line": 2880,
+              "kind": "shell-function"
+            },
+            {
+              "name": "orchestrator_start",
+              "line": 2895,
+              "kind": "shell-function"
+            },
+            {
+              "name": "orchestrator_stop",
+              "line": 2965,
+              "kind": "shell-function"
+            }
+          ],
+          "httpPathLiterals": [],
+          "reviewStatus": "Scoped callback follow-up reviewed; final native and phase qualification remain open."
         }
       ]
     }

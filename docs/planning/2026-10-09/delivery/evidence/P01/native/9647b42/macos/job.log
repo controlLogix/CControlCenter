@@ -1,0 +1,786 @@
+P01 native macos-15	Set up job	﻿2026-10-10T00:20:46.2516700Z Current runner version: '2.337.0'
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2535650Z ##[group]Runner Image Provisioner
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2536280Z Hosted Compute Agent
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2536660Z Version: 20260828.587
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2537070Z Commit: abac92662cab4cc7352de4f9f9d2e2419aad9c29
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2537540Z Build Date: 2026-08-28T16:44:25Z
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2537960Z Worker ID: {50f8f9e7-9845-4a75-8591-13162debf5b0}
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2538410Z Azure Region: westus
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2539180Z ##[endgroup]
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2541000Z ##[group]Operating System
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2541410Z macOS
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2541760Z 15.7.9
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2542100Z 24G830
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2542440Z ##[endgroup]
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2542800Z ##[group]Runner Image
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2543180Z Image: macos-15-arm64
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2543550Z Version: 20260907.0337.1
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2544290Z Included Software: https://github.com/actions/runner-images/blob/macos-15-arm64/20260907.0337/images/macos/macos-15-arm64-Readme.md
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2545490Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-15-arm64%2F20260907.0337
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2546140Z ##[endgroup]
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2546920Z ##[group]GITHUB_TOKEN Permissions
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2548870Z Contents: read
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2549250Z Metadata: read
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2549710Z ##[endgroup]
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2551410Z Secret source: Actions
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2552000Z Cache mode: write
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2552480Z Prepare workflow directory
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2825720Z Prepare all required actions
+P01 native macos-15	Set up job	2026-10-10T00:20:46.2863100Z Getting action download info
+P01 native macos-15	Set up job	2026-10-10T00:20:46.5931510Z Download action repository 'actions/checkout@v5' (SHA:fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09)
+P01 native macos-15	Set up job	2026-10-10T00:20:46.9197090Z Download action repository 'actions/setup-python@v6' (SHA:ece7cb06caefa5fff74198d8649806c4678c61a1)
+P01 native macos-15	Set up job	2026-10-10T00:20:47.0099010Z Download action repository 'actions/setup-node@v5' (SHA:a0853c24544627f65ddf259abe73b1d18a591444)
+P01 native macos-15	Set up job	2026-10-10T00:20:47.1246310Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+P01 native macos-15	Set up job	2026-10-10T00:20:47.3249080Z Complete job name: P01 native macos-15
+P01 native macos-15	Run actions/checkout@v5	﻿2026-10-10T00:20:47.3804610Z ##[group]Run actions/checkout@v5
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.3805120Z with:
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.3805420Z   persist-credentials: false
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.3805760Z   fetch-depth: 0
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.3806070Z   repository: controlLogix/agentmux
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.3808500Z   token: ***
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.3808780Z   ssh-strict: true
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.3809070Z   ssh-user: git
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.3809360Z   clean: true
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.3809650Z   sparse-checkout-cone-mode: true
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.3810000Z   fetch-tags: false
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.3810300Z   show-progress: true
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.3810590Z   lfs: false
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.3810870Z   submodules: false
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.3811170Z   set-safe-directory: true
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.3811510Z   allow-unsafe-pr-checkout: false
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.3811960Z ##[endgroup]
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.7427800Z Syncing repository: controlLogix/agentmux
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.7429480Z ##[group]Getting Git version info
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.7430260Z Working directory is '/Users/runner/work/agentmux/agentmux'
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.7431280Z [command]/opt/homebrew/bin/git version
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.7884670Z git version 2.55.0
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.7899280Z ##[endgroup]
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.7905580Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/da33cef4-7f3f-4181-af2d-35b153eb11bc/.gitconfig'
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.7910670Z Temporarily overriding HOME='/Users/runner/work/_temp/da33cef4-7f3f-4181-af2d-35b153eb11bc' before making global git config changes
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.7911960Z Adding repository directory to the temporary git global config as a safe directory
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.7913530Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/agentmux/agentmux
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8009030Z Deleting the contents of '/Users/runner/work/agentmux/agentmux'
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8011070Z ##[group]Initializing the repository
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8013990Z [command]/opt/homebrew/bin/git init /Users/runner/work/agentmux/agentmux
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8199070Z hint: Using 'master' as the name for the initial branch. This default branch name
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8200070Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8200800Z hint: to use in all of your new repositories, which will suppress this warning,
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8201430Z hint: call:
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8201760Z hint:
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8202200Z hint: 	git config --global init.defaultBranch <name>
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8202660Z hint:
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8203090Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8204570Z hint: 'development'. The just-created branch can be renamed via this command:
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8205210Z hint:
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8205560Z hint: 	git branch -m <name>
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8205960Z hint:
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8206480Z hint: Disable this message with "git config set advice.defaultBranchName false"
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8207240Z Initialized empty Git repository in /Users/runner/work/agentmux/agentmux/.git/
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8210430Z [command]/opt/homebrew/bin/git remote add origin https://github.com/controlLogix/agentmux
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8270980Z ##[endgroup]
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8271690Z ##[group]Disabling automatic garbage collection
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8273170Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8332490Z ##[endgroup]
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8333170Z ##[group]Setting up auth
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8336750Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.8393300Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.9125640Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.9178170Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:47.9952880Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:48.0021270Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:48.1338610Z [command]/opt/homebrew/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:48.1342030Z ##[endgroup]
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:48.1342660Z ##[group]Fetching the repository
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:48.1343600Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.3681580Z From https://github.com/controlLogix/agentmux
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.3690680Z  * [new branch]      backup/pre-reset-2026-09-26 -> origin/backup/pre-reset-2026-09-26
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.3695890Z  * [new branch]      feat/agentmux-platform-rearchitecture -> origin/feat/agentmux-platform-rearchitecture
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.3696940Z  * [new branch]      main       -> origin/main
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.3699020Z [command]/opt/homebrew/bin/git branch --list --remote origin/feat/agentmux-platform-rearchitecture
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.3757560Z   origin/feat/agentmux-platform-rearchitecture
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.3762360Z [command]/opt/homebrew/bin/git rev-parse refs/remotes/origin/feat/agentmux-platform-rearchitecture
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.3814350Z 9647b4240a43c60c246512efa1553e8f4cb58530
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.3817280Z ##[endgroup]
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.3818280Z ##[group]Determining the checkout info
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.3819330Z ##[endgroup]
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.3823100Z [command]/opt/homebrew/bin/git sparse-checkout disable
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.3895330Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.3947000Z ##[group]Checking out the ref
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.3949640Z [command]/opt/homebrew/bin/git checkout --progress --force -B feat/agentmux-platform-rearchitecture refs/remotes/origin/feat/agentmux-platform-rearchitecture
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.6050020Z Switched to a new branch 'feat/agentmux-platform-rearchitecture'
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.6131400Z branch 'feat/agentmux-platform-rearchitecture' set up to track 'origin/feat/agentmux-platform-rearchitecture'.
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.6444010Z ##[endgroup]
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.6535000Z [command]/opt/homebrew/bin/git log -1 --format=%H
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.6538870Z 9647b4240a43c60c246512efa1553e8f4cb58530
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.6643920Z ##[group]Removing auth
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.6688920Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.6725910Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.7477580Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.7479280Z http.https://github.com/.extraheader
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.7481940Z [command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.7745980Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.8661750Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.8726990Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+P01 native macos-15	Run actions/checkout@v5	2026-10-10T00:20:50.9834480Z ##[endgroup]
+P01 native macos-15	Run actions/setup-python@v6	﻿2026-10-10T00:20:51.0251920Z ##[group]Run actions/setup-python@v6
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:51.0252700Z with:
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:51.0253280Z   python-version: 3.14.8
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:51.0253890Z   check-latest: false
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:51.0256830Z   token: ***
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:51.0257420Z   update-environment: true
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:51.0258030Z   allow-prereleases: false
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:51.0258640Z   freethreaded: false
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:51.0259230Z ##[endgroup]
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:51.2635520Z ##[group]Installed versions
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:51.2708130Z Version 3.14.8 was not found in the local cache
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:52.1419440Z Version 3.14.8 is available for downloading
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:52.1420290Z Download from "https://github.com/actions/python-versions/releases/download/3.14.8-36806082737/python-3.14.8-darwin-arm64.tar.gz"
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:52.9410750Z Extract downloaded archive
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:52.9594540Z [command]/usr/bin/tar xz -C /Users/runner/work/_temp/5d1d7517-43f5-4274-b288-6cc8b15ffda3 -f /Users/runner/work/_temp/7f523cbb-6894-42cc-a97c-8fc6b930adda
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:53.2692990Z Execute installation script
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:53.3017750Z Check if Python hostedtoolcache folder exist...
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:53.3127610Z Deleting Python /Users/runner/hostedtoolcache/Python/3.14.7/arm64
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:20:53.3259870Z Install Python binaries from prebuilt package
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:11.0343940Z installer: Package name is Python
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:11.0345400Z installer: choices changes file '/var/folders/nj/vtw8zd2j31d1gdrtntc5y4600000gn/T/tmp.XllJJIphg1' applied
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:11.0346770Z installer: Upgrading at base path /
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:11.0347940Z installer: The upgrade was successful.
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:11.0352780Z Create hostedtoolcach symlinks (Required for the backward compatibility)
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:11.0358250Z Create Python 3.14.8 folder
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:11.0510200Z Create additional symlinks (Required for the UsePythonVersion Azure Pipelines task and the setup-python GitHub Action)
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:11.0585740Z Upgrading pip...
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:11.7864400Z Collecting pip
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:11.7985010Z Using cached pip-26.2.1-py3-none-any.whl.metadata (4.6 kB)
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:11.8018570Z Using cached pip-26.2.1-py3-none-any.whl (1.8 MB)
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:11.8243430Z Installing collected packages: pip
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:11.8289630Z Attempting uninstall: pip
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:11.8291070Z Found existing installation: pip 26.2.1
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:11.8584520Z Uninstalling pip-26.2.1:
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:11.9764760Z Successfully uninstalled pip-26.2.1
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:12.9551210Z Successfully installed pip-26.2.1
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:13.0389480Z Install OpenSSL certificates
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:13.5241300Z Requirement already satisfied: certifi in /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages (2026.7.22)
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:13.7145670Z -- pip install --upgrade certifi
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:13.7246430Z  -- removing any existing file or link
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:13.7330130Z  -- creating symlink to certifi certificate bundle
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:13.7345940Z  -- setting permissions
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:13.7355080Z  -- update complete
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:13.7399520Z Create complete file
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:13.7554850Z Successfully set up CPython (3.14.8)
+P01 native macos-15	Run actions/setup-python@v6	2026-10-10T00:21:13.7558190Z ##[endgroup]
+P01 native macos-15	Run actions/setup-node@v5	﻿2026-10-10T00:21:13.7820960Z ##[group]Run actions/setup-node@v5
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:13.7821290Z with:
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:13.7821540Z   node-version: 22.21.1
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:13.7821850Z   always-auth: false
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:13.7822070Z   check-latest: false
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:13.7824270Z   token: ***
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:13.7824580Z   package-manager-cache: true
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:13.7824820Z env:
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:13.7825180Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.14.8/arm64
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:13.7825680Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.14.8/arm64/lib/pkgconfig
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:13.7826090Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.14.8/arm64
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:13.7826670Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.14.8/arm64
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:13.7827140Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.14.8/arm64
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:13.7827530Z ##[endgroup]
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:14.0618390Z Attempting to download 22.21.1...
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:14.0812360Z (node:10892) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:14.0836100Z (Use `node --trace-deprecation ...` to show where the warning was created)
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:14.9725190Z Acquiring 22.21.1 - arm64 from https://github.com/actions/node-versions/releases/download/22.21.1-18894912842/node-22.21.1-darwin-arm64.tar.gz
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:15.4387600Z Extracting ...
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:15.4558800Z [command]/usr/bin/tar xz --strip 1 -C /Users/runner/work/_temp/1538a6ee-dbc9-46c7-a1cb-3d98232ecbf7 -f /Users/runner/work/_temp/24673178-631e-4fef-b9f4-e8919e6d2773
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:16.8215480Z Adding to the cache ...
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:20.0028540Z ##[group]Environment details
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:20.5190950Z node: v22.21.1
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:20.5294110Z npm: 10.9.4
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:20.5395100Z yarn: 1.22.22
+P01 native macos-15	Run actions/setup-node@v5	2026-10-10T00:21:20.5499610Z ##[endgroup]
+P01 native macos-15	Build locked SDKs and run required checks	﻿2026-10-10T00:21:20.5959270Z ##[group]Run python tests/contracts/ci.py --workspace "/Users/runner/work/_temp/agentmux-p01" --evidence "/Users/runner/work/_temp/agentmux-evidence"
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:20.5960420Z ^[[36;1mpython tests/contracts/ci.py --workspace "/Users/runner/work/_temp/agentmux-p01" --evidence "/Users/runner/work/_temp/agentmux-evidence"^[[0m
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:20.6049230Z shell: /bin/bash -e {0}
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:20.6049690Z env:
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:20.6050030Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.14.8/arm64
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:20.6050610Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.14.8/arm64/lib/pkgconfig
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:20.6051160Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.14.8/arm64
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:20.6058260Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.14.8/arm64
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:20.6058820Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.14.8/arm64
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:20.6059230Z ##[endgroup]
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:21.7306370Z Collecting attrs==26.1.0 (from -r /Users/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 1))
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:21.8141510Z   Downloading attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:21.9517930Z Collecting cffi==2.1.1 (from -r /Users/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 2))
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:21.9685630Z   Downloading cffi-2.1.1-cp314-cp314-macosx_11_0_arm64.whl.metadata (2.5 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:21.9990560Z Collecting jsonschema==4.26.0 (from -r /Users/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 3))
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.0168400Z   Downloading jsonschema-4.26.0-py3-none-any.whl.metadata (7.6 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.0557450Z Collecting jsonschema-specifications==2025.9.1 (from -r /Users/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 4))
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.0731160Z   Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl.metadata (2.9 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.1014400Z Collecting pycparser==3.0 (from -r /Users/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 5))
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.1172750Z   Downloading pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.1581570Z Collecting PyNaCl==1.6.2 (from -r /Users/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 6))
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.1756970Z   Downloading pynacl-1.6.2-cp38-abi3-macosx_10_10_universal2.whl.metadata (10.0 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.2174900Z Collecting referencing==0.37.0 (from -r /Users/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 7))
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.2321250Z   Downloading referencing-0.37.0-py3-none-any.whl.metadata (2.8 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.2531860Z Collecting rfc8785==0.1.4 (from -r /Users/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 8))
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.2683560Z   Downloading rfc8785-0.1.4-py3-none-any.whl.metadata (3.4 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.4435380Z Collecting rpds-py==2026.9.1 (from -r /Users/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 9))
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.4616550Z   Downloading rpds_py-2026.9.1-cp314-cp314-macosx_11_0_arm64.whl.metadata (4.1 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.4829540Z Collecting nats-py==2.16.0 (from -r /Users/runner/work/agentmux/agentmux/hub/requirements.lock (line 7))
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.4992330Z   Downloading nats_py-2.16.0-py3-none-any.whl.metadata (8.0 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.5234690Z Collecting nkeys==0.2.1 (from -r /Users/runner/work/agentmux/agentmux/hub/requirements.lock (line 8))
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.5408100Z   Downloading nkeys-0.2.1.tar.gz (10 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:22.5533280Z   Installing build dependencies: started
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:23.3376510Z   Installing build dependencies: finished with status 'done'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:23.3389820Z   Getting requirements to build wheel: started
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:23.8840090Z   Getting requirements to build wheel: finished with status 'done'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:23.8872800Z   Preparing metadata (pyproject.toml): started
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.1163610Z   Preparing metadata (pyproject.toml): finished with status 'done'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.1386990Z Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.1767580Z Downloading cffi-2.1.1-cp314-cp314-macosx_11_0_arm64.whl (184 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.2085410Z Downloading jsonschema-4.26.0-py3-none-any.whl (90 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.2277890Z Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.2457950Z Downloading pycparser-3.0-py3-none-any.whl (48 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.2700170Z Downloading pynacl-1.6.2-cp38-abi3-macosx_10_10_universal2.whl (388 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.3005530Z Downloading referencing-0.37.0-py3-none-any.whl (26 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.3201320Z Downloading rfc8785-0.1.4-py3-none-any.whl (9.2 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.3446490Z Downloading rpds_py-2026.9.1-cp314-cp314-macosx_11_0_arm64.whl (341 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.3698560Z Downloading nats_py-2.16.0-py3-none-any.whl (93 kB)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.3883650Z Building wheels for collected packages: nkeys
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.3892250Z   Building wheel for nkeys (pyproject.toml): started
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.6011720Z   Building wheel for nkeys (pyproject.toml): finished with status 'done'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.6021650Z   Created wheel for nkeys: filename=nkeys-0.2.1-py3-none-any.whl size=10715 sha256=d89cc3a7111beae7f41143176445345b2be8deb0a77cec99ad74d012b592a9bd
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.6022740Z   Stored in directory: /Users/runner/Library/Caches/pip/wheels/fe/1d/60/2b5d7c5040c3f54b07c23e5f670e18a629155a1e506d544ade
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.6038650Z Successfully built nkeys
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:24.6206390Z Installing collected packages: rpds-py, rfc8785, pycparser, nats-py, attrs, referencing, cffi, PyNaCl, jsonschema-specifications, nkeys, jsonschema
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:25.0383340Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:25.0397120Z Successfully installed PyNaCl-1.6.2 attrs-26.1.0 cffi-2.1.1 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 nats-py-2.16.0 nkeys-0.2.1 pycparser-3.0 referencing-0.37.0 rfc8785-0.1.4 rpds-py-2026.9.1
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:26.3944000Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:26.3945570Z added 11 packages in 1s
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:26.8633920Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:26.8635830Z > @agentmux/contracts@1.0.0 build
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:26.8636640Z > tsc
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:26.8636980Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:28.4966890Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:28.4968010Z added 10 packages in 754ms
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:28.6326210Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:28.6326880Z > agentmux-storage-fixture@1.0.0 build
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:28.6327560Z > tsc
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:28.6327900Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.1030780Z test_cli_error_does_not_echo_bad_input (test_contracts.AttestationTests.test_cli_error_does_not_echo_bad_input) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.2681960Z test_cli_size_limit_excludes_only_line_delimiter (test_contracts.AttestationTests.test_cli_size_limit_excludes_only_line_delimiter) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.3256110Z test_expiry_is_exclusive (test_contracts.AttestationTests.test_expiry_is_exclusive) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.3281610Z test_no_remote_schema_resolution_and_unknown_schema (test_contracts.AttestationTests.test_no_remote_schema_resolution_and_unknown_schema) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.3321840Z test_schema_cache_invalidates_changed_bytes_with_same_mtime (test_contracts.AttestationTests.test_schema_cache_invalidates_changed_bytes_with_same_mtime) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.3426470Z test_signature_and_payload_tampering (test_contracts.AttestationTests.test_signature_and_payload_tampering) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.3495800Z test_signed_envelope (test_contracts.AttestationTests.test_signed_envelope) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.3591730Z test_signed_invalid_issuer_and_lifetime (test_contracts.AttestationTests.test_signed_invalid_issuer_and_lifetime) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.3792840Z test_cross_field_invariants (test_contracts.SemanticTests.test_cross_field_invariants) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.3793730Z test_bad_unicode_and_nonfinite_numbers (test_contracts.WireTests.test_bad_unicode_and_nonfinite_numbers) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.3794950Z test_duplicate_keys_include_escaped_nested_names (test_contracts.WireTests.test_duplicate_keys_include_escaped_nested_names) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.3800540Z test_limits_and_non_json_objects (test_contracts.WireTests.test_limits_and_non_json_objects) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.3801520Z test_raw_large_integer_is_not_rounded (test_contracts.WireTests.test_raw_large_integer_is_not_rounded) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.3802700Z test_rfc_number_and_utf16_ordering (test_contracts.WireTests.test_rfc_number_and_utf16_ordering) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.4894620Z test_all_edges_and_required_evidence (test_state_models.StateModelTests.test_all_edges_and_required_evidence) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.4921520Z test_cancellation_survives_unknown_result (test_state_models.StateModelTests.test_cancellation_survives_unknown_result) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.5052750Z test_closed_fields_owner_revision_and_evidence (test_state_models.StateModelTests.test_closed_fields_owner_revision_and_evidence) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.5080450Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.5081480Z ----------------------------------------------------------------------
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.5082070Z Ran 17 tests in 0.504s
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.5082500Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.5082750Z OK
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.7479460Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.7530940Z > @agentmux/contracts@1.0.0 test
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.7536000Z > node --test dist/test.js dist/state-models.test.js
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.7538010Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:32.8196290Z TAP version 13
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.2749070Z # Subtest: all 68 model edges require the exact role, revision and evidence
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.2849400Z ok 1 - all 68 model edges require the exact role, revision and evidence
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.2949510Z   ---
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3054490Z   duration_ms: 282.732625
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3153750Z   type: 'test'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3194690Z   ...
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3212100Z # Subtest: malformed requests cannot invent state, authority, guards or revisions
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3224840Z ok 2 - malformed requests cannot invent state, authority, guards or revisions
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3255380Z   ---
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3257280Z   duration_ms: 5.072375
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3258160Z   type: 'test'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3261290Z   ...
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3265220Z # Subtest: cancellation remains sticky through uncertainty and blocks normal completion
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3269760Z ok 3 - cancellation remains sticky through uncertainty and blocks normal completion
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3271150Z   ---
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3272060Z   duration_ms: 1.505083
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3272430Z   type: 'test'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3273650Z   ...
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3274350Z # Subtest: evidence reference limits count Unicode code points
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3276850Z ok 4 - evidence reference limits count Unicode code points
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3280970Z   ---
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3281390Z   duration_ms: 7.526458
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3281820Z   type: 'test'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.3288660Z   ...
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4631240Z # Subtest: rejects duplicate escaped keys, comments, trailing syntax and invalid UTF-8
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4679330Z ok 5 - rejects duplicate escaped keys, comments, trailing syntax and invalid UTF-8
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4717700Z   ---
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4719820Z   duration_ms: 2.943958
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4728290Z   type: 'test'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4729880Z   ...
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4730880Z # Subtest: preserves hostile property names without prototype mutation
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4731880Z ok 6 - preserves hostile property names without prototype mutation
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4733840Z   ---
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4734430Z   duration_ms: 0.347584
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4773210Z   type: 'test'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4773880Z   ...
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4775450Z # Subtest: canonical numbers and UTF-16 property ordering match JCS
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4776440Z ok 7 - canonical numbers and UTF-16 property ordering match JCS
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4776960Z   ---
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4777230Z   duration_ms: 0.242834
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4777470Z   type: 'test'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4777770Z   ...
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4778190Z # Subtest: RFC8032 seed derives the published public key
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4778760Z ok 8 - RFC8032 seed derives the published public key
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4779740Z   ---
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4787650Z   duration_ms: 10.1195
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4788160Z   type: 'test'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4788680Z   ...
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4789290Z # Subtest: bounds canonical output, container depth and dense arrays
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4791330Z ok 9 - bounds canonical output, container depth and dense arrays
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4793000Z   ---
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4801170Z   duration_ms: 17.878958
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4822240Z   type: 'test'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4862080Z   ...
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4862950Z # Subtest: CLI rejects an oversized frame once and resumes at the next line
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4865970Z ok 10 - CLI rejects an oversized frame once and resumes at the next line
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4867110Z   ---
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4867540Z   duration_ms: 221.874083
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4867970Z   type: 'test'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4868390Z   ...
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4868930Z # Subtest: compiled schema cache invalidates when trusted schema bytes change
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4869690Z ok 11 - compiled schema cache invalidates when trusted schema bytes change
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4870410Z   ---
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4871310Z   duration_ms: 169.230167
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4872860Z   type: 'test'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4874340Z   ...
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4876260Z # Subtest: rejects cross-field manifest, context and owner contradictions
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4877470Z ok 12 - rejects cross-field manifest, context and owner contradictions
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4878420Z   ---
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4880440Z   duration_ms: 47.726083
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4881560Z   type: 'test'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4882940Z   ...
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4884580Z # Subtest: validates promoted schemas and rejects unsigned outer changes
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4886510Z ok 13 - validates promoted schemas and rejects unsigned outer changes
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4887360Z   ---
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4890460Z   duration_ms: 18.286625
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4892470Z   type: 'test'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4893130Z   ...
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4894030Z 1..13
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4894640Z # tests 13
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4896030Z # suites 0
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4897130Z # pass 13
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4897660Z # fail 0
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4898430Z # cancelled 0
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4899930Z # skipped 0
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4900430Z # todo 0
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:33.4901880Z # duration_ms 669.041125
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:34.4034620Z test_all_required_schema_fields_and_unknown_fields (test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:34.8793010Z test_all_schema_examples (test_conformance.Conformance.test_all_schema_examples) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:36.1598780Z test_attestation_tampering_and_signed_policy_rejections (test_conformance.Conformance.test_attestation_tampering_and_signed_policy_rejections) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:37.6297320Z test_cross_signatures_both_directions (test_conformance.Conformance.test_cross_signatures_both_directions) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:37.8722290Z test_depth_boundary (test_conformance.Conformance.test_depth_boundary) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:38.1090020Z test_escaped_unicode_valid (test_conformance.Conformance.test_escaped_unicode_valid) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:38.4199040Z test_exact_size_frame_excludes_newline_delimiter (test_conformance.Conformance.test_exact_size_frame_excludes_newline_delimiter) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:38.6480470Z test_independent_canonical_vectors (test_conformance.Conformance.test_independent_canonical_vectors) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:38.8986580Z test_oversized_raw_cli_recovers (test_conformance.Conformance.test_oversized_raw_cli_recovers) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:39.2053280Z test_raw_utf8_and_recovery (test_conformance.Conformance.test_raw_utf8_and_recovery) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:39.4664630Z test_strict_parser_rejections (test_conformance.Conformance.test_strict_parser_rejections) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:40.2406630Z test_unsigned_envelope_cannot_override_verified_claims (test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:40.2438610Z test_confirmed_cancel_stops_output_and_requires_reconciliation (test_fake_execution.ControlledExecution.test_confirmed_cancel_stops_output_and_requires_reconciliation) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:40.2476030Z test_delay_and_explicit_reordering_preserve_each_operation (test_fake_execution.ControlledExecution.test_delay_and_explicit_reordering_preserve_each_operation) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:40.2480560Z test_histories_and_snapshots_are_detached_from_delivered_objects (test_fake_execution.ControlledExecution.test_histories_and_snapshots_are_detached_from_delivered_objects) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:40.2482070Z test_invalid_controls_and_duplicate_dispatch_have_no_second_effect (test_fake_execution.ControlledExecution.test_invalid_controls_and_duplicate_dispatch_have_no_second_effect) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:40.2507830Z test_lost_reply_is_unknown_despite_completed_provider (test_fake_execution.ControlledExecution.test_lost_reply_is_unknown_despite_completed_provider) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:40.2509150Z test_provider_unavailable_proves_no_dispatch (test_fake_execution.ControlledExecution.test_provider_unavailable_proves_no_dispatch) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:40.2510230Z test_reply_at_deadline_is_unknown_without_polling (test_fake_execution.ControlledExecution.test_reply_at_deadline_is_unknown_without_polling) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:40.2511390Z test_success_uses_real_callback_and_separate_output_history (test_fake_execution.ControlledExecution.test_success_uses_real_callback_and_separate_output_history) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:40.2512670Z test_timeout_before_execution_does_not_retry_and_late_reply_needs_lookup (test_fake_execution.ControlledExecution.test_timeout_before_execution_does_not_retry_and_late_reply_needs_lookup) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:40.2513960Z test_unconfirmed_cancel_retains_intent_after_late_completion (test_fake_execution.ControlledExecution.test_unconfirmed_cancel_retains_intent_after_late_completion) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:40.6413490Z test_cancellation_wide_target_and_unknown_outcome_shapes (test_payloads.Payloads.test_cancellation_wide_target_and_unknown_outcome_shapes) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:41.0407400Z test_every_registry_payload (test_payloads.Payloads.test_every_registry_payload) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:41.7829880Z test_missing_and_unknown_payload_fields (test_payloads.Payloads.test_missing_and_unknown_payload_fields) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:42.3031520Z test_payload_context_binding (test_payloads.Payloads.test_payload_context_binding) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:42.7345190Z test_receipt_execution_and_acceptance_are_not_interchangeable (test_payloads.Payloads.test_receipt_execution_and_acceptance_are_not_interchangeable) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:43.2048420Z test_unknown_contract_wrong_major_kind_and_service (test_payloads.Payloads.test_unknown_contract_wrong_major_kind_and_service) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:44.0733400Z test_valid_signature_does_not_bypass_payload_admission (test_payloads.Payloads.test_valid_signature_does_not_bypass_payload_admission) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:45.1999300Z test_recovery_approval_cannot_override_hard_denial (test_recovery.Recovery.test_recovery_approval_cannot_override_hard_denial) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:47.7435560Z test_recovery_cancellation_and_unknown_attempt (test_recovery.Recovery.test_recovery_cancellation_and_unknown_attempt) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:51.0008140Z test_recovery_reordered_stale_result_and_duplicate (test_recovery.Recovery.test_recovery_reordered_stale_result_and_duplicate) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:52.0298620Z test_recovery_replay_and_authorized_late_lookup (test_recovery.Recovery.test_recovery_replay_and_authorized_late_lookup) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:53.8549430Z test_recovery_signed_deadline_and_unknown_outcome_payloads (test_recovery.Recovery.test_recovery_signed_deadline_and_unknown_outcome_payloads) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:55.8998780Z test_recovery_unavailable_requires_observed_non_admission (test_recovery.Recovery.test_recovery_unavailable_requires_observed_non_admission) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:56.2980980Z test_identity_uniqueness_and_self_dependency (test_semantics.Semantics.test_identity_uniqueness_and_self_dependency) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:56.8980660Z test_p00_semantic_rejections_remain_enforced (test_semantics.Semantics.test_p00_semantic_rejections_remain_enforced) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:57.5853240Z test_all_accepted_draft_edges_and_each_missing_guard (test_state_models.StateModels.test_all_accepted_draft_edges_and_each_missing_guard) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:57.8814630Z test_closed_input_and_owner_binding (test_state_models.StateModels.test_closed_input_and_owner_binding) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:58.0825800Z test_delivery_receipts_do_not_advance_work (test_state_models.StateModels.test_delivery_receipts_do_not_advance_work) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:58.3156760Z test_json_integer_and_unicode_reference_boundaries (test_state_models.StateModels.test_json_integer_and_unicode_reference_boundaries) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:58.5360940Z test_ordered_reservation_result_and_origin_acceptance (test_state_models.StateModels.test_ordered_reservation_result_and_origin_acceptance) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:58.7918590Z test_pending_cancellation_survives_uncertain_execution (test_state_models.StateModels.test_pending_cancellation_survives_uncertain_execution) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.0126390Z test_preserved_p00_model_examples (test_state_models.StateModels.test_preserved_p00_model_examples) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.2381940Z test_reconciliation_records_newly_discovered_cancellation (test_state_models.StateModels.test_reconciliation_records_newly_discovered_cancellation) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.2382730Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.2383090Z ----------------------------------------------------------------------
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.2383570Z Ran 45 tests in 25.483s
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.2383690Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.2383850Z OK
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5168230Z {
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5168790Z   "recordedAt": "2026-10-10T00:21:59.515761+00:00",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5169630Z   "candidateCommit": "9647b4240a43c60c246512efa1553e8f4cb58530",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5170290Z   "command": [
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5170830Z     "/Library/Frameworks/Python.framework/Versions/3.14/bin/python",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5171600Z     "docs/planning/2026-10-09/delivery/check_conformance_evidence.py",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5172180Z     "--report",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5172810Z     "/Users/runner/work/_temp/agentmux-evidence/contracts.json",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5173340Z     "--candidate",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5173710Z     "9647b4240a43c60c246512efa1553e8f4cb58530",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5174210Z     "--environment",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5174520Z     "macos",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5174900Z     "--evidence",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5175600Z     "/Users/runner/work/_temp/agentmux-evidence/conformance-admission.json"
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5175990Z   ],
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5176280Z   "environmentRequired": "macos",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5176670Z   "report": "/Users/runner/work/_temp/agentmux-evidence/contracts.json",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5177250Z   "reportSha256": "9d59b051a61226a28a51db12c875a05b9a1dd4e65ad7a63e54ccb2439f9aaeec",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5177860Z   "checkerSha256": "2f1508894c5fccd9ee1d4f44d11171f959529e2b1fa55621d76757f866129dc6",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5178280Z   "exitCode": 0,
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5178520Z   "errors": [],
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5178720Z   "limits": [
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5179250Z     "Conformance-format evidence admission only; not authenticity proof, other suite acceptance or phase approval.",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5180010Z     "Compiled hashes record tested output identity; this tool does not rebuild or authenticate binaries.",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5180590Z     "Candidate comparison reads committed Git blobs, never working-tree files."
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5180980Z   ]
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.5181170Z }
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:21:59.8567750Z test_accepts_archived_native_report_against_actual_git_candidate (__main__.ConformanceEvidence.test_accepts_archived_native_report_against_actual_git_candidate) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:00.0162050Z test_build_and_mirror_claims_need_actual_hash_equality (__main__.ConformanceEvidence.test_build_and_mirror_claims_need_actual_hash_equality) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:00.2387770Z test_linux_cannot_count_as_wsl_or_macos_evidence (__main__.ConformanceEvidence.test_linux_cannot_count_as_wsl_or_macos_evidence) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:00.3687840Z test_missing_compiled_output_and_repeated_test_id_reject (__main__.ConformanceEvidence.test_missing_compiled_output_and_repeated_test_id_reject) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:00.4287340Z test_missing_required_source_cannot_reduce_the_scope (__main__.ConformanceEvidence.test_missing_required_source_cannot_reduce_the_scope) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:00.5485770Z test_omitted_method_rejects_even_when_test_count_is_adjusted (__main__.ConformanceEvidence.test_omitted_method_rejects_even_when_test_count_is_adjusted) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:00.5585790Z test_rejects_unsupported_dynamic_discovery (__main__.ConformanceEvidence.test_rejects_unsupported_dynamic_discovery) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:00.6352170Z test_skipped_environment_rejects_even_with_success_exit_code (__main__.ConformanceEvidence.test_skipped_environment_rejects_even_with_success_exit_code) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:00.8057720Z test_skipped_test_rejects_even_with_success_summary (__main__.ConformanceEvidence.test_skipped_test_rejects_even_with_success_summary) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:01.3294880Z test_skips_failures_and_mutable_build_flags_each_reject (__main__.ConformanceEvidence.test_skips_failures_and_mutable_build_flags_each_reject) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:01.3985500Z test_stale_hash_rejects_even_with_success_exit_code (__main__.ConformanceEvidence.test_stale_hash_rejects_even_with_success_exit_code) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:01.4560550Z test_working_selection_and_uncommitted_inputs_cannot_qualify_old_candidate (__main__.ConformanceEvidence.test_working_selection_and_uncommitted_inputs_cannot_qualify_old_candidate) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:01.4561550Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:01.4562170Z ----------------------------------------------------------------------
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:01.4562840Z Ran 12 tests in 1.671s
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:01.4563290Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:01.4563510Z OK
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:10.2123540Z {"status": "passed", "cases": 20, "seconds": 7.441}
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:13.4941360Z {"exitCode": 0, "passedCases": 11, "failure": null}
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.1167580Z {"exitCode": 0, "passedCases": 19, "failure": null}
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.3138250Z Running hub.tests.test_local_runner, hub.tests.test_governance, hub.tests.test_fed_unit, hub.tests.test_hub_offline, hub.tests.test_nats_federation, hub.tests.test_fed_live; evidence: /Users/runner/work/_temp/agentmux-p01/hub-home/cache/agentmux-tests/22504d4121b06e09/20261010T002224-188e54bc
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.6297180Z test_class_setup_failure_saves_class (hub.tests.test_local_runner.RunnerTests.test_class_setup_failure_saves_class) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.6382950Z test_failed_selection_can_be_retried_without_running_other_suites (hub.tests.test_local_runner.RunnerTests.test_failed_selection_can_be_retried_without_running_other_suites) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.6433160Z test_import_error_retries_original_selection (hub.tests.test_local_runner.RunnerTests.test_import_error_retries_original_selection) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.6434290Z test_regular_selector_is_unchanged (hub.tests.test_local_runner.RunnerTests.test_regular_selector_is_unchanged) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.6499030Z test_skipped_or_empty_selection_cannot_pass (hub.tests.test_local_runner.RunnerTests.test_skipped_or_empty_selection_cannot_pass) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.6502080Z test_subtest_failure_saves_loadable_parent (hub.tests.test_local_runner.RunnerTests.test_subtest_failure_saves_loadable_parent) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.6506330Z test_subject_destination_repository_and_role_match (hub.tests.test_governance.AuthorizationBinding.test_subject_destination_repository_and_role_match) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.6507520Z test_work_cannot_enter_through_information_plane (hub.tests.test_governance.AuthorizationBinding.test_work_cannot_enter_through_information_plane) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.7225450Z test_concurrent_stores_do_not_replace_snapshots (hub.tests.test_governance.BackupIdentity.test_concurrent_stores_do_not_replace_snapshots) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.7293720Z test_failed_copy_does_not_publish_or_prune_a_snapshot (hub.tests.test_governance.BackupIdentity.test_failed_copy_does_not_publish_or_prune_a_snapshot) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.7482140Z test_frozen_clock_keeps_distinct_restorable_snapshots (hub.tests.test_governance.BackupIdentity.test_frozen_clock_keeps_distinct_restorable_snapshots) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.7564190Z test_second_boundary_uses_one_timestamp_for_backup_rotation (hub.tests.test_governance.BackupIdentity.test_second_boundary_uses_one_timestamp_for_backup_rotation) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.8244070Z test_abrupt_process_exit_after_completion_still_returns_result (hub.tests.test_governance.WorkProtocol.test_abrupt_process_exit_after_completion_still_returns_result) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.8458890Z test_completion_recovers_after_restart_and_failed_staging (hub.tests.test_governance.WorkProtocol.test_completion_recovers_after_restart_and_failed_staging) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.8641200Z test_exhausted_lease_also_records_return_obligation (hub.tests.test_governance.WorkProtocol.test_exhausted_lease_also_records_return_obligation) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.9155540Z test_late_grant_cannot_revive_cancelled_execution (hub.tests.test_governance.WorkProtocol.test_late_grant_cannot_revive_cancelled_execution) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.9451880Z test_legacy_work_stays_quarantined_and_cannot_be_auto_approved (hub.tests.test_governance.WorkProtocol.test_legacy_work_stays_quarantined_and_cannot_be_auto_approved) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.9648960Z test_malformed_claim_cannot_reserve_an_origin_task (hub.tests.test_governance.WorkProtocol.test_malformed_claim_cannot_reserve_an_origin_task) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:24.9837420Z test_origin_reservation_and_grant_rollback_together (hub.tests.test_governance.WorkProtocol.test_origin_reservation_and_grant_rollback_together) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.0042170Z test_receive_is_atomic_with_claim_and_retry_after_injected_crash (hub.tests.test_governance.WorkProtocol.test_receive_is_atomic_with_claim_and_retry_after_injected_crash) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.0224480Z test_result_binds_peer_node_attempt_task_repo_grant_and_evidence (hub.tests.test_governance.WorkProtocol.test_result_binds_peer_node_attempt_task_repo_grant_and_evidence) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.0438360Z test_same_peer_other_node_completes_without_confusing_origin_rows (hub.tests.test_governance.WorkProtocol.test_same_peer_other_node_completes_without_confusing_origin_rows) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.0671740Z test_two_receivers_only_origin_selected_one_becomes_ready (hub.tests.test_governance.WorkProtocol.test_two_receivers_only_origin_selected_one_becomes_ready) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.0870310Z test_completion_keeps_durable_return_intent_without_callback (hub.tests.test_governance.WorkRecovery.test_completion_keeps_durable_return_intent_without_callback) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.0900960Z test_incoming_creation_rolls_back_when_attribution_fails (hub.tests.test_governance.WorkRecovery.test_incoming_creation_rolls_back_when_attribution_fails) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.0985910Z test_same_peer_other_node_is_not_discarded (hub.tests.test_governance.WorkRecovery.test_same_peer_other_node_is_not_discarded) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.1197650Z test_wrong_peer_result_does_not_complete_origin (hub.tests.test_governance.WorkRecovery.test_wrong_peer_result_does_not_complete_origin) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.1215260Z test_round_trip (hub.tests.test_fed_unit.Config.test_round_trip) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.1216370Z test_subjects_refuse_bad_tokens (hub.tests.test_fed_unit.Envelope.test_subjects_refuse_bad_tokens) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.1217370Z test_validate (hub.tests.test_fed_unit.Envelope.test_validate) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.1218230Z test_only_privileged_tools_are_gated (hub.tests.test_fed_unit.Gate.test_only_privileged_tools_are_gated) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.1219240Z test_remote_work_blocks_privileged (hub.tests.test_fed_unit.Gate.test_remote_work_blocks_privileged) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.1221440Z test_local_names_differ_rid_does_not (hub.tests.test_fed_unit.Identity.test_local_names_differ_rid_does_not) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.1222760Z test_same_repo_same_rid_whatever_the_url_spelling (hub.tests.test_fed_unit.Identity.test_same_repo_same_rid_whatever_the_url_spelling) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.1223970Z test_unshared_and_unmatched (hub.tests.test_fed_unit.Identity.test_unshared_and_unmatched) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.1225010Z test_privileged_work_is_quarantined_even_from_auto (hub.tests.test_fed_unit.Inbound.test_privileged_work_is_quarantined_even_from_auto) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.1226400Z test_spoof_self_and_scope (hub.tests.test_fed_unit.Inbound.test_spoof_self_and_scope) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.1227160Z test_trust_levels (hub.tests.test_fed_unit.Inbound.test_trust_levels) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.1227810Z test_wrap (hub.tests.test_fed_unit.Inbound.test_wrap) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.1316540Z test_protocol (hub.tests.test_fed_unit.Mcp.test_protocol) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.2507470Z test_redact_block_and_size (hub.tests.test_fed_unit.Outbound.test_redact_block_and_size) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.2608970Z test_scope (hub.tests.test_fed_unit.Outbound.test_scope) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.2702430Z test_blocks_private_keys_and_seeds (hub.tests.test_fed_unit.Redaction.test_blocks_private_keys_and_seeds) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.2703840Z test_clean_payload_is_untouched (hub.tests.test_fed_unit.Redaction.test_clean_payload_is_untouched) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.2704890Z test_redacts_known_tokens_and_keeps_the_rest (hub.tests.test_fed_unit.Redaction.test_redacts_known_tokens_and_keeps_the_rest) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.2705910Z test_migration_takes_a_backup_first (hub.tests.test_hub_offline.BackupsAndRetention.test_migration_takes_a_backup_first) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.2706940Z test_prune_never_touches_undelivered_mail (hub.tests.test_hub_offline.BackupsAndRetention.test_prune_never_touches_undelivered_mail) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.2830660Z test_rotation_keeps_newest_and_copy_restores (hub.tests.test_hub_offline.BackupsAndRetention.test_rotation_keeps_newest_and_copy_restores) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.5940560Z test_silent_endpoint_times_out_instead_of_hanging (hub.tests.test_hub_offline.BridgeConnectBounded.test_silent_endpoint_times_out_instead_of_hanging) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.6043300Z test_assistant_text_and_partial_lines_are_not_receipts (hub.tests.test_hub_offline.CliReceipts.test_assistant_text_and_partial_lines_are_not_receipts) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.6115800Z test_each_cli_format (hub.tests.test_hub_offline.CliReceipts.test_each_cli_format) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.6167420Z test_grok_bell_split_across_chunks (hub.tests.test_hub_offline.CliReceipts.test_grok_bell_split_across_chunks) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.6287900Z test_hold_alert_fires_once (hub.tests.test_hub_offline.CliReceipts.test_hold_alert_fires_once) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.6354560Z test_mark_received (hub.tests.test_hub_offline.CliReceipts.test_mark_received) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:25.6355350Z test_booting_defers (hub.tests.test_hub_offline.Deliver.test_booting_defers) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:27.4462090Z test_busy_defers_without_keys (hub.tests.test_hub_offline.Deliver.test_busy_defers_without_keys) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:30.3614260Z test_clean_submit (hub.tests.test_hub_offline.Deliver.test_clean_submit) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:33.8996380Z test_copy_mode_left_first (hub.tests.test_hub_offline.Deliver.test_copy_mode_left_first) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:33.8997420Z test_handle_mismatch_refused (hub.tests.test_hub_offline.Deliver.test_handle_mismatch_refused) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:37.5321230Z test_hint_text_cleared_first (hub.tests.test_hub_offline.Deliver.test_hint_text_cleared_first) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:38.4969670Z test_login_modal_blocks_without_keys (hub.tests.test_hub_offline.Deliver.test_login_modal_blocks_without_keys) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:44.0875650Z test_placeholder_gets_second_enter (hub.tests.test_hub_offline.Deliver.test_placeholder_gets_second_enter) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:46.1632260Z test_stale_line_resubmitted_not_retyped (hub.tests.test_hub_offline.Deliver.test_stale_line_resubmitted_not_retyped) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:47.2178740Z test_unknown_prompt_blocks (hub.tests.test_hub_offline.Deliver.test_unknown_prompt_blocks) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:47.2180220Z test_update_banner_is_not_the_update_menu (hub.tests.test_hub_offline.Deliver.test_update_banner_is_not_the_update_menu)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:50.8091750Z codex 0.159.2 (2026-09-30): every pane shows this NON-modal banner. It must be ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:22:55.7806230Z test_update_modal_answered_safely (hub.tests.test_hub_offline.Deliver.test_update_modal_answered_safely) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:01.6099090Z test_missing_safe_option_blocks (hub.tests.test_hub_offline.MenuByLabel.test_missing_safe_option_blocks) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:06.8575500Z test_trust_selects_yes_even_when_no_is_preselected (hub.tests.test_hub_offline.MenuByLabel.test_trust_selects_yes_even_when_no_is_preselected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:06.8706410Z test_attempts_to_dead (hub.tests.test_hub_offline.Messaging.test_attempts_to_dead) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:06.8818050Z test_courier_kinds_accepted (hub.tests.test_hub_offline.Messaging.test_courier_kinds_accepted) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:06.8924530Z test_direct_inbox_ack (hub.tests.test_hub_offline.Messaging.test_direct_inbox_ack) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:06.9004350Z test_duplicate_live_name_refused (hub.tests.test_hub_offline.Messaging.test_duplicate_live_name_refused) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:06.9147550Z test_events_tail_returns_newest_oldest_first (hub.tests.test_hub_offline.Messaging.test_events_tail_returns_newest_oldest_first) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:06.9567080Z test_fts_and_audit (hub.tests.test_hub_offline.Messaging.test_fts_and_audit) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:06.9627210Z test_idempotent_post (hub.tests.test_hub_offline.Messaging.test_idempotent_post) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:06.9682020Z test_legacy_names_resolve (hub.tests.test_hub_offline.Messaging.test_legacy_names_resolve) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:06.9737750Z test_no_live_recipient_refused (hub.tests.test_hub_offline.Messaging.test_no_live_recipient_refused) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:06.9932730Z test_order_preserved (hub.tests.test_hub_offline.Messaging.test_order_preserved) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:06.9990710Z test_reregistered_name_does_not_inherit_mail (hub.tests.test_hub_offline.Messaging.test_reregistered_name_does_not_inherit_mail) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:07.0067490Z test_role_broadcast_and_cross_repo_group (hub.tests.test_hub_offline.Messaging.test_role_broadcast_and_cross_repo_group) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:07.0142100Z test_unknown_kind_lists_known (hub.tests.test_hub_offline.Messaging.test_unknown_kind_lists_known) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:07.0202270Z test_virtual_operator_inbox (hub.tests.test_hub_offline.Messaging.test_virtual_operator_inbox) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:07.0204830Z test_addresses_and_subjects (hub.tests.test_hub_offline.Names.test_addresses_and_subjects) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:07.0207580Z test_all_address_forms_roundtrip (hub.tests.test_hub_offline.Names.test_all_address_forms_roundtrip) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:07.0211460Z test_malformed_addresses_rejected (hub.tests.test_hub_offline.Names.test_malformed_addresses_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:07.0212480Z test_normalize_and_refuse (hub.tests.test_hub_offline.Names.test_normalize_and_refuse) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:07.0213260Z test_session_roundtrip (hub.tests.test_hub_offline.Names.test_session_roundtrip) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:07.0214150Z test_session_spellings_enforce_same_length_limits (hub.tests.test_hub_offline.Names.test_session_spellings_enforce_same_length_limits) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:07.0215130Z test_claude_bypass_consent_answer (hub.tests.test_hub_offline.Profiles.test_claude_bypass_consent_answer) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:07.0216020Z test_claude_idle_prompt_is_not_a_modal (hub.tests.test_hub_offline.Profiles.test_claude_idle_prompt_is_not_a_modal) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:07.2550330Z test_agentmux_post_goes_through_the_hub (hub.tests.test_hub_offline.ServerAPI.test_agentmux_post_goes_through_the_hub) ... FAIL
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:07.4539920Z test_every_write_verb_returns_a_result (hub.tests.test_hub_offline.ServerAPI.test_every_write_verb_returns_a_result) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:07.5551410Z test_retire_courier_imports_only_the_undelivered_backlog_once (hub.tests.test_hub_offline.ServerAPI.test_retire_courier_imports_only_the_undelivered_backlog_once) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:08.1299560Z test_subscribe_streams_new_mail_and_events (hub.tests.test_hub_offline.ServerAPI.test_subscribe_streams_new_mail_and_events) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:08.1338760Z test_tcp_ignores_as (hub.tests.test_hub_offline.ServerAPI.test_tcp_ignores_as) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:08.1384710Z test_tcp_post_and_read (hub.tests.test_hub_offline.ServerAPI.test_tcp_post_and_read) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:08.1386840Z test_tcp_requires_a_valid_token (hub.tests.test_hub_offline.ServerAPI.test_tcp_requires_a_valid_token) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:08.1387840Z test_token_file_is_private (hub.tests.test_hub_offline.ServerAPI.test_token_file_is_private) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:08.1663360Z test_unknown_verb_is_an_error_not_null (hub.tests.test_hub_offline.ServerAPI.test_unknown_verb_is_an_error_not_null) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:08.8053580Z test_cancel_takes_open_children (hub.tests.test_hub_offline.Work.test_cancel_takes_open_children) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:08.9303100Z test_capacity_and_lease_expiry (hub.tests.test_hub_offline.Work.test_capacity_and_lease_expiry) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:08.9357590Z test_dead_agent_returns_leases (hub.tests.test_hub_offline.Work.test_dead_agent_returns_leases) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:08.9404490Z test_direct_to_dead_refused (hub.tests.test_hub_offline.Work.test_direct_to_dead_refused) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:09.4929250Z test_first_claim_wins_across_processes (hub.tests.test_hub_offline.Work.test_first_claim_wins_across_processes) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:09.5178390Z test_path_claims_are_per_repo (hub.tests.test_hub_offline.Work.test_path_claims_are_per_repo) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:09.5249400Z test_requirements (hub.tests.test_hub_offline.Work.test_requirements) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:09.5376300Z test_team_lead_decomposes (hub.tests.test_hub_offline.Work.test_team_lead_decomposes) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:10.3375490Z test_direct_message_crosses_nodes (hub.tests.test_nats_federation.TwoNodes.test_direct_message_crosses_nodes) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:13.7987580Z test_federated_role_item_claimed_exactly_once (hub.tests.test_nats_federation.TwoNodes.test_federated_role_item_claimed_exactly_once) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:15.8477460Z test_governance_same_peer_different_node_round_trip (hub.tests.test_fed_live.Fed.test_governance_same_peer_different_node_round_trip)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:17.4875630Z AMX-BASE-004: the consuming node must not look for the origin's local row. ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:17.9823290Z test_governance_v3_offer_isolated_from_legacy_work_consumer (hub.tests.test_fed_live.Fed.test_governance_v3_offer_isolated_from_legacy_work_consumer) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:20.1161610Z test_governance_wrong_executor_result_cannot_complete_work (hub.tests.test_fed_live.Fed.test_governance_wrong_executor_result_cannot_complete_work) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:20.2640460Z test_p0_connected_and_present (hub.tests.test_fed_live.Fed.test_p0_connected_and_present) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:20.2642770Z test_p0_payload_spoof_is_dropped (hub.tests.test_fed_live.Fed.test_p0_payload_spoof_is_dropped)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:20.3318510Z mallory may publish am.msg.mallory.* but writes from=nick in the payload. ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:22.3385870Z test_p0_server_refuses_spoofed_subject (hub.tests.test_fed_live.Fed.test_p0_server_refuses_spoofed_subject) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:22.5181970Z test_p1_denied_peer_is_dropped (hub.tests.test_fed_live.Fed.test_p1_denied_peer_is_dropped) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:23.9333120Z test_p1_remote_privileged_work_needs_explicit_approval (hub.tests.test_fed_live.Fed.test_p1_remote_privileged_work_needs_explicit_approval) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:24.0396380Z test_p1_scope_limits_who_a_repo_is_shared_with (hub.tests.test_fed_live.Fed.test_p1_scope_limits_who_a_repo_is_shared_with) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:24.6297410Z test_p1_secrets_are_redacted_and_keys_blocked (hub.tests.test_fed_live.Fed.test_p1_secrets_are_redacted_and_keys_blocked) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:25.2896050Z test_p1_untrusted_peer_is_quarantined_then_approved (hub.tests.test_fed_live.Fed.test_p1_untrusted_peer_is_quarantined_then_approved) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:25.2897110Z test_p2_address_in_the_peers_own_naming (hub.tests.test_fed_live.Fed.test_p2_address_in_the_peers_own_naming)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:25.8045180Z Live-demo finding: alice copied nick's repo name into an address. Accept it. ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:28.0030700Z test_p2_federated_work_is_done_exactly_once_and_comes_home (hub.tests.test_fed_live.Fed.test_p2_federated_work_is_done_exactly_once_and_comes_home) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:28.8401190Z test_p2_message_reply_round_trip (hub.tests.test_fed_live.Fed.test_p2_message_reply_round_trip) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:29.3508640Z test_p2_role_address_reaches_a_holder (hub.tests.test_fed_live.Fed.test_p2_role_address_reaches_a_holder) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:30.0101550Z test_p3_shared_board_cas (hub.tests.test_fed_live.Fed.test_p3_shared_board_cas) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:31.3614130Z test_p4_knowledge_explicit_auto_and_search (hub.tests.test_fed_live.Fed.test_p4_knowledge_explicit_auto_and_search) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:32.4832400Z test_p5_code_share_fetch_verify (hub.tests.test_fed_live.Fed.test_p5_code_share_fetch_verify) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:32.5129090Z test_p6_panel_has_every_plugin (hub.tests.test_fed_live.Fed.test_p6_panel_has_every_plugin) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:38.8082170Z test_z_kill_switch_revoke_and_resume (hub.tests.test_fed_live.Fed.test_z_kill_switch_revoke_and_resume) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3917440Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3919470Z ======================================================================
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3921760Z FAIL: test_agentmux_post_goes_through_the_hub (hub.tests.test_hub_offline.ServerAPI.test_agentmux_post_goes_through_the_hub)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3923920Z ----------------------------------------------------------------------
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3924460Z Traceback (most recent call last):
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3925220Z   File "/Users/runner/work/agentmux/agentmux/hub/tests/test_hub_offline.py", line 676, in test_agentmux_post_goes_through_the_hub
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3926050Z     self.assertEqual(r.returncode, 0, r.stderr)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3926390Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3926940Z AssertionError: 2 != 0 : /dev/fd/63: line 101: conditional binary operator expected
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3927560Z /dev/fd/63: line 101: syntax error near `AGENTMUX_WINDOWS_CALLBACK'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3928090Z /dev/fd/63: line 101: `if [[ -v AGENTMUX_WINDOWS_CALLBACK ]]; then'
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3928400Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3928410Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3929030Z ----------------------------------------------------------------------
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3930120Z Ran 129 tests in 74.763s
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3930610Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3931170Z FAILED (failures=1)
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3938360Z failed-or-incomplete: 129 tests in 75.08s; /Users/runner/work/_temp/agentmux-p01/hub-home/cache/agentmux-tests/22504d4121b06e09/20261010T002224-188e54bc/result.json
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3939550Z   6.295s hub.tests.test_fed_live.Fed.test_z_kill_switch_revoke_and_resume
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3940400Z   5.827s hub.tests.test_hub_offline.MenuByLabel.test_missing_safe_option_blocks
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.3941110Z   5.590s hub.tests.test_hub_offline.Deliver.test_placeholder_gets_second_enter
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6523280Z test_cli_reports_failure_and_does_not_modify_input (test_inventory.InventoryContract.test_cli_reports_failure_and_does_not_modify_input) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6529650Z test_closed_format_and_duplicate_identity (test_inventory.InventoryContract.test_closed_format_and_duplicate_identity) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6531820Z test_credentials_copy_is_rejected (test_inventory.InventoryContract.test_credentials_copy_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6533410Z test_different_installation_is_rejected (test_inventory.InventoryContract.test_different_installation_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6534870Z test_duplicate_linux_installation_is_rejected (test_inventory.InventoryContract.test_duplicate_linux_installation_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6536310Z test_failed_probe_cannot_fabricate_version (test_inventory.InventoryContract.test_failed_probe_cannot_fabricate_version) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6537740Z test_linux_client_cannot_substitute_for_windows (test_inventory.InventoryContract.test_linux_client_cannot_substitute_for_windows) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6556390Z test_malformed_field_types_fail_without_exception (test_inventory.InventoryContract.test_malformed_field_types_fail_without_exception) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6558850Z test_malformed_records_return_errors (test_inventory.InventoryContract.test_malformed_records_return_errors) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6559840Z test_missing_client_cannot_claim_probe (test_inventory.InventoryContract.test_missing_client_cannot_claim_probe) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6560960Z test_missing_client_is_explicit_inventory_not_support (test_inventory.InventoryContract.test_missing_client_is_explicit_inventory_not_support) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6562980Z test_missing_limits_and_p06_claim_are_rejected (test_inventory.InventoryContract.test_missing_limits_and_p06_claim_are_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6564000Z test_missing_search_boundary_is_rejected (test_inventory.InventoryContract.test_missing_search_boundary_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6565020Z test_native_platform_placement_stays_native (test_inventory.InventoryContract.test_native_platform_placement_stays_native) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6566500Z test_npm_identity_binds_node_and_package (test_inventory.InventoryContract.test_npm_identity_binds_node_and_package) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6567930Z test_ownership_mismatches_are_rejected (test_inventory.InventoryContract.test_ownership_mismatches_are_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6569270Z test_probe_evidence_cannot_be_omitted_or_duplicated (test_inventory.InventoryContract.test_probe_evidence_cannot_be_omitted_or_duplicated) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6570280Z test_runtime_and_probe_surface_placement (test_inventory.InventoryContract.test_runtime_and_probe_surface_placement) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6571910Z test_unavailable_records_failed_interop_without_success (test_inventory.InventoryContract.test_unavailable_records_failed_interop_without_success) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6573440Z test_unavailable_requires_actual_failed_observation (test_inventory.InventoryContract.test_unavailable_requires_actual_failed_observation) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6574580Z test_version_mismatch_is_rejected (test_inventory.InventoryContract.test_version_mismatch_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6575710Z test_versioned_target_is_rejected (test_inventory.InventoryContract.test_versioned_target_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6576900Z test_wsl_observation_contract (test_inventory.InventoryContract.test_wsl_observation_contract) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6577650Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6578700Z ----------------------------------------------------------------------
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6579610Z Ran 23 tests in 0.051s
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6579990Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.6580310Z OK
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8295060Z test_context_only_and_unrelated_wslenv_preserved (hub.tests.test_windows_callbacks.CallbackSelection.test_context_only_and_unrelated_wslenv_preserved) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8296250Z test_explicit_selection (hub.tests.test_windows_callbacks.CallbackSelection.test_explicit_selection) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8302010Z test_lifecycle_rejected_before_local_action (hub.tests.test_windows_callbacks.CallbackSelection.test_lifecycle_rejected_before_local_action) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8309190Z test_missing_selection_never_launches (hub.tests.test_windows_callbacks.CallbackSelection.test_missing_selection_never_launches) ... agentmux: Windows agent callbacks need an explicit WSL distribution
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8312840Z agentmux: AGENTMUX_WSL_DISTRO must name a WSL distribution
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8317190Z agentmux: AGENTMUX_WSL_DISTRO must name a WSL distribution
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8322420Z agentmux: Windows agent callbacks need an explicit absolute Linux binary path
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8326280Z agentmux: AGENTMUX_WSL_BIN must be an absolute Linux path
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8331390Z agentmux: AGENTMUX_WSL_BIN must be an absolute Linux path
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8335250Z agentmux: Windows agent callbacks need an explicit absolute AGENTMUX_HOME
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8340490Z agentmux: Windows agent callbacks need an explicit absolute AGENTMUX_HOME
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8345880Z agentmux: Windows agent callbacks need an explicit absolute AGENTMUX_HOME
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8349080Z ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8350710Z test_nick_defaults_and_exact_received_arguments (hub.tests.test_windows_callbacks.CallbackSelection.test_nick_defaults_and_exact_received_arguments) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8406050Z test_no_fallback_or_inline_token (hub.tests.test_windows_callbacks.CallbackSelection.test_no_fallback_or_inline_token) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8639920Z test_shell_callback_rejection_creates_no_default_or_scoped_state (hub.tests.test_windows_callbacks.CallbackSelection.test_shell_callback_rejection_creates_no_default_or_scoped_state) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8696540Z test_bad_opt_in_has_no_registration_side_effect (hub.tests.test_windows_callbacks.SpawnContext.test_bad_opt_in_has_no_registration_side_effect) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8818010Z test_native_spawn_drops_stale_worker_but_preserves_explicit_native_context (hub.tests.test_windows_callbacks.SpawnContext.test_native_spawn_drops_stale_worker_but_preserves_explicit_native_context) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8924850Z test_two_spawns_get_distinct_token_paths_without_inline_tokens (hub.tests.test_windows_callbacks.SpawnContext.test_two_spawns_get_distinct_token_paths_without_inline_tokens) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8925580Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8925900Z ----------------------------------------------------------------------
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8926250Z Ran 10 tests in 0.063s
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8926460Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:39.8926580Z OK
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.0792850Z test_executor_cannot_accept_for_origin (test_track.FinalEvidenceTests.test_executor_cannot_accept_for_origin) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.0800410Z test_final_update_checks_remote_before_saving (test_track.FinalEvidenceTests.test_final_update_checks_remote_before_saving) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.0801430Z test_merge_permission_is_rejected (test_track.FinalEvidenceTests.test_merge_permission_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.0802340Z test_missing_dated_codex_decision_is_rejected (test_track.FinalEvidenceTests.test_missing_dated_codex_decision_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.0803290Z test_missing_or_incomplete_phase_is_rejected (test_track.FinalEvidenceTests.test_missing_or_incomplete_phase_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.0804210Z test_missing_reverse_run_is_rejected (test_track.FinalEvidenceTests.test_missing_reverse_run_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.0805050Z test_modified_input_is_rejected (test_track.FinalEvidenceTests.test_modified_input_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.0805860Z test_shared_administration_is_rejected (test_track.FinalEvidenceTests.test_shared_administration_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.0806810Z test_unaccepted_gate_is_rejected (test_track.FinalEvidenceTests.test_unaccepted_gate_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.0807550Z test_valid_autonomous_record (test_track.FinalEvidenceTests.test_valid_autonomous_record) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.0808450Z test_worker_claim_is_not_codex_review (test_track.FinalEvidenceTests.test_worker_claim_is_not_codex_review) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.0809320Z test_wrong_candidate_is_rejected (test_track.FinalEvidenceTests.test_wrong_candidate_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.1034130Z test_complete_inventory_is_consistent (test_track.TrackingTests.test_complete_inventory_is_consistent) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.1181490Z test_cycle_is_rejected (test_track.TrackingTests.test_cycle_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.1437290Z test_duplicate_behavior_owner_is_rejected (test_track.TrackingTests.test_duplicate_behavior_owner_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.1574770Z test_host_qualification_cannot_be_moved_before_host_implementation (test_track.TrackingTests.test_host_qualification_cannot_be_moved_before_host_implementation) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.1694890Z test_missing_catalog_record_is_rejected (test_track.TrackingTests.test_missing_catalog_record_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.1788230Z test_missing_work_is_rejected (test_track.TrackingTests.test_missing_work_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.1943980Z test_parallel_phases_are_rejected (test_track.TrackingTests.test_parallel_phases_are_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.2102980Z test_predecessor_cannot_be_bypassed (test_track.TrackingTests.test_predecessor_cannot_be_bypassed) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.2246810Z test_removed_dependency_cannot_skip_phase_gate (test_track.TrackingTests.test_removed_dependency_cannot_skip_phase_gate) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.2386320Z test_removed_phase_criterion_is_rejected (test_track.TrackingTests.test_removed_phase_criterion_is_rejected) ... ok
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.2391850Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.2392910Z ----------------------------------------------------------------------
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.2393340Z Ran 22 tests in 0.160s
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.2393520Z 
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.2393620Z OK
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.3829690Z {
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.3830020Z   "ok": true,
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.3831210Z   "acceptedCommit": "f19c6473d56335b8eeb28704b02895b9d9ab7fcc",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.3832330Z   "files": 105,
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.3833150Z   "errors": [],
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.3833720Z   "negativeTest": {
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.3834370Z     "path": "dashboard/test_ads.py",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.3835340Z     "assertionRemovalDetected": true,
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.3836720Z     "mutation": "One actual Python assertion replaced with pass in an in-memory candidate; repository unchanged."
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.3838110Z   },
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.3839820Z   "assurance": "Exact regression-file retention or recorded Codex-reviewed replacement. It does not prove assertion quality or semantic equivalence of a replacement."
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.3841660Z }
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.5329710Z {
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.5330170Z   "ok": true,
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.5330500Z   "baselineFiles": 338,
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.5330760Z   "additionalFiles": 82,
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.5331050Z   "components": 93,
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.5331320Z   "behaviorChecks": 198,
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.5331620Z   "baselineGroups": 37,
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.5331970Z   "phaseCriteria": 99,
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.5332210Z   "failureScenarios": 62,
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.5332500Z   "errors": [],
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.5333090Z   "assurance": "Checks planning coverage and references only; does not prove semantic completeness or execute runtime tests."
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.5333630Z }
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.9031190Z {
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.9031740Z   "baselineVersion": "1.1.0",
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.9032110Z   "ok": true,
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.9032290Z   "errors": [],
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.9032940Z   "assurance": "Validates review attestations, source freshness and remediation; does not prove semantic correctness or execute build/tests."
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:40.9033730Z }
+P01 native macos-15	Build locked SDKs and run required checks	2026-10-10T00:23:41.0001420Z ##[error]Process completed with exit code 1.
+P01 native macos-15	Preserve execution evidence, including failures	﻿2026-10-10T00:23:41.0173900Z ##[group]Run actions/upload-artifact@v4
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.0174140Z with:
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.0174400Z   name: p01-macos-15-9647b4240a43c60c246512efa1553e8f4cb58530
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.0174690Z   path: /Users/runner/work/_temp/agentmux-evidence/
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.0174910Z   if-no-files-found: error
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.0175070Z   retention-days: 30
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.0175220Z   compression-level: 6
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.0175370Z   overwrite: false
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.0175510Z   include-hidden-files: false
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.0175670Z env:
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.0175870Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.14.8/arm64
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.0176250Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.14.8/arm64/lib/pkgconfig
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.0176620Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.14.8/arm64
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.0176950Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.14.8/arm64
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.0177280Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.14.8/arm64
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.0177570Z ##[endgroup]
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.4074880Z (node:16705) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.4076920Z (Use `node --trace-deprecation ...` to show where the warning was created)
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.4139200Z With the provided path, there will be 9 files uploaded
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.4142020Z Artifact name is valid!
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.4143020Z Root directory input is valid!
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.7251370Z Beginning upload of artifact content to blob storage
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:41.7805190Z (node:16705) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:42.0179830Z Uploaded bytes 50967
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:42.0624330Z Finished uploading artifact content to blob storage!
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:42.0625130Z SHA256 digest of uploaded artifact zip is 36cd36ab0c024871ca598b2f2dee1170e2bdbec201f8c3527e2eed16b7111c58
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:42.0625700Z Finalizing artifact upload
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:42.3229520Z Artifact p01-macos-15-9647b4240a43c60c246512efa1553e8f4cb58530.zip successfully finalized. Artifact ID 11652038046
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:42.3230550Z Artifact p01-macos-15-9647b4240a43c60c246512efa1553e8f4cb58530 has been successfully uploaded! Final size is 50967 bytes. Artifact ID is 11652038046
+P01 native macos-15	Preserve execution evidence, including failures	2026-10-10T00:23:42.3262270Z Artifact download URL: https://github.com/controlLogix/agentmux/actions/runs/38008633683/artifacts/11652038046
+P01 native macos-15	Post Run actions/checkout@v5	﻿2026-10-10T00:23:42.3500170Z Post job cleanup.
+P01 native macos-15	Post Run actions/checkout@v5	2026-10-10T00:23:42.4747370Z [command]/opt/homebrew/bin/git version
+P01 native macos-15	Post Run actions/checkout@v5	2026-10-10T00:23:42.4838870Z git version 2.55.0
+P01 native macos-15	Post Run actions/checkout@v5	2026-10-10T00:23:42.4887300Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/c820175d-4e01-46bd-a678-7bc5e72e6744/.gitconfig'
+P01 native macos-15	Post Run actions/checkout@v5	2026-10-10T00:23:42.4897040Z Temporarily overriding HOME='/Users/runner/work/_temp/c820175d-4e01-46bd-a678-7bc5e72e6744' before making global git config changes
+P01 native macos-15	Post Run actions/checkout@v5	2026-10-10T00:23:42.4898100Z Adding repository directory to the temporary git global config as a safe directory
+P01 native macos-15	Post Run actions/checkout@v5	2026-10-10T00:23:42.4905440Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/agentmux/agentmux
+P01 native macos-15	Post Run actions/checkout@v5	2026-10-10T00:23:42.4972600Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+P01 native macos-15	Post Run actions/checkout@v5	2026-10-10T00:23:42.5082070Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+P01 native macos-15	Post Run actions/checkout@v5	2026-10-10T00:23:42.5810860Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+P01 native macos-15	Post Run actions/checkout@v5	2026-10-10T00:23:42.5865370Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+P01 native macos-15	Post Run actions/checkout@v5	2026-10-10T00:23:42.6878930Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+P01 native macos-15	Post Run actions/checkout@v5	2026-10-10T00:23:42.6947230Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+P01 native macos-15	Complete job	﻿2026-10-10T00:23:42.8161880Z Cleaning up orphan processes
+P01 native macos-15	Complete job	2026-10-10T00:23:43.3890430Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -463,9 +463,9 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Messaging Gateway",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessagingGateway.html",
       "referenceDepth": "full-public-reference",
-      "how": "Agents never see NATS: the CLI (agentmux hub fed ...) and the stdio MCP server expose verbs generated from one registry and call the hub socket. The existing Windows launcher forwards explicit agent hub commands into the selected WSL distribution and binary. Per-pane token files identify callbacks to the existing loopback TCP hub; callback admission validates explicit selection and scoped home before launch and forbids lifecycle verbs before side effects.",
-      "why": "Interview F10: CLI canonical, thin MCP wrapper. Windows-owned clients cannot retain Linux process ancestry when returning through WSL, so authenticated per-agent gateway context is required to preserve existing hub identity.",
-      "tradeoffs": "The MCP server is hand-written (A18). Alternative: agents use nats directly, rejected - would bypass identity and guardrails. An explicit callback context and Windows Python 3 dependency add setup work; normal operator defaults remain separate. A direct unauthenticated callback or ancestry fallback is simpler but loses agent identity. Tests qualify bounded launcher arguments and real local agent tokens; automatic provider forwarding and authenticated concurrent provider workflows remain unqualified.",
+      "how": "Agents never see NATS: the CLI (agentmux hub fed ...) and the stdio MCP server expose verbs generated from one registry and call the hub socket. The existing Windows launcher forwards explicit agent hub commands into the selected WSL distribution and binary. Per-pane token files identify callbacks to the existing loopback TCP hub; callback admission validates explicit selection and scoped home before launch and forbids lifecycle verbs before side effects. A maintained legacy orchestration package is now planned under plugins/agentmux-orchestration: installed skills select the existing runtime through an explicit binding; roster MCP translates read calls to existing dashboard endpoints. Pre-tool checks preserve current product policy as defense in depth. No package location is marked applied before implementation and review.",
+      "why": "Interview F10: CLI canonical, thin MCP wrapper. Windows-owned clients cannot retain Linux process ancestry when returning through WSL, so authenticated per-agent gateway context is required to preserve existing hub identity. Original external plugin source is missing, leaving20baseline tests skipped; current source contracts and nine historical workflow names support an explicitly maintained replacement.",
+      "tradeoffs": "The MCP server is hand-written (A18). Alternative: agents use nats directly, rejected - would bypass identity and guardrails. An explicit callback context and Windows Python 3 dependency add setup work; normal operator defaults remain separate. A direct unauthenticated callback or ancestry fallback is simpler but loses agent identity. Tests qualify bounded launcher arguments and real local agent tokens; automatic provider forwarding and authenticated concurrent provider workflows remain unqualified. Recovery is not claimed. Vendoring preserves reviewed command workflows but adds hook/parser, packaging and provenance maintenance; leaving the package external is simpler but currently prevents required preservation checks. Hooks do not replace authoritative runtime authorization or provide complete shell containment.",
       "locations": [
         {
           "path": "hub/fed/mcp.py",
@@ -521,6 +521,15 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
             "verificationEvidence": [
               "hub/tests/test_fed_unit.py"
             ]
+          }
+        },
+        {
+          "date": "2026-10-09",
+          "reason": "Bounded restoration of missing legacy CLI/roster plugin proposed; runtime implementation remains pending review.",
+          "previous": {
+            "how": "Agents never see NATS: the CLI (agentmux hub fed ...) and the stdio MCP server expose verbs generated from one registry and call the hub socket. The existing Windows launcher forwards explicit agent hub commands into the selected WSL distribution and binary. Per-pane token files identify callbacks to the existing loopback TCP hub; callback admission validates explicit selection and scoped home before launch and forbids lifecycle verbs before side effects.",
+            "why": "Interview F10: CLI canonical, thin MCP wrapper. Windows-owned clients cannot retain Linux process ancestry when returning through WSL, so authenticated per-agent gateway context is required to preserve existing hub identity.",
+            "tradeoffs": "The MCP server is hand-written (A18). Alternative: agents use nats directly, rejected - would bypass identity and guardrails. An explicit callback context and Windows Python 3 dependency add setup work; normal operator defaults remain separate. A direct unauthenticated callback or ancestry fallback is simpler but loses agent identity. Tests qualify bounded launcher arguments and real local agent tokens; automatic provider forwarding and authenticated concurrent provider workflows remain unqualified."
           }
         }
       ]

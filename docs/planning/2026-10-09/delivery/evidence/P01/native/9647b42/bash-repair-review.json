@@ -1,0 +1,22 @@
+{
+  "scope": "Independent narrow repair review; not native platform acceptance",
+  "failedCandidate": "9647b4240a43c60c246512efa1553e8f4cb58530",
+  "sourceSha256": {
+    "agentmux.sh": "310d538866f29478ef01bfd77c782dd62ead2a09eb1a244fe890bf96b1b36867",
+    "hub/tests/test_windows_callbacks.py": "a25340865b551ae290bd5302159dff365f58129947023608b6f6123bc092e4f0"
+  },
+  "sourceReview": "Static presence check uses portable parameter expansion; dynamic allowlist uses declare -p. Legacy default entrypoint remains. Denial tests require specific validation text, so syntax failures cannot satisfy them.",
+  "focusedReport": "/home/ryan/.cache/agentmux-tests/b31831888bbd9588/20261009T202537-a0f63a83/result.json",
+  "focusedTests": 20,
+  "failures": 0,
+  "skips": 0,
+  "allFocusedSourceHashesMatched": true,
+  "independentlyRerunTests": [
+    "CallbackSelection.test_shell_without_callback_keeps_native_hub_entrypoint",
+    "CallbackSelection.test_shell_callback_rejection_creates_no_default_or_scoped_state",
+    "CallbackSelection.test_missing_selection_never_launches"
+  ],
+  "independentResult": "All3 pass with prepared WSL Python/current WSL bash",
+  "nativeMacosRepairAccepted": false,
+  "requiredFollowup": "Commit new candidate and rerun actual native macOS CI including original129hub profile; old9647 artifacts remain failed-candidate evidence."
+}

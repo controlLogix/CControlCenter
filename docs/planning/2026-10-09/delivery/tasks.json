@@ -2129,7 +2129,12 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/windows-callback-final/README.md",
         "docs/planning/2026-10-09/delivery/evidence/P01/hub-callback-incomplete-setup/archive.json",
         "docs/planning/2026-10-09/delivery/evidence/P01/hub-callback-final-failed/archive.json",
-        "docs/planning/2026-10-09/delivery/evidence/P01/server-api-diagnostics/archive.json"
+        "docs/planning/2026-10-09/delivery/evidence/P01/server-api-diagnostics/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/9647b42/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/bash-portability/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/wsl-native-9647b42/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/plugin-restoration-spec.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-evidence.json"
       ],
       "commits": [
         "f19c6473d56335b8eeb28704b02895b9d9ab7fcc",
@@ -2237,6 +2242,13 @@
           "from": "in_progress",
           "to": "in_progress",
           "note": "Unchanged original9ServerAPI tests passed in1.474s with captured server output and exact failed-run source hashes. Normal startup/clean shutdown; no source defect reproduced. Earlier broad startup cause unproven because stderr was discarded. Retain failure; broad/native candidate qualification remains required."
+        },
+        {
+          "at": "2026-10-10T00:37:12.394252+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "in_progress",
+          "note": "Native exact9647 Linux passed22 checks; macOS failed original ServerAPI due unsupported Bash variable-presence syntax. Narrow repair preserves set/unset semantics and strengthens callback denial assertions; focused20 and independent3 pass in WSL. Fresh macOS candidate remains required. Exact9647 native WSL snapshot full129+callback10 passed with unchanged sources; earlier mounted-path failure remains unexplained and retained. Approved maintained nine-workflow plugin restoration with original20 unchanged tests plus real runtime and independent compatibility checks; not historical-source equality or P06 acceptance."
         }
       ],
       "phaseCriteria": [
@@ -2534,7 +2546,7 @@
           "text": "Build a bounded NATS persistence spike before production storage code: one owning task record, persistent operation identity, conditional competing writes, complete provenance/effect intent, lost acknowledgments and replay. Exercise single-record commits and any required atomic batch inside one stream."
         }
       ],
-      "status": "in_progress",
+      "status": "done",
       "owner": "Codex",
       "dependsOn": [
         "P00-GATE",
@@ -2573,13 +2585,15 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/parent-change-review.json",
         "docs/planning/2026-10-09/delivery/evidence/P01/incoming-storage/archive.json",
         "docs/planning/2026-10-09/delivery/evidence/P01/incoming-storage-negative/archive.json",
-        "docs/planning/2026-10-09/delivery/evidence/P01/backup-boundary/archive.json"
+        "docs/planning/2026-10-09/delivery/evidence/P01/backup-boundary/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/P01-T07-acceptance.json"
       ],
       "commits": [
         "7ef00dcb299c100d6dda45bfffa2b4e127345a50",
         "f19c6473d56335b8eeb28704b02895b9d9ab7fcc",
         "a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41",
-        "00353fd0ccb0b4ce34cb4eb45549703430af30d1"
+        "00353fd0ccb0b4ce34cb4eb45549703430af30d1",
+        "9647b4240a43c60c246512efa1553e8f4cb58530"
       ],
       "blocker": null,
       "history": [
@@ -2605,6 +2619,13 @@
           "from": "in_progress",
           "to": "in_progress",
           "note": "Reviewed complete incoming state/origin/claim fixture:20positive storage cases and partial-publication negative control. Independent backup review found and repaired second-boundary rotation defect;7focused positives and old-code negative control. Production scope remains separate."
+        },
+        {
+          "at": "2026-10-10T00:29:00.489957+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "done",
+          "note": "Codex accepted the complete bounded storage fixture scope using all20cases on native Linux/macOS and WSL, source-bound negative controls and independent preservation review. Separate callback/macOS and external-plugin gaps still block phase advancement."
         }
       ],
       "phaseCriteria": [
@@ -33954,6 +33975,14 @@
         "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
         "component-audit-repository.json": "52a2e7648da7727c260b28764f6fc5817b6776d4e24198bec7a4b8436bf442c2"
       }
+    },
+    {
+      "at": "2026-10-10T00:29:00.489957+00:00",
+      "actor": "Codex",
+      "from": "in_progress",
+      "to": "done",
+      "note": "Codex accepted the complete bounded storage fixture scope using all20cases on native Linux/macOS and WSL, source-bound negative controls and independent preservation review. Separate callback/macOS and external-plugin gaps still block phase advancement.",
+      "taskId": "P01-T07"
     }
   ],
   "deliveryGovernance": {

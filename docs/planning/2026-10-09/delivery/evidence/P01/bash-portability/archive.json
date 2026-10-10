@@ -1,0 +1,8 @@
+{
+  "externalSource": "/home/ryan/.cache/agentmux-tests/b31831888bbd9588/20261009T202537-a0f63a83",
+  "sha256": {
+    "tests.log": "12dbe718139b1c3b6753316400b2cc66f91e25bb338e65287275ce25553f2dfd",
+    "result.json": "0d7441f367fbecf7b02fbed83836b78cb02e271d0f97d740a0e0015f4fbed570"
+  },
+  "scope": "Bounded P01 source-bound proof. Native checkout qualifies9647; Bash focused20qualifies repaired sources. No repaired macOS/phase acceptance."
+}

@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, scoped P01 Windows/WSL and preservation review; phase remains open",
-  "sourceDigest": "e151e283abe36cc3a94ffb212e975ebbea3e1877f0c988eaa4be806e6004b6dc",
+  "reviewer": "Codex, scoped P01 portability/storage review; phase remains open",
+  "sourceDigest": "44e4d894583881963d7d8d0e8b585b57fbed6cd12f918103397cc68602c93026",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -497,6 +497,24 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/server-api-diagnostics/archive.json"
       ],
       "rationale": "Reviewed changed runtime sources and independent source-bound evidence. Existing FED-15 gateway now includes explicit per-agent Windows-to-WSL callback selection, pre-side-effect validation and pane isolation; recorded how/where/why, alternative, Windows Python dependency and limits, with matching sequence diagram. PLAN-09/10 production status remains planned while incoming complete-record construction has bounded positive/negative fixtures. Backup second-boundary repair adds no new pattern. Validator is a plain closed-format evidence boundary, not a runtime plugin. Preserved registry/remediation histories, original regression hashes and all component/behavior scope; refreshed source surfaces and tracked evidence with tasks open. Actual Windows-owned links/version observations and dashboard runner pass do not qualify authenticated provider workflows, final native candidate, missing external-plugin coverage or P06. No phase advancement, merge or final delivery acceptance. Raw archive attributes preserve hash-bound execution bytes; metadata hashes were refreshed for those attributes only. Final broad hub rerun is rejected with9startup/socket errors; unchanged focused9API checks subsequently pass, but the exact prior cause is unknown. Both outcomes remain tracked and no phase qualification is claimed."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex; independent native hash and Bash review",
+      "scope": "P01 portability and scoped storage acceptance checkpoint",
+      "previousReviewer": "Codex, scoped P01 Windows/WSL and preservation review; phase remains open",
+      "previousSourceDigest": "e151e283abe36cc3a94ffb212e975ebbea3e1877f0c988eaa4be806e6004b6dc",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/9647b42/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/9647b42/bash-repair-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/bash-portability/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/wsl-native-9647b42/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/P01-T07-acceptance.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/plugin-restoration-spec.md",
+        ".context/design-patterns.md",
+        ".context/design-patterns-diagrams.md"
+      ],
+      "rationale": "Reviewed two Bash variable-presence checks and strengthened callback tests; semantics remain existing FED-15 gateway, no new pattern. Native macOS actual failure is retained; repaired macOS candidate remains required. Reviewed source-bound native WSL129+callback10 and focused repaired20, with independent3 review. T07 storage acceptance is scoped to its four criteria and unchanged exact sources across Linux/macOS/WSL, not whole CI or phase acceptance. Approved bounded maintained legacy plugin restoration plan with current runtime mapping, source-gap provenance and additional independent compatibility gates; recorded planned FED-15 gateway and diagram, with live-definition enforcement explicitly host-hook only. Pending implementation is outside this checkpoint and will get a separate source review. Preserved original registry/history, refreshed launcher surface and file tracking; component coverage and original105 regression retention/negative checks pass. No later phase, merge, release or final delivery acceptance."
     }
   ],
   "rules": {

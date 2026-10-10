@@ -1,0 +1,29 @@
+{
+  "sourceCommit": "9647b4240a43c60c246512efa1553e8f4cb58530",
+  "workflowRun": 38008633683,
+  "files": {
+    "bash-repair-review.json": "0919a42087aee2f993880fbe53d2a790767b50bde4b0313a7f18444e84c76f31",
+    "independent-hash-review.json": "b9140543c841f59bd8610a1d533c7afb5d6a4c93a66db7ac97dceaf9d7771594",
+    "linux/ci-result.json": "6646a7390cc3b9bf055d84b95dae2c614af9dbad2b3c5e2a892e6dc9942ed292",
+    "linux/conformance-admission-negative.json": "1677fc160a5761040b4a34cbcc8f9af1fa6823d9d28340becac0d95b3d91aa5c",
+    "linux/conformance-admission.json": "4247934f0490ada4d13cdea8da8a4e91593118237aae42a8726b6b75a57868f6",
+    "linux/contracts.json": "f618d36405203b49686510031f07e30cb8cbc07e09de847252054032db63a8c8",
+    "linux/hub-full-result.json": "23b3d9010cf10faa7f2aeac29d7b82b11837ed0ff8db7a38929b0d633bc00d1b",
+    "linux/job.log": "e29ea84a20f16fda2b25622367bfbde5a23aa7ab06e10162e46769b32be442a2",
+    "linux/leaf-result.json": "fa3a220c53a743ec4cda1a9307ef387697bd3bf762936db9a4f55c0ade0507ca",
+    "linux/negative-fixture.json": "d2b870c50576e01e159e70dc3de24c20306f49542f92a435915170dc5c30f294",
+    "linux/signed-leaf-result.json": "dd77c57f56a9cf0b000e1fdc6f0cf0f3d69031e32478d3e01d9243a05380b52f",
+    "linux/storage-result.json": "c5ca088261351b36e26d53f8b29768a55dcbff6d1c1465b6c3c416f8b77989d6",
+    "macos/ci-result.json": "a20820521e67a63836ab6fadfada34b8d56f73b47fa097edbd125222f5eca3a1",
+    "macos/conformance-admission-negative.json": "d35e77c5ba105cdbd2b3c5a381ecff018b712181bf691aef051f43cab4e90e70",
+    "macos/conformance-admission.json": "186d8126be9454e9716fce6cdf9c6c2ca380baa7b2957b269586e409dd695ab2",
+    "macos/contracts.json": "9d59b051a61226a28a51db12c875a05b9a1dd4e65ad7a63e54ccb2439f9aaeec",
+    "macos/hub-full-result.json": "03b7909f200037ff8800efa9e1fe995bbfce0267f45e3a74c81d10f16afa5881",
+    "macos/job.log": "813c2c4618f9350caa869ff2e5c3f982724116229f84fefa54d7f9da4c14aa70",
+    "macos/leaf-result.json": "58336d4dd82ad1c067630c3521d0dd88b81f3c3e587cfe034e685079915d86cf",
+    "macos/negative-fixture.json": "d2b870c50576e01e159e70dc3de24c20306f49542f92a435915170dc5c30f294",
+    "macos/signed-leaf-result.json": "fc5cc8f5d696b636fbce4b2c271376062bbf7c9525acf58d744aa1e04a065da5",
+    "macos/storage-result.json": "0a534fafa7fc337f9f7c06bd55f693fe9c3d22943ab1bd61af1eafd10915a81c"
+  },
+  "scope": "Exact-candidate native CI archive. Linux passed22checks; macOS original hub failed Bash callback syntax. Both storage20/conformance45 and other bounded cases pass. Not whole workflow or phase acceptance."
+}

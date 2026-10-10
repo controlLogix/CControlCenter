@@ -1,0 +1,118 @@
+{
+  "runId": 38008633683,
+  "runUrl": "https://github.com/controlLogix/agentmux/actions/runs/38008633683",
+  "candidate": "9647b4240a43c60c246512efa1553e8f4cb58530",
+  "phaseAccepted": false,
+  "conclusion": "failure",
+  "platforms": {
+    "linux": {
+      "commit": "9647b4240a43c60c246512efa1553e8f4cb58530",
+      "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+      "checks": 22,
+      "failedChecks": [],
+      "hashComparisons": 588,
+      "sourceMismatches": [],
+      "conformance": {
+        "testsRun": 45,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "exitCode": 0,
+        "sourceUnchangedDuringRun": true
+      },
+      "storageCases": 20,
+      "storageAllPassed": true,
+      "hub": {
+        "tests": 129,
+        "status": "passed",
+        "failures": [],
+        "skips": []
+      },
+      "reportHashes": {
+        "ci-result.json": "6646a7390cc3b9bf055d84b95dae2c614af9dbad2b3c5e2a892e6dc9942ed292",
+        "conformance-admission-negative.json": "1677fc160a5761040b4a34cbcc8f9af1fa6823d9d28340becac0d95b3d91aa5c",
+        "conformance-admission.json": "4247934f0490ada4d13cdea8da8a4e91593118237aae42a8726b6b75a57868f6",
+        "contracts.json": "f618d36405203b49686510031f07e30cb8cbc07e09de847252054032db63a8c8",
+        "hub-full-result.json": "23b3d9010cf10faa7f2aeac29d7b82b11837ed0ff8db7a38929b0d633bc00d1b",
+        "leaf-result.json": "fa3a220c53a743ec4cda1a9307ef387697bd3bf762936db9a4f55c0ade0507ca",
+        "negative-fixture.json": "d2b870c50576e01e159e70dc3de24c20306f49542f92a435915170dc5c30f294",
+        "signed-leaf-result.json": "dd77c57f56a9cf0b000e1fdc6f0cf0f3d69031e32478d3e01d9243a05380b52f",
+        "storage-result.json": "c5ca088261351b36e26d53f8b29768a55dcbff6d1c1465b6c3c416f8b77989d6"
+      }
+    },
+    "macos": {
+      "commit": "9647b4240a43c60c246512efa1553e8f4cb58530",
+      "platform": "macOS-15.7.9-arm64-arm-64bit-Mach-O",
+      "checks": 22,
+      "failedChecks": [
+        "original-hub-full-profile",
+        "original-hub-evidence"
+      ],
+      "hashComparisons": 588,
+      "sourceMismatches": [],
+      "conformance": {
+        "testsRun": 45,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "exitCode": 0,
+        "sourceUnchangedDuringRun": true
+      },
+      "storageCases": 20,
+      "storageAllPassed": true,
+      "hub": {
+        "tests": 129,
+        "status": "failed-or-incomplete",
+        "failures": [
+          "hub.tests.test_hub_offline.ServerAPI.test_agentmux_post_goes_through_the_hub"
+        ],
+        "skips": []
+      },
+      "reportHashes": {
+        "ci-result.json": "a20820521e67a63836ab6fadfada34b8d56f73b47fa097edbd125222f5eca3a1",
+        "conformance-admission-negative.json": "d35e77c5ba105cdbd2b3c5a381ecff018b712181bf691aef051f43cab4e90e70",
+        "conformance-admission.json": "186d8126be9454e9716fce6cdf9c6c2ca380baa7b2957b269586e409dd695ab2",
+        "contracts.json": "9d59b051a61226a28a51db12c875a05b9a1dd4e65ad7a63e54ccb2439f9aaeec",
+        "hub-full-result.json": "03b7909f200037ff8800efa9e1fe995bbfce0267f45e3a74c81d10f16afa5881",
+        "leaf-result.json": "58336d4dd82ad1c067630c3521d0dd88b81f3c3e587cfe034e685079915d86cf",
+        "negative-fixture.json": "d2b870c50576e01e159e70dc3de24c20306f49542f92a435915170dc5c30f294",
+        "signed-leaf-result.json": "fc5cc8f5d696b636fbce4b2c271376062bbf7c9525acf58d744aa1e04a065da5",
+        "storage-result.json": "0a534fafa7fc337f9f7c06bd55f693fe9c3d22943ab1bd61af1eafd10915a81c"
+      }
+    }
+  },
+  "jobs": {
+    "linux": 114083202705,
+    "macos": 114083202797
+  },
+  "artifacts": {
+    "linux": 11652651414,
+    "macos": 11652038046
+  },
+  "independentConformanceAdmission": {
+    "linux": "passed against exact committed candidate",
+    "macos": "passed against exact committed candidate"
+  },
+  "additionalChecksBothPlatforms": {
+    "leaf": 11,
+    "signedLeaf": 19,
+    "negativeAdmission": 12,
+    "platformPlacement": 23,
+    "callbackContract": 10,
+    "tracker": 22,
+    "preservedRegressionFiles": 105,
+    "assertionRemovalNegativeDetected": true
+  },
+  "finding": {
+    "test": "hub.tests.test_hub_offline.ServerAPI.test_agentmux_post_goes_through_the_hub",
+    "platform": "macos",
+    "detail": "Exit2 instead of0; /dev/fd/63 line101 conditional binary operator expected at newly added [[ -v AGENTMUX_WINDOWS_CALLBACK ]].",
+    "relatedTestWeakness": "Callback shell rejection test only requires nonzero/no directories and can pass on a Bash syntax error. Require expected validation reason.",
+    "requiredFollowup": "Portable variable-presence checks and meaningful regression, then fresh actual native macOS CI for repaired committed candidate."
+  },
+  "limits": [
+    "All reports here belong only to9647b42. Linux success and passing contract subsets do not accept failed macOS candidate.",
+    "Native callback tests are synthetic shell/context contracts, not Windows interop execution.",
+    "Source hash verification does not independently authenticate execution; actual GitHub job logs and downloaded artifacts were reviewed."
+  ]
+}

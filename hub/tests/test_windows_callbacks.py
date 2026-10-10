@@ -49,8 +49,26 @@ class CallbackSelection(unittest.TestCase):
                 result = subprocess.run(["bash", str(root / "agentmux.sh"), "hub", "start"],
                                         env=env, capture_output=True, text=True, timeout=10)
                 self.assertNotEqual(result.returncode, 0, result.stdout)
+                expected = ("Windows agent callbacks need an explicit absolute AGENTMUX_HOME" if missing_home
+                            else "This operation is not available through an agent callback")
+                self.assertIn(expected, result.stderr)
                 self.assertFalse((home / ".agentmux").exists())
                 self.assertFalse((Path(tmp) / "scoped").exists())
+
+    def test_shell_without_callback_keeps_native_hub_entrypoint(self):
+        root = Path(__file__).resolve().parents[2]
+        with tempfile.TemporaryDirectory() as tmp:
+            env = {k: v for k, v in os.environ.items() if not k.startswith("AGENTMUX_")}
+            env.update(HOME=tmp, AGENTMUX_HOME=str(Path(tmp) / "private"), PYTHONDONTWRITEBYTECODE="1")
+            result = subprocess.run(["bash", str(root / "agentmux.sh"), "hub", "--help"],
+                                    env=env, capture_output=True, text=True, timeout=10)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("usage: agentmux hub", result.stdout)
+            env["AGENTMUX_WINDOWS_CALLBACK"] = ""
+            result = subprocess.run(["bash", str(root / "agentmux.sh"), "hub", "start"],
+                                    env=env, capture_output=True, text=True, timeout=10)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("AGENTMUX_WINDOWS_CALLBACK must be 1 when set", result.stderr)
 
     def test_nick_defaults_and_exact_received_arguments(self):
         args = ["ask", "worker", "", "a!b", "x y", "quote\"", "C:\\a\\b", "a\nb", "雪"]

@@ -1,0 +1,151 @@
+{
+  "taskId": "P01-T07",
+  "sourceCommit": "9647b4240a43c60c246512efa1553e8f4cb58530",
+  "reviewer": "Codex",
+  "reviewedAt": "2026-10-10T00:28:45.444741+00:00",
+  "decision": "accepted-scoped-task",
+  "phaseAccepted": false,
+  "acceptanceResults": [
+    {
+      "criterionId": "P01-T07-AC01",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/9647b42/linux/storage-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/9647b42/macos/storage-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/incoming-storage/storage-result.json"
+      ],
+      "review": "Complete owning record, persistent operation identity, conditional races, provenance/effect intent, lost acknowledgments, retained-history reconciliation and qualified one-stream atomic batches implemented in both independent clients. All20 fixture cases pass on native Linux, macOS and WSL."
+    },
+    {
+      "criterionId": "P01-T07-AC02",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/9647b42/linux/storage-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/9647b42/macos/storage-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/incoming-storage/storage-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/incoming-storage-negative/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/parent-change-review.json"
+      ],
+      "review": "All scoped capabilities exercised; FAIL-42lost final batch acknowledgment/restart, FAIL-43stale projection and FAIL-47unsupported resource atomicity checked. Incoming partial-construction and post-commit recovery port AMX-BASE-002 to NATS fixture boundary. Partial-publication mutation fails as expected. No named storage fixture capability remains an unresolved gap."
+    },
+    {
+      "criterionId": "P01-T07-AC03",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/parent-change-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/9647b42/independent-hash-review.json"
+      ],
+      "review": "Original18cases and54require calls retained; two incoming cases added. Regression retention passes for105files and actual assertion-removal control on both native hosts. Existing owner runtime remains intact; no production storage authority moved in P01."
+    },
+    {
+      "criterionId": "P01-T07-AC04",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/9647b42/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/incoming-storage/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/incoming-storage-negative/archive.json"
+      ],
+      "review": "Exact candidate, commands, real host, pinned versions, source/build/broker digests and results verified against commit/current relevant inputs. Scope is R1 fixture qualification. Reports retain unsupported cross-resource, external effect, authorization, power-loss and production migration limits; synthetic token values are not archived."
+    }
+  ],
+  "observations": [
+    {
+      "report": "docs/planning/2026-10-09/delivery/evidence/P01/native/9647b42/linux/storage-result.json",
+      "sha256": "c5ca088261351b36e26d53f8b29768a55dcbff6d1c1465b6c3c416f8b77989d6",
+      "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+      "cases": [
+        "complete-state-provenance-effect-record",
+        "conditional-two-language-race",
+        "authoritative-latest-read-both-clients",
+        "conditional-winner-only-dispatches-once",
+        "lost-puback-reconciles-after-restart-and-dedup-expiry",
+        "changed-digest-replay-rejected-both-clients",
+        "python-atomic-batch-no-partial-before-commit",
+        "atomic-gap-rejects-without-partial-records",
+        "uncommitted-batch-remains-absent-after-restart",
+        "typescript-native-atomic-batch",
+        "atomic-batch-stale-subject-condition-rejected",
+        "atomic-condition-rechecked-after-interleaved-commit",
+        "typescript-raw-batch-gap-rejected",
+        "cross-stream-atomic-transaction-rejected",
+        "lost-final-batch-ack-reconciles-after-restart-and-dedup-expiry",
+        "stale-kv-projection-requires-owner-and-policy-revalidation",
+        "fixture-capability-rejects-cross-stream-kv-object-tool-atomicity",
+        "incoming-creation-atomic-with-attribution-claim-python",
+        "incoming-creation-atomic-with-attribution-claim-typescript",
+        "retention-hole-requires-reconciliation"
+      ],
+      "natsServer": "nats-server: v2.15.0",
+      "natsPy": "2.16.0",
+      "node": "v22.21.1",
+      "sourceInputsMatchCurrent": true
+    },
+    {
+      "report": "docs/planning/2026-10-09/delivery/evidence/P01/native/9647b42/macos/storage-result.json",
+      "sha256": "0a534fafa7fc337f9f7c06bd55f693fe9c3d22943ab1bd61af1eafd10915a81c",
+      "platform": "macOS-15.7.9-arm64-arm-64bit-Mach-O",
+      "cases": [
+        "complete-state-provenance-effect-record",
+        "conditional-two-language-race",
+        "authoritative-latest-read-both-clients",
+        "conditional-winner-only-dispatches-once",
+        "lost-puback-reconciles-after-restart-and-dedup-expiry",
+        "changed-digest-replay-rejected-both-clients",
+        "python-atomic-batch-no-partial-before-commit",
+        "atomic-gap-rejects-without-partial-records",
+        "uncommitted-batch-remains-absent-after-restart",
+        "typescript-native-atomic-batch",
+        "atomic-batch-stale-subject-condition-rejected",
+        "atomic-condition-rechecked-after-interleaved-commit",
+        "typescript-raw-batch-gap-rejected",
+        "cross-stream-atomic-transaction-rejected",
+        "lost-final-batch-ack-reconciles-after-restart-and-dedup-expiry",
+        "stale-kv-projection-requires-owner-and-policy-revalidation",
+        "fixture-capability-rejects-cross-stream-kv-object-tool-atomicity",
+        "incoming-creation-atomic-with-attribution-claim-python",
+        "incoming-creation-atomic-with-attribution-claim-typescript",
+        "retention-hole-requires-reconciliation"
+      ],
+      "natsServer": "nats-server: v2.15.0",
+      "natsPy": "2.16.0",
+      "node": "v22.21.1",
+      "sourceInputsMatchCurrent": true
+    },
+    {
+      "report": "docs/planning/2026-10-09/delivery/evidence/P01/incoming-storage/storage-result.json",
+      "sha256": "fe9f7df341e295f078eb7b80ee2fd6f5fb7c8a513bbcac0a3e270198941f68db",
+      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+      "cases": [
+        "complete-state-provenance-effect-record",
+        "conditional-two-language-race",
+        "authoritative-latest-read-both-clients",
+        "conditional-winner-only-dispatches-once",
+        "lost-puback-reconciles-after-restart-and-dedup-expiry",
+        "changed-digest-replay-rejected-both-clients",
+        "python-atomic-batch-no-partial-before-commit",
+        "atomic-gap-rejects-without-partial-records",
+        "uncommitted-batch-remains-absent-after-restart",
+        "typescript-native-atomic-batch",
+        "atomic-batch-stale-subject-condition-rejected",
+        "atomic-condition-rechecked-after-interleaved-commit",
+        "typescript-raw-batch-gap-rejected",
+        "cross-stream-atomic-transaction-rejected",
+        "lost-final-batch-ack-reconciles-after-restart-and-dedup-expiry",
+        "stale-kv-projection-requires-owner-and-policy-revalidation",
+        "fixture-capability-rejects-cross-stream-kv-object-tool-atomicity",
+        "incoming-creation-atomic-with-attribution-claim-python",
+        "incoming-creation-atomic-with-attribution-claim-typescript",
+        "retention-hole-requires-reconciliation"
+      ],
+      "natsServer": "nats-server: v2.15.0",
+      "natsPy": "2.16.0",
+      "node": "v22.22.1",
+      "sourceInputsMatchCurrent": true
+    }
+  ],
+  "scopeLimits": [
+    "The macOS full hub profile on this same candidate failed a separate Bash callback entrypoint; that failure is preserved and blocks P01 advancement, while macOS storage20cases passed.",
+    "Later production owner, plugin registry, external effect dispatch, R3 and actual power-loss qualification remain in their owning phases.",
+    "Dashboard/external-plugin and provider preservation are separate open P01-T04 obligations. This record accepts only the complete P01-T07 fixture deliverable."
+  ]
+}

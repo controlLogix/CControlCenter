@@ -1,0 +1,146 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordedDate": "2026-10-09",
+  "purpose": "Bounded original-plugin recovery investigation; proposed maintained replacement, not recovered source or accepted preservation",
+  "candidate": "9647b4240a43c60c246512efa1553e8f4cb58530",
+  "result": "original_artifact_not_recovered",
+  "originalArtifact": "plugins/agentmux-orchestration",
+  "searches": [
+    {
+      "result": "No artifact history; repository is not shallow",
+      "command": "git log --all -- paths for agentmux-orchestration, agentmux-hook.sh, agentmux-plugin, agent-config/scripts/runtime.py",
+      "source": "Agentmux Git history"
+    },
+    {
+      "path": "C:/Users/RyanHelms/.claude/plugins/marketplaces/adaggroup",
+      "commit": "0beccb60aa9fead5b24045318e7a1ca44d805375",
+      "shallow": true,
+      "source": "Windows registered adaggroup marketplace",
+      "result": "Expected plugin absent; local exact-path history empty"
+    },
+    {
+      "branches": [
+        "main",
+        "chore/MKT-31-jira-migration",
+        "chore/move-codesys-dev-to-csai-bms",
+        "feat/design-patterns-bytedesk-store",
+        "feat/design-patterns-launcher-node24",
+        "feat/design-patterns-remediate-command",
+        "feat/reprompt-plugin",
+        "fix/design-patterns-migrate-evidence-paths"
+      ],
+      "command": "GET commits?path=plugins/agentmux-orchestration&sha=<branch>&per_page=1",
+      "source": "GitHub API adaggroup-com/marketplace",
+      "result": "Zero matching commits on each current branch"
+    },
+    {
+      "truncated": false,
+      "result": "No matching paths",
+      "command": "GET git/trees/HEAD?recursive=1",
+      "source": "GitHub API adaggroup-com/marketplace",
+      "matchingPatterns": [
+        "agentmux",
+        "agent-config",
+        "team-compose",
+        "team-dispatch",
+        "team-merge",
+        "agent-doctor"
+      ]
+    },
+    {
+      "result": "No exact agentmux-orchestration directory",
+      "roots": [
+        "C:/Users/RyanHelms/.claude/plugins",
+        "C:/Users/RyanHelms/.codex/plugins"
+      ],
+      "source": "Windows installed plugin directories"
+    },
+    {
+      "result": "No exact plugin directory; /home/ryan/.claude/plugins/known_marketplaces.json absent",
+      "roots": [
+        "/home/ryan/.claude/plugins",
+        "/home/ryan/.codex/plugins"
+      ],
+      "source": "WSL installed plugin directories"
+    },
+    {
+      "path": "C:/Users/RyanHelms/Downloads",
+      "result": "No matching source download; unrelated sensitive filename content was not opened",
+      "source": "Downloads filename scan"
+    }
+  ],
+  "history": [
+    {
+      "limit": "Commit body is historical evidence, not current qualification or original skill source",
+      "commit": "ef513e0606c49e7527ba0415fa830fed564c458b",
+      "claim": "Names agent-new, agent-roster, agent-edit, agent-remove; says strict plugin validation passed"
+    },
+    {
+      "limit": "Contains no plugin implementation",
+      "actualFiles": [
+        "dashboard/run_tests.sh",
+        "dashboard/teams.js",
+        "dashboard/test_frontend_teams.sh",
+        "dashboard/test_orchestration_plugin.py",
+        "dashboard/test_plugin_skills.py"
+      ],
+      "commit": "bc81405c81faef89dcbe638415a5dba8974d1e7f",
+      "claim": "Names team-compose, team-dispatch, team-merge, agent-config, agent-doctor; describes hook/MCP structure and passing suites"
+    },
+    {
+      "limit": "Current runtime takes precedence over historical descriptions",
+      "commit": "ef08abc2a3b89325cc3f71b431156267e2bc08fa",
+      "claim": "Documents guarded member integration and coordination CLI decisions"
+    }
+  ],
+  "checkCounts": {
+    "recoveredPluginTestsExecuted": 0,
+    "installedLauncher": 4,
+    "hookAndMcp": 16
+  },
+  "limitations": [
+    "Deleted or unpublished remote branches and other original checkouts were not available; absence here is not proof of nonexistence.",
+    "No unrelated agent-orchestration package can substitute.",
+    "No credential contents or private conversation transcripts were read.",
+    "No original skill text, upstream version or package license metadata was recovered.",
+    "Replacement design is proposed; no runtime implementation, installation or acceptance was performed."
+  ],
+  "sourceBindings": [
+    {
+      "path": "dashboard/test_orchestration_plugin.py",
+      "sha256": "4c45e748533bec8a4f3fc1d08ef7df09afebe02a8cb06d36a10d8f35e5ff6463"
+    },
+    {
+      "path": "dashboard/test_plugin_skills.py",
+      "sha256": "38f0c17512cf355cd43f569ad78c53a28362a1a35f39d886d02a113a2233f2b0"
+    },
+    {
+      "path": "docs/CONTRACTS_agents.md",
+      "sha256": "865e7b15667e75ce2b9e071a2386b7632b148b69d84e80d2a84c0d1a1a715c52"
+    },
+    {
+      "path": "taskmgmt/coordination.py",
+      "sha256": "21711353c6d0babf127df12eba0457970f8e22689e711004432fd018f3713ff3"
+    },
+    {
+      "path": "taskmgmt/dispatch.py",
+      "sha256": "b04c6735c43ac0d7186706db1add5d7e1cc97b44f73e3f0832216db1bba67256"
+    },
+    {
+      "path": "taskmgmt/setup_auth.py",
+      "sha256": "c6957a58807eaa93181dd5a06a33e18af28b4bc369c3923ec9cee54b1ed8c994"
+    },
+    {
+      "path": "taskmgmt/agentdefs.py",
+      "sha256": "5c5cfaaf8e62679025290aaca80aef04ded499d28ffa069cfff736a798f95749"
+    },
+    {
+      "path": "dashboard/boardagents.py",
+      "sha256": "0957b0f90d2ab3573e16f32d64c6931dfe76fb713176068b28f0d9676524c484"
+    },
+    {
+      "path": "dashboard/boardteams.py",
+      "sha256": "f0c964b8ebcc713f3cef3c609baa95ba2d46880722b421ba6051e345b4e1a882"
+    }
+  ]
+}

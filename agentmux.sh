@@ -98,7 +98,7 @@ agentmux_self() {
 }
 # Agent callbacks reach the Python client before any local state is created.
 # The client validates the complete scoped context and rejects lifecycle verbs.
-if [[ -v AGENTMUX_WINDOWS_CALLBACK ]]; then
+if [ "${AGENTMUX_WINDOWS_CALLBACK+x}" = x ]; then
   if [ "${1:-}" != hub ]; then
     printf 'agentmux: Windows agent callbacks support hub commands only\n' >&2
     exit 1
@@ -1084,7 +1084,7 @@ except Exception:
   # Values are paths/context only; inline tokens never go into pane commands.
   local callback_key callback_value
   for callback_key in AGENTMUX_WINDOWS_CALLBACK AGENTMUX_WSL_DISTRO AGENTMUX_WSL_BIN AGENTMUX_WSL_CWD AGENTMUX_HUB_URL AGENTMUX_HUB_TOKEN_FILE AGENTMUX_SOCKET TMUX_TMPDIR; do
-    if [[ -v "$callback_key" ]]; then
+    if declare -p "$callback_key" >/dev/null 2>&1; then
       printf -v callback_value '%q' "${!callback_key}"
       env_prefix="$env_prefix export $callback_key=$callback_value;"
     else
