@@ -3,8 +3,8 @@
   "reviewMethod": "static source review; no runtime tests run",
   "reviewDate": "2026-10-09",
   "fileInventory": {
-    "assignedTrackedFiles": 88,
-    "coveredTrackedFiles": 88,
+    "assignedTrackedFiles": 89,
+    "coveredTrackedFiles": 89,
     "unassignedPaths": []
   },
   "interpretation": "These are proposed reuse and verification obligations, not implemented changes or passed parity checks. A shared file can serve several components. Existing tests are regression starting points and do not necessarily cover every proposed check; identified gaps require new focused fixtures. No source behavior removal is authorized. Source safeguards are retained while unsafe assumptions require explicit repairs and reviewed behavior changes.",
@@ -307,7 +307,8 @@
       "files": [
         "install.sh",
         "agentmux.cmd",
-        "link-windows-state.sh"
+        "link-windows-state.sh",
+        "agentmux_windows.py"
       ],
       "role": "runtime",
       "baselineGroups": [
@@ -1527,6 +1528,16 @@
       "limitations": [
         "The old five-run result is retained evidence, not a new execution result.",
         "No dashboard or service was started or stopped."
+      ]
+    }
+  ],
+  "reviewHistory": [
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "Add source ownership for bounded P01 platform/callback fixtures; preserve original behavioral obligations",
+      "addedFiles": [
+        "agentmux_windows.py"
       ]
     }
   ]

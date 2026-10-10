@@ -1,0 +1,10 @@
+{
+  "surface": "windows",
+  "command": [
+    "C:/Users/RyanHelms/.grok/bin/grok.exe",
+    "--version"
+  ],
+  "exitCode": 0,
+  "stdout": "grok 1.0.13 (5e9a58528b76) [stable]\n",
+  "stderr": ""
+}

@@ -1,0 +1,120 @@
+{
+  "results": [
+    {
+      "case": "real-pane-paneone",
+      "env": {
+        "AGENTMUX_WINDOWS_CALLBACK": "1",
+        "AGENTMUX_HUB_URL": "tcp://127.0.0.1:34217",
+        "AGENTMUX_HUB_TOKEN_FILE": "/home/ryan/.cache/agentmux-governance/callback-real-c45fry44/home/.agentmux/repos/alpha/agents/worker-paneone/run/token"
+      }
+    },
+    {
+      "case": "real-pane-panetwo",
+      "env": {
+        "AGENTMUX_WINDOWS_CALLBACK": "1",
+        "AGENTMUX_HUB_URL": "tcp://127.0.0.1:34217",
+        "AGENTMUX_HUB_TOKEN_FILE": "/home/ryan/.cache/agentmux-governance/callback-real-c45fry44/home/.agentmux/repos/alpha/agents/worker-panetwo/run/token"
+      }
+    },
+    {
+      "case": "native-after-callback-no-markers-or-token",
+      "env": {}
+    },
+    {
+      "case": "identity-one",
+      "code": 0,
+      "out": "alpha-worker-one  repo=alpha role=worker cli=shell state=ready\neligible: agent:alpha-worker-one, role:alpha/worker, role:*/worker\n",
+      "err": ""
+    },
+    {
+      "case": "identity-two",
+      "code": 0,
+      "out": "alpha-worker-two  repo=alpha role=worker cli=shell state=ready\neligible: agent:alpha-worker-two, role:alpha/worker, role:*/worker\n",
+      "err": ""
+    },
+    {
+      "case": "identity-paneone",
+      "code": 0,
+      "out": "alpha-worker-paneone  repo=alpha role=worker cli=shell state=ready\neligible: agent:alpha-worker-paneone, role:alpha/worker, role:*/worker\n",
+      "err": ""
+    },
+    {
+      "case": "identity-panetwo",
+      "code": 0,
+      "out": "alpha-worker-panetwo  repo=alpha role=worker cli=shell state=ready\neligible: agent:alpha-worker-panetwo, role:alpha/worker, role:*/worker\n",
+      "err": ""
+    },
+    {
+      "case": "claim-own-work",
+      "code": 0,
+      "out": "{\n  \"claimed\": {\n    \"id\": \"W-041RN8B8WH\",\n    \"parent_id\": null,\n    \"task_key\": null,\n    \"repo\": \"alpha\",\n    \"target\": \"agent:alpha-worker-paneone\",\n    \"target_kind\": \"agent\",\n    \"title\": \"safe callback proof\",\n    \"body\": null,\n    \"created_by\": \"virtual:operator\",\n    \"requirements\": null,\n    \"priority\": 100,\n    \"state\": \"claimed\",\n    \"claimed_by\": \"alpha-worker-paneone\",\n    \"lease_until\": \"2026-10-10T00:29:09.501Z\",\n    \"attempts\": 1,\n    \"max_attempts\": 3,\n    \"result\": null,\n    \"blocked_reason\": null,\n    \"created\": \"2026-10-10T00:09:08.825Z\",\n    \"updated\": \"2026-10-10T00:09:09.501Z\",\n    \"origin\": null,\n    \"origin_peer\": null,\n    \"fed_flags\": null\n  }\n}\n",
+      "err": ""
+    },
+    {
+      "case": "reject-other-agent-completion",
+      "code": 1,
+      "out": "",
+      "err": "agentmux hub release: W-041RN8B8WH is held by alpha-worker-paneone, not alpha-worker-panetwo\n"
+    },
+    {
+      "case": "complete-own-work",
+      "code": 0,
+      "out": "W-041RN8B8WH -> done\n",
+      "err": ""
+    },
+    {
+      "case": "revoked-agent",
+      "code": 1,
+      "out": "",
+      "err": "agentmux hub whoami: invalid or revoked token\n"
+    },
+    {
+      "case": "spoof-as-ignored",
+      "code": 0,
+      "out": "alpha-worker-one  repo=alpha role=worker cli=shell state=ready\neligible: agent:alpha-worker-one, role:alpha/worker, role:*/worker\n",
+      "err": ""
+    },
+    {
+      "case": "invalid-context",
+      "code": 2,
+      "out": "",
+      "err": "agentmux: Windows agent callbacks need tcp://127.0.0.1:<port>\r\n"
+    },
+    {
+      "case": "invalid-context",
+      "code": 2,
+      "out": "",
+      "err": "agentmux: Windows agent callbacks need tcp://127.0.0.1:<port>\r\n"
+    },
+    {
+      "case": "invalid-context",
+      "code": 1,
+      "out": "",
+      "err": "agentmux hub: cannot read the TCP token file\n"
+    },
+    {
+      "case": "no-daemon",
+      "code": 1,
+      "out": "",
+      "err": "This operation is not available through an agent callback\n"
+    },
+    {
+      "case": "wrong-token",
+      "code": 1,
+      "out": "",
+      "err": "agentmux hub whoami: invalid or revoked token\n"
+    }
+  ],
+  "hubExited": true,
+  "sourceHashes": {
+    "agentmux.cmd": "c870282fc53288bd1576a8f1331474fa98ed99ec76940b4105465fb060bae777",
+    "agentmux_windows.py": "d8d579d0a63306d71337024798db188eea309f19e2debd8694cda161ca2eb17b",
+    "hub/cli.py": "276e8311b0cbd683e3c123ff327cfd4664fa8ef55882ef94ad89e50a6ecc0efb",
+    "hub/server.py": "8f4de71e0885b395d058b7dd88cfd740fdffd8a986f6a58ae8cc5b115dca2153",
+    "agentmux.sh": "8fd501e6733798b7abdb3eb9e7f10dbe691e094aed9af5f27e5c9f3888bb5551"
+  },
+  "limitations": [
+    "Two real shell panes and two pre-registered identities; no provider execution.",
+    "Windows Python helper used; batch shell parser not tested."
+  ]
+}

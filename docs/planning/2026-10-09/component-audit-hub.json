@@ -290,7 +290,8 @@
       "id": "HUB-04",
       "name": "Hub CLI and federation command client",
       "files": [
-        "hub/cli.py"
+        "hub/cli.py",
+        "agentmux_windows.py"
       ],
       "role": "runtime",
       "baselineGroups": [
@@ -1639,7 +1640,12 @@
         "tests/storage/typescript/package-lock.json",
         "tests/storage/typescript/package.json",
         "tests/storage/typescript/src/client.ts",
-        "tests/storage/typescript/tsconfig.json"
+        "tests/storage/typescript/tsconfig.json",
+        "hub/tests/test_windows_callbacks.py",
+        "tests/platform/inventory.py",
+        "tests/platform/README.md",
+        "tests/platform/test_inventory.py",
+        "tests/platform/fixtures/wsl-inventory.json"
       ],
       "role": "test-support",
       "baselineGroups": [
@@ -1818,6 +1824,19 @@
         "tests/contracts/test_fake_execution.py"
       ],
       "note": "HUB-26 retains fixture ownership. Existing baseline behavior checks and phase qualification requirements are unchanged; storage fixture extensions remain evidence rather than production cutover."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "Add source ownership for bounded P01 platform/callback fixtures; preserve original behavioral obligations",
+      "addedFiles": [
+        "agentmux_windows.py",
+        "hub/tests/test_windows_callbacks.py",
+        "tests/platform/README.md",
+        "tests/platform/fixtures/wsl-inventory.json",
+        "tests/platform/inventory.py",
+        "tests/platform/test_inventory.py"
+      ]
     }
   ]
 }

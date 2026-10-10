@@ -17,6 +17,8 @@ import sys
 import time
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, REPO)
+from agentmux_windows import validate_callback
 ROOT = os.environ.get("AGENTMUX_HOME") or os.path.expanduser("~/.agentmux")
 SOCK = os.path.join(ROOT, "hub", "hub.sock")
 
@@ -52,6 +54,11 @@ def connect(timeout):
     """Unix socket by default. AGENTMUX_HUB_URL=tcp://127.0.0.1:PORT selects the
     token-authenticated TCP listener - the only way in from Windows, where there is no
     unix socket and no process ancestry for the hub to read."""
+    try:
+        if validate_callback(os.environ):
+            tcp_token()  # Reject an unreadable token file before opening a socket.
+    except ValueError as exc:
+        raise Fail(str(exc))
     url = os.environ.get("AGENTMUX_HUB_URL", "")
     if url.startswith("tcp://"):
         host, _, port = url[6:].rpartition(":")
@@ -67,14 +74,21 @@ def tcp_token():
     tok = os.environ.get("AGENTMUX_HUB_TOKEN")
     path = os.environ.get("AGENTMUX_HUB_TOKEN_FILE")
     if not tok and path:
-        with open(path) as f:
-            tok = f.read().strip()
+        try:
+            with open(path) as f:
+                tok = f.read().strip()
+        except OSError:
+            raise Fail("agentmux hub: cannot read the TCP token file")
     if not tok:
         raise Fail("agentmux hub: TCP needs AGENTMUX_HUB_TOKEN or AGENTMUX_HUB_TOKEN_FILE")
     return tok
 
 
 def call(verb, args=None, as_=None, timeout=30):
+    try:
+        validate_callback(os.environ, verb)
+    except ValueError as exc:
+        raise Fail(str(exc))
     req = {"verb": verb, "args": args or {}}
     if as_:
         req["as"] = as_
@@ -176,6 +190,10 @@ def python():
 
 def start():
     try:
+        validate_callback(os.environ, "start")
+    except ValueError as exc:
+        raise Fail(str(exc))
+    try:
         call("ping", timeout=3)
         print("hub already running")
         return
@@ -202,6 +220,10 @@ def main(argv):
     if not argv or argv[0] in ("-h", "--help", "help"):
         print(USAGE); return
     verb, rest = argv[0], argv[1:]
+    try:
+        validate_callback(os.environ, verb)
+    except ValueError as exc:
+        raise Fail(str(exc))
 
     def out(resp, text=None):
         if js:

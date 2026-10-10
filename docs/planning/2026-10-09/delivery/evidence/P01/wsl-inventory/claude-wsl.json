@@ -1,0 +1,16 @@
+{
+  "surface": "wsl",
+  "command": [
+    "wsl.exe",
+    "-d",
+    "Ubuntu-26.04",
+    "--user",
+    "ryan",
+    "--exec",
+    "/usr/local/bin/claude",
+    "--version"
+  ],
+  "exitCode": 0,
+  "stdout": "2.1.296 (Claude Code)\n",
+  "stderr": ""
+}

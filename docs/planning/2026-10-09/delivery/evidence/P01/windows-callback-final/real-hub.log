@@ -1,0 +1,4 @@
+2026-10-09 20:08:57 tcp listening 127.0.0.1:34217
+2026-10-09 20:08:57 hub up /home/ryan/.cache/agentmux-governance/callback-real-c45fry44/home/.agentmux/hub/hub.sock db /home/ryan/.cache/agentmux-governance/callback-real-c45fry44/home/.agentmux/hub/hub.db
+2026-10-09 20:08:57 backup /home/ryan/.cache/agentmux-governance/callback-real-c45fry44/home/.agentmux/hub/backups/hub-hourly-20261010T000857886Z-01M4HJ8D8ZCBQ0G3N3GVNTDX17-jna5kv3v.db
+2026-10-09 20:09:19 hub down

@@ -1,0 +1,69 @@
+{
+  "sourceCommit": "09fe9c749ff674c0dd5ca4fa7c53abfbe23cadcd",
+  "workflowRun": 38005239121,
+  "url": "https://github.com/controlLogix/agentmux/actions/runs/38005239121",
+  "reviewer": "Codex",
+  "recordedAt": "2026-10-09T23:47:45.717535+00:00",
+  "phaseAccepted": false,
+  "platforms": [
+    {
+      "platform": "macos",
+      "host": "macOS-15.7.9-arm64-arm-64bit-Mach-O",
+      "checks": 20,
+      "sourceHashesVerifiedAgainstCommit": 206,
+      "ciExitCode": 0,
+      "failedChecks": [],
+      "hubStatus": "passed",
+      "hubFailures": [],
+      "hubTests": 128,
+      "hubSourceFilesVerified": 44,
+      "contractAdmission": [],
+      "artifactSha256": {
+        "ci-result.json": "fba76600152ae23269fd97eeaf4626c390b92e02742a789c3d4d3be20d0b6ca7",
+        "conformance-admission-negative.json": "289781dd7dbb9664e6c95799cd41e86f6da7aaae97b3f079cd954b9b77496c54",
+        "conformance-admission.json": "52653c1748ad17b2371f7363c7dd88383ca5da0f8e12412deb788370601380b7",
+        "contracts.json": "f65117444692e94006238ebb50e02a4f13ea5c83105e8f59a0ffd5543a5c7514",
+        "hub-full-result.json": "68849cef9fac6a1e3d088e85197daa854ca61510cb344f906d0b8475e2c6d85f",
+        "leaf-result.json": "1c07c4e32ad2a2ffa2df86456e9c4cb334c6ca674fb01006f80f3a27069c6b69",
+        "negative-fixture.json": "df9bac69190e9a9ef2f0978c32f78236ff4d4d461585a8ca7481f210773a256a",
+        "signed-leaf-result.json": "9ddfa2d14df98edd8be82734d0ef69ba4285c5407832fc3df0a0e34fbfdbe8ee",
+        "storage-result.json": "79352acd95f40b2691294a597194f355bb7aeb9d0e5288155fb9590878f86e0c"
+      }
+    },
+    {
+      "platform": "linux",
+      "host": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+      "checks": 20,
+      "sourceHashesVerifiedAgainstCommit": 206,
+      "ciExitCode": 1,
+      "failedChecks": [
+        "original-hub-full-profile",
+        "original-hub-evidence"
+      ],
+      "hubStatus": "failed-or-incomplete",
+      "hubFailures": [
+        "hub.tests.test_hub_offline.BackupsAndRetention.test_rotation_keeps_newest_and_copy_restores"
+      ],
+      "hubTests": 128,
+      "hubSourceFilesVerified": 44,
+      "contractAdmission": [],
+      "artifactSha256": {
+        "ci-result.json": "4dc6d6f645db1857999650da7c9cb82b521b7f857d09e0c0bf2b6efb3873c339",
+        "conformance-admission-negative.json": "4877b87751fa7afc069e00179de9ba2d30294a1fda190abd7db3858c7fc48a3f",
+        "conformance-admission.json": "ae46c642d70760b43f95c7d0b1fc748b611a3f30759f55fb1e50487c1d4d7c98",
+        "contracts.json": "8f7afcda7809ebb486db44cff86b7d6e1b776c77f4fc2c9366ad73179bbb45da",
+        "hub-full-result.json": "8716c4e69bf1d56e8a2157eca035a0ac509643b509a2f667522b72a2c3e5c4ff",
+        "leaf-result.json": "85fb592cba339823de57ae95a197bdb46c4b421f4597ba8526cf64932a144d9a",
+        "negative-fixture.json": "df9bac69190e9a9ef2f0978c32f78236ff4d4d461585a8ca7481f210773a256a",
+        "signed-leaf-result.json": "63f02a03537a40d5d6a9c43bd610202ac37c90a12ff553347510af63263928dc",
+        "storage-result.json": "bbaf0ad7a58d86e4fa78710daf294e415af2426d36810c7cee457996da3f6ba1"
+      }
+    }
+  ],
+  "notAcceptedReason": "Linux original hub profile failed backup rotation at a second boundary; macOS passed. The failed candidate is preserved, not accepted. Parent repair and deterministic original-negative reproduction are separate evidence.",
+  "limits": [
+    "P01 native contract/broker and original hub fixtures; no desktop client or actual provider orchestration proof.",
+    "R1 broker and fixture trust do not establish production enrollment, R3, power-loss recovery or final bilateral acceptance.",
+    "Dashboard and external-plugin preservation remain separately tracked."
+  ]
+}

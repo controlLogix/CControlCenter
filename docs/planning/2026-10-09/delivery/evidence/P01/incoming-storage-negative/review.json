@@ -1,0 +1,11 @@
+{
+  "mutation": "Publish partial blocked task before attribution and claim construction; no assertions removed",
+  "exitCode": 1,
+  "expectedFailure": "partial incoming state, attribution or claim became durable",
+  "sourceSha256": "3eb87919f153de49af63839d00dd07305e2a341cad1d965b33c57fbb02d55b55",
+  "sourceUnchanged": true,
+  "logSha256": "30292e6a03325338ecb95eb3db2e22cc190d9a8c2c4e4f9a767cfc0ca79920ba",
+  "limits": [
+    "Isolated instrumented runner, not a committed product change. All original storage cases execute before this injected failure."
+  ]
+}

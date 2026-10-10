@@ -96,6 +96,17 @@ agentmux_self() {
   done
   return 1
 }
+# Agent callbacks reach the Python client before any local state is created.
+# The client validates the complete scoped context and rejects lifecycle verbs.
+if [[ -v AGENTMUX_WINDOWS_CALLBACK ]]; then
+  if [ "${1:-}" != hub ]; then
+    printf 'agentmux: Windows agent callbacks support hub commands only\n' >&2
+    exit 1
+  fi
+  _callback_self="$(agentmux_self)" || exit 1
+  shift
+  exec python3 "$(dirname "$_callback_self")/hub/cli.py" "$@"
+fi
 ROOT="${AGENTMUX_HOME:-$HOME/.agentmux}"
 LOGDIR="$ROOT/logs"
 RUNDIR="$ROOT/run"
@@ -933,7 +944,6 @@ cmd_spawn() (
     printf -v quoted_home '%q' "$AGENTMUX_HOME"
     env_prefix="$env_prefix export AGENTMUX_HOME=$quoted_home;"
   fi
-
   # Private env for spawned panes - API keys for custom providers (e.g.
   # XAI_API_KEY for the codex "grok" profile) go in $ROOT/env, mode 0600, on the
   # Linux filesystem. It is SOURCED at pane start rather than interpolated into
@@ -1068,6 +1078,22 @@ except Exception:
     env_prefix="$env_prefix export AGENTMUX_PERSONA_FILE=$quoted_path;"
   else
     rm -f "$RUNDIR/$name.persona"
+  fi
+
+  # A shared tmux server must not reuse another pane's callback selection.
+  # Values are paths/context only; inline tokens never go into pane commands.
+  local callback_key callback_value
+  for callback_key in AGENTMUX_WINDOWS_CALLBACK AGENTMUX_WSL_DISTRO AGENTMUX_WSL_BIN AGENTMUX_WSL_CWD AGENTMUX_HUB_URL AGENTMUX_HUB_TOKEN_FILE AGENTMUX_SOCKET TMUX_TMPDIR; do
+    if [[ -v "$callback_key" ]]; then
+      printf -v callback_value '%q' "${!callback_key}"
+      env_prefix="$env_prefix export $callback_key=$callback_value;"
+    else
+      env_prefix="$env_prefix unset $callback_key;"
+    fi
+  done
+  env_prefix="$env_prefix unset AGENTMUX_SPAWN_WINDOWS_CALLBACK;"
+  if [ "${AGENTMUX_SPAWN_WINDOWS_CALLBACK:-}" = 1 ]; then
+    env_prefix="$env_prefix export AGENTMUX_WINDOWS_CALLBACK=1; unset AGENTMUX_HUB_TOKEN;"
   fi
 
   tm new-session -d -s "$name" -c "$cwd" -x "$COLS" -y "$ROWS" \

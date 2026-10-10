@@ -1,0 +1,38 @@
+# P01-T02 bounded completion audit
+
+Reviewed checkout: `09fe9c749ff674c0dd5ca4fa7c53abfbe23cadcd`. Reviewer: Codex independent subagent. This is a task audit, not task completion or phase acceptance. No runtime, tracker or pattern-review source was changed.
+
+## Finding
+
+Keep P01-T02 open. Reusable cross-language, controlled-execution and real-broker fixtures have substantial passing evidence. The added Windows/WSL requirement still needs a reusable placement/inventory contract and its positive/negative checks. The existing machine archive supplies observations and launcher checks, but its hard-coded setup/probe scripts are not that reusable contract.
+
+`windows-clients/verify.py` has a fixed Ryan/distro/cache location and performs setup/evidence writes while probing. `clients.json` describes seven launch targets and path flags; it does not express observed direct-Windows versus WSL identity, missing-client state, placement requirements, or evidence completeness. The plan defines WSL-CLIENT-01 in prose. No separate reusable inventory validator or environmental contract vectors were found in the current contracts/tests inventory. The parent confirmed no other such file is being prepared.
+
+## Proposed per-criterion evidence
+
+| Criterion | Evidence inspected | Judgment and remaining work |
+| --- | --- | --- |
+| P01-T02-AC01: reusable fixtures and environmental contract | `tests/contracts/fake_execution.py`, `fake-execution.md`, shared vectors and recovery/model tests; `tests/storage/README.md`; `tests/contracts/ci.py`; `windows-clients` archive and plan WSL-CLIENT-01 | Worker/provider and broker fixtures are implemented. Ten controlled-execution tests cover actual callbacks, manual delay/reordering, timeout/unknown, unavailable, cancellation and immutable observations. Add the reusable Windows-client placement/inventory contract described below before accepting the full expanded scope. |
+| P01-T02-AC02: focused checks for every named capability | Native `native/7a7d47a/{linux,macos}` reports: 20 successful CI steps, 45 contract tests, 18 storage cases and real leaf suites. WSL `controlled-conformance-result.json` has 45 passing tests; `storage-result.json` has 18 passing cases. Final Windows launcher review verifies four argument cases, fourteen durable links, backup hashes and seven help logs. | Core fixture checks pass at their recorded source versions. FAIL-42 covers lost final batch acknowledgment/restart; FAIL-43 rejects stale projection authority; FAIL-47 rejects unsupported cross-resource atomicity. Add passing inventory contract checks plus deliberate invalid records. Do not count P06 callback/concurrent-host gaps as P01 implementation failures, but do require their honest classification in the inventory. |
+| P01-T02-AC03: preserve affected behavior | Native CI records successful regression and component preservation steps and original 128-test hub profiles. `regression-replacement-review.md` and `regression-retention-result.json` retain assertion history; the latter records actual assertion-removal detection. | Historical preservation evidence is useful, not a new whole-repository acceptance. Re-run affected preservation checks on the final task candidate after adding the contract. New fixtures must be additive and must not remove existing test assertions. |
+| P01-T02-AC04: exact source/environment/command/result and limits | Native reports identify commit `7a7d47ae6830f86b8fed318ee64da6a5aac52701`, actual hosts, commands and source/build hashes. WSL reports identify checkout base plus exact working hashes. Windows archive has hashes and a review that separates local setup from P06. | Attach the new contract report to its committed candidate. Refresh WSL full conformance evidence for the stable final candidate: existing 45-test WSL report differs from current source inventory at `tests/contracts/ci.py`. Keep historical reports unchanged. The older WSL report is not an exact-current full-suite admission. |
+
+## Independent checks in this audit
+
+Both native contract reports passed `check_conformance_evidence.py --candidate 7a7d47ae6830f86b8fed318ee64da6a5aac52701 --environment linux|macos` against their matching `native/7a7d47a/<platform>/contracts.json`, exit zero. This is conformance-format admission only; it does not authenticate execution or accept another report format.
+
+Compared all source hashes in the native Linux contract report against the reviewed HEAD: no mismatch. The broader native CI inventory differs at eight governance/planning files (pattern review, goal, regression baseline, requirements coverage, task details, tasks, implementation plan and phases). It must remain evidence for its recorded candidate, not be relabeled as a current full CI run. The WSL controlled-conformance inventory differs at `tests/contracts/ci.py`. The earlier regression-retention report differs at its baseline file. These are source-freshness distinctions, not newly discovered runtime failures.
+
+CI deliberately corrupts a copied positive manifest in `negative_fixture`; its recorded native step passes only when the real contract test rejects the mutation. Tracker tests include removed dependencies, parallel phases and an unaccepted gate. Current pattern check passed: `node .bytedesk/design-patterns/check.mjs check --root .` (before this audit document was added).
+
+## Smallest remaining P01 implementation
+
+Add a reusable, delivery/environment-only inventory format and validator, with synthetic positive and negative vectors. Suggested fields are client ID, Windows installation owner and stable launch target, WSL resolved entry point, direct-Windows and WSL probe command/result/version, config/auth owner (metadata only), runtime placement, observation time, source/evidence hashes and explicit unavailable/unsupported states. Do not put credentials or arbitrary environment dumps in records.
+
+Validate matching identity when both probes succeed; reject a Linux replacement presented as a Windows-owned client, hard-coded version-specific launch targets, missing probe evidence presented as success, or config/auth copying presented as compliant. Preserve missing/unavailable observations as such; their existence must not automatically turn a recorded inventory into qualified P06 support. Keep report completeness separate from workflow support. Add a current real inventory using safe identity/help probes for the discovered clients and a missing-Pi observation with its search boundary. Accept existing archived outputs where exact source and command provenance are available; collect only missing observations. The fixture runner must be callable with an input path, avoid rewriting machine setup, and support a disposable test directory.
+
+After implementation, run the focused validator tests, retain source-bound inventory evidence, refresh affected WSL conformance/preservation checks on the stable candidate and have Codex review the criterion mapping. Native contract results already match current contract sources; whether broader native CI must rerun is a final-candidate gate decision, not something this audit waives.
+
+## P06-owned qualification, not work to pull into P01
+
+Authenticated client workflows; correct selected-hub callbacks into WSL; concurrent tmux/session/host isolation; fresh install/uninstall behavior; and before/after Windows-only update proof with the final wrapper unchanged remain P06 acceptance requirements. The current update observation explicitly had concurrent wrapper hardening. Native macOS/Linux runtime support remains required. Keep these limitations in the P01 inventory rather than claiming completion or starting P06.

@@ -1,0 +1,23 @@
+{
+  "command": [
+    "python",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests/platform",
+    "-p",
+    "test_*.py",
+    "-v"
+  ],
+  "exitCode": 0,
+  "tests": 23,
+  "sourceHashes": {
+    "tests/platform/inventory.py": "351e8104436491dd70a399b0c7344f87423315e0322832730d938bcab36f4edf",
+    "tests/platform/README.md": "f2bdeab08eb628e36b56c9976144ec05da4f3c526e8fefe17847e26598056418",
+    "tests/platform/test_inventory.py": "40011ee2ad6a0bb939b7861fb1ab7dfa1128afcebc27a3bfa1fa66dd4ad69726",
+    "tests/platform/fixtures/wsl-inventory.json": "b7b484deb75f9e850eb59fde72d9a780cb318240044e65439a841ddd7d61d315"
+  },
+  "logSha256": "6210ba731a2d01c4f48834cedb4dcb8a34425ea63fb4faeea5d0d5e77ebd9543",
+  "scope": "Windows synthetic P01 validator; actual client inventory is separately archived. No P06 acceptance."
+}

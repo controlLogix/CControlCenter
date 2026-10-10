@@ -1,0 +1,4 @@
+2026-10-09 20:18:22 tcp listening 127.0.0.1:47409
+2026-10-09 20:18:22 hub up /tmp/hubapi-v185hjki/hub/hub.sock db /tmp/hubapi-v185hjki/hub/hub.db
+2026-10-09 20:18:22 backup /tmp/hubapi-v185hjki/hub/backups/hub-hourly-20261010T001822224Z-01M4HJSMCG3XNECS3YRX9ZCPEP-7rbs1ecn.db
+2026-10-09 20:18:23 hub down

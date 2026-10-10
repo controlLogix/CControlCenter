@@ -1,0 +1,9 @@
+{
+  "sha256": {
+    "result.json": "da843c08deb09b5b08182b79a1d15ec4e0c64410595bcec9f3ead1cf1672949a",
+    "tests.log": "abddee57e086bfa45b877af5076b71419998fa36941e1365dd19376e2e091c9d",
+    "server.log": "521b957ff55318703d0da8a230d71c3b51cf8ec75f0569572314d5b06c096e29",
+    "runner.py": "3fb1c5a8d295582bdea767ea2335350aa9ca4c11f31b95695d72af33abbb3e7c"
+  },
+  "scope": "Unchanged original9ServerAPI tests passed with captured server output. Earlier broad failure exact cause unknown; no phase acceptance."
+}

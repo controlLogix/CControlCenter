@@ -1,0 +1,22 @@
+{
+  "externalSource": "C:/Users/RyanHelms/.cache/agentmux/p01-wsl-inventory",
+  "sha256": {
+    "claude-windows.json": "67f95cbd7c416af95e748d16553ab873c77be608aadab6042ec36a66cc3da423",
+    "claude-wsl.json": "56942170c1218bed1e6a6b61f1a44cee11061021c3020b10733f0f89a1d1b513",
+    "codex-windows.json": "05ff0397e66d80997ee6d3af00bcb70bdcacac25e54bf4f797a09a0413b6de19",
+    "codex-wsl.json": "2fc7559ec1f956531103f330d3a5065f2538aa5d4e6513b2a6cea0ed118bd794",
+    "dsh-windows.json": "aac6225f8bbfe347e80e6b67ee69641aa3f6776a4659f666a828f1a8417a22e5",
+    "dsh-wsl.json": "a11f536931e918e4233ae24172edeed5901ee3bda4a43a05d81c29dbc789b537",
+    "goose-windows.json": "03d59572ca822c9c3cc505495417d816632b15ec24177967482d3711b80ffc79",
+    "goose-wsl.json": "3e06a5e48b6a0185c62d8973d8a6b50ae175f56290cf42685ce515d9de943c2a",
+    "grok-windows.json": "a1a357de0acadb83bcb8b0456d82be7e21fde982841009590c06c71005524848",
+    "grok-wsl.json": "f393236556507472be609aeea5b69c518ef211776ad574522c9cf8eba82bd124",
+    "inventory.json": "f20c81480c758fdc31307749c5f55458c6a49b71bec8e2574d3442c8627a5ecb",
+    "kimi-windows.json": "02ce73ac451a9964c15030349851bd79f0aeb71f0b2ff5aeedc5f07b6027885a",
+    "kimi-wsl.json": "39525667ce0edb3b91c5af3fe094d36abd36037e6b5477061cfcbc386c578aae",
+    "trueforge-windows.json": "a113a217beb6bcd560c67919820c884c6b03e78b5e80217d11201ab973b4a0c8",
+    "trueforge-wsl.json": "b219e812c02e2d797c53a0de01a5bb058257ae0455057e3beb5468abe9c2cc36",
+    "validation.json": "53d0a28015f7154dce2d861dc19f8e80aa56f104f08676077b6bf8c174a9f35b"
+  },
+  "scope": "Reviewed bounded P01 evidence; no phase acceptance"
+}

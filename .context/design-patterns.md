@@ -463,9 +463,9 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Messaging Gateway",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessagingGateway.html",
       "referenceDepth": "full-public-reference",
-      "how": "Agents never see NATS: the CLI (agentmux hub fed ...) and the stdio MCP server expose verbs generated from one registry and call the hub socket.",
-      "why": "Interview F10: CLI canonical, thin MCP wrapper.",
-      "tradeoffs": "The MCP server is hand-written (A18). Alternative: agents use nats directly, rejected - would bypass identity and guardrails.",
+      "how": "Agents never see NATS: the CLI (agentmux hub fed ...) and the stdio MCP server expose verbs generated from one registry and call the hub socket. The existing Windows launcher forwards explicit agent hub commands into the selected WSL distribution and binary. Per-pane token files identify callbacks to the existing loopback TCP hub; callback admission validates explicit selection and scoped home before launch and forbids lifecycle verbs before side effects.",
+      "why": "Interview F10: CLI canonical, thin MCP wrapper. Windows-owned clients cannot retain Linux process ancestry when returning through WSL, so authenticated per-agent gateway context is required to preserve existing hub identity.",
+      "tradeoffs": "The MCP server is hand-written (A18). Alternative: agents use nats directly, rejected - would bypass identity and guardrails. An explicit callback context and Windows Python 3 dependency add setup work; normal operator defaults remain separate. A direct unauthenticated callback or ancestry fallback is simpler but loses agent identity. Tests qualify bounded launcher arguments and real local agent tokens; automatic provider forwarding and authenticated concurrent provider workflows remain unqualified.",
       "locations": [
         {
           "path": "hub/fed/mcp.py",
@@ -474,13 +474,55 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
         {
           "path": "hub/cli.py",
           "symbol": "fed_main"
+        },
+        {
+          "path": "agentmux_windows.py",
+          "symbol": "command"
+        },
+        {
+          "path": "hub/cli.py",
+          "symbol": "main"
+        },
+        {
+          "path": "agentmux.sh",
+          "symbol": "cmd_spawn"
+        },
+        {
+          "path": "hub/server.py",
+          "symbol": "Hub.spawn"
         }
       ],
       "verificationEvidence": [
-        "hub/tests/test_fed_unit.py"
+        "hub/tests/test_fed_unit.py",
+        "hub/tests/test_windows_callbacks.py",
+        "docs/planning/2026-10-09/delivery/evidence/P01/windows-callback-review.json"
       ],
       "decisionEvidence": [
         "docs/FEDERATION.md"
+      ],
+      "revisions": [
+        {
+          "date": "2026-10-09",
+          "reason": "P01 existing Windows callback preservation repair; language-neutral plugin adapter remains planned for P06.",
+          "previous": {
+            "how": "Agents never see NATS: the CLI (agentmux hub fed ...) and the stdio MCP server expose verbs generated from one registry and call the hub socket.",
+            "why": "Interview F10: CLI canonical, thin MCP wrapper.",
+            "tradeoffs": "The MCP server is hand-written (A18). Alternative: agents use nats directly, rejected - would bypass identity and guardrails.",
+            "locations": [
+              {
+                "path": "hub/fed/mcp.py",
+                "symbol": "handle"
+              },
+              {
+                "path": "hub/cli.py",
+                "symbol": "fed_main"
+              }
+            ],
+            "verificationEvidence": [
+              "hub/tests/test_fed_unit.py"
+            ]
+          }
+        }
       ]
     },
     {
@@ -729,7 +771,7 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Message Bus",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/MessageBus.html",
       "referenceDepth": "full-public-reference",
-      "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01\u2013P12. Implementation locations will be recorded when implemented. P00 proposes NATS for every inter-plugin exchange across the fixed protected assembly and ordinary scoped accounts. A bounded three-language request/reply spike proves client interoperability only; it does not qualify lifecycle, security or persistence. See delivery/spikes/runtime/comparison-result.json. This is a recommendation pending P00 review. A P01 fixture now links two independently stored NATS domains through dedicated federation accounts and restricted leaf credentials. Actual commands and observations traverse only the approved subjects; unrelated account and subject traffic is denied. This qualifies static broker boundaries on loopback, not production enrollment, TLS or dynamic trust agreements. The additional signed leaf fixture transports versioned delegation-offer, delegation-decision and execution-report envelopes through the same restricted NATS link. It checks byte preservation and receiving SDK admission before fixture owner mutation. Transport tests use real local brokers and fixed test trust; production hub connection management remains planned.",
+      "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01–P12. Implementation locations will be recorded when implemented. P00 proposes NATS for every inter-plugin exchange across the fixed protected assembly and ordinary scoped accounts. A bounded three-language request/reply spike proves client interoperability only; it does not qualify lifecycle, security or persistence. See delivery/spikes/runtime/comparison-result.json. This is a recommendation pending P00 review. A P01 fixture now links two independently stored NATS domains through dedicated federation accounts and restricted leaf credentials. Actual commands and observations traverse only the approved subjects; unrelated account and subject traffic is denied. This qualifies static broker boundaries on loopback, not production enrollment, TLS or dynamic trust agreements. The additional signed leaf fixture transports versioned delegation-offer, delegation-decision and execution-report envelopes through the same restricted NATS link. It checks byte preservation and receiving SDK admission before fixture owner mutation. Transport tests use real local brokers and fixed test trust; production hub connection management remains planned.",
       "why": "Accepted requirement mandates NATS locally and across connected systems.",
       "tradeoffs": "Direct local calls are simpler/faster but contradict scope; message contracts add latency, retry, schema and operational cost.",
       "locations": [
@@ -758,7 +800,7 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
         {
           "date": "2026-10-09",
           "decision": "P00 concrete implementation recommendation; pending review",
-          "previousHow": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01\u2013P12. Implementation locations will be recorded when implemented.",
+          "previousHow": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01–P12. Implementation locations will be recorded when implemented.",
           "evidence": "docs/planning/2026-10-09/delivery/decisions/README.md"
         }
       ],
@@ -768,7 +810,7 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
           "reason": "P01 pure transition and scoped leaf fixture qualification; production scope remains unchanged.",
           "previous": {
             "status": "planned",
-            "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01\u2013P12. Implementation locations will be recorded when implemented. P00 proposes NATS for every inter-plugin exchange across the fixed protected assembly and ordinary scoped accounts. A bounded three-language request/reply spike proves client interoperability only; it does not qualify lifecycle, security or persistence. See delivery/spikes/runtime/comparison-result.json. This is a recommendation pending P00 review.",
+            "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01–P12. Implementation locations will be recorded when implemented. P00 proposes NATS for every inter-plugin exchange across the fixed protected assembly and ordinary scoped accounts. A bounded three-language request/reply spike proves client interoperability only; it does not qualify lifecycle, security or persistence. See delivery/spikes/runtime/comparison-result.json. This is a recommendation pending P00 review.",
             "locations": [],
             "verificationEvidence": [
               "docs/planning/2026-10-09/delivery/spikes/runtime/comparison-result.json"
@@ -780,7 +822,7 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
           "reason": "P01 ordered recovery and signed leaf qualification; production scope and status are unchanged.",
           "previous": {
             "status": "planned",
-            "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01\u2013P12. Implementation locations will be recorded when implemented. P00 proposes NATS for every inter-plugin exchange across the fixed protected assembly and ordinary scoped accounts. A bounded three-language request/reply spike proves client interoperability only; it does not qualify lifecycle, security or persistence. See delivery/spikes/runtime/comparison-result.json. This is a recommendation pending P00 review. A P01 fixture now links two independently stored NATS domains through dedicated federation accounts and restricted leaf credentials. Actual commands and observations traverse only the approved subjects; unrelated account and subject traffic is denied. This qualifies static broker boundaries on loopback, not production enrollment, TLS or dynamic trust agreements.",
+            "how": "Carry all inter-plugin communication on versioned NATS subjects and schemas. Proposed location: docs/planning/2026-10-09/implementation-plan.md, P01–P12. Implementation locations will be recorded when implemented. P00 proposes NATS for every inter-plugin exchange across the fixed protected assembly and ordinary scoped accounts. A bounded three-language request/reply spike proves client interoperability only; it does not qualify lifecycle, security or persistence. See delivery/spikes/runtime/comparison-result.json. This is a recommendation pending P00 review. A P01 fixture now links two independently stored NATS domains through dedicated federation accounts and restricted leaf credentials. Actual commands and observations traverse only the approved subjects; unrelated account and subject traffic is denied. This qualifies static broker boundaries on loopback, not production enrollment, TLS or dynamic trust agreements.",
             "locations": [
               {
                 "path": "tests/leaf/run.py",
@@ -1138,9 +1180,9 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
       "pattern": "Transactional Client",
       "source": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/TransactionalClient.html",
       "referenceDepth": "full-public-reference",
-      "how": "Apply a bounded transaction boundary at the owning JetStream record or qualified atomic batch within one stream: state, provenance, operation outcome and recoverable outgoing intent commit together. Consumer acknowledgment, projection updates, cross-stream/hub transfer and external tool actions remain separate recoverable steps. Legacy SQL plus outbox repairs remain relevant to P01 baseline work; STATE-01 supersedes SQL as the preferred new authority. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P05, P10. Implementation locations will be recorded when implemented. P00 prefers one conditional complete entity transition including state, provenance, outcome and effect intent. Same-stream batching requires the P01 SDK/concurrency proof; cross-boundary work remains recoverable. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. Configuration and registry changes also commit to their owner ledger first; KV is a cursor-bearing projection, never a second authoritative write. P01 tests/storage/run.py now qualifies this boundary only in disposable fixture owners: Python and TypeScript conditional publishes append a complete state/provenance/effect-intent record, and a two-client race admits one subject revision. Raw Python and native TypeScript atomic batches are exercised on one file-backed R1 stream. Tests reject sequence gaps, stale conditions (including an intervening ordinary commit), uncommitted batches across graceful restart and attempted cross-stream batches. The opening staging reply is not a durable acknowledgment; only a final commit acknowledgment confirms the batch. Production domain owners remain planned for P04/P05/P10; no legacy authority moved. The next bounded storage extension recovers a complete two-record batch after losing its final acknowledgment and restarting beyond the deduplication window. It also rejects fixture capability declarations spanning another stream, KV, object upload or an external tool before dispatch. Production capability registration and staged artifact recovery remain later work.",
+      "how": "Apply a bounded transaction boundary at the owning JetStream record or qualified atomic batch within one stream: state, provenance, operation outcome and recoverable outgoing intent commit together. Consumer acknowledgment, projection updates, cross-stream/hub transfer and external tool actions remain separate recoverable steps. Legacy SQL plus outbox repairs remain relevant to P01 baseline work; STATE-01 supersedes SQL as the preferred new authority. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P05, P10. Implementation locations will be recorded when implemented. P00 prefers one conditional complete entity transition including state, provenance, outcome and effect intent. Same-stream batching requires the P01 SDK/concurrency proof; cross-boundary work remains recoverable. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. Configuration and registry changes also commit to their owner ledger first; KV is a cursor-bearing projection, never a second authoritative write. P01 tests/storage/run.py now qualifies this boundary only in disposable fixture owners: Python and TypeScript conditional publishes append a complete state/provenance/effect-intent record, and a two-client race admits one subject revision. Raw Python and native TypeScript atomic batches are exercised on one file-backed R1 stream. Tests reject sequence gaps, stale conditions (including an intervening ordinary commit), uncommitted batches across graceful restart and attempted cross-stream batches. The opening staging reply is not a durable acknowledgment; only a final commit acknowledgment confirms the batch. Production domain owners remain planned for P04/P05/P10; no legacy authority moved. The next bounded storage extension recovers a complete two-record batch after losing its final acknowledgment and restarting beyond the deduplication window. It also rejects fixture capability declarations spanning another stream, KV, object upload or an external tool before dispatch. Production capability registration and staged artifact recovery remain later work. The P01 incoming fixture constructs blocked state, exact origin hub/node/offer attribution and one claim intent before a single conditional record publish. Both client paths inject construction failures and recover one complete record after a simulated caller exception following commit; independent reads and retries preserve task identity and claim payload digest. This carries AMX-BASE-002 into the complete-record boundary without implementing a production owner.",
       "why": "Crash windows must not lose results or create unattributed executable work.",
-      "tradeoffs": "One complete record is simpler than a batch and is preferred when it preserves the invariant. Same-stream atomic batches require pinned server/client qualification and do not create a distributed database/broker/hub/tool transaction. SQL authority is an explicit exception requiring evidence and review. Fixture qualification uses NATS Server 2.15.0 on WSL/Linux only. It does not prove native macOS, replication availability, power-loss durability, account permissions or business-level authorization. Full aggregate records remain preferred over batch coordination. The earlier native-platform exclusion describes the original report. Native macOS and Linux passed the original 14-case suite at a2e9ee6; the additional 18-case candidate needs its own CI evidence. R3 and power-loss remain unqualified.",
+      "tradeoffs": "One complete record is simpler than a batch and is preferred when it preserves the invariant. Same-stream atomic batches require pinned server/client qualification and do not create a distributed database/broker/hub/tool transaction. SQL authority is an explicit exception requiring evidence and review. Fixture qualification uses NATS Server 2.15.0 on WSL/Linux only. It does not prove native macOS, replication availability, power-loss durability, account permissions or business-level authorization. Full aggregate records remain preferred over batch coordination. The earlier native-platform exclusion describes the original report. Native macOS and Linux passed the original 14-case suite at a2e9ee6; the additional 18-case candidate needs its own CI evidence. R3 and power-loss remain unqualified. Native Linux/macOS passed the 18-case storage boundary at 7a7d47a. The new 20-case incoming fixture has WSL positive and partial-publication negative proof; its native candidate evidence remains pending. Caller exception is not a killed process or power loss.",
       "locations": [
         {
           "path": "tests/storage/run.py",
@@ -1225,6 +1267,14 @@ This registry records how, where, and why approved Dofactory and Enterprise Inte
             "tradeoffs": "One complete record is simpler than a batch and is preferred when it preserves the invariant. Same-stream atomic batches require pinned server/client qualification and do not create a distributed database/broker/hub/tool transaction. SQL authority is an explicit exception requiring evidence and review.",
             "locations": [],
             "verificationEvidence": []
+          }
+        },
+        {
+          "date": "2026-10-09",
+          "reason": "P01 incoming creation invariant qualification; production status unchanged",
+          "previous": {
+            "how": "Apply a bounded transaction boundary at the owning JetStream record or qualified atomic batch within one stream: state, provenance, operation outcome and recoverable outgoing intent commit together. Consumer acknowledgment, projection updates, cross-stream/hub transfer and external tool actions remain separate recoverable steps. Legacy SQL plus outbox repairs remain relevant to P01 baseline work; STATE-01 supersedes SQL as the preferred new authority. Proposed location: docs/planning/2026-10-09/implementation-plan.md, STATE-01, P01, P04, P05, P10. Implementation locations will be recorded when implemented. P00 prefers one conditional complete entity transition including state, provenance, outcome and effect intent. Same-stream batching requires the P01 SDK/concurrency proof; cross-boundary work remains recoverable. See delivery/decisions/storage-contract.md. This is a recommendation pending P00 review. Configuration and registry changes also commit to their owner ledger first; KV is a cursor-bearing projection, never a second authoritative write. P01 tests/storage/run.py now qualifies this boundary only in disposable fixture owners: Python and TypeScript conditional publishes append a complete state/provenance/effect-intent record, and a two-client race admits one subject revision. Raw Python and native TypeScript atomic batches are exercised on one file-backed R1 stream. Tests reject sequence gaps, stale conditions (including an intervening ordinary commit), uncommitted batches across graceful restart and attempted cross-stream batches. The opening staging reply is not a durable acknowledgment; only a final commit acknowledgment confirms the batch. Production domain owners remain planned for P04/P05/P10; no legacy authority moved. The next bounded storage extension recovers a complete two-record batch after losing its final acknowledgment and restarting beyond the deduplication window. It also rejects fixture capability declarations spanning another stream, KV, object upload or an external tool before dispatch. Production capability registration and staged artifact recovery remain later work.",
+            "tradeoffs": "One complete record is simpler than a batch and is preferred when it preserves the invariant. Same-stream atomic batches require pinned server/client qualification and do not create a distributed database/broker/hub/tool transaction. SQL authority is an explicit exception requiring evidence and review. Fixture qualification uses NATS Server 2.15.0 on WSL/Linux only. It does not prove native macOS, replication availability, power-loss durability, account permissions or business-level authorization. Full aggregate records remain preferred over batch coordination. The earlier native-platform exclusion describes the original report. Native macOS and Linux passed the original 14-case suite at a2e9ee6; the additional 18-case candidate needs its own CI evidence. R3 and power-loss remain unqualified."
           }
         }
       ]

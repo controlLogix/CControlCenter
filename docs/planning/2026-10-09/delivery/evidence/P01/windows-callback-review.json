@@ -1,0 +1,95 @@
+{
+  "reviewedAt": "2026-10-10T00:11:00.389622+00:00",
+  "scope": "P01 opt-in Windows hub callback repair; no provider or P06 acceptance",
+  "reviewer": "Codex independent subagent p01_pattern_checkpoint",
+  "status": "scoped_findings_resolved",
+  "phaseAccepted": false,
+  "sourceSha256": {
+    "agentmux.cmd": "c870282fc53288bd1576a8f1331474fa98ed99ec76940b4105465fb060bae777",
+    "agentmux_windows.py": "d8d579d0a63306d71337024798db188eea309f19e2debd8694cda161ca2eb17b",
+    "agentmux.sh": "8fd501e6733798b7abdb3eb9e7f10dbe691e094aed9af5f27e5c9f3888bb5551",
+    "hub/cli.py": "276e8311b0cbd683e3c123ff327cfd4664fa8ef55882ef94ad89e50a6ecc0efb",
+    "hub/server.py": "8f4de71e0885b395d058b7dd88cfd740fdffd8a986f6a58ae8cc5b115dca2153",
+    "hub/tests/test_windows_callbacks.py": "1b17fe417d1829e4a3cb555ac394329ab00fbe92cb720f98d71e536a9b15b2b0"
+  },
+  "actualEvidence": {
+    "realReport": "/home/ryan/.cache/agentmux-governance/callback-real-c45fry44/result.json",
+    "reportSha256": "1eb0f72161d9496e5047bca3efce931585307a843a7f64c1bdf37cdc48d9f06b",
+    "checks": 17,
+    "allFiveReportSourceHashesMatched": true,
+    "hubExited": true,
+    "focusedReport": "/home/ryan/.cache/agentmux-tests/b31831888bbd9588/20261009T200840-fdc28c40/result.json",
+    "focusedTests": 19,
+    "focusedFailures": 0,
+    "focusedSkips": 0,
+    "allFocusedSourceHashesMatched": true,
+    "independentRerun": "Prepared WSL Python -m unittest hub.tests.test_windows_callbacks.CallbackSelection -v; seven tests passed.",
+    "cmdProof": "windows-callback-final/cmd-result.json reviewed: six exact argv values, stdin and exit7 match; archived hash verified.",
+    "repositoryArchive": "docs/planning/2026-10-09/delivery/evidence/P01/windows-callback-final",
+    "archiveFileHashesVerified": 7
+  },
+  "findings": [
+    {
+      "id": "CALLBACK-REVIEW-01",
+      "status": "resolved",
+      "detail": "Callback mode still inherits legacy Ubuntu and /home/nick launcher defaults when selection variables are missing. Require explicit selection before invoking WSL; preserve defaults for ordinary non-callback invocation.",
+      "evidence": "Read command() and validate_callback(); existing tests do not cover missing distro/bin in callback mode.",
+      "resolution": "validate_callback now requires explicit valid distro, absolute Linux launcher and absolute scoped home. Independently reran seven CallbackSelection methods: missing/empty/invalid selection returns before subprocess; legacy defaults remain only outside callback mode."
+    },
+    {
+      "id": "CALLBACK-REVIEW-02",
+      "status": "resolved",
+      "detail": "agentmux.sh creates default HOME/.agentmux/logs and run before rejecting callback hub start. Require scoped home and route/validate callbacks before harness directory creation.",
+      "evidence": "Independent disposable WSL HOME reproduction: bash LF-copy agentmux.sh hub start, callback=1, explicit distro/bin/URL and missing AGENTMUX_HOME. Exit1 denied lifecycle command; default .agentmux/logs and run existed. Fixture cleaned; no user state touched.",
+      "resolution": "agentmux.sh routes callback hub commands to cli.py before ROOT/mkdir. Independent targeted test passed for missing and explicit scoped home: forbidden start returns failure and creates neither default nor scoped state."
+    },
+    {
+      "id": "CALLBACK-REVIEW-03",
+      "status": "resolved",
+      "detail": "Internal spawn marker could persist in tmux server environment and leak to later native panes.",
+      "evidence": "Independent isolated tmux reproduction: caller removed marker but native pane inherited1.",
+      "resolution": "Every pane command now unsets AGENTMUX_SPAWN_WINDOWS_CALLBACK before launch. Fresh actual same-server callback-to-native test records empty callback/internal-marker/token-file environment for native pane."
+    }
+  ],
+  "observations": [
+    "Hub spawn assigns distinct per-agent token paths before launching panes and removes inherited inline token. Shell exports or unsets callback keys per pane rather than relying on shared tmux server environment.",
+    "Opt-in leaves native spawn behavior intact except stripping inherited callback-worker context; ordinary explicit native configuration remains preserved.",
+    "Real proof uses two shell panes, extracted token paths and Windows Python helper invocations through explicitly constructed WSLENV. It proves token-bound callbacks, own-work completion, cross-agent denial and revoked-token rejection.",
+    "Existing setup forwarder is unchanged. Automatic Windows-provider environment propagation and authenticated model workflows are not demonstrated.",
+    "Windows Python3 is now a required dependency of agentmux.cmd. Batch proof is bounded to supplied arguments, not every calling-shell quoting case.",
+    "Actual callback helper commands were invoked separately using captured pane context, not as model-issued commands inside a provider terminal."
+  ],
+  "limits": [
+    "This is not sandboxing of same-user processes or proof that a caller cannot edit its environment.",
+    "No production NATS/plugin integration or P06 acceptance is claimed."
+  ],
+  "historicalReview": {
+    "reviewedAt": "2026-10-09T23:55:46.254754+00:00",
+    "sourceSha256": {
+      "agentmux.cmd": "3d7653e429c2ada389b72df02df29fb0a445974c36e024c44938120b6aff97db",
+      "agentmux_windows.py": "2e236d2dde784dd6856af006e21cdfb426bd4962a09f31686052eea2f169f1dc",
+      "agentmux.sh": "de477faa14c4c7d1a8e0e63cb95f0a081b0429b4ed6b491f83fc67dab6989c89",
+      "hub/cli.py": "276e8311b0cbd683e3c123ff327cfd4664fa8ef55882ef94ad89e50a6ecc0efb",
+      "hub/server.py": "f9719113f313f4f7e942c8f003e76cd7d3445120ccb1dbe34767e5777901f833",
+      "hub/tests/test_windows_callbacks.py": "5b1bd9df1c4d8a137bcc6a007f4babd83f50a91136b1e63328b424d174362f8e"
+    },
+    "actualEvidence": {
+      "realReport": "/home/ryan/.cache/agentmux-governance/callback-real-32m83di5/result.json",
+      "reportSha256": "225a84cdce14b27f870b21a9e19f1aa8571974fc100b3990d6d90374dba16ea8",
+      "checks": 16,
+      "allFiveReportSourceHashesMatched": true,
+      "hubExited": true,
+      "cmdProof": "/home/ryan/.cache/agentmux-governance/windows-callback-proposal/callback-cmd-result.json",
+      "cmdObserved": "Six argv values including empty/space/Unicode/Windows-path/shell characters round-tripped, stdin preserved, probe exit7 propagated."
+    },
+    "status": "findings_open"
+  },
+  "limitationsAfterRepair": [
+    "No provider/model execution or automatic Linux-to-Windows client environment propagation was tested.",
+    "Windows Python3 remains required. Batch proof covers supplied arguments, not every calling-shell quoting case.",
+    "Native-after-callback check proves environment cleanup for this private tmux server, not multi-user security or complete cross-host isolation.",
+    "Callbacks were invoked separately with captured pane token context, not issued by a model inside a provider.",
+    "Parent owns full native/final-candidate hub evidence and phase acceptance.",
+    "Implementer reports exact fixture watchdog cleanup after real probe; reviewer verified reported hub exit, not independent process cleanup history."
+  ]
+}

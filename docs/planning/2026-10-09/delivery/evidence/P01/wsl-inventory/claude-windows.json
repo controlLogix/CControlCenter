@@ -1,0 +1,10 @@
+{
+  "surface": "windows",
+  "command": [
+    "C:/nvm4w/nodejs/node_modules/@anthropic-ai/claude-code/bin/claude.exe",
+    "--version"
+  ],
+  "exitCode": 0,
+  "stdout": "2.1.296 (Claude Code)\n",
+  "stderr": ""
+}

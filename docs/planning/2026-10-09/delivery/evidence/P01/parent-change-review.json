@@ -1,0 +1,51 @@
+{
+  "reviewedAt": "2026-10-09T23:46:54.256986+00:00",
+  "reviewer": "Codex independent subagent p01_pattern_checkpoint",
+  "baseCommit": "09fe9c749ff674c0dd5ca4fa7c53abfbe23cadcd",
+  "scope": "Backup second-boundary repair and P01 incoming atomicity fixture only",
+  "phaseAccepted": false,
+  "sourceSha256": {
+    "hub/store.py": "1f6a22f5ea5cc3d24b343e5f1c764974409640dd84aacd66cda565ba80b6cc58",
+    "hub/tests/test_governance.py": "67348cc4c748e9bbdd93286808c770622f9c563addf3fb6c78b84a4090f1648d",
+    "tests/storage/run.py": "3eb87919f153de49af63839d00dd07305e2a341cad1d965b33c57fbb02d55b55",
+    "tests/storage/README.md": "9655bd9b9e24e5b11b1c6dbeb806e4fe24145647891d45c801c0ee26c98ebe6c"
+  },
+  "backup": {
+    "reviewedReport": "/home/ryan/.cache/agentmux-governance/p01-backup-boundary/result.json",
+    "positiveTests": 7,
+    "originalImplementationNegativeTests": 1,
+    "negativeFailedAsExpected": true,
+    "reportSourceAndLogHashesVerified": true,
+    "originalGovernanceTestMethodsUnchangedAST": 20,
+    "finding": "One captured wall-clock value now supplies both seconds and milliseconds. The deterministic second-boundary test checks rotation and restored newest content. Existing frozen-clock/concurrent/copy-failure assertions remain unchanged.",
+    "limits": [
+      "Does not establish arbitrary wall-clock rollback ordering, replicated durability or power-loss recovery.",
+      "Full native final-candidate rerun remains required."
+    ]
+  },
+  "incoming": {
+    "reviewedPositiveReport": "/home/ryan/.cache/agentmux-governance/p01-incoming-storage-reviewed/storage-result.json",
+    "reviewedNegativeReport": "/home/ryan/.cache/agentmux-governance/p01-incoming-storage-negative-reviewed/review.json",
+    "positiveCases": 20,
+    "allPassed": true,
+    "positiveSourceHashesMatch": true,
+    "typescriptInputsMatch": true,
+    "originalRequireCallsRetained": 54,
+    "negativeExitCode": 1,
+    "negativeLogHashVerified": true,
+    "negativeFailure": "partial incoming state, attribution or claim became durable",
+    "resolvedReviewFindings": [
+      "Operation, state and entity task IDs now agree.",
+      "Recovery asserts complete origin hub/node/offer identity and exact claim offer/executor payload, not only offer and contract names.",
+      "Claim effect digest is now recomputed from the exact sorted compact JSON claim payload and checked on recovery."
+    ],
+    "finding": "For each language, construction faults leave no durable subject or increased ledger count. A failure after one conditional commit recovers one blocked, attributed task and one claim intent through retry and independent-language read. This addresses AMX-BASE-002 at the bounded complete-record persistence fixture boundary.",
+    "limits": [
+      "The injected caller failure is an exception after commit, not a killed process or power loss.",
+      "No provider is dispatched here; single claim intent is not proof of exactly-once external execution.",
+      "Fixture synthetic authorization references are not production admission."
+    ]
+  },
+  "preservationMethod": "Compared all original sync/async governance test method ASTs and original storage require-call multiset to base commit; no original method or require call was removed. Read actual positive/negative logs and validated report hashes.",
+  "historicalEvidence": "Earlier initial/final incoming reports remain historical. The reviewed paths bind the strengthened identity assertions and corrected claim payload digest."
+}

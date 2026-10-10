@@ -23,3 +23,14 @@ The second full dashboard run passed the scanner and browser checks, but exposed
 - `dashboard/test_residue.sh` now makes its fake readiness probe wait for the fixture server's startup record. The old stub returned success before the server started, allowing SIGINT to arrive before there was a process to clean up. All 26 assertions remain. Two ordinary runs and one with a deliberate half-second server startup delay passed. See `dashboard-full-residue/`.
 
 Production MQTT, scanner and dashboard cleanup code did not change. No further full dashboard run is claimed after these repairs. Windows-owned client forwarding changes how isolated client configurations must be passed; that boundary must be checked before another full run.
+
+
+## Windows-backed rerun and storage boundary follow-up
+
+The later source-identical Windows-backed dashboard runner passed all 62 suite entries on `09fe9c7` using a short private temporary root. Both the preceding socket-path failure and passing rerun are retained in `../dashboard-windows/`. Twenty external-plugin tests remain skipped; configuration routing does not qualify provider inference or Windows state storage over Linux UNC.
+
+Native Ubuntu CI on `09fe9c7` exposed a real backup filename race: seconds and milliseconds were sampled separately across a second boundary. `Store.backup_to` now uses one captured time. Seven focused backup checks pass, and the new deterministic rotation check fails against the original implementation. The unchanged original governance methods and independent review are recorded in `../parent-change-review.json`; raw proof is archived in `../backup-boundary/`.
+
+The existing storage fixture now checks complete incoming blocked state, exact origin and one claim intent before a single conditional publish. All prior cases and assertions remain, with two added Python/TypeScript cases. Construction failures leave no record; a simulated caller exception after commit reconciles one retained complete record. Twenty positive cases pass, and an injected partial publication fails. See `../incoming-storage/`, `../incoming-storage-negative/` and the independent review. This is fixture persistence proof, not process-kill, production authorization or provider dispatch proof.
+
+A bounded local full hub run passed 129 tests, and conformance passed 45 tests before the subsequent callback admission repair. Those reports are retained separately in `../hub-current-pre-followup/` and `../conformance-reviewed/`. Changed callback sources require fresh affected verification, and final native candidate results remain required. P01 stays open.

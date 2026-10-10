@@ -1,0 +1,17 @@
+{
+  "status": "failed",
+  "errorType": "AssertionError",
+  "sourceSha256": {
+    "hub/requirements.lock": "3ed79db16ab9b01c1c4f1b2b99443b8952579abd8a85fd38e60aff8c1baa2420",
+    "tests/contracts/fake_execution.py": "5d451dee85a6653869d83d6f38c26540a2fabd8797dad28385dcfe66dc5507c0",
+    "tests/storage/README.md": "9655bd9b9e24e5b11b1c6dbeb806e4fe24145647891d45c801c0ee26c98ebe6c",
+    "tests/storage/python_client.py": "e09951cf4a7237cac16a9b3b2b455dfeecdc3bd904e575343412d471561865c6",
+    "tests/storage/run.py": "3eb87919f153de49af63839d00dd07305e2a341cad1d965b33c57fbb02d55b55",
+    "tests/storage/typescript/README.md": "951a9f510f9a117cffd07cf9118a240485e37aea683c6867ae3ffd054b618e88",
+    "tests/storage/typescript/package-lock.json": "e0d86aeebaf835fb965ef32ff0925c4f3919fd87b8f41daa2ca90ffe9f291a1d",
+    "tests/storage/typescript/package.json": "5df63a73a27894e59288e4ee366e0fa1ff495812a8a2efe7d25efd7e63561a1e",
+    "tests/storage/typescript/src/client.ts": "9087215cf5266e2a12e44dee4edd1ed3192d5c94813e65443c8e152b0c0ac43a",
+    "tests/storage/typescript/tsconfig.json": "c46cb61f3946e5fc5c84ab49896f889d2bde0478d8f8b0710079d5e17edb79d4"
+  },
+  "detail": "partial incoming state, attribution or claim became durable"
+}

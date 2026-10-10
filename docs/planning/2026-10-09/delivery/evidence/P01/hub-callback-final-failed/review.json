@@ -1,0 +1,55 @@
+{
+  "checks": [
+    {
+      "name": "original-hub-full-profile",
+      "command": [
+        "/home/ryan/.cache/agentmux-governance/venv/bin/python",
+        "-m",
+        "hub.tests.run_local",
+        "--profile",
+        "full"
+      ],
+      "exitCode": 1,
+      "logSha256": "990035c772b2b36df15df2700e314e346e5ac0ec7af38d2a85b16f02a5eb0d01"
+    },
+    {
+      "name": "original-hub-evidence",
+      "exitCode": 1
+    },
+    {
+      "name": "windows-callback-contract",
+      "command": [
+        "/home/ryan/.cache/agentmux-governance/venv/bin/python",
+        "-m",
+        "unittest",
+        "hub.tests.test_windows_callbacks",
+        "-v"
+      ],
+      "exitCode": 0,
+      "logSha256": "0e4c698d8df73723044a0f00d9bd8a37b71b69dda43a20620c8b021631ea8ffc"
+    }
+  ],
+  "scope": "Original full hub profile after backup and callback repairs; separate callback contract suite",
+  "sourceHashes": {
+    "agentmux.sh": "8fd501e6733798b7abdb3eb9e7f10dbe691e094aed9af5f27e5c9f3888bb5551",
+    "agentmux.cmd": "c870282fc53288bd1576a8f1331474fa98ed99ec76940b4105465fb060bae777",
+    "agentmux_windows.py": "d8d579d0a63306d71337024798db188eea309f19e2debd8694cda161ca2eb17b",
+    "tests/contracts/ci.py": "cab9d707d3366ffe698bcd418ac38728912b42fffe0af7d29c94b32454da406c",
+    "hub/tests/test_windows_callbacks.py": "1b17fe417d1829e4a3cb555ac394329ab00fbe92cb720f98d71e536a9b15b2b0"
+  },
+  "hubPreservation": {
+    "report": "hub-full-result.json",
+    "reportSha256": "d2d39e2072541b9df4e882127e72429a8bb7de0acbce96de0df043be0929e806",
+    "tests": 129,
+    "noSkippedTests": true,
+    "sourceUnchangedDuringRun": true,
+    "isolatedHome": true,
+    "isolatedCache": true,
+    "accepted": false,
+    "limits": [
+      "Existing local full profile only; not R3, power loss or final bilateral platform acceptance."
+    ]
+  },
+  "sourceUnchanged": true,
+  "exitCode": 1
+}

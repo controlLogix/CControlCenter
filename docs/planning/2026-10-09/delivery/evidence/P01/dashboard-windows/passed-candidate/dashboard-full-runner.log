@@ -1,0 +1,67 @@
+(test dashboard on http://127.0.0.1:57295, home /tmp/amx-4exqfa9d/tmp.u32nVdoseA; 8787 is not touched)
+(spawned ccc-selftest-50542-1 ccc-selftest-50542-2 for the stream checks; they are killed on exit)
+test_testlib.sh  passed 11, failed 0
+check_test_failability.sh passed 18, failed 0
+test_argguard.sh passed 38, failed 0
+test_modal_guard.sh passed 32, failed 0
+test_inbox_guard.sh passed 16, failed 0
+test_coordination.sh passed 61, failed 0
+test_run.sh      passed 91, failed 0
+test_residue.sh  passed 26, failed 0
+test_lifecycle.sh passed 26, failed 0
+test_evidence_archive.sh passed 5, failed 0
+test_theme_import.sh passed 51, failed 0
+test_themes.sh   passed 77, failed 0
+test_frontend.sh passed 13, failed 0
+test_frontend_board.sh passed 19, failed 0
+test_frontend_post.sh passed 3, failed 0
+test_frontend_kanban.sh passed 10, failed 0
+test_frontend_drawer.sh passed 12, failed 0
+test_frontend_tabs.sh passed 27, failed 0
+test_idle.sh     passed 34, failed 0
+smoke.sh         passed 101, failed 0
+test_board.py    passed 194, failed 0
+test_host_guard.py OK
+test_dispatch.py passed 333, failed 0
+test_sandbox_coordination.py passed 11, failed 0
+test_runsview.py OK
+test_notify.py   OK
+test_no_inherited_stdin.py passed 4, failed 0
+test_runcards.py OK
+test_runlock.py  OK
+test_warrant.py  OK
+test_modbus_poll.py passed 19, failed 0
+test_modbus_rtu.py passed 21, failed 0
+test_enip.py     passed 8, failed 0
+test_orchestration_plugin.py passed 0, failed 0
+test_plugin_skills.py passed 0, failed 0
+test_agentdefs.py passed 16, failed 0
+test_agentcli.py passed 5, failed 0
+test_teamcli.py  passed 9, failed 0
+test_boardagents.py passed 13, failed 0
+test_boardteams.py passed 15, failed 0
+test_launch.sh   passed 8, failed 0
+test_frontend_agents.sh passed 1, failed 0
+test_frontend_teams.sh passed 1, failed 0
+test_frontend_collapse.sh passed 11, failed 0
+test_github_panel.py passed 18, failed 0
+test_hub_panel.py OK
+test_fed_panel.py OK
+test_codesys_panel.py passed 23, failed 0
+test_logix.py    passed 16, failed 0
+test_ads.py      passed 16, failed 0
+test_pn_dcp.py   passed 22, failed 0
+test_ecat_diag.py passed 13, failed 0
+test_snapshot.py passed 18, failed 0
+test_stream_slots.sh passed 4, failed 0
+test_mqtt.py     passed 57, failed 0
+test_field_panels.py passed 213, failed 0
+test_e2e.sh      passed 49, failed 0
+test_tickets.py  passed 48, failed 0
+test_chatter.py  passed 11, failed 0
+test_courier.py  passed 129, failed 0
+test_gateway.py  passed 57, failed 0
+test_auth.py     passed 81, failed 0
+
+all suites passed
+operator dashboard on 8787 untouched (pid none, home /none)

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "kind": "synthetic",
+  "platform": "wsl",
+  "runtime": "linux",
+  "observedAt": "2026-10-09T00:00:00Z",
+  "candidateCommit": "0000000000000000000000000000000000000000",
+  "p06Accepted": false,
+  "limits": [
+    "authenticated_workflows_unverified",
+    "hub_callbacks_unverified",
+    "concurrent_sessions_unverified",
+    "unchanged_launcher_update_unverified"
+  ],
+  "clients": [
+    {
+      "id": "example-client",
+      "status": "observed",
+      "searchScope": "Synthetic Windows PATH and WSL launcher fixture only",
+      "installationOwner": "windows",
+      "configOwner": "windows",
+      "authOwner": "windows",
+      "credentialsCopied": false,
+      "linuxDuplicateInstalled": false,
+      "stableTarget": "C:/Program Files/Example Client/client.exe",
+      "launcher": "/home/fixture/.local/bin/example-client",
+      "probes": [
+        {
+          "surface": "windows",
+          "command": [
+            "C:/Program Files/Example Client/client.exe",
+            "--version"
+          ],
+          "exitCode": 0,
+          "version": "example 1.2.3",
+          "installation": "C:/Program Files/Example Client/client.exe",
+          "evidenceSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+          "executable": "C:/Program Files/Example Client/client.exe"
+        },
+        {
+          "surface": "wsl",
+          "command": [
+            "/home/fixture/.local/bin/example-client",
+            "--version"
+          ],
+          "exitCode": 0,
+          "version": "example 1.2.3",
+          "installation": "C:/Program Files/Example Client/client.exe",
+          "evidenceSha256": "2222222222222222222222222222222222222222222222222222222222222222",
+          "executable": "C:/Program Files/Example Client/client.exe"
+        }
+      ],
+      "interopLimits": [
+        "Synthetic fixture: no client was executed."
+      ],
+      "executableTarget": "C:/Program Files/Example Client/client.exe"
+    }
+  ]
+}

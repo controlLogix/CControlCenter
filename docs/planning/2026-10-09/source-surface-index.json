@@ -24,10 +24,10 @@
       "componentIds": [
         "HAR-05"
       ],
-      "workingFileSha256": "5986458bce65dc01306bab1280b4409ff6ec501fb2c79098170c538745cb80f8",
+      "workingFileSha256": "c870282fc53288bd1576a8f1331474fa98ed99ec76940b4105465fb060bae777",
       "declarations": [],
       "httpPathLiterals": [],
-      "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
+      "reviewStatus": "Scoped callback follow-up reviewed; final native and phase qualification remain open."
     },
     {
       "path": "agentmux.sh",
@@ -41,7 +41,7 @@
         "HAR-12",
         "HAR-13"
       ],
-      "workingFileSha256": "b0185ec33a5a082dc482a829a530e6b8e22aa07a98919504f3f0e6cb4234514b",
+      "workingFileSha256": "8fd501e6733798b7abdb3eb9e7f10dbe691e094aed9af5f27e5c9f3888bb5551",
       "declarations": [
         {
           "name": "attach_prefix",
@@ -470,7 +470,39 @@
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
+      "reviewStatus": "Scoped callback follow-up reviewed; final native and phase qualification remain open."
+    },
+    {
+      "path": "agentmux_windows.py",
+      "componentIds": [
+        "HAR-05",
+        "HUB-04"
+      ],
+      "declarations": [
+        {
+          "name": "validate_callback",
+          "line": 9,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "command",
+          "line": 37,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "environment",
+          "line": 55,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "main",
+          "line": 69,
+          "kind": "FunctionDef"
+        }
+      ],
+      "httpPathLiterals": [],
+      "workingFileSha256": "d8d579d0a63306d71337024798db188eea309f19e2debd8694cda161ca2eb17b",
+      "reviewStatus": "Scoped callback follow-up reviewed; final native and phase qualification remain open."
     },
     {
       "path": "clear-modals.sh",
@@ -5276,81 +5308,81 @@
       "componentIds": [
         "HUB-04"
       ],
-      "workingFileSha256": "45e061b6a30cb7654e0104cf46a1100bc87bba48a38e77cee30ea9c7550b3227",
+      "workingFileSha256": "276e8311b0cbd683e3c123ff327cfd4664fa8ef55882ef94ad89e50a6ecc0efb",
       "declarations": [
         {
           "name": "Fail",
-          "line": 47,
+          "line": 49,
           "kind": "ClassDef"
         },
         {
           "name": "connect",
-          "line": 51,
+          "line": 53,
           "kind": "FunctionDef"
         },
         {
           "name": "tcp_token",
-          "line": 66,
+          "line": 73,
           "kind": "FunctionDef"
         },
         {
           "name": "call",
-          "line": 77,
+          "line": 87,
           "kind": "FunctionDef"
         },
         {
           "name": "opt",
-          "line": 101,
+          "line": 115,
           "kind": "FunctionDef"
         },
         {
           "name": "show_msgs",
-          "line": 119,
+          "line": 133,
           "kind": "FunctionDef"
         },
         {
           "name": "show_work",
-          "line": 150,
+          "line": 164,
           "kind": "FunctionDef"
         },
         {
           "name": "python",
-          "line": 167,
+          "line": 181,
           "kind": "FunctionDef"
         },
         {
           "name": "start",
-          "line": 177,
+          "line": 191,
           "kind": "FunctionDef"
         },
         {
           "name": "main",
-          "line": 199,
+          "line": 217,
           "kind": "FunctionDef"
         },
         {
           "name": "fed_parse",
-          "line": 404,
+          "line": 426,
           "kind": "FunctionDef"
         },
         {
           "name": "fed_text",
-          "line": 442,
+          "line": 464,
           "kind": "FunctionDef"
         },
         {
           "name": "fed_setup",
-          "line": 455,
+          "line": 477,
           "kind": "FunctionDef"
         },
         {
           "name": "fed_main",
-          "line": 465,
+          "line": 487,
           "kind": "FunctionDef"
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
+      "reviewStatus": "Scoped P01 inventory and preservation repair review; source freshness does not grant phase or P06 acceptance."
     },
     {
       "path": "hub/deliver.py",
@@ -7503,223 +7535,223 @@
       "componentIds": [
         "HUB-02"
       ],
-      "workingFileSha256": "570f3c4cd778ce1600cf10b4a33d7375cc448818c48e27a8727c4abd1f4a317c",
+      "workingFileSha256": "8f4de71e0885b395d058b7dd88cfd740fdffd8a986f6a58ae8cc5b115dca2153",
       "declarations": [
         {
           "name": "log",
-          "line": 71,
+          "line": 72,
           "kind": "FunctionDef"
         },
         {
           "name": "load_toml",
-          "line": 75,
+          "line": 76,
           "kind": "FunctionDef"
         },
         {
           "name": "parent_pid",
-          "line": 83,
+          "line": 84,
           "kind": "FunctionDef"
         },
         {
           "name": "ancestors",
-          "line": 95,
+          "line": 96,
           "kind": "FunctionDef"
         },
         {
           "name": "toml_dump",
-          "line": 104,
+          "line": 105,
           "kind": "FunctionDef"
         },
         {
           "name": "Hub",
-          "line": 111,
+          "line": 112,
           "kind": "ClassDef"
         },
         {
           "name": "Hub.__init__",
-          "line": 112,
+          "line": 113,
           "kind": "FunctionDef"
         },
         {
           "name": "Hub._operator_token",
-          "line": 135,
+          "line": 136,
           "kind": "FunctionDef"
         },
         {
           "name": "Hub.db",
-          "line": 142,
+          "line": 143,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Hub._seed_roles",
-          "line": 146,
+          "line": 147,
           "kind": "FunctionDef"
         },
         {
           "name": "Hub.resolve_role",
-          "line": 155,
+          "line": 156,
           "kind": "FunctionDef"
         },
         {
           "name": "Hub.peer",
-          "line": 163,
+          "line": 164,
           "kind": "FunctionDef"
         },
         {
           "name": "Hub.identify",
-          "line": 175,
+          "line": 176,
           "kind": "FunctionDef"
         },
         {
           "name": "Hub.caller_of",
-          "line": 192,
+          "line": 193,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Hub.handle_conn",
-          "line": 218,
+          "line": 219,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Hub.subscribe",
-          "line": 239,
+          "line": 240,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Hub.need_agent",
-          "line": 291,
+          "line": 292,
           "kind": "FunctionDef"
         },
         {
           "name": "Hub.need_operator",
-          "line": 296,
+          "line": 297,
           "kind": "FunctionDef"
         },
         {
           "name": "Hub.sender_of",
-          "line": 300,
+          "line": 301,
           "kind": "FunctionDef"
         },
         {
           "name": "Hub.dispatch",
-          "line": 307,
+          "line": 308,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Hub._repo_of_target",
-          "line": 462,
+          "line": 463,
           "kind": "FunctionDef"
         },
         {
           "name": "Hub._notify_work_owner",
-          "line": 478,
+          "line": 479,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Hub._write_brief",
-          "line": 501,
+          "line": 502,
           "kind": "FunctionDef"
         },
         {
           "name": "Hub.harness",
-          "line": 511,
+          "line": 512,
           "kind": "FunctionDef"
         },
         {
           "name": "Hub.virtual_names",
-          "line": 527,
+          "line": 528,
           "kind": "FunctionDef"
         },
         {
           "name": "Hub.adopt",
-          "line": 531,
+          "line": 532,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Hub.retire_courier",
-          "line": 564,
+          "line": 565,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Hub.spawn",
-          "line": 628,
+          "line": 629,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Hub.bell_loop",
-          "line": 680,
-          "kind": "AsyncFunctionDef"
-        },
-        {
-          "name": "Hub._bell_pass",
-          "line": 688,
-          "kind": "AsyncFunctionDef"
-        },
-        {
-          "name": "Hub._ring",
           "line": 715,
           "kind": "AsyncFunctionDef"
         },
         {
+          "name": "Hub._bell_pass",
+          "line": 723,
+          "kind": "AsyncFunctionDef"
+        },
+        {
+          "name": "Hub._ring",
+          "line": 750,
+          "kind": "AsyncFunctionDef"
+        },
+        {
           "name": "Hub._tell_operator",
-          "line": 770,
+          "line": 805,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Hub.live_loop",
-          "line": 776,
+          "line": 811,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Hub.receipt_loop",
-          "line": 817,
+          "line": 852,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Hub.check_holds",
-          "line": 837,
+          "line": 872,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Hub.lease_loop",
-          "line": 853,
+          "line": 888,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "Hub.main",
-          "line": 880,
+          "line": 915,
           "kind": "AsyncFunctionDef"
         },
         {
           "name": "term",
-          "line": 928,
+          "line": 963,
           "kind": "FunctionDef"
         },
         {
           "name": "write_secret",
-          "line": 934,
+          "line": 969,
           "kind": "FunctionDef"
         },
         {
           "name": "normalize_remote",
-          "line": 942,
+          "line": 977,
           "kind": "FunctionDef"
         },
         {
           "name": "welcome",
-          "line": 953,
+          "line": 988,
           "kind": "FunctionDef"
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
+      "reviewStatus": "Scoped callback follow-up reviewed; final native and phase qualification remain open."
     },
     {
       "path": "hub/store.py",
       "componentIds": [
         "HUB-03"
       ],
-      "workingFileSha256": "144cafdc425d73ac420f5762ccd4a6153f8c5f70175226d0504e1040d4526f33",
+      "workingFileSha256": "1f6a22f5ea5cc3d24b343e5f1c764974409640dd84aacd66cda565ba80b6cc58",
       "declarations": [
         {
           "name": "now",
@@ -7788,252 +7820,252 @@
         },
         {
           "name": "Store.prune",
-          "line": 310,
+          "line": 311,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.repo_add",
-          "line": 331,
+          "line": 332,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.repo_for_path",
-          "line": 347,
+          "line": 348,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.register",
-          "line": 357,
+          "line": 358,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.set_handle",
-          "line": 385,
+          "line": 386,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.set_state",
-          "line": 390,
+          "line": 391,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.touch_output",
-          "line": 397,
+          "line": 398,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.agents",
-          "line": 400,
+          "line": 401,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.agent",
-          "line": 404,
+          "line": 405,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.team_add",
-          "line": 412,
+          "line": 413,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.team",
-          "line": 423,
+          "line": 424,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.eligible_targets",
-          "line": 431,
+          "line": 432,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.canonical_target",
-          "line": 446,
+          "line": 447,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.adopt",
-          "line": 459,
+          "line": 460,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.recipients",
-          "line": 469,
+          "line": 470,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.post",
-          "line": 489,
+          "line": 490,
           "kind": "FunctionDef"
         },
         {
           "name": "Store._recips_of",
-          "line": 527,
+          "line": 528,
           "kind": "FunctionDef"
         },
         {
           "name": "Store._outbox",
-          "line": 530,
+          "line": 531,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.outbox_pending",
-          "line": 537,
+          "line": 538,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.outbox_sent",
-          "line": 540,
+          "line": 541,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.ingest_message",
-          "line": 546,
+          "line": 547,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.ingest_work",
-          "line": 557,
+          "line": 558,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.ingest_result",
-          "line": 571,
+          "line": 572,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.inbox",
-          "line": 582,
+          "line": 583,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.ack",
-          "line": 594,
+          "line": 595,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.delivery_report",
-          "line": 604,
+          "line": 605,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.mark_received",
-          "line": 611,
+          "line": 612,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.pending_for",
-          "line": 622,
+          "line": 623,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.bump_attempt",
-          "line": 626,
+          "line": 627,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.work_create",
-          "line": 637,
+          "line": 638,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.claimable",
-          "line": 670,
+          "line": 671,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.claim",
-          "line": 680,
+          "line": 681,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.heartbeat",
-          "line": 702,
+          "line": 703,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.release",
-          "line": 713,
+          "line": 714,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.cancel",
-          "line": 742,
+          "line": 743,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.work",
-          "line": 751,
+          "line": 752,
           "kind": "FunctionDef"
         },
         {
           "name": "Store._return_leases",
-          "line": 765,
+          "line": 766,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.sweep_leases",
-          "line": 773,
+          "line": 774,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.claim_path",
-          "line": 784,
+          "line": 785,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.status",
-          "line": 797,
+          "line": 798,
           "kind": "FunctionDef"
         },
         {
           "name": "Store.events",
-          "line": 807,
+          "line": 808,
           "kind": "FunctionDef"
         },
         {
           "name": "_Tx",
-          "line": 819,
+          "line": 820,
           "kind": "ClassDef"
         },
         {
           "name": "_Tx.__init__",
-          "line": 820,
+          "line": 821,
           "kind": "FunctionDef"
         },
         {
           "name": "_Tx.__enter__",
-          "line": 824,
+          "line": 825,
           "kind": "FunctionDef"
         },
         {
           "name": "_Tx.__exit__",
-          "line": 830,
+          "line": 831,
           "kind": "FunctionDef"
         },
         {
           "name": "_caps",
-          "line": 837,
+          "line": 838,
           "kind": "FunctionDef"
         },
         {
           "name": "_meets",
-          "line": 842,
+          "line": 843,
           "kind": "FunctionDef"
         },
         {
           "name": "_split_sql",
-          "line": 855,
+          "line": 856,
           "kind": "FunctionDef"
         },
         {
           "name": "_is_9p",
-          "line": 877,
+          "line": 878,
           "kind": "FunctionDef"
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "Scoped P01 repair reviewed against original behavior and regression evidence; target platform phase qualification remains open.",
+      "reviewStatus": "Scoped P01 inventory and preservation repair review; source freshness does not grant phase or P06 acceptance.",
       "history": [
         {
           "date": "2026-10-09",
@@ -10809,7 +10841,7 @@
       "componentIds": [
         "HUB-26"
       ],
-      "workingFileSha256": "a0d40390b9534d0fa312ecceb347ed16ce153c0eb4ec05a3d86c7602e6487b39",
+      "workingFileSha256": "cab9d707d3366ffe698bcd418ac38728912b42fffe0af7d29c94b32454da406c",
       "declarations": [
         {
           "name": "digest",
@@ -10853,7 +10885,7 @@
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "Codex reviewed P01 preservation repair; current verification evidence remains scoped to its recorded sources and environment."
+      "reviewStatus": "Scoped P01 inventory and preservation repair review; source freshness does not grant phase or P06 acceptance."
     },
     {
       "path": "tests/contracts/fake_execution.py",
@@ -11250,6 +11282,27 @@
       "reviewStatus": "owned-by-component; signed leaf fixture source indexed; runtime qualification recorded separately"
     },
     {
+      "path": "tests/platform/inventory.py",
+      "componentIds": [
+        "HUB-26"
+      ],
+      "declarations": [
+        {
+          "name": "validate",
+          "line": 16,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "main",
+          "line": 141,
+          "kind": "FunctionDef"
+        }
+      ],
+      "httpPathLiterals": [],
+      "workingFileSha256": "351e8104436491dd70a399b0c7344f87423315e0322832730d938bcab36f4edf",
+      "reviewStatus": "Scoped P01 inventory and preservation repair review; source freshness does not grant phase or P06 acceptance."
+    },
+    {
       "path": "tests/storage/python_client.py",
       "componentIds": [
         "HUB-26"
@@ -11275,7 +11328,7 @@
       "componentIds": [
         "HUB-26"
       ],
-      "workingFileSha256": "47d0e4314dc35d6f7cb708bc9b367bc209de79d50535b7af8f72c240828b9a70",
+      "workingFileSha256": "3eb87919f153de49af63839d00dd07305e2a341cad1d965b33c57fbb02d55b55",
       "declarations": [
         {
           "name": "require",
@@ -11334,7 +11387,7 @@
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "Codex reviewed P01 preservation repair; current verification evidence remains scoped to its recorded sources and environment."
+      "reviewStatus": "Scoped P01 inventory and preservation repair review; source freshness does not grant phase or P06 acceptance."
     },
     {
       "path": "tests/storage/typescript/src/client.ts",
@@ -12977,6 +13030,2232 @@
           ],
           "httpPathLiterals": [],
           "reviewStatus": "P01 isolated contract validation/fixture surface reviewed; no legacy runtime caller replaced. Runtime enrollment, grants, durable replay and migration remain separately gated."
+        }
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "P01 platform validator, gateway preservation, backup and incoming storage fixtures; prior surface rows retained.",
+      "previousFiles": [
+        {
+          "path": "agentmux.cmd",
+          "componentIds": [
+            "HAR-05"
+          ],
+          "workingFileSha256": "5986458bce65dc01306bab1280b4409ff6ec501fb2c79098170c538745cb80f8",
+          "declarations": [],
+          "httpPathLiterals": [],
+          "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
+        },
+        {
+          "path": "agentmux.sh",
+          "componentIds": [
+            "HAR-01",
+            "HAR-02",
+            "HAR-03",
+            "HAR-09",
+            "HAR-10",
+            "HAR-11",
+            "HAR-12",
+            "HAR-13"
+          ],
+          "workingFileSha256": "b0185ec33a5a082dc482a829a530e6b8e22aa07a98919504f3f0e6cb4234514b",
+          "declarations": [
+            {
+              "name": "attach_prefix",
+              "line": 64,
+              "kind": "shell-function"
+            },
+            {
+              "name": "mv_T",
+              "line": 68,
+              "kind": "shell-function"
+            },
+            {
+              "name": "file_mode",
+              "line": 74,
+              "kind": "shell-function"
+            },
+            {
+              "name": "iso_now",
+              "line": 77,
+              "kind": "shell-function"
+            },
+            {
+              "name": "agentmux_self",
+              "line": 88,
+              "kind": "shell-function"
+            },
+            {
+              "name": "tm",
+              "line": 116,
+              "kind": "shell-function"
+            },
+            {
+              "name": "die",
+              "line": 118,
+              "kind": "shell-function"
+            },
+            {
+              "name": "have",
+              "line": 119,
+              "kind": "shell-function"
+            },
+            {
+              "name": "need",
+              "line": 120,
+              "kind": "shell-function"
+            },
+            {
+              "name": "strip_ansi",
+              "line": 123,
+              "kind": "shell-function"
+            },
+            {
+              "name": "trim_edges",
+              "line": 132,
+              "kind": "shell-function"
+            },
+            {
+              "name": "to_wsl_path",
+              "line": 135,
+              "kind": "shell-function"
+            },
+            {
+              "name": "node_bin",
+              "line": 145,
+              "kind": "shell-function"
+            },
+            {
+              "name": "effective_claude_dir",
+              "line": 160,
+              "kind": "shell-function"
+            },
+            {
+              "name": "claude_config_gc",
+              "line": 197,
+              "kind": "shell-function"
+            },
+            {
+              "name": "strip_credentials",
+              "line": 228,
+              "kind": "shell-function"
+            },
+            {
+              "name": "archive_log",
+              "line": 240,
+              "kind": "shell-function"
+            },
+            {
+              "name": "archive_dest",
+              "line": 256,
+              "kind": "shell-function"
+            },
+            {
+              "name": "archive_prune",
+              "line": 271,
+              "kind": "shell-function"
+            },
+            {
+              "name": "claude_credentials_sync",
+              "line": 341,
+              "kind": "shell-function"
+            },
+            {
+              "name": "claude_credentials_sync_locked",
+              "line": 409,
+              "kind": "shell-function"
+            },
+            {
+              "name": "federation_on",
+              "line": 420,
+              "kind": "shell-function"
+            },
+            {
+              "name": "claude_config_dir",
+              "line": 430,
+              "kind": "shell-function"
+            },
+            {
+              "name": "task_cli",
+              "line": 507,
+              "kind": "shell-function"
+            },
+            {
+              "name": "task_try",
+              "line": 518,
+              "kind": "shell-function"
+            },
+            {
+              "name": "pane_of",
+              "line": 525,
+              "kind": "shell-function"
+            },
+            {
+              "name": "pane_hash",
+              "line": 534,
+              "kind": "shell-function"
+            },
+            {
+              "name": "usage",
+              "line": 538,
+              "kind": "shell-function"
+            },
+            {
+              "name": "auth_resolve",
+              "line": 689,
+              "kind": "shell-function"
+            },
+            {
+              "name": "auth_default_for",
+              "line": 792,
+              "kind": "shell-function"
+            },
+            {
+              "name": "modal_text",
+              "line": 1225,
+              "kind": "shell-function"
+            },
+            {
+              "name": "modal_prompt",
+              "line": 1229,
+              "kind": "shell-function"
+            },
+            {
+              "name": "modal_answer",
+              "line": 1259,
+              "kind": "shell-function"
+            },
+            {
+              "name": "modal_decision",
+              "line": 1273,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_unblock",
+              "line": 1285,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_send",
+              "line": 1334,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_key",
+              "line": 1413,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_read",
+              "line": 1462,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_tail",
+              "line": 1485,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_wait",
+              "line": 1501,
+              "kind": "shell-function"
+            },
+            {
+              "name": "busy_marker",
+              "line": 1541,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_ask",
+              "line": 1577,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_post",
+              "line": 1639,
+              "kind": "shell-function"
+            },
+            {
+              "name": "coord_py",
+              "line": 1748,
+              "kind": "shell-function"
+            },
+            {
+              "name": "dispatch_py",
+              "line": 1755,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_dispatch",
+              "line": 1768,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_collect",
+              "line": 1772,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_pool",
+              "line": 1777,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_claim",
+              "line": 1782,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_release",
+              "line": 1795,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_claims",
+              "line": 1804,
+              "kind": "shell-function"
+            },
+            {
+              "name": "run_py",
+              "line": 1819,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_run",
+              "line": 1826,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_run_teardown",
+              "line": 1899,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_tasks",
+              "line": 1988,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_task",
+              "line": 1990,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_epic",
+              "line": 2041,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_board",
+              "line": 2062,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_team",
+              "line": 2094,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_journal",
+              "line": 2107,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_courier",
+              "line": 2122,
+              "kind": "shell-function"
+            },
+            {
+              "name": "observed_perms",
+              "line": 2165,
+              "kind": "shell-function"
+            },
+            {
+              "name": "report_stale",
+              "line": 2181,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_inbox",
+              "line": 2193,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_list",
+              "line": 2327,
+              "kind": "shell-function"
+            },
+            {
+              "name": "claim_reported",
+              "line": 2392,
+              "kind": "shell-function"
+            },
+            {
+              "name": "sweep_sidecars",
+              "line": 2405,
+              "kind": "shell-function"
+            },
+            {
+              "name": "stop_courier_if_idle",
+              "line": 2416,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_kill",
+              "line": 2451,
+              "kind": "shell-function"
+            },
+            {
+              "name": "sidecar_names",
+              "line": 2503,
+              "kind": "shell-function"
+            },
+            {
+              "name": "stale_count",
+              "line": 2510,
+              "kind": "shell-function"
+            },
+            {
+              "name": "idle_candidates",
+              "line": 2560,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_idle",
+              "line": 2573,
+              "kind": "shell-function"
+            },
+            {
+              "name": "idle_watchdog_running",
+              "line": 2646,
+              "kind": "shell-function"
+            },
+            {
+              "name": "start_idle_watchdog",
+              "line": 2650,
+              "kind": "shell-function"
+            },
+            {
+              "name": "stop_idle_watchdog_if_no_agents",
+              "line": 2720,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_reap",
+              "line": 2729,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_attach",
+              "line": 2799,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_exec",
+              "line": 2807,
+              "kind": "shell-function"
+            },
+            {
+              "name": "orchestrator_live",
+              "line": 2853,
+              "kind": "shell-function"
+            },
+            {
+              "name": "orchestrator_warranted_name",
+              "line": 2861,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_orchestrator",
+              "line": 2870,
+              "kind": "shell-function"
+            },
+            {
+              "name": "orchestrator_status",
+              "line": 2880,
+              "kind": "shell-function"
+            },
+            {
+              "name": "orchestrator_start",
+              "line": 2895,
+              "kind": "shell-function"
+            },
+            {
+              "name": "orchestrator_stop",
+              "line": 2965,
+              "kind": "shell-function"
+            }
+          ],
+          "httpPathLiterals": [],
+          "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
+        },
+        {
+          "path": "hub/cli.py",
+          "componentIds": [
+            "HUB-04"
+          ],
+          "workingFileSha256": "45e061b6a30cb7654e0104cf46a1100bc87bba48a38e77cee30ea9c7550b3227",
+          "declarations": [
+            {
+              "name": "Fail",
+              "line": 47,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "connect",
+              "line": 51,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "tcp_token",
+              "line": 66,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "call",
+              "line": 77,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "opt",
+              "line": 101,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "show_msgs",
+              "line": 119,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "show_work",
+              "line": 150,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "python",
+              "line": 167,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "start",
+              "line": 177,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "main",
+              "line": 199,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "fed_parse",
+              "line": 404,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "fed_text",
+              "line": 442,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "fed_setup",
+              "line": 455,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "fed_main",
+              "line": 465,
+              "kind": "FunctionDef"
+            }
+          ],
+          "httpPathLiterals": [],
+          "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
+        },
+        {
+          "path": "hub/server.py",
+          "componentIds": [
+            "HUB-02"
+          ],
+          "workingFileSha256": "570f3c4cd778ce1600cf10b4a33d7375cc448818c48e27a8727c4abd1f4a317c",
+          "declarations": [
+            {
+              "name": "log",
+              "line": 71,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "load_toml",
+              "line": 75,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "parent_pid",
+              "line": 83,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "ancestors",
+              "line": 95,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "toml_dump",
+              "line": 104,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub",
+              "line": 111,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "Hub.__init__",
+              "line": 112,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub._operator_token",
+              "line": 135,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.db",
+              "line": 142,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub._seed_roles",
+              "line": 146,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.resolve_role",
+              "line": 155,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.peer",
+              "line": 163,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.identify",
+              "line": 175,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.caller_of",
+              "line": 192,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.handle_conn",
+              "line": 218,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.subscribe",
+              "line": 239,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.need_agent",
+              "line": 291,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.need_operator",
+              "line": 296,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.sender_of",
+              "line": 300,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.dispatch",
+              "line": 307,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub._repo_of_target",
+              "line": 462,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub._notify_work_owner",
+              "line": 478,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub._write_brief",
+              "line": 501,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.harness",
+              "line": 511,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.virtual_names",
+              "line": 527,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.adopt",
+              "line": 531,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.retire_courier",
+              "line": 564,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.spawn",
+              "line": 628,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.bell_loop",
+              "line": 680,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub._bell_pass",
+              "line": 688,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub._ring",
+              "line": 715,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub._tell_operator",
+              "line": 770,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.live_loop",
+              "line": 776,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.receipt_loop",
+              "line": 817,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.check_holds",
+              "line": 837,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.lease_loop",
+              "line": 853,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.main",
+              "line": 880,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "term",
+              "line": 928,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "write_secret",
+              "line": 934,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "normalize_remote",
+              "line": 942,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "welcome",
+              "line": 953,
+              "kind": "FunctionDef"
+            }
+          ],
+          "httpPathLiterals": [],
+          "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
+        },
+        {
+          "path": "hub/store.py",
+          "componentIds": [
+            "HUB-03"
+          ],
+          "workingFileSha256": "144cafdc425d73ac420f5762ccd4a6153f8c5f70175226d0504e1040d4526f33",
+          "declarations": [
+            {
+              "name": "now",
+              "line": 23,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "ulid",
+              "line": 33,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "HubError",
+              "line": 210,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "Store",
+              "line": 214,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "Store.__init__",
+              "line": 215,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store._migrate",
+              "line": 230,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.tx",
+              "line": 252,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.q",
+              "line": 255,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.q1",
+              "line": 258,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.event",
+              "line": 262,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.checkpoint",
+              "line": 266,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.backup",
+              "line": 270,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.backup_to",
+              "line": 278,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.prune",
+              "line": 310,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.repo_add",
+              "line": 331,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.repo_for_path",
+              "line": 347,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.register",
+              "line": 357,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.set_handle",
+              "line": 385,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.set_state",
+              "line": 390,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.touch_output",
+              "line": 397,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.agents",
+              "line": 400,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.agent",
+              "line": 404,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.team_add",
+              "line": 412,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.team",
+              "line": 423,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.eligible_targets",
+              "line": 431,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.canonical_target",
+              "line": 446,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.adopt",
+              "line": 459,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.recipients",
+              "line": 469,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.post",
+              "line": 489,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store._recips_of",
+              "line": 527,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store._outbox",
+              "line": 530,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.outbox_pending",
+              "line": 537,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.outbox_sent",
+              "line": 540,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.ingest_message",
+              "line": 546,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.ingest_work",
+              "line": 557,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.ingest_result",
+              "line": 571,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.inbox",
+              "line": 582,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.ack",
+              "line": 594,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.delivery_report",
+              "line": 604,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.mark_received",
+              "line": 611,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.pending_for",
+              "line": 622,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.bump_attempt",
+              "line": 626,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.work_create",
+              "line": 637,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.claimable",
+              "line": 670,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.claim",
+              "line": 680,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.heartbeat",
+              "line": 702,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.release",
+              "line": 713,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.cancel",
+              "line": 742,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.work",
+              "line": 751,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store._return_leases",
+              "line": 765,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.sweep_leases",
+              "line": 773,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.claim_path",
+              "line": 784,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.status",
+              "line": 797,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Store.events",
+              "line": 807,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "_Tx",
+              "line": 819,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "_Tx.__init__",
+              "line": 820,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "_Tx.__enter__",
+              "line": 824,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "_Tx.__exit__",
+              "line": 830,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "_caps",
+              "line": 837,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "_meets",
+              "line": 842,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "_split_sql",
+              "line": 855,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "_is_9p",
+              "line": 877,
+              "kind": "FunctionDef"
+            }
+          ],
+          "httpPathLiterals": [],
+          "reviewStatus": "Scoped P01 repair reviewed against original behavior and regression evidence; target platform phase qualification remains open.",
+          "history": [
+            {
+              "date": "2026-10-09",
+              "workingFileSha256": "5b4d0a4dd5787f0328cdac7e27926eb40be7b57161abb25b406ea13b47f53eb9",
+              "declarations": [
+                {
+                  "name": "now",
+                  "line": 23,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "ulid",
+                  "line": 33,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "HubError",
+                  "line": 196,
+                  "kind": "ClassDef"
+                },
+                {
+                  "name": "Store",
+                  "line": 200,
+                  "kind": "ClassDef"
+                },
+                {
+                  "name": "Store.__init__",
+                  "line": 201,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store._migrate",
+                  "line": 216,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.tx",
+                  "line": 238,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.q",
+                  "line": 241,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.q1",
+                  "line": 244,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.event",
+                  "line": 248,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.checkpoint",
+                  "line": 252,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.backup",
+                  "line": 256,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.backup_to",
+                  "line": 262,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.prune",
+                  "line": 280,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.repo_add",
+                  "line": 301,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.repo_for_path",
+                  "line": 317,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.register",
+                  "line": 327,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.set_handle",
+                  "line": 355,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.set_state",
+                  "line": 360,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.touch_output",
+                  "line": 367,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.agents",
+                  "line": 370,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.agent",
+                  "line": 374,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.team_add",
+                  "line": 382,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.team",
+                  "line": 393,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.eligible_targets",
+                  "line": 401,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.canonical_target",
+                  "line": 416,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.adopt",
+                  "line": 429,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.recipients",
+                  "line": 439,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.post",
+                  "line": 459,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store._recips_of",
+                  "line": 497,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store._outbox",
+                  "line": 500,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.outbox_pending",
+                  "line": 507,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.outbox_sent",
+                  "line": 510,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.ingest_message",
+                  "line": 516,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.ingest_work",
+                  "line": 527,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.ingest_result",
+                  "line": 541,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.inbox",
+                  "line": 552,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.ack",
+                  "line": 564,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.delivery_report",
+                  "line": 574,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.mark_received",
+                  "line": 581,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.pending_for",
+                  "line": 592,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.bump_attempt",
+                  "line": 596,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.work_create",
+                  "line": 607,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.claimable",
+                  "line": 640,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.claim",
+                  "line": 650,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.heartbeat",
+                  "line": 672,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.release",
+                  "line": 683,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.cancel",
+                  "line": 712,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.work",
+                  "line": 721,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store._return_leases",
+                  "line": 735,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.sweep_leases",
+                  "line": 743,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.claim_path",
+                  "line": 754,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.status",
+                  "line": 767,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "Store.events",
+                  "line": 777,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "_Tx",
+                  "line": 789,
+                  "kind": "ClassDef"
+                },
+                {
+                  "name": "_Tx.__init__",
+                  "line": 790,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "_Tx.__enter__",
+                  "line": 794,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "_Tx.__exit__",
+                  "line": 800,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "_caps",
+                  "line": 807,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "_meets",
+                  "line": 812,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "_split_sql",
+                  "line": 825,
+                  "kind": "FunctionDef"
+                },
+                {
+                  "name": "_is_9p",
+                  "line": 847,
+                  "kind": "FunctionDef"
+                }
+              ],
+              "reason": "Preserved before scoped P01 governance repairs; see governance-repairs.md."
+            }
+          ]
+        },
+        {
+          "path": "tests/contracts/ci.py",
+          "componentIds": [
+            "HUB-26"
+          ],
+          "workingFileSha256": "a0d40390b9534d0fa312ecceb347ed16ce153c0eb4ec05a3d86c7602e6487b39",
+          "declarations": [
+            {
+              "name": "digest",
+              "line": 39,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "source_hashes",
+              "line": 43,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "download",
+              "line": 59,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "broker",
+              "line": 65,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "negative_fixture",
+              "line": 94,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "nsc",
+              "line": 125,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "hub_preservation",
+              "line": 157,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "main",
+              "line": 197,
+              "kind": "FunctionDef"
+            }
+          ],
+          "httpPathLiterals": [],
+          "reviewStatus": "Codex reviewed P01 preservation repair; current verification evidence remains scoped to its recorded sources and environment."
+        },
+        {
+          "path": "tests/storage/run.py",
+          "componentIds": [
+            "HUB-26"
+          ],
+          "workingFileSha256": "47d0e4314dc35d6f7cb708bc9b367bc209de79d50535b7af8f72c240828b9a70",
+          "declarations": [
+            {
+              "name": "require",
+              "line": 30,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "fixture_atomic_capability",
+              "line": 35,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "hashes",
+              "line": 42,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "record",
+              "line": 48,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Broker",
+              "line": 68,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "Broker.__init__",
+              "line": 69,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Broker.start",
+              "line": 82,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Broker.stop",
+              "line": 99,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Broker.connect",
+              "line": 110,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Broker.client",
+              "line": 113,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "main",
+              "line": 128,
+              "kind": "AsyncFunctionDef"
+            }
+          ],
+          "httpPathLiterals": [],
+          "reviewStatus": "Codex reviewed P01 preservation repair; current verification evidence remains scoped to its recorded sources and environment."
+        }
+      ],
+      "addedFiles": [
+        "agentmux_windows.py",
+        "tests/platform/inventory.py"
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "Preserved source rows before callback admission follow-up.",
+      "previousFiles": [
+        {
+          "path": "agentmux.cmd",
+          "componentIds": [
+            "HAR-05"
+          ],
+          "workingFileSha256": "3d7653e429c2ada389b72df02df29fb0a445974c36e024c44938120b6aff97db",
+          "declarations": [],
+          "httpPathLiterals": [],
+          "reviewStatus": "Scoped P01 inventory and preservation repair review; source freshness does not grant phase or P06 acceptance."
+        },
+        {
+          "path": "agentmux.sh",
+          "componentIds": [
+            "HAR-01",
+            "HAR-02",
+            "HAR-03",
+            "HAR-09",
+            "HAR-10",
+            "HAR-11",
+            "HAR-12",
+            "HAR-13"
+          ],
+          "workingFileSha256": "de477faa14c4c7d1a8e0e63cb95f0a081b0429b4ed6b491f83fc67dab6989c89",
+          "declarations": [
+            {
+              "name": "attach_prefix",
+              "line": 64,
+              "kind": "shell-function"
+            },
+            {
+              "name": "mv_T",
+              "line": 68,
+              "kind": "shell-function"
+            },
+            {
+              "name": "file_mode",
+              "line": 74,
+              "kind": "shell-function"
+            },
+            {
+              "name": "iso_now",
+              "line": 77,
+              "kind": "shell-function"
+            },
+            {
+              "name": "agentmux_self",
+              "line": 88,
+              "kind": "shell-function"
+            },
+            {
+              "name": "tm",
+              "line": 116,
+              "kind": "shell-function"
+            },
+            {
+              "name": "die",
+              "line": 118,
+              "kind": "shell-function"
+            },
+            {
+              "name": "have",
+              "line": 119,
+              "kind": "shell-function"
+            },
+            {
+              "name": "need",
+              "line": 120,
+              "kind": "shell-function"
+            },
+            {
+              "name": "strip_ansi",
+              "line": 123,
+              "kind": "shell-function"
+            },
+            {
+              "name": "trim_edges",
+              "line": 132,
+              "kind": "shell-function"
+            },
+            {
+              "name": "to_wsl_path",
+              "line": 135,
+              "kind": "shell-function"
+            },
+            {
+              "name": "node_bin",
+              "line": 145,
+              "kind": "shell-function"
+            },
+            {
+              "name": "effective_claude_dir",
+              "line": 160,
+              "kind": "shell-function"
+            },
+            {
+              "name": "claude_config_gc",
+              "line": 197,
+              "kind": "shell-function"
+            },
+            {
+              "name": "strip_credentials",
+              "line": 228,
+              "kind": "shell-function"
+            },
+            {
+              "name": "archive_log",
+              "line": 240,
+              "kind": "shell-function"
+            },
+            {
+              "name": "archive_dest",
+              "line": 256,
+              "kind": "shell-function"
+            },
+            {
+              "name": "archive_prune",
+              "line": 271,
+              "kind": "shell-function"
+            },
+            {
+              "name": "claude_credentials_sync",
+              "line": 341,
+              "kind": "shell-function"
+            },
+            {
+              "name": "claude_credentials_sync_locked",
+              "line": 409,
+              "kind": "shell-function"
+            },
+            {
+              "name": "federation_on",
+              "line": 420,
+              "kind": "shell-function"
+            },
+            {
+              "name": "claude_config_dir",
+              "line": 430,
+              "kind": "shell-function"
+            },
+            {
+              "name": "task_cli",
+              "line": 507,
+              "kind": "shell-function"
+            },
+            {
+              "name": "task_try",
+              "line": 518,
+              "kind": "shell-function"
+            },
+            {
+              "name": "pane_of",
+              "line": 525,
+              "kind": "shell-function"
+            },
+            {
+              "name": "pane_hash",
+              "line": 534,
+              "kind": "shell-function"
+            },
+            {
+              "name": "usage",
+              "line": 538,
+              "kind": "shell-function"
+            },
+            {
+              "name": "auth_resolve",
+              "line": 689,
+              "kind": "shell-function"
+            },
+            {
+              "name": "auth_default_for",
+              "line": 792,
+              "kind": "shell-function"
+            },
+            {
+              "name": "modal_text",
+              "line": 1225,
+              "kind": "shell-function"
+            },
+            {
+              "name": "modal_prompt",
+              "line": 1229,
+              "kind": "shell-function"
+            },
+            {
+              "name": "modal_answer",
+              "line": 1259,
+              "kind": "shell-function"
+            },
+            {
+              "name": "modal_decision",
+              "line": 1273,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_unblock",
+              "line": 1285,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_send",
+              "line": 1334,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_key",
+              "line": 1413,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_read",
+              "line": 1462,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_tail",
+              "line": 1485,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_wait",
+              "line": 1501,
+              "kind": "shell-function"
+            },
+            {
+              "name": "busy_marker",
+              "line": 1541,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_ask",
+              "line": 1577,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_post",
+              "line": 1639,
+              "kind": "shell-function"
+            },
+            {
+              "name": "coord_py",
+              "line": 1748,
+              "kind": "shell-function"
+            },
+            {
+              "name": "dispatch_py",
+              "line": 1755,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_dispatch",
+              "line": 1768,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_collect",
+              "line": 1772,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_pool",
+              "line": 1777,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_claim",
+              "line": 1782,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_release",
+              "line": 1795,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_claims",
+              "line": 1804,
+              "kind": "shell-function"
+            },
+            {
+              "name": "run_py",
+              "line": 1819,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_run",
+              "line": 1826,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_run_teardown",
+              "line": 1899,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_tasks",
+              "line": 1988,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_task",
+              "line": 1990,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_epic",
+              "line": 2041,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_board",
+              "line": 2062,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_team",
+              "line": 2094,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_journal",
+              "line": 2107,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_courier",
+              "line": 2122,
+              "kind": "shell-function"
+            },
+            {
+              "name": "observed_perms",
+              "line": 2165,
+              "kind": "shell-function"
+            },
+            {
+              "name": "report_stale",
+              "line": 2181,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_inbox",
+              "line": 2193,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_list",
+              "line": 2327,
+              "kind": "shell-function"
+            },
+            {
+              "name": "claim_reported",
+              "line": 2392,
+              "kind": "shell-function"
+            },
+            {
+              "name": "sweep_sidecars",
+              "line": 2405,
+              "kind": "shell-function"
+            },
+            {
+              "name": "stop_courier_if_idle",
+              "line": 2416,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_kill",
+              "line": 2451,
+              "kind": "shell-function"
+            },
+            {
+              "name": "sidecar_names",
+              "line": 2503,
+              "kind": "shell-function"
+            },
+            {
+              "name": "stale_count",
+              "line": 2510,
+              "kind": "shell-function"
+            },
+            {
+              "name": "idle_candidates",
+              "line": 2560,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_idle",
+              "line": 2573,
+              "kind": "shell-function"
+            },
+            {
+              "name": "idle_watchdog_running",
+              "line": 2646,
+              "kind": "shell-function"
+            },
+            {
+              "name": "start_idle_watchdog",
+              "line": 2650,
+              "kind": "shell-function"
+            },
+            {
+              "name": "stop_idle_watchdog_if_no_agents",
+              "line": 2720,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_reap",
+              "line": 2729,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_attach",
+              "line": 2799,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_exec",
+              "line": 2807,
+              "kind": "shell-function"
+            },
+            {
+              "name": "orchestrator_live",
+              "line": 2853,
+              "kind": "shell-function"
+            },
+            {
+              "name": "orchestrator_warranted_name",
+              "line": 2861,
+              "kind": "shell-function"
+            },
+            {
+              "name": "cmd_orchestrator",
+              "line": 2870,
+              "kind": "shell-function"
+            },
+            {
+              "name": "orchestrator_status",
+              "line": 2880,
+              "kind": "shell-function"
+            },
+            {
+              "name": "orchestrator_start",
+              "line": 2895,
+              "kind": "shell-function"
+            },
+            {
+              "name": "orchestrator_stop",
+              "line": 2965,
+              "kind": "shell-function"
+            }
+          ],
+          "httpPathLiterals": [],
+          "reviewStatus": "Scoped P01 inventory and preservation repair review; source freshness does not grant phase or P06 acceptance."
+        },
+        {
+          "path": "agentmux_windows.py",
+          "componentIds": [
+            "HAR-05",
+            "HUB-04"
+          ],
+          "declarations": [
+            {
+              "name": "validate_callback",
+              "line": 8,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "command",
+              "line": 27,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "environment",
+              "line": 45,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "main",
+              "line": 59,
+              "kind": "FunctionDef"
+            }
+          ],
+          "httpPathLiterals": [],
+          "workingFileSha256": "2e236d2dde784dd6856af006e21cdfb426bd4962a09f31686052eea2f169f1dc",
+          "reviewStatus": "Scoped P01 inventory and preservation repair review; source freshness does not grant phase or P06 acceptance."
+        },
+        {
+          "path": "hub/server.py",
+          "componentIds": [
+            "HUB-02"
+          ],
+          "workingFileSha256": "f9719113f313f4f7e942c8f003e76cd7d3445120ccb1dbe34767e5777901f833",
+          "declarations": [
+            {
+              "name": "log",
+              "line": 72,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "load_toml",
+              "line": 76,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "parent_pid",
+              "line": 84,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "ancestors",
+              "line": 96,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "toml_dump",
+              "line": 105,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub",
+              "line": 112,
+              "kind": "ClassDef"
+            },
+            {
+              "name": "Hub.__init__",
+              "line": 113,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub._operator_token",
+              "line": 136,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.db",
+              "line": 143,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub._seed_roles",
+              "line": 147,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.resolve_role",
+              "line": 156,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.peer",
+              "line": 164,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.identify",
+              "line": 176,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.caller_of",
+              "line": 193,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.handle_conn",
+              "line": 219,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.subscribe",
+              "line": 240,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.need_agent",
+              "line": 292,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.need_operator",
+              "line": 297,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.sender_of",
+              "line": 301,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.dispatch",
+              "line": 308,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub._repo_of_target",
+              "line": 463,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub._notify_work_owner",
+              "line": 479,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub._write_brief",
+              "line": 502,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.harness",
+              "line": 512,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.virtual_names",
+              "line": 528,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "Hub.adopt",
+              "line": 532,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.retire_courier",
+              "line": 565,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.spawn",
+              "line": 629,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.bell_loop",
+              "line": 712,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub._bell_pass",
+              "line": 720,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub._ring",
+              "line": 747,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub._tell_operator",
+              "line": 802,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.live_loop",
+              "line": 808,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.receipt_loop",
+              "line": 849,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.check_holds",
+              "line": 869,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.lease_loop",
+              "line": 885,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "Hub.main",
+              "line": 912,
+              "kind": "AsyncFunctionDef"
+            },
+            {
+              "name": "term",
+              "line": 960,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "write_secret",
+              "line": 966,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "normalize_remote",
+              "line": 974,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "welcome",
+              "line": 985,
+              "kind": "FunctionDef"
+            }
+          ],
+          "httpPathLiterals": [],
+          "reviewStatus": "Scoped P01 inventory and preservation repair review; source freshness does not grant phase or P06 acceptance."
         }
       ]
     }

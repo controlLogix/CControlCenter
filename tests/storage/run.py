@@ -409,6 +409,89 @@ async def main():
             await case('fixture-capability-rejects-cross-stream-kv-object-tool-atomicity', scenario='FAIL-47',
                        rejectedResourceKinds=rejected_kinds, boundary='fixture admission only; no production plugin registry')
 
+            # AMX-BASE-002: construct incoming state, attribution and claim intent
+            # before one conditional publish. A construction failure cannot leak
+            # unattributed or executable work into the authoritative ledger.
+            async def receive_incoming(language, incoming_subject, operation, fail_at=None):
+                complete = record(operation, 1)
+                lookup = {'op': 'reconcile', 'stream': 'LEDGER', 'subject': incoming_subject,
+                          'operationId': operation, 'payloadDigest': complete['operation']['payloadDigest']}
+                retained = await broker.client(language, lookup)
+                if retained['ok']:
+                    return retained['result']
+                require(retained.get('error') == 'not_found', 'incoming recovery did not fail closed')
+                complete['entityId'] = operation
+                complete['operation']['taskId'] = operation
+                complete['state'] = {'status': 'blocked', 'taskId': operation}
+                if fail_at == 'state':
+                    raise RuntimeError('injected state construction failure')
+                complete['state']['origin'] = {'hubId': 'hub-origin', 'nodeId': 'node-origin',
+                                              'offerId': 'offer-' + operation}
+                if fail_at == 'attribution':
+                    raise RuntimeError('injected attribution construction failure')
+                complete['effects'][0].update(contractId='work-claim',
+                                              payload={'offerId': 'offer-' + operation,
+                                                       'executorHubId': 'hub-executor'})
+                complete['effects'][0]['payloadDigest'] = 'sha256:' + hashlib.sha256(
+                    json.dumps(complete['effects'][0]['payload'], sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+                if fail_at == 'claim':
+                    raise RuntimeError('injected claim construction failure')
+                published = await broker.client(language, {'op': 'publish', 'subject': incoming_subject,
+                                                           'record': complete, 'expectedSequence': 0})
+                require(published['ok'], 'incoming complete record failed')
+                if fail_at == 'after-commit':
+                    raise RuntimeError('injected caller crash after incoming commit')
+                return {'record': complete, 'sequence': published['result']['sequence']}
+
+            for language in ('python', 'typescript'):
+                incoming_subject = 'fixture.ledger.incoming-' + language
+                operation = 'incoming-' + language
+                before = (await js.stream_info('LEDGER')).state.messages
+                for fault in ('state', 'attribution', 'claim'):
+                    try:
+                        await receive_incoming(language, incoming_subject, operation, fault)
+                    except RuntimeError as exc:
+                        require(str(exc).startswith('injected '), 'unexpected incoming failure')
+                    else:
+                        raise AssertionError('incoming construction fault did not fire')
+                    absent = await broker.client(language, {'op': 'read', 'stream': 'LEDGER',
+                                                           'subject': incoming_subject})
+                    require(not absent['ok'] and absent.get('error') == 'not_found',
+                            'partial incoming state, attribution or claim became durable')
+                    require((await js.stream_info('LEDGER')).state.messages == before,
+                            'failed incoming creation changed ledger count')
+                try:
+                    await receive_incoming(language, incoming_subject, operation, 'after-commit')
+                except RuntimeError as exc:
+                    require(str(exc).startswith('injected '), 'unexpected post-commit failure')
+                else:
+                    raise AssertionError('post-commit fault did not fire')
+                recovered = await receive_incoming(language, incoming_subject, operation)
+                repeated = await receive_incoming(language, incoming_subject, operation)
+                independent = await broker.client('typescript' if language == 'python' else 'python',
+                                                  {'op': 'read', 'stream': 'LEDGER', 'subject': incoming_subject})
+                require(recovered == repeated and independent['ok'] and
+                        independent['result']['record'] == recovered['record'],
+                        'incoming retry did not retain one exact complete record')
+                complete = recovered['record']
+                require(complete['entityId'] == complete['operation']['taskId'] == complete['state']['taskId'] == operation
+                        and complete['state']['status'] == 'blocked'
+                        and complete['state']['origin'] == {'hubId': 'hub-origin', 'nodeId': 'node-origin',
+                                                          'offerId': 'offer-' + operation}
+                        and len(complete['effects']) == 1 and complete['effects'][0]['contractId'] == 'work-claim'
+                        and complete['effects'][0]['payload'] == {'offerId': 'offer-' + operation,
+                                                                 'executorHubId': 'hub-executor'}
+                        and complete['effects'][0]['payloadDigest'] == 'sha256:' + hashlib.sha256(
+                            json.dumps(complete['effects'][0]['payload'], sort_keys=True, separators=(',', ':')).encode()).hexdigest(),
+                        'incoming commit lost exact task, blocked state, origin attribution or claim intent')
+                require((await js.stream_info('LEDGER')).state.messages == before + 1,
+                        'incoming retry duplicated record or claim intent')
+                await case('incoming-creation-atomic-with-attribution-claim-' + language,
+                           scenario='FAIL-08', baselineFinding='AMX-BASE-002',
+                           injectedBoundaries=['state', 'attribution', 'claim', 'after-commit'],
+                           recordsAdded=1, claimIntents=1,
+                           boundary='fixture complete-record construction; no production authorization or dispatch')
+
             # Retention holes must never justify inventing a previously acknowledged operation.
             await js.delete_msg('LEDGER', 1)
             for lang in ('python', 'typescript'):

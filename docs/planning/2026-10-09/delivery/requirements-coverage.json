@@ -18,11 +18,11 @@
     },
     {
       "path": "component-audit-harness.json",
-      "sha256": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08"
+      "sha256": "a21684b80ad201e8a9e789dc838df91d70675aa690e8a73a226edad34ee13ae9"
     },
     {
       "path": "component-audit-hub.json",
-      "sha256": "b2eb15d467fc12d4099a0a9534184b1be308fa11c55adcd68d6f2533c21a3cca"
+      "sha256": "689690b169d1dcd9301cbeaed7764846b39b5676f04a2ef734bfc7e3048ba69d"
     },
     {
       "path": "component-audit-repository.json",
@@ -3307,6 +3307,37 @@
         "status": "mapped-not-accepted",
         "acceptanceEvidence": []
       }
+    },
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "Additive platform/callback source ownership; requirement and acceptance scope unchanged",
+      "previousSourceFiles": [
+        {
+          "path": "implementation-plan.md",
+          "sha256": "33a2b962bfc101732f4532a0313de65f518b8dc1fabd8bd2fa0d3704cae0f452"
+        },
+        {
+          "path": "phases.json",
+          "sha256": "882de6f13f309b878ebd8898ba73ab05fe94dc68ec517b311054f2a99f3102f7"
+        },
+        {
+          "path": "component-audit-dashboard.json",
+          "sha256": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f"
+        },
+        {
+          "path": "component-audit-harness.json",
+          "sha256": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08"
+        },
+        {
+          "path": "component-audit-hub.json",
+          "sha256": "b2eb15d467fc12d4099a0a9534184b1be308fa11c55adcd68d6f2533c21a3cca"
+        },
+        {
+          "path": "component-audit-repository.json",
+          "sha256": "52a2e7648da7727c260b28764f6fc5817b6776d4e24198bec7a4b8436bf442c2"
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,17 @@
+..E/usr/lib/python3.14/unittest/case.py:668: ResourceWarning: unclosed <socket.socket fd=3, family=1, type=1, proto=0>
+  with outcome.testPartExecutor(self):
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+......
+======================================================================
+ERROR: test_stale_socket_file_is_a_graceful_503 (__main__.HubDown.test_stale_socket_file_is_a_graceful_503)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ryan/.cache/agentmux-governance/p01-dashboard-full-vkqiqkjv/checkout/dashboard/test_hub_panel.py", line 183, in test_stale_socket_file_is_a_graceful_503
+    s.bind(path)
+    ~~~~~~^^^^^^
+OSError: AF_UNIX path too long
+
+----------------------------------------------------------------------
+Ran 9 tests in 1.721s
+
+FAILED (errors=1)

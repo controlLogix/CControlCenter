@@ -1,0 +1,7 @@
+{
+  "externalSource": "//wsl.localhost/Ubuntu-26.04/home/ryan/.cache/agentmux-governance/p01-incoming-storage-reviewed",
+  "sha256": {
+    "storage-result.json": "fe9f7df341e295f078eb7b80ee2fd6f5fb7c8a513bbcac0a3e270198941f68db"
+  },
+  "scope": "Reviewed bounded P01 evidence; no phase acceptance"
+}

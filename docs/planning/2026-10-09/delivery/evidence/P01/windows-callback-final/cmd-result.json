@@ -1,0 +1,13 @@
+{
+  "args": [
+    "a space",
+    "",
+    "one!two",
+    "C:\\folder with spaces\\file",
+    "\u96ea",
+    "amp & pipe | text"
+  ],
+  "code": 7,
+  "stdout": "{\"argv\": [\"a space\", \"\", \"one!two\", \"C:\\\\folder with spaces\\\\file\", \"\\u96ea\", \"amp & pipe | text\"], \"stdin\": \"stdin proof\"}\n",
+  "stderr": ""
+}

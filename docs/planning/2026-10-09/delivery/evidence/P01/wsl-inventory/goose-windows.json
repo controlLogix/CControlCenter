@@ -1,0 +1,10 @@
+{
+  "surface": "windows",
+  "command": [
+    "C:/Users/RyanHelms/.local/bin/goose.exe",
+    "--version"
+  ],
+  "exitCode": 0,
+  "stdout": " 1.46.0\n",
+  "stderr": ""
+}

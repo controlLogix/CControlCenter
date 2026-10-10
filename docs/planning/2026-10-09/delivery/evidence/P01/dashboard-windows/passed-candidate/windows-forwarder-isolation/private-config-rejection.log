@@ -1,0 +1,6 @@
+WARNING: proceeding, even though we could not create PATH aliases: Incorrect function. (os error 1)
+Error loading config.toml:
+\\wsl.localhost\Ubuntu-26.04\home\ryan\.cache\agentmux-governance\p01-dashboard-windows-isolation-w8n2bhwv\codex\config.toml:1:1: unknown configuration field `p01_private_configuration_sentinel`
+  |
+1 | p01_private_configuration_sentinel = true
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,0 +1,338 @@
+{
+  "schemaVersion": 1,
+  "kind": "observation",
+  "platform": "wsl",
+  "runtime": "linux",
+  "observedAt": "2026-10-09T23:45:04.568978+00:00",
+  "candidateCommit": "09fe9c749ff674c0dd5ca4fa7c53abfbe23cadcd",
+  "p06Accepted": false,
+  "limits": [
+    "authenticated_workflows_unverified",
+    "hub_callbacks_unverified",
+    "concurrent_sessions_unverified",
+    "unchanged_launcher_update_unverified"
+  ],
+  "clients": [
+    {
+      "id": "claude",
+      "status": "observed",
+      "searchScope": "Seven installations from the reviewed Windows client map; not an exhaustive machine inventory",
+      "installationOwner": "windows",
+      "configOwner": "windows",
+      "authOwner": "windows",
+      "credentialsCopied": false,
+      "linuxDuplicateInstalled": false,
+      "stableTarget": "C:/nvm4w/nodejs/node_modules/@anthropic-ai/claude-code/bin/claude.exe",
+      "executableTarget": "C:/nvm4w/nodejs/node_modules/@anthropic-ai/claude-code/bin/claude.exe",
+      "launcher": "/usr/local/bin/claude",
+      "probes": [
+        {
+          "surface": "windows",
+          "command": [
+            "C:/nvm4w/nodejs/node_modules/@anthropic-ai/claude-code/bin/claude.exe",
+            "--version"
+          ],
+          "exitCode": 0,
+          "version": "2.1.296 (Claude Code)",
+          "installation": "C:/nvm4w/nodejs/node_modules/@anthropic-ai/claude-code/bin/claude.exe",
+          "executable": "C:/nvm4w/nodejs/node_modules/@anthropic-ai/claude-code/bin/claude.exe",
+          "evidenceSha256": "67f95cbd7c416af95e748d16553ab873c77be608aadab6042ec36a66cc3da423"
+        },
+        {
+          "surface": "wsl",
+          "command": [
+            "/usr/local/bin/claude",
+            "--version"
+          ],
+          "exitCode": 0,
+          "version": "2.1.296 (Claude Code)",
+          "installation": "C:/nvm4w/nodejs/node_modules/@anthropic-ai/claude-code/bin/claude.exe",
+          "executable": "C:/nvm4w/nodejs/node_modules/@anthropic-ai/claude-code/bin/claude.exe",
+          "evidenceSha256": "56942170c1218bed1e6a6b61f1a44cee11061021c3020b10733f0f89a1d1b513"
+        }
+      ],
+      "interopLimits": [
+        "Version probes only; authenticated inference, hub callbacks, concurrent sessions and final unchanged-launcher update remain unverified.",
+        "Default Windows configuration ownership follows invocation of the same installation without HOME/config overrides; credentials were not inspected."
+      ]
+    },
+    {
+      "id": "codex",
+      "status": "observed",
+      "searchScope": "Seven installations from the reviewed Windows client map; not an exhaustive machine inventory",
+      "installationOwner": "windows",
+      "configOwner": "windows",
+      "authOwner": "windows",
+      "credentialsCopied": false,
+      "linuxDuplicateInstalled": false,
+      "stableTarget": "C:/nvm4w/nodejs/node_modules/@openai/codex/bin/codex.js",
+      "executableTarget": "C:/nvm4w/nodejs/node.exe",
+      "launcher": "/usr/local/bin/codex",
+      "probes": [
+        {
+          "surface": "windows",
+          "command": [
+            "C:/nvm4w/nodejs/node.exe",
+            "C:/nvm4w/nodejs/node_modules/@openai/codex/bin/codex.js",
+            "--version"
+          ],
+          "exitCode": 0,
+          "version": "codex-cli 0.162.1",
+          "installation": "C:/nvm4w/nodejs/node_modules/@openai/codex/bin/codex.js",
+          "executable": "C:/nvm4w/nodejs/node.exe",
+          "evidenceSha256": "05ff0397e66d80997ee6d3af00bcb70bdcacac25e54bf4f797a09a0413b6de19"
+        },
+        {
+          "surface": "wsl",
+          "command": [
+            "/usr/local/bin/codex",
+            "--version"
+          ],
+          "exitCode": 0,
+          "version": "codex-cli 0.162.1",
+          "installation": "C:/nvm4w/nodejs/node_modules/@openai/codex/bin/codex.js",
+          "executable": "C:/nvm4w/nodejs/node.exe",
+          "evidenceSha256": "2fc7559ec1f956531103f330d3a5065f2538aa5d4e6513b2a6cea0ed118bd794"
+        }
+      ],
+      "interopLimits": [
+        "Version probes only; authenticated inference, hub callbacks, concurrent sessions and final unchanged-launcher update remain unverified.",
+        "Default Windows configuration ownership follows invocation of the same installation without HOME/config overrides; credentials were not inspected."
+      ]
+    },
+    {
+      "id": "grok",
+      "status": "observed",
+      "searchScope": "Seven installations from the reviewed Windows client map; not an exhaustive machine inventory",
+      "installationOwner": "windows",
+      "configOwner": "windows",
+      "authOwner": "windows",
+      "credentialsCopied": false,
+      "linuxDuplicateInstalled": false,
+      "stableTarget": "C:/Users/RyanHelms/.grok/bin/grok.exe",
+      "executableTarget": "C:/Users/RyanHelms/.grok/bin/grok.exe",
+      "launcher": "/usr/local/bin/grok",
+      "probes": [
+        {
+          "surface": "windows",
+          "command": [
+            "C:/Users/RyanHelms/.grok/bin/grok.exe",
+            "--version"
+          ],
+          "exitCode": 0,
+          "version": "grok 1.0.13 (5e9a58528b76) [stable]",
+          "installation": "C:/Users/RyanHelms/.grok/bin/grok.exe",
+          "executable": "C:/Users/RyanHelms/.grok/bin/grok.exe",
+          "evidenceSha256": "a1a357de0acadb83bcb8b0456d82be7e21fde982841009590c06c71005524848"
+        },
+        {
+          "surface": "wsl",
+          "command": [
+            "/usr/local/bin/grok",
+            "--version"
+          ],
+          "exitCode": 0,
+          "version": "grok 1.0.13 (5e9a58528b76) [stable]",
+          "installation": "C:/Users/RyanHelms/.grok/bin/grok.exe",
+          "executable": "C:/Users/RyanHelms/.grok/bin/grok.exe",
+          "evidenceSha256": "f393236556507472be609aeea5b69c518ef211776ad574522c9cf8eba82bd124"
+        }
+      ],
+      "interopLimits": [
+        "Version probes only; authenticated inference, hub callbacks, concurrent sessions and final unchanged-launcher update remain unverified.",
+        "Default Windows configuration ownership follows invocation of the same installation without HOME/config overrides; credentials were not inspected."
+      ]
+    },
+    {
+      "id": "kimi",
+      "status": "observed",
+      "searchScope": "Seven installations from the reviewed Windows client map; not an exhaustive machine inventory",
+      "installationOwner": "windows",
+      "configOwner": "windows",
+      "authOwner": "windows",
+      "credentialsCopied": false,
+      "linuxDuplicateInstalled": false,
+      "stableTarget": "C:/Users/RyanHelms/.kimi-code/bin/kimi.exe",
+      "executableTarget": "C:/Users/RyanHelms/.kimi-code/bin/kimi.exe",
+      "launcher": "/usr/local/bin/kimi",
+      "probes": [
+        {
+          "surface": "windows",
+          "command": [
+            "C:/Users/RyanHelms/.kimi-code/bin/kimi.exe",
+            "--version"
+          ],
+          "exitCode": 0,
+          "version": "0.36.0",
+          "installation": "C:/Users/RyanHelms/.kimi-code/bin/kimi.exe",
+          "executable": "C:/Users/RyanHelms/.kimi-code/bin/kimi.exe",
+          "evidenceSha256": "02ce73ac451a9964c15030349851bd79f0aeb71f0b2ff5aeedc5f07b6027885a"
+        },
+        {
+          "surface": "wsl",
+          "command": [
+            "/usr/local/bin/kimi",
+            "--version"
+          ],
+          "exitCode": 0,
+          "version": "0.36.0",
+          "installation": "C:/Users/RyanHelms/.kimi-code/bin/kimi.exe",
+          "executable": "C:/Users/RyanHelms/.kimi-code/bin/kimi.exe",
+          "evidenceSha256": "39525667ce0edb3b91c5af3fe094d36abd36037e6b5477061cfcbc386c578aae"
+        }
+      ],
+      "interopLimits": [
+        "Version probes only; authenticated inference, hub callbacks, concurrent sessions and final unchanged-launcher update remain unverified.",
+        "Default Windows configuration ownership follows invocation of the same installation without HOME/config overrides; credentials were not inspected."
+      ]
+    },
+    {
+      "id": "goose",
+      "status": "observed",
+      "searchScope": "Seven installations from the reviewed Windows client map; not an exhaustive machine inventory",
+      "installationOwner": "windows",
+      "configOwner": "windows",
+      "authOwner": "windows",
+      "credentialsCopied": false,
+      "linuxDuplicateInstalled": false,
+      "stableTarget": "C:/Users/RyanHelms/.local/bin/goose.exe",
+      "executableTarget": "C:/Users/RyanHelms/.local/bin/goose.exe",
+      "launcher": "/usr/local/bin/goose",
+      "probes": [
+        {
+          "surface": "windows",
+          "command": [
+            "C:/Users/RyanHelms/.local/bin/goose.exe",
+            "--version"
+          ],
+          "exitCode": 0,
+          "version": "1.46.0",
+          "installation": "C:/Users/RyanHelms/.local/bin/goose.exe",
+          "executable": "C:/Users/RyanHelms/.local/bin/goose.exe",
+          "evidenceSha256": "03d59572ca822c9c3cc505495417d816632b15ec24177967482d3711b80ffc79"
+        },
+        {
+          "surface": "wsl",
+          "command": [
+            "/usr/local/bin/goose",
+            "--version"
+          ],
+          "exitCode": 0,
+          "version": "1.46.0",
+          "installation": "C:/Users/RyanHelms/.local/bin/goose.exe",
+          "executable": "C:/Users/RyanHelms/.local/bin/goose.exe",
+          "evidenceSha256": "3e06a5e48b6a0185c62d8973d8a6b50ae175f56290cf42685ce515d9de943c2a"
+        }
+      ],
+      "interopLimits": [
+        "Version probes only; authenticated inference, hub callbacks, concurrent sessions and final unchanged-launcher update remain unverified.",
+        "Default Windows configuration ownership follows invocation of the same installation without HOME/config overrides; credentials were not inspected."
+      ]
+    },
+    {
+      "id": "dsh",
+      "status": "observed",
+      "searchScope": "Seven installations from the reviewed Windows client map; not an exhaustive machine inventory",
+      "installationOwner": "windows",
+      "configOwner": "windows",
+      "authOwner": "windows",
+      "credentialsCopied": false,
+      "linuxDuplicateInstalled": false,
+      "stableTarget": "C:/nvm4w/nodejs/node_modules/@deepseek-ai/dsh/lib/bin.js",
+      "executableTarget": "C:/nvm4w/nodejs/node.exe",
+      "launcher": "/usr/local/bin/dsh",
+      "probes": [
+        {
+          "surface": "windows",
+          "command": [
+            "C:/nvm4w/nodejs/node.exe",
+            "C:/nvm4w/nodejs/node_modules/@deepseek-ai/dsh/lib/bin.js",
+            "--version"
+          ],
+          "exitCode": 0,
+          "version": "0.1.0-rc.7",
+          "installation": "C:/nvm4w/nodejs/node_modules/@deepseek-ai/dsh/lib/bin.js",
+          "executable": "C:/nvm4w/nodejs/node.exe",
+          "evidenceSha256": "aac6225f8bbfe347e80e6b67ee69641aa3f6776a4659f666a828f1a8417a22e5"
+        },
+        {
+          "surface": "wsl",
+          "command": [
+            "/usr/local/bin/dsh",
+            "--version"
+          ],
+          "exitCode": 0,
+          "version": "0.1.0-rc.7",
+          "installation": "C:/nvm4w/nodejs/node_modules/@deepseek-ai/dsh/lib/bin.js",
+          "executable": "C:/nvm4w/nodejs/node.exe",
+          "evidenceSha256": "a11f536931e918e4233ae24172edeed5901ee3bda4a43a05d81c29dbc789b537"
+        }
+      ],
+      "interopLimits": [
+        "Version probes only; authenticated inference, hub callbacks, concurrent sessions and final unchanged-launcher update remain unverified.",
+        "Default Windows configuration ownership follows invocation of the same installation without HOME/config overrides; credentials were not inspected."
+      ]
+    },
+    {
+      "id": "trueforge",
+      "status": "unavailable",
+      "searchScope": "Seven installations from the reviewed Windows client map; not an exhaustive machine inventory",
+      "installationOwner": "windows",
+      "configOwner": "windows",
+      "authOwner": "windows",
+      "credentialsCopied": false,
+      "linuxDuplicateInstalled": false,
+      "stableTarget": "C:/nvm4w/nodejs/node_modules/@truefoundry/trueforge/dist/cli.js",
+      "executableTarget": "C:/nvm4w/nodejs/node.exe",
+      "launcher": "/usr/local/bin/trueforge",
+      "probes": [
+        {
+          "surface": "windows",
+          "command": [
+            "C:/nvm4w/nodejs/node.exe",
+            "C:/nvm4w/nodejs/node_modules/@truefoundry/trueforge/dist/cli.js",
+            "--version"
+          ],
+          "exitCode": 1,
+          "version": null,
+          "installation": "C:/nvm4w/nodejs/node_modules/@truefoundry/trueforge/dist/cli.js",
+          "executable": "C:/nvm4w/nodejs/node.exe",
+          "evidenceSha256": "a113a217beb6bcd560c67919820c884c6b03e78b5e80217d11201ab973b4a0c8"
+        },
+        {
+          "surface": "wsl",
+          "command": [
+            "/usr/local/bin/trueforge",
+            "--version"
+          ],
+          "exitCode": 1,
+          "version": null,
+          "installation": "C:/nvm4w/nodejs/node_modules/@truefoundry/trueforge/dist/cli.js",
+          "executable": "C:/nvm4w/nodejs/node.exe",
+          "evidenceSha256": "b219e812c02e2d797c53a0de01a5bb058257ae0455057e3beb5468abe9c2cc36"
+        }
+      ],
+      "interopLimits": [
+        "Version probes only; authenticated inference, hub callbacks, concurrent sessions and final unchanged-launcher update remain unverified.",
+        "Default Windows configuration ownership follows invocation of the same installation without HOME/config overrides; credentials were not inspected."
+      ]
+    },
+    {
+      "id": "pi",
+      "status": "missing",
+      "searchScope": "Previous Windows PATH and npm/bin paths inspected in Windows client setup evidence; no exhaustive machine search",
+      "installationOwner": null,
+      "configOwner": null,
+      "authOwner": null,
+      "credentialsCopied": false,
+      "linuxDuplicateInstalled": false,
+      "stableTarget": null,
+      "executableTarget": null,
+      "launcher": null,
+      "probes": [],
+      "interopLimits": [
+        "Not found within the recorded search scope; no support claim."
+      ]
+    }
+  ]
+}

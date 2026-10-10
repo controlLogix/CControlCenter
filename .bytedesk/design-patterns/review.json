@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, P01 preservation repairs; phase gate remains open",
-  "sourceDigest": "d10f3ba399abe4faaafd670245eb3ef1c401e05315b6df03c6a22d0a852ec58f",
+  "reviewer": "Codex, scoped P01 Windows/WSL and preservation review; phase remains open",
+  "sourceDigest": "e151e283abe36cc3a94ffb212e975ebbea3e1877f0c988eaa4be806e6004b6dc",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -477,6 +477,26 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md"
       ],
       "rationale": "Reviewed final forwarding and rollback code, independent local checks and explicit limitations; no credentials copied. Windows setup is local P01 evidence, not P06 integration acceptance; PLAN-02 remains planned. Fixture repairs retain exact assertions and have positive and negative/delayed-start evidence. Native CI reports are bound to committed source. No runtime pattern or diagram relationship changed. P01 remains active; no phase acceptance or merge."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex; independent callback, backup and storage review",
+      "scope": "P01 Windows-owned client inventory and baseline preservation checkpoint",
+      "previousReviewer": "Codex, P01 preservation repairs; phase gate remains open",
+      "previousSourceDigest": "d10f3ba399abe4faaafd670245eb3ef1c401e05315b6df03c6a22d0a852ec58f",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/windows-callback-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/windows-callback-final/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/parent-change-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/dashboard-windows/archive-manifest.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/wsl-inventory/validation.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/platform-contract/result.json",
+        ".context/design-patterns.md",
+        ".context/design-patterns-diagrams.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/hub-callback-final-failed/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/server-api-diagnostics/archive.json"
+      ],
+      "rationale": "Reviewed changed runtime sources and independent source-bound evidence. Existing FED-15 gateway now includes explicit per-agent Windows-to-WSL callback selection, pre-side-effect validation and pane isolation; recorded how/where/why, alternative, Windows Python dependency and limits, with matching sequence diagram. PLAN-09/10 production status remains planned while incoming complete-record construction has bounded positive/negative fixtures. Backup second-boundary repair adds no new pattern. Validator is a plain closed-format evidence boundary, not a runtime plugin. Preserved registry/remediation histories, original regression hashes and all component/behavior scope; refreshed source surfaces and tracked evidence with tasks open. Actual Windows-owned links/version observations and dashboard runner pass do not qualify authenticated provider workflows, final native candidate, missing external-plugin coverage or P06. No phase advancement, merge or final delivery acceptance. Raw archive attributes preserve hash-bound execution bytes; metadata hashes were refreshed for those attributes only. Final broad hub rerun is rejected with9startup/socket errors; unchanged focused9API checks subsequently pass, but the exact prior cause is unknown. Both outcomes remain tracked and no phase qualification is claimed."
     }
   ],
   "rules": {

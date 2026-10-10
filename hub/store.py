@@ -286,7 +286,8 @@ class Store:
             raise HubError("backup label must contain only letters, digits, underscore or dash")
         os.makedirs(dest_dir, mode=0o700, exist_ok=True)
         os.chmod(dest_dir, 0o700)                       # backups hold every message body
-        stamp = time.strftime("%Y%m%dT%H%M%S", time.gmtime()) + f"{int(time.time() * 1000) % 1000:03d}Z"
+        captured = time.time()
+        stamp = time.strftime("%Y%m%dT%H%M%S", time.gmtime(captured)) + f"{int(captured * 1000) % 1000:03d}Z"
         # Exclusive temporary creation plus no-replace publication: a clock collision
         # or another process must never overwrite a previously completed snapshot.
         fd, tmp = tempfile.mkstemp(prefix=f"hub-{label}-{stamp}-{ulid()}-", suffix=".tmp", dir=dest_dir)

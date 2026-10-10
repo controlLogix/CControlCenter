@@ -37,11 +37,41 @@ WezTerm's mux (`wezterm cli send-text` / `get-text`), which would mean adopting
 a whole terminal emulator with weak headless support. WSL Ubuntu 24.04 already
 had tmux 3.4, so the harness runs there.
 
-The agents run as **native Linux processes** in WSL, not Windows `.exe` files
+The original harness runs agents as **native Linux processes** in WSL, not Windows `.exe` files
 through interop. A Windows console TUI inside a Linux pty has unreliable
 redraws and key handling; a Linux binary in a Linux pty does not. The tradeoff
 is that the WSL `codex` has its own `~/.codex` — separate login, separate
 `config.toml`, separate MCP servers from the Windows install.
+
+### Windows clients and WSL callbacks
+
+The Windows entrypoint, `agentmux.cmd`, requires **Python 3 available as `python`
+on Windows** and an installed WSL distribution. Ordinary calls retain the original
+`Ubuntu` and `/home/nick/.local/bin/agentmux` defaults. Set `AGENTMUX_WSL_DISTRO`
+and `AGENTMUX_WSL_BIN` to select another distribution and an absolute Linux
+launcher path; `AGENTMUX_WSL_CWD` optionally selects an absolute Linux directory.
+The helper passes received arguments as a list. The calling shell still parses
+quotes and metacharacters: quote arguments normally. This does not promise that
+arbitrary command text is interchangeable between cmd.exe, PowerShell and Bash.
+
+For a hub launching Windows-backed clients, explicitly set
+`AGENTMUX_WINDOWS_CALLBACKS=1`, select `AGENTMUX_WSL_DISTRO`, and configure the
+hub's loopback `tcp_port`. The hub gives each new pane its own existing agent
+token file and selected launcher, directory and state home. The internal spawn
+flag is consumed while preparing that pane; it is not an agent identity.
+An actual callback uses `AGENTMUX_WINDOWS_CALLBACK=1` and requires explicit
+`AGENTMUX_WSL_DISTRO`, `AGENTMUX_WSL_BIN`, `AGENTMUX_HOME`,
+`AGENTMUX_HUB_URL=tcp://127.0.0.1:<port>` and `AGENTMUX_HUB_TOKEN_FILE`.
+Missing context fails before choosing a default instance or creating harness
+state. Callback mode allows hub client work, and rejects daemon lifecycle and
+other harness operations. The hub authenticates the token, not an agent name
+or `--as`; do not forward an operator token or copy credentials.
+
+Windows-backed clients also need a process-scoped callback launcher and environment
+forwarding. These are not installed automatically by this source change. Existing
+native Unix identity checks remain in place. The bounded callback tests establish
+argument transport and hub identity; they do not qualify every provider's TUI,
+shell choice, authentication or complete model-driven workflow.
 
 ### macOS
 

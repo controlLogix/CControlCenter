@@ -1,0 +1,9 @@
+{
+  "externalSource": "//wsl.localhost/Ubuntu-26.04/home/ryan/.cache/agentmux-governance/p01-incoming-storage-negative-reviewed",
+  "sha256": {
+    "review.json": "6895d463f063f480a9e1c8d99bfbbe367e0f3887c9f784a6ba60b47817be7585",
+    "storage-result.json": "83e614849a16d8dc5705e7bb518e830c8ef99f7ba3b9ea25948dbf44e8675d97",
+    "negative.log": "30292e6a03325338ecb95eb3db2e22cc190d9a8c2c4e4f9a767cfc0ca79920ba"
+  },
+  "scope": "Reviewed bounded P01 evidence; no phase acceptance"
+}

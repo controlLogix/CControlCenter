@@ -1,0 +1,12 @@
+Coverage: top-level state files (including auth, env, Atlassian, cc.db and SQLite sidecars), run/, claims/, runs/, queue/, inbox/, claude-config/, and configured Codex profiles.
+Excluded: continuously changing pane logs, courier runtime files, and Claude histories/backups/cache stamps. Concurrent operator edits count as residue.
+      test_tickets.py  passed 48, failed 0
+      test_chatter.py  passed 11, failed 0
+      test_courier.py  passed 129, failed 0
+      test_gateway.py  passed 57, failed 0
+      test_auth.py     passed 81, failed 0
+      
+      1 suite(s) failed
+      operator dashboard on 8787 untouched (pid none, home /none)
+CLEAN: 0 covered files are byte/mode-identical; no additions or deletions
+SUITE FAILED: exit 1 (a clean snapshot does not make a failed suite pass)

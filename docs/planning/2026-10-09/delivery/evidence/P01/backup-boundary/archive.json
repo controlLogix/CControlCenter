@@ -1,0 +1,9 @@
+{
+  "externalSource": "//wsl.localhost/Ubuntu-26.04/home/ryan/.cache/agentmux-governance/p01-backup-boundary",
+  "sha256": {
+    "result.json": "398ab003f8174d7c614c1e1e6c7492069a3797a0e813d9a3b5f7af47a5e8f238",
+    "original-negative.log": "7323b01366cfeddf7a4b146fcf14e810bccc43003e89515ea226770cfe0c4fa0",
+    "positive.log": "70a3166689f584a4a68cbcbb797748688a08ad95468392e818dfc6acbe5d5d63"
+  },
+  "scope": "Reviewed bounded P01 evidence; no phase acceptance"
+}

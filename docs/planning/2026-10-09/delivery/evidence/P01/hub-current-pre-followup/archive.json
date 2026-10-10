@@ -1,0 +1,10 @@
+{
+  "externalSource": "\\\\wsl.localhost\\Ubuntu-26.04\\home\\ryan\\.cache\\agentmux-governance\\p01-hub-current",
+  "sha256": {
+    "hub-full-result.json": "d82c3fbefb27e6175070dabbfbee5fb878b55ed373ee544dff910519a4e3ca9f",
+    "original-hub-full-profile.log": "c60fe5f6ab8ec36e899191acc3b15db5d6d0b06ed3c568a1212dbe390a4adceb",
+    "review.json": "a2de939bd1f6446f3f99361e27deb76b208ed009e64651dcb3ca425eba6f2fae",
+    "windows-callback-contract.log": "b767efd2deeba59b36848ce5d9e7ca50c61bfdce202535f7bd170a610bcad764"
+  },
+  "scope": "Bounded local P01 evidence before callback follow-up repairs; no exact final-candidate or phase acceptance"
+}

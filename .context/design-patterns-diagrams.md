@@ -487,3 +487,50 @@ flowchart LR
 ```
 
 The batch fixture loses the final commit reply, restarts the real broker and reconciles both contiguous records after the duplicate window. Unsupported cross-stream, KV, object and tool atomicity claims are rejected by fixture admission. These checks do not qualify production capability registration, external effects or power-loss durability.
+
+
+## P01 incoming creation invariant fixture
+
+This extends the existing PLAN-09/10 storage fixture boundary. It changes no production owner or hub relationship.
+
+```mermaid
+sequenceDiagram
+  participant F as Incoming fixture
+  participant C as Python or TypeScript client
+  participant J as Owned JetStream ledger
+  F->>F: Build blocked task, exact origin and one claim intent
+  Note over F,J: State, attribution or claim construction failure leaves no record
+  F->>C: One complete record with expected revision zero
+  C->>J: Conditional publish
+  J-->>C: Commit complete record
+  Note over F,C: Inject caller exception after commit
+  F->>C: Reconcile same operation and digest
+  C->>J: Read retained owner record
+  J-->>F: Same task, origin and claim intent; no duplicate publish
+```
+
+The [bounded review](../docs/planning/2026-10-09/delivery/evidence/P01/parent-change-review.json) identifies exact sources and limits. This is fixture persistence proof; provider dispatch, production authorization and native final-candidate qualification remain separate.
+
+
+## Existing Windows callback gateway repair
+
+This extends FED-15 at the existing launcher boundary. The P06 plugin adapter remains planned.
+
+```mermaid
+sequenceDiagram
+  participant P as Agent pane in WSL
+  participant W as Windows-owned client
+  participant G as Windows Agentmux gateway
+  participant C as Selected WSL hub CLI
+  participant H as Existing hub
+  P->>W: Scoped pane callback context
+  W->>G: Agent hub command
+  G->>G: Require explicit selection and scoped home
+  Note over G,C: Invalid context or lifecycle verb rejected before state creation
+  G->>C: Exact arguments through selected WSL binary
+  C->>H: Loopback request with private per-agent token
+  H->>H: Authenticate registered agent; enforce ownership
+  H-->>W: Result or denial
+```
+
+The callback review preserves the original findings and records their closure against fresh repaired-source evidence, including a native pane after callbacks on the same tmux server. The diagram describes the repaired gateway contract; no automatic model-provider forwarding or P06 acceptance is claimed.

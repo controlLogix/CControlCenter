@@ -1,0 +1,9 @@
+{
+  "sha256": {
+    "review.json": "835f90db4fbb6b23a2d4656a7b5e4c1170019c4b0e2204a8db52130a9934cd49",
+    "windows-callback-contract.log": "03af899ac8e8d63c89635048732d941822ecfd9e56ac9297959a986e76cf0005",
+    "hub-full-result.json": "c8d7fe6ff121780442b24a0bd2722d504e2f7eac3199036e620a3f298600f6d3",
+    "original-hub-full-profile.log": "c97a3f98b7c573e1e3387b06bf21a8bfbd6c294d6d638f59591c1785f73fef51"
+  },
+  "scope": "Wrong prepared SDK environment;20 live hub tests skipped. Rejected qualification; rerun uses correct prepared hub venv."
+}

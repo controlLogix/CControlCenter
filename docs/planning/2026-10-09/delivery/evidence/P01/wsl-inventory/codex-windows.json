@@ -1,0 +1,11 @@
+{
+  "surface": "windows",
+  "command": [
+    "C:/nvm4w/nodejs/node.exe",
+    "C:/nvm4w/nodejs/node_modules/@openai/codex/bin/codex.js",
+    "--version"
+  ],
+  "exitCode": 0,
+  "stdout": "codex-cli 0.162.1\n",
+  "stderr": ""
+}

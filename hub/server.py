@@ -34,6 +34,7 @@ from hub.bridge import Bridge  # noqa: E402
 from hub.fed.runtime import Federation  # noqa: E402
 from hub.receipts import ReceiptScanner  # noqa: E402
 from hub.transport import TmuxTransport  # noqa: E402
+from agentmux_windows import command as windows_command
 
 ROOT = os.environ.get("AGENTMUX_HOME") or os.path.expanduser("~/.agentmux")
 HUBDIR = os.path.join(ROOT, "hub")
@@ -626,6 +627,22 @@ class Hub:
 
     # -- spawn --------------------------------------------------------------------------
     async def spawn(self, a):
+        # Opt-in for Windows providers; native process-ancestry identity is unchanged.
+        selected = os.environ.get("AGENTMUX_WINDOWS_CALLBACKS")
+        if selected is not None and selected != "1":
+            raise HubError("AGENTMUX_WINDOWS_CALLBACKS must be 1 when set")
+        windows_callbacks = selected == "1"
+        if windows_callbacks:
+            try:
+                port = int(self.cfg.get("tcp_port", 0) or 0)
+            except (TypeError, ValueError):
+                raise HubError("Windows callbacks need an integer hub tcp_port")
+            if not 1 <= port <= 65535 or not os.environ.get("AGENTMUX_WSL_DISTRO"):
+                raise HubError("Windows callbacks need a selected WSL distro and hub tcp_port")
+            try:
+                windows_command([], {"AGENTMUX_WSL_DISTRO": os.environ["AGENTMUX_WSL_DISTRO"]})
+            except ValueError as exc:
+                raise HubError(str(exc))
         repo = names.check_part(a["repo"], "repo")
         role = names.check_part(a["role"], "role")
         agent = names.check_part(a["agent"], "agent", a.get("accept_normalized", False))
@@ -653,6 +670,24 @@ class Hub:
             cmd += ["--model", a["model"]]
         env = {**os.environ, "AGENTMUX_IDLE_MINUTES": "0"}
         env.pop("AGENTMUX_AGENT", None)
+        env.pop("AGENTMUX_SPAWN_WINDOWS_CALLBACK", None)
+        if not windows_callbacks and "AGENTMUX_WINDOWS_CALLBACK" in env:
+            # A hub launched from a worker must not pass that worker's identity
+            # to a new native pane. Ordinary explicit native settings stay intact.
+            for key in ("AGENTMUX_WINDOWS_CALLBACK", "AGENTMUX_HUB_TOKEN", "AGENTMUX_HUB_TOKEN_FILE",
+                        "AGENTMUX_HUB_URL", "AGENTMUX_WSL_BIN", "AGENTMUX_WSL_CWD", "AGENTMUX_WSL_DISTRO"):
+                env.pop(key, None)
+        if windows_callbacks:
+            # The token exists before the pane starts; no pane-registration race.
+            # Only its path goes into the pane environment, never the secret.
+            env.pop("AGENTMUX_HUB_TOKEN", None)
+            env.pop("AGENTMUX_WINDOWS_CALLBACK", None)
+            env.update({"AGENTMUX_SPAWN_WINDOWS_CALLBACK": "1",
+                        "AGENTMUX_HOME": ROOT,
+                        "AGENTMUX_HUB_URL": f"tcp://127.0.0.1:{port}",
+                        "AGENTMUX_HUB_TOKEN_FILE": os.path.join(adir, "run", "token"),
+                        "AGENTMUX_WSL_BIN": os.path.abspath(cmd[0]),
+                        "AGENTMUX_WSL_CWD": os.path.abspath(cwd)})
         r = await asyncio.get_running_loop().run_in_executor(
             self.io, lambda: subprocess.run(cmd, capture_output=True, text=True, env=env, stdin=subprocess.DEVNULL,
                                             timeout=120))

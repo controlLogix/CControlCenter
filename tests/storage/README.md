@@ -10,6 +10,8 @@ The Python and TypeScript clients independently publish conditional complete rec
 
 The real conditional-write winner also drives a controllable fake provider. A fixture dispatch coordinator reads the retained owner record before each request, denies the loser, admits the winner and suppresses its duplicate. Actual provider callbacks and histories prove one admission and one completion (FAIL-06). Dispatch deduplication here is in memory; durable external-effect fencing and recovery remain production responsibilities.
 
+The incoming-creation fixture carries AMX-BASE-002 into the NATS boundary. For both language clients, injected failures after constructing state, attribution or claim intent leave no owner record. A caller crash after the single conditional commit recovers one blocked task, its origin identity and one claim intent; duplicate retries do not append another record. This qualifies fixture construction and persistence, not production authorization or provider dispatch.
+
 The lost-ack test publishes without a reply inbox. An independent read confirms the resulting commit before the broker is restarted. This establishes recovery when the publisher has no acknowledgment; it is not a random packet-loss simulation or a power-failure test.
 
 Atomic batches are exercised through Python raw headers and the TypeScript native API. Opening a batch returns an empty staging reply, not proof of commitment. Only the final acknowledgment confirms the batch count and sequence. The tests require no partial records before commit, after sequence gaps, or after restart of an uncommitted batch. A stale condition, including an ordinary write inserted between batch opening and commit, must reject the entire batch. Cross-stream batch attempts must fail.

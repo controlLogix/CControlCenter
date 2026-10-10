@@ -1,0 +1,24 @@
+test_context_only_and_unrelated_wslenv_preserved (hub.tests.test_windows_callbacks.CallbackSelection.test_context_only_and_unrelated_wslenv_preserved) ... ok
+test_explicit_selection (hub.tests.test_windows_callbacks.CallbackSelection.test_explicit_selection) ... ok
+test_lifecycle_rejected_before_local_action (hub.tests.test_windows_callbacks.CallbackSelection.test_lifecycle_rejected_before_local_action) ... ok
+test_missing_selection_never_launches (hub.tests.test_windows_callbacks.CallbackSelection.test_missing_selection_never_launches) ... agentmux: Windows agent callbacks need an explicit WSL distribution
+agentmux: AGENTMUX_WSL_DISTRO must name a WSL distribution
+agentmux: AGENTMUX_WSL_DISTRO must name a WSL distribution
+agentmux: Windows agent callbacks need an explicit absolute Linux binary path
+agentmux: AGENTMUX_WSL_BIN must be an absolute Linux path
+agentmux: AGENTMUX_WSL_BIN must be an absolute Linux path
+agentmux: Windows agent callbacks need an explicit absolute AGENTMUX_HOME
+agentmux: Windows agent callbacks need an explicit absolute AGENTMUX_HOME
+agentmux: Windows agent callbacks need an explicit absolute AGENTMUX_HOME
+ok
+test_nick_defaults_and_exact_received_arguments (hub.tests.test_windows_callbacks.CallbackSelection.test_nick_defaults_and_exact_received_arguments) ... ok
+test_no_fallback_or_inline_token (hub.tests.test_windows_callbacks.CallbackSelection.test_no_fallback_or_inline_token) ... ok
+test_shell_callback_rejection_creates_no_default_or_scoped_state (hub.tests.test_windows_callbacks.CallbackSelection.test_shell_callback_rejection_creates_no_default_or_scoped_state) ... ok
+test_bad_opt_in_has_no_registration_side_effect (hub.tests.test_windows_callbacks.SpawnContext.test_bad_opt_in_has_no_registration_side_effect) ... ok
+test_native_spawn_drops_stale_worker_but_preserves_explicit_native_context (hub.tests.test_windows_callbacks.SpawnContext.test_native_spawn_drops_stale_worker_but_preserves_explicit_native_context) ... ok
+test_two_spawns_get_distinct_token_paths_without_inline_tokens (hub.tests.test_windows_callbacks.SpawnContext.test_two_spawns_get_distinct_token_paths_without_inline_tokens) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.579s
+
+OK

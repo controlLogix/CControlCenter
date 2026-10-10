@@ -1,0 +1,7 @@
+{
+  "externalSource": "\\\\wsl.localhost\\Ubuntu-26.04\\home\\ryan\\.cache\\agentmux-governance\\p01-conformance-reviewed",
+  "sha256": {
+    "contracts.json": "b36396f12e2425af4004b780db2c9dc7e4379a8ba3bd563ae5aeb3344e6a61d0"
+  },
+  "scope": "Bounded local P01 evidence before callback follow-up repairs; no exact final-candidate or phase acceptance"
+}

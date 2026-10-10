@@ -312,6 +312,14 @@
       ]
     },
     {
+      "path": "agentmux_windows.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-05",
+        "HUB-04"
+      ]
+    },
+    {
       "path": "analysis/comms-2026-09/.gitignore",
       "baselineBlob": "89f9ac04aac6c8ee66e158853e7d0439b3ec782d",
       "componentIds": [
@@ -2314,6 +2322,13 @@
       ]
     },
     {
+      "path": "hub/tests/test_windows_callbacks.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
       "path": "hub/transport.py",
       "baselineBlob": "d456e5e25886840c410f3fe54ca994201bc501bb",
       "componentIds": [
@@ -2861,6 +2876,34 @@
       ]
     },
     {
+      "path": "tests/platform/README.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/platform/fixtures/wsl-inventory.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/platform/inventory.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/platform/test_inventory.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HUB-26"
+      ]
+    },
+    {
       "path": "tests/storage/README.md",
       "baselineBlob": null,
       "componentIds": [
@@ -3034,6 +3077,20 @@
         "tests/contracts/test_fake_execution.py"
       ],
       "note": "Reusable in-memory execution fixtures extend qualification coverage without changing baseline identities, component ownership or behavior checks. They do not establish production authority, persistence or phase acceptance."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "P01 reusable platform inventory and existing Windows callback regression boundary",
+      "addedFiles": [
+        "agentmux_windows.py",
+        "hub/tests/test_windows_callbacks.py",
+        "tests/platform/inventory.py",
+        "tests/platform/README.md",
+        "tests/platform/test_inventory.py",
+        "tests/platform/fixtures/wsl-inventory.json"
+      ],
+      "note": "All baseline files, component identities and existing behavior criteria retained; no P06 plugin support or phase acceptance."
     }
   ]
 }

@@ -1,0 +1,241 @@
+{
+  "schemaVersion": "1.0.0",
+  "candidateCommit": "09fe9c749ff674c0dd5ca4fa7c53abfbe23cadcd",
+  "sourceIdentity": [
+    {
+      "folder": "failed-candidate",
+      "candidateCommit": "09fe9c749ff674c0dd5ca4fa7c53abfbe23cadcd",
+      "comparedSourceFiles": 403,
+      "allSourceHashesMatchCommittedBlobs": true,
+      "boundLogHashesMatch": true,
+      "boundHarnessHashMatches": true,
+      "exitCode": 1,
+      "actualSuiteCount": 62,
+      "remainingOwnedProcesses": []
+    },
+    {
+      "folder": "passed-candidate",
+      "candidateCommit": "09fe9c749ff674c0dd5ca4fa7c53abfbe23cadcd",
+      "comparedSourceFiles": 403,
+      "allSourceHashesMatchCommittedBlobs": true,
+      "boundLogHashesMatch": true,
+      "boundHarnessHashMatches": true,
+      "exitCode": 0,
+      "actualSuiteCount": 62,
+      "remainingOwnedProcesses": []
+    }
+  ],
+  "copiedFiles": [
+    {
+      "path": "failed-candidate/agentmux-gate-fail-2818-test_hub_panel.py.out",
+      "sourcePath": "/home/ryan/.cache/agentmux-governance/p01-dashboard-windows-mc7hup16/evidence/agentmux-gate-fail-2818-test_hub_panel.py.out",
+      "sha256": "b917326c6d7c8e2dc1af42826ee7640c0c6d7ee2196edacfec09524ebc364ec7",
+      "bytes": 870
+    },
+    {
+      "path": "failed-candidate/dashboard-full-runner.log",
+      "sourcePath": "/home/ryan/.cache/agentmux-governance/p01-dashboard-windows-mc7hup16/evidence/dashboard-full-runner.log",
+      "sha256": "5b13272a9f2184da1bafb8c37117a70de6c692e6ae3c49100ce8c157ea606e60",
+      "bytes": 3349
+    },
+    {
+      "path": "failed-candidate/dashboard-full-windows-result.json",
+      "sourcePath": "/home/ryan/.cache/agentmux-governance/p01-dashboard-windows-mc7hup16/evidence/dashboard-full-windows-result.json",
+      "sha256": "68914fa6e0183ddd8d71a581f87e9d8b6a08e9fc19cda2dde982252f6866675d",
+      "bytes": 47383
+    },
+    {
+      "path": "failed-candidate/dashboard-full-windows.py",
+      "sourcePath": "/home/ryan/.cache/agentmux-governance/p01-dashboard-windows-mc7hup16/evidence/dashboard-full-windows.py",
+      "sha256": "4a3fcc880b437f458499eaf076c9c4ca425d5bad537281d0c256e53e77067a73",
+      "bytes": 4667
+    },
+    {
+      "path": "failed-candidate/dashboard-full-wrapper.log",
+      "sourcePath": "/home/ryan/.cache/agentmux-governance/p01-dashboard-windows-mc7hup16/evidence/dashboard-full-wrapper.log",
+      "sha256": "863ad368cea3ca21f2a8b6c02833f190588b2ebf9bf285dfa633aaf513d85dad",
+      "bytes": 792
+    },
+    {
+      "path": "passed-candidate/dashboard-full-runner.log",
+      "sourcePath": "/home/ryan/.cache/agentmux-governance/p01-dashboard-windows-v4d41lzm/evidence/dashboard-full-runner.log",
+      "sha256": "553b716dc54885006891e8c7fb1904f31c5064255f1d1ce62d982258c4d30b96",
+      "bytes": 2588
+    },
+    {
+      "path": "passed-candidate/dashboard-full-windows-result.json",
+      "sourcePath": "/home/ryan/.cache/agentmux-governance/p01-dashboard-windows-v4d41lzm/evidence/dashboard-full-windows-result.json",
+      "sha256": "ce83bdf77c062840fdc650a5e30a48abfcb06484025e555ee32b85629e32c1e9",
+      "bytes": 47527
+    },
+    {
+      "path": "passed-candidate/dashboard-full-windows.py",
+      "sourcePath": "/home/ryan/.cache/agentmux-governance/p01-dashboard-windows-v4d41lzm/evidence/dashboard-full-windows.py",
+      "sha256": "4cc1055f79417a7bc0ea108632653596688d84e060d9f3497e36e861734691eb",
+      "bytes": 5042
+    },
+    {
+      "path": "passed-candidate/dashboard-full-wrapper.log",
+      "sourcePath": "/home/ryan/.cache/agentmux-governance/p01-dashboard-windows-v4d41lzm/evidence/dashboard-full-wrapper.log",
+      "sha256": "cc50c8e1d4bf68f94a8bdb4d191552ba559394157643a5de7b907b9c528e6d5d",
+      "bytes": 791
+    },
+    {
+      "path": "passed-candidate/focused-hub-panel.log",
+      "sourcePath": "/home/ryan/.cache/agentmux-governance/p01-dashboard-windows-v4d41lzm/evidence/focused-hub-panel.log",
+      "sha256": "53a702f4e4be2821ae23f8b5a23e3e1642c3392b7c8b7325cbb1117f363feab9",
+      "bytes": 107
+    },
+    {
+      "path": "passed-candidate/windows-forwarder-isolation/dashboard-windows-isolation.py",
+      "sourcePath": "/home/ryan/.cache/agentmux-governance/p01-dashboard-windows-v4d41lzm/evidence/windows-forwarder-isolation/dashboard-windows-isolation.py",
+      "sha256": "003ae63d068a6d1af1c5a5d28b7016a297d785b76ae5261fb3fac0503d777e47",
+      "bytes": 3039
+    },
+    {
+      "path": "passed-candidate/windows-forwarder-isolation/dashboard-windows-profile.py",
+      "sourcePath": "/home/ryan/.cache/agentmux-governance/p01-dashboard-windows-v4d41lzm/evidence/windows-forwarder-isolation/dashboard-windows-profile.py",
+      "sha256": "d2223805660ee0375870932a532d2739fc5a0733c020ca9344ab4969ef8bf9fe",
+      "bytes": 2411
+    },
+    {
+      "path": "passed-candidate/windows-forwarder-isolation/isolation-result.json",
+      "sourcePath": "/home/ryan/.cache/agentmux-governance/p01-dashboard-windows-v4d41lzm/evidence/windows-forwarder-isolation/isolation-result.json",
+      "sha256": "2b88ac490feb104c90ffe660a24fac02394f95b0845f9950be34326565f27839",
+      "bytes": 1226
+    },
+    {
+      "path": "passed-candidate/windows-forwarder-isolation/private-config-rejection.log",
+      "sourcePath": "/home/ryan/.cache/agentmux-governance/p01-dashboard-windows-v4d41lzm/evidence/windows-forwarder-isolation/private-config-rejection.log",
+      "sha256": "fb7234c73f1442189000f594dbeeca7681fbddb6ca3d9632beed851ed5ad4314",
+      "bytes": 411
+    },
+    {
+      "path": "passed-candidate/windows-forwarder-isolation/private-profile-missing-key.log",
+      "sourcePath": "/home/ryan/.cache/agentmux-governance/p01-dashboard-windows-v4d41lzm/evidence/windows-forwarder-isolation/private-profile-missing-key.log",
+      "sha256": "0601298d5f2e329b8b333896e89cae2b963e9ccdbb0475c4a0467d23dfbdd8ca",
+      "bytes": 1521
+    },
+    {
+      "path": "passed-candidate/windows-forwarder-isolation/private-profile-rejection.log",
+      "sourcePath": "/home/ryan/.cache/agentmux-governance/p01-dashboard-windows-v4d41lzm/evidence/windows-forwarder-isolation/private-profile-rejection.log",
+      "sha256": "5b5d5bac6caabbf8bb00a0352e4391c423da529293907cfe70d47584f1a4e30e",
+      "bytes": 403
+    }
+  ],
+  "privacyReview": {
+    "scope": "Synthetic configuration probes and isolated dashboard fixture logs; no default credential files or private transcripts read by integration harness.",
+    "providerKeyPresenceInWindowsProbe": false,
+    "privateKeyOrCommonTokenScanFindings": [],
+    "reviewedNoRealCredentialValues": true
+  },
+  "limits": [
+    "External plugin20tests remain skipped.",
+    "Python3.12 differential remains separate.",
+    "WindowsUNC inference/state runtime not qualified.",
+    "No phase acceptance."
+  ],
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sha256": "2a83d95d71d4c90c2d6521c94976dd722a35d41a52e6d21d8ef568bebae89677",
+      "bytes": 95
+    },
+    {
+      "path": "README.md",
+      "sha256": "09e0ca9b6ef506c71b6130d1e1a35cc41c8e2ee9a4773170c27e8f9530bf84a9",
+      "bytes": 3394
+    },
+    {
+      "path": "failed-candidate/agentmux-gate-fail-2818-test_hub_panel.py.out",
+      "sha256": "b917326c6d7c8e2dc1af42826ee7640c0c6d7ee2196edacfec09524ebc364ec7",
+      "bytes": 870
+    },
+    {
+      "path": "failed-candidate/dashboard-full-runner.log",
+      "sha256": "5b13272a9f2184da1bafb8c37117a70de6c692e6ae3c49100ce8c157ea606e60",
+      "bytes": 3349
+    },
+    {
+      "path": "failed-candidate/dashboard-full-windows-result.json",
+      "sha256": "68914fa6e0183ddd8d71a581f87e9d8b6a08e9fc19cda2dde982252f6866675d",
+      "bytes": 47383
+    },
+    {
+      "path": "failed-candidate/dashboard-full-windows.py",
+      "sha256": "4a3fcc880b437f458499eaf076c9c4ca425d5bad537281d0c256e53e77067a73",
+      "bytes": 4667
+    },
+    {
+      "path": "failed-candidate/dashboard-full-wrapper.log",
+      "sha256": "863ad368cea3ca21f2a8b6c02833f190588b2ebf9bf285dfa633aaf513d85dad",
+      "bytes": 792
+    },
+    {
+      "path": "passed-candidate/dashboard-full-runner.log",
+      "sha256": "553b716dc54885006891e8c7fb1904f31c5064255f1d1ce62d982258c4d30b96",
+      "bytes": 2588
+    },
+    {
+      "path": "passed-candidate/dashboard-full-windows-result.json",
+      "sha256": "ce83bdf77c062840fdc650a5e30a48abfcb06484025e555ee32b85629e32c1e9",
+      "bytes": 47527
+    },
+    {
+      "path": "passed-candidate/dashboard-full-windows.py",
+      "sha256": "4cc1055f79417a7bc0ea108632653596688d84e060d9f3497e36e861734691eb",
+      "bytes": 5042
+    },
+    {
+      "path": "passed-candidate/dashboard-full-wrapper.log",
+      "sha256": "cc50c8e1d4bf68f94a8bdb4d191552ba559394157643a5de7b907b9c528e6d5d",
+      "bytes": 791
+    },
+    {
+      "path": "passed-candidate/focused-hub-panel.log",
+      "sha256": "53a702f4e4be2821ae23f8b5a23e3e1642c3392b7c8b7325cbb1117f363feab9",
+      "bytes": 107
+    },
+    {
+      "path": "passed-candidate/windows-forwarder-isolation/dashboard-windows-isolation.py",
+      "sha256": "003ae63d068a6d1af1c5a5d28b7016a297d785b76ae5261fb3fac0503d777e47",
+      "bytes": 3039
+    },
+    {
+      "path": "passed-candidate/windows-forwarder-isolation/dashboard-windows-profile.py",
+      "sha256": "d2223805660ee0375870932a532d2739fc5a0733c020ca9344ab4969ef8bf9fe",
+      "bytes": 2411
+    },
+    {
+      "path": "passed-candidate/windows-forwarder-isolation/isolation-result.json",
+      "sha256": "2b88ac490feb104c90ffe660a24fac02394f95b0845f9950be34326565f27839",
+      "bytes": 1226
+    },
+    {
+      "path": "passed-candidate/windows-forwarder-isolation/private-config-rejection.log",
+      "sha256": "fb7234c73f1442189000f594dbeeca7681fbddb6ca3d9632beed851ed5ad4314",
+      "bytes": 411
+    },
+    {
+      "path": "passed-candidate/windows-forwarder-isolation/private-profile-missing-key.log",
+      "sha256": "0601298d5f2e329b8b333896e89cae2b963e9ccdbb0475c4a0467d23dfbdd8ca",
+      "bytes": 1521
+    },
+    {
+      "path": "passed-candidate/windows-forwarder-isolation/private-profile-rejection.log",
+      "sha256": "5b5d5bac6caabbf8bb00a0352e4391c423da529293907cfe70d47584f1a4e30e",
+      "bytes": 403
+    }
+  ],
+  "history": [
+    {
+      "actor": "Codex",
+      "reason": "Preserve raw evidence bytes and exempt captured logs/CRLF script terminators from source whitespace checks. All original execution evidence unchanged.",
+      "previousAttributes": {
+        "path": ".gitattributes",
+        "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+        "bytes": 8
+      }
+    }
+  ]
+}

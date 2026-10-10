@@ -1,0 +1,49 @@
+{
+  "files": [
+    {
+      "path": "real-result.json",
+      "source": "/home/ryan/.cache/agentmux-governance/callback-real-c45fry44/result.json",
+      "sha256": "1eb0f72161d9496e5047bca3efce931585307a843a7f64c1bdf37cdc48d9f06b"
+    },
+    {
+      "path": "real-hub.log",
+      "source": "/home/ryan/.cache/agentmux-governance/callback-real-c45fry44/hub.log",
+      "sha256": "36dae0e0221816752a7f7f945c865d2163909dc0770416a60d1e43e590d8452d"
+    },
+    {
+      "path": "real-probe.py",
+      "source": "/home/ryan/.cache/agentmux-governance/windows-callback-proposal/callback-panes.py",
+      "sha256": "26dec6324e2a71e24b68843aaf30f11d04a0d054deb75d01b34877b19dc9a6e5"
+    },
+    {
+      "path": "focused-result.json",
+      "source": "/home/ryan/.cache/agentmux-tests/b31831888bbd9588/20261009T200840-fdc28c40/result.json",
+      "sha256": "161700722e07d07a54b76b686b99f9834e7c869ff69029873f06cee839b1d3d5"
+    },
+    {
+      "path": "focused-tests.log",
+      "source": "/home/ryan/.cache/agentmux-tests/b31831888bbd9588/20261009T200840-fdc28c40/tests.log",
+      "sha256": "a2eb0ed7485feef13404a25fe6a422204a96be73878cfc4913a351c89897c56e"
+    },
+    {
+      "path": "cmd-probe.py",
+      "source": "/mnt/c/Users/RyanHelms/AppData/Local/Temp/callback-cmd.py",
+      "sha256": "9b0b7385b63332466d27dd95e2ba7151d130671045d23d2e6c8bba4910d7bdf9"
+    },
+    {
+      "path": "cmd-result.json",
+      "source": "/mnt/c/Users/RyanHelms/AppData/Local/Temp/callback-cmd-result.json",
+      "sha256": "f0ebd821cf69ac21053862cdb8b545ca46825347e148202978edd352da638883"
+    }
+  ],
+  "cleanup": "Private hub/tmux/home/token cleanup in probe; path-verified remaining idle watchdog and child terminated separately, subsequent pgrep had no matches.",
+  "sourceHashes": {
+    "agentmux.cmd": "c870282fc53288bd1576a8f1331474fa98ed99ec76940b4105465fb060bae777",
+    "agentmux_windows.py": "d8d579d0a63306d71337024798db188eea309f19e2debd8694cda161ca2eb17b",
+    "agentmux.sh": "8fd501e6733798b7abdb3eb9e7f10dbe691e094aed9af5f27e5c9f3888bb5551",
+    "hub/cli.py": "276e8311b0cbd683e3c123ff327cfd4664fa8ef55882ef94ad89e50a6ecc0efb",
+    "hub/server.py": "8f4de71e0885b395d058b7dd88cfd740fdffd8a986f6a58ae8cc5b115dca2153",
+    "hub/tests/test_windows_callbacks.py": "1b17fe417d1829e4a3cb555ac394329ab00fbe92cb720f98d71e536a9b15b2b0",
+    "README.md": "ebbf988413d573c92a09df0631b07029b9c24205333c2ad94412d2e4171ee98f"
+  }
+}

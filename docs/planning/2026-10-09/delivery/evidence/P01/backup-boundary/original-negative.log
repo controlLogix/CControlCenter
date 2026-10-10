@@ -1,0 +1,15 @@
+test_second_boundary_uses_one_timestamp_for_backup_rotation (hub.tests.test_governance.BackupIdentity.test_second_boundary_uses_one_timestamp_for_backup_rotation) ... FAIL
+
+======================================================================
+FAIL: test_second_boundary_uses_one_timestamp_for_backup_rotation (hub.tests.test_governance.BackupIdentity.test_second_boundary_uses_one_timestamp_for_backup_rotation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/Users/RyanHelms/GitHub/agentmux/hub/tests/test_governance.py", line 81, in test_second_boundary_uses_one_timestamp_for_backup_rotation
+    self.assertFalse(Path(first).exists())
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 1 test in 0.023s
+
+FAILED (failures=1)

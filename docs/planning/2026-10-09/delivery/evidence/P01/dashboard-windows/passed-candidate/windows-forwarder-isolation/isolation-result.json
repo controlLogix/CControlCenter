@@ -1,0 +1,20 @@
+{
+  "windowsVersion": "codex-cli 0.162.1",
+  "windowsEnvironment": {
+    "CODEX_HOME": "\\\\wsl.localhost\\Ubuntu-26.04\\home\\ryan\\.cache\\agentmux-governance\\p01-dashboard-windows-isolation-w8n2bhwv\\codex",
+    "providerEnvPresent": false
+  },
+  "wrapperSha256": "8c702954575d96e9169cce0c7e1399018e22496aa1b3e4e41c607e23f1734600",
+  "clientsSha256": "28f37c3b81b5450b8458b1b77e5ea6af266f114e90653609a2b07121911a8cfa",
+  "configSentinelRejectedFromPrivatePath": true,
+  "profileSentinelRejectedFromPrivatePath": true,
+  "validProfileRuntimeResult": "Windows state initialization failed over Linux UNC; not a missing-key validation pass.",
+  "inferencePerformed": false,
+  "defaultCredentialFilesOpenedByHarness": false,
+  "scope": "Proves explicit private config and profile path routing through Windows-backed client. No OS-wide file-access tracing; Windowsruntime onUNC not qualified.",
+  "logs": {
+    "private-profile-rejection.log": "5b5d5bac6caabbf8bb00a0352e4391c423da529293907cfe70d47584f1a4e30e",
+    "private-profile-missing-key.log": "0601298d5f2e329b8b333896e89cae2b963e9ccdbb0475c4a0467d23dfbdd8ca",
+    "private-config-rejection.log": "fb7234c73f1442189000f594dbeeca7681fbddb6ca3d9632beed851ed5ad4314"
+  }
+}

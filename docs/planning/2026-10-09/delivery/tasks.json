@@ -6,9 +6,9 @@
     "phases.json": "882de6f13f309b878ebd8898ba73ab05fe94dc68ec517b311054f2a99f3102f7",
     "verification-matrix.json": "516813fd034d6c73b4b0d6f9eaaf4b1b54798828e137336324605d0b956085bc",
     "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
-    "component-inventory.json": "58af2d827495c5476a73b3b0a0835919958639e992526f887bcb5af4773fd851",
-    "component-audit-hub.json": "b2eb15d467fc12d4099a0a9534184b1be308fa11c55adcd68d6f2533c21a3cca",
-    "component-audit-harness.json": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08",
+    "component-inventory.json": "77a8ea1282e521151354e504f56a944ce7835c4de1cc1dcbd94b3fca17e74ad7",
+    "component-audit-hub.json": "689690b169d1dcd9301cbeaed7764846b39b5676f04a2ef734bfc7e3048ba69d",
+    "component-audit-harness.json": "a21684b80ad201e8a9e789dc838df91d70675aa690e8a73a226edad34ee13ae9",
     "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
     "component-audit-repository.json": "52a2e7648da7727c260b28764f6fc5817b6776d4e24198bec7a4b8436bf442c2"
   },
@@ -1840,7 +1840,10 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md",
         "docs/planning/2026-10-09/delivery/evidence/P01/model-leaf-checkpoint.md",
         "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md",
-        "docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md"
+        "docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/platform-contract/result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/wsl-inventory/inventory.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/wsl-inventory/validation.json"
       ],
       "commits": [
         "7ef00dcb299c100d6dda45bfffa2b4e127345a50",
@@ -1906,6 +1909,13 @@
             ]
           },
           "statusUnchanged": "in_progress"
+        },
+        {
+          "at": "2026-10-10T00:03:13.151573+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "in_progress",
+          "note": "Added reusable23-test environment inventory validator and actual Windows/WSL installed-client observations. Seven stable forwarder symlink pairs verified; six version pairs match; TrueForge version unavailable and Pi missing within recorded search boundary. Native final-candidate and P06 authenticated/update/callback/concurrency qualification remain open."
         }
       ],
       "phaseCriteria": [
@@ -2110,7 +2120,16 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/native/37e0d8c/review.json",
         "docs/planning/2026-10-09/delivery/evidence/P01/preservation/acceptance-map.json",
         "docs/planning/2026-10-09/delivery/evidence/P01/native/7a7d47a/review.json",
-        "docs/planning/2026-10-09/delivery/evidence/P01/windows-clients/README.md"
+        "docs/planning/2026-10-09/delivery/evidence/P01/windows-clients/README.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/dashboard-windows/archive-manifest.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/hub-current-pre-followup/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/conformance-reviewed/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/09fe9c7/review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/windows-callback-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/windows-callback-final/README.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/hub-callback-incomplete-setup/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/hub-callback-final-failed/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/server-api-diagnostics/archive.json"
       ],
       "commits": [
         "f19c6473d56335b8eeb28704b02895b9d9ab7fcc",
@@ -2190,6 +2209,34 @@
           "from": "in_progress",
           "to": "in_progress",
           "note": "Native candidate 7a7d47a passed all 20 CI checks on macOS/Linux, including 128 original hub tests without skips. WSL-CLIENT-01 setup forwards Windows-owned clients and Windows Codex was updated to 0.162.1; full provider orchestration and scoped Windows-to-WSL hub callbacks remain unqualified. Further dashboard fixture timing repairs have focused positive/negative evidence; no full pass is claimed."
+        },
+        {
+          "at": "2026-10-10T00:03:13.151821+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "in_progress",
+          "note": "Original62-suite dashboard run passes on09fe9c7 through Windows-backed launcher with private configuration. Retains20missing-external-plugin skips and UNC inference limits. Full129 hub tests and45 conformance tests pass on bounded pre-followup source; source changes require final native candidate verification."
+        },
+        {
+          "at": "2026-10-10T00:11:57.633864+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "in_progress",
+          "note": "Independent callback review resolved three findings;19focused tests and17real callback checks passed, including same-server callback-to-native isolation. Explicit selected WSL instance/home is required before side effects. Live generic forwarder remains unchanged; no provider inference or P06 acceptance. Final broad/native candidate verification remains open."
+        },
+        {
+          "at": "2026-10-10T00:17:41.257086+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "in_progress",
+          "note": "Final broad hub rerun rejected: initial wrong prepared SDK environment skipped20live tests; correct hub environment ran129 with no skips but9ServerAPI socket/startup errors. Both raw runs retained, sources unchanged. Narrow startup diagnosis open; no phase acceptance or source defect disproval claimed."
+        },
+        {
+          "at": "2026-10-10T00:19:37.945423+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "in_progress",
+          "note": "Unchanged original9ServerAPI tests passed in1.474s with captured server output and exact failed-run source hashes. Normal startup/clean shutdown; no source defect reproduced. Earlier broad startup cause unproven because stderr was discarded. Retain failure; broad/native candidate qualification remains required."
         }
       ],
       "phaseCriteria": [
@@ -2522,7 +2569,11 @@
       "evidence": [
         "docs/planning/2026-10-09/delivery/evidence/P01/payload-storage-checkpoint.md",
         "docs/planning/2026-10-09/delivery/evidence/P01/recovery-ci-checkpoint.md",
-        "docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md"
+        "docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md",
+        "docs/planning/2026-10-09/delivery/evidence/P01/parent-change-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/incoming-storage/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/incoming-storage-negative/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/backup-boundary/archive.json"
       ],
       "commits": [
         "7ef00dcb299c100d6dda45bfffa2b4e127345a50",
@@ -2547,6 +2598,13 @@
           "from": "planned",
           "to": "in_progress",
           "note": "Begin real NATS persistence fixtures with independently implemented clients; preserve single-owner records and explicit transaction limits."
+        },
+        {
+          "at": "2026-10-10T00:03:13.151928+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "in_progress",
+          "note": "Reviewed complete incoming state/origin/claim fixture:20positive storage cases and partial-publication negative control. Independent backup review found and repaired second-boundary rotation defect;7focused positives and old-code negative control. Production scope remains separate."
         }
       ],
       "phaseCriteria": [
@@ -33881,6 +33939,21 @@
           "reviewer": "Codex"
         }
       ]
+    },
+    {
+      "at": "2026-10-09T23:55:18.688729+00:00",
+      "actor": "Codex",
+      "reason": "Reviewed additive P01 platform/callback fixture file ownership; existing criteria and states unchanged",
+      "previousSourceHashes": {
+        "phases.json": "882de6f13f309b878ebd8898ba73ab05fe94dc68ec517b311054f2a99f3102f7",
+        "verification-matrix.json": "516813fd034d6c73b4b0d6f9eaaf4b1b54798828e137336324605d0b956085bc",
+        "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
+        "component-inventory.json": "58af2d827495c5476a73b3b0a0835919958639e992526f887bcb5af4773fd851",
+        "component-audit-hub.json": "b2eb15d467fc12d4099a0a9534184b1be308fa11c55adcd68d6f2533c21a3cca",
+        "component-audit-harness.json": "9f063dcd387228d77d10c1327d190c95c588d066fc92dd7344eacf04ac654f08",
+        "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
+        "component-audit-repository.json": "52a2e7648da7727c260b28764f6fc5817b6776d4e24198bec7a4b8436bf442c2"
+      }
     }
   ],
   "deliveryGovernance": {

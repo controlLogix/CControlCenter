@@ -1,0 +1,16 @@
+{
+  "surface": "wsl",
+  "command": [
+    "wsl.exe",
+    "-d",
+    "Ubuntu-26.04",
+    "--user",
+    "ryan",
+    "--exec",
+    "/usr/local/bin/goose",
+    "--version"
+  ],
+  "exitCode": 0,
+  "stdout": " 1.46.0\n",
+  "stderr": ""
+}

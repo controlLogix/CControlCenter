@@ -64,6 +64,26 @@ class BackupIdentity(unittest.TestCase):
                 self.assertEqual(restored.execute("PRAGMA integrity_check").fetchone()[0], "ok")
                 self.assertEqual(restored.execute("SELECT title FROM repos").fetchone()[0], f"revision {i}")
 
+    def test_second_boundary_uses_one_timestamp_for_backup_rotation(self):
+        # A previous gmtime() sample followed by the next second's milliseconds
+        # can sort the newest backup before the old one and prune it immediately.
+        real_gmtime = __import__('time').gmtime
+        before = 1_700_000_000.999
+        after = 1_700_000_001.001
+        def clock_gmtime(value=None):
+            return real_gmtime(before if value is None else value)
+        with patch("hub.store.time.gmtime", side_effect=clock_gmtime):
+            with patch("hub.store.time.time", return_value=before):
+                first = self.store.backup_to(self.dest, keep=1)
+            self.store.repo_add("fixture", title="newest")
+            with patch("hub.store.time.time", return_value=after):
+                newest = self.store.backup_to(self.dest, keep=1)
+        self.assertFalse(Path(first).exists())
+        self.assertTrue(Path(newest).exists())
+        self.assertEqual([p.name for p in Path(self.dest).iterdir()], [Path(newest).name])
+        with closing(sqlite3.connect(newest)) as restored:
+            self.assertEqual(restored.execute("SELECT title FROM repos").fetchone()[0], "newest")
+
     def test_failed_copy_does_not_publish_or_prune_a_snapshot(self):
         good = self.store.backup_to(self.dest, keep=1)
         original = Path(good).read_bytes()

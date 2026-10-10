@@ -42,13 +42,13 @@ def digest(path):
 
 def source_hashes():
     paths = []
-    for name in ('contracts/v1', 'sdk', 'tests/contracts', 'tests/storage', 'tests/leaf'):
+    for name in ('contracts/v1', 'sdk', 'tests/contracts', 'tests/storage', 'tests/leaf', 'tests/platform'):
         paths.extend(p for p in (ROOT / name).rglob('*') if p.is_file()
                      and not set(p.parts) & {'node_modules', 'dist', '__pycache__'}
                      and p.suffix != '.pyc')
     paths += list((ROOT / 'hub').rglob('*.py'))
     paths += [ROOT / name for name in ('hub/requirements.lock','hub/requirements.txt',
-              'agentmux.sh','deploy/nats/circle.sh','.github/workflows/contracts.yml')]
+              'agentmux.sh','agentmux.cmd','agentmux_windows.py','deploy/nats/circle.sh','.github/workflows/contracts.yml')]
     for name in ('docs/planning/2026-10-09', '.bytedesk/design-patterns', '.context'):
         paths.extend(p for p in (ROOT / name).rglob('*') if p.is_file()
                      and not set(p.parts) & {'evidence', '__pycache__', 'node_modules'}
@@ -276,6 +276,8 @@ def main():
             if not source.is_file():
                 report['checks'].append({'name':suite+'-fresh-evidence','exitCode':1})
         hub_preservation(args.workspace,args.evidence,env,run,report)
+        run('platform-placement-contract',[sys.executable,'-m','unittest','discover','-s','tests/platform','-p','test_*.py','-v'])
+        run('windows-callback-contract',[sys.executable,'-m','unittest','hub.tests.test_windows_callbacks','-v'])
         run('tracker-tests',[sys.executable,'-m','unittest','discover','-s',delivery,'-p','test_track.py','-v'])
         run('regression-preservation',[sys.executable,delivery+'/check_regressions.py','--self-test'])
         run('component-preservation',[sys.executable,'docs/planning/2026-10-09/verify-component-coverage.py'])

@@ -1,0 +1,10 @@
+{
+  "surface": "windows",
+  "command": [
+    "C:/Users/RyanHelms/.kimi-code/bin/kimi.exe",
+    "--version"
+  ],
+  "exitCode": 0,
+  "stdout": "0.36.0\n",
+  "stderr": ""
+}
