@@ -1,0 +1,79 @@
+{
+  "status": "passed",
+  "scope": "HAR-20-C01/C02 synthetic fresh judgments and full repeated analysis flow",
+  "root": "/home/ryan/.cache/agentmux-governance/har20-4d6vov3v",
+  "sourceHashes": {
+    "correlate.py": "9513e32863d64f2c5cd83f977748885c2cb0f24d05ec26e4024b005f494c74a1",
+    "spotcheck.py": "92b27c0facf9239f61be9a76cfd14334ab171298cbbbc66ea7befa1d1e3bd8a2",
+    "determinism.sh": "3c04514c28311990cddbc0e5067946ee27522ad11d1ea8eca02764fb829bbf86",
+    "spotcheck.judgments.json": "1d6b32d65828fb82c82ff896f887b20c8092c3bafa99b244c9fb8674b316a133",
+    "spotcheck.pass1.judgments.json": "f033729edcce658c538ae1f9f90b136b2365cc19bcf875803b71a9e7918d1a41"
+  },
+  "copiedHashes": {
+    "correlate.py": "9513e32863d64f2c5cd83f977748885c2cb0f24d05ec26e4024b005f494c74a1",
+    "spotcheck.py": "92b27c0facf9239f61be9a76cfd14334ab171298cbbbc66ea7befa1d1e3bd8a2",
+    "determinism.sh": "43b82caeea3b68d1397e6ea646da1762ed98b333ccb218c770e84517af4a9a7c"
+  },
+  "adaptation": "Only determinism.sh two /tmp output path literals redirected to fixture-owned paths; text copy normalizes CRLF to LF. Python scripts copied byte-for-byte.",
+  "adaptationDiffSha256": "6c52eeff1faead62fa32c180fbdd74725487dbf1cff36acbff21a19e25381fcc",
+  "inputsUnchanged": true,
+  "historicalJudgmentsPreserved": true,
+  "sourceUnchanged": true,
+  "inputHashes": {
+    "raw/disagree-session.jsonl": "c6ae5bb4f3ac1939fd780000e2f83edd25d984567a496797fab39dc6d4710059",
+    "raw/agree-session.jsonl": "a50129c46b598e5e8724c5b04f24264de1076f0ed6936b3b3bfb077abf068c32",
+    "raw/disagree-queue.jsonl": "5ce3820ac3307193bcf1602dc8237456852a95479cadaf61f1eb4bc7eedca00c",
+    "raw/unverifiable-queue.jsonl": "f1a4ba3bd7558424b5ead9c117c361047b27a819aba9903166017533340b5598",
+    "raw/agree-queue.jsonl": "71a101ca12d6cf0fda7cd8deef3a85a3612940efd30e8a5d5a92be4c3bedabff",
+    "out/receipts.rescued-claude-config.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "out/panes.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "out/receipts.jsonl": "9c4771affe0d4bd00c8f4a7bf88e0e2cd5a8e4af52660d6790caa3a99236afdb",
+    "out/courier.jsonl": "bce6a583ceb10ceca3d9823f2d730b2c0511957663d368a36500cf4cd2b3ef3d",
+    "out/transcripts.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "history/spotcheck.pass1.judgments.json": "f033729edcce658c538ae1f9f90b136b2365cc19bcf875803b71a9e7918d1a41",
+    "history/spotcheck.judgments.json": "1d6b32d65828fb82c82ff896f887b20c8092c3bafa99b244c9fb8674b316a133",
+    "spotcheck.pass1.judgments.json": "f033729edcce658c538ae1f9f90b136b2365cc19bcf875803b71a9e7918d1a41"
+  },
+  "runs": [
+    {
+      "exitCode": 0,
+      "verdicts": {
+        "agree": "agree",
+        "disagree": "disagree",
+        "unverifiable": "unverifiable"
+      },
+      "sha256": {
+        "out/outcomes.jsonl": "3751d20cb68086b91c13add58f50c76ecb820047fe2b9adda06bc1e6136bd09f",
+        "out/summary.md": "3323102eced330c63c2af6eef191d8608d1499f35c716b1cd94ff1ed8b946342",
+        "out/spotcheck.sample.jsonl": "3751d20cb68086b91c13add58f50c76ecb820047fe2b9adda06bc1e6136bd09f",
+        "out/spotcheck.raw.jsonl": "85a1bc558cac0db3b7c30a305bfb8dacae0d9499e6441f81e049a2912370a516",
+        "spotcheck.judgments.json": "ffb92e0c832bd15bece542cb2829adf6c4560600bb111e65706675b2addfe6ab"
+      },
+      "logSha256": "b396be06d5cd93c193ab7bcd86b25df447f15abc742fbac683f3735f591b169e"
+    },
+    {
+      "exitCode": 0,
+      "verdicts": {
+        "agree": "agree",
+        "disagree": "disagree",
+        "unverifiable": "unverifiable"
+      },
+      "sha256": {
+        "out/outcomes.jsonl": "3751d20cb68086b91c13add58f50c76ecb820047fe2b9adda06bc1e6136bd09f",
+        "out/summary.md": "3323102eced330c63c2af6eef191d8608d1499f35c716b1cd94ff1ed8b946342",
+        "out/spotcheck.sample.jsonl": "3751d20cb68086b91c13add58f50c76ecb820047fe2b9adda06bc1e6136bd09f",
+        "out/spotcheck.raw.jsonl": "85a1bc558cac0db3b7c30a305bfb8dacae0d9499e6441f81e049a2912370a516",
+        "spotcheck.judgments.json": "ffb92e0c832bd15bece542cb2829adf6c4560600bb111e65706675b2addfe6ab"
+      },
+      "logSha256": "b396be06d5cd93c193ab7bcd86b25df447f15abc742fbac683f3735f591b169e"
+    }
+  ],
+  "limits": [
+    "Synthetic source records intentionally include a mismatched raw body and a deleted session to test independent judgments.",
+    "Not reanalysis of private historical transcripts or proof of historical verdict correctness.",
+    "Shell flow is path-adapted, not original-byte execution. Original script exit code alone is not sufficient: harness also requires DETERMINISTIC marker and independently compares SHA256 outputs.",
+    "Each shell invocation runs correlate->spotcheck->correlate twice; two invocations qualify four cycles."
+  ],
+  "harnessSha256": "6c926bac3b0236e16663dc56bb4f943c30a08979baed43f7277dea56da90d1c7",
+  "fixtureGuardSha256": "f089a2166eff759f31ac9a63f23fe462287d9519953eadf3ac1fa80edad5da96"
+}

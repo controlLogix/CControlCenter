@@ -1,0 +1,314 @@
+{
+  "passed": 9,
+  "cases": [
+    {
+      "case": "repeat",
+      "outcome": "submitted",
+      "assertion": "already integrated missing branch/tree handled without data loss"
+    },
+    {
+      "case": "success",
+      "outcome": "submitted",
+      "events": [
+        [
+          "agentmux",
+          "wait",
+          "tm-900",
+          "--timeout",
+          "3"
+        ],
+        [
+          "agentmux",
+          "wait",
+          "tm-900-worker",
+          "--timeout",
+          "3"
+        ],
+        [
+          "agentmux",
+          "kill",
+          "tm-900-worker"
+        ],
+        [
+          "release",
+          "tm-900-worker"
+        ],
+        [
+          "release",
+          "tm-900-worker"
+        ],
+        [
+          "agentmux",
+          "kill",
+          "tm-900"
+        ],
+        [
+          "release",
+          "tm-900"
+        ],
+        [
+          "comment",
+          "TM-900",
+          "worker tm-900 finished and was reaped; evidence attached, card left in_progress for review.",
+          "orchestrator"
+        ]
+      ],
+      "stdout": "2026-10-09T20:48:23-0400  collect: TM-900 submitted by tm-900; claims released, pane reaped\nTM-900: submitted\n",
+      "assertion": "real Git merge/cleanup verified"
+    },
+    {
+      "case": "wrong-branch",
+      "outcome": "unresolved",
+      "events": [
+        [
+          "agentmux",
+          "wait",
+          "tm-900",
+          "--timeout",
+          "3"
+        ],
+        [
+          "agentmux",
+          "wait",
+          "tm-900-worker",
+          "--timeout",
+          "3"
+        ],
+        [
+          "agentmux",
+          "kill",
+          "tm-900-worker"
+        ],
+        [
+          "release",
+          "tm-900-worker"
+        ],
+        [
+          "comment",
+          "TM-900",
+          "integration/teardown requires recovery: lead worktree is not on its integration branch",
+          "tm-900"
+        ]
+      ],
+      "stdout": "TM-900: unresolved\n",
+      "assertion": "member commits/tree and original lead HEAD retained"
+    },
+    {
+      "case": "dirty-lead",
+      "outcome": "unresolved",
+      "events": [
+        [
+          "agentmux",
+          "wait",
+          "tm-900",
+          "--timeout",
+          "3"
+        ],
+        [
+          "agentmux",
+          "wait",
+          "tm-900-worker",
+          "--timeout",
+          "3"
+        ],
+        [
+          "agentmux",
+          "kill",
+          "tm-900-worker"
+        ],
+        [
+          "release",
+          "tm-900-worker"
+        ],
+        [
+          "comment",
+          "TM-900",
+          "integration/teardown requires recovery: lead integration worktree has uncommitted changes",
+          "tm-900"
+        ]
+      ],
+      "stdout": "TM-900: unresolved\n",
+      "assertion": "member commits/tree and original lead HEAD retained"
+    },
+    {
+      "case": "dirty-member",
+      "outcome": "unresolved",
+      "events": [
+        [
+          "agentmux",
+          "wait",
+          "tm-900",
+          "--timeout",
+          "3"
+        ],
+        [
+          "agentmux",
+          "wait",
+          "tm-900-worker",
+          "--timeout",
+          "3"
+        ],
+        [
+          "agentmux",
+          "kill",
+          "tm-900-worker"
+        ],
+        [
+          "release",
+          "tm-900-worker"
+        ],
+        [
+          "comment",
+          "TM-900",
+          "integration/teardown requires recovery: member has uncommitted work: agentmux/tm-900-worker",
+          "tm-900"
+        ]
+      ],
+      "stdout": "TM-900: unresolved\n",
+      "assertion": "member commits/tree and original lead HEAD retained"
+    },
+    {
+      "case": "unmanaged",
+      "outcome": "unresolved",
+      "events": [
+        [
+          "agentmux",
+          "wait",
+          "tm-900",
+          "--timeout",
+          "3"
+        ],
+        [
+          "agentmux",
+          "wait",
+          "tm-900-worker",
+          "--timeout",
+          "3"
+        ],
+        [
+          "agentmux",
+          "kill",
+          "tm-900-worker"
+        ],
+        [
+          "release",
+          "tm-900-worker"
+        ],
+        [
+          "comment",
+          "TM-900",
+          "integration/teardown requires recovery: refusing unmanaged member branch: unmanaged",
+          "tm-900"
+        ]
+      ],
+      "stdout": "TM-900: unresolved\n",
+      "assertion": "member commits/tree and original lead HEAD retained"
+    },
+    {
+      "case": "conflict",
+      "outcome": "parked",
+      "events": [
+        [
+          "agentmux",
+          "wait",
+          "tm-900",
+          "--timeout",
+          "3"
+        ],
+        [
+          "agentmux",
+          "wait",
+          "tm-900-worker",
+          "--timeout",
+          "3"
+        ],
+        [
+          "agentmux",
+          "kill",
+          "tm-900-worker"
+        ],
+        [
+          "release",
+          "tm-900-worker"
+        ],
+        [
+          "comment",
+          "TM-900",
+          "merge conflict integrating agentmux/tm-900-worker into integration: shared.txt",
+          "tm-900"
+        ],
+        [
+          "status",
+          "TM-900",
+          "parked",
+          "tm-900"
+        ],
+        [
+          "agentmux",
+          "kill",
+          "tm-900"
+        ],
+        [
+          "release",
+          "tm-900"
+        ]
+      ],
+      "stdout": "TM-900: parked\n",
+      "assertion": "member commits/tree and original lead HEAD retained"
+    },
+    {
+      "case": "absent-evidence",
+      "outcome": "working",
+      "events": [
+        [
+          "agentmux",
+          "wait",
+          "tm-900",
+          "--timeout",
+          "3"
+        ],
+        [
+          "agentmux",
+          "wait",
+          "tm-900-worker",
+          "--timeout",
+          "3"
+        ]
+      ],
+      "stdout": "TM-900: working\n",
+      "assertion": "member commits/tree and original lead HEAD retained"
+    },
+    {
+      "case": "busy-member",
+      "outcome": "working",
+      "events": [
+        [
+          "agentmux",
+          "wait",
+          "tm-900",
+          "--timeout",
+          "3"
+        ],
+        [
+          "agentmux",
+          "wait",
+          "tm-900-worker",
+          "--timeout",
+          "3"
+        ]
+      ],
+      "stdout": "TM-900: working\n",
+      "assertion": "member commits/tree and original lead HEAD retained"
+    }
+  ],
+  "sourceHashes": {
+    "taskmgmt/dispatch.py": "b04c6735c43ac0d7186706db1add5d7e1cc97b44f73e3f0832216db1bba67256",
+    "taskmgmt/coordination.py": "21711353c6d0babf127df12eba0457970f8e22689e711004432fd018f3713ff3",
+    "plugins/agentmux-orchestration/skills/agent-config/scripts/runtime.py": "0fbf4f9d9aa534d0f93476307835cf6a28d73dc756adc422b8e538e2604beea7"
+  },
+  "limits": [
+    "Relocated unchanged plugin launcher invokes disposable trusted runtime adapter importing unchanged actual dispatch implementation.",
+    "Actual main/collect/integrate/teardown and Git repositories/worktrees/commits; board/pane/claim transports replaced by explicit fixture functions. No real provider, dashboard, authentication or host integration qualification.",
+    "Repeated collect uses retained roster, already removed member branch/tree, and synthetic live idle lead; it does not claim real-pane repeat behavior."
+  ]
+}

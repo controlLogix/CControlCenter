@@ -6,9 +6,9 @@
     "phases.json": "882de6f13f309b878ebd8898ba73ab05fe94dc68ec517b311054f2a99f3102f7",
     "verification-matrix.json": "516813fd034d6c73b4b0d6f9eaaf4b1b54798828e137336324605d0b956085bc",
     "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
-    "component-inventory.json": "77a8ea1282e521151354e504f56a944ce7835c4de1cc1dcbd94b3fca17e74ad7",
+    "component-inventory.json": "4fdabe9afcd5d2fd0c758263284e537ad1d457ba4a0d3b23cf4b929b8abe91a8",
     "component-audit-hub.json": "689690b169d1dcd9301cbeaed7764846b39b5676f04a2ef734bfc7e3048ba69d",
-    "component-audit-harness.json": "a21684b80ad201e8a9e789dc838df91d70675aa690e8a73a226edad34ee13ae9",
+    "component-audit-harness.json": "7aad553c9ec95dbd1da1309ba3718984befb4fffb6eafba62be222cbe2ec7a50",
     "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
     "component-audit-repository.json": "52a2e7648da7727c260b28764f6fc5817b6776d4e24198bec7a4b8436bf442c2"
   },
@@ -1804,7 +1804,7 @@
           "text": "Create reusable contract fixtures and controllable fake workers/providers plus real NATS integration environments for CI. Include WSL-CLIENT-01 environmental contract fixtures and an actual Windows/WSL client inventory; distinguish this preparation from P06 host integration."
         }
       ],
-      "status": "in_progress",
+      "status": "done",
       "owner": "Codex",
       "dependsOn": [
         "P00-GATE",
@@ -1843,13 +1843,15 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md",
         "docs/planning/2026-10-09/delivery/evidence/P01/platform-contract/result.json",
         "docs/planning/2026-10-09/delivery/evidence/P01/wsl-inventory/inventory.json",
-        "docs/planning/2026-10-09/delivery/evidence/P01/wsl-inventory/validation.json"
+        "docs/planning/2026-10-09/delivery/evidence/P01/wsl-inventory/validation.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/P01-T02-acceptance.json"
       ],
       "commits": [
         "7ef00dcb299c100d6dda45bfffa2b4e127345a50",
         "f19c6473d56335b8eeb28704b02895b9d9ab7fcc",
         "a2e9ee6d84a44a0b2f5783c3c0a3a613d50d0e41",
-        "00353fd0ccb0b4ce34cb4eb45549703430af30d1"
+        "00353fd0ccb0b4ce34cb4eb45549703430af30d1",
+        "80f43e02f3344696a3985c48ef12578319f3bd0f"
       ],
       "blocker": null,
       "history": [
@@ -1916,6 +1918,13 @@
           "from": "in_progress",
           "to": "in_progress",
           "note": "Added reusable23-test environment inventory validator and actual Windows/WSL installed-client observations. Seven stable forwarder symlink pairs verified; six version pairs match; TrueForge version unavailable and Pi missing within recorded search boundary. Native final-candidate and P06 authenticated/update/callback/concurrency qualification remain open."
+        },
+        {
+          "at": "2026-10-10T00:43:56.932513+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "done",
+          "note": "Codex accepted the complete bounded fixture/environment preparation scope after independent review: conformance45 macOS/Linux/WSL, real broker fault fixtures, controls10, placement23 and actual Windows-owned inventory. Missing/unavailable client observations are retained; P06 host support and T04 preservation remain open."
         }
       ],
       "phaseCriteria": [
@@ -2134,7 +2143,12 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/bash-portability/archive.json",
         "docs/planning/2026-10-09/delivery/evidence/P01/wsl-native-9647b42/archive.json",
         "docs/planning/2026-10-09/delivery/evidence/P01/plugin-restoration-spec.md",
-        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-evidence.json"
+        "docs/planning/2026-10-09/delivery/evidence/P01/recovery-evidence.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/plugin-restoration/parent-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/har20-fresh/result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/wsl-native-80f43e0/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/plugin-restoration/metadata-fastpath-parent-review.json"
       ],
       "commits": [
         "f19c6473d56335b8eeb28704b02895b9d9ab7fcc",
@@ -2249,6 +2263,13 @@
           "from": "in_progress",
           "to": "in_progress",
           "note": "Native exact9647 Linux passed22 checks; macOS failed original ServerAPI due unsupported Bash variable-presence syntax. Narrow repair preserves set/unset semantics and strengthens callback denial assertions; focused20 and independent3 pass in WSL. Fresh macOS candidate remains required. Exact9647 native WSL snapshot full129+callback10 passed with unchanged sources; earlier mounted-path failure remains unexplained and retained. Approved maintained nine-workflow plugin restoration with original20 unchanged tests plus real runtime and independent compatibility checks; not historical-source equality or P06 acceptance."
+        },
+        {
+          "at": "2026-10-10T00:52:29.125927+00:00",
+          "actor": "Codex",
+          "from": "in_progress",
+          "to": "in_progress",
+          "note": "Reviewed actual native80f Linux/macOS22checks/hub129 and independently588source references each; Bash finding closed. Approved maintained legacy22file plugin repair after unchanged20 plus16 added checks, real dashboard/tmux and nine realGitcollect outcomes; no P06/historicalsource equality. HAR20 fresh raw judgments/fullflow4cycles closes two named gaps. Retained four realprovider scenarios, orchestration-attached orchtest and remaining assertion/sensitivity mapping gaps; P01 remains open."
         }
       ],
       "phaseCriteria": [
@@ -2286,9 +2307,14 @@
         "DASH-29",
         "DASH-31",
         "REPO-02",
-        "REPO-03"
+        "REPO-03",
+        "HAR-23"
       ],
-      "behaviorCheckIds": [],
+      "behaviorCheckIds": [
+        "HAR-23-C01",
+        "HAR-23-C02",
+        "HAR-23-C03"
+      ],
       "catalogRecordIds": [],
       "reviewer": "Codex",
       "deliveryPolicy": "deliveryGovernance"
@@ -33983,6 +34009,65 @@
       "to": "done",
       "note": "Codex accepted the complete bounded storage fixture scope using all20cases on native Linux/macOS and WSL, source-bound negative controls and independent preservation review. Separate callback/macOS and external-plugin gaps still block phase advancement.",
       "taskId": "P01-T07"
+    },
+    {
+      "at": "2026-10-10T00:43:56.932513+00:00",
+      "actor": "Codex",
+      "from": "in_progress",
+      "to": "done",
+      "note": "Codex accepted the complete bounded fixture/environment preparation scope after independent review: conformance45 macOS/Linux/WSL, real broker fault fixtures, controls10, placement23 and actual Windows-owned inventory. Missing/unavailable client observations are retained; P06 host support and T04 preservation remain open.",
+      "taskId": "P01-T02"
+    },
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "Explicitly reconcile approved maintained legacy plugin ownership; retain complete baseline and previous fingerprints.",
+      "previousSourceHashes": {
+        "phases.json": "882de6f13f309b878ebd8898ba73ab05fe94dc68ec517b311054f2a99f3102f7",
+        "verification-matrix.json": "516813fd034d6c73b4b0d6f9eaaf4b1b54798828e137336324605d0b956085bc",
+        "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
+        "component-inventory.json": "77a8ea1282e521151354e504f56a944ce7835c4de1cc1dcbd94b3fca17e74ad7",
+        "component-audit-hub.json": "689690b169d1dcd9301cbeaed7764846b39b5676f04a2ef734bfc7e3048ba69d",
+        "component-audit-harness.json": "a21684b80ad201e8a9e789dc838df91d70675aa690e8a73a226edad34ee13ae9",
+        "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
+        "component-audit-repository.json": "52a2e7648da7727c260b28764f6fc5817b6776d4e24198bec7a4b8436bf442c2"
+      }
+    },
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "Correct maintained plugin CLI test references to actual filenames; no criterion changed.",
+      "previousHarnessFingerprint": "7116a93a3325524fd3d9eaa8ea19cdaef49babe4a6e97ba9a974dabbf545d9ba"
+    },
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "Explicitly reconcile native plugin runner ownership; no source/test/phase criteria removed.",
+      "previousSourceHashes": {
+        "phases.json": "882de6f13f309b878ebd8898ba73ab05fe94dc68ec517b311054f2a99f3102f7",
+        "verification-matrix.json": "516813fd034d6c73b4b0d6f9eaaf4b1b54798828e137336324605d0b956085bc",
+        "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
+        "component-inventory.json": "65c70c72dcfe590e96bb6341e90785cbc0b4a2207a8dba6a02b7580bb6ba1f5f",
+        "component-audit-hub.json": "689690b169d1dcd9301cbeaed7764846b39b5676f04a2ef734bfc7e3048ba69d",
+        "component-audit-harness.json": "ef8cfa2c9c62bb68703f4745586a0ef52f6f3fad8931bf350e7b8d528121bfe7",
+        "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
+        "component-audit-repository.json": "52a2e7648da7727c260b28764f6fc5817b6776d4e24198bec7a4b8436bf442c2"
+      }
+    },
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "Reconcile scoped maintained-plugin shim surface after independent actual verification. No requirements removed.",
+      "previousSourceHashes": {
+        "phases.json": "882de6f13f309b878ebd8898ba73ab05fe94dc68ec517b311054f2a99f3102f7",
+        "verification-matrix.json": "516813fd034d6c73b4b0d6f9eaaf4b1b54798828e137336324605d0b956085bc",
+        "jev-coverage.json": "c7df684ce9162c36fb0d77ed8cf76c656824b7339b6c8464dce7ef2ce5988f95",
+        "component-inventory.json": "4fdabe9afcd5d2fd0c758263284e537ad1d457ba4a0d3b23cf4b929b8abe91a8",
+        "component-audit-hub.json": "689690b169d1dcd9301cbeaed7764846b39b5676f04a2ef734bfc7e3048ba69d",
+        "component-audit-harness.json": "7aad553c9ec95dbd1da1309ba3718984befb4fffb6eafba62be222cbe2ec7a50",
+        "component-audit-dashboard.json": "a406607c28ee44054de9dc5f3b40b4b7e7d6e4e7989d29666fe09adb4904741f",
+        "component-audit-repository.json": "52a2e7648da7727c260b28764f6fc5817b6776d4e24198bec7a4b8436bf442c2"
+      }
     }
   ],
   "deliveryGovernance": {

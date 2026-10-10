@@ -1,0 +1,21 @@
+{
+  "success": false,
+  "strict": true,
+  "target": "C:\\Users\\RyanHelms\\GitHub\\agentmux\\plugins\\agentmux-orchestration\\skills\\team-merge\\SKILL.md",
+  "manifest": {
+    "file": "C:\\Users\\RyanHelms\\GitHub\\agentmux\\plugins\\agentmux-orchestration\\skills\\team-merge\\SKILL.md",
+    "type": "plugin",
+    "errors": [
+      {
+        "path": "json",
+        "message": "Invalid JSON syntax: JSON Parse error: Invalid number",
+        "code": null
+      }
+    ],
+    "warnings": [],
+    "notes": [],
+    "gatingHooks": []
+  },
+  "contents": [],
+  "advice": []
+}

@@ -1,0 +1,18 @@
+{
+  "externalSource": "/mnt/c/Users/RyanHelms/AppData/Local/Temp/agentmux-plugin-validator-2bff310ca8584646975cf36dc84a0519",
+  "files": {
+    "agent-config-result.json": "295893f2014eb3ab36b6ef6f7df6bd6f1f9f07a4315d7b92ddbf0d53df94c23c",
+    "agent-doctor-result.json": "2cbea258ef4ef8a9d0124a51c12d6fb481f84a08572e68b4612cf0685305aa06",
+    "agent-edit-result.json": "dd9c5ad4ee12db4a2fc9f931bfec2fc6600c9b9e54ce94250eaeec79dc255347",
+    "agent-new-result.json": "a0fb5f32cdc843e39010908cc2cdc08818423cbdfa2f49037e1494ec9ada820d",
+    "agent-remove-result.json": "8505db786d2bd8dc80af9307f7b76199f83d99fde771a04b8c24c1b5cbaa9be5",
+    "agent-roster-result.json": "aba9cdb3f84eabcf01ffc78983e34c20b75d2d9e1be25edf3fb2e276b89281c1",
+    "manifest-result.json": "c7bd98b979c3fbd767905b9908fe648c6e0956b880ecdadc9809fe2d765bd360",
+    "skills-result.json": "f9fe22de1af0236fdfe2a58d1e7bbe3e86295990c2495f0e9b8635597eeae975",
+    "team-compose-result.json": "c9439a54681211fc3a048d559f71b857c9b34a5e3f0dc49654761413881aa82c",
+    "team-dispatch-result.json": "7cd104933308d977352990a237b609b124b68ade382ac744bbffbf86fa21fbb3",
+    "team-merge-result.json": "68500233b7540a9fe9ad3dc0bcc27884fe328ca0b281df9c8a563909f9521b61",
+    "packaging-worker-report.json": "3a9345fcd62944ce22d5c3f466a92c8b3423936396dcaccf9764a1111ce0b560"
+  },
+  "scope": "Bounded maintained plugin compatibility proof; metadata validator does not execute hooks or validate skills folder. Earlier worker packaging source hashes for README/test are superseded by final7 source-bound run; original report retained. No personal configuration files copied; no phase/P06 acceptance."
+}

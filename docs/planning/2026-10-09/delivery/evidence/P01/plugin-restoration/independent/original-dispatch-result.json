@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/mnt/c/Users/RyanHelms/GitHub/agentmux/dashboard/test_dispatch.py"
+  ],
+  "exitCode": 0,
+  "sourceHash": "a15fac0491f2cdd936b67017e6c666b7a99295f8dd5b8a9fe47eb9062c155439",
+  "sourceUnchanged": true,
+  "summary": [
+    "  ok   newly hired panes are recounted after dispatch",
+    "  ok   pool collects before filling slots",
+    "  ok   zero card budget disables new dispatch",
+    "  ok   pool collects before filling slots",
+    "  ok   team limit is loaded from board metadata when dispatch view omits it",
+    "  ok   unavailable team config prevents dispatch",
+    "",
+    "passed 333, failed 0"
+  ],
+  "limits": [
+    "Unchanged original runtime suite, independent of new package launcher. Uses original mocked transport seams and actual disposable Git lifecycle assertions."
+  ]
+}

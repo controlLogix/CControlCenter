@@ -176,11 +176,11 @@
     "tests/contracts/README.md": {
       "path": "tests/contracts/README.md",
       "originalSha256": "1d0a3b5128c46ed31fd1744b41345e6445d262138c63bc5eb91c4ab055cb4916",
-      "replacementSha256": "ef707414ec1d1a7892fa4457e71b1efec3ecc80172a172b326c1b06803c5e470",
+      "replacementSha256": "f3840cb0298f312fbd5e7694b23b117e0ace7f1655f523dc43a9b75cf2400930",
       "reviewer": "Codex",
       "reviewedAt": "2026-10-09",
-      "reason": "Retains prior contract requirements and documents original full hub qualification with pinned NSC.",
-      "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md"
+      "reason": "Retain all previous contract instructions byte-for-byte; append maintained legacy plugin native CI scope and exact36-method admission. Documentation only; no test assertion removed.",
+      "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/plugin-restoration/metadata-fastpath-parent-review.json"
     },
     "dashboard/test_mqtt.py": {
       "path": "dashboard/test_mqtt.py",
@@ -251,6 +251,20 @@
           "reason": "Preserved all original assertions and documentation; added four fixture storage cases and their limitations.",
           "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/regression-replacement-review.md"
         }
+      }
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "reason": "Reviewed append-only contract README extension; retain prior replacement evidence.",
+      "previousReplacement": {
+        "path": "tests/contracts/README.md",
+        "originalSha256": "1d0a3b5128c46ed31fd1744b41345e6445d262138c63bc5eb91c4ab055cb4916",
+        "replacementSha256": "ef707414ec1d1a7892fa4457e71b1efec3ecc80172a172b326c1b06803c5e470",
+        "reviewer": "Codex",
+        "reviewedAt": "2026-10-09",
+        "reason": "Retains prior contract requirements and documents original full hub qualification with pinned NSC.",
+        "evidence": "docs/planning/2026-10-09/delivery/evidence/P01/preservation/repair-review.md"
       }
     }
   ]

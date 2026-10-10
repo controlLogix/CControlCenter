@@ -1,0 +1,27 @@
+{
+  "recordedAt": "2026-10-10T00:40:04.613906+00:00",
+  "candidateCommit": "80f43e02f3344696a3985c48ef12578319f3bd0f",
+  "command": [
+    "C:\\Users\\RyanHelms\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+    "docs/planning/2026-10-09/delivery/check_conformance_evidence.py",
+    "--report",
+    "docs/planning/2026-10-09/delivery/evidence/P01/conformance-reviewed/contracts.json",
+    "--candidate",
+    "80f43e02f3344696a3985c48ef12578319f3bd0f",
+    "--environment",
+    "wsl",
+    "--evidence",
+    "C:/Users/RyanHelms/.cache/agentmux/p01-t02-wsl-admission.json"
+  ],
+  "environmentRequired": "wsl",
+  "report": "docs\\planning\\2026-10-09\\delivery\\evidence\\P01\\conformance-reviewed\\contracts.json",
+  "reportSha256": "b36396f12e2425af4004b780db2c9dc7e4379a8ba3bd563ae5aeb3344e6a61d0",
+  "checkerSha256": "2f1508894c5fccd9ee1d4f44d11171f959529e2b1fa55621d76757f866129dc6",
+  "exitCode": 0,
+  "errors": [],
+  "limits": [
+    "Conformance-format evidence admission only; not authenticity proof, other suite acceptance or phase approval.",
+    "Compiled hashes record tested output identity; this tool does not rebuild or authenticate binaries.",
+    "Candidate comparison reads committed Git blobs, never working-tree files."
+  ]
+}

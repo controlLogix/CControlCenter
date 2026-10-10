@@ -1,0 +1,92 @@
+{
+  "runId": 38009885497,
+  "candidate": "80f43e02f3344696a3985c48ef12578319f3bd0f",
+  "phaseAccepted": false,
+  "platforms": {
+    "macos": {
+      "jobId": 114087190599,
+      "jobUrl": "https://github.com/controlLogix/agentmux/actions/runs/38009885497/job/114087190599",
+      "sourceCommit": "80f43e02f3344696a3985c48ef12578319f3bd0f",
+      "checks": 22,
+      "failedChecks": [],
+      "hashComparisons": 588,
+      "sourceMismatches": [],
+      "conformance": {
+        "testsRun": 45,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "exitCode": 0,
+        "sourceUnchangedDuringRun": true
+      },
+      "independentAdmissionExit": 0,
+      "hub": {
+        "tests": 129,
+        "status": "passed",
+        "failures": [],
+        "skips": []
+      },
+      "caseCounts": {
+        "storage-result.json": 20,
+        "leaf-result.json": 11,
+        "signed-leaf-result.json": 19
+      },
+      "reportHashes": {
+        "ci-result.json": "93b4a9f72e76862c4ad619133c1d00de99268d2a9ff4a7adebdd2ed708e20c44",
+        "conformance-admission-negative.json": "2408bb4cac0929956384f47cc62a62798ead23060d558ecdb316fc8737999a11",
+        "conformance-admission.json": "a83da51529a3a865a6ad23cd9c460c4afd345f61e12cd4968d7938b47d1a256a",
+        "contracts.json": "f23e853343794b27731b7841a4827151d48da2c2c3f26eda5b225fb7438398af",
+        "hub-full-result.json": "e6e76d09125a1c51e473fe4df2ea28c9ba6660d115d5cfe4d2ca76f62ab19b67",
+        "leaf-result.json": "d801e8f78ac05d9f0cca428a4b9bbddad8e6618b6a830adc754d691ba249666b",
+        "negative-fixture.json": "afcb8455bea62ce76d9eb25e7cf297a60a44ab265bf40b18ed795ba76ff28245",
+        "signed-leaf-result.json": "207264888e1f2313a73f962be2f685d468f473cfbeb0b0e846aa4fd264d6afa1",
+        "storage-result.json": "dc370cb34e7969e99f68768cc6bf8627bd0f669dffd7187fccbfcf51db4afe12"
+      }
+    },
+    "linux": {
+      "jobId": 114087190733,
+      "jobUrl": "https://github.com/controlLogix/agentmux/actions/runs/38009885497/job/114087190733",
+      "sourceCommit": "80f43e02f3344696a3985c48ef12578319f3bd0f",
+      "checks": 22,
+      "failedChecks": [],
+      "hashComparisons": 588,
+      "sourceMismatches": [],
+      "conformance": {
+        "testsRun": 45,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "exitCode": 0,
+        "sourceUnchangedDuringRun": true
+      },
+      "independentAdmissionExit": 0,
+      "hub": {
+        "tests": 129,
+        "status": "passed",
+        "failures": [],
+        "skips": []
+      },
+      "caseCounts": {
+        "storage-result.json": 20,
+        "leaf-result.json": 11,
+        "signed-leaf-result.json": 19
+      },
+      "reportHashes": {
+        "ci-result.json": "c2ca96da6ad178b5f909e2059552ed9326ed928e7bfdf98d62a7e18214fd4f9a",
+        "conformance-admission-negative.json": "f8d889e11f7a85727889bf7bf9e3454d8c8b50befa04d431a8c61e5164d15447",
+        "conformance-admission.json": "ea1c903256d013006cd566bd04ba2d569e3c4923af6ae4486fb37676e646c2b3",
+        "contracts.json": "3520aa2f0737f25dfaceb1fdded47d1354b827a5d1b288994e4be1aed1797ae5",
+        "hub-full-result.json": "e5498a7e7a9c6b9a5759f49a4606dbb95322177c36f1cffa914185ed6d73d232",
+        "leaf-result.json": "e069a5a122239b65c4ec9b934cb91221e54f5aedf6ff7d5316527103e6ba059f",
+        "negative-fixture.json": "afcb8455bea62ce76d9eb25e7cf297a60a44ab265bf40b18ed795ba76ff28245",
+        "signed-leaf-result.json": "bc375e2baa2f4b783d053ea4fbed57ed628400e50a9103e3342f205de301ff03",
+        "storage-result.json": "f6c6376d270c0290e095cc17842f5e56cffb0fc8db4ac576ae1b6eee4170a1cd"
+      }
+    }
+  },
+  "limits": [
+    "Exact committed pre-plugin candidate only; untracked maintained plugin is excluded.",
+    "Fixture and original runtime preservation evidence; no P01 phase acceptance or P06 qualification.",
+    "Previous failed 9647 candidate evidence is retained separately."
+  ]
+}

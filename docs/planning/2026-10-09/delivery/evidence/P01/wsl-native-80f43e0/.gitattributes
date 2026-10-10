@@ -1,0 +1,3 @@
+*.json -text
+*.py -text -whitespace
+*.log -text -whitespace

@@ -1,0 +1,109 @@
+{
+  "taskId": "P01-T02",
+  "sourceCommit": "80f43e02f3344696a3985c48ef12578319f3bd0f",
+  "reviewer": "Codex",
+  "reviewedAt": "2026-10-10T00:43:56.434474+00:00",
+  "decision": "accepted-scoped-task",
+  "phaseAccepted": false,
+  "acceptanceResults": [
+    {
+      "criterionId": "P01-T02-AC01",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/linux/contracts.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/macos/contracts.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/conformance-reviewed/contracts.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/platform-contract/result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/wsl-inventory/inventory.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/wsl-inventory/validation.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/controlled-storage-checkpoint.md"
+      ],
+      "review": "Reusable independent Python/TypeScript contract vectors, ten manual-clock worker/provider controls, real pinned-broker CI harnesses and a closed23-test placement inventory contract are implemented. Actual Windows/WSL client identities and failed/missing observations retained separately from synthetic and native runtime fixtures."
+    },
+    {
+      "criterionId": "P01-T02-AC02",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/independent-hash-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/linux/negative-fixture.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/macos/negative-fixture.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/linux/storage-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/macos/storage-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/linux/leaf-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/macos/leaf-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/t02-wsl-admission.json"
+      ],
+      "review": "Full45 contract methods including all10 controlled-provider cases pass on actual macOS/Linux/WSL with matching relevant source inputs. Actual broken positive fixture fails in both clients; tracker22 exercises advancement rejection. Real broker restart/reconnect, lost final batch acknowledgment, stale projection and unsupported atomic resources are covered by storage20 and leaf11/signed19. Actual placement23 checks pass. Inventory absence/unavailability are observations, not client qualification; all required T02 preparation capabilities are covered."
+    },
+    {
+      "criterionId": "P01-T02-AC03",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/independent-hash-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/linux/ci-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/macos/ci-result.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/9647b42/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/bash-portability/archive.json"
+      ],
+      "review": "Native original hub129 and regression retention105 including assertion-removal negative pass. Contract/source identities and earlier assertions preserved; historical failed macOS and mounted-path evidence remain. No production authority or original plugin/source removed by these fixtures; maintained external-plugin compatibility is separately open under T04."
+    },
+    {
+      "criterionId": "P01-T02-AC04",
+      "status": "passed",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/conformance-reviewed/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/t02-wsl-admission.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/wsl-inventory/inventory.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/windows-clients/review.json"
+      ],
+      "review": "Reports identify pushed80f candidate or unchanged source-bound WSL inputs, actual commands/host/version/outcomes, exact Git source and compiled inputs. Independent588 source comparisons each native host have zero mismatches. Fixture-only grants, clocks, fake execution and graceful-restart limitations are explicit. Windows owns clients/auth/config; neither unavailable TrueForge nor absent Pi implies P06 support. No authenticated workflow, concurrent-client isolation or unchanged-final-wrapper update claim is accepted."
+    }
+  ],
+  "observations": [
+    {
+      "report": "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/linux/contracts.json",
+      "sha256": "3520aa2f0737f25dfaceb1fdded47d1354b827a5d1b288994e4be1aed1797ae5",
+      "environment": {
+        "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+        "harnessPython": "3.14.8",
+        "clientPython": "Python 3.14.8",
+        "node": "v22.21.1"
+      },
+      "testsRun": 45,
+      "sourceInputMismatches": [],
+      "command": "python tests/contracts/run.py --evidence <output>"
+    },
+    {
+      "report": "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/macos/contracts.json",
+      "sha256": "f23e853343794b27731b7841a4827151d48da2c2c3f26eda5b225fb7438398af",
+      "environment": {
+        "platform": "macOS-15.7.9-arm64-arm-64bit-Mach-O",
+        "harnessPython": "3.14.8",
+        "clientPython": "Python 3.14.8",
+        "node": "v22.21.1"
+      },
+      "testsRun": 45,
+      "sourceInputMismatches": [],
+      "command": "python tests/contracts/run.py --evidence <output>"
+    },
+    {
+      "report": "docs/planning/2026-10-09/delivery/evidence/P01/conformance-reviewed/contracts.json",
+      "sha256": "b36396f12e2425af4004b780db2c9dc7e4379a8ba3bd563ae5aeb3344e6a61d0",
+      "environment": {
+        "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+        "harnessPython": "3.14.4",
+        "clientPython": "Python 3.14.4",
+        "node": "v22.22.1"
+      },
+      "testsRun": 45,
+      "sourceInputMismatches": [],
+      "command": "python tests/contracts/run.py --evidence <output>"
+    }
+  ],
+  "limits": [
+    "P01 fixture/environment preparation only; P06 Windows client integration remains unaccepted.",
+    "Independent review found no remaining named T02 harness gap; task acceptance does not approve the phase or original-plugin replacement.",
+    "Production authority, provider execution, power-loss/quorum guarantees and final real-hub demonstration remain later obligations."
+  ]
+}

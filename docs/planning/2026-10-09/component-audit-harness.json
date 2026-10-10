@@ -3,8 +3,8 @@
   "reviewMethod": "static source review; no runtime tests run",
   "reviewDate": "2026-10-09",
   "fileInventory": {
-    "assignedTrackedFiles": 89,
-    "coveredTrackedFiles": 89,
+    "assignedTrackedFiles": 112,
+    "coveredTrackedFiles": 112,
     "unassignedPaths": []
   },
   "interpretation": "These are proposed reuse and verification obligations, not implemented changes or passed parity checks. A shared file can serve several components. Existing tests are regression starting points and do not necessarily cover every proposed check; identified gaps require new focused fixtures. No source behavior removal is authorized. Source safeguards are retained while unsafe assumptions require explicit repairs and reviewed behavior changes.",
@@ -1529,6 +1529,97 @@
         "The old five-run result is retained evidence, not a new execution result.",
         "No dashboard or service was started or stopped."
       ]
+    },
+    {
+      "id": "HAR-23",
+      "name": "Maintained legacy orchestration plugin replacement",
+      "files": [
+        "plugins/agentmux-orchestration/.claude-plugin/plugin.json",
+        "plugins/agentmux-orchestration/.mcp.json",
+        "plugins/agentmux-orchestration/PROVENANCE.md",
+        "plugins/agentmux-orchestration/README.md",
+        "plugins/agentmux-orchestration/bin/agentmux-plugin",
+        "plugins/agentmux-orchestration/hooks/agentmux-hook.sh",
+        "plugins/agentmux-orchestration/hooks/hooks.json",
+        "plugins/agentmux-orchestration/lib/gateway.py",
+        "plugins/agentmux-orchestration/lib/policy.py",
+        "plugins/agentmux-orchestration/lib/roster_mcp.py",
+        "plugins/agentmux-orchestration/skills/agent-config/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-config/scripts/runtime.py",
+        "plugins/agentmux-orchestration/skills/agent-doctor/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-edit/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-new/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-remove/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-roster/SKILL.md",
+        "plugins/agentmux-orchestration/skills/team-compose/SKILL.md",
+        "plugins/agentmux-orchestration/skills/team-dispatch/SKILL.md",
+        "plugins/agentmux-orchestration/skills/team-merge/SKILL.md",
+        "plugins/agentmux-orchestration/tests/test_hook_mcp.py",
+        "plugins/agentmux-orchestration/tests/test_packaging.py",
+        "tests/contracts/plugin_preservation.py"
+      ],
+      "role": "runtime-and-client-guidance",
+      "baselineGroups": [],
+      "ownerPhase": "P01",
+      "disposition": "extend",
+      "currentBehavior": [
+        "New maintained package restores nine source-backed legacy workflow names using current coordination, dispatch and setup-auth commands. Original external plugin source was not recovered.",
+        "POSIX pre-tool hook reads current roster/live worker observations; read-only newline JSON-RPC MCP exposes two roster tools. Discovery is independent of dashboard readiness.",
+        "Explicit runtime binding forwards literal arguments and preserves output/exit status. Live-definition protection is hook-only, with a preflight race; direct HTTP lacks that protection."
+      ],
+      "reusePlan": "Preserve current runtime business rules and unchanged twenty external-plugin assertions. Ship reviewed maintained replacement with explicit provenance, compatibility evidence and original gap history; no personal install/publication.",
+      "enhancements": [
+        "Additional parser, HTTP, frame and relocation negatives plus independent real dashboard checks.",
+        "P06 owns actual supported-host plugin launch, Windows-native interop and framework integration."
+      ],
+      "replacementReason": null,
+      "behaviorChecks": [
+        {
+          "id": "HAR-23-C01",
+          "description": "Validate nine maintained skill guides and metadata, literal-argument runtime forwarding, explicit binding and relocation with spaces; distinguish new provenance from unavailable original source.",
+          "existingTests": [
+            "dashboard/test_plugin_skills.py",
+            "plugins/agentmux-orchestration/tests/test_packaging.py"
+          ],
+          "requiredEnvironment": "Private Linux/WSL package/runtime fixtures; actual installed-host metadata validator; no inference.",
+          "baselineStatus": "not-run",
+          "targetStatus": "not-run"
+        },
+        {
+          "id": "HAR-23-C02",
+          "description": "Verify irrelevant hook bypass, approved literal hire, live definition refusals, ambiguous/path/patch/HTTP denials and continued-service read-only roster MCP.",
+          "existingTests": [
+            "dashboard/test_orchestration_plugin.py",
+            "plugins/agentmux-orchestration/tests/test_hook_mcp.py",
+            "tests/contracts/plugin_preservation.py"
+          ],
+          "requiredEnvironment": "Disposable HTTP/dashboard/tmux and package fixtures; native Windows hook launch remains P06-unqualified.",
+          "baselineStatus": "not-run",
+          "targetStatus": "not-run"
+        },
+        {
+          "id": "HAR-23-C03",
+          "description": "Run current definition/team CLI contracts through the relocated launcher against actual disposable dashboard state; map all nine workflows to supported commands and preserve collection/identity/checksum policy.",
+          "existingTests": [
+            "dashboard/test_agentcli.py",
+            "dashboard/test_teamcli.py",
+            "dashboard/test_dispatch.py"
+          ],
+          "requiredEnvironment": "Private real dashboard/SQLite and bounded original provider fixtures; no real-model equivalence claim.",
+          "baselineStatus": "not-run",
+          "targetStatus": "not-run"
+        }
+      ],
+      "migrationChecks": [
+        "Require explicit trusted AGENTMUX_REPO; do not infer a sibling runtime or copy credentials.",
+        "Preserve current agent identity, scope, checksum, team approval and guarded collection semantics.",
+        "Retain original-source gap and unknown original prose/metadata; compatibility is not historical byte equality."
+      ],
+      "limitations": [
+        "Initial package processes run on Linux/macOS or explicitly selected WSL; Windows-owned clients remain Windows-owned, native Windows hook launch unqualified.",
+        "Host hooks are defense in depth, not authentication, endpoint authorization or universal shell containment.",
+        "No model skill-performance eval, authenticated inference, original-source equality or P06 acceptance implied."
+      ]
     }
   ],
   "reviewHistory": [
@@ -1538,6 +1629,45 @@
       "scope": "Add source ownership for bounded P01 platform/callback fixtures; preserve original behavioral obligations",
       "addedFiles": [
         "agentmux_windows.py"
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "Approved P01 maintained original-plugin preservation repair; original baseline/components retained",
+      "addedFiles": [
+        "plugins/agentmux-orchestration/.claude-plugin/plugin.json",
+        "plugins/agentmux-orchestration/.mcp.json",
+        "plugins/agentmux-orchestration/PROVENANCE.md",
+        "plugins/agentmux-orchestration/README.md",
+        "plugins/agentmux-orchestration/bin/agentmux-plugin",
+        "plugins/agentmux-orchestration/hooks/agentmux-hook.sh",
+        "plugins/agentmux-orchestration/hooks/hooks.json",
+        "plugins/agentmux-orchestration/lib/gateway.py",
+        "plugins/agentmux-orchestration/lib/policy.py",
+        "plugins/agentmux-orchestration/lib/roster_mcp.py",
+        "plugins/agentmux-orchestration/skills/agent-config/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-config/scripts/runtime.py",
+        "plugins/agentmux-orchestration/skills/agent-doctor/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-edit/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-new/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-remove/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-roster/SKILL.md",
+        "plugins/agentmux-orchestration/skills/team-compose/SKILL.md",
+        "plugins/agentmux-orchestration/skills/team-dispatch/SKILL.md",
+        "plugins/agentmux-orchestration/skills/team-merge/SKILL.md",
+        "plugins/agentmux-orchestration/tests/test_hook_mcp.py",
+        "plugins/agentmux-orchestration/tests/test_packaging.py"
+      ],
+      "newComponent": "HAR-23",
+      "evidence": "delivery/evidence/P01/plugin-restoration-spec.md"
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "Owned native plugin36-method evidence runner with exact method/source admission; existing22CIchecks retained",
+      "addedFiles": [
+        "tests/contracts/plugin_preservation.py"
       ]
     }
   ]

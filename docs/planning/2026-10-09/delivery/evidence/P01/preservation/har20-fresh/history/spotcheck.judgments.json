@@ -1,0 +1,206 @@
+{
+ "i:28339abd-a8f6-4e02-88e0-033eec825fc3.jsonl:2933#tm-046": {
+  "note": "no user turn anywhere after send; pane log needle hits {'start': 0, 'middle': 0, 'end': 0}",
+  "verdict": "agree"
+ },
+ "i:28339abd-a8f6-4e02-88e0-033eec825fc3.jsonl:3807#tm-064": {
+  "note": "raw user turn at rollout-2026-09-23T17-07-47-01a0d04f-832:88 (start,middle,end)",
+  "verdict": "agree"
+ },
+ "q:agora-anim.jsonl:12": {
+  "note": "raw user turn at updates.jsonl:1897 (start,middle,end)",
+  "verdict": "agree"
+ },
+ "q:agora-backend.jsonl:5": {
+  "note": "raw user turn at updates.jsonl:842 (start,middle,end)",
+  "verdict": "agree"
+ },
+ "q:agora-frontend.jsonl:33": {
+  "note": "raw user turn at updates.jsonl:1079 (start,middle,end)",
+  "verdict": "agree"
+ },
+ "q:agora-lead.jsonl:105": {
+  "note": "raw user turn at rollout-2026-09-29T19-17-30-01a0efac-6e4:134 (start,middle,end)",
+  "verdict": "agree"
+ },
+ "q:agora-lead.jsonl:63": {
+  "note": "raw user turn at rollout-2026-09-29T15-24-47-01a0eed7-5ea:252 (start,middle,end)",
+  "verdict": "agree"
+ },
+ "q:agora-lead.jsonl:79": {
+  "note": "raw user turn at rollout-2026-09-29T15-24-54-01a0eed7-7c1:345 (start,middle,end)",
+  "verdict": "agree"
+ },
+ "q:agora-rev.jsonl:109": {
+  "note": "raw user turn at rollout-2026-09-29T15-24-47-01a0eed7-5ea:301 (start,middle,end)",
+  "verdict": "agree"
+ },
+ "q:agora-rev.jsonl:42": {
+  "note": "raw user turn at rollout-2026-09-29T15-24-43-01a0eed7-522:376 (start,middle,end)",
+  "verdict": "agree"
+ },
+ "q:ccc-frontend-dev.jsonl:23": {
+  "note": "no user turn anywhere after send; pane log needle hits {'start': 0, 'middle': 0, 'end': 0}",
+  "verdict": "agree"
+ },
+ "q:ccc-frontend-dev.jsonl:28": {
+  "note": "no user turn anywhere after send; pane log needle hits {'start': 0, 'middle': 0, 'end': 0}",
+  "verdict": "agree"
+ },
+ "q:ccc-frontend-dev.jsonl:32": {
+  "note": "no user turn anywhere after send; pane log needle hits {'start': 0, 'middle': 0, 'end': 0}",
+  "verdict": "agree"
+ },
+ "q:claude.jsonl:4": {
+  "note": "raw user turn at updates.jsonl:60 (start,middle,end)",
+  "verdict": "agree"
+ },
+ "q:claude.jsonl:7": {
+  "note": "raw user turn at updates.jsonl:393 (whole)",
+  "verdict": "agree"
+ },
+ "q:codex.jsonl:10": {
+  "note": "no user turn anywhere after send; pane log needle hits {'whole': 1}",
+  "verdict": "agree"
+ },
+ "q:codex.jsonl:3": {
+  "note": "no user turn anywhere after send; pane log needle hits {'whole': 0}",
+  "verdict": "agree"
+ },
+ "q:codex.jsonl:4": {
+  "note": "no user turn anywhere after send; pane log needle hits {'whole': 0}",
+  "verdict": "agree"
+ },
+ "q:codex.jsonl:6": {
+  "note": "raw user turn at updates.jsonl:208 (whole)",
+  "verdict": "agree"
+ },
+ "q:codex.jsonl:9": {
+  "note": "no user turn anywhere after send; pane log needle hits {'whole': 0}",
+  "verdict": "agree"
+ },
+ "q:codexdev.jsonl:1": {
+  "note": "no user turn anywhere after send; pane log needle hits {}",
+  "verdict": "agree"
+ },
+ "q:codexdev.jsonl:2": {
+  "note": "no user turn anywhere after send; pane log needle hits {}",
+  "verdict": "agree"
+ },
+ "q:codexdev.jsonl:3": {
+  "note": "no user turn anywhere after send; pane log needle hits {}",
+  "verdict": "agree"
+ },
+ "q:grok.jsonl:6": {
+  "note": "no user turn anywhere after send; pane log needle hits {'whole': 0}",
+  "verdict": "agree"
+ },
+ "q:grok.jsonl:7": {
+  "note": "no user turn anywhere after send; pane log needle hits {}",
+  "verdict": "agree"
+ },
+ "q:grok.jsonl:8": {
+  "note": "no user turn anywhere after send; pane log needle hits {'whole': 0}",
+  "verdict": "agree"
+ },
+ "q:grok.jsonl:9": {
+  "note": "no user turn anywhere after send; pane log needle hits {}",
+  "verdict": "agree"
+ },
+ "q:grokrev.jsonl:1": {
+  "note": "no user turn anywhere after send; pane log needle hits {}",
+  "verdict": "agree"
+ },
+ "q:grokrev.jsonl:2": {
+  "note": "no user turn anywhere after send; pane log needle hits {}",
+  "verdict": "agree"
+ },
+ "q:grokrev.jsonl:3": {
+  "note": "no user turn anywhere after send; pane log needle hits {}",
+  "verdict": "agree"
+ },
+ "q:nfl-grok.jsonl:12": {
+  "note": "the agent's session files are gone since extraction (2 missing)",
+  "verdict": "unverifiable"
+ },
+ "q:nfl-lead.jsonl:10": {
+  "note": "raw user turn at updates.jsonl:657 (start,middle,end)",
+  "verdict": "agree"
+ },
+ "q:nfl-lead.jsonl:24": {
+  "note": "the agent's session files are gone since extraction (2 missing)",
+  "verdict": "unverifiable"
+ },
+ "q:orchestrator.jsonl:2": {
+  "note": "no user turn anywhere after send; pane log needle hits {}",
+  "verdict": "agree"
+ },
+ "q:orchestrator.jsonl:3": {
+  "note": "no user turn anywhere after send; pane log needle hits {}",
+  "verdict": "agree"
+ },
+ "q:orchestrator.jsonl:51": {
+  "note": "raw user turn at updates.jsonl:286 (whole)",
+  "verdict": "agree"
+ },
+ "q:orchestrator.jsonl:8": {
+  "note": "no user turn anywhere after send; pane log needle hits {}",
+  "verdict": "agree"
+ },
+ "q:tm-209-lead.jsonl:100": {
+  "note": "no user turn anywhere after send; pane log needle hits {'start': 0, 'middle': 0, 'end': 0}",
+  "verdict": "agree"
+ },
+ "q:tm-209-lead.jsonl:111": {
+  "note": "only hit is an UNMAPPED session 01a0e578-eba3:1624 (a co-recipient; no agent mapping), not the intended agent",
+  "verdict": "agree"
+ },
+ "q:tm-209-lead.jsonl:112": {
+  "note": "no user turn anywhere after send; pane log needle hits {'start': 0, 'middle': 0, 'end': 0}",
+  "verdict": "agree"
+ },
+ "q:tm-209-lead.jsonl:115": {
+  "note": "no user turn anywhere after send; pane log needle hits {'start': 0, 'middle': 0, 'end': 0}",
+  "verdict": "agree"
+ },
+ "q:tm-209-lead.jsonl:14": {
+  "note": "no user turn anywhere after send; pane log needle hits {'start': 0, 'middle': 0, 'end': 0}",
+  "verdict": "agree"
+ },
+ "q:tm-209-lead.jsonl:19": {
+  "note": "no user turn anywhere after send; pane log needle hits {'start': 0, 'middle': 0, 'end': 0}",
+  "verdict": "agree"
+ },
+ "q:tm-209-lead.jsonl:58": {
+  "note": "raw user turn at rollout-2026-09-27T19-45-27-01a0e579-4f9:283 (start,middle,end)",
+  "verdict": "agree"
+ },
+ "q:tm-209-lead.jsonl:77": {
+  "note": "raw user turn at rollout-2026-09-27T19-45-28-01a0e579-503:733 (start,middle,end)",
+  "verdict": "agree"
+ },
+ "q:tm-209-worker3.jsonl:25": {
+  "note": "no user turn anywhere after send; pane log needle hits {'start': 0, 'middle': 0, 'end': 0}",
+  "verdict": "agree"
+ },
+ "q:tm-209-worker4.jsonl:55": {
+  "note": "no user turn anywhere after send; pane log needle hits {'start': 1, 'middle': 1, 'end': 1}",
+  "verdict": "agree"
+ },
+ "q:tm-209-worker4.jsonl:56": {
+  "note": "no user turn anywhere after send; pane log needle hits {'start': 0, 'middle': 0, 'end': 0}",
+  "verdict": "agree"
+ },
+ "q:tm-209-worker6.jsonl:32": {
+  "note": "no user turn anywhere after send; pane log needle hits {'start': 0, 'middle': 0, 'end': 0}",
+  "verdict": "agree"
+ },
+ "q:tm-209-worker6.jsonl:41": {
+  "note": "raw user turn at rollout-2026-09-27T18-40-16-01a0e53d-a1d:383 (start,middle,end)",
+  "verdict": "agree"
+ },
+ "q:tm-209-worker6.jsonl:6": {
+  "note": "raw user turn at updates.jsonl:922 (start,middle)",
+  "verdict": "agree"
+ }
+}

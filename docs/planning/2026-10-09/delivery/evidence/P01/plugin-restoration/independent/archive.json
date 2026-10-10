@@ -1,0 +1,18 @@
+{
+  "externalSource": "/mnt/c/Users/RyanHelms/.cache/agentmux/plugin-independent-review",
+  "files": {
+    "agents-result.json": "8bb21166c066c0dd480db1a50957c1a1e1b91c8f7608fb265e18b07af654a70b",
+    "collect-result.json": "e8ea09ca288c8ec5e21d4756184f175d68c9f3b5f89464ad43a575680f53fe1c",
+    "collect_probe.py": "de031d9de17476933e4662defc4fcb8fef6b7d3dedaf6ade19598f1a7dc644ec",
+    "guide-scenarios.json": "717d149b20b8e9ec1a06d5f81e08c06349715445736e006daff64031497d65f3",
+    "independent-review.json": "57adbd941c42dd9d5d66d0d13dd68992d1d625c24c29b7404f30cde889d42820",
+    "live-result.json": "379b674927da49df40ff0b7ac58021a9fe6a18f1e711e94b112f38bd262a6742",
+    "live_guard_probe.py": "23fcf1952fbb11c7161f9a420f3d7957d1ebea478f4cfecc1eb54b851c45328a",
+    "original-dispatch-result.json": "fad03c9455a17402b783204aa70a64d87b87e72ef6c8eaa1a0df02499f0e7c29",
+    "original-dispatch-result.log": "4764eb6859323a8a8c448be5bbbc2cd989562be9c100c1c7c67ffaa939e74220",
+    "original_dispatch_probe.py": "176858c8354e5e874b0d65f424ddb8b0a52ee8c9f60af641e054dce0a1fef22f",
+    "runtime_probe.py": "5d817a29c242e74a717b7163f5df5ae30b4a685ffeeac0d044b137136d1b1241",
+    "teams-result.json": "640225b73db0b5b9c2ed90acb7f1378e58ed77303bd47b8fe65cadf79d87baaa"
+  },
+  "scope": "Bounded maintained plugin compatibility proof; metadata validator does not execute hooks or validate skills folder. Earlier worker packaging source hashes for README/test are superseded by final7 source-bound run; original report retained. No personal configuration files copied; no phase/P06 acceptance."
+}

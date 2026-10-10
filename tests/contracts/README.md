@@ -56,3 +56,10 @@ Only the test subprocess receives a disposable home, cache, configuration and da
 The original runner's unmodified `result.json` is copied to `hub-full-result.json` in the fresh CI evidence directory. Admission requires the full six-module profile, at least the existing 125 tests, no skipped or expected-failure tests, no failures, and unchanged hub source hashes matching the report. The CI record also binds the shell entry point and circle provisioning script. The report preserves `phaseGatePassed: false`; this check qualifies the original full profile on its actual recorded host, not R3, power-loss recovery or the final bilateral platform demonstration.
 
 The additional checks are `original-hub-full-profile` and `original-hub-evidence`; the preceding 18 checks remain required. Failed or incomplete original-suite output is retained when the runner produces it. A passing workflow does not approve a phase automatically.
+
+
+## Maintained legacy plugin native check
+
+CI retains the previous22checks and adds `maintained-plugin-preservation`. `plugin_preservation.py` runs the unchanged16hook/MCP and4launcher methods, plus13hook/MCP and3packaging methods, in private state. Admission requires the exact36method IDs derived from the four source modules, zero skips/errors/expected failures, matching before/after source hashes, fresh report/log paths, matching log digest and removed private home. Reports bind all22package files and current runtime/test inputs.
+
+Discovery/HTTP fixtures are local and no provider is called. This qualifies the maintained replacement on its recorded native host; it does not establish original-source equality, authenticated inference, Windows-native hook execution or P06 framework acceptance. All earlier failed and skipped evidence remains retained.

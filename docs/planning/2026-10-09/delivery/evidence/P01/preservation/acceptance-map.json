@@ -4762,6 +4762,28 @@
       "sha256": "42e68370fde744a8aab48e1e462046092c8caf4f950b885ee6ef35db6819f5c6",
       "recordedCandidateOrBase": "37e0d8cd7439d31a491ac673e73438f7885cd04e",
       "bindingNote": "Use the report source hashes and explicit working-change flag. Names and field-panel fixes are tested working changes above the recorded base, not bytes already present in 37e0d8c."
+    },
+    "native80": {
+      "path": "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/archive.json",
+      "sha256": "55037cb4ec9b4d51b838b70b48ee181388488818563b5f7e64a429544f1d1089",
+      "recordedCandidateOrBase": "80f43e02f3344696a3985c48ef12578319f3bd0f",
+      "bindingNote": "Independent native Linux/macOS588source references each match exact80f; all22 checks pass. No plugin code included."
+    },
+    "har20Fresh": {
+      "path": "docs/planning/2026-10-09/delivery/evidence/P01/preservation/har20-fresh/result.json",
+      "sha256": "b5e88928edfa9caa6b6086c7d6431aa53bafc9209861e7ba2d4aca775380c1f4",
+      "bindingNote": "Current original Python bytes and preserved historical judgments; synthetic raw inputs; only shell-owned output paths/line endings adapted, full diff retained."
+    },
+    "pluginRestoration": {
+      "path": "docs/planning/2026-10-09/delivery/evidence/P01/plugin-restoration/parent-review.json",
+      "sha256": "ca0bc91704dbad8f8d966c30dc8783f81dd74257bafb91e631ef03ec668ce058",
+      "bindingNote": "New maintained source, original unavailable, exact final22source hashes; scoped36 compatibility methods and independent actual runtime/Git checks, not P06 or phase acceptance."
+    },
+    "wsl80": {
+      "path": "docs/planning/2026-10-09/delivery/evidence/P01/wsl-native-80f43e0/archive.json",
+      "sha256": "840be29dac5e29a99ce361b6596466c8cdaefeda54aa623b9783c65fd0253cfe",
+      "recordedCandidateOrBase": "80f43e02f3344696a3985c48ef12578319f3bd0f",
+      "bindingNote": "ExactGit archive on WSL native Linux filesystem with preparedlockedruntime, no credential inheritance; rawresults/sourcechecks/cleanup retained."
     }
   },
   "checks": [
@@ -5143,20 +5165,18 @@
       "componentId": "HAR-20",
       "requirement": "Use synthetic matching and nonmatching sources to check wrong recipients, clock skew, truncation, duplicates and missing-source unknowns; compare both judgment passes without deleting disagreements.",
       "requiredEnvironment": "Offline Python with portable fixture records; add direct correlation regression cases.",
-      "status": "partial",
+      "status": "qualified",
       "proved": [
         "Synthetic correlator checks cover wrong recipient, inclusive clock-skew bound, truncation, duplicates and unknown/missing sources.",
-        "Both retained judgment files are compared without deletion: first pass 49 agree / 10 disagree / 2 unverifiable; second 49 agree / 2 unverifiable. Shared 35 IDs have no changed shared verdict."
+        "Both retained judgment files are compared without deletion: first pass 49 agree / 10 disagree / 2 unverifiable; second 49 agree / 2 unverifiable. Shared 35 IDs have no changed shared verdict.",
+        "Fresh unchanged correlate/spotcheck scripts produce independently expected agree/disagree/unverifiable judgments from synthetic raw inputs. Two actual path-adapted full determinism shell executions (four complete cycles) yield identical5derivedSHA256 outputs; inputs and both original judgment files remain unchanged. Original shell byte equality and historical verdict correctness are not claimed."
       ],
       "evidenceKeys": [
-        "comms"
+        "comms",
+        "har20Fresh"
       ],
-      "remainingAssertions": [
-        "spotcheck.py has not produced fresh judgments from the synthetic raw sources. Retained judgment comparison does not prove present spot-check generation."
-      ],
-      "nextChecks": [
-        "Inspect spotcheck.py input paths, copy it and frozen raw fixtures into an isolated root, redirect fixture paths only, run python spotcheck.py, and assert newly generated agree/disagree/unverifiable judgments against known cases. Keep both original passes."
-      ],
+      "remainingAssertions": [],
+      "nextChecks": [],
       "limits": [],
       "sourceAssertions": [
         "analysis/comms-2026-09/correlate.py",
@@ -5165,26 +5185,47 @@
         "analysis/comms-2026-09/spotcheck.judgments.json",
         "analysis/comms-2026-09/spotcheck.pass1.judgments.json"
       ],
-      "existingTests": []
+      "existingTests": [],
+      "history": [
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "Synthetic correlator checks cover wrong recipient, inclusive clock-skew bound, truncation, duplicates and unknown/missing sources.",
+              "Both retained judgment files are compared without deletion: first pass 49 agree / 10 disagree / 2 unverifiable; second 49 agree / 2 unverifiable. Shared 35 IDs have no changed shared verdict."
+            ],
+            "remainingAssertions": [
+              "spotcheck.py has not produced fresh judgments from the synthetic raw sources. Retained judgment comparison does not prove present spot-check generation."
+            ],
+            "nextChecks": [
+              "Inspect spotcheck.py input paths, copy it and frozen raw fixtures into an isolated root, redirect fixture paths only, run python spotcheck.py, and assert newly generated agree/disagree/unverifiable judgments against known cases. Keep both original passes."
+            ],
+            "evidenceKeys": [
+              "comms"
+            ]
+          },
+          "reason": "Review fresh source-bound evidence; retain earlier gaps and scope."
+        }
+      ]
     },
     {
       "id": "HAR-20-C02",
       "componentId": "HAR-20",
       "requirement": "Verify repeated analysis yields identical derived hashes on a frozen input set while retaining prior judgment files.",
       "requiredEnvironment": "An isolated copy of a frozen dataset; this script writes derived outputs and is not a read-only command.",
-      "status": "partial",
+      "status": "qualified",
       "proved": [
-        "Two frozen synthetic correlate.py runs produce identical outcomes, sample and summary hashes; both prior judgment files remain unchanged."
+        "Two frozen synthetic correlate.py runs produce identical outcomes, sample and summary hashes; both prior judgment files remain unchanged.",
+        "Fresh unchanged correlate/spotcheck scripts produce independently expected agree/disagree/unverifiable judgments from synthetic raw inputs. Two actual path-adapted full determinism shell executions (four complete cycles) yield identical5derivedSHA256 outputs; inputs and both original judgment files remain unchanged. Original shell byte equality and historical verdict correctness are not claimed."
       ],
       "evidenceKeys": [
-        "comms"
+        "comms",
+        "har20Fresh"
       ],
-      "remainingAssertions": [
-        "The repeated execution covers correlate.py only; determinism.sh and the new spotcheck judgment output have not been exercised together."
-      ],
-      "nextChecks": [
-        "After supplying portable raw snapshots in an isolated copy, run the inspected determinism.sh flow twice; compare all derived output and new-judgment hashes and assert original judgment history is retained."
-      ],
+      "remainingAssertions": [],
+      "nextChecks": [],
       "limits": [],
       "sourceAssertions": [
         "analysis/comms-2026-09/correlate.py",
@@ -5195,6 +5236,28 @@
       ],
       "existingTests": [
         "analysis/comms-2026-09/determinism.sh"
+      ],
+      "history": [
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "Two frozen synthetic correlate.py runs produce identical outcomes, sample and summary hashes; both prior judgment files remain unchanged."
+            ],
+            "remainingAssertions": [
+              "The repeated execution covers correlate.py only; determinism.sh and the new spotcheck judgment output have not been exercised together."
+            ],
+            "nextChecks": [
+              "After supplying portable raw snapshots in an isolated copy, run the inspected determinism.sh flow twice; compare all derived output and new-judgment hashes and assert original judgment history is retained."
+            ],
+            "evidenceKeys": [
+              "comms"
+            ]
+          },
+          "reason": "Review fresh source-bound evidence; retain earlier gaps and scope."
+        }
       ]
     },
     {
@@ -5343,21 +5406,19 @@
       "componentId": "HUB-01",
       "requirement": "Round-trip every supported address form; preserve invalid-name suggestions, explicit normalization and refusal of malformed or wildcard-bearing identity tokens.",
       "requiredEnvironment": "Pinned Python and SQLite with FTS5 on native macOS/Linux and Linux filesystems in WSL; isolated temporary homes.",
-      "status": "partial",
+      "status": "qualified",
       "proved": [
         "Existing Names tests cover explicit normalization/suggestions, session round trip, group-role parsing, agent/group subject conversion and invalid prefix; federation tests reject bad subject tokens.",
-        "Added six-method Names selection covers all eight address forms, canonical round trips and subject mapping, malformed/wildcard identity tokens, intentional role:* scope, and equal per-part length limits for both session spellings. Against original 37e source it fails ten subtests; working source passes all six methods. Original test methods are unchanged by AST comparison."
+        "Added six-method Names selection covers all eight address forms, canonical round trips and subject mapping, malformed/wildcard identity tokens, intentional role:* scope, and equal per-part length limits for both session spellings. Against original 37e source it fails ten subtests; working source passes all six methods. Original test methods are unchanged by AST comparison.",
+        "Actual native Linux/macOS original hub full129tests pass with zero failures/errors/skips, including current address/config/federation assertions. Independent source identity matches exact80f candidate, closing recorded native legacy-suite gap. Original WSL focused/broad fixtures remain separately preserved."
       ],
       "evidenceKeys": [
         "baseline",
-        "namesReview"
+        "namesReview",
+        "native80"
       ],
-      "remainingAssertions": [
-        "The two parser fixes still need the affected legacy suite and declared native macOS/Linux environment checks. The focused WSL result closes the address-form and refusal probe gap, not full platform qualification."
-      ],
-      "nextChecks": [
-        "Run affected hub offline/federation tests on the fixed candidate, then obtain declared native legacy-suite evidence. Reuse unchanged unrelated evidence."
-      ],
+      "remainingAssertions": [],
+      "nextChecks": [],
       "limits": [],
       "sourceAssertions": [
         "contracts/v1/README.md",
@@ -5387,6 +5448,30 @@
       ],
       "existingTests": [
         "hub/tests/test_hub_offline.py"
+      ],
+      "history": [
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "Existing Names tests cover explicit normalization/suggestions, session round trip, group-role parsing, agent/group subject conversion and invalid prefix; federation tests reject bad subject tokens.",
+              "Added six-method Names selection covers all eight address forms, canonical round trips and subject mapping, malformed/wildcard identity tokens, intentional role:* scope, and equal per-part length limits for both session spellings. Against original 37e source it fails ten subtests; working source passes all six methods. Original test methods are unchanged by AST comparison."
+            ],
+            "remainingAssertions": [
+              "The two parser fixes still need the affected legacy suite and declared native macOS/Linux environment checks. The focused WSL result closes the address-form and refusal probe gap, not full platform qualification."
+            ],
+            "nextChecks": [
+              "Run affected hub offline/federation tests on the fixed candidate, then obtain declared native legacy-suite evidence. Reuse unchanged unrelated evidence."
+            ],
+            "evidenceKeys": [
+              "baseline",
+              "namesReview"
+            ]
+          },
+          "reason": "Review fresh source-bound evidence; retain earlier gaps and scope."
+        }
       ]
     },
     {
@@ -5446,19 +5531,17 @@
       "componentId": "HUB-11",
       "requirement": "Round-trip configuration and permissions, compare remote URL forms and local aliases, preserve sharing defaults and reject malformed IDs/envelopes.",
       "requiredEnvironment": "Pinned Python and SQLite with FTS5 on native macOS/Linux and Linux filesystems in WSL; isolated temporary homes.",
-      "status": "partial",
+      "status": "qualified",
       "proved": [
-        "Config.test_round_trip checks saved repository/peer values and 0600 permissions; Identity tests compare URL spellings, local aliases and unshared defaults; Envelope tests reject malformed IDs/type/version/data and bad subject tokens."
+        "Config.test_round_trip checks saved repository/peer values and 0600 permissions; Identity tests compare URL spellings, local aliases and unshared defaults; Envelope tests reject malformed IDs/type/version/data and bad subject tokens.",
+        "Actual native Linux/macOS original hub full129tests pass with zero failures/errors/skips, including current address/config/federation assertions. Independent source identity matches exact80f candidate, closing recorded native legacy-suite gap. Original WSL focused/broad fixtures remain separately preserved."
       ],
       "evidenceKeys": [
-        "baseline"
+        "baseline",
+        "native80"
       ],
-      "remainingAssertions": [
-        "Declared native macOS/Linux legacy fixture execution is not supplied by the archived native contract-only job. Verify complete assertion coverage and qualify the declared environments."
-      ],
-      "nextChecks": [
-        "Run the existing fed unit selection through the strict local runner in prepared native macOS/Linux fixtures; reuse unchanged WSL hashes."
-      ],
+      "remainingAssertions": [],
+      "nextChecks": [],
       "limits": [],
       "sourceAssertions": [
         "hub/fed/config.py",
@@ -5467,6 +5550,28 @@
       ],
       "existingTests": [
         "hub/tests/test_fed_unit.py"
+      ],
+      "history": [
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "Config.test_round_trip checks saved repository/peer values and 0600 permissions; Identity tests compare URL spellings, local aliases and unshared defaults; Envelope tests reject malformed IDs/type/version/data and bad subject tokens."
+            ],
+            "remainingAssertions": [
+              "Declared native macOS/Linux legacy fixture execution is not supplied by the archived native contract-only job. Verify complete assertion coverage and qualify the declared environments."
+            ],
+            "nextChecks": [
+              "Run the existing fed unit selection through the strict local runner in prepared native macOS/Linux fixtures; reuse unchanged WSL hashes."
+            ],
+            "evidenceKeys": [
+              "baseline"
+            ]
+          },
+          "reason": "Review fresh source-bound evidence; retain earlier gaps and scope."
+        }
       ]
     },
     {
@@ -5533,7 +5638,7 @@
     {
       "id": "HUB-24-C02",
       "componentId": "HUB-24",
-      "requirement": "Compare all four orchestration scenarios and E1\u00e2\u20ac\u201cE6 against baseline and target; add explicit acceptance checks and keep failed/skipped outcomes.",
+      "requirement": "Compare all four orchestration scenarios and E1â€“E6 against baseline and target; add explicit acceptance checks and keep failed/skipped outcomes.",
       "requiredEnvironment": "Pinned Python and SQLite with FTS5 on native macOS/Linux and Linux filesystems in WSL; isolated temporary homes. tmux, isolated repos and approved real provider accounts/budget.",
       "status": "missing",
       "proved": [
@@ -5589,19 +5694,18 @@
       "componentId": "HUB-26",
       "requirement": "Run all existing suites in their declared environments, recording every pass/fail/skip and known baseline failure; do not import old counts as a new result.",
       "requiredEnvironment": "Pinned Python and SQLite with FTS5 on native macOS/Linux and Linux filesystems in WSL; isolated temporary homes. Bash; real NATS/nsc/nats-py/Git for broker suites; disposable kind only when requested.",
-      "status": "partial",
+      "status": "qualified",
       "proved": [
-        "Strict WSL full profile records 125 tests across six existing hub modules with no skips. Source hashes bind this baseline."
+        "Strict WSL full profile records 125 tests across six existing hub modules with no skips. Source hashes bind this baseline.",
+        "Native Linux/macOS original full129 and callback11 pass against80f; actual WSL native filesystem exact80f full129 and callback11 also pass, zero skips, unchanged inputs. Reports include original failures and exact environments; no new plugin/nativeCI or later adapters accepted."
       ],
       "evidenceKeys": [
-        "baseline"
+        "baseline",
+        "native80",
+        "wsl80"
       ],
-      "remainingAssertions": [
-        "Native macOS/Linux execution of the existing full hub suites remains unproven in the supplied evidence. Native contracts CI does not run those legacy suites; old tests.yml can skip broker tests when nats/nsc are absent."
-      ],
-      "nextChecks": [
-        "On prepared native macOS/Linux run python -m hub.tests.run_local --profile full with pinned nats/nsc; preserve per-test failures/skips and source hashes. Do not rerun unchanged WSL baseline without a relevant source change."
-      ],
+      "remainingAssertions": [],
+      "nextChecks": [],
       "limits": [],
       "sourceAssertions": [
         "hub/tests/__init__.py",
@@ -5668,6 +5772,28 @@
         "hub/tests/test_fed_live.py",
         "hub/tests/test_governance.py",
         "hub/tests/test_local_runner.py"
+      ],
+      "history": [
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "Strict WSL full profile records 125 tests across six existing hub modules with no skips. Source hashes bind this baseline."
+            ],
+            "remainingAssertions": [
+              "Native macOS/Linux execution of the existing full hub suites remains unproven in the supplied evidence. Native contracts CI does not run those legacy suites; old tests.yml can skip broker tests when nats/nsc are absent."
+            ],
+            "nextChecks": [
+              "On prepared native macOS/Linux run python -m hub.tests.run_local --profile full with pinned nats/nsc; preserve per-test failures/skips and source hashes. Do not rerun unchanged WSL baseline without a relevant source change."
+            ],
+            "evidenceKeys": [
+              "baseline"
+            ]
+          },
+          "reason": "Actual original full129 andcallback11 on nativeLinux/macOS and exactWSL80f with no skips; preserve prior missing-native gap."
+        }
       ]
     },
     {
@@ -5915,11 +6041,11 @@
     }
   ],
   "counts": {
-    "qualified": 13,
-    "partial": 13,
+    "qualified": 18,
+    "partial": 8,
     "missing": 2
   },
-  "updatedAt": "2026-10-09T23:12:25.651071+00:00",
+  "updatedAt": "2026-10-10T00:52:29.088344+00:00",
   "workingChangesReviewed": {
     "names": "Two validation fixes and three additive test methods; source hashes in namesReview. The original full suite is not a new run against these changes.",
     "fieldPanels": "Event synchronization repair; source hashes and positive/negative results in fieldRace. Full dashboard failed on the earlier test and is not retroactively a pass."
@@ -5930,6 +6056,12 @@
       "workflowRun": 38002099888,
       "evidenceKey": "native37",
       "review": "Both native platforms have 18 successful checks, 45 conformance tests, 18 storage cases, 11 leaf and 19 signed-leaf checks. All 16 archived artifact hashes match the reviewed manifest. Does not include legacy full hub suites or working Names/field-panel changes."
+    },
+    {
+      "candidate": "80f43e02f3344696a3985c48ef12578319f3bd0f",
+      "workflowRun": 38009885497,
+      "evidenceKey": "native80",
+      "review": "Both native platforms all22 checks pass, hub129 no skips,588source references each verified. Additional plugin/har20 evidence source-bound separately. Remaining named P01 preservation obligations still open."
     }
   ]
 }

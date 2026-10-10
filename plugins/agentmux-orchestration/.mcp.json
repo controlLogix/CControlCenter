@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "agentmux-roster": {
+      "command": "python3",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/bin/agentmux-plugin",
+        "mcp"
+      ]
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "reports": {
+    "full": {
+      "status": "passed",
+      "tests": 129,
+      "seconds": 56.918,
+      "failures": [],
+      "skips": []
+    },
+    "callbacks": {
+      "status": "passed",
+      "tests": 11,
+      "seconds": 0.335,
+      "failures": [],
+      "skips": []
+    }
+  },
+  "remainingFixtureProcesses": [],
+  "unreadableEnvironmentCount": 75,
+  "privateStateRetained": true
+}

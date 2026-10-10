@@ -1,0 +1,9 @@
+{
+  "externalSource": "/home/ryan/.cache/agentmux-governance/plugin-hook-mcp-djbi47cl",
+  "files": {
+    "result.json": "a7068144f7f523752da73caf1d51a2f77976db1ffe9cfd7ac4d23959b477f05c",
+    "runner.py": "e651eabd213ecdafefa8e09f4db7e07e144c091aa78d5f280858ead818a7e093",
+    "tests.log": "d9c31d71b14f316f0749ce3859169ae984f8347fe03f3537ed2bdb198e2b701c"
+  },
+  "scope": "Real maintained package29 checks including unchanged16; package byte identity retained; not whole phase acceptance."
+}

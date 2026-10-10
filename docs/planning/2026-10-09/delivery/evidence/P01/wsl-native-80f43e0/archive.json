@@ -1,0 +1,15 @@
+{
+  "externalSource": "/home/ryan/.cache/agentmux-governance/native-qualification-amx80f-zvd98_0a",
+  "sourceCommit": "80f43e02f3344696a3985c48ef12578319f3bd0f",
+  "files": {
+    "callbacks-result.json": "4dba0eab094cc0a7581c14ba28773545d931395dbaf194f6afcded7da1336f3b",
+    "callbacks.log": "c782ed59118d2d7b133bfaad00b218dc13497741e8b88f7e51b1a1b36950d9a2",
+    "cleanup.json": "9b5ecbba9e395ba5cd718985a8438e6b393851ba255085c2cc2beac56b6b8040",
+    "full-result.json": "c0339c601699e5f09f48cd96ee2603f6b4c910f468951337ec49b416b61429ee",
+    "full.log": "dda5a8491f0de9fcc97a7b44c98fd9df2e7e105014a8983f68ed717c1a11b7b4",
+    "qualification.json": "550d91fca0ad6f7c4fd9d5e97ebe560027915a3cc79579501659b449654864cc",
+    "runner.py": "9d174ba8e0bf28afae0fc983a1ea7ca5a593ac6743296b743f7ba825e872b461",
+    "setup.json": "15766cebf41db610b6835a9d3059523575528cc76d9769b49deb434defdac0f9"
+  },
+  "scope": "Actual WSL native Linux filesystem exact80f full129 +callback11, no skips and unchanged sources. Fixture-specific cleanup retained, with unreadable process environment limits. No paid-provider, plugin or phase acceptance."
+}

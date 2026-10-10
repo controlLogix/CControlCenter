@@ -1,0 +1,60 @@
+{
+  "kind": "manual guide-to-runtime review scenarios, not model evaluations",
+  "basis": "skill-creator guidance for realistic prompts and discriminating expected outcomes; no providers or baseline model runs authorized in this review",
+  "scenarios": [
+    {
+      "skill": "agent-new",
+      "request": "Create a repo-scoped read-only reviewer named check-reader; do not start it.",
+      "expected": "List definitions/problems; create complete writable-scope definition through agentdef; read back; no provider launch.",
+      "nearMiss": "Start the existing reviewer on TM-123."
+    },
+    {
+      "skill": "agent-roster",
+      "request": "Which definitions can review changes, and what is check-reader instructed to do?",
+      "expected": "agents JSON list plus detail; preserve persona/checksum distinction and collisions; no mutation.",
+      "nearMiss": "Who is currently running in tmux?"
+    },
+    {
+      "skill": "agent-edit",
+      "request": "Change check-reader description but preserve its persona and tool restrictions.",
+      "expected": "Read full definition/checksum; check live workers; submit full replacement with checksum; read back; stale conflict never unchecked retry.",
+      "nearMiss": "Create another reviewer under a new name."
+    },
+    {
+      "skill": "agent-remove",
+      "request": "Remove the unused check-reader definition I just created.",
+      "expected": "Read definition/scope/checksum and live state; authorized agentdrop with checksum; readback absence; no direct unlink.",
+      "nearMiss": "Stop the running reviewer pane."
+    },
+    {
+      "skill": "team-compose",
+      "request": "Propose a team for TM-123; I have not approved any hires.",
+      "expected": "Inspect task/definitions; recruit and roster; report proposed/approved policy state and gaps; no fabricated approval/hire.",
+      "nearMiss": "Hire an already approved reviewer."
+    },
+    {
+      "skill": "team-dispatch",
+      "request": "Launch the already approved reviewer for TM-123, using its definition.",
+      "expected": "Inspect readiness and roster; narrow hire KEY --name NAME; preserve disabled-policy/capacity errors; no model/actor overrides.",
+      "nearMiss": "Change reviewer configuration to skip approval."
+    },
+    {
+      "skill": "team-merge",
+      "request": "Collect the finished members for TM-123 into its lead integration worktree.",
+      "expected": "Inspect evidence/status; authorized dispatch collect; preserve conflict/live/dirty/branch refusal; no card close/release merge.",
+      "nearMiss": "Merge this platform feature branch into main."
+    },
+    {
+      "skill": "agent-config",
+      "request": "Show the current dispatch limit and change it to 2 as requested.",
+      "expected": "Read config first; typed config setting mutation via runtime; report result; no unrelated approval/auth changes.",
+      "nearMiss": "Print the provider API token so I can check it."
+    },
+    {
+      "skill": "agent-doctor",
+      "request": "Why is TM-123 not ready? Diagnose without launching or changing anything.",
+      "expected": "doctor --strict, definitions and dispatch status; concrete failure/remedy; no automatic policy/auth repair.",
+      "nearMiss": "Fix an unrelated Python application bug."
+    }
+  ]
+}

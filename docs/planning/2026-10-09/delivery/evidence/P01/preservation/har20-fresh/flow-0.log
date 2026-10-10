@@ -1,0 +1,7 @@
+{"lost_silent": 0, "outcomes": {"received": 3}, "rows": 3, "sample": 3}
+c810bef1a91b08b645b2e2b82eff94f8c679b851  out/outcomes.jsonl
+0c4042f3075421064570851cf042338137755419  out/summary.md
+c810bef1a91b08b645b2e2b82eff94f8c679b851  out/spotcheck.sample.jsonl
+35862610e80680fe09267bce75966b1304b4321e  out/spotcheck.raw.jsonl
+d9d6b5fd71cab5f5aa2b3818b9163de53383e354  spotcheck.judgments.json
+DETERMINISTIC: identical sha1 across two runs

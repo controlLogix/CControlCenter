@@ -1,0 +1,96 @@
+{
+  "kind": "independent maintained-plugin bounded review",
+  "candidateBase": "80f43e02f3344696a3985c48ef12578319f3bd0f",
+  "scope": "New maintained P01 preservation repair; unavailable original source not recovered.",
+  "phaseAccepted": false,
+  "sourceHashes": {
+    "taskmgmt/coordination.py": "21711353c6d0babf127df12eba0457970f8e22689e711004432fd018f3713ff3",
+    "taskmgmt/dispatch.py": "b04c6735c43ac0d7186706db1add5d7e1cc97b44f73e3f0832216db1bba67256",
+    "dashboard/server.py": "856adec15cbb491e3fae11ef71bd39105c16d888fea389154fe8e4c85a01bc68",
+    "dashboard/boardagents.py": "0957b0f90d2ab3573e16f32d64c6931dfe76fb713176068b28f0d9676524c484",
+    "dashboard/boardteams.py": "f0c964b8ebcc713f3cef3c609baa95ba2d46880722b421ba6051e345b4e1a882",
+    "dashboard/test_agentcli.py": "7ad779fbbfa98a77cfabdaa00a97062593f38f803ee7f93af295593986530bda",
+    "dashboard/test_teamcli.py": "ea240266d9bee62cc5d84ce12e10746e5ae8716ce3f2242f48851dda61354fc2"
+  },
+  "packageHashes": {
+    ".mcp.json": "6bbb7bf043bd2e3f59c954d742a1b48a30c8054ec6cf1b2946665d67345c557f",
+    "PROVENANCE.md": "00421e54990c7667bc6732596017e421231c74fe1d94abf54414b8d1b21c305d",
+    "README.md": "9b68d007b3647b1599e6c02d26d7f87d7b79d565a37f55ff8c427ec7af632ce3",
+    ".claude-plugin/plugin.json": "23175b54f6a73ac007473ccfaeb2c8444818e2b616f6817081e27482aa388028",
+    "bin/agentmux-plugin": "f872e9203751b7bf6e5413c3ec04162b1508dd901236f62fed095c2f6ddec1cd",
+    "hooks/agentmux-hook.sh": "e3184f77accfece692a56e9e0ee1a197d8a0594461f16e998aa825b4d9755975",
+    "hooks/hooks.json": "30da11b86abf4eae47e1010f0b3a268f5b8e15567e8dc5b1ccd681b1c6be2869",
+    "lib/gateway.py": "dc9e22d6c01c77f0880540fdb9c55118f6028fc5421990d80ef2119d4d7476ec",
+    "lib/policy.py": "41a64ff60f460490e66255255ec0f1f0884d76d92ea12cc320b8de09ec1681c6",
+    "lib/roster_mcp.py": "e36ae6deb4933ea1c94523cb03dc19c1924dd9000caaa51aaab158facaaf2441",
+    "tests/test_hook_mcp.py": "4fcb436784f7c540fda5fa7c6af4dbfcc60dede5527719c3015c86e25ade2d37",
+    "tests/test_packaging.py": "163901358871512fe641432461d9f59fa720a7963ffadb7c00d8f00b78dce143",
+    "skills/agent-config/SKILL.md": "56682aaea23a494098e20f562f2c8bdb22075a2b082ff5d0a5634a5c8a8d2e77",
+    "skills/agent-doctor/SKILL.md": "274eafd330b06c4a073c5084b2bf61ad1926f8cde0363b9b9e556c66938b2a8f",
+    "skills/agent-edit/SKILL.md": "ef26b75ba5436b4431e0db2a1f33ab79641f497b526ac83ea9073c9a6539ac30",
+    "skills/agent-new/SKILL.md": "15b14feca028299250a9b8b9464947751f84a70e230031ef0a24473cb143bcc4",
+    "skills/agent-remove/SKILL.md": "a0630a2ac81cb30d0363c62f8e577857cffcb1caffb2834ec691a0be451ff8e0",
+    "skills/agent-roster/SKILL.md": "95bb546b4d5ae87587f4cf7454ff153abc999f3215233f69ef45dcb18226093d",
+    "skills/team-compose/SKILL.md": "d213e7d8de15d897ad458223cf83cb48b19e127bb076c402617caf586f392531",
+    "skills/team-dispatch/SKILL.md": "eab6042bb9ace9c20ac406a870da25085ab2b1f63de4ca40e036cc512a0d05b4",
+    "skills/team-merge/SKILL.md": "a613335e4e8f48010fd37baf2b441b659b59988168158314c39f4a355e738743",
+    "skills/agent-config/scripts/runtime.py": "0fbf4f9d9aa534d0f93476307835cf6a28d73dc756adc422b8e538e2604beea7"
+  },
+  "observations": {
+    "definitionCLI": {
+      "tests": 5,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    "teamCLI": {
+      "tests": 9,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    "liveAndMCP": [
+      "real-definition-created-via-relocated-launcher",
+      "real-MCP-definition-detail-and-readonly-discovery",
+      "real-private-detached-worker-visible",
+      "live-refusal:pre-bash:{'command': 'python3 coordination.py agentdef repo reviewer'}",
+      "live-refusal:pre-edit:{'file_path': '/tmp/plugin-live-review-yo3dlc73/private project/.agentmux/agents/reviewer.md'}",
+      "live-refusal:pre-bash:{'command': \"rm '/tmp/plugin-live-review-yo3dlc73/private project/.agentmux/agents/reviewer.md'\"}",
+      "unrelated-edit-allowed",
+      "stale-worker-edit-allowed"
+    ],
+    "guides": "All nine inspected against actual commands and realistic request/near-miss traces in guide-scenarios.json. Manual inspection, not model skill evaluations.",
+    "hookImplementerReport": "Inspected29 passing cases with full unchanged package hashes, zero skips; original16 preserved.",
+    "patternCheck": "Failed solely stale sourceDigest for new package; parent owns review refresh.",
+    "packageCollect": "Nine actual collection outcomes passed via relocated launcher and explicit private runtime transport adapter; see collect-result.json and collect_probe.py.",
+    "originalDispatch": "Unchanged original suite333 passing assertions,0 failures; exact source hash and full log in original-dispatch-result files. Distinct from9 package launcher collection scenarios."
+  },
+  "resolvedFindings": [
+    "Correct dashboard env name and hook-only live-worker authority documented.",
+    "Supported hire --json passes narrow approval grammar.",
+    "Attached/path-bearing shell destination options inspected.",
+    "Relevant malformed physical-newline JSON not normalized into valid text."
+  ],
+  "limits": [
+    "Team launch mocked by unchanged original tests; no provider or inference execution.",
+    "Live guard tested with actual detached tmux sleep worker and stale transition; no attached GUI client.",
+    "Direct HTTP definition endpoint has no live-worker guard; hook preflight has unavoidable race and is not universal shell containment.",
+    "HTTP socket/body bounds do not provide absolute end-to-end deadline against trickled response headers; shell input length check follows read allocation.",
+    "No native Windows hook qualification, authenticated client qualification, P06 framework acceptance or historical source equality.",
+    "Native80f CI predates this untracked plugin and cannot qualify its code.",
+    "Collection integration uses real Git and unchanged actual dispatch main/collect/integrate/teardown, with mocked board/pane/claim transports; not live provider or actual dashboard collection."
+  ],
+  "diagnosticHashes": {
+    "agents-result.json": "8bb21166c066c0dd480db1a50957c1a1e1b91c8f7608fb265e18b07af654a70b",
+    "collect-result.json": "e8ea09ca288c8ec5e21d4756184f175d68c9f3b5f89464ad43a575680f53fe1c",
+    "collect_probe.py": "de031d9de17476933e4662defc4fcb8fef6b7d3dedaf6ade19598f1a7dc644ec",
+    "guide-scenarios.json": "717d149b20b8e9ec1a06d5f81e08c06349715445736e006daff64031497d65f3",
+    "live-result.json": "379b674927da49df40ff0b7ac58021a9fe6a18f1e711e94b112f38bd262a6742",
+    "live_guard_probe.py": "23fcf1952fbb11c7161f9a420f3d7957d1ebea478f4cfecc1eb54b851c45328a",
+    "original-dispatch-result.json": "fad03c9455a17402b783204aa70a64d87b87e72ef6c8eaa1a0df02499f0e7c29",
+    "original-dispatch-result.log": "4764eb6859323a8a8c448be5bbbc2cd989562be9c100c1c7c67ffaa939e74220",
+    "original_dispatch_probe.py": "176858c8354e5e874b0d65f424ddb8b0a52ee8c9f60af641e054dce0a1fef22f",
+    "runtime_probe.py": "5d817a29c242e74a717b7163f5df5ae30b4a685ffeeac0d044b137136d1b1241",
+    "teams-result.json": "640225b73db0b5b9c2ed90acb7f1378e58ed77303bd47b8fe65cadf79d87baaa"
+  }
+}

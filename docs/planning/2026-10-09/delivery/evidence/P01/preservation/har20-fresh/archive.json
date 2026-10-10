@@ -1,0 +1,33 @@
+{
+  "externalSource": "/home/ryan/.cache/agentmux-governance/har20-4d6vov3v",
+  "files": {
+    "adaptation.diff": "6c52eeff1faead62fa32c180fbdd74725487dbf1cff36acbff21a19e25381fcc",
+    "correlate.py": "9513e32863d64f2c5cd83f977748885c2cb0f24d05ec26e4024b005f494c74a1",
+    "determinism.sh": "43b82caeea3b68d1397e6ea646da1762ed98b333ccb218c770e84517af4a9a7c",
+    "flow-0.log": "b396be06d5cd93c193ab7bcd86b25df447f15abc742fbac683f3735f591b169e",
+    "flow-1.log": "b396be06d5cd93c193ab7bcd86b25df447f15abc742fbac683f3735f591b169e",
+    "history/spotcheck.judgments.json": "1d6b32d65828fb82c82ff896f887b20c8092c3bafa99b244c9fb8674b316a133",
+    "history/spotcheck.pass1.judgments.json": "f033729edcce658c538ae1f9f90b136b2365cc19bcf875803b71a9e7918d1a41",
+    "out/courier.jsonl": "bce6a583ceb10ceca3d9823f2d730b2c0511957663d368a36500cf4cd2b3ef3d",
+    "out/outcomes.jsonl": "3751d20cb68086b91c13add58f50c76ecb820047fe2b9adda06bc1e6136bd09f",
+    "out/panes.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "out/receipts.jsonl": "9c4771affe0d4bd00c8f4a7bf88e0e2cd5a8e4af52660d6790caa3a99236afdb",
+    "out/receipts.rescued-claude-config.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "out/spotcheck.raw.jsonl": "85a1bc558cac0db3b7c30a305bfb8dacae0d9499e6441f81e049a2912370a516",
+    "out/spotcheck.sample.jsonl": "3751d20cb68086b91c13add58f50c76ecb820047fe2b9adda06bc1e6136bd09f",
+    "out/summary.md": "3323102eced330c63c2af6eef191d8608d1499f35c716b1cd94ff1ed8b946342",
+    "out/transcripts.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "raw/agree-queue.jsonl": "71a101ca12d6cf0fda7cd8deef3a85a3612940efd30e8a5d5a92be4c3bedabff",
+    "raw/agree-session.jsonl": "a50129c46b598e5e8724c5b04f24264de1076f0ed6936b3b3bfb077abf068c32",
+    "raw/disagree-queue.jsonl": "5ce3820ac3307193bcf1602dc8237456852a95479cadaf61f1eb4bc7eedca00c",
+    "raw/disagree-session.jsonl": "c6ae5bb4f3ac1939fd780000e2f83edd25d984567a496797fab39dc6d4710059",
+    "raw/unverifiable-queue.jsonl": "f1a4ba3bd7558424b5ead9c117c361047b27a819aba9903166017533340b5598",
+    "result.json": "b5e88928edfa9caa6b6086c7d6431aa53bafc9209861e7ba2d4aca775380c1f4",
+    "runner.py": "6c926bac3b0236e16663dc56bb4f943c30a08979baed43f7277dea56da90d1c7",
+    "sitecustomize.py": "f089a2166eff759f31ac9a63f23fe462287d9519953eadf3ac1fa80edad5da96",
+    "spotcheck.judgments.json": "ffb92e0c832bd15bece542cb2829adf6c4560600bb111e65706675b2addfe6ab",
+    "spotcheck.pass1.judgments.json": "f033729edcce658c538ae1f9f90b136b2365cc19bcf875803b71a9e7918d1a41",
+    "spotcheck.py": "92b27c0facf9239f61be9a76cfd14334ab171298cbbbc66ea7befa1d1e3bd8a2"
+  },
+  "scope": "Unchanged correlate/spotcheck on synthetic raw inputs; owned temporary paths only adapted in determinism shell. Four full cycles, five identical derived outputs; no private logs or phase acceptance."
+}

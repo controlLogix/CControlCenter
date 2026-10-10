@@ -42,11 +42,15 @@ def digest(path):
 
 def source_hashes():
     paths = []
-    for name in ('contracts/v1', 'sdk', 'tests/contracts', 'tests/storage', 'tests/leaf', 'tests/platform'):
+    for name in ('contracts/v1', 'sdk', 'tests/contracts', 'tests/storage', 'tests/leaf', 'tests/platform',
+                 'plugins/agentmux-orchestration'):
         paths.extend(p for p in (ROOT / name).rglob('*') if p.is_file()
                      and not set(p.parts) & {'node_modules', 'dist', '__pycache__'}
                      and p.suffix != '.pyc')
     paths += list((ROOT / 'hub').rglob('*.py'))
+    paths += list((ROOT / 'taskmgmt').rglob('*.py'))
+    paths += [ROOT / name for name in ('dashboard/auth.json', 'dashboard/test_orchestration_plugin.py',
+                                     'dashboard/test_plugin_skills.py')]
     paths += [ROOT / name for name in ('hub/requirements.lock','hub/requirements.txt',
               'agentmux.sh','agentmux.cmd','agentmux_windows.py','deploy/nats/circle.sh','.github/workflows/contracts.yml')]
     for name in ('docs/planning/2026-10-09', '.bytedesk/design-patterns', '.context'):
@@ -276,6 +280,22 @@ def main():
             if not source.is_file():
                 report['checks'].append({'name':suite+'-fresh-evidence','exitCode':1})
         hub_preservation(args.workspace,args.evidence,env,run,report)
+        import plugin_preservation
+        plugin_report = args.evidence/'plugin-preservation.json'
+        plugin_before = plugin_preservation.source_hashes()
+        plugin_ok = run('maintained-plugin-preservation',
+                        [sys.executable, 'tests/contracts/plugin_preservation.py', '--evidence', str(plugin_report)],
+                        child_env={'PATH': os.defpath, 'PYTHONDONTWRITEBYTECODE': '1', 'PYTHONNOUSERSITE': '1'})
+        plugin_record = json.loads(plugin_report.read_text(encoding='utf-8')) if plugin_report.is_file() else {}
+        plugin_log = plugin_report.with_suffix('.log')
+        plugin_accepted = (plugin_ok and plugin_preservation.admitted(plugin_record, plugin_before)
+                           and plugin_before == plugin_preservation.source_hashes()
+                           and plugin_record.get('isolatedHomeRemoved') is True
+                           and plugin_log.is_file() and plugin_record.get('logSha256') == digest(plugin_log))
+        report['checks'][-1]['exitCode'] = 0 if plugin_accepted else 1
+        report['pluginPreservation'] = {'accepted': plugin_accepted, 'report': plugin_report.name,
+                                      'reportSha256': digest(plugin_report) if plugin_report.is_file() else None,
+                                      'tests': plugin_record.get('tests', 0)}
         run('platform-placement-contract',[sys.executable,'-m','unittest','discover','-s','tests/platform','-p','test_*.py','-v'])
         run('windows-callback-contract',[sys.executable,'-m','unittest','hub.tests.test_windows_callbacks','-v'])
         run('tracker-tests',[sys.executable,'-m','unittest','discover','-s',delivery,'-p','test_track.py','-v'])

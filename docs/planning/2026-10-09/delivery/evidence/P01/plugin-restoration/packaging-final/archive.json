@@ -1,0 +1,9 @@
+{
+  "externalSource": "/home/ryan/.cache/agentmux-governance/plugin-packaging-final-3egrru8s",
+  "files": {
+    "result.json": "7e43cadf235d89352dcf06c0af8eac2594783e38c163c79bc67003d2772442d9",
+    "tests.log": "6f8e958432c1294c42e32ba623c1a4639176bdad2c81d8fba7e33a210bf9cfb5",
+    "runner.py": "ee74979f5d31880062a45f1a85482d97a3e9e63da2ce1ed102f5b8324637ce65"
+  },
+  "scope": "Bounded maintained plugin compatibility proof; metadata validator does not execute hooks or validate skills folder. Earlier worker packaging source hashes for README/test are superseded by final7 source-bound run; original report retained. No personal configuration files copied; no phase/P06 acceptance."
+}

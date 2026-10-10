@@ -1,0 +1,8 @@
+{
+  "files": {
+    "result.json": "87e888223f2aaeebda2cb10807a1cbd01d7eef03d9e27c276e071012ba052c69",
+    "tests.log": "92e3a5c403698baa41dd1a3cd4508667c66d7b7d92500980f11b14ac4ed87da5",
+    "independent-review.json": "54ec6ffb892fa5ed6640856102e702b3c5409294964a7d803e93ab5d14a9c7a3"
+  },
+  "scope": "Final actualWSL36methods on exact40source inputs with independentadmission7negative groups. No currentnativeMac/Linux CI result claimed; newCI23checks awaits pushedcandidate."
+}

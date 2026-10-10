@@ -1,0 +1,21 @@
+{
+  "success": true,
+  "strict": true,
+  "target": "C:\\Users\\RyanHelms\\GitHub\\agentmux\\plugins\\agentmux-orchestration\\.claude-plugin\\plugin.json",
+  "manifest": {
+    "file": "C:\\Users\\RyanHelms\\GitHub\\agentmux\\plugins\\agentmux-orchestration\\.claude-plugin\\plugin.json",
+    "type": "plugin",
+    "errors": [],
+    "warnings": [],
+    "notes": [],
+    "gatingHooks": []
+  },
+  "contents": [],
+  "advice": [
+    {
+      "file": "C:\\Users\\RyanHelms\\GitHub\\agentmux\\plugins\\agentmux-orchestration\\README.md",
+      "message": "This README has no line that installs \"agentmux-orchestration\" from a marketplace. Add the install line, which works in one step on Claude Code 2.1.275 or later. Validate the folder that holds its marketplace.json to have <owner>/<repo> filled in, and the name its marketplace lists it under.",
+      "installLine": "/plugin install agentmux-orchestration --marketplace <owner>/<repo>"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+ "q:agree-queue.jsonl:1": {
+  "note": "raw user turn at agree-session.jsonl:1 (whole)",
+  "verdict": "agree"
+ },
+ "q:disagree-queue.jsonl:1": {
+  "note": "no user turn with this body in the agent's session files",
+  "verdict": "disagree"
+ },
+ "q:unverifiable-queue.jsonl:1": {
+  "note": "the agent's session files are gone since extraction (1 missing)",
+  "verdict": "unverifiable"
+ }
+}

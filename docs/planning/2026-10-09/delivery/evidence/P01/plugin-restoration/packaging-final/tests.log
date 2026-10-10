@@ -1,0 +1,12 @@
+test_arbitrary_script_selector_refuses (packaging_final_0.InstalledLauncher.test_arbitrary_script_selector_refuses) ... ok
+test_incomplete_runtime_refuses (packaging_final_0.InstalledLauncher.test_incomplete_runtime_refuses) ... ok
+test_missing_and_relative_binding_refuse (packaging_final_0.InstalledLauncher.test_missing_and_relative_binding_refuse) ... ok
+test_relocated_copy_preserves_arguments_and_refusals (packaging_final_0.InstalledLauncher.test_relocated_copy_preserves_arguments_and_refusals) ... ok
+test_metadata_registers_real_entrypoints (packaging_final_1.Packaging.test_metadata_registers_real_entrypoints) ... ok
+test_nine_discoverable_guides (packaging_final_1.Packaging.test_nine_discoverable_guides) ... ok
+test_relocated_real_runtime_help_without_provider (packaging_final_1.Packaging.test_relocated_real_runtime_help_without_provider) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 4.851s
+
+OK

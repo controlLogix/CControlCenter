@@ -2504,6 +2504,160 @@
       ]
     },
     {
+      "path": "plugins/agentmux-orchestration/.claude-plugin/plugin.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/.mcp.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/PROVENANCE.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/README.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/bin/agentmux-plugin",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/hooks/agentmux-hook.sh",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/hooks/hooks.json",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/lib/gateway.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/lib/policy.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/lib/roster_mcp.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/skills/agent-config/SKILL.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/skills/agent-config/scripts/runtime.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/skills/agent-doctor/SKILL.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/skills/agent-edit/SKILL.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/skills/agent-new/SKILL.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/skills/agent-remove/SKILL.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/skills/agent-roster/SKILL.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/skills/team-compose/SKILL.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/skills/team-dispatch/SKILL.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/skills/team-merge/SKILL.md",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/tests/test_hook_mcp.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
+      "path": "plugins/agentmux-orchestration/tests/test_packaging.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
+      ]
+    },
+    {
       "path": "sdk/python/README.md",
       "baselineBlob": null,
       "componentIds": [
@@ -2782,6 +2936,13 @@
       "baselineBlob": null,
       "componentIds": [
         "HUB-26"
+      ]
+    },
+    {
+      "path": "tests/contracts/plugin_preservation.py",
+      "baselineBlob": null,
+      "componentIds": [
+        "HAR-23"
       ]
     },
     {
@@ -3091,6 +3252,44 @@
         "tests/platform/fixtures/wsl-inventory.json"
       ],
       "note": "All baseline files, component identities and existing behavior criteria retained; no P06 plugin support or phase acceptance."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "Maintained legacy orchestration plugin source ownership; no recovered-source or phase acceptance claim",
+      "addedFiles": [
+        "plugins/agentmux-orchestration/.claude-plugin/plugin.json",
+        "plugins/agentmux-orchestration/.mcp.json",
+        "plugins/agentmux-orchestration/PROVENANCE.md",
+        "plugins/agentmux-orchestration/README.md",
+        "plugins/agentmux-orchestration/bin/agentmux-plugin",
+        "plugins/agentmux-orchestration/hooks/agentmux-hook.sh",
+        "plugins/agentmux-orchestration/hooks/hooks.json",
+        "plugins/agentmux-orchestration/lib/gateway.py",
+        "plugins/agentmux-orchestration/lib/policy.py",
+        "plugins/agentmux-orchestration/lib/roster_mcp.py",
+        "plugins/agentmux-orchestration/skills/agent-config/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-config/scripts/runtime.py",
+        "plugins/agentmux-orchestration/skills/agent-doctor/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-edit/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-new/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-remove/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-roster/SKILL.md",
+        "plugins/agentmux-orchestration/skills/team-compose/SKILL.md",
+        "plugins/agentmux-orchestration/skills/team-dispatch/SKILL.md",
+        "plugins/agentmux-orchestration/skills/team-merge/SKILL.md",
+        "plugins/agentmux-orchestration/tests/test_hook_mcp.py",
+        "plugins/agentmux-orchestration/tests/test_packaging.py"
+      ],
+      "newComponent": "HAR-23"
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex",
+      "scope": "Native plugin compatibility CI runner",
+      "addedFiles": [
+        "tests/contracts/plugin_preservation.py"
+      ]
     }
   ]
 }

@@ -536,9 +536,9 @@ sequenceDiagram
 The callback review preserves the original findings and records their closure against fresh repaired-source evidence, including a native pane after callbacks on the same tmux server. The diagram describes the repaired gateway contract; no automatic model-provider forwarding or P06 acceptance is claimed.
 
 
-## Planned legacy orchestration package restoration
+## Maintained legacy orchestration package restoration
 
-This is the bounded FED-15 legacy gateway restoration approved in `delivery/evidence/P01/plugin-restoration-spec.md`; P06 framework work stays planned.
+This implements the bounded FED-15 legacy gateway restoration approved in `delivery/evidence/P01/plugin-restoration-spec.md`; P06 framework work stays planned.
 
 ```mermaid
 flowchart LR
@@ -553,4 +553,4 @@ flowchart LR
   MCP -->|read only| API
 ```
 
-Unrelated shell commands bypass external processing. Current runtime identity, checksum and approval checks remain authoritative. The restored host hook adds the live-definition check; direct dashboard HTTP mutation does not enforce that check and remains a documented limitation. New source, maintained provenance and unchanged baseline tests must be reviewed before any restoration acceptance; no historical source equivalence is asserted.
+Unrelated shell commands bypass external processing. Current runtime identity, checksum and approval checks remain authoritative. The restored host hook adds the live-definition check; direct dashboard HTTP mutation does not enforce that check and remains a documented limitation. The source locations are plugins/agentmux-orchestration/lib, bin/agentmux-plugin and skills/agent-config/scripts/runtime.py. Independent compatibility review qualifies only recorded behavior; no historical source equivalence or P06 framework acceptance is asserted.

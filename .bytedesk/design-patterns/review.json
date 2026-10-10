@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, scoped P01 portability/storage review; phase remains open",
-  "sourceDigest": "44e4d894583881963d7d8d0e8b585b57fbed6cd12f918103397cc68602c93026",
+  "reviewer": "Codex, scoped P01 maintained legacy restoration and preservation review; phase remains open",
+  "sourceDigest": "2e35cc257757fb7cc1d6922f0683917a69534b7ed7a13b6c2ccfc6d6fd60dd27",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -515,6 +515,25 @@
         ".context/design-patterns-diagrams.md"
       ],
       "rationale": "Reviewed two Bash variable-presence checks and strengthened callback tests; semantics remain existing FED-15 gateway, no new pattern. Native macOS actual failure is retained; repaired macOS candidate remains required. Reviewed source-bound native WSL129+callback10 and focused repaired20, with independent3 review. T07 storage acceptance is scoped to its four criteria and unchanged exact sources across Linux/macOS/WSL, not whole CI or phase acceptance. Approved bounded maintained legacy plugin restoration plan with current runtime mapping, source-gap provenance and additional independent compatibility gates; recorded planned FED-15 gateway and diagram, with live-definition enforcement explicitly host-hook only. Pending implementation is outside this checkpoint and will get a separate source review. Preserved original registry/history, refreshed launcher surface and file tracking; component coverage and original105 regression retention/negative checks pass. No later phase, merge, release or final delivery acceptance."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex; independent runtime, metadata, native-source and hook reviews",
+      "scope": "P01 maintained legacy plugin restoration, native CI preservation, scoped T02 and evidence archival",
+      "previousReviewer": "Codex, scoped P01 portability/storage review; phase remains open",
+      "previousSourceDigest": "44e4d894583881963d7d8d0e8b585b57fbed6cd12f918103397cc68602c93026",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/plugin-restoration/parent-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/plugin-restoration/metadata-fastpath-parent-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/plugin-restoration/native-ci/independent-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/80f43e0/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/wsl-native-80f43e0/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/P01-T02-acceptance.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/har20-fresh/archive.json",
+        ".context/design-patterns.md",
+        ".context/design-patterns-diagrams.md"
+      ],
+      "rationale": "Reviewed maintained22-file source restoration and exact36 unchanged/additional compatibility methods, explicit trusted runtime selection, readonly MCP/GET gateway and conservative host hook. Independent actual dashboard/tmux and disposable Git evidence binds original runtime; fake adapters and direct endpoint/preflight limitations are explicit. Corrected realistic host-metadata fast path, independently verified five probes and fresh36 on exact40source hashes. Existing FED-15 Messaging Gateway records source locations, rationale, simpler alternative, costs, tradeoffs and concrete diagram; all prior registry/remediation history remains. Original22 native CI checks preserved and exactlyone source-bound36-method plugin check added; native candidate execution still required. Reviewed actual80f nativeLinux/macOS22checks and native-filesystemWSL129+callback11, T02 scoped acceptance, synthetic HAR20 deterministic evidence, retained historical failures/source bindings and honest remaining P01/provider gaps. HAR-23 ownership adds23paths and3checks; all338baseline files and198original checks retained. Appended contract README retains previous bytes and has explicit replacement history. Captured evidence bytes/line endings preserved with scoped attributes; metadata refreshed through tracker. Coverage, tracker22, regression105 and assertion-removal negative passed. No P01 gate, P02 advance, P06 framework, personal plugin installation, merge or final delivery acceptance is claimed."
     }
   ],
   "rules": {

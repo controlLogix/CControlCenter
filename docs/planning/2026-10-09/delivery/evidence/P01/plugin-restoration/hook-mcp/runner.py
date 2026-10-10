@@ -1,0 +1,9 @@
+from pathlib import Path
+import os,sys,tempfile,hashlib,json,time,unittest
+repo=Path('/mnt/c/Users/RyanHelms/GitHub/agentmux');package=repo/'plugins/agentmux-orchestration';base=Path(tempfile.mkdtemp(prefix='plugin-hook-mcp-',dir='/home/ryan/.cache/agentmux-governance'));home=base/'home';home.mkdir();os.environ['HOME']=str(home);os.environ['AGENTMUX_PLUGIN_ROOT']=str(package);os.environ['PATH']=str(Path(sys.executable).parent)+':/usr/bin:/bin';os.environ.pop('AGENTMUX_DASHBOARD',None);sys.path.insert(0,str(repo))
+def hashes():return {str(p.relative_to(package)):hashlib.sha256(p.read_bytes()).hexdigest() for p in package.rglob('*') if p.is_file() and '__pycache__' not in p.parts}
+before=hashes();suite=unittest.TestSuite();suite.addTests(unittest.defaultTestLoader.loadTestsFromName('dashboard.test_orchestration_plugin'));suite.addTests(unittest.defaultTestLoader.discover(str(package/'tests'),pattern='test_hook_mcp.py'))
+with open(base/'tests.log','w') as log:
+ start=time.monotonic();result=unittest.TextTestRunner(stream=log,verbosity=2).run(suite);elapsed=time.monotonic()-start
+report={'tests':result.testsRun,'errors':[(str(t),e) for t,e in result.errors],'failures':[(str(t),e) for t,e in result.failures],'skips':result.skipped,'successful':result.wasSuccessful() and not result.skipped,'seconds':elapsed,'packageHashes':before,'packageUnchanged':before==hashes(),'scope':'Unchanged16 real-package relocated hook/MCP checks plus13 added hook/MCP cases; isolated HTTP fixtures, no model/provider calls or live dashboard. Not phase acceptance.','python':sys.version,'originalTestHash':hashlib.sha256((repo/'dashboard/test_orchestration_plugin.py').read_bytes()).hexdigest()}
+(base/'result.json').write_text(json.dumps(report,indent=2));print(base);print(json.dumps({k:report[k] for k in ['tests','successful','skips','seconds','packageUnchanged']}));sys.exit(not report['successful'])

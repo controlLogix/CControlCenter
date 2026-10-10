@@ -4113,3 +4113,10 @@ The signed leaf fixture adds contract validation and signature checks to real di
 Three additional files under HUB-26 provide reusable worker/provider fixtures, ordered tests and their usage guide. They control completion, delivery order, unavailable providers, lost replies, timeouts and cancellation without external model tokens or wall-clock races. These in-memory helpers do not replace real broker recovery tests or establish production identity, persistence or external-effect safety.
 
 The existing storage fixture now also checks recovery after a lost final atomic-batch acknowledgment, rejection of writes based on a stale KV projection, and rejection of capability declarations that cross the qualified transaction boundary. The storage guide explains the evidence and limits. These additions preserve all 338 baseline file identities, 93 components and 198 behavior checks; phase acceptance still requires its separate evidence review.
+
+
+## Maintained legacy orchestration plugin preservation repair
+
+HAR-23 records the newly maintained package under plugins/agentmux-orchestration. All 338 original baseline files, 93 original components and 198 original behavior checks remain; this adds one component and three checks, giving 94 components and 201 checks. The original external plugin was not recovered. Source-backed reconstruction, unchanged20 compatibility tests, additional16 checks, independent real dashboard/tmux/Git checks and strict metadata validation are recorded in delivery/evidence/P01/plugin-restoration/parent-review.json. Current runtime business rules remain in taskmgmt and dashboard.
+
+The nine guides, explicit runtime binding, two roster MCP tools and conservative hook restore recorded client behavior. Hooks add no endpoint authority; direct HTTP live-definition protection and preflight races remain explicit. Native Windows hook launch, authenticated client workflows and the P06 framework remain unqualified. No personal installation, publication or historical source equality is claimed.

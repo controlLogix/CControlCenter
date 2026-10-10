@@ -1,0 +1,32 @@
+{
+  "sourceCommit": "80f43e02f3344696a3985c48ef12578319f3bd0f",
+  "workflowRun": 38009885497,
+  "files": {
+    "independent-hash-review.json": "e4394ddf2996d1cb8cab0e5339c1bd44ec411f8e09a499e03b837b9204160035",
+    "linux/ci-result.json": "c2ca96da6ad178b5f909e2059552ed9326ed928e7bfdf98d62a7e18214fd4f9a",
+    "linux/conformance-admission-negative.json": "f8d889e11f7a85727889bf7bf9e3454d8c8b50befa04d431a8c61e5164d15447",
+    "linux/conformance-admission.json": "ea1c903256d013006cd566bd04ba2d569e3c4923af6ae4486fb37676e646c2b3",
+    "linux/contracts.json": "3520aa2f0737f25dfaceb1fdded47d1354b827a5d1b288994e4be1aed1797ae5",
+    "linux/hub-full-result.json": "e5498a7e7a9c6b9a5759f49a4606dbb95322177c36f1cffa914185ed6d73d232",
+    "linux/job.log": "d593f6ea9ef35194a0091f68f3adf34f29ccc20f93effdcdb45e38051baf9030",
+    "linux/leaf-result.json": "e069a5a122239b65c4ec9b934cb91221e54f5aedf6ff7d5316527103e6ba059f",
+    "linux/negative-fixture.json": "afcb8455bea62ce76d9eb25e7cf297a60a44ab265bf40b18ed795ba76ff28245",
+    "linux/signed-leaf-result.json": "bc375e2baa2f4b783d053ea4fbed57ed628400e50a9103e3342f205de301ff03",
+    "linux/storage-result.json": "f6c6376d270c0290e095cc17842f5e56cffb0fc8db4ac576ae1b6eee4170a1cd",
+    "macos/ci-result.json": "93b4a9f72e76862c4ad619133c1d00de99268d2a9ff4a7adebdd2ed708e20c44",
+    "macos/conformance-admission-negative.json": "2408bb4cac0929956384f47cc62a62798ead23060d558ecdb316fc8737999a11",
+    "macos/conformance-admission.json": "a83da51529a3a865a6ad23cd9c460c4afd345f61e12cd4968d7938b47d1a256a",
+    "macos/contracts.json": "f23e853343794b27731b7841a4827151d48da2c2c3f26eda5b225fb7438398af",
+    "macos/hub-full-result.json": "e6e76d09125a1c51e473fe4df2ea28c9ba6660d115d5cfe4d2ca76f62ab19b67",
+    "macos/job.log": "454cd80a460866555cb1498f3ef8cbaeaf0a28d3b89ae5c474c5bb6b17db0b2a",
+    "macos/leaf-result.json": "d801e8f78ac05d9f0cca428a4b9bbddad8e6618b6a830adc754d691ba249666b",
+    "macos/negative-fixture.json": "afcb8455bea62ce76d9eb25e7cf297a60a44ab265bf40b18ed795ba76ff28245",
+    "macos/signed-leaf-result.json": "207264888e1f2313a73f962be2f685d468f473cfbeb0b0e846aa4fd264d6afa1",
+    "macos/storage-result.json": "dc370cb34e7969e99f68768cc6bf8627bd0f669dffd7187fccbfcf51db4afe12"
+  },
+  "scope": "Exact-candidate native CI, independent588source-reference checks each host; all22 checks pass on Linux/macOS, closing recorded Bash syntax failure. Not maintained plugin qualification or phase acceptance.",
+  "artifactDirectoryMapping": {
+    "linux": "p01-ubuntu-24.04-80f43e02f3344696a3985c48ef12578319f3bd0f",
+    "macos": "p01-macos-15-80f43e02f3344696a3985c48ef12578319f3bd0f"
+  }
+}

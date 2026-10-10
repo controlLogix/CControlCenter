@@ -1,0 +1,8 @@
+{
+  "name": "agentmux-orchestration",
+  "description": "Manage existing Agentmux definitions and teams through the installed runtime. Maintained local replacement; see PROVENANCE.md.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Agentmux maintainers"
+  }
+}

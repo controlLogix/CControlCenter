@@ -1,0 +1,230 @@
+{
+  "kind": "Independent P01 maintained plugin native-CI addition review",
+  "reviewer": "Codex independent subagent",
+  "phaseAccepted": false,
+  "remainingActionableFindings": [],
+  "sourceHashes": {
+    "tests/contracts/ci.py": "aea36550b1c7e77d15eb108b830ee3e3844e7cc45165bdfed398810084ed87bb",
+    "tests/contracts/plugin_preservation.py": "9181a98b3c9b071dc866b0f501c41fe5c71c54fa44248dc787ec3254070a2058"
+  },
+  "executionEvidence": {
+    "report": "/home/ryan/.cache/agentmux-governance/plugin-native-preservation-final.json",
+    "reportSha256": "87e888223f2aaeebda2cb10807a1cbd01d7eef03d9e27c276e071012ba052c69",
+    "log": "/home/ryan/.cache/agentmux-governance/plugin-native-preservation-final.log",
+    "logSha256": "92e3a5c403698baa41dd1a3cd4508667c66d7b7d92500980f11b14ac4ed87da5",
+    "logHashMatchesReport": true,
+    "tests": 36,
+    "sourceReferenceCount": 40,
+    "allSourceHashesMatchedReviewedWorkingSource": true,
+    "sourceUnchangedDuringRun": true,
+    "isolatedHomeRemoved": true,
+    "suites": [
+      {
+        "path": "dashboard/test_orchestration_plugin.py",
+        "expectedTests": 16,
+        "tests": 16,
+        "passed": true,
+        "methods": [
+          {
+            "id": "plugin_preservation_0.PluginTests.test_direct_file_and_patch_edits_refuse",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_0.PluginTests.test_duplicate_name_cannot_check_a_different_member",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_0.PluginTests.test_dynamic_and_multiple_hires_refuse",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_0.PluginTests.test_edit_service_failure_refuses_but_unrelated_edit_passes",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_0.PluginTests.test_hire_unavailable_fails_closed",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_0.PluginTests.test_installed_skill_launcher_uses_same_gates",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_0.PluginTests.test_irrelevant_bash_exits_before_external_process",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_0.PluginTests.test_live_definition_cli_writes_refuse",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_0.PluginTests.test_mcp_discovery_without_user_config_or_dashboard",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_0.PluginTests.test_mcp_errors_do_not_kill_server",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_0.PluginTests.test_mcp_roster_reads_correct_endpoints",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_0.PluginTests.test_no_roster_refuses_hire",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_0.PluginTests.test_only_matching_approved_member_allows_hire",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_0.PluginTests.test_raw_api_mutations_refuse",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_0.PluginTests.test_registration_covers_both_harnesses",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_0.PluginTests.test_stale_and_unrelated_workers_allow_edit",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "path": "dashboard/test_plugin_skills.py",
+        "expectedTests": 4,
+        "tests": 4,
+        "passed": true,
+        "methods": [
+          {
+            "id": "plugin_preservation_1.InstalledLauncher.test_arbitrary_script_selector_refuses",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_1.InstalledLauncher.test_incomplete_runtime_refuses",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_1.InstalledLauncher.test_missing_and_relative_binding_refuse",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_1.InstalledLauncher.test_relocated_copy_preserves_arguments_and_refusals",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "path": "plugins/agentmux-orchestration/tests/test_hook_mcp.py",
+        "expectedTests": 13,
+        "tests": 13,
+        "passed": true,
+        "methods": [
+          {
+            "id": "plugin_preservation_2.HookAndMCP.test_ambiguous_mutations_never_execute_command_text",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_2.HookAndMCP.test_bad_frames_and_oversized_frame_do_not_end_session",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_2.HookAndMCP.test_bad_worker_or_roster_response_fails_closed",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_2.HookAndMCP.test_http_failure_redirect_size_and_json_errors_preserve_service",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_2.HookAndMCP.test_literal_read_is_allowed_but_redirected_read_is_not",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_2.HookAndMCP.test_lookup_timeout_is_a_service_error",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_2.HookAndMCP.test_multi_edit_and_patch_move_protect_all_destinations",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_2.HookAndMCP.test_normalized_symlink_parent_and_option_destinations_are_protected",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_2.HookAndMCP.test_notifications_discovery_and_invalid_arguments",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_2.HookAndMCP.test_query_encoding_prevents_injected_parameters",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_2.HookAndMCP.test_raw_encoded_http_and_escaped_json_hire_are_checked",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_2.HookAndMCP.test_relevant_bad_json_duplicate_keys_newlines_and_large_input_refuse",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_2.HookAndMCP.test_supported_json_hire_and_unique_approval",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "path": "plugins/agentmux-orchestration/tests/test_packaging.py",
+        "expectedTests": 3,
+        "tests": 3,
+        "passed": true,
+        "methods": [
+          {
+            "id": "plugin_preservation_3.Packaging.test_metadata_registers_real_entrypoints",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_3.Packaging.test_nine_discoverable_guides",
+            "status": "passed"
+          },
+          {
+            "id": "plugin_preservation_3.Packaging.test_relocated_real_runtime_help_without_provider",
+            "status": "passed"
+          }
+        ]
+      }
+    ]
+  },
+  "admissionReview": {
+    "actualReportAdmittedAgainstCurrent40SourceHashes": true,
+    "negativeGroups": [
+      "fabricated-id",
+      "missing-method",
+      "skipped",
+      "changed-hash",
+      "malformed-methods",
+      "malformed-suite",
+      "malformed-report-types"
+    ],
+    "negativeGroupsPassed": 7,
+    "findingResolved": "Exact source-derived method sets now reject invented unique IDs, rather than admitting counts alone."
+  },
+  "ciCallComparison": {
+    "method": "Compared AST-unparsed run() calls in HEAD:tests/contracts/ci.py with the changed file.",
+    "prior22ChecksRetained": true,
+    "changedOrRemovedRunCalls": [],
+    "addedRunCalls": [
+      "maintained-plugin-preservation"
+    ],
+    "additionalAdmission": "CI requires runner report admission, source equality, removed isolated home, existing log and matching log SHA."
+  },
+  "isolationReview": "Runner child receives an explicit environment with private HOME, runtime state, client configuration and XDG directories; no inherited provider variables or live instance selectors. Fresh report/log outside repository required.",
+  "limits": [
+    "Actual36 execution evidence is WSL Linux only; native macOS/Linux CI awaits candidate commit and push.",
+    "Unchanged prior22 check calls were inspected, not re-executed by this review.",
+    "Report integrity negatives are in-memory synthetic mutations, not provider execution or phase acceptance.",
+    "Parent owns metadata/pattern digest refresh, candidate checkpoint and phase gate."
+  ]
+}

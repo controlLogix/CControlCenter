@@ -1,0 +1,8 @@
+{
+  "files": {
+    "result.json": "d3bf26b47c702bebdf8ec3d0671f3a2fea2d1ea6670160e808bfe94efd43d765",
+    "tests.log": "eed365a6e65ecb30f8a1800dace4330d0c110accd4d97fb1312b6bc345024926",
+    "independent-review.json": "b29d1013fd5625ffdd36cb4c1e8907ac9459c3cc61ad132d0be2fb1d5114f0e8"
+  },
+  "scope": "Final WSL36 compatibility checks and five independent probes on repaired plain-pwd metadata path. Earlier reports retain historical hashes. Native macOS/Linux candidate execution remains required."
+}

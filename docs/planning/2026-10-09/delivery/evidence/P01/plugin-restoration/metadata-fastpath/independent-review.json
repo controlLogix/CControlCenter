@@ -1,0 +1,63 @@
+{
+  "kind": "Independent plain-pwd metadata fast path repair review",
+  "phaseAccepted": false,
+  "findings": [],
+  "sourceHashes": {
+    "plugins/agentmux-orchestration/hooks/agentmux-hook.sh": "f7eb3a8cfc2c20ad17736f06b338117ee7a168b10efd216bd473ca430735f1e3",
+    "plugins/agentmux-orchestration/tests/test_hook_mcp.py": "4958ec86dd04441885763ad85c86aa6850a2242099b30c761196671706b2fd30",
+    "tests/contracts/plugin_preservation.py": "9181a98b3c9b071dc866b0f501c41fe5c71c54fa44248dc787ec3254070a2058",
+    "tests/contracts/ci.py": "aea36550b1c7e77d15eb108b830ee3e3844e7cc45165bdfed398810084ed87bb"
+  },
+  "actualRunner": {
+    "report": "/home/ryan/.cache/agentmux-governance/plugin-preservation-metadata-reviewed.json",
+    "reportSha256": "d3bf26b47c702bebdf8ec3d0671f3a2fea2d1ea6670160e808bfe94efd43d765",
+    "logSha256": "eed365a6e65ecb30f8a1800dace4330d0c110accd4d97fb1312b6bc345024926",
+    "tests": 36,
+    "sourceReferences": 40,
+    "admittedAgainstCurrentSource": true,
+    "sourceUnchangedDuringRun": true,
+    "isolatedHomeRemoved": true,
+    "allSuitesPassed": true
+  },
+  "independentProbes": {
+    "checks": [
+      {
+        "case": "metadata-first",
+        "exitCode": 0,
+        "stderr": ""
+      },
+      {
+        "case": "input-first",
+        "exitCode": 0,
+        "stderr": ""
+      },
+      {
+        "case": "duplicate-tool-input",
+        "exitCode": 2,
+        "stderr": "agentmux hook: duplicate JSON key\n"
+      },
+      {
+        "case": "fake-key-in-string",
+        "exitCode": 2,
+        "stderr": "agentmux hook: dashboard lookup failed: URLError\n"
+      },
+      {
+        "case": "relevant-protected-path",
+        "exitCode": 2,
+        "stderr": "agentmux hook: dashboard lookup failed: URLError\n"
+      }
+    ],
+    "passed": 5,
+    "shimSha256": "f7eb3a8cfc2c20ad17736f06b338117ee7a168b10efd216bd473ca430735f1e3",
+    "limits": [
+      "Private subprocess probes; PATH-empty successful pwd proves no required external executable. Relevant protected cases use deliberately closed localhost port and verify lookup refusal; real live-worker denial covered by36 suite."
+    ]
+  },
+  "review": "Finite-state shell scan accepts only exact plain pwd with enumerated flat host metadata. Full frame structure and unique outer keys checked; escapes, duplicate keys, unknown fields, relevant commands and frames over8KiB take full Python parser. Existing13 test methods gain subcases;36 method count unchanged.",
+  "limits": [
+    "WSL execution only; native candidate CI required.",
+    "Earlier plugin reports retain historical source bindings and do not qualify changed shim.",
+    "Generic irrelevant events keep original keyword fast bypass; new parser optimization is plain pwd only.",
+    "No claim of general JSON parser, shell containment, provider execution or phase acceptance."
+  ]
+}

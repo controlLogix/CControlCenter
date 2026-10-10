@@ -1,0 +1,16 @@
+--- original/determinism.sh
++++ fixture/determinism.sh
+@@ -8,8 +8,8 @@
+   python3 correlate.py
+   sha1sum out/outcomes.jsonl out/summary.md out/spotcheck.sample.jsonl out/spotcheck.raw.jsonl spotcheck.judgments.json
+ }
+-run > /tmp/am-det-1.txt
+-run > /tmp/am-det-2.txt
+-cat /tmp/am-det-1.txt
+-if cmp -s /tmp/am-det-1.txt /tmp/am-det-2.txt; then echo "DETERMINISTIC: identical sha1 across two runs"; else echo "DIFFERENT"; diff /tmp/am-det-1.txt /tmp/am-det-2.txt || true; fi
+-rm -f /tmp/am-det-1.txt /tmp/am-det-2.txt
++run > /home/ryan/.cache/agentmux-governance/har20-4d6vov3v/det-1.txt
++run > /home/ryan/.cache/agentmux-governance/har20-4d6vov3v/det-2.txt
++cat /home/ryan/.cache/agentmux-governance/har20-4d6vov3v/det-1.txt
++if cmp -s /home/ryan/.cache/agentmux-governance/har20-4d6vov3v/det-1.txt /home/ryan/.cache/agentmux-governance/har20-4d6vov3v/det-2.txt; then echo "DETERMINISTIC: identical sha1 across two runs"; else echo "DIFFERENT"; diff /home/ryan/.cache/agentmux-governance/har20-4d6vov3v/det-1.txt /home/ryan/.cache/agentmux-governance/har20-4d6vov3v/det-2.txt || true; fi
++rm -f /home/ryan/.cache/agentmux-governance/har20-4d6vov3v/det-1.txt /home/ryan/.cache/agentmux-governance/har20-4d6vov3v/det-2.txt

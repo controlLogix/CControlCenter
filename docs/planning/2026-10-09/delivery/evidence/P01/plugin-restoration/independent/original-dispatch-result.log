@@ -1,0 +1,392 @@
+
+== config: the dispatch policy is part of the board, and is validated
+  ok   dispatch is OFF by default
+  ok   every dispatch setting has a default
+  ok   dispatchEnabled accepts a bool
+  ok   dispatchEnabled refuses a string
+  ok   dispatchWip accepts a number in range
+  ok   dispatchWip refuses out of range
+  ok   dispatchPoll refuses a value below the floor
+  ok   dispatchCli refuses shell syntax
+  ok   dispatchCli accepts a plain name
+
+== dispatchable: an unready card is not offered
+  ok   a card with no body or acceptance is not offered
+  ok   a card with no body is not offered
+  ok   a fully specified card IS offered
+
+== dispatchable: the epic is resolved before readiness is judged
+  ok   requireEpic is on for this board
+  ok   a card with an epic is not reported epic-less
+
+== dispatchable: a card reserved for a person is never offered
+  ok   a card labelled ready-for-human is not offered
+  ok   a card labelled needs-info is not offered
+  ok   a card labelled human-gate is not offered
+  ok   a card labelled decision:interview is not offered
+  ok   a card labelled decision:prototype is not offered
+  ok   a card labelled decision:map is not offered
+  ok   decision:research IS offered
+
+== dispatchable: a blocked dependency withholds the card
+  ok   a card whose blocker is open is not offered
+  ok   the same card is offered once the blocker is done
+
+== dispatchable: a card already in flight is not offered twice
+  ok   an in_progress card is not offered
+  ok   in_flight reports it once it has an assignee
+
+== busy paths: work already being done is not handed out again
+  ok   busy_paths reports the in-flight card's files
+
+== touches: overlapping work ranks last but is still offered
+  ok   a card overlapping busy work is still offered
+  ok   a card overlapping busy work ranks after a disjoint one
+  ok   two cards on the same file are not both ranked first
+
+== dispatchable: priority beats arrival order
+  ok   the highest priority disjoint card comes first
+  ok   a low priority card still appears
+
+== dispatch_view: one read, one moment
+  ok   view carries the queue
+  ok   view carries what is in flight
+  ok   view carries only the dispatch half of config
+  ok   view respects the limit
+  ok   the queue carries no bodies
+
+== dispatchable: the limit is validated like every other bounded read
+  ok   limit refuses zero
+  ok   limit refuses a value past the ceiling
+
+== the human veto still outranks the computation
+  ok   a sweep cannot put a human-vetoed card back in the queue
+
+== worker naming: card identity and team roles stay unambiguous
+  ok   role suffix resolves to its card
+  ok   four-digit key keeps its final digit
+  ok   invalid worker is rejected: 'tm-042-7'
+  ok   invalid worker is rejected: 'tm-042-2worker'
+  ok   invalid worker is rejected: 'tm-042-worker.2'
+  ok   invalid worker is rejected: 'tm-042-worker-dev'
+  ok   invalid worker is rejected: 'tm-42'
+  ok   invalid worker is rejected: 'tm-1234567890'
+  ok   invalid worker is rejected: 'tm-042-'
+  ok   invalid worker is rejected: 'TM-042'
+  ok   invalid worker is rejected: 'tm-042\n'
+  ok   invalid worker is rejected: ''
+  ok   invalid worker is rejected: None
+  ok   lead round-trip: EP-042
+  ok   unsuffixed role is lead: EP-042
+  ok   member round-trip: ep-042-lead
+  ok   member round-trip: ep-042-lead2
+  ok   member round-trip: ep-042-lead123
+  ok   member round-trip: ep-042-worker
+  ok   member round-trip: ep-042-worker2
+  ok   member round-trip: ep-042-worker123
+  ok   member round-trip: ep-042-reviewer
+  ok   member round-trip: ep-042-reviewer2
+  ok   member round-trip: ep-042-reviewer123
+  ok   member round-trip: ep-042-researcher
+  ok   member round-trip: ep-042-researcher2
+  ok   member round-trip: ep-042-researcher123
+  ok   lead round-trip: EP-999999999
+  ok   unsuffixed role is lead: EP-999999999
+  ok   member round-trip: ep-999999999-lead
+  ok   member round-trip: ep-999999999-lead2
+  ok   member round-trip: ep-999999999-lead123
+  ok   member round-trip: ep-999999999-worker
+  ok   member round-trip: ep-999999999-worker2
+  ok   member round-trip: ep-999999999-worker123
+  ok   member round-trip: ep-999999999-reviewer
+  ok   member round-trip: ep-999999999-reviewer2
+  ok   member round-trip: ep-999999999-reviewer123
+  ok   member round-trip: ep-999999999-researcher
+  ok   member round-trip: ep-999999999-researcher2
+  ok   member round-trip: ep-999999999-researcher123
+  ok   lead round-trip: TM-042
+  ok   unsuffixed role is lead: TM-042
+  ok   member round-trip: tm-042-lead
+  ok   member round-trip: tm-042-lead2
+  ok   member round-trip: tm-042-lead123
+  ok   member round-trip: tm-042-worker
+  ok   member round-trip: tm-042-worker2
+  ok   member round-trip: tm-042-worker123
+  ok   member round-trip: tm-042-reviewer
+  ok   member round-trip: tm-042-reviewer2
+  ok   member round-trip: tm-042-reviewer123
+  ok   member round-trip: tm-042-researcher
+  ok   member round-trip: tm-042-researcher2
+  ok   member round-trip: tm-042-researcher123
+  ok   lead round-trip: TM-999999999
+  ok   unsuffixed role is lead: TM-999999999
+  ok   member round-trip: tm-999999999-lead
+  ok   member round-trip: tm-999999999-lead2
+  ok   member round-trip: tm-999999999-lead123
+  ok   member round-trip: tm-999999999-worker
+  ok   member round-trip: tm-999999999-worker2
+  ok   member round-trip: tm-999999999-worker123
+  ok   member round-trip: tm-999999999-reviewer
+  ok   member round-trip: tm-999999999-reviewer2
+  ok   member round-trip: tm-999999999-reviewer123
+  ok   member round-trip: tm-999999999-researcher
+  ok   member round-trip: tm-999999999-researcher2
+  ok   member round-trip: tm-999999999-researcher123
+  ok   lead round-trip: ADR-0042
+  ok   unsuffixed role is lead: ADR-0042
+  ok   member round-trip: adr-0042-lead
+  ok   member round-trip: adr-0042-lead2
+  ok   member round-trip: adr-0042-lead123
+  ok   member round-trip: adr-0042-worker
+  ok   member round-trip: adr-0042-worker2
+  ok   member round-trip: adr-0042-worker123
+  ok   member round-trip: adr-0042-reviewer
+  ok   member round-trip: adr-0042-reviewer2
+  ok   member round-trip: adr-0042-reviewer123
+  ok   member round-trip: adr-0042-researcher
+  ok   member round-trip: adr-0042-researcher2
+  ok   member round-trip: adr-0042-researcher123
+  ok   lead round-trip: ADR-999999999
+  ok   unsuffixed role is lead: ADR-999999999
+  ok   member round-trip: adr-999999999-lead
+  ok   member round-trip: adr-999999999-lead2
+  ok   member round-trip: adr-999999999-lead123
+  ok   member round-trip: adr-999999999-worker
+  ok   member round-trip: adr-999999999-worker2
+  ok   member round-trip: adr-999999999-worker123
+  ok   member round-trip: adr-999999999-reviewer
+  ok   member round-trip: adr-999999999-reviewer2
+  ok   member round-trip: adr-999999999-reviewer123
+  ok   member round-trip: adr-999999999-researcher
+  ok   member round-trip: adr-999999999-researcher2
+  ok   member round-trip: adr-999999999-researcher123
+  ok   lead round-trip: SP-042
+  ok   unsuffixed role is lead: SP-042
+  ok   member round-trip: sp-042-lead
+  ok   member round-trip: sp-042-lead2
+  ok   member round-trip: sp-042-lead123
+  ok   member round-trip: sp-042-worker
+  ok   member round-trip: sp-042-worker2
+  ok   member round-trip: sp-042-worker123
+  ok   member round-trip: sp-042-reviewer
+  ok   member round-trip: sp-042-reviewer2
+  ok   member round-trip: sp-042-reviewer123
+  ok   member round-trip: sp-042-researcher
+  ok   member round-trip: sp-042-researcher2
+  ok   member round-trip: sp-042-researcher123
+  ok   lead round-trip: SP-999999999
+  ok   unsuffixed role is lead: SP-999999999
+  ok   member round-trip: sp-999999999-lead
+  ok   member round-trip: sp-999999999-lead2
+  ok   member round-trip: sp-999999999-lead123
+  ok   member round-trip: sp-999999999-worker
+  ok   member round-trip: sp-999999999-worker2
+  ok   member round-trip: sp-999999999-worker123
+  ok   member round-trip: sp-999999999-reviewer
+  ok   member round-trip: sp-999999999-reviewer2
+  ok   member round-trip: sp-999999999-reviewer123
+  ok   member round-trip: sp-999999999-researcher
+  ok   member round-trip: sp-999999999-researcher2
+  ok   member round-trip: sp-999999999-researcher123
+  ok   lead round-trip: CAP-0042
+  ok   unsuffixed role is lead: CAP-0042
+  ok   member round-trip: cap-0042-lead
+  ok   member round-trip: cap-0042-lead2
+  ok   member round-trip: cap-0042-lead123
+  ok   member round-trip: cap-0042-worker
+  ok   member round-trip: cap-0042-worker2
+  ok   member round-trip: cap-0042-worker123
+  ok   member round-trip: cap-0042-reviewer
+  ok   member round-trip: cap-0042-reviewer2
+  ok   member round-trip: cap-0042-reviewer123
+  ok   member round-trip: cap-0042-researcher
+  ok   member round-trip: cap-0042-researcher2
+  ok   member round-trip: cap-0042-researcher123
+  ok   lead round-trip: CAP-999999999
+  ok   unsuffixed role is lead: CAP-999999999
+  ok   member round-trip: cap-999999999-lead
+  ok   member round-trip: cap-999999999-lead2
+  ok   member round-trip: cap-999999999-lead123
+  ok   member round-trip: cap-999999999-worker
+  ok   member round-trip: cap-999999999-worker2
+  ok   member round-trip: cap-999999999-worker123
+  ok   member round-trip: cap-999999999-reviewer
+  ok   member round-trip: cap-999999999-reviewer2
+  ok   member round-trip: cap-999999999-reviewer123
+  ok   member round-trip: cap-999999999-researcher
+  ok   member round-trip: cap-999999999-researcher2
+  ok   member round-trip: cap-999999999-researcher123
+  ok   member ordinal defaults to one
+  ok   invalid member arguments refused: ('TM-042', 'dev', 1)
+  ok   invalid member arguments refused: ('TM-042', 'worker', 0)
+  ok   invalid member arguments refused: ('TM-042', 'worker', -1)
+  ok   invalid member arguments refused: ('TM-042', 'worker', True)
+  ok   invalid member arguments refused: ('TM-042', 'worker', 1.5)
+  ok   invalid member arguments refused: ('TM-042', 'worker', '2')
+  ok   invalid member arguments refused: ('TM-042', 'researcher', 1000000)
+  ok   invalid member arguments refused: ('TM-042.worker', 'worker', 1)
+  ok   invalid member arguments refused: ('TM-042-dev', 'worker', 1)
+
+== briefs: persona uses only the space left by the complete task
+  ok   chosen persona appears under its heading
+  ok   task content is unchanged by adding a persona
+  ok   oversized multibyte persona stays within BRIEF_MAX bytes
+  ok   persona truncation keeps all task content and final claim
+  ok   persona was truncated
+  ok   zero persona budget preserves the complete task
+  ok   oversized required content is refused without overwriting the brief
+
+== dispatch refuses a board that is not backed by its own home
+  ok   a dashboard serving another home is refused
+  ok   the refusal names both homes and the way out
+  ok   a dashboard serving this home is allowed
+  ok   an undiscoverable dashboard fails open
+  ok   the default pairing is not second-guessed
+  ok   the escape hatch is honoured
+2026-10-09T20:48:52-0400  nope
+  ok   a refused board is never even read
+
+== dispatch: selected spec reaches spawn and brief
+2026-10-09T20:48:52-0400  dispatch: lead specialist (built-in fallback), cli=claude, posture=unrestricted
+2026-10-09T20:48:52-0400  dispatch: TM-900 -> tm-900 [claude]  dispatch seam
+  ok   definitions are loaded for the dispatch repository
+  ok   roster selection receives the full task and CLI override
+  ok   chosen CLI, model, auth and posture reach spawn
+  ok   spawn precedes claims and brief delivery
+  ok   dispatch writes chosen persona and sends the brief path
+2026-10-09T20:48:52-0400  dispatch: lead lead (built-in fallback), cli=codex, posture=unrestricted
+2026-10-09T20:48:52-0400  dispatch: TM-900 -> tm-900 [codex]  dispatch seam
+  ok   definitions are loaded for the dispatch repository
+  ok   roster selection receives the full task and CLI override
+  ok   no definition preserves legacy CLI resolution: codex
+  ok   no definition preserves the original brief
+2026-10-09T20:48:52-0400  dispatch: lead lead (built-in fallback), cli=claude, posture=unrestricted
+2026-10-09T20:48:52-0400  dispatch: TM-900 -> tm-900 [claude]  dispatch seam
+  ok   definitions are loaded for the dispatch repository
+  ok   roster selection receives the full task and CLI override
+  ok   no definition preserves legacy CLI resolution: claude
+  ok   no definition preserves the original brief
+2026-10-09T20:48:52-0400  dispatch: lead lead (built-in fallback), cli=gemini, posture=unrestricted
+2026-10-09T20:48:52-0400  dispatch: TM-900 -> tm-900 [gemini]  dispatch seam
+  ok   definitions are loaded for the dispatch repository
+  ok   roster selection receives the full task and CLI override
+  ok   no definition preserves legacy CLI resolution: gemini
+  ok   no definition preserves the original brief
+2026-10-09T20:48:52-0400  dispatch: lead specialist (built-in fallback), cli=codex, posture=unrestricted
+2026-10-09T20:48:52-0400  dispatch: TM-900 -> tm-900 [codex]  dispatch seam
+  ok   definitions are loaded for the dispatch repository
+  ok   roster selection receives the full task and CLI override
+  ok   CLI override drops incompatible model and auth
+2026-10-09T20:48:52-0400  dispatch: lead specialist (built-in fallback), cli=claude, posture=unrestricted
+2026-10-09T20:48:52-0400  dispatch: would spawn tm-900 [claude] for TM-900 - dispatch seam
+  ok   definitions are loaded for the dispatch repository
+  ok   roster selection receives the full task and CLI override
+  ok   dry run does not spawn or claim
+2026-10-09T20:48:52-0400  dispatch: lead specialist (built-in fallback), cli=claude, posture=unrestricted
+2026-10-09T20:48:52-0400  dispatch: TM-900 cannot be briefed: task brief exceeds BRIEF_MAX; acceptance and claims cannot be truncated
+  ok   definitions are loaded for the dispatch repository
+  ok   roster selection receives the full task and CLI override
+  ok   oversized required brief is refused before spawning
+
+== C6: namespaced resources and transactional claim acquisition
+  ok   member resource satisfies the coordination pattern
+  ok   flattened claims distinguish lead and both members
+  ok   combined resource accepts exactly 200 characters
+  ok   invalid member path refused: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  ok   invalid member path refused: ../secret
+  ok   invalid member path refused: /absolute
+  ok   invalid member path refused: a//b
+  ok   invalid member path refused: ./a
+  ok   invalid member path refused: a:b
+  ok   lead claims the full unnamespaced touches set
+  ok   member can claim the same file within its tree
+  ok   member release preserves lead claim
+  ok   partial acquisition releases its successful claim on conflict
+  ok   rollback preserves the conflicting owner's claim
+  ok   invalid late resource is rejected before any acquisition
+  ok   failed rollback is surfaced for recovery
+
+== member worktrees: real git lifecycle and roster metadata
+  ok   member 1 records tree, branch and pane on its row
+  ok   member tree is outside the repository
+  ok   member checks out its own recorded branch
+  ok   duplicate setup preserves the original member tree
+  ok   cleanup refuses to discard uncommitted member work
+  ok   clean removal retains the member branch for lead integration
+  ok   member 2 records tree, branch and pane on its row
+  ok   member tree is outside the repository
+  ok   member checks out its own recorded branch
+  ok   duplicate setup preserves the original member tree
+  ok   cleanup refuses to discard uncommitted member work
+  ok   clean removal retains the member branch for lead integration
+  ok   failed recording rolls back roster metadata
+  ok   failed recording removes the new tree and unused branch
+  ok   missing approved row is refused before creating a worktree
+  ok   configured worktree storage inside repo is refused
+
+== collect: fan-out, lead-last, and orphan cleanup
+  ok   done reaps all members before lead
+  ok   done releases member namespaces and lead resources
+  ok   done does not change the card status
+  ok   deleted reaps all members before lead
+  ok   deleted releases member namespaces and lead resources
+  ok   deleted does not change the card status
+  ok   blocked reaps all members before lead
+  ok   blocked releases member namespaces and lead resources
+  ok   blocked does not change the card status
+  ok   submitted team reaps workers then lead
+  ok   submission never closes the card
+  ok   idle lead with busy member stays working, evidence=[]
+  ok   idle lead with busy member stays working, evidence=['result']
+  ok   idle member without evidence keeps the lead working
+  ok   finished member is reaped while busy lead continues
+  ok   exited member CLI still has its pane reaped
+  ok   dead lead reaps live members and parks card
+  ok   dead lead reaps live members and parks card
+  ok   failed member kill prevents lead reap
+  ok   single lead retains working behavior
+  ok   single lead retains idle behavior
+  ok   single lead retains submitted behavior
+  ok   single lead retains parked behavior
+  ok   collection propagates conflict parking and reaps the lead
+  ok   failed integration is not reported as submission
+  ok   roster discovers absent member panes and releases their claims
+  ok   failed claim release cannot report clean teardown
+
+== lead integration: real merges, conflicts and retryable teardown
+  ok   member commits merge into the lead integration branch
+  ok   successful teardown removes member tree and branch
+  ok   teardown releases claims beyond original touches
+  ok   repeated integration and teardown succeed
+  ok   conflict parks the card
+  ok   conflict comment identifies source, target and files
+  ok   conflict preserves commits and leaves no merge in progress
+  ok   teardown refuses unmerged member commits
+  ok   failed conflict reporting cannot claim successful parking
+  ok   integration never closes the card
+  ok   successful teardown leaves no claims held by the member
+  ok   already removed tree still has its branch cleaned up
+  ok   missing directory with stale git registration is cleaned up
+
+== pool: independent card and global pane limits
+  ok   pool collects before filling slots
+  ok   three-pane team uses one card slot
+  ok   pool collects before filling slots
+  ok   global pane cap stops dispatch despite free card slots
+  ok   pool collects before filling slots
+  ok   manual panes also consume global capacity
+  ok   pool collects before filling slots
+  ok   pane budget limits the number of newly started leads
+  ok   pool collects before filling slots
+  ok   card budget remains binding with pane space available
+  ok   pool collects before filling slots
+  ok   missing teamMaxAgents uses default eight
+  ok   pool collects before filling slots
+  ok   newly hired panes are recounted after dispatch
+  ok   pool collects before filling slots
+  ok   zero card budget disables new dispatch
+  ok   pool collects before filling slots
+  ok   team limit is loaded from board metadata when dispatch view omits it
+  ok   unavailable team config prevents dispatch
+
+passed 333, failed 0

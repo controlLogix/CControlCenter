@@ -8874,6 +8874,163 @@
       "reviewStatus": "owned-by-component; maintainers must review behavioral completeness before P00 exit"
     },
     {
+      "path": "plugins/agentmux-orchestration/hooks/agentmux-hook.sh",
+      "componentIds": [
+        "HAR-23"
+      ],
+      "workingFileSha256": "f7eb3a8cfc2c20ad17736f06b338117ee7a168b10efd216bd473ca430735f1e3",
+      "declarations": [
+        {
+          "name": "plain_pwd_event",
+          "line": 7,
+          "kind": "shell-function"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "Scoped maintained plugin repair independently reviewed; WSL36 and five probes pass. Native candidate verification and P06 remain required."
+    },
+    {
+      "path": "plugins/agentmux-orchestration/lib/gateway.py",
+      "componentIds": [
+        "HAR-23"
+      ],
+      "workingFileSha256": "dc9e22d6c01c77f0880540fdb9c55118f6028fc5421990d80ef2119d4d7476ec",
+      "declarations": [
+        {
+          "name": "Refused",
+          "line": 14,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "_object",
+          "line": 18,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "loads",
+          "line": 27,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "NoRedirect",
+          "line": 32,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "NoRedirect.redirect_request",
+          "line": 33,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "read",
+          "line": 37,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "rows",
+          "line": 82,
+          "kind": "FunctionDef"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "Maintained P01 legacy plugin; parent source review with independent compatibility evidence required; P06 unaccepted."
+    },
+    {
+      "path": "plugins/agentmux-orchestration/lib/policy.py",
+      "componentIds": [
+        "HAR-23"
+      ],
+      "workingFileSha256": "41a64ff60f460490e66255255ec0f1f0884d76d92ea12cc320b8de09ec1681c6",
+      "declarations": [
+        {
+          "name": "protected",
+          "line": 18,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "protect_live",
+          "line": 48,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "hire",
+          "line": 66,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "shell",
+          "line": 98,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "edit",
+          "line": 163,
+          "kind": "FunctionDef"
+        }
+      ],
+      "httpPathLiterals": [
+        "/api/agents",
+        "/api/board/",
+        "/api/board/roster"
+      ],
+      "reviewStatus": "Maintained P01 legacy plugin; parent source review with independent compatibility evidence required; P06 unaccepted."
+    },
+    {
+      "path": "plugins/agentmux-orchestration/lib/roster_mcp.py",
+      "componentIds": [
+        "HAR-23"
+      ],
+      "workingFileSha256": "e36ae6deb4933ea1c94523cb03dc19c1924dd9000caaa51aaab158facaaf2441",
+      "declarations": [
+        {
+          "name": "ProtocolError",
+          "line": 14,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "ProtocolError.__init__",
+          "line": 15,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "dispatch",
+          "line": 19,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "reply",
+          "line": 55,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "serve",
+          "line": 71,
+          "kind": "FunctionDef"
+        }
+      ],
+      "httpPathLiterals": [
+        "/api/board/agents",
+        "/api/board/roster"
+      ],
+      "reviewStatus": "Maintained P01 legacy plugin; parent source review with independent compatibility evidence required; P06 unaccepted."
+    },
+    {
+      "path": "plugins/agentmux-orchestration/skills/agent-config/scripts/runtime.py",
+      "componentIds": [
+        "HAR-23"
+      ],
+      "workingFileSha256": "0fbf4f9d9aa534d0f93476307835cf6a28d73dc756adc422b8e538e2604beea7",
+      "declarations": [
+        {
+          "name": "main",
+          "line": 9,
+          "kind": "FunctionDef"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "Maintained P01 legacy plugin; parent source review with independent compatibility evidence required; P06 unaccepted."
+    },
+    {
       "path": "sdk/python/agentmux_contracts/__init__.py",
       "componentIds": [
         "HUB-26"
@@ -10841,7 +10998,7 @@
       "componentIds": [
         "HUB-26"
       ],
-      "workingFileSha256": "cab9d707d3366ffe698bcd418ac38728912b42fffe0af7d29c94b32454da406c",
+      "workingFileSha256": "aea36550b1c7e77d15eb108b830ee3e3844e7cc45165bdfed398810084ed87bb",
       "declarations": [
         {
           "name": "digest",
@@ -10855,37 +11012,37 @@
         },
         {
           "name": "download",
-          "line": 59,
+          "line": 63,
           "kind": "FunctionDef"
         },
         {
           "name": "broker",
-          "line": 65,
+          "line": 69,
           "kind": "FunctionDef"
         },
         {
           "name": "negative_fixture",
-          "line": 94,
+          "line": 98,
           "kind": "FunctionDef"
         },
         {
           "name": "nsc",
-          "line": 125,
+          "line": 129,
           "kind": "FunctionDef"
         },
         {
           "name": "hub_preservation",
-          "line": 157,
+          "line": 161,
           "kind": "FunctionDef"
         },
         {
           "name": "main",
-          "line": 197,
+          "line": 201,
           "kind": "FunctionDef"
         }
       ],
       "httpPathLiterals": [],
-      "reviewStatus": "Scoped P01 inventory and preservation repair review; source freshness does not grant phase or P06 acceptance."
+      "reviewStatus": "Scoped native plugin36-method runner and preserved22checks independently reviewed; native candidate execution remains required."
     },
     {
       "path": "tests/contracts/fake_execution.py",
@@ -10992,6 +11149,97 @@
       ],
       "httpPathLiterals": [],
       "reviewStatus": "owned-by-component; controlled execution fixture source indexed; runtime qualification recorded separately"
+    },
+    {
+      "path": "tests/contracts/plugin_preservation.py",
+      "componentIds": [
+        "HAR-23"
+      ],
+      "workingFileSha256": "9181a98b3c9b071dc866b0f501c41fe5c71c54fa44248dc787ec3254070a2058",
+      "declarations": [
+        {
+          "name": "digest",
+          "line": 27,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "source_hashes",
+          "line": 31,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "expected_method_ids",
+          "line": 42,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "RecordedResult",
+          "line": 54,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "RecordedResult.__init__",
+          "line": 55,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "RecordedResult.addSuccess",
+          "line": 60,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "RecordedResult.record",
+          "line": 65,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "RecordedResult.addFailure",
+          "line": 69,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "RecordedResult.addError",
+          "line": 73,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "RecordedResult.addSkip",
+          "line": 77,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "RecordedResult.addExpectedFailure",
+          "line": 81,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "RecordedResult.addUnexpectedSuccess",
+          "line": 85,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "RecordedResult.addSubTest",
+          "line": 89,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "worker",
+          "line": 95,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "admitted",
+          "line": 125,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "main",
+          "line": 139,
+          "kind": "FunctionDef"
+        }
+      ],
+      "httpPathLiterals": [],
+      "reviewStatus": "Scoped native plugin36-method runner and preserved22checks independently reviewed; native candidate execution remains required."
     },
     {
       "path": "tests/contracts/run.py",
@@ -15706,6 +15954,113 @@
           ],
           "httpPathLiterals": [],
           "reviewStatus": "Scoped callback follow-up reviewed; final native and phase qualification remain open."
+        }
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "Added owned maintained legacy plugin source surfaces; prior files/history retained.",
+      "addedPaths": [
+        "plugins/agentmux-orchestration/.claude-plugin/plugin.json",
+        "plugins/agentmux-orchestration/.mcp.json",
+        "plugins/agentmux-orchestration/PROVENANCE.md",
+        "plugins/agentmux-orchestration/README.md",
+        "plugins/agentmux-orchestration/bin/agentmux-plugin",
+        "plugins/agentmux-orchestration/hooks/agentmux-hook.sh",
+        "plugins/agentmux-orchestration/hooks/hooks.json",
+        "plugins/agentmux-orchestration/lib/gateway.py",
+        "plugins/agentmux-orchestration/lib/policy.py",
+        "plugins/agentmux-orchestration/lib/roster_mcp.py",
+        "plugins/agentmux-orchestration/skills/agent-config/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-config/scripts/runtime.py",
+        "plugins/agentmux-orchestration/skills/agent-doctor/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-edit/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-new/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-remove/SKILL.md",
+        "plugins/agentmux-orchestration/skills/agent-roster/SKILL.md",
+        "plugins/agentmux-orchestration/skills/team-compose/SKILL.md",
+        "plugins/agentmux-orchestration/skills/team-dispatch/SKILL.md",
+        "plugins/agentmux-orchestration/skills/team-merge/SKILL.md",
+        "plugins/agentmux-orchestration/tests/test_hook_mcp.py",
+        "plugins/agentmux-orchestration/tests/test_packaging.py"
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "Owned native plugin qualification and refreshed changedCI surfaces; original rows retained.",
+      "previousFiles": [
+        {
+          "path": "tests/contracts/ci.py",
+          "componentIds": [
+            "HUB-26"
+          ],
+          "workingFileSha256": "cab9d707d3366ffe698bcd418ac38728912b42fffe0af7d29c94b32454da406c",
+          "declarations": [
+            {
+              "name": "digest",
+              "line": 39,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "source_hashes",
+              "line": 43,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "download",
+              "line": 59,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "broker",
+              "line": 65,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "negative_fixture",
+              "line": 94,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "nsc",
+              "line": 125,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "hub_preservation",
+              "line": 157,
+              "kind": "FunctionDef"
+            },
+            {
+              "name": "main",
+              "line": 197,
+              "kind": "FunctionDef"
+            }
+          ],
+          "httpPathLiterals": [],
+          "reviewStatus": "Scoped P01 inventory and preservation repair review; source freshness does not grant phase or P06 acceptance."
+        }
+      ],
+      "addedPaths": [
+        "tests/contracts/plugin_preservation.py"
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "actor": "Codex",
+      "reason": "Realistic host metadata plain-pwd repair; historical source row retained.",
+      "previousFiles": [
+        {
+          "path": "plugins/agentmux-orchestration/hooks/agentmux-hook.sh",
+          "componentIds": [
+            "HAR-23"
+          ],
+          "workingFileSha256": "e3184f77accfece692a56e9e0ee1a197d8a0594461f16e998aa825b4d9755975",
+          "declarations": [],
+          "httpPathLiterals": [],
+          "reviewStatus": "Maintained P01 legacy plugin; parent source review with independent compatibility evidence required; P06 unaccepted."
         }
       ]
     }
