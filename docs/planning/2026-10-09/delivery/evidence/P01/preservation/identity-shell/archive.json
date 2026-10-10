@@ -1,0 +1,21 @@
+{
+  "files": {
+    "identity-first/runner.py": "b3f1751a6a2355e39649e12974e57c2fd8f1cd95a144cbcbc07cc19980ccb056",
+    "identity-first/result.json": "e76a7616089ada414880efad0ac2a513b77e4261643bba56106571447d22e1bc",
+    "identity-first/cleanup.json": "e80ab7b9006bbd8e7db33eca998436a8db4763ae393a82649c736411820ba00b",
+    "identity-first/worker.py": "ec5e02189487fa56dbb4747d845994c59b36c63b48cf9915fbf00f21fd75363d",
+    "identity-first/run.json": "166b529c2c02482308a9191360cd73cdec447742d2c1cd32321216fcd39e97e1",
+    "identity-first/wrong-repo.json": "2e34729514fa0319dd686f4eee0417b56e9ac1dc81ee0f87d00775a675dabdaf",
+    "shell-retry/runner.py": "af5a35462d3ee350653d5d5287326a695aff8feeb8c45c37f73fb2cd4ec9399a",
+    "shell-retry/result.json": "29509d0374d3800c18a2e788c84aa88c8d433967c969083b253b505bf5f13719",
+    "shell-retry/cleanup.json": "e80ab7b9006bbd8e7db33eca998436a8db4763ae393a82649c736411820ba00b",
+    "shell-retry/worker.py": "bbfb075ce9fe582b7c0f77ad4b8484c787f91a717f0213813e83e140a9753947",
+    "shell-retry/run.json": "1ac41902fac069f67640bd532f8432736eff651059cf4dba97b1cab0b27aaf2b",
+    "shell-retry/run.log": "7f69338751e8b90ebcfefefbd2d1dbb69426f34e6b3f2f7c67a980f602ebfda1",
+    "shell-retry/wrong-repo.json": "23e1292786a31a5313b50976c288e1b7bb03d09a890b7b695278c3aef2721c4b",
+    "summary.json": "68d18910a524a26a114f408282a8d772e48f075f01b5804e008831f2a2f9b69c",
+    "independent-review.json": "ba2c255c093b9486f505f063157af13d011d651f55bf9070fb7b8a1c7f15b942",
+    "characterization-opinion.json": "b8069fe5f2ccd1d58da83f420bedb91391de3a80992d2ad9a3f1b4953526466a"
+  },
+  "scope": "Actual private WSL hub/tmux shell identities and attached unchanged orchtest28 results. Initial loader failure retained. No providers or production v1 adapter qualification. Only sanitized explicit allowlist retained; no tokens/state dirs."
+}

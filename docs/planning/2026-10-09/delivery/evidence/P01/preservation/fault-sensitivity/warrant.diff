@@ -1,0 +1,11 @@
+--- original/taskmgmt/coordination.py
++++ mutant/taskmgmt/coordination.py
+@@ -205,7 +205,7 @@
+         return None
+     if not isinstance(record, dict) or record.get("version") != 1:
+         return None
+-    if not secrets.compare_digest(str(record.get("secret") or ""), secret):
++    if False:
+         return None
+     agent = str(record.get("agent") or "")
+     # THE RESERVED NAME IS LOAD-BEARING. resolve_identity routes who == "orchestrator"

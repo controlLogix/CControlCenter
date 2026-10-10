@@ -1,0 +1,83 @@
+{
+  "candidate": "a21f03a8a6792f4fa21099afe62804a56dfa7fc4",
+  "phaseAccepted": false,
+  "scope": "HAR18C01/HUB01C02 native WSL baseline evidence review only",
+  "reviewedSourceReferences": 2122,
+  "committedSourceMismatches": [],
+  "verifiedAllowlistedEvidenceHashes": 13,
+  "addressReceipts": [
+    {
+      "address": "agent:alpha/worker/same",
+      "recipients": [
+        "alpha-worker-same"
+      ],
+      "acked": true
+    },
+    {
+      "address": "agent:beta/worker/same",
+      "recipients": [
+        "beta-worker-same"
+      ],
+      "acked": true
+    },
+    {
+      "address": "agent:alpha-worker-same",
+      "recipients": [
+        "alpha-worker-same"
+      ],
+      "acked": true
+    },
+    {
+      "address": "role:alpha/worker",
+      "recipients": [
+        "alpha-worker-same"
+      ],
+      "acked": true
+    },
+    {
+      "address": "role:beta/worker",
+      "recipients": [
+        "beta-worker-same"
+      ],
+      "acked": true
+    },
+    {
+      "address": "role:group:both/worker",
+      "recipients": [
+        "alpha-worker-same",
+        "beta-worker-same"
+      ],
+      "acked": true
+    },
+    {
+      "address": "role:*/worker",
+      "recipients": [
+        "alpha-worker-same",
+        "beta-worker-same"
+      ],
+      "acked": true
+    }
+  ],
+  "authenticatedIdentity": "Native Unix peer PID/UID process ancestry bound alpha/beta shell panes; no caller override in worker hub.cli.call. Not TCP-token or model-provider proof.",
+  "crossRepoClaimRefused": true,
+  "actualResultAttachedAndOperatorRetrieved": true,
+  "orchtest": {
+    "sourceRevision": "a21f03a8a6792f4fa21099afe62804a56dfa7fc4",
+    "tests": 28,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "logPath": "/home/ryan/.cache/agentmux-governance/identity-shell-es8gsah5/run.log",
+    "logSha256": "7f69338751e8b90ebcfefefbd2d1dbb69426f34e6b3f2f7c67a980f602ebfda1"
+  },
+  "sourceUnchangedBoth": true,
+  "firstRunFailureRetained": true,
+  "firstRunLimit": "Identity/address checks passed; orchtest discovery failed before execution due to explicit top-level directory. Later shell-only run fixed harness discovery; original runtime remained unchanged.",
+  "cleanup": "Both allowlisted cleanup reports show no remaining readable fixture processes; result records no remaining sidecars.",
+  "findings": [],
+  "limits": [
+    "Same-role/local-name isolation uses actual native WSL local hub and tmux shell agents, not cross-hub federation.",
+    "No real model provider execution. Local path and digest travel as structured JSON in the existing work result, not a dedicated artifact transport.",
+    "No four-provider/P06 qualification, cross-hub demonstration or production legacy-to-v1 adapter claim."
+  ]
+}

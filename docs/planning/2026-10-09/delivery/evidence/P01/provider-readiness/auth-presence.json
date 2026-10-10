@@ -1,0 +1,15 @@
+{
+  "candidate": "a21f03a8a6792f4fa21099afe62804a56dfa7fc4",
+  "observedAt": "2026-10-10T01:31:30.7930725+00:00",
+  "WindowsGrokAuthPresent": false,
+  "ProcessXaiKeyPresent": false,
+  "UserXaiKeyPresent": false,
+  "MachineXaiKeyPresent": false,
+  "noProviderCalls": true,
+  "noAuthenticationChanges": true,
+  "limits": [
+    "Presence only within recorded Windows default auth path and XAI_API_KEY scopes; no exhaustive credential search or authentication validation.",
+    "No credential values recorded. WSL default Grok auth absence observed separately.",
+    "Original four actual-provider runs remain unexecuted; client state/tool-path readiness is separate."
+  ]
+}

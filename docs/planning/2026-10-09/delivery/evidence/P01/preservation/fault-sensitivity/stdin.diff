@@ -1,0 +1,11 @@
+--- original/taskmgmt/notify.py
++++ mutant/taskmgmt/notify.py
+@@ -132,7 +132,7 @@
+              "-Command", TOAST_SCRIPT],
+             # DEVNULL, never inherited - see "NO CHILD SPAWNED HERE MAY INHERIT STDIN".
+             # This call site is the one that was measured eating a caller's script.
+-            stdin=subprocess.DEVNULL,
++            
+             capture_output=True, text=True, timeout=TOAST_TIMEOUT_S, errors="replace",
+             env=env)
+     except subprocess.TimeoutExpired:

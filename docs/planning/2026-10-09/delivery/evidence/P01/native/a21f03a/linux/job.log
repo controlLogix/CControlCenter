@@ -1,0 +1,748 @@
+P01 native ubuntu-24.04	Set up job	﻿2026-10-10T01:16:20.9565772Z Current runner version: '2.337.0'
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9599744Z ##[group]Runner Image Provisioner
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9601195Z Hosted Compute Agent
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9602127Z Version: 20261002.596
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9603246Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9604609Z Build Date: 2026-10-02T22:28:27Z
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9605682Z Worker ID: {28882aed-e16e-4d50-a0b5-1e8bf94f6e5d}
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9607266Z Region: eastus
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9608189Z Cloud: Azure
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9609176Z ##[endgroup]
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9611497Z ##[group]Operating System
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9612491Z Ubuntu
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9613464Z 24.04.5
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9614329Z LTS
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9615636Z ##[endgroup]
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9616952Z ##[group]Runner Image
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9618080Z Image: ubuntu-24.04
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9619042Z Version: 20261004.327.1
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9620914Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9624022Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9625835Z ##[endgroup]
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9627900Z ##[group]GITHUB_TOKEN Permissions
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9630943Z Contents: read
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9632035Z Metadata: read
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9633172Z ##[endgroup]
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9636008Z Secret source: Actions
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9638329Z Cache mode: write
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:20.9639771Z Prepare workflow directory
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:21.0109743Z Prepare all required actions
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:21.0179507Z Getting action download info
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:21.2329208Z Download action repository 'actions/checkout@v5' (SHA:fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09)
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:21.3351604Z Download action repository 'actions/setup-python@v6' (SHA:ece7cb06caefa5fff74198d8649806c4678c61a1)
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:21.4079767Z Download action repository 'actions/setup-node@v5' (SHA:a0853c24544627f65ddf259abe73b1d18a591444)
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:21.5048742Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+P01 native ubuntu-24.04	Set up job	2026-10-10T01:16:21.7216664Z Complete job name: P01 native ubuntu-24.04
+P01 native ubuntu-24.04	Run actions/checkout@v5	﻿2026-10-10T01:16:21.7986104Z ##[group]Run actions/checkout@v5
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.7987387Z with:
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.7987868Z   persist-credentials: false
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.7988395Z   fetch-depth: 0
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.7988862Z   repository: controlLogix/agentmux
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.7992391Z   token: ***
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.7992831Z   ssh-strict: true
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.7993277Z   ssh-user: git
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.7993764Z   clean: true
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.7994218Z   sparse-checkout-cone-mode: true
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.7994748Z   fetch-tags: false
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.7995205Z   show-progress: true
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.7995671Z   lfs: false
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.7996092Z   submodules: false
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.7996563Z   set-safe-directory: true
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.7997330Z   allow-unsafe-pr-checkout: false
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.7998196Z ##[endgroup]
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.8983915Z Syncing repository: controlLogix/agentmux
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.8986284Z ##[group]Getting Git version info
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.8987397Z Working directory is '/home/runner/work/agentmux/agentmux'
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.8988519Z [command]/usr/bin/git version
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9094295Z git version 2.55.0
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9120396Z ##[endgroup]
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9137471Z Temporarily overriding HOME='/home/runner/work/_temp/ab4a29dc-aeae-4f4d-bc67-be471992ce87' before making global git config changes
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9140224Z Adding repository directory to the temporary git global config as a safe directory
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9151541Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/agentmux/agentmux
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9227236Z Deleting the contents of '/home/runner/work/agentmux/agentmux'
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9232729Z ##[group]Initializing the repository
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9237414Z [command]/usr/bin/git init /home/runner/work/agentmux/agentmux
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9397247Z hint: Using 'master' as the name for the initial branch. This default branch name
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9399291Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9400995Z hint: to use in all of your new repositories, which will suppress this warning,
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9402288Z hint: call:
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9402993Z hint:
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9403755Z hint: 	git config --global init.defaultBranch <name>
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9404401Z hint:
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9405006Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9405949Z hint: 'development'. The just-created branch can be renamed via this command:
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9407300Z hint:
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9408012Z hint: 	git branch -m <name>
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9408528Z hint:
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9409173Z hint: Disable this message with "git config set advice.defaultBranchName false"
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9410222Z Initialized empty Git repository in /home/runner/work/agentmux/agentmux/.git/
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9416227Z [command]/usr/bin/git remote add origin https://github.com/controlLogix/agentmux
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9487076Z ##[endgroup]
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9488843Z ##[group]Disabling automatic garbage collection
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9492963Z [command]/usr/bin/git config --local gc.auto 0
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9533277Z ##[endgroup]
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9535035Z ##[group]Setting up auth
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9542421Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:21.9590610Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:22.0074437Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:22.0118968Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:22.0360835Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:22.0400438Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:22.0635864Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:22.0679601Z ##[endgroup]
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:22.0681064Z ##[group]Fetching the repository
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:22.0692206Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:23.7939038Z From https://github.com/controlLogix/agentmux
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:23.7941571Z  * [new branch]      backup/pre-reset-2026-09-26 -> origin/backup/pre-reset-2026-09-26
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:23.7945097Z  * [new branch]      feat/agentmux-platform-rearchitecture -> origin/feat/agentmux-platform-rearchitecture
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:23.7947484Z  * [new branch]      main       -> origin/main
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:23.7952044Z [command]/usr/bin/git branch --list --remote origin/feat/agentmux-platform-rearchitecture
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:23.7982167Z   origin/feat/agentmux-platform-rearchitecture
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:23.7994527Z [command]/usr/bin/git rev-parse refs/remotes/origin/feat/agentmux-platform-rearchitecture
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:23.8020818Z a21f03a8a6792f4fa21099afe62804a56dfa7fc4
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:23.8026234Z ##[endgroup]
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:23.8028169Z ##[group]Determining the checkout info
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:23.8030022Z ##[endgroup]
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:23.8032852Z [command]/usr/bin/git sparse-checkout disable
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:23.8099694Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:23.8132594Z ##[group]Checking out the ref
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:23.8138630Z [command]/usr/bin/git checkout --progress --force -B feat/agentmux-platform-rearchitecture refs/remotes/origin/feat/agentmux-platform-rearchitecture
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:24.0551322Z Switched to a new branch 'feat/agentmux-platform-rearchitecture'
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:24.0556244Z branch 'feat/agentmux-platform-rearchitecture' set up to track 'origin/feat/agentmux-platform-rearchitecture'.
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:24.0579569Z ##[endgroup]
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:24.0627475Z [command]/usr/bin/git log -1 --format=%H
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:24.0654398Z a21f03a8a6792f4fa21099afe62804a56dfa7fc4
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:24.0667838Z ##[group]Removing auth
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:24.0668944Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:24.0703442Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:24.0934892Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:24.0965112Z http.https://github.com/.extraheader
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:24.0974227Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:24.1014810Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:24.1241334Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:24.1279396Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+P01 native ubuntu-24.04	Run actions/checkout@v5	2026-10-10T01:16:24.1500794Z ##[endgroup]
+P01 native ubuntu-24.04	Run actions/setup-python@v6	﻿2026-10-10T01:16:24.1905762Z ##[group]Run actions/setup-python@v6
+P01 native ubuntu-24.04	Run actions/setup-python@v6	2026-10-10T01:16:24.1906822Z with:
+P01 native ubuntu-24.04	Run actions/setup-python@v6	2026-10-10T01:16:24.1907354Z   python-version: 3.14.8
+P01 native ubuntu-24.04	Run actions/setup-python@v6	2026-10-10T01:16:24.1908005Z   check-latest: false
+P01 native ubuntu-24.04	Run actions/setup-python@v6	2026-10-10T01:16:24.1916284Z   token: ***
+P01 native ubuntu-24.04	Run actions/setup-python@v6	2026-10-10T01:16:24.1916984Z   update-environment: true
+P01 native ubuntu-24.04	Run actions/setup-python@v6	2026-10-10T01:16:24.1917744Z   allow-prereleases: false
+P01 native ubuntu-24.04	Run actions/setup-python@v6	2026-10-10T01:16:24.1918466Z   freethreaded: false
+P01 native ubuntu-24.04	Run actions/setup-python@v6	2026-10-10T01:16:24.1919067Z ##[endgroup]
+P01 native ubuntu-24.04	Run actions/setup-python@v6	2026-10-10T01:16:24.3310221Z ##[group]Installed versions
+P01 native ubuntu-24.04	Run actions/setup-python@v6	2026-10-10T01:16:24.3365014Z Successfully set up CPython (3.14.8)
+P01 native ubuntu-24.04	Run actions/setup-python@v6	2026-10-10T01:16:24.3368117Z ##[endgroup]
+P01 native ubuntu-24.04	Run actions/setup-node@v5	﻿2026-10-10T01:16:24.3726834Z ##[group]Run actions/setup-node@v5
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.3728216Z with:
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.3729140Z   node-version: 22.21.1
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.3730191Z   always-auth: false
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.3731221Z   check-latest: false
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.3740290Z   token: ***
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.3741319Z   package-manager-cache: true
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.3742453Z env:
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.3743890Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.8/x64
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.3745785Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.8/x64/lib/pkgconfig
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.3747843Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.3749546Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.3751229Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.3752913Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.8/x64/lib
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.3754339Z ##[endgroup]
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.5269062Z Attempting to download 22.21.1...
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.5374066Z (node:2374) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:24.5377153Z (Use `node --trace-deprecation ...` to show where the warning was created)
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:25.0382328Z Acquiring 22.21.1 - x64 from https://github.com/actions/node-versions/releases/download/22.21.1-18894912842/node-22.21.1-linux-x64.tar.gz
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:25.5284498Z Extracting ...
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:25.5422690Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/71a3cdb1-dc54-4f58-bced-a4598b363244 -f /home/runner/work/_temp/bcfadd1b-00c4-4e95-be6f-e40de6001bee
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:26.7777445Z Adding to the cache ...
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:29.3072638Z ##[group]Environment details
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:29.5253891Z node: v22.21.1
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:29.5254444Z npm: 10.9.4
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:29.5254828Z yarn: 1.22.22
+P01 native ubuntu-24.04	Run actions/setup-node@v5	2026-10-10T01:16:29.5255726Z ##[endgroup]
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	﻿2026-10-10T01:16:29.5461561Z ##[group]Run python tests/contracts/ci.py --workspace "/home/runner/work/_temp/agentmux-p01" --evidence "/home/runner/work/_temp/agentmux-evidence"
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:29.5462694Z ^[[36;1mpython tests/contracts/ci.py --workspace "/home/runner/work/_temp/agentmux-p01" --evidence "/home/runner/work/_temp/agentmux-evidence"^[[0m
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:29.5760627Z shell: /usr/bin/bash -e {0}
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:29.5760947Z env:
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:29.5761239Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.8/x64
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:29.5761711Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.8/x64/lib/pkgconfig
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:29.5762224Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:29.5762630Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:29.5763050Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:29.5763452Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.8/x64/lib
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:29.5763793Z ##[endgroup]
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:31.5336172Z Collecting attrs==26.1.0 (from -r /home/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 1))
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:31.6050146Z   Downloading attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:31.7388455Z Collecting cffi==2.1.1 (from -r /home/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 2))
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:31.7485717Z   Downloading cffi-2.1.1-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.5 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:31.7734396Z Collecting jsonschema==4.26.0 (from -r /home/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 3))
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:31.7864408Z   Downloading jsonschema-4.26.0-py3-none-any.whl.metadata (7.6 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:31.8068355Z Collecting jsonschema-specifications==2025.9.1 (from -r /home/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 4))
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:31.8158886Z   Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl.metadata (2.9 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:31.8325196Z Collecting pycparser==3.0 (from -r /home/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 5))
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:31.8421477Z   Downloading pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:31.8704963Z Collecting PyNaCl==1.6.2 (from -r /home/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 6))
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:31.8795518Z   Downloading pynacl-1.6.2-cp38-abi3-manylinux_2_34_x86_64.whl.metadata (10.0 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:31.9132142Z Collecting referencing==0.37.0 (from -r /home/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 7))
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:31.9226218Z   Downloading referencing-0.37.0-py3-none-any.whl.metadata (2.8 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:31.9418267Z Collecting rfc8785==0.1.4 (from -r /home/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 8))
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:31.9501793Z   Downloading rfc8785-0.1.4-py3-none-any.whl.metadata (3.4 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:32.2533998Z Collecting rpds-py==2026.9.1 (from -r /home/runner/work/agentmux/agentmux/sdk/python/requirements.lock (line 9))
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:32.2633758Z   Downloading rpds_py-2026.9.1-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.1 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:32.2824494Z Collecting nats-py==2.16.0 (from -r /home/runner/work/agentmux/agentmux/hub/requirements.lock (line 7))
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:32.2926556Z   Downloading nats_py-2.16.0-py3-none-any.whl.metadata (8.0 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:32.3237919Z Collecting nkeys==0.2.1 (from -r /home/runner/work/agentmux/agentmux/hub/requirements.lock (line 8))
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:32.3347945Z   Downloading nkeys-0.2.1.tar.gz (10 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:32.3475949Z   Installing build dependencies: started
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:34.3370973Z   Installing build dependencies: finished with status 'done'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:34.3377243Z   Getting requirements to build wheel: started
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.0019522Z   Getting requirements to build wheel: finished with status 'done'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.0028441Z   Preparing metadata (pyproject.toml): started
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.2091857Z   Preparing metadata (pyproject.toml): finished with status 'done'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.2438792Z Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.2725593Z Downloading cffi-2.1.1-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (221 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.2988934Z Downloading jsonschema-4.26.0-py3-none-any.whl (90 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.3177260Z Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.3300699Z Downloading pycparser-3.0-py3-none-any.whl (48 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.3424166Z Downloading pynacl-1.6.2-cp38-abi3-manylinux_2_34_x86_64.whl (1.4 MB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.3763751Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.4/1.4 MB 47.7 MB/s  0:00:00
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.3937025Z Downloading referencing-0.37.0-py3-none-any.whl (26 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.4051126Z Downloading rfc8785-0.1.4-py3-none-any.whl (9.2 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.4181729Z Downloading rpds_py-2026.9.1-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (371 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.4305041Z Downloading nats_py-2.16.0-py3-none-any.whl (93 kB)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.4566911Z Building wheels for collected packages: nkeys
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.4574820Z   Building wheel for nkeys (pyproject.toml): started
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.6815072Z   Building wheel for nkeys (pyproject.toml): finished with status 'done'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.6819936Z   Created wheel for nkeys: filename=nkeys-0.2.1-py3-none-any.whl size=10715 sha256=69864afcbd9a337f0a08477563c6605c9d50db0a0d1f6c4ac778b284d2946f81
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.6821572Z   Stored in directory: /home/runner/.cache/pip/wheels/fe/1d/60/2b5d7c5040c3f54b07c23e5f670e18a629155a1e506d544ade
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.6839605Z Successfully built nkeys
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:35.7110141Z Installing collected packages: rpds-py, rfc8785, pycparser, nats-py, attrs, referencing, cffi, PyNaCl, jsonschema-specifications, nkeys, jsonschema
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:36.1979518Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:36.1997904Z Successfully installed PyNaCl-1.6.2 attrs-26.1.0 cffi-2.1.1 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 nats-py-2.16.0 nkeys-0.2.1 pycparser-3.0 referencing-0.37.0 rfc8785-0.1.4 rpds-py-2026.9.1
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:37.3479109Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:37.3479714Z added 11 packages in 1s
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:37.4958524Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:37.4959141Z > @agentmux/contracts@1.0.0 build
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:37.4959475Z > tsc
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:37.4959601Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:38.7843269Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:38.7843883Z added 10 packages in 710ms
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:38.9279387Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:38.9280157Z > agentmux-storage-fixture@1.0.0 build
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:38.9280756Z > tsc
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:38.9280976Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:40.5555574Z test_cli_error_does_not_echo_bad_input (test_contracts.AttestationTests.test_cli_error_does_not_echo_bad_input) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:40.6983938Z test_cli_size_limit_excludes_only_line_delimiter (test_contracts.AttestationTests.test_cli_size_limit_excludes_only_line_delimiter) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:40.8271481Z test_expiry_is_exclusive (test_contracts.AttestationTests.test_expiry_is_exclusive) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:40.8287102Z test_no_remote_schema_resolution_and_unknown_schema (test_contracts.AttestationTests.test_no_remote_schema_resolution_and_unknown_schema) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:40.8321850Z test_schema_cache_invalidates_changed_bytes_with_same_mtime (test_contracts.AttestationTests.test_schema_cache_invalidates_changed_bytes_with_same_mtime) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:40.8488618Z test_signature_and_payload_tampering (test_contracts.AttestationTests.test_signature_and_payload_tampering) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:40.8599895Z test_signed_envelope (test_contracts.AttestationTests.test_signed_envelope) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:40.8722216Z test_signed_invalid_issuer_and_lifetime (test_contracts.AttestationTests.test_signed_invalid_issuer_and_lifetime) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:40.9095770Z test_cross_field_invariants (test_contracts.SemanticTests.test_cross_field_invariants) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:40.9098927Z test_bad_unicode_and_nonfinite_numbers (test_contracts.WireTests.test_bad_unicode_and_nonfinite_numbers) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:40.9102081Z test_duplicate_keys_include_escaped_nested_names (test_contracts.WireTests.test_duplicate_keys_include_escaped_nested_names) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:40.9114866Z test_limits_and_non_json_objects (test_contracts.WireTests.test_limits_and_non_json_objects) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:40.9117833Z test_raw_large_integer_is_not_rounded (test_contracts.WireTests.test_raw_large_integer_is_not_rounded) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:40.9138502Z test_rfc_number_and_utf16_ordering (test_contracts.WireTests.test_rfc_number_and_utf16_ordering) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.0946117Z test_all_edges_and_required_evidence (test_state_models.StateModelTests.test_all_edges_and_required_evidence) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.0986514Z test_cancellation_survives_unknown_result (test_state_models.StateModelTests.test_cancellation_survives_unknown_result) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.1047154Z test_closed_fields_owner_revision_and_evidence (test_state_models.StateModelTests.test_closed_fields_owner_revision_and_evidence) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.1048082Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.1048475Z ----------------------------------------------------------------------
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.1049071Z Ran 17 tests in 0.669s
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.1049289Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.1049416Z OK
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.2539421Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.2540034Z > @agentmux/contracts@1.0.0 test
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.2540666Z > node --test dist/test.js dist/state-models.test.js
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.2540916Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.2977978Z TAP version 13
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7287630Z # Subtest: all 68 model edges require the exact role, revision and evidence
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7337825Z ok 1 - all 68 model edges require the exact role, revision and evidence
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7343960Z   ---
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7344790Z   duration_ms: 322.809034
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7345737Z   type: 'test'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7346354Z   ...
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7347735Z # Subtest: malformed requests cannot invent state, authority, guards or revisions
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7349363Z ok 2 - malformed requests cannot invent state, authority, guards or revisions
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7350449Z   ---
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7351141Z   duration_ms: 8.784971
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7351822Z   type: 'test'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7352513Z   ...
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7353574Z # Subtest: cancellation remains sticky through uncertainty and blocks normal completion
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7355048Z ok 3 - cancellation remains sticky through uncertainty and blocks normal completion
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7355957Z   ---
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7356526Z   duration_ms: 3.4704
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7357386Z   type: 'test'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7357895Z   ...
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7358604Z # Subtest: evidence reference limits count Unicode code points
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7359609Z ok 4 - evidence reference limits count Unicode code points
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7360290Z   ---
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7360764Z   duration_ms: 4.584609
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7361250Z   type: 'test'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.7361732Z   ...
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8890163Z # Subtest: rejects duplicate escaped keys, comments, trailing syntax and invalid UTF-8
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8891591Z ok 5 - rejects duplicate escaped keys, comments, trailing syntax and invalid UTF-8
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8892391Z   ---
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8892788Z   duration_ms: 3.729383
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8893229Z   type: 'test'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8893593Z   ...
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8894576Z # Subtest: preserves hostile property names without prototype mutation
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8907677Z ok 6 - preserves hostile property names without prototype mutation
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8914460Z   ---
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8916096Z   duration_ms: 0.629174
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8916593Z   type: 'test'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8917381Z   ...
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8918127Z # Subtest: canonical numbers and UTF-16 property ordering match JCS
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8919257Z ok 7 - canonical numbers and UTF-16 property ordering match JCS
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8920007Z   ---
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8920435Z   duration_ms: 0.411508
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8921195Z   type: 'test'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8921560Z   ...
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8922170Z # Subtest: RFC8032 seed derives the published public key
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8923215Z ok 8 - RFC8032 seed derives the published public key
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8923938Z   ---
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8924360Z   duration_ms: 2.525335
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8924934Z   type: 'test'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8925340Z   ...
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8926044Z # Subtest: bounds canonical output, container depth and dense arrays
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8927402Z ok 9 - bounds canonical output, container depth and dense arrays
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8928202Z   ---
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8928625Z   duration_ms: 14.683083
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8929052Z   type: 'test'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8929436Z   ...
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8930165Z # Subtest: CLI rejects an oversized frame once and resumes at the next line
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8931363Z ok 10 - CLI rejects an oversized frame once and resumes at the next line
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8932048Z   ---
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8932440Z   duration_ms: 209.763379
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8932854Z   type: 'test'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8933273Z   ...
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8934034Z # Subtest: compiled schema cache invalidates when trusted schema bytes change
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8935151Z ok 11 - compiled schema cache invalidates when trusted schema bytes change
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8935863Z   ---
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8936218Z   duration_ms: 197.616227
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8936615Z   type: 'test'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8938565Z   ...
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8939384Z # Subtest: rejects cross-field manifest, context and owner contradictions
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8940693Z ok 12 - rejects cross-field manifest, context and owner contradictions
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8941259Z   ---
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8941470Z   duration_ms: 51.667122
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8941701Z   type: 'test'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8941892Z   ...
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8942275Z # Subtest: validates promoted schemas and rejects unsigned outer changes
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8942850Z ok 13 - validates promoted schemas and rejects unsigned outer changes
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8943219Z   ---
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8943419Z   duration_ms: 19.977599
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8943645Z   type: 'test'
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.8943834Z   ...
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.9114764Z 1..13
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.9115189Z # tests 13
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.9115862Z # suites 0
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.9116271Z # pass 13
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.9116993Z # fail 0
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.9117392Z # cancelled 0
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.9118111Z # skipped 0
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.9118700Z # todo 0
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:41.9119351Z # duration_ms 629.532926
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:42.7844735Z test_all_required_schema_fields_and_unknown_fields (test_conformance.Conformance.test_all_required_schema_fields_and_unknown_fields) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:43.2667785Z test_all_schema_examples (test_conformance.Conformance.test_all_schema_examples) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:44.4920599Z test_attestation_tampering_and_signed_policy_rejections (test_conformance.Conformance.test_attestation_tampering_and_signed_policy_rejections) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:45.9570578Z test_cross_signatures_both_directions (test_conformance.Conformance.test_cross_signatures_both_directions) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:46.1556179Z test_depth_boundary (test_conformance.Conformance.test_depth_boundary) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:46.3525478Z test_escaped_unicode_valid (test_conformance.Conformance.test_escaped_unicode_valid) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:46.5791027Z test_exact_size_frame_excludes_newline_delimiter (test_conformance.Conformance.test_exact_size_frame_excludes_newline_delimiter) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:46.7768149Z test_independent_canonical_vectors (test_conformance.Conformance.test_independent_canonical_vectors) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:46.9844941Z test_oversized_raw_cli_recovers (test_conformance.Conformance.test_oversized_raw_cli_recovers) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:47.1817133Z test_raw_utf8_and_recovery (test_conformance.Conformance.test_raw_utf8_and_recovery) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:47.3809975Z test_strict_parser_rejections (test_conformance.Conformance.test_strict_parser_rejections) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:48.2683625Z test_unsigned_envelope_cannot_override_verified_claims (test_conformance.Conformance.test_unsigned_envelope_cannot_override_verified_claims) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:48.2685669Z test_confirmed_cancel_stops_output_and_requires_reconciliation (test_fake_execution.ControlledExecution.test_confirmed_cancel_stops_output_and_requires_reconciliation) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:48.2688443Z test_delay_and_explicit_reordering_preserve_each_operation (test_fake_execution.ControlledExecution.test_delay_and_explicit_reordering_preserve_each_operation) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:48.2690201Z test_histories_and_snapshots_are_detached_from_delivered_objects (test_fake_execution.ControlledExecution.test_histories_and_snapshots_are_detached_from_delivered_objects) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:48.2691736Z test_invalid_controls_and_duplicate_dispatch_have_no_second_effect (test_fake_execution.ControlledExecution.test_invalid_controls_and_duplicate_dispatch_have_no_second_effect) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:48.2693138Z test_lost_reply_is_unknown_despite_completed_provider (test_fake_execution.ControlledExecution.test_lost_reply_is_unknown_despite_completed_provider) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:48.2694314Z test_provider_unavailable_proves_no_dispatch (test_fake_execution.ControlledExecution.test_provider_unavailable_proves_no_dispatch) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:48.2696055Z test_reply_at_deadline_is_unknown_without_polling (test_fake_execution.ControlledExecution.test_reply_at_deadline_is_unknown_without_polling) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:48.2698566Z test_success_uses_real_callback_and_separate_output_history (test_fake_execution.ControlledExecution.test_success_uses_real_callback_and_separate_output_history) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:48.2701282Z test_timeout_before_execution_does_not_retry_and_late_reply_needs_lookup (test_fake_execution.ControlledExecution.test_timeout_before_execution_does_not_retry_and_late_reply_needs_lookup) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:48.2703932Z test_unconfirmed_cancel_retains_intent_after_late_completion (test_fake_execution.ControlledExecution.test_unconfirmed_cancel_retains_intent_after_late_completion) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:48.7513838Z test_cancellation_wide_target_and_unknown_outcome_shapes (test_payloads.Payloads.test_cancellation_wide_target_and_unknown_outcome_shapes) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:49.2734152Z test_every_registry_payload (test_payloads.Payloads.test_every_registry_payload) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:50.0985461Z test_missing_and_unknown_payload_fields (test_payloads.Payloads.test_missing_and_unknown_payload_fields) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:50.6735548Z test_payload_context_binding (test_payloads.Payloads.test_payload_context_binding) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:51.1593344Z test_receipt_execution_and_acceptance_are_not_interchangeable (test_payloads.Payloads.test_receipt_execution_and_acceptance_are_not_interchangeable) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:51.7482365Z test_unknown_contract_wrong_major_kind_and_service (test_payloads.Payloads.test_unknown_contract_wrong_major_kind_and_service) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:52.6256383Z test_valid_signature_does_not_bypass_payload_admission (test_payloads.Payloads.test_valid_signature_does_not_bypass_payload_admission) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:53.6741846Z test_recovery_approval_cannot_override_hard_denial (test_recovery.Recovery.test_recovery_approval_cannot_override_hard_denial) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:56.0865111Z test_recovery_cancellation_and_unknown_attempt (test_recovery.Recovery.test_recovery_cancellation_and_unknown_attempt) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:16:59.0886210Z test_recovery_reordered_stale_result_and_duplicate (test_recovery.Recovery.test_recovery_reordered_stale_result_and_duplicate) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:00.0807682Z test_recovery_replay_and_authorized_late_lookup (test_recovery.Recovery.test_recovery_replay_and_authorized_late_lookup) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:02.1171624Z test_recovery_signed_deadline_and_unknown_outcome_payloads (test_recovery.Recovery.test_recovery_signed_deadline_and_unknown_outcome_payloads) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:04.4879795Z test_recovery_unavailable_requires_observed_non_admission (test_recovery.Recovery.test_recovery_unavailable_requires_observed_non_admission) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:04.9294011Z test_identity_uniqueness_and_self_dependency (test_semantics.Semantics.test_identity_uniqueness_and_self_dependency) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:05.4974537Z test_p00_semantic_rejections_remain_enforced (test_semantics.Semantics.test_p00_semantic_rejections_remain_enforced) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:06.2184051Z test_all_accepted_draft_edges_and_each_missing_guard (test_state_models.StateModels.test_all_accepted_draft_edges_and_each_missing_guard) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:06.4629548Z test_closed_input_and_owner_binding (test_state_models.StateModels.test_closed_input_and_owner_binding) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:06.7067981Z test_delivery_receipts_do_not_advance_work (test_state_models.StateModels.test_delivery_receipts_do_not_advance_work) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:06.9278045Z test_json_integer_and_unicode_reference_boundaries (test_state_models.StateModels.test_json_integer_and_unicode_reference_boundaries) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:07.1586547Z test_ordered_reservation_result_and_origin_acceptance (test_state_models.StateModels.test_ordered_reservation_result_and_origin_acceptance) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:07.3866945Z test_pending_cancellation_survives_uncertain_execution (test_state_models.StateModels.test_pending_cancellation_survives_uncertain_execution) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:07.6541297Z test_preserved_p00_model_examples (test_state_models.StateModels.test_preserved_p00_model_examples) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:07.8591352Z test_reconciliation_records_newly_discovered_cancellation (test_state_models.StateModels.test_reconciliation_records_newly_discovered_cancellation) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:07.8592559Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:07.8593012Z ----------------------------------------------------------------------
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:07.8593686Z Ran 45 tests in 25.819s
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:07.8593955Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:07.8594139Z OK
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0072921Z {
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0073539Z   "recordedAt": "2026-10-10T01:17:08.006446+00:00",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0074188Z   "candidateCommit": "a21f03a8a6792f4fa21099afe62804a56dfa7fc4",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0074569Z   "command": [
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0074887Z     "/opt/hostedtoolcache/Python/3.14.8/x64/bin/python",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0075366Z     "docs/planning/2026-10-09/delivery/check_conformance_evidence.py",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0075750Z     "--report",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0076079Z     "/home/runner/work/_temp/agentmux-evidence/contracts.json",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0076445Z     "--candidate",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0077004Z     "a21f03a8a6792f4fa21099afe62804a56dfa7fc4",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0077332Z     "--environment",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0077570Z     "linux",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0077783Z     "--evidence",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0078177Z     "/home/runner/work/_temp/agentmux-evidence/conformance-admission.json"
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0078585Z   ],
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0078821Z   "environmentRequired": "linux",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0079262Z   "report": "/home/runner/work/_temp/agentmux-evidence/contracts.json",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0079872Z   "reportSha256": "4c7ea712ecaf33f7908a3233ee2dd73e4747f9a2d78fb626eee201b5a5871988",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0080563Z   "checkerSha256": "2f1508894c5fccd9ee1d4f44d11171f959529e2b1fa55621d76757f866129dc6",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0081011Z   "exitCode": 0,
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0081225Z   "errors": [],
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0081430Z   "limits": [
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0081995Z     "Conformance-format evidence admission only; not authenticity proof, other suite acceptance or phase approval.",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0083165Z     "Compiled hashes record tested output identity; this tool does not rebuild or authenticate binaries.",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0083876Z     "Candidate comparison reads committed Git blobs, never working-tree files."
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0084295Z   ]
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.0084482Z }
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.1285693Z test_accepts_archived_native_report_against_actual_git_candidate (__main__.ConformanceEvidence.test_accepts_archived_native_report_against_actual_git_candidate) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.2001766Z test_build_and_mirror_claims_need_actual_hash_equality (__main__.ConformanceEvidence.test_build_and_mirror_claims_need_actual_hash_equality) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.2672223Z test_linux_cannot_count_as_wsl_or_macos_evidence (__main__.ConformanceEvidence.test_linux_cannot_count_as_wsl_or_macos_evidence) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.3385050Z test_missing_compiled_output_and_repeated_test_id_reject (__main__.ConformanceEvidence.test_missing_compiled_output_and_repeated_test_id_reject) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.3742982Z test_missing_required_source_cannot_reduce_the_scope (__main__.ConformanceEvidence.test_missing_required_source_cannot_reduce_the_scope) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.4102460Z test_omitted_method_rejects_even_when_test_count_is_adjusted (__main__.ConformanceEvidence.test_omitted_method_rejects_even_when_test_count_is_adjusted) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.4115125Z test_rejects_unsupported_dynamic_discovery (__main__.ConformanceEvidence.test_rejects_unsupported_dynamic_discovery) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.4473063Z test_skipped_environment_rejects_even_with_success_exit_code (__main__.ConformanceEvidence.test_skipped_environment_rejects_even_with_success_exit_code) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.4827248Z test_skipped_test_rejects_even_with_success_summary (__main__.ConformanceEvidence.test_skipped_test_rejects_even_with_success_summary) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.6941234Z test_skips_failures_and_mutable_build_flags_each_reject (__main__.ConformanceEvidence.test_skips_failures_and_mutable_build_flags_each_reject) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.7297262Z test_stale_hash_rejects_even_with_success_exit_code (__main__.ConformanceEvidence.test_stale_hash_rejects_even_with_success_exit_code) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.7628167Z test_working_selection_and_uncommitted_inputs_cannot_qualify_old_candidate (__main__.ConformanceEvidence.test_working_selection_and_uncommitted_inputs_cannot_qualify_old_candidate) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.7629471Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.7629883Z ----------------------------------------------------------------------
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.7630462Z Ran 12 tests in 0.675s
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.7630706Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:08.7630853Z OK
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:16.2366571Z {"status": "passed", "cases": 20, "seconds": 6.543}
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:18.7685359Z {"exitCode": 0, "passedCases": 11, "failure": null}
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:29.4944679Z {"exitCode": 0, "passedCases": 19, "failure": null}
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:29.6009592Z Running hub.tests.test_local_runner, hub.tests.test_governance, hub.tests.test_fed_unit, hub.tests.test_hub_offline, hub.tests.test_nats_federation, hub.tests.test_fed_live; evidence: /home/runner/work/_temp/agentmux-p01/hub-home/cache/agentmux-tests/b0aa493d9ca1b39b/20261010T011729-a4643acd
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:29.9395596Z test_class_setup_failure_saves_class (hub.tests.test_local_runner.RunnerTests.test_class_setup_failure_saves_class) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:29.9497064Z test_failed_selection_can_be_retried_without_running_other_suites (hub.tests.test_local_runner.RunnerTests.test_failed_selection_can_be_retried_without_running_other_suites) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:29.9543570Z test_import_error_retries_original_selection (hub.tests.test_local_runner.RunnerTests.test_import_error_retries_original_selection) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:29.9545522Z test_regular_selector_is_unchanged (hub.tests.test_local_runner.RunnerTests.test_regular_selector_is_unchanged) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:29.9627555Z test_skipped_or_empty_selection_cannot_pass (hub.tests.test_local_runner.RunnerTests.test_skipped_or_empty_selection_cannot_pass) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:29.9633884Z test_subtest_failure_saves_loadable_parent (hub.tests.test_local_runner.RunnerTests.test_subtest_failure_saves_loadable_parent) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:29.9638426Z test_subject_destination_repository_and_role_match (hub.tests.test_governance.AuthorizationBinding.test_subject_destination_repository_and_role_match) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:29.9641115Z test_work_cannot_enter_through_information_plane (hub.tests.test_governance.AuthorizationBinding.test_work_cannot_enter_through_information_plane) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.0633286Z test_concurrent_stores_do_not_replace_snapshots (hub.tests.test_governance.BackupIdentity.test_concurrent_stores_do_not_replace_snapshots) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.0743170Z test_failed_copy_does_not_publish_or_prune_a_snapshot (hub.tests.test_governance.BackupIdentity.test_failed_copy_does_not_publish_or_prune_a_snapshot) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.0974348Z test_frozen_clock_keeps_distinct_restorable_snapshots (hub.tests.test_governance.BackupIdentity.test_frozen_clock_keeps_distinct_restorable_snapshots) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.1105595Z test_second_boundary_uses_one_timestamp_for_backup_rotation (hub.tests.test_governance.BackupIdentity.test_second_boundary_uses_one_timestamp_for_backup_rotation) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.2211549Z test_abrupt_process_exit_after_completion_still_returns_result (hub.tests.test_governance.WorkProtocol.test_abrupt_process_exit_after_completion_still_returns_result) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.2579757Z test_completion_recovers_after_restart_and_failed_staging (hub.tests.test_governance.WorkProtocol.test_completion_recovers_after_restart_and_failed_staging) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.2871675Z test_exhausted_lease_also_records_return_obligation (hub.tests.test_governance.WorkProtocol.test_exhausted_lease_also_records_return_obligation) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.3152478Z test_late_grant_cannot_revive_cancelled_execution (hub.tests.test_governance.WorkProtocol.test_late_grant_cannot_revive_cancelled_execution) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.3428219Z test_legacy_work_stays_quarantined_and_cannot_be_auto_approved (hub.tests.test_governance.WorkProtocol.test_legacy_work_stays_quarantined_and_cannot_be_auto_approved) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.3737489Z test_malformed_claim_cannot_reserve_an_origin_task (hub.tests.test_governance.WorkProtocol.test_malformed_claim_cannot_reserve_an_origin_task) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.4023299Z test_origin_reservation_and_grant_rollback_together (hub.tests.test_governance.WorkProtocol.test_origin_reservation_and_grant_rollback_together) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.4301239Z test_receive_is_atomic_with_claim_and_retry_after_injected_crash (hub.tests.test_governance.WorkProtocol.test_receive_is_atomic_with_claim_and_retry_after_injected_crash) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.4622857Z test_result_binds_peer_node_attempt_task_repo_grant_and_evidence (hub.tests.test_governance.WorkProtocol.test_result_binds_peer_node_attempt_task_repo_grant_and_evidence) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.4955359Z test_same_peer_other_node_completes_without_confusing_origin_rows (hub.tests.test_governance.WorkProtocol.test_same_peer_other_node_completes_without_confusing_origin_rows) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5256246Z test_two_receivers_only_origin_selected_one_becomes_ready (hub.tests.test_governance.WorkProtocol.test_two_receivers_only_origin_selected_one_becomes_ready) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5367041Z test_completion_keeps_durable_return_intent_without_callback (hub.tests.test_governance.WorkRecovery.test_completion_keeps_durable_return_intent_without_callback) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5471556Z test_incoming_creation_rolls_back_when_attribution_fails (hub.tests.test_governance.WorkRecovery.test_incoming_creation_rolls_back_when_attribution_fails) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5578231Z test_same_peer_other_node_is_not_discarded (hub.tests.test_governance.WorkRecovery.test_same_peer_other_node_is_not_discarded) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5686211Z test_wrong_peer_result_does_not_complete_origin (hub.tests.test_governance.WorkRecovery.test_wrong_peer_result_does_not_complete_origin) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5699149Z test_round_trip (hub.tests.test_fed_unit.Config.test_round_trip) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5700805Z test_subjects_refuse_bad_tokens (hub.tests.test_fed_unit.Envelope.test_subjects_refuse_bad_tokens) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5701910Z test_validate (hub.tests.test_fed_unit.Envelope.test_validate) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5703730Z test_only_privileged_tools_are_gated (hub.tests.test_fed_unit.Gate.test_only_privileged_tools_are_gated) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5705195Z test_remote_work_blocks_privileged (hub.tests.test_fed_unit.Gate.test_remote_work_blocks_privileged) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5706793Z test_local_names_differ_rid_does_not (hub.tests.test_fed_unit.Identity.test_local_names_differ_rid_does_not) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5708500Z test_same_repo_same_rid_whatever_the_url_spelling (hub.tests.test_fed_unit.Identity.test_same_repo_same_rid_whatever_the_url_spelling) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5709783Z test_unshared_and_unmatched (hub.tests.test_fed_unit.Identity.test_unshared_and_unmatched) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5711529Z test_privileged_work_is_quarantined_even_from_auto (hub.tests.test_fed_unit.Inbound.test_privileged_work_is_quarantined_even_from_auto) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5713391Z test_spoof_self_and_scope (hub.tests.test_fed_unit.Inbound.test_spoof_self_and_scope) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5716347Z test_trust_levels (hub.tests.test_fed_unit.Inbound.test_trust_levels) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5717435Z test_wrap (hub.tests.test_fed_unit.Inbound.test_wrap) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.5848017Z test_protocol (hub.tests.test_fed_unit.Mcp.test_protocol) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.8027849Z test_redact_block_and_size (hub.tests.test_fed_unit.Outbound.test_redact_block_and_size) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.8029590Z test_scope (hub.tests.test_fed_unit.Outbound.test_scope) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.8031959Z test_blocks_private_keys_and_seeds (hub.tests.test_fed_unit.Redaction.test_blocks_private_keys_and_seeds) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.8034060Z test_clean_payload_is_untouched (hub.tests.test_fed_unit.Redaction.test_clean_payload_is_untouched) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.8035950Z test_redacts_known_tokens_and_keeps_the_rest (hub.tests.test_fed_unit.Redaction.test_redacts_known_tokens_and_keeps_the_rest) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.8176397Z test_migration_takes_a_backup_first (hub.tests.test_hub_offline.BackupsAndRetention.test_migration_takes_a_backup_first) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.8256886Z test_prune_never_touches_undelivered_mail (hub.tests.test_hub_offline.BackupsAndRetention.test_prune_never_touches_undelivered_mail) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:30.8418113Z test_rotation_keeps_newest_and_copy_restores (hub.tests.test_hub_offline.BackupsAndRetention.test_rotation_keeps_newest_and_copy_restores) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:31.1468920Z test_silent_endpoint_times_out_instead_of_hanging (hub.tests.test_hub_offline.BridgeConnectBounded.test_silent_endpoint_times_out_instead_of_hanging) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:31.1508176Z test_assistant_text_and_partial_lines_are_not_receipts (hub.tests.test_hub_offline.CliReceipts.test_assistant_text_and_partial_lines_are_not_receipts) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:31.1523112Z test_each_cli_format (hub.tests.test_hub_offline.CliReceipts.test_each_cli_format) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:31.1535362Z test_grok_bell_split_across_chunks (hub.tests.test_hub_offline.CliReceipts.test_grok_bell_split_across_chunks) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:31.1998054Z test_hold_alert_fires_once (hub.tests.test_hub_offline.CliReceipts.test_hold_alert_fires_once) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:31.2084765Z test_mark_received (hub.tests.test_hub_offline.CliReceipts.test_mark_received) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:31.2086245Z test_booting_defers (hub.tests.test_hub_offline.Deliver.test_booting_defers) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:32.4099390Z test_busy_defers_without_keys (hub.tests.test_hub_offline.Deliver.test_busy_defers_without_keys) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:34.7120363Z test_clean_submit (hub.tests.test_hub_offline.Deliver.test_clean_submit) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:37.2142912Z test_copy_mode_left_first (hub.tests.test_hub_offline.Deliver.test_copy_mode_left_first) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:37.2144269Z test_handle_mismatch_refused (hub.tests.test_hub_offline.Deliver.test_handle_mismatch_refused) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:39.7169144Z test_hint_text_cleared_first (hub.tests.test_hub_offline.Deliver.test_hint_text_cleared_first) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:40.3177538Z test_login_modal_blocks_without_keys (hub.tests.test_hub_offline.Deliver.test_login_modal_blocks_without_keys) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:44.6207056Z test_placeholder_gets_second_enter (hub.tests.test_hub_offline.Deliver.test_placeholder_gets_second_enter) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:46.2222895Z test_stale_line_resubmitted_not_retyped (hub.tests.test_hub_offline.Deliver.test_stale_line_resubmitted_not_retyped) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:46.8230850Z test_unknown_prompt_blocks (hub.tests.test_hub_offline.Deliver.test_unknown_prompt_blocks) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:46.8232183Z test_update_banner_is_not_the_update_menu (hub.tests.test_hub_offline.Deliver.test_update_banner_is_not_the_update_menu)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:49.3257355Z codex 0.159.2 (2026-09-30): every pane shows this NON-modal banner. It must be ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:53.3785720Z test_update_modal_answered_safely (hub.tests.test_hub_offline.Deliver.test_update_modal_answered_safely) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:17:58.1818832Z test_missing_safe_option_blocks (hub.tests.test_hub_offline.MenuByLabel.test_missing_safe_option_blocks) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.1852588Z test_trust_selects_yes_even_when_no_is_preselected (hub.tests.test_hub_offline.MenuByLabel.test_trust_selects_yes_even_when_no_is_preselected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.1941665Z test_attempts_to_dead (hub.tests.test_hub_offline.Messaging.test_attempts_to_dead) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.2034814Z test_courier_kinds_accepted (hub.tests.test_hub_offline.Messaging.test_courier_kinds_accepted) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.2115173Z test_direct_inbox_ack (hub.tests.test_hub_offline.Messaging.test_direct_inbox_ack) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.2188087Z test_duplicate_live_name_refused (hub.tests.test_hub_offline.Messaging.test_duplicate_live_name_refused) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.2319642Z test_events_tail_returns_newest_oldest_first (hub.tests.test_hub_offline.Messaging.test_events_tail_returns_newest_oldest_first) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.2562787Z test_fts_and_audit (hub.tests.test_hub_offline.Messaging.test_fts_and_audit) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.2643731Z test_idempotent_post (hub.tests.test_hub_offline.Messaging.test_idempotent_post) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.2730412Z test_legacy_names_resolve (hub.tests.test_hub_offline.Messaging.test_legacy_names_resolve) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.2835930Z test_no_live_recipient_refused (hub.tests.test_hub_offline.Messaging.test_no_live_recipient_refused) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.3018455Z test_order_preserved (hub.tests.test_hub_offline.Messaging.test_order_preserved) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.3105333Z test_reregistered_name_does_not_inherit_mail (hub.tests.test_hub_offline.Messaging.test_reregistered_name_does_not_inherit_mail) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.3186906Z test_role_broadcast_and_cross_repo_group (hub.tests.test_hub_offline.Messaging.test_role_broadcast_and_cross_repo_group) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.3261588Z test_unknown_kind_lists_known (hub.tests.test_hub_offline.Messaging.test_unknown_kind_lists_known) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.3345492Z test_virtual_operator_inbox (hub.tests.test_hub_offline.Messaging.test_virtual_operator_inbox) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.3346982Z test_addresses_and_subjects (hub.tests.test_hub_offline.Names.test_addresses_and_subjects) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.3350005Z test_all_address_forms_roundtrip (hub.tests.test_hub_offline.Names.test_all_address_forms_roundtrip) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.3368469Z test_malformed_addresses_rejected (hub.tests.test_hub_offline.Names.test_malformed_addresses_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.3369828Z test_normalize_and_refuse (hub.tests.test_hub_offline.Names.test_normalize_and_refuse) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.3371234Z test_session_roundtrip (hub.tests.test_hub_offline.Names.test_session_roundtrip) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.3373635Z test_session_spellings_enforce_same_length_limits (hub.tests.test_hub_offline.Names.test_session_spellings_enforce_same_length_limits) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.3375276Z test_claude_bypass_consent_answer (hub.tests.test_hub_offline.Profiles.test_claude_bypass_consent_answer) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.3376861Z test_claude_idle_prompt_is_not_a_modal (hub.tests.test_hub_offline.Profiles.test_claude_idle_prompt_is_not_a_modal) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.7527601Z test_agentmux_post_goes_through_the_hub (hub.tests.test_hub_offline.ServerAPI.test_agentmux_post_goes_through_the_hub) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.7711643Z test_every_write_verb_returns_a_result (hub.tests.test_hub_offline.ServerAPI.test_every_write_verb_returns_a_result) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:02.7846090Z test_retire_courier_imports_only_the_undelivered_backlog_once (hub.tests.test_hub_offline.ServerAPI.test_retire_courier_imports_only_the_undelivered_backlog_once) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:03.2936964Z test_subscribe_streams_new_mail_and_events (hub.tests.test_hub_offline.ServerAPI.test_subscribe_streams_new_mail_and_events) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:03.2957762Z test_tcp_ignores_as (hub.tests.test_hub_offline.ServerAPI.test_tcp_ignores_as) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:03.2977031Z test_tcp_post_and_read (hub.tests.test_hub_offline.ServerAPI.test_tcp_post_and_read) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:03.2990752Z test_tcp_requires_a_valid_token (hub.tests.test_hub_offline.ServerAPI.test_tcp_requires_a_valid_token) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:03.2991879Z test_token_file_is_private (hub.tests.test_hub_offline.ServerAPI.test_token_file_is_private) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:03.3021981Z test_unknown_verb_is_an_error_not_null (hub.tests.test_hub_offline.ServerAPI.test_unknown_verb_is_an_error_not_null) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:03.8525639Z test_cancel_takes_open_children (hub.tests.test_hub_offline.Work.test_cancel_takes_open_children) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:03.9127069Z test_capacity_and_lease_expiry (hub.tests.test_hub_offline.Work.test_capacity_and_lease_expiry) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:03.9225501Z test_dead_agent_returns_leases (hub.tests.test_hub_offline.Work.test_dead_agent_returns_leases) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:03.9312156Z test_direct_to_dead_refused (hub.tests.test_hub_offline.Work.test_direct_to_dead_refused) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:04.3387421Z test_first_claim_wins_across_processes (hub.tests.test_hub_offline.Work.test_first_claim_wins_across_processes) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:04.3479973Z test_path_claims_are_per_repo (hub.tests.test_hub_offline.Work.test_path_claims_are_per_repo) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:04.3574515Z test_requirements (hub.tests.test_hub_offline.Work.test_requirements) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:04.3685194Z test_team_lead_decomposes (hub.tests.test_hub_offline.Work.test_team_lead_decomposes) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:05.2225747Z test_direct_message_crosses_nodes (hub.tests.test_nats_federation.TwoNodes.test_direct_message_crosses_nodes) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:07.6489849Z test_federated_role_item_claimed_exactly_once (hub.tests.test_nats_federation.TwoNodes.test_federated_role_item_claimed_exactly_once) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:08.9688607Z test_governance_same_peer_different_node_round_trip (hub.tests.test_fed_live.Fed.test_governance_same_peer_different_node_round_trip)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:09.8262998Z AMX-BASE-004: the consuming node must not look for the origin's local row. ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:10.3118168Z test_governance_v3_offer_isolated_from_legacy_work_consumer (hub.tests.test_fed_live.Fed.test_governance_v3_offer_isolated_from_legacy_work_consumer) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:11.3789154Z test_governance_wrong_executor_result_cannot_complete_work (hub.tests.test_fed_live.Fed.test_governance_wrong_executor_result_cannot_complete_work) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:11.3952408Z test_p0_connected_and_present (hub.tests.test_fed_live.Fed.test_p0_connected_and_present) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:11.3953258Z test_p0_payload_spoof_is_dropped (hub.tests.test_fed_live.Fed.test_p0_payload_spoof_is_dropped)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:11.8168248Z mallory may publish am.msg.mallory.* but writes from=nick in the payload. ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:13.8232129Z test_p0_server_refuses_spoofed_subject (hub.tests.test_fed_live.Fed.test_p0_server_refuses_spoofed_subject) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:13.8431949Z test_p1_denied_peer_is_dropped (hub.tests.test_fed_live.Fed.test_p1_denied_peer_is_dropped) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:14.6901821Z test_p1_remote_privileged_work_needs_explicit_approval (hub.tests.test_fed_live.Fed.test_p1_remote_privileged_work_needs_explicit_approval) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:14.7118987Z test_p1_scope_limits_who_a_repo_is_shared_with (hub.tests.test_fed_live.Fed.test_p1_scope_limits_who_a_repo_is_shared_with) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:15.1403013Z test_p1_secrets_are_redacted_and_keys_blocked (hub.tests.test_fed_live.Fed.test_p1_secrets_are_redacted_and_keys_blocked) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:15.3662760Z test_p1_untrusted_peer_is_quarantined_then_approved (hub.tests.test_fed_live.Fed.test_p1_untrusted_peer_is_quarantined_then_approved) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:15.3663909Z test_p2_address_in_the_peers_own_naming (hub.tests.test_fed_live.Fed.test_p2_address_in_the_peers_own_naming)
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:15.5920162Z Live-demo finding: alice copied nick's repo name into an address. Accept it. ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:18.1105239Z test_p2_federated_work_is_done_exactly_once_and_comes_home (hub.tests.test_fed_live.Fed.test_p2_federated_work_is_done_exactly_once_and_comes_home) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:18.7427571Z test_p2_message_reply_round_trip (hub.tests.test_fed_live.Fed.test_p2_message_reply_round_trip) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:18.9548420Z test_p2_role_address_reaches_a_holder (hub.tests.test_fed_live.Fed.test_p2_role_address_reaches_a_holder) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:19.0865592Z test_p3_shared_board_cas (hub.tests.test_fed_live.Fed.test_p3_shared_board_cas) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:20.1335103Z test_p4_knowledge_explicit_auto_and_search (hub.tests.test_fed_live.Fed.test_p4_knowledge_explicit_auto_and_search) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:20.6553480Z test_p5_code_share_fetch_verify (hub.tests.test_fed_live.Fed.test_p5_code_share_fetch_verify) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:20.6656344Z test_p6_panel_has_every_plugin (hub.tests.test_fed_live.Fed.test_p6_panel_has_every_plugin) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:26.4562799Z test_z_kill_switch_revoke_and_resume (hub.tests.test_fed_live.Fed.test_z_kill_switch_revoke_and_resume) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:26.7899072Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:26.7899855Z ----------------------------------------------------------------------
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:26.7900325Z Ran 129 tests in 56.852s
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:26.7900503Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:26.7900609Z OK
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:26.7909001Z passed: 129 tests in 57.19s; /home/runner/work/_temp/agentmux-p01/hub-home/cache/agentmux-tests/b0aa493d9ca1b39b/20261010T011729-a4643acd/result.json
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:26.7910000Z   5.791s hub.tests.test_fed_live.Fed.test_z_kill_switch_revoke_and_resume
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:26.7910631Z   4.803s hub.tests.test_hub_offline.MenuByLabel.test_missing_safe_option_blocks
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:26.7911289Z   4.303s hub.tests.test_hub_offline.Deliver.test_placeholder_gets_second_enter
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:34.9325702Z {"tests": 36, "exitCode": 0, "report": "/home/runner/work/_temp/agentmux-evidence/plugin-preservation.json"}
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0858133Z test_cli_reports_failure_and_does_not_modify_input (test_inventory.InventoryContract.test_cli_reports_failure_and_does_not_modify_input) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0866173Z test_closed_format_and_duplicate_identity (test_inventory.InventoryContract.test_closed_format_and_duplicate_identity) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0868891Z test_credentials_copy_is_rejected (test_inventory.InventoryContract.test_credentials_copy_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0871341Z test_different_installation_is_rejected (test_inventory.InventoryContract.test_different_installation_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0873776Z test_duplicate_linux_installation_is_rejected (test_inventory.InventoryContract.test_duplicate_linux_installation_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0876033Z test_failed_probe_cannot_fabricate_version (test_inventory.InventoryContract.test_failed_probe_cannot_fabricate_version) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0878750Z test_linux_client_cannot_substitute_for_windows (test_inventory.InventoryContract.test_linux_client_cannot_substitute_for_windows) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0919243Z test_malformed_field_types_fail_without_exception (test_inventory.InventoryContract.test_malformed_field_types_fail_without_exception) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0924222Z test_malformed_records_return_errors (test_inventory.InventoryContract.test_malformed_records_return_errors) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0926262Z test_missing_client_cannot_claim_probe (test_inventory.InventoryContract.test_missing_client_cannot_claim_probe) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0928812Z test_missing_client_is_explicit_inventory_not_support (test_inventory.InventoryContract.test_missing_client_is_explicit_inventory_not_support) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0934244Z test_missing_limits_and_p06_claim_are_rejected (test_inventory.InventoryContract.test_missing_limits_and_p06_claim_are_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0936519Z test_missing_search_boundary_is_rejected (test_inventory.InventoryContract.test_missing_search_boundary_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0939975Z test_native_platform_placement_stays_native (test_inventory.InventoryContract.test_native_platform_placement_stays_native) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0943773Z test_npm_identity_binds_node_and_package (test_inventory.InventoryContract.test_npm_identity_binds_node_and_package) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0948577Z test_ownership_mismatches_are_rejected (test_inventory.InventoryContract.test_ownership_mismatches_are_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0952561Z test_probe_evidence_cannot_be_omitted_or_duplicated (test_inventory.InventoryContract.test_probe_evidence_cannot_be_omitted_or_duplicated) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0955676Z test_runtime_and_probe_surface_placement (test_inventory.InventoryContract.test_runtime_and_probe_surface_placement) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0959565Z test_unavailable_records_failed_interop_without_success (test_inventory.InventoryContract.test_unavailable_records_failed_interop_without_success) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0962216Z test_unavailable_requires_actual_failed_observation (test_inventory.InventoryContract.test_unavailable_requires_actual_failed_observation) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0964635Z test_version_mismatch_is_rejected (test_inventory.InventoryContract.test_version_mismatch_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0967565Z test_versioned_target_is_rejected (test_inventory.InventoryContract.test_versioned_target_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0969621Z test_wsl_observation_contract (test_inventory.InventoryContract.test_wsl_observation_contract) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0970364Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0970775Z ----------------------------------------------------------------------
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0971397Z Ran 23 tests in 0.069s
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0971642Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.0971769Z OK
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.2394137Z test_context_only_and_unrelated_wslenv_preserved (hub.tests.test_windows_callbacks.CallbackSelection.test_context_only_and_unrelated_wslenv_preserved) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.2395940Z test_explicit_selection (hub.tests.test_windows_callbacks.CallbackSelection.test_explicit_selection) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.2407482Z test_lifecycle_rejected_before_local_action (hub.tests.test_windows_callbacks.CallbackSelection.test_lifecycle_rejected_before_local_action) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.2418006Z test_missing_selection_never_launches (hub.tests.test_windows_callbacks.CallbackSelection.test_missing_selection_never_launches) ... agentmux: Windows agent callbacks need an explicit WSL distribution
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.2425870Z agentmux: AGENTMUX_WSL_DISTRO must name a WSL distribution
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.2434508Z agentmux: AGENTMUX_WSL_DISTRO must name a WSL distribution
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.2443740Z agentmux: Windows agent callbacks need an explicit absolute Linux binary path
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.2452367Z agentmux: AGENTMUX_WSL_BIN must be an absolute Linux path
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.2460985Z agentmux: AGENTMUX_WSL_BIN must be an absolute Linux path
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.2469773Z agentmux: Windows agent callbacks need an explicit absolute AGENTMUX_HOME
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.2478339Z agentmux: Windows agent callbacks need an explicit absolute AGENTMUX_HOME
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.2486973Z agentmux: Windows agent callbacks need an explicit absolute AGENTMUX_HOME
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.2489578Z ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.2491467Z test_nick_defaults_and_exact_received_arguments (hub.tests.test_windows_callbacks.CallbackSelection.test_nick_defaults_and_exact_received_arguments) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.2553243Z test_no_fallback_or_inline_token (hub.tests.test_windows_callbacks.CallbackSelection.test_no_fallback_or_inline_token) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.3619905Z test_shell_callback_rejection_creates_no_default_or_scoped_state (hub.tests.test_windows_callbacks.CallbackSelection.test_shell_callback_rejection_creates_no_default_or_scoped_state) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.4728751Z test_shell_without_callback_keeps_native_hub_entrypoint (hub.tests.test_windows_callbacks.CallbackSelection.test_shell_without_callback_keeps_native_hub_entrypoint) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.4765952Z test_bad_opt_in_has_no_registration_side_effect (hub.tests.test_windows_callbacks.SpawnContext.test_bad_opt_in_has_no_registration_side_effect) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.4838462Z test_native_spawn_drops_stale_worker_but_preserves_explicit_native_context (hub.tests.test_windows_callbacks.SpawnContext.test_native_spawn_drops_stale_worker_but_preserves_explicit_native_context) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.4893333Z test_two_spawns_get_distinct_token_paths_without_inline_tokens (hub.tests.test_windows_callbacks.SpawnContext.test_two_spawns_get_distinct_token_paths_without_inline_tokens) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.4894639Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.4895101Z ----------------------------------------------------------------------
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.4895765Z Ran 11 tests in 0.250s
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.4896013Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.4896168Z OK
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.6428344Z test_executor_cannot_accept_for_origin (test_track.FinalEvidenceTests.test_executor_cannot_accept_for_origin) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.6440660Z test_final_update_checks_remote_before_saving (test_track.FinalEvidenceTests.test_final_update_checks_remote_before_saving) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.6442090Z test_merge_permission_is_rejected (test_track.FinalEvidenceTests.test_merge_permission_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.6443813Z test_missing_dated_codex_decision_is_rejected (test_track.FinalEvidenceTests.test_missing_dated_codex_decision_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.6445397Z test_missing_or_incomplete_phase_is_rejected (test_track.FinalEvidenceTests.test_missing_or_incomplete_phase_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.6447310Z test_missing_reverse_run_is_rejected (test_track.FinalEvidenceTests.test_missing_reverse_run_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.6448973Z test_modified_input_is_rejected (test_track.FinalEvidenceTests.test_modified_input_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.6450704Z test_shared_administration_is_rejected (test_track.FinalEvidenceTests.test_shared_administration_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.6452488Z test_unaccepted_gate_is_rejected (test_track.FinalEvidenceTests.test_unaccepted_gate_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.6453749Z test_valid_autonomous_record (test_track.FinalEvidenceTests.test_valid_autonomous_record) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.6455043Z test_worker_claim_is_not_codex_review (test_track.FinalEvidenceTests.test_worker_claim_is_not_codex_review) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.6456225Z test_wrong_candidate_is_rejected (test_track.FinalEvidenceTests.test_wrong_candidate_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.6691565Z test_complete_inventory_is_consistent (test_track.TrackingTests.test_complete_inventory_is_consistent) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.6908155Z test_cycle_is_rejected (test_track.TrackingTests.test_cycle_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.7190742Z test_duplicate_behavior_owner_is_rejected (test_track.TrackingTests.test_duplicate_behavior_owner_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.7388102Z test_host_qualification_cannot_be_moved_before_host_implementation (test_track.TrackingTests.test_host_qualification_cannot_be_moved_before_host_implementation) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.7544958Z test_missing_catalog_record_is_rejected (test_track.TrackingTests.test_missing_catalog_record_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.7667810Z test_missing_work_is_rejected (test_track.TrackingTests.test_missing_work_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.7857622Z test_parallel_phases_are_rejected (test_track.TrackingTests.test_parallel_phases_are_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.8058260Z test_predecessor_cannot_be_bypassed (test_track.TrackingTests.test_predecessor_cannot_be_bypassed) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.8238532Z test_removed_dependency_cannot_skip_phase_gate (test_track.TrackingTests.test_removed_dependency_cannot_skip_phase_gate) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.8418380Z test_removed_phase_criterion_is_rejected (test_track.TrackingTests.test_removed_phase_criterion_is_rejected) ... ok
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.8429421Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.8429959Z ----------------------------------------------------------------------
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.8430506Z Ran 22 tests in 0.200s
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.8430698Z 
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.8430809Z OK
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.9972954Z {
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.9973396Z   "ok": true,
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.9973985Z   "acceptedCommit": "f19c6473d56335b8eeb28704b02895b9d9ab7fcc",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.9974558Z   "files": 105,
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.9974881Z   "errors": [],
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.9975176Z   "negativeTest": {
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.9975569Z     "path": "dashboard/test_ads.py",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.9976068Z     "assertionRemovalDetected": true,
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.9977255Z     "mutation": "One actual Python assertion replaced with pass in an in-memory candidate; repository unchanged."
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.9978089Z   },
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.9979137Z   "assurance": "Exact regression-file retention or recorded Codex-reviewed replacement. It does not prove assertion quality or semantic equivalence of a replacement."
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:35.9980235Z }
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.0866376Z {
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.0867055Z   "ok": true,
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.0867442Z   "baselineFiles": 338,
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.0867873Z   "additionalFiles": 105,
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.0868236Z   "components": 94,
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.0868564Z   "behaviorChecks": 201,
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.0868943Z   "baselineGroups": 37,
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.0869298Z   "phaseCriteria": 99,
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.0869654Z   "failureScenarios": 62,
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.0870023Z   "errors": [],
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.0870917Z   "assurance": "Checks planning coverage and references only; does not prove semantic completeness or execute runtime tests."
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.0871756Z }
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.3440950Z {
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.3441450Z   "baselineVersion": "1.1.0",
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.3441999Z   "ok": true,
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.3442355Z   "errors": [],
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.3443537Z   "assurance": "Validates review attestations, source freshness and remediation; does not prove semantic correctness or execute build/tests."
+P01 native ubuntu-24.04	Build locked SDKs and run required checks	2026-10-10T01:18:36.3444602Z }
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	﻿2026-10-10T01:18:36.4537505Z ##[group]Run actions/upload-artifact@v4
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.4537864Z with:
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.4538243Z   name: p01-ubuntu-24.04-a21f03a8a6792f4fa21099afe62804a56dfa7fc4
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.4538653Z   path: /home/runner/work/_temp/agentmux-evidence/
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.4538971Z   if-no-files-found: error
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.4539204Z   retention-days: 30
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.4539439Z   compression-level: 6
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.4539657Z   overwrite: false
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.4539868Z   include-hidden-files: false
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.4540105Z env:
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.4540362Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.8/x64
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.4540793Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.8/x64/lib/pkgconfig
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.4541423Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.4541795Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.4542175Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.8/x64
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.4542600Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.8/x64/lib
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.4542914Z ##[endgroup]
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.6283242Z (node:5158) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.6284120Z (Use `node --trace-deprecation ...` to show where the warning was created)
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.6367120Z With the provided path, there will be 11 files uploaded
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.6376229Z Artifact name is valid!
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.6377065Z Root directory input is valid!
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.8202916Z Beginning upload of artifact content to blob storage
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.8657146Z (node:5158) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.9268588Z Uploaded bytes 59597
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.9451967Z Finished uploading artifact content to blob storage!
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.9454940Z SHA256 digest of uploaded artifact zip is 7e5af1fce55a5aa0f42176a6ece1396f9651f7b5a5199fe9568b3266245e41ca
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:36.9456382Z Finalizing artifact upload
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:37.1448440Z Artifact p01-ubuntu-24.04-a21f03a8a6792f4fa21099afe62804a56dfa7fc4.zip successfully finalized. Artifact ID 11655505324
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:37.1450619Z Artifact p01-ubuntu-24.04-a21f03a8a6792f4fa21099afe62804a56dfa7fc4 has been successfully uploaded! Final size is 59597 bytes. Artifact ID is 11655505324
+P01 native ubuntu-24.04	Preserve execution evidence, including failures	2026-10-10T01:18:37.1452363Z Artifact download URL: https://github.com/controlLogix/agentmux/actions/runs/38012525208/artifacts/11655505324
+P01 native ubuntu-24.04	Post Run actions/setup-node@v5	﻿2026-10-10T01:18:37.1635499Z Post job cleanup.
+P01 native ubuntu-24.04	Post Run actions/setup-node@v5	2026-10-10T01:18:37.2957992Z (node:5170) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+P01 native ubuntu-24.04	Post Run actions/setup-node@v5	2026-10-10T01:18:37.2959030Z (Use `node --trace-deprecation ...` to show where the warning was created)
+P01 native ubuntu-24.04	Post Run actions/setup-python@v6	﻿2026-10-10T01:18:37.3114054Z Post job cleanup.
+P01 native ubuntu-24.04	Post Run actions/checkout@v5	﻿2026-10-10T01:18:37.4690287Z Post job cleanup.
+P01 native ubuntu-24.04	Post Run actions/checkout@v5	2026-10-10T01:18:37.5627362Z [command]/usr/bin/git version
+P01 native ubuntu-24.04	Post Run actions/checkout@v5	2026-10-10T01:18:37.5671654Z git version 2.55.0
+P01 native ubuntu-24.04	Post Run actions/checkout@v5	2026-10-10T01:18:37.5709972Z Temporarily overriding HOME='/home/runner/work/_temp/b92ac9ce-01c3-49c3-a7b8-75cdfe012250' before making global git config changes
+P01 native ubuntu-24.04	Post Run actions/checkout@v5	2026-10-10T01:18:37.5711690Z Adding repository directory to the temporary git global config as a safe directory
+P01 native ubuntu-24.04	Post Run actions/checkout@v5	2026-10-10T01:18:37.5715851Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/agentmux/agentmux
+P01 native ubuntu-24.04	Post Run actions/checkout@v5	2026-10-10T01:18:37.5759135Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+P01 native ubuntu-24.04	Post Run actions/checkout@v5	2026-10-10T01:18:37.5794869Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+P01 native ubuntu-24.04	Post Run actions/checkout@v5	2026-10-10T01:18:37.6067989Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+P01 native ubuntu-24.04	Post Run actions/checkout@v5	2026-10-10T01:18:37.6103293Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+P01 native ubuntu-24.04	Post Run actions/checkout@v5	2026-10-10T01:18:37.6374368Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+P01 native ubuntu-24.04	Post Run actions/checkout@v5	2026-10-10T01:18:37.6416071Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+P01 native ubuntu-24.04	Complete job	﻿2026-10-10T01:18:37.6855712Z Cleaning up orphan processes
+P01 native ubuntu-24.04	Complete job	2026-10-10T01:18:37.7288911Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -1,0 +1,52 @@
+{
+  "candidate": "a21f03a8a6792f4fa21099afe62804a56dfa7fc4",
+  "kind": "Independent bounded P01 identity and envelope characterization opinion",
+  "phaseAccepted": false,
+  "checks": {
+    "HAR-18-C01": {
+      "opinion": "Qualified for recorded WSL baseline execution and actual target orchestration result attachment.",
+      "evidence": "identity-shell-independent-review.json: actual28 test run, Unix-authenticated pane release/done, operator retrieval, source revision and log digest."
+    },
+    "HUB-01-C02": {
+      "opinion": "P01 characterization and assertion mapping can be qualified after linking reviewed mapping and new collision evidence; production adapter remains unimplemented and unaccepted.",
+      "mapping": [
+        "Messaging.test_legacy_names_resolve",
+        "Messaging.test_duplicate_live_name_refused",
+        "Messaging.test_reregistered_name_does_not_inherit_mail",
+        "Messaging.test_role_broadcast_and_cross_repo_group",
+        "Work.test_path_claims_are_per_repo",
+        "Identity.test_same_repo_same_rid_whatever_the_url_spelling",
+        "Identity.test_local_names_differ_rid_does_not",
+        "Fed.test_p2_address_in_the_peers_own_naming",
+        "Fed.test_p2_role_address_reaches_a_holder"
+      ],
+      "supplement": "Actual alpha/beta same role and local name, explicit/legacy/group/wildcard addressing, seven receipt sets, cross-repo work claim refusal.",
+      "remainingProductionObligation": "Compare these same identity/generation/local/remote fixtures against the later production legacy-to-v1 adapter; no v1 migration success inferred."
+    },
+    "HUB-11-C02": {
+      "opinion": "P01 current-boundary characterization can be qualified with explicit field mapping below; original requirement to translate valid legacy envelopes remains deferred to production adapter owner, not accepted.",
+      "mapping": {
+        "planeTypeRecipient": "AuthorizationBinding.test_work_cannot_enter_through_information_plane; test_subject_destination_repository_and_role_match",
+        "senderAndBrokerAccount": "Inbound.test_spoof_self_and_scope; Fed.test_p0_server_refuses_spoofed_subject; test_p0_payload_spoof_is_dropped",
+        "unsupportedVersion": "Envelope.test_validate rejects v1 at legacy boundary; Fed.test_governance_v3_offer_isolated_from_legacy_work_consumer verifies separate v3 work delivery",
+        "peerQualifiedSender": "Fed.test_p2_message_reply_round_trip checks exact peer/repo/role/agent sender and reply",
+        "sourceNodeRepositoryOriginalWorkID": "WorkProtocol.test_result_binds_peer_node_attempt_task_repo_grant_and_evidence independently mutates node, rid, origin_node, origin_id plus from and requires origin stay reserved; valid result completes exact original row",
+        "crossNodeCompletion": "Fed.test_governance_same_peer_different_node_round_trip returns result to exact original work ID on real broker",
+        "resultEnvelopeIdentity": "WorkProtocol.test_completion_recovers_after_restart_and_failed_staging retains result message ID through recovery and duplicate delivery"
+      },
+      "mappingCorrection": "The earlier read-only mapping report lists WorkProtocol methods generally but does not attach the explicit per-field binding method to HUB-11-C02. Add that mapping using existing exact-candidate native129 evidence; no additional runtime execution is needed for this mapping gap.",
+      "remainingProductionObligation": "Execute actual legacy-v2/v3 to new-v1 translation and verify sender, source node, repository and original IDs end-to-end on the production adapter. No current test implements that adapter."
+    }
+  },
+  "sourceBindings": {
+    "hub/tests/test_hub_offline.py": "56fb5359476f012c1a7170829d2d56771c1bd42ba63834e07c9660407495338e",
+    "hub/tests/test_fed_unit.py": "b5753215fef5705fdb829078730e5fb14e12bc4c1ec040870e84ff2603772adf",
+    "hub/tests/test_fed_live.py": "af39ed93f205952f90a9975a7ed7381a7560ee8e0e4278dee220a57b08ad3b0c",
+    "hub/tests/test_governance.py": "67348cc4c748e9bbdd93286808c770622f9c563addf3fb6c78b84a4090f1648d"
+  },
+  "limits": [
+    "Qualified means only the acceptance-map declared recorded-environment P01 characterization scope. Do not describe the full production translation requirement as delivered.",
+    "Native a21f CI previously independently reviewed: bothplatforms129hub tests source-bound; new shell identity/result execution is WSL only.",
+    "No four-provider qualification, P06 work, phase advancement or merge authority supplied by this opinion."
+  ]
+}

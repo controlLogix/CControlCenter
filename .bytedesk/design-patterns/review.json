@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, scoped P01 maintained legacy restoration and preservation review; phase remains open",
-  "sourceDigest": "2e35cc257757fb7cc1d6922f0683917a69534b7ed7a13b6c2ccfc6d6fd60dd27",
+  "reviewer": "Codex, scoped P01 characterization/evidence review; four real-provider repetitions remain open",
+  "sourceDigest": "64b765a823cf0f8b8477334c94177bcf337b9f0bafb252bf4ccdcf6b4f60ead8",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -534,6 +534,23 @@
         ".context/design-patterns-diagrams.md"
       ],
       "rationale": "Reviewed maintained22-file source restoration and exact36 unchanged/additional compatibility methods, explicit trusted runtime selection, readonly MCP/GET gateway and conservative host hook. Independent actual dashboard/tmux and disposable Git evidence binds original runtime; fake adapters and direct endpoint/preflight limitations are explicit. Corrected realistic host-metadata fast path, independently verified five probes and fresh36 on exact40source hashes. Existing FED-15 Messaging Gateway records source locations, rationale, simpler alternative, costs, tradeoffs and concrete diagram; all prior registry/remediation history remains. Original22 native CI checks preserved and exactlyone source-bound36-method plugin check added; native candidate execution still required. Reviewed actual80f nativeLinux/macOS22checks and native-filesystemWSL129+callback11, T02 scoped acceptance, synthetic HAR20 deterministic evidence, retained historical failures/source bindings and honest remaining P01/provider gaps. HAR-23 ownership adds23paths and3checks; all338baseline files and198original checks retained. Appended contract README retains previous bytes and has explicit replacement history. Captured evidence bytes/line endings preserved with scoped attributes; metadata refreshed through tracker. Coverage, tracker22, regression105 and assertion-removal negative passed. No P01 gate, P02 advance, P06 framework, personal plugin installation, merge or final delivery acceptance is claimed."
+    },
+    {
+      "date": "2026-10-09",
+      "reviewer": "Codex; independent native, identity, fault and assertion-mapping reviews",
+      "scope": "P01 immutable evidence archival and current-boundary characterization checkpoint",
+      "previousReviewer": "Codex, scoped P01 maintained legacy restoration and preservation review; phase remains open",
+      "previousSourceDigest": "2e35cc257757fb7cc1d6922f0683917a69534b7ed7a13b6c2ccfc6d6fd60dd27",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/a21f03a/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/fault-sensitivity/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/identity-shell/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/legacy-step-negative/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/assertion-mapping/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/provider-readiness/archive.json",
+        "docs/planning/2026-10-09/delivery/tasks.json"
+      ],
+      "rationale": "No runtime source or design-pattern implementation changed. Reviewed actual pusheda21f native23checks on Linux/macOS,747source references each, plugin36/hub129/conformance45 with no skips and exact log/source admission. Seven isolated runtime faults trigger intended original assertions; repository source unchanged, mutation diffs/line-ending adaptation and logs retained. Actual WSL alpha/beta same-name shell identities route seven forms with acknowledgements, refuse cross-repo claim, execute unchangedorchtest28 and return actual revision/log digest through production release/done to operator retrieval; initial external loader failure retained. Independent2122source references and13sanitized artifact hashes matcha21f. Current-boundary mapping qualifies26/28 within declared recorded environments; production adapters remain unaccepted with explicit added P04/P10 task criteria and every later task AC03 retained. Dashboard fullrun62 and every historical skip/empty-operator-state limitation are preserved, with unchanged-source/supplemental callback/backup and restoredplugin evidence distinguished. Workflow negative has four tests/one intentional failure/zeroerrors, python3 vs workflowpython equivalence limit and prior setup failure retained. Provider readiness documents absent Grok authentication and unresolved privateWindows state/tool paths; no inference/auth changes, no reduced provider mix, task/phase remain open. File tracker22, coverage338baseline/94components/201checks and regression105/assertion-removal negative pass. Registry, diagrams, baseline and remediation history unchanged. No P02 advance, P06 acceptance, merge or final delivery claim."
     }
   ],
   "rules": {

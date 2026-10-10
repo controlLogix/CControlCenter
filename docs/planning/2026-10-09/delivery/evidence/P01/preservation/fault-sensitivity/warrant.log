@@ -1,0 +1,15 @@
+test_a_wrong_secret_is_refused (__main__.TestTheWarrantItself.test_a_wrong_secret_is_refused) ... FAIL
+
+======================================================================
+FAIL: test_a_wrong_secret_is_refused (__main__.TestTheWarrantItself.test_a_wrong_secret_is_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ryan/.cache/agentmux-governance/preservation-faults-yhxmcem8/warrant/dashboard/test_warrant.py", line 99, in test_a_wrong_secret_is_refused
+    self.assertIsNone(self.co.orchestrator_warrant())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'ccc-orchestrator' is not None
+
+----------------------------------------------------------------------
+Ran 1 test in 0.135s
+
+FAILED (failures=1)

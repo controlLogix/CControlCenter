@@ -1,0 +1,7 @@
+{
+  "files": {
+    "review.json": "21c905e8a860745d1591905624ed20987c3c1535d56480793570c3428367e726",
+    "final-scoped-opinion.json": "d17bfd7618e54dc0dd82d9a9eeb60af36330d453549e3d7af91e87c0c5bce1d4"
+  },
+  "scope": "Read-only assertion/capability mapping18dashboard suites and current hub identities/runner checks; no executions or acceptance by this report alone."
+}

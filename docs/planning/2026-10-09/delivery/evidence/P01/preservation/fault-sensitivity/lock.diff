@@ -1,0 +1,11 @@
+--- original/taskmgmt/run.py
++++ mutant/taskmgmt/run.py
+@@ -749,6 +749,8 @@
+     """
+     directory = run_dir(run_id)
+     directory.mkdir(parents=True, exist_ok=True)
++    yield
++    return
+     lock = directory / ".lock"
+     token = secrets.token_hex(8)
+     waiting_since = time.time()

@@ -1,0 +1,249 @@
+{
+  "candidate": "a21f03a8a6792f4fa21099afe62804a56dfa7fc4",
+  "root": "/home/ryan/.cache/agentmux-governance/preservation-faults-yhxmcem8",
+  "historicalExclusions": "Do not repeat argument/run/lifecycle/coordination/residue historical baselines; these seven cover separate retained predicates.",
+  "results": [
+    {
+      "name": "lock",
+      "source": "taskmgmt/run.py",
+      "originalSha256": "65c0b3a8a2aae5af295ee2c4df11f2d5fe9d099dd462eb5d985845e96d0a1eba",
+      "matchesCurrentRepository": true,
+      "mutantSha256": "939db18e421831065464548b4b8da21100820ee5265db03e6bbf2d47a59aca59",
+      "diffSha256": "6caeb86394930785f36afb5a6254e6d104fb54b15a2786f9dede6a7b2aa2d53f",
+      "test": "dashboard/test_runlock.py",
+      "originalTestSha256": "ae1c28fa5bc0802e2df76d58fa5a71b91684cb3f33fe1f5ffdcdc7edc68b7def",
+      "copiedTestSha256": "ae1c28fa5bc0802e2df76d58fa5a71b91684cb3f33fe1f5ffdcdc7edc68b7def",
+      "executedTestSha256": "ae1c28fa5bc0802e2df76d58fa5a71b91684cb3f33fe1f5ffdcdc7edc68b7def",
+      "testAdaptation": "none",
+      "command": [
+        "python3",
+        "dashboard/test_runlock.py",
+        "TestReleaseIsConditional.test_only_one_waiter_gets_in_at_a_time"
+      ],
+      "exitCode": 1,
+      "expectedAssertion": "two holders were inside the lock together",
+      "observedExpectedAssertion": true,
+      "negativeControlPassed": true,
+      "logSha256": "97786b7ecde2c11e0f6c2f540473819eeef4f8354a3b5bd091babc6d895f5676",
+      "seconds": 0.201,
+      "failureLines": [
+        "test_only_one_waiter_gets_in_at_a_time (__main__.TestReleaseIsConditional.test_only_one_waiter_gets_in_at_a_time) ... FAIL",
+        "FAIL: test_only_one_waiter_gets_in_at_a_time (__main__.TestReleaseIsConditional.test_only_one_waiter_gets_in_at_a_time)",
+        "AssertionError: 8 != 1 : two holders were inside the lock together",
+        "FAILED (failures=1)"
+      ],
+      "assertionFailurePresent": true
+    },
+    {
+      "name": "stdin",
+      "source": "taskmgmt/notify.py",
+      "originalSha256": "afb75f8f7a41899e0ec99040e2bc25d9b02d0842a839f7701ea244224ea07d20",
+      "matchesCurrentRepository": true,
+      "mutantSha256": "582fabd27cc7ef72bb490554f0322daa020b07e43ce97a191dbda9adb5227dd6",
+      "diffSha256": "8dbf3d648cae58b8df4d4f7588137cced1c836623d6e47a421f777683bd0d1e4",
+      "test": "dashboard/test_no_inherited_stdin.py",
+      "originalTestSha256": "d5b5b6aa88cbc3bf79935453250394ff51d575576237074c60956ed40de57973",
+      "copiedTestSha256": "d5b5b6aa88cbc3bf79935453250394ff51d575576237074c60956ed40de57973",
+      "executedTestSha256": "d5b5b6aa88cbc3bf79935453250394ff51d575576237074c60956ed40de57973",
+      "testAdaptation": "none",
+      "command": [
+        "python3",
+        "dashboard/test_no_inherited_stdin.py"
+      ],
+      "exitCode": 1,
+      "expectedAssertion": "FAIL",
+      "observedExpectedAssertion": true,
+      "negativeControlPassed": true,
+      "logSha256": "a2c3c19afdde834e246e498a453ae27d128bc15d2684951dad246f46406a1e01",
+      "seconds": 0.323,
+      "failureLines": [
+        "  FAIL  no spawn inherits the caller's stdin",
+        "  FAIL  every notify.py spawn is guarded"
+      ],
+      "assertionFailurePresent": true
+    },
+    {
+      "name": "warrant",
+      "source": "taskmgmt/coordination.py",
+      "originalSha256": "21711353c6d0babf127df12eba0457970f8e22689e711004432fd018f3713ff3",
+      "matchesCurrentRepository": true,
+      "mutantSha256": "ba0c996a77270b98e28be9cab98db6bfeb4c51c5dfa3d3944d10505e429bd081",
+      "diffSha256": "d86f1db477342e0f1275efc21795f2513e41ba7486271f67bf61974bd6774ee6",
+      "test": "dashboard/test_warrant.py",
+      "originalTestSha256": "31a4d46640542b4175ac3ac1450230ea39f04d997cf28bfb3987c95f925bea0a",
+      "copiedTestSha256": "31a4d46640542b4175ac3ac1450230ea39f04d997cf28bfb3987c95f925bea0a",
+      "executedTestSha256": "31a4d46640542b4175ac3ac1450230ea39f04d997cf28bfb3987c95f925bea0a",
+      "testAdaptation": "none",
+      "command": [
+        "python3",
+        "dashboard/test_warrant.py",
+        "TestTheWarrantItself.test_a_wrong_secret_is_refused"
+      ],
+      "exitCode": 1,
+      "expectedAssertion": "FAIL: test_a_wrong_secret_is_refused",
+      "observedExpectedAssertion": true,
+      "negativeControlPassed": true,
+      "logSha256": "29d23054bf6a434236afd6a33c150c1e3aa2999efc312c6818a9aad79da83eca",
+      "seconds": 0.276,
+      "failureLines": [
+        "test_a_wrong_secret_is_refused (__main__.TestTheWarrantItself.test_a_wrong_secret_is_refused) ... FAIL",
+        "FAIL: test_a_wrong_secret_is_refused (__main__.TestTheWarrantItself.test_a_wrong_secret_is_refused)",
+        "AssertionError: 'ccc-orchestrator' is not None",
+        "FAILED (failures=1)"
+      ],
+      "assertionFailurePresent": true
+    },
+    {
+      "name": "archive",
+      "source": "agentmux.sh",
+      "originalSha256": "310d538866f29478ef01bfd77c782dd62ead2a09eb1a244fe890bf96b1b36867",
+      "matchesCurrentRepository": true,
+      "mutantSha256": "7814771286c73d8c1fbb08cafe76e516e6f808e3f78803e857976156a6505caf",
+      "diffSha256": "b3711c659c19ab4b9bd55f0dccbacadd9a6bd7a44a1aedb86c4ae7ecbc750d76",
+      "test": "dashboard/test_evidence_archive.sh",
+      "originalTestSha256": "c65aa48dce5a98b99423aa6739f1c87ed0bdbebcf693d441b5fa21553bd04b13",
+      "copiedTestSha256": "c65aa48dce5a98b99423aa6739f1c87ed0bdbebcf693d441b5fa21553bd04b13",
+      "executedTestSha256": "c65aa48dce5a98b99423aa6739f1c87ed0bdbebcf693d441b5fa21553bd04b13",
+      "testAdaptation": "CRLF normalization only",
+      "command": [
+        "bash",
+        "dashboard/test_evidence_archive.sh"
+      ],
+      "exitCode": 1,
+      "expectedAssertion": "AssertionError",
+      "observedExpectedAssertion": true,
+      "negativeControlPassed": true,
+      "logSha256": "66e1b922f53969cf88cb795bd390224a06ee2fa6dda08db453d49ac4a7273d0e",
+      "seconds": 1.357,
+      "failureLines": [
+        "AssertionError: []"
+      ],
+      "assertionFailurePresent": true
+    },
+    {
+      "name": "inbox",
+      "source": "agentmux.sh",
+      "originalSha256": "310d538866f29478ef01bfd77c782dd62ead2a09eb1a244fe890bf96b1b36867",
+      "matchesCurrentRepository": true,
+      "mutantSha256": "181a93505cc68072171c7eb6c37e4630dea279c6308711cdad01f8c4500f76cf",
+      "diffSha256": "84fd4b74f0769a074e35249b9f538e75e4eadbffcc6ff3083d678a8e6738ccea",
+      "test": "dashboard/test_inbox_guard.sh",
+      "originalTestSha256": "dfaf2c61070861e25c49b777a74928543a1ba0658d6cb888101e88962052925d",
+      "copiedTestSha256": "dfaf2c61070861e25c49b777a74928543a1ba0658d6cb888101e88962052925d",
+      "executedTestSha256": "dfaf2c61070861e25c49b777a74928543a1ba0658d6cb888101e88962052925d",
+      "testAdaptation": "CRLF normalization only",
+      "command": [
+        "bash",
+        "dashboard/test_inbox_guard.sh"
+      ],
+      "exitCode": 1,
+      "expectedAssertion": "queue/dev.jsonl was destroyed",
+      "observedExpectedAssertion": true,
+      "negativeControlPassed": true,
+      "logSha256": "cc2e1e9604deb042f86868f09f420c6d52b030983f36ab0056fb73a23d6938ed",
+      "seconds": 2.602,
+      "failureLines": [
+        "  FAIL  accepted '../queue/dev'",
+        "  FAIL  accepted '../../etc/passwd'",
+        "  FAIL  accepted 'a/b'",
+        "  FAIL  accepted '/etc/passwd'",
+        "  FAIL  queue/dev.jsonl was destroyed"
+      ],
+      "assertionFailurePresent": true
+    },
+    {
+      "name": "modal",
+      "source": "agentmux.sh",
+      "originalSha256": "310d538866f29478ef01bfd77c782dd62ead2a09eb1a244fe890bf96b1b36867",
+      "matchesCurrentRepository": true,
+      "mutantSha256": "2577816c700317b1d6bae6515f740fd334738623299fa2529b27373482e9ddf0",
+      "diffSha256": "ca8ea0bd17dc1ece8ed89d38ff31942d0633cd4077c604ea93565870d50ecece",
+      "test": "dashboard/test_modal_guard.sh",
+      "originalTestSha256": "8b6a43adf4ca22f32fb528cfa12e24d0df55ccffea6bfc806c6e85b6d7ffb4f0",
+      "copiedTestSha256": "8b6a43adf4ca22f32fb528cfa12e24d0df55ccffea6bfc806c6e85b6d7ffb4f0",
+      "executedTestSha256": "8b6a43adf4ca22f32fb528cfa12e24d0df55ccffea6bfc806c6e85b6d7ffb4f0",
+      "testAdaptation": "CRLF normalization only",
+      "command": [
+        "bash",
+        "dashboard/test_modal_guard.sh"
+      ],
+      "exitCode": 1,
+      "expectedAssertion": "MISSED - send would actuate this",
+      "observedExpectedAssertion": true,
+      "negativeControlPassed": true,
+      "logSha256": "784d68dcdbdf53069e29e5315d90db3de7aded38556c4db06e629e1873c41b4a",
+      "seconds": 0.052,
+      "failureLines": [
+        "  FAIL  codex update prompt (2026-09-20)                         MISSED - send would actuate this",
+        "  FAIL  claude bypass consent (2026-09-22)                       MISSED - send would actuate this",
+        "  FAIL  folder trust                                             MISSED - send would actuate this",
+        "  FAIL  workspace safety check                                   MISSED - send would actuate this",
+        "  FAIL  opus effort recommendation                               MISSED - send would actuate this",
+        "  FAIL  bare confirm footer                                      MISSED - send would actuate this",
+        "  FAIL  codex directory trust                                    MISSED - send would actuate this",
+        "  FAIL  numbered selection                                       MISSED - send would actuate this",
+        "  FAIL  y/n inline                                               MISSED - send would actuate this",
+        "  FAIL  parenthesised y/n                                        MISSED - send would actuate this",
+        "  FAIL  press any key                                            MISSED - send would actuate this",
+        "  FAIL  select an option                                         MISSED - send would actuate this",
+        "  FAIL  login menu                                               MISSED - send would actuate this"
+      ],
+      "assertionFailurePresent": true
+    },
+    {
+      "name": "courier",
+      "source": "taskmgmt/courier.py",
+      "originalSha256": "26d713ea8b8389c6a45efbc571ac65ce8e6f422cc57b47cdc21a35066587fc98",
+      "matchesCurrentRepository": true,
+      "mutantSha256": "bb7b151b56a22f37cc3eca0c1d74801a6df6cbbba68d34f0e89ab49bd495a295",
+      "diffSha256": "14592b441b324cd291c5aca39619f873e433939db85818fed9946dee3173a613",
+      "test": "dashboard/test_courier.py",
+      "originalTestSha256": "3a7770a7f8f2258c68a1145a80374fa5ca28c1e688cb848112635e8de369300d",
+      "copiedTestSha256": "3a7770a7f8f2258c68a1145a80374fa5ca28c1e688cb848112635e8de369300d",
+      "executedTestSha256": "3a7770a7f8f2258c68a1145a80374fa5ca28c1e688cb848112635e8de369300d",
+      "testAdaptation": "none",
+      "command": [
+        "python3",
+        "dashboard/test_courier.py"
+      ],
+      "exitCode": 1,
+      "expectedAssertion": "recipient with a slash",
+      "observedExpectedAssertion": true,
+      "negativeControlPassed": true,
+      "logSha256": "333a168939308acbaa1b99540b08ad3568afd37d23768b8b9098fb59035ee669",
+      "seconds": 0.548,
+      "failureLines": [
+        "  FAIL  no recipient is not deliverable                            got {'at': '2026-10-09T21:19:00-0400', 'sender': 'dev', 'recipient': None, 'kind': 'status', 'body': 'x', 'ref': None} want None",
+        "  FAIL  recipient with a slash                                     got {'at': '2026-10-09T21:19:00-0400', 'sender': 'dev', 'recipient': '../etc', 'kind': 'status', 'body': 'x', 'ref': None} want None"
+      ],
+      "assertionFailurePresent": true
+    }
+  ],
+  "status": "passed",
+  "limits": [
+    "Fault sensitivity of selected existing assertions only, not proof of complete security coverage.",
+    "No providers or live operator state; tests use copied source/private homes and their declared fake or offline dependencies.",
+    "Runtime and test line endings normalized only where recorded; source mutation diffs retained."
+  ],
+  "harnessSha256": "883bc577212bc74a9f17f7412bc53ffa2a305fb412d99ebbe66be921e8cec341",
+  "originalSourcesAndTestsUnchanged": true,
+  "archiveAllowlist": [
+    "runner.py",
+    "result.json",
+    "lock.diff",
+    "lock.log",
+    "stdin.diff",
+    "stdin.log",
+    "warrant.diff",
+    "warrant.log",
+    "archive.diff",
+    "archive.log",
+    "inbox.diff",
+    "inbox.log",
+    "modal.diff",
+    "modal.log",
+    "courier.diff",
+    "courier.log"
+  ],
+  "archiveWarning": "Do not archive disposable checkout/private-state directories; retain only the reviewed allowlist. Fixture credentials are synthetic and must not be confused with provider credentials."
+}

@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/tmp/legacy-step-negative-mwsu3fja/dashboard/test_host_guard.py", line 24, in <module>
+    import server  # noqa: E402
+    ^^^^^^^^^^^^^
+  File "/tmp/legacy-step-negative-mwsu3fja/dashboard/server.py", line 5, in <module>
+    import boardagents
+  File "/tmp/legacy-step-negative-mwsu3fja/dashboard/boardagents.py", line 19, in <module>
+    import agentdefs
+ModuleNotFoundError: No module named 'agentdefs'

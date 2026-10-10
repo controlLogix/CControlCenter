@@ -1,0 +1,21 @@
+{
+  "files": {
+    "runner.py": "883bc577212bc74a9f17f7412bc53ffa2a305fb412d99ebbe66be921e8cec341",
+    "result.json": "ff431c4c73dfeec2c95d4e3b8ff1c9d596681570084737d1216e1b7420b7c68b",
+    "lock.diff": "6caeb86394930785f36afb5a6254e6d104fb54b15a2786f9dede6a7b2aa2d53f",
+    "lock.log": "97786b7ecde2c11e0f6c2f540473819eeef4f8354a3b5bd091babc6d895f5676",
+    "stdin.diff": "8dbf3d648cae58b8df4d4f7588137cced1c836623d6e47a421f777683bd0d1e4",
+    "stdin.log": "a2c3c19afdde834e246e498a453ae27d128bc15d2684951dad246f46406a1e01",
+    "warrant.diff": "d86f1db477342e0f1275efc21795f2513e41ba7486271f67bf61974bd6774ee6",
+    "warrant.log": "29d23054bf6a434236afd6a33c150c1e3aa2999efc312c6818a9aad79da83eca",
+    "archive.diff": "b3711c659c19ab4b9bd55f0dccbacadd9a6bd7a44a1aedb86c4ae7ecbc750d76",
+    "archive.log": "66e1b922f53969cf88cb795bd390224a06ee2fa6dda08db453d49ac4a7273d0e",
+    "inbox.diff": "84fd4b74f0769a074e35249b9f538e75e4eadbffcc6ff3083d678a8e6738ccea",
+    "inbox.log": "cc2e1e9604deb042f86868f09f420c6d52b030983f36ab0056fb73a23d6938ed",
+    "modal.diff": "ca8ea0bd17dc1ece8ed89d38ff31942d0633cd4077c604ea93565870d50ecece",
+    "modal.log": "784d68dcdbdf53069e29e5315d90db3de7aded38556c4db06e629e1873c41b4a",
+    "courier.diff": "14592b441b324cd291c5aca39619f873e433939db85818fed9946dee3173a613",
+    "courier.log": "333a168939308acbaa1b99540b08ad3568afd37d23768b8b9098fb59035ee669"
+  },
+  "scope": "Seven exact-source deliberate runtime faults trigger existing assertions in disposable copies. Not full security coverage or provider execution. Parent inspected intended failures and unchanged originals."
+}

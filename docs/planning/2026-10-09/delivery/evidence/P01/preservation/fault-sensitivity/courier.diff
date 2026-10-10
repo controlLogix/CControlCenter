@@ -1,0 +1,11 @@
+--- original/taskmgmt/courier.py
++++ mutant/taskmgmt/courier.py
+@@ -278,7 +278,7 @@
+                 f"This courier knows {sorted(MESSAGE_KINDS)}. If the vocabulary was "
+                 f"just extended, restart the courier: agentmux courier stop && start")
+         return None
+-    if not isinstance(recipient, str) or not NAME_PATTERN.fullmatch(recipient):
++    if False:
+         return None
+     if not isinstance(sender, str) or not NAME_PATTERN.fullmatch(sender):
+         return None

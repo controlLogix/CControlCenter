@@ -1,0 +1,11 @@
+--- original/agentmux.sh
++++ mutant/agentmux.sh
+@@ -2248,7 +2248,7 @@
+   # not been delivered yet. cmd_post rejected such a name and cmd_inbox accepted it,
+   # which is the kind of gap that only shows up when someone goes looking. Found by
+   # grok reviewing this file.
+-  printf '%s' "$name" | grep -Eq '^[A-Za-z0-9_.-]{1,64}$' \
++  printf '%s' "$name" | grep -Eq '.*' \
+     || die "inbox name must be 1-64 chars of letters, digits, '_', '.' or '-' (got '$name')"
+   case "$name" in
+     .|..) die "inbox name must not be '.' or '..'" ;;

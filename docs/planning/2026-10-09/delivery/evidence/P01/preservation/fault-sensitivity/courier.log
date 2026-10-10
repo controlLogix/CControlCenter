@@ -1,0 +1,210 @@
+--- parse_record rejects what the store would also reject ---
+  ok    a valid record parses                                      'rev'
+  ok    ref survives                                               'T-1'
+  ok    not JSON                                                   None
+  ok    JSON but not an object                                     None
+2026-10-09T21:19:00-0400  SKIPPING records of unknown kind 'gossip' from 'dev'. This courier knows ['claim', 'error', 'finding', 'plan', 'release', 'reply', 'request', 'status']. If the vocabulary was just extended, restart the courier: agentmux courier stop && start
+  ok    unknown kind                                               None
+  FAIL  no recipient is not deliverable                            got {'at': '2026-10-09T21:19:00-0400', 'sender': 'dev', 'recipient': None, 'kind': 'status', 'body': 'x', 'ref': None} want None
+  FAIL  recipient with a slash                                     got {'at': '2026-10-09T21:19:00-0400', 'sender': 'dev', 'recipient': '../etc', 'kind': 'status', 'body': 'x', 'ref': None} want None
+  ok    sender with a space                                        None
+  ok    empty body                                                 None
+  ok    body is capped                                             65536
+  ok    a missing 'at' is filled in                                True
+--- what the recipient sees is attributed ---
+  ok    render names the sender                                    True
+  ok    render names the kind                                      True
+  ok    render carries the body                                    True
+  ok    render is marked as relayed                                True
+  ok    render includes a ref when set                             True
+--- a first run must NOT replay existing history ---
+2026-10-09T21:19:00-0400  cursor  dev predates the courier - adopting at EOF (offset 387)
+  ok    nothing delivered from an unseen outbox                    0
+  ok    and nothing queued either                                  0
+  ok    the stub was never called                                  0
+  ok    a cursor was written                                       True
+  ok    the cursor is at EOF                                       387
+  ok    cursor is 0600                                             384
+--- but an outbox created AFTER the baseline is read from the start ---
+2026-10-09T21:19:00-0400  cursor  newbie is a new outbox - reading from the start
+2026-10-09T21:19:00-0400  sent    newbie -> rev (request)
+  ok    a newly spawned agent's opening message is not swallowed   1
+  ok    it reaches the recipient                                   True
+  ok    history and new files are told apart by the marker         True
+--- --from-start is the deliberate override ---
+2026-10-09T21:19:00-0400  cursor  dev is a new outbox - reading from the start
+2026-10-09T21:19:00-0400  sent    dev -> rev (request)
+  ok    --from-start does replay                                   1
+  ok    delivered to the right agent                               'rev'
+  ok    delivered with the send verb                               'send'
+  ok    no --force anywhere                                        False
+--- steady state: new messages, delivered once ---
+2026-10-09T21:19:00-0400  cursor  dev is a new outbox - reading from the start
+2026-10-09T21:19:00-0400  sent    dev -> rev (request)
+  ok    a new message is delivered                                 1
+  ok    text reaches the pane                                      True
+  ok    a second pass redelivers nothing                           0
+  ok    the stub stayed idle                                       0
+2026-10-09T21:19:00-0400  sent    dev -> rev (request)
+2026-10-09T21:19:00-0400  sent    dev -> rev (request)
+  ok    two more are delivered in one pass                         2
+  ok    in file order                                              ['second', 'third']
+--- a half-written record waits for its newline ---
+2026-10-09T21:19:00-0400  cursor  dev is a new outbox - reading from the start
+2026-10-09T21:19:00-0400  sent    dev -> rev (status)
+  ok    the complete record goes                                   1
+  ok    the partial one does not                                   1
+2026-10-09T21:19:00-0400  sent    dev -> rev (status)
+  ok    it is delivered once completed                             1
+  ok    with its body intact                                       True
+--- truncation and rotation do not replay ---
+2026-10-09T21:19:00-0400  cursor  dev is a new outbox - reading from the start
+2026-10-09T21:19:00-0400  sent    dev -> rev (request)
+2026-10-09T21:19:00-0400  cursor  dev outbox truncated - restarting at 0
+2026-10-09T21:19:00-0400  sent    dev -> rev (request)
+  ok    truncated outbox delivers only what is new                 1
+  ok    and it is the new message                                  True
+2026-10-09T21:19:00-0400  cursor  dev outbox replaced - restarting at 0
+2026-10-09T21:19:00-0400  sent    dev -> rev (request)
+  ok    a replaced outbox restarts at 0                            1
+  ok    delivering the new file's contents                         True
+--- addressing: self, courier, and the courier's own outbox ---
+2026-10-09T21:19:00-0400  cursor  dev is a new outbox - reading from the start
+2026-10-09T21:19:00-0400  defer   dev -> dev: addressed to itself
+  ok    a self-addressed message is not delivered                  0
+  ok    it is not retried forever either                           1
+2026-10-09T21:19:00-0400  cursor  dev is a new outbox - reading from the start
+2026-10-09T21:19:00-0400  defer   dev -> courier: addressed to the courier
+  ok    nothing is delivered to the courier                        0
+  ok    the courier's own outbox is never harvested                0
+  ok    and gets no cursor                                         False
+--- a symlinked outbox is refused ---
+  ok    a symlinked outbox delivers nothing                        0
+--- a recipient that is not running is retried, not lost ---
+2026-10-09T21:19:00-0400  cursor  dev is a new outbox - reading from the start
+2026-10-09T21:19:00-0400  defer   dev -> ghost: 'ghost' is not running
+  ok    not delivered                                              0
+  ok    held as pending                                            1
+  ok    never handed to send at all                                0
+  ok    the reason names the agent                                 True
+  ok    pending is 0600                                            384
+2026-10-09T21:19:00-0400  sent    dev -> ghost (request, retry 2)
+  ok    delivered once the agent appears                           1
+  ok    and pending drains                                         0
+  ok    the body survived the wait                                 True
+--- a pane showing a modal defers; send is never forced ---
+2026-10-09T21:19:00-0400  cursor  dev is a new outbox - reading from the start
+2026-10-09T21:19:00-0400  defer   dev -> rev: agentmux: 'rev' is showing a prompt, not its normal input. Refusing to send:
+  ok    a refused send is not counted as delivered                 0
+  ok    it is pending                                              1
+  ok    the refusal reason is kept                                 True
+  ok    attempts are counted                                       1
+  ok    attempts increment on retry                                2
+  ok    --force is never used                                      False
+2026-10-09T21:19:00-0400  sent    dev -> rev (request, retry 3)
+  ok    it lands once the modal clears                             1
+--- giving up is reported through the queue, not silently ---
+2026-10-09T21:19:00-0400  cursor  dev is a new outbox - reading from the start
+2026-10-09T21:19:00-0400  defer   dev -> rev: agentmux: 'rev' is showing a prompt, not its normal input. Refusing to send:
+2026-10-09T21:19:00-0400  gave up dev -> rev: agentmux: 'rev' is showing a prompt, not its normal input. Refusing to send:
+  ok    the message is eventually dropped                          1
+  ok    after exactly MAX_ATTEMPTS tries                           12
+  ok    and stops consuming retries                                0
+  ok    a note was posted                                          1
+  ok    as an error                                                'error'
+  ok    from the courier                                           'courier'
+  ok    addressed to nobody, so it cannot loop                     None
+  ok    naming both ends                                           True
+--- and the body is KEPT, not thrown away ---
+  ok    the message lands in the dead-letter file                  1
+  ok    with its body intact                                       'doomed'
+  ok    and its attempt count                                      12
+  ok    and why it failed                                          True
+  ok    the note points at the dead-letter file                    True
+  ok    dead-letter is 0600                                        384
+--- a virtual recipient has no pane, so its inbox IS the delivery ---
+2026-10-09T21:19:00-0400  cursor  dev is a new outbox - reading from the start
+2026-10-09T21:19:00-0400  sent    dev -> orchestrator (reply)
+  ok    delivered even though no pane exists                       1
+  ok    nothing is left pending                                    0
+  ok    it went to the inbox, not a pane                           0
+  ok    the inbox has it                                           1
+  ok    with the body intact                                       'answering the orchestrator'
+  ok    attributed to the sender                                   'dev'
+  ok    inbox file is 0600                                         384
+  ok    nothing reached the dead-letter file                       0
+--- a live agent still wins over the virtual name ---
+2026-10-09T21:19:00-0400  cursor  dev is a new outbox - reading from the start
+2026-10-09T21:19:00-0400  sent    dev -> orchestrator (reply)
+  ok    delivered to the pane                                      1
+  ok    the launcher was used                                      'orchestrator'
+  ok    and the inbox was not written                              0
+--- backoff: a transient outage is ridden out, not punished ---
+  ok    first retry waits the base interval                        3.0
+  ok    it doubles                                                 6.0
+  ok    and again                                                  12.0
+  ok    but is capped                                              60.0
+  ok    zero base disables it, for tests                           0.0
+  ok    more attempts than the old five                            True
+--- a message not yet due is held, not retried ---
+2026-10-09T21:19:00-0400  cursor  dev is a new outbox - reading from the start
+2026-10-09T21:19:00-0400  defer   dev -> ghost: 'ghost' is not running
+  ok    held until its next_at                                     0
+  ok    no send attempted                                          0
+  ok    still pending                                              1
+  ok    attempts did not increment                                 1
+--- a message must NOT overtake one that is serving backoff ---
+  ok    nothing is delivered while the first waits                 0
+  ok    SECOND did not overtake FIRST                              0
+  ok    both are still pending                                     2
+  ok    the held message keeps its order                           'FIRST'
+  ok    and the blocked one did NOT consume an attempt             0
+--- once the first is due, both go in order ---
+2026-10-09T21:19:00-0400  sent    dev -> rev (request, retry 2)
+2026-10-09T21:19:00-0400  sent    dev -> rev (request, retry 1)
+  ok    both delivered                                             2
+  ok    FIRST first                                                ['FIRST', 'SECOND']
+--- one stuck recipient must not stall the others ---
+2026-10-09T21:19:00-0400  cursor  dev is a new outbox - reading from the start
+2026-10-09T21:19:00-0400  defer   dev -> stuck: 'stuck' is not running
+2026-10-09T21:19:00-0400  sent    dev -> rev (request)
+  ok    the live recipient still gets its message                  1
+  ok    it is the right one                                        'rev'
+  ok    the stuck one is held                                      1
+--- per-recipient order survives a deferral ---
+2026-10-09T21:19:00-0400  cursor  dev is a new outbox - reading from the start
+2026-10-09T21:19:00-0400  defer   dev -> later: 'later' is not running
+  ok    first is deferred                                          1
+  ok    the second queues behind it rather than overtaking         2
+2026-10-09T21:19:00-0400  sent    dev -> later (request, retry 3)
+2026-10-09T21:19:00-0400  sent    dev -> later (request, retry 1)
+  ok    both go when the agent appears                             2
+  ok    in the order they were posted                              ['message one', 'message two']
+--- pidfile: a stale one is not a running courier ---
+  ok    a dead pid reads as not running                            None
+  ok    a live pid is reported                                     3205
+  ok    a corrupt pidfile is not running                           None
+  ok    no pidfile is not running                                  None
+--- --status delivers nothing ---
+2026-10-09T21:19:00-0400  cursor  dev is a new outbox - reading from the start
+  ok    dry run sends nothing                                      0
+  ok    dry run calls no stub                                      0
+2026-10-09T21:19:00-0400  sent    dev -> rev (request)
+  ok    the cursor did not advance, so it still delivers           1
+  ok    exactly once                                               1
+--- oversized record does not stall an outbox forever ---
+2026-10-09T21:19:00-0400  cursor  dev is a new outbox - reading from the start
+2026-10-09T21:19:00-0400  skip    dev has a record longer than 262144 bytes
+  ok    the monster line is stepped over, not parsed               0
+2026-10-09T21:19:00-0400  sent    dev -> rev (request)
+  ok    the record behind it still arrives                         1
+  ok    intact                                                     True
+--- a courier whose home is deleted stops instead of rebuilding it ---
+  ok    the watcher came up                                        True
+  ok    it exits when its home is removed                          0
+  ok    and it did not rebuild the home it was told to forget      False
+--- but a missing home is a first run, not an orphan, for the one-shot modes ---
+  ok    --once still creates a home that has never existed         0
+  ok    and it is there afterwards                                 True
+
+passed 127, failed 2

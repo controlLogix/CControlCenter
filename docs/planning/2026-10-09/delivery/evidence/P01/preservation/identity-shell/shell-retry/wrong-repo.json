@@ -1,0 +1,41 @@
+{
+  "whoami": {
+    "ok": true,
+    "caller": "beta-worker-same",
+    "result": {
+      "caller": "beta-worker-same",
+      "agent": {
+        "session": "beta-worker-same",
+        "repo": "beta",
+        "role": "worker",
+        "agent": "same",
+        "cli": "shell",
+        "role_snapshot": "{\"name\": \"worker\", \"description\": \"Implements a work item.\", \"capabilities\": [\"python\", \"bash\", \"code\"], \"max_active\": 1, \"lease_s\": 1200, \"instructions\": \"As a worker: claim one item, do exactly what it says in the repo checkout, run its tests, then `agentmux hub done <id> --result \\\"<what changed, test result>\\\"`.\", \"override\": false}",
+        "transport": "tmux",
+        "handle": "%1",
+        "pane_pid": 7876,
+        "token_sha": "0701f0aa1a85e441279128585c38fad077e171f5acd68a779de03f3d46611b76",
+        "state": "starting",
+        "state_note": null,
+        "last_seen": "2026-10-10T01:21:19.037Z",
+        "last_output": "2026-10-10T01:21:19.037Z",
+        "last_bell": null,
+        "created": "2026-10-10T01:21:15.398Z",
+        "term_name": null
+      },
+      "eligible": [
+        "agent:beta-worker-same",
+        "role:beta/worker",
+        "role:*/worker",
+        "role:group:both/worker"
+      ]
+    }
+  },
+  "claim": {
+    "ok": true,
+    "caller": "beta-worker-same",
+    "result": {
+      "claimed": null
+    }
+  }
+}

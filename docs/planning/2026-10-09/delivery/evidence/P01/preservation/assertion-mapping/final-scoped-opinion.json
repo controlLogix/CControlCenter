@@ -1,0 +1,138 @@
+{
+  "recordedAt": "2026-10-10T01:29:32.676456+00:00",
+  "scope": "Independent final scoped mapping opinion; no reruns, source edits, task or phase acceptance",
+  "candidate": "a21f03a8a6792f4fa21099afe62804a56dfa7fc4",
+  "nativeReviewSha256": "f7d84b7bfa0c2eaed928b0671674e4652dccbb0cb02c4d61cbe60642c2f4d584",
+  "recommendations": {
+    "DASH-29-C02": {
+      "currentBoundary": "qualifiable",
+      "basis": "Completed62suite09run, residue/cleanup and every recorded skip reviewed; cancellation/writer/sentinel cases independently retained. Current unchanged runner plus callback19/real17/native129 changeimpact.",
+      "limits": [
+        "Zero covered preexisting files and no operator8787 process in fullrun; populated-home and live-listener properties rely on separate fixturecontrols.",
+        "No nativeWindows inference, hook or broad Windows fileaccessaudit.",
+        "Original20plugin skips and3.14archivedbytecode skip remain historical gaps; new36plugin and separate3.12 differential supplement them."
+      ]
+    },
+    "DASH-31-C01": {
+      "currentBoundary": "qualifiable",
+      "basis": "All18assigned suites now have owner mapping and exactassertion anchors with retained results; all18testhashes match. Original externalplugin tests now execute16+4 in native36replacement gate with no skips. Runtimecallbackchanges reviewed separately.",
+      "limits": [
+        "Maintained replacement is not recoveredoriginalsource.",
+        "No target-adapter equivalence claimed until later owningimplementation passes its AC03."
+      ]
+    },
+    "HUB-26-C02": {
+      "currentBoundary": "qualifiable with attached class/method mapping",
+      "basis": "Sixlegacy modules run129tests natively on macOS/Linux with exactsourcebinding, WSLsource-bound baseline retained, repaired regressions/faults retained. Class ownership below links suite methods to current component boundaries; SDK/contract/storage/leaf reports retain their separate fixtureoracles.",
+      "limits": [
+        "Broad Fed class spans capabilities; use exact methodnames/results to claim individual behaviors, not classpass alone.",
+        "No blanket all198behavior or wholecomponentqualification. Production adapter comparisons remain required in later owningtasks."
+      ]
+    },
+    "REPO-03-C01": {
+      "currentBoundary": "qualifiable",
+      "basis": "Strict localrunner test_failed_selection_can_be_retried_without_running_other_suites proves failureexit1 then repairedexit0; skipped/emptyselection tests prove1; nativecontract fixture/admission and patternnegative evidence; deliberate dashboardassertion exits1 through sameworkflow script/args.",
+      "limits": [
+        "Local dashboardprobe interpreter is python3 vs workflowpython; no deliberate remoteCI failure asserted.",
+        "tests.yml optional broker skips never qualify liveevidence; native strict129 supplies actualbroker execution."
+      ]
+    }
+  },
+  "currentHubClassOwners": {
+    "hub.tests.test_hub_offline.Names": [
+      "HUB-01"
+    ],
+    "hub.tests.test_hub_offline.Messaging": [
+      "HUB-02",
+      "HUB-03"
+    ],
+    "hub.tests.test_hub_offline.Work": [
+      "HUB-03"
+    ],
+    "hub.tests.test_hub_offline.Deliver": [
+      "HUB-05",
+      "HUB-06"
+    ],
+    "hub.tests.test_hub_offline.CliReceipts": [
+      "HUB-07"
+    ],
+    "hub.tests.test_hub_offline.BackupsAndRetention": [
+      "HUB-03"
+    ],
+    "hub.tests.test_hub_offline.ServerAPI": [
+      "HUB-02",
+      "HUB-04"
+    ],
+    "hub.tests.test_hub_offline.Profiles": [
+      "HUB-06"
+    ],
+    "hub.tests.test_hub_offline.MenuByLabel": [
+      "HUB-06"
+    ],
+    "hub.tests.test_hub_offline.BridgeConnectBounded": [
+      "HUB-08"
+    ],
+    "hub.tests.test_nats_federation.TwoNodes": [
+      "HUB-08"
+    ],
+    "hub.tests.test_fed_unit.Identity": [
+      "HUB-11"
+    ],
+    "hub.tests.test_fed_unit.Redaction": [
+      "HUB-12"
+    ],
+    "hub.tests.test_fed_unit.Outbound": [
+      "HUB-12"
+    ],
+    "hub.tests.test_fed_unit.Inbound": [
+      "HUB-12"
+    ],
+    "hub.tests.test_fed_unit.Config": [
+      "HUB-11"
+    ],
+    "hub.tests.test_fed_unit.Envelope": [
+      "HUB-11"
+    ],
+    "hub.tests.test_fed_unit.Mcp": [
+      "HUB-21"
+    ],
+    "hub.tests.test_fed_unit.Gate": [
+      "HUB-13"
+    ],
+    "hub.tests.test_governance.AuthorizationBinding": [
+      "HUB-12"
+    ],
+    "hub.tests.test_governance.BackupIdentity": [
+      "HUB-03"
+    ],
+    "hub.tests.test_governance.WorkRecovery": [
+      "HUB-17"
+    ],
+    "hub.tests.test_governance.WorkProtocol": [
+      "HUB-17"
+    ],
+    "hub.tests.test_fed_live.Fed": [
+      "HUB-10",
+      "HUB-12",
+      "HUB-14",
+      "HUB-15",
+      "HUB-16",
+      "HUB-17",
+      "HUB-18",
+      "HUB-19",
+      "HUB-20",
+      "HUB-23"
+    ],
+    "hub.tests.test_local_runner.RunnerTests": [
+      "HUB-26",
+      "REPO-03"
+    ]
+  },
+  "laterTaskAcceptanceContract": {
+    "example": "P02-T01-AC03",
+    "text": "Affected existing behavior has a baseline/candidate comparison or an approved behavior-change record; no capability, required assertion or stored identity is silently removed.",
+    "requirement": "Retain and apply this existing AC03 on each later task that changes these boundaries; current characterization does not discharge it."
+  },
+  "stillBlocked": "P01-T04 four actualprovider scenario repetitions (HAR21C02/HUB24C02); no phaseacceptance",
+  "evidenceNotExpanded": "No suitewide pass is used to accept all198checks. Other independent named gaps remain separately governed."
+}

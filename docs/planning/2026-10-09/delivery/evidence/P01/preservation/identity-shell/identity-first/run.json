@@ -1,0 +1,66 @@
+{
+  "whoami": {
+    "ok": true,
+    "caller": "alpha-worker-same",
+    "result": {
+      "caller": "alpha-worker-same",
+      "agent": {
+        "session": "alpha-worker-same",
+        "repo": "alpha",
+        "role": "worker",
+        "agent": "same",
+        "cli": "shell",
+        "role_snapshot": "{\"name\": \"worker\", \"description\": \"Implements a work item.\", \"capabilities\": [\"python\", \"bash\", \"code\"], \"max_active\": 1, \"lease_s\": 1200, \"instructions\": \"As a worker: claim one item, do exactly what it says in the repo checkout, run its tests, then `agentmux hub done <id> --result \\\"<what changed, test result>\\\"`.\", \"override\": false}",
+        "transport": "tmux",
+        "handle": "%0",
+        "pane_pid": 4067,
+        "token_sha": "b9fb9c07a3599e621d191b0336cd181697a2609193841e9b1c78cd87cfec82ab",
+        "state": "busy",
+        "state_note": null,
+        "last_seen": "2026-10-10T01:20:30.951Z",
+        "last_output": "2026-10-10T01:20:30.951Z",
+        "last_bell": "2026-10-10T01:20:30.054Z",
+        "created": "2026-10-10T01:19:54.728Z",
+        "term_name": null
+      },
+      "eligible": [
+        "agent:alpha-worker-same",
+        "role:alpha/worker",
+        "role:*/worker",
+        "role:group:both/worker"
+      ]
+    }
+  },
+  "claim": {
+    "ok": true,
+    "caller": "alpha-worker-same",
+    "result": {
+      "claimed": {
+        "id": "W-ZBWQHB9AW1",
+        "parent_id": null,
+        "task_key": null,
+        "repo": "alpha",
+        "target": "role:alpha/worker",
+        "target_kind": "role",
+        "title": "Run unchanged orchtest acceptance suite",
+        "body": "Run exact checkout orchtest, return count, source revision and log digest.",
+        "created_by": "virtual:operator",
+        "requirements": null,
+        "priority": 100,
+        "state": "claimed",
+        "claimed_by": "alpha-worker-same",
+        "lease_until": "2026-10-10T01:40:31.693Z",
+        "attempts": 1,
+        "max_attempts": 3,
+        "result": null,
+        "blocked_reason": null,
+        "created": "2026-10-10T01:20:31.388Z",
+        "updated": "2026-10-10T01:20:31.693Z",
+        "origin": null,
+        "origin_peer": null,
+        "fed_flags": null
+      }
+    }
+  },
+  "failure": "Traceback (most recent call last):\n  File \"/home/ryan/.cache/agentmux-governance/identity-shell-3q6u9faw/worker.py\", line 10, in <module>\n    suite=unittest.defaultTestLoader.discover(str(pathlib.Path(tree)/'orchtest'),pattern='test_*.py',top_level_dir=tree)\n  File \"/usr/lib/python3.14/unittest/loader.py\", line 334, in discover\n    raise ImportError('Start directory is not importable: %r' % start_dir)\nImportError: Start directory is not importable: '/home/ryan/.cache/agentmux-governance/identity-shell-3q6u9faw/checkout/orchtest'\n"
+}

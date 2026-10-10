@@ -1,0 +1,10 @@
+{
+  "files": {
+    "auth-presence.json": "e42e85a821279c66a92a98eb38ac7c600b9b2253351970e116bc4befc70a9270",
+    "auth-presence.ps1": "9e5ab42d0359a69cb9c5446a2e9a0f1e008cb06b383b826aea1cb3a9adde7dc1",
+    "codex-calib-refinement.md": "a7028d9aa813b7786ad69917858121bc110a3d9f778aae19d3b117547efab07a",
+    "original-readiness-plan.md": "5233e923192fd8d1660a72072dec16d6149c6b3f8392f48ff815faa0855665f8",
+    "README.md": "01b0cd8935e3ac764568635948f86bcfca571ddca9946783740c8806b8c11232"
+  },
+  "scope": "Read-only readiness and safe credential presence observations; no model calls, authentication or configuration changes; original four scenarios remain required."
+}

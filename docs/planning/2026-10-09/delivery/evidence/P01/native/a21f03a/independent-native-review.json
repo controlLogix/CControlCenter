@@ -1,0 +1,143 @@
+{
+  "runId": 38012525208,
+  "candidate": "a21f03a8a6792f4fa21099afe62804a56dfa7fc4",
+  "phaseAccepted": false,
+  "platforms": {
+    "linux": {
+      "jobId": 114095482071,
+      "jobUrl": "https://github.com/controlLogix/agentmux/actions/runs/38012525208/job/114095482071",
+      "checks": 23,
+      "failedChecks": [],
+      "hashComparisons": 747,
+      "sourceMismatches": [],
+      "conformance": {
+        "testsRun": 45,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "exitCode": 0,
+        "sourceUnchangedDuringRun": true
+      },
+      "independentAdmissionExit": 0,
+      "hub": {
+        "tests": 129,
+        "status": "passed",
+        "failures": [],
+        "skips": []
+      },
+      "caseCounts": {
+        "storage-result.json": 20,
+        "leaf-result.json": 11,
+        "signed-leaf-result.json": 19
+      },
+      "plugin": {
+        "tests": 36,
+        "sourceReferences": 40,
+        "sourceUnchanged": true,
+        "isolatedHomeRemoved": true,
+        "independentAdmission": true,
+        "exactLogHashMatch": true,
+        "ciReportHashMatch": true,
+        "methodStatuses": [
+          "passed"
+        ]
+      },
+      "reportHashes": {
+        "ci-result.json": "49a15c2300073046524fbf74acfbd887ec9b215a61d9d68b31a46b9549657d7d",
+        "conformance-admission-negative.json": "7fd8e05007bba42b9bc5d8ee5bcb31d418b1c848d9ab18133985d2f04545112f",
+        "conformance-admission.json": "ad810a9da9f1ae89c27951324c614aa6ce55fba564847780075ddfe9ef2077dd",
+        "contracts.json": "4c7ea712ecaf33f7908a3233ee2dd73e4747f9a2d78fb626eee201b5a5871988",
+        "hub-full-result.json": "bd24d81a04a24d0c1d6220fa376373cef7992a9dcd548b46179ea9717049a1c7",
+        "leaf-result.json": "32b13ae04eaef45abbb8f31bd59e25b83f34618d7ce1f4ae14eb348bb0ce7202",
+        "negative-fixture.json": "391eb0a9628ab3a4584114833da34bde8d60632d0de515e7e6dd558994c495a2",
+        "plugin-preservation.json": "af8d58fff3f3583c3a9e41a44898df053a17b028e08029f3afb2cbd1db677e2d",
+        "signed-leaf-result.json": "101274caf20368b8e610eaed20491dd0df0ee5529b75660afa50ae1efe0cc450",
+        "storage-result.json": "3b934e6d0ded053c80e79b7e568782fe31f8868fda9bf5ea7cf47f036b829030"
+      },
+      "allStorageLeafSignedCasesPassed": true,
+      "logsReviewed": {
+        "platformTests": 23,
+        "callbackTests": 11,
+        "trackerTests": 22,
+        "regressionRetainedFiles": 105,
+        "nativeCallbackUnsetHelpPassed": true
+      }
+    },
+    "macos": {
+      "jobId": 114095482371,
+      "jobUrl": "https://github.com/controlLogix/agentmux/actions/runs/38012525208/job/114095482371",
+      "checks": 23,
+      "failedChecks": [],
+      "hashComparisons": 747,
+      "sourceMismatches": [],
+      "conformance": {
+        "testsRun": 45,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "exitCode": 0,
+        "sourceUnchangedDuringRun": true
+      },
+      "independentAdmissionExit": 0,
+      "hub": {
+        "tests": 129,
+        "status": "passed",
+        "failures": [],
+        "skips": []
+      },
+      "caseCounts": {
+        "storage-result.json": 20,
+        "leaf-result.json": 11,
+        "signed-leaf-result.json": 19
+      },
+      "plugin": {
+        "tests": 36,
+        "sourceReferences": 40,
+        "sourceUnchanged": true,
+        "isolatedHomeRemoved": true,
+        "independentAdmission": true,
+        "exactLogHashMatch": true,
+        "ciReportHashMatch": true,
+        "methodStatuses": [
+          "passed"
+        ]
+      },
+      "reportHashes": {
+        "ci-result.json": "adcb8d5d9fcbac5a4238521e6bdfa661e4a75e5c6d21ff11c4f35155ca137bb8",
+        "conformance-admission-negative.json": "0116bef47b28090c0acf2fb5cece5bac08ff031ed0d6b19fe4028174f32c5d48",
+        "conformance-admission.json": "c18470c4ae6672433179047a6d7894ff18f9df85146e2c21f0d4b8460970da19",
+        "contracts.json": "6cc3f181720de648102079a1eafd130c76f531a1047aa9d74dc355cb044f4369",
+        "hub-full-result.json": "7a7f1e2072d78a82807070cda9225c8c972a21b8515c0096ecb723c7a3c55b48",
+        "leaf-result.json": "514837826e5c42719f167e15cb7913a67482ab769c4fe96bd30eee261a7e293e",
+        "negative-fixture.json": "391eb0a9628ab3a4584114833da34bde8d60632d0de515e7e6dd558994c495a2",
+        "plugin-preservation.json": "8e7983038462b7aef0dfcd0dc602d5d8f1fc928d1a8f5440f5ea100b995ff293",
+        "signed-leaf-result.json": "d4d9f08e5a6736b3579e0a91dd26a1fb3bb2a1d3b12599d26a3976a1ea833769",
+        "storage-result.json": "327d5ad57c8e49825e1ff65458d8965ba92327e45f4296a07bfd1380bd67272d"
+      },
+      "allStorageLeafSignedCasesPassed": true,
+      "logsReviewed": {
+        "platformTests": 23,
+        "callbackTests": 11,
+        "trackerTests": 22,
+        "regressionRetainedFiles": 105,
+        "nativeCallbackUnsetHelpPassed": true
+      }
+    }
+  },
+  "limits": [
+    "Native exact-candidate fixture and compatibility evidence; not provider inference, P06 qualification or P01 phase acceptance.",
+    "Previous candidate and WSL evidence kept distinct."
+  ],
+  "artifactMetadata": [
+    {
+      "platform": "linux",
+      "id": 11655505324,
+      "digest": "sha256:7e5af1fce55a5aa0f42176a6ece1396f9651f7b5a5199fe9568b3266245e41ca"
+    },
+    {
+      "platform": "macos",
+      "id": 11655305587,
+      "digest": "sha256:99551e3f2b4a295817f3be514fb915eb85c508cc2c1fd7ecb50ed2308460a4af"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+--- every spawned child is handed its own stdin ---
+  ok    the sweep actually found spawning calls
+        (31 subprocess spawn call(s) inspected)
+  FAIL  no spawn inherits the caller's stdin
+          expected []
+          actual   ['taskmgmt/notify.py:130']
+  ok    notify.py still spawns at all
+  FAIL  every notify.py spawn is guarded
+          expected []
+          actual   ['notify.py:130']
+passed 2, failed 2

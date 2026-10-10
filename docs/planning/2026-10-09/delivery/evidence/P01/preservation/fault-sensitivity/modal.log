@@ -1,0 +1,39 @@
+--- the two that actually cost an agent ---
+  FAIL  codex update prompt (2026-09-20)                         MISSED - send would actuate this
+  FAIL  claude bypass consent (2026-09-22)                       MISSED - send would actuate this
+--- claude startup dialogs ---
+  FAIL  folder trust                                             MISSED - send would actuate this
+  FAIL  workspace safety check                                   MISSED - send would actuate this
+  FAIL  opus effort recommendation                               MISSED - send would actuate this
+  FAIL  bare confirm footer                                      MISSED - send would actuate this
+--- codex / grok dialogs ---
+  FAIL  codex directory trust                                    MISSED - send would actuate this
+  FAIL  numbered selection                                       MISSED - send would actuate this
+  FAIL  y/n inline                                               MISSED - send would actuate this
+  FAIL  parenthesised y/n                                        MISSED - send would actuate this
+  FAIL  press any key                                            MISSED - send would actuate this
+  FAIL  select an option                                         MISSED - send would actuate this
+  FAIL  login menu                                               MISSED - send would actuate this
+--- ordinary panes: the guard must stay quiet ---
+  ok    claude idle prompt                                       not a modal
+  ok    claude placeholder                                       not a modal
+  ok    codex idle prompt                                        not a modal
+  ok    grok idle prompt                                         not a modal
+  ok    bash prompt                                              not a modal
+  ok    a finished answer                                        not a modal
+  ok    prose mentioning exit                                    not a modal
+  ok    shell output                                             not a modal
+  ok    a diff                                                   not a modal
+--- unblock: what may be answered, and what may NOT ---
+  ok    the codex update nag is a nuisance, not a decision       answers 2
+  ok    folder trust                                             left for a person
+  ok    claude bypass consent                                    left for a person
+  ok    codex directory trust                                    left for a person
+  ok    account chooser                                          left for a person
+  ok    a destructive y/n                                        left for a person
+  ok    an unrecognised prompt                                   left for a person
+  ok    trust is named as a trust decision                       named: a trust decision about this directory
+  ok    consent is named, and so is its lethal default           named: a consent decision, and its default is "No, exit"
+  ok    an account chooser is named                              named: an account choice
+
+passed 19, failed 13

@@ -1,0 +1,103 @@
+{
+  "whoami": {
+    "ok": true,
+    "caller": "alpha-worker-same",
+    "result": {
+      "caller": "alpha-worker-same",
+      "agent": {
+        "session": "alpha-worker-same",
+        "repo": "alpha",
+        "role": "worker",
+        "agent": "same",
+        "cli": "shell",
+        "role_snapshot": "{\"name\": \"worker\", \"description\": \"Implements a work item.\", \"capabilities\": [\"python\", \"bash\", \"code\"], \"max_active\": 1, \"lease_s\": 1200, \"instructions\": \"As a worker: claim one item, do exactly what it says in the repo checkout, run its tests, then `agentmux hub done <id> --result \\\"<what changed, test result>\\\"`.\", \"override\": false}",
+        "transport": "tmux",
+        "handle": "%0",
+        "pane_pid": 7753,
+        "token_sha": "992bcafc76f4c44c3cf4e93526f2b0a999f09b91a673be33975017d16c17a9cb",
+        "state": "busy",
+        "state_note": null,
+        "last_seen": "2026-10-10T01:21:19.020Z",
+        "last_output": "2026-10-10T01:21:19.019Z",
+        "last_bell": "2026-10-10T01:21:18.380Z",
+        "created": "2026-10-10T01:21:13.119Z",
+        "term_name": null
+      },
+      "eligible": [
+        "agent:alpha-worker-same",
+        "role:alpha/worker",
+        "role:*/worker",
+        "role:group:both/worker"
+      ]
+    }
+  },
+  "claim": {
+    "ok": true,
+    "caller": "alpha-worker-same",
+    "result": {
+      "claimed": {
+        "id": "W-GRNWV9315F",
+        "parent_id": null,
+        "task_key": null,
+        "repo": "alpha",
+        "target": "role:alpha/worker",
+        "target_kind": "role",
+        "title": "Run unchanged orchtest acceptance suite",
+        "body": "Run exact checkout orchtest, return count, source revision and log digest.",
+        "created_by": "virtual:operator",
+        "requirements": null,
+        "priority": 100,
+        "state": "claimed",
+        "claimed_by": "alpha-worker-same",
+        "lease_until": "2026-10-10T01:41:21.584Z",
+        "attempts": 1,
+        "max_attempts": 3,
+        "result": null,
+        "blocked_reason": null,
+        "created": "2026-10-10T01:21:21.172Z",
+        "updated": "2026-10-10T01:21:21.584Z",
+        "origin": null,
+        "origin_peer": null,
+        "fed_flags": null
+      }
+    }
+  },
+  "attachment": {
+    "sourceRevision": "a21f03a8a6792f4fa21099afe62804a56dfa7fc4",
+    "tests": 28,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "logPath": "/home/ryan/.cache/agentmux-governance/identity-shell-es8gsah5/run.log",
+    "logSha256": "7f69338751e8b90ebcfefefbd2d1dbb69426f34e6b3f2f7c67a980f602ebfda1"
+  },
+  "done": {
+    "ok": true,
+    "caller": "alpha-worker-same",
+    "result": {
+      "id": "W-GRNWV9315F",
+      "parent_id": null,
+      "task_key": null,
+      "repo": "alpha",
+      "target": "role:alpha/worker",
+      "target_kind": "role",
+      "title": "Run unchanged orchtest acceptance suite",
+      "body": "Run exact checkout orchtest, return count, source revision and log digest.",
+      "created_by": "virtual:operator",
+      "requirements": null,
+      "priority": 100,
+      "state": "done",
+      "claimed_by": "alpha-worker-same",
+      "lease_until": null,
+      "attempts": 1,
+      "max_attempts": 3,
+      "result": "{\"sourceRevision\": \"a21f03a8a6792f4fa21099afe62804a56dfa7fc4\", \"tests\": 28, \"failures\": 0, \"errors\": 0, \"skips\": 0, \"logPath\": \"/home/ryan/.cache/agentmux-governance/identity-shell-es8gsah5/run.log\", \"logSha256\": \"7f69338751e8b90ebcfefefbd2d1dbb69426f34e6b3f2f7c67a980f602ebfda1\"}",
+      "blocked_reason": null,
+      "created": "2026-10-10T01:21:21.172Z",
+      "updated": "2026-10-10T01:21:21.624Z",
+      "origin": null,
+      "origin_peer": null,
+      "fed_flags": null
+    }
+  }
+}

@@ -1,0 +1,10 @@
+--- original/agentmux.sh
++++ mutant/agentmux.sh
+@@ -1249,6 +1249,7 @@
+ # modal_text takes the text, modal_prompt supplies it from a pane.
+ # dashboard/test_modal_guard.sh exercises modal_text against captured samples.
+ modal_text() {
++  return 1
+   printf '%s' "$1" | grep -Eqi \
+     'press enter to continue|update now \(runs|\[y/n\]|\(y/n\)|do you (want|trust)|allow this|press any key|select an option|continue\? *$|enter to confirm|esc to cancel|no, (exit|quit)|yes, i (accept|trust)|trust this folder|^[[:space:]]*[│|]?[[:space:]]*[❯›▶>][[:space:]]+([0-9]+\.|yes\b|no\b|switch\b|keep\b|continue\b|sign in\b|log ?in\b)'
+ }

@@ -17,7 +17,13 @@
     {
       "candidate": "fba373a06a7b356b49fc778b96be5d6e5ae387b6",
       "run": "Full dashboard fixture suite",
-      "status": "Full run has a reported test_field_panels.py scanner concurrency failure at line 451; final suite and isolation report await review. No pass is claimed."
+      "status": "completed historical failure retained; later repaired62-suite result and independent current-boundary review recorded under assertionMapping",
+      "history": [
+        {
+          "previousStatus": "Full run has a reported test_field_panels.py scanner concurrency failure at line 451; final suite and isolation report await review. No pass is claimed.",
+          "reason": "Full run is terminal and its failure remains historical; later repaired full-run/supplement evidence independently reviewed."
+        }
+      ]
     }
   ],
   "evidenceIndex": {
@@ -4784,6 +4790,31 @@
       "sha256": "840be29dac5e29a99ce361b6596466c8cdaefeda54aa623b9783c65fd0253cfe",
       "recordedCandidateOrBase": "80f43e02f3344696a3985c48ef12578319f3bd0f",
       "bindingNote": "ExactGit archive on WSL native Linux filesystem with preparedlockedruntime, no credential inheritance; rawresults/sourcechecks/cleanup retained."
+    },
+    "faultSensitivity": {
+      "path": "docs/planning/2026-10-09/delivery/evidence/P01/preservation/fault-sensitivity/archive.json",
+      "sha256": "31af5f56a81d6e4208bc46fada44a3e5353b09b63017ddb604967b585cf62e9d",
+      "bindingNote": "Source-bound scoped review; captured proof retains original limits and failures."
+    },
+    "legacyStepNegative": {
+      "path": "docs/planning/2026-10-09/delivery/evidence/P01/preservation/legacy-step-negative/archive.json",
+      "sha256": "85603e034869c072446731680b32d8745734300be6684dcf681c217e30e95011",
+      "bindingNote": "Source-bound scoped review; captured proof retains original limits and failures."
+    },
+    "assertionMapping": {
+      "path": "docs/planning/2026-10-09/delivery/evidence/P01/preservation/assertion-mapping/archive.json",
+      "sha256": "416e9695222dd1f493832ecdf2951da4fd260cc5cc05ac07b702e53965cfc9e6",
+      "bindingNote": "Source-bound scoped review; captured proof retains original limits and failures."
+    },
+    "identityShell": {
+      "path": "docs/planning/2026-10-09/delivery/evidence/P01/preservation/identity-shell/archive.json",
+      "sha256": "1c031197d687dd8f4fe9ce1518cc2b903a6d00d41fe876da44ed71b8cb67a519",
+      "bindingNote": "Exacta21f actual native WSL shell work/results; source revisions/log hashes verified independently. Initial loader failure retained."
+    },
+    "nativeA21": {
+      "path": "docs/planning/2026-10-09/delivery/evidence/P01/native/a21f03a/archive.json",
+      "sha256": "f7c5f46a75e5322ebd40cc1872db8d82c6c9c5f11a0e692f6708dd5bb91c43fb",
+      "bindingNote": "Bothnative hosts all23checks;747source references each agree witha21f. Plugin36, hub129/conformance45 pass no skips."
     }
   },
   "checks": [
@@ -4829,23 +4860,26 @@
       "componentId": "DASH-29",
       "requirement": "Full fixture runs preserve the live dashboard/home and scoped persistent state; cancellation stops child writers before cleanup.",
       "requiredEnvironment": "Disposable supported host with shell/process tools; operator state is observed only by permitted safe metadata.",
-      "status": "partial",
+      "status": "qualified",
       "proved": [
         "Residue meta suite proves cancellation/child-writer/sentinel and scoped state checks with isolated stub fixtures.",
-        "The reported field-panel race has a bounded test-only repair: 213 positive checks pass; removing the runtime duplicate-scan guard in a disposable copy causes exactly two intended failures. This does not replace the full dashboard isolation result."
+        "The reported field-panel race has a bounded test-only repair: 213 positive checks pass; removing the runtime duplicate-scan guard in a disposable copy causes exactly two intended failures. This does not replace the full dashboard isolation result.",
+        "Completed62suite09run, residue/cleanup and every recorded skip reviewed; cancellation/writer/sentinel cases independently retained. Current unchanged runner plus callback19/real17/native129 changeimpact."
       ],
       "evidenceKeys": [
         "local",
         "cleanup",
-        "fieldRace"
+        "fieldRace",
+        "assertionMapping",
+        "nativeA21"
       ],
-      "remainingAssertions": [
-        "The full dashboard fixture run at fba373a reported a scanner concurrency test failure. No pass is inferred. Inspect full output, every skip, before/after state and cleanup before claiming full-run isolation."
+      "remainingAssertions": [],
+      "nextChecks": [],
+      "limits": [
+        "Zero covered preexisting files and no operator8787 process in fullrun; populated-home and live-listener properties rely on separate fixturecontrols.",
+        "No nativeWindows inference, hook or broad Windows fileaccessaudit.",
+        "Original20plugin skips and3.14archivedbytecode skip remain historical gaps; new36plugin and separate3.12 differential supplement them."
       ],
-      "nextChecks": [
-        "Review the external full dashboard run report and log once it finishes; do not start another shared-tmux run."
-      ],
-      "limits": [],
       "sourceAssertions": [
         "dashboard/run_tests.sh",
         "dashboard/suite_server.py",
@@ -4861,6 +4895,40 @@
       "existingTests": [
         "dashboard/test_residue.sh",
         "dashboard/check_test_residue.sh"
+      ],
+      "history": [
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "Residue meta suite proves cancellation/child-writer/sentinel and scoped state checks with isolated stub fixtures.",
+              "The reported field-panel race has a bounded test-only repair: 213 positive checks pass; removing the runtime duplicate-scan guard in a disposable copy causes exactly two intended failures. This does not replace the full dashboard isolation result."
+            ],
+            "remainingAssertions": [
+              "The full dashboard fixture run at fba373a reported a scanner concurrency test failure. No pass is inferred. Inspect full output, every skip, before/after state and cleanup before claiming full-run isolation."
+            ],
+            "nextChecks": [
+              "Review the external full dashboard run report and log once it finishes; do not start another shared-tmux run."
+            ],
+            "evidenceKeys": [
+              "local",
+              "cleanup",
+              "fieldRace"
+            ]
+          },
+          "reason": "Current-boundary characterization reviewed using completed runs, exact source bindings and scoped supplements; preserve recorded environment limits and later production comparisons."
+        }
+      ],
+      "qualificationScope": "Recorded P01 current-boundary characterization only",
+      "productionAdapterAccepted": false,
+      "remainingProductionObligations": [
+        {
+          "requirement": "Retain and apply this existing AC03 on each later task that changes these boundaries; current characterization does not discharge it.",
+          "status": "not-run",
+          "scope": "Each later implementation task that changes the mapped boundary retains AC03 baseline/candidate comparison. All phase ADD-01 gates remain required."
+        }
       ]
     },
     {
@@ -4868,20 +4936,25 @@
       "componentId": "DASH-31",
       "requirement": "Every assigned regression is mapped to an owning runtime capability and either rerun against target adapters or superseded by an equivalent accepted test.",
       "requiredEnvironment": "Static checks and Python/Node/shell fixtures in a disposable checkout; no live operator state.",
-      "status": "partial",
+      "status": "qualified",
       "proved": [
-        "All 18 assigned regression files remain inventoried; retention evidence preserves assertions or explicit reviewed replacements."
+        "All 18 assigned regression files remain inventoried; retention evidence preserves assertions or explicit reviewed replacements.",
+        "Independent read-only review maps all18assigned dashboard suites to owner capabilities and exact assertion lines; test hashes match retained full-run records. Current maintained-plugin36 proof supersedes missing external-plugin source counts separately. Later production adapter comparisons remain obligations in their owning phases.",
+        "All18assigned suites now have owner mapping and exactassertion anchors with retained results; all18testhashes match. Original externalplugin tests now execute16+4 in native36replacement gate with no skips. Runtimecallbackchanges reviewed separately."
       ],
       "evidenceKeys": [
-        "retention"
+        "retention",
+        "assertionMapping",
+        "nativeA21",
+        "identityShell",
+        "pluginRestoration"
       ],
-      "remainingAssertions": [
-        "Full dashboard execution remains pending, and each assigned suite still needs its result linked to the existing owner capability. New production adapters are absent."
+      "remainingAssertions": [],
+      "nextChecks": [],
+      "limits": [
+        "Maintained replacement is not recoveredoriginalsource.",
+        "No target-adapter equivalence claimed until later owningimplementation passes its AC03."
       ],
-      "nextChecks": [
-        "Map the 18 DASH-31 files to HAR-01/02/03/09/10/11/12/13 and applicable CLI/plugin owners; attach completed full-dashboard outcomes, distinguishing skipped suites and later adapter parity."
-      ],
-      "limits": [],
       "sourceAssertions": [
         "dashboard/test_argguard.sh",
         "dashboard/test_coordination.sh",
@@ -4908,6 +4981,59 @@
         "dashboard/test_orchestration_plugin.py",
         "dashboard/test_plugin_skills.py",
         "dashboard/test_run.sh"
+      ],
+      "history": [
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "All 18 assigned regression files remain inventoried; retention evidence preserves assertions or explicit reviewed replacements."
+            ],
+            "remainingAssertions": [
+              "Full dashboard execution remains pending, and each assigned suite still needs its result linked to the existing owner capability. New production adapters are absent."
+            ],
+            "nextChecks": [
+              "Map the 18 DASH-31 files to HAR-01/02/03/09/10/11/12/13 and applicable CLI/plugin owners; attach completed full-dashboard outcomes, distinguishing skipped suites and later adapter parity."
+            ],
+            "evidenceKeys": [
+              "retention"
+            ]
+          },
+          "reason": "Attach bounded assertion mapping and actual deliberate failures without accepting missing broader checks."
+        },
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "All 18 assigned regression files remain inventoried; retention evidence preserves assertions or explicit reviewed replacements.",
+              "Independent read-only review maps all18assigned dashboard suites to owner capabilities and exact assertion lines; test hashes match retained full-run records. Current maintained-plugin36 proof supersedes missing external-plugin source counts separately. Later production adapter comparisons remain obligations in their owning phases."
+            ],
+            "remainingAssertions": [
+              "Full dashboard execution remains pending, and each assigned suite still needs its result linked to the existing owner capability. New production adapters are absent."
+            ],
+            "nextChecks": [
+              "Map the 18 DASH-31 files to HAR-01/02/03/09/10/11/12/13 and applicable CLI/plugin owners; attach completed full-dashboard outcomes, distinguishing skipped suites and later adapter parity."
+            ],
+            "evidenceKeys": [
+              "retention",
+              "assertionMapping"
+            ]
+          },
+          "reason": "Current-boundary characterization reviewed using completed runs, exact source bindings and scoped supplements; preserve recorded environment limits and later production comparisons."
+        }
+      ],
+      "qualificationScope": "Recorded P01 current-boundary characterization only",
+      "productionAdapterAccepted": false,
+      "remainingProductionObligations": [
+        {
+          "requirement": "Retain and apply this existing AC03 on each later task that changes these boundaries; current characterization does not discharge it.",
+          "status": "not-run",
+          "scope": "Each later implementation task that changes the mapped boundary retains AC03 baseline/candidate comparison. All phase ADD-01 gates remain required."
+        }
       ]
     },
     {
@@ -4915,21 +5041,20 @@
       "componentId": "DASH-31",
       "requirement": "Claim/liveness/lock, guard, stdin and evidence-retention assertions still fail under deliberately broken behavior; scope and identity cannot be satisfied by changing a test expectation.",
       "requiredEnvironment": "Per-test temporary homes and fake/live prerequisites declared separately; actual CLI/tmux qualification only on supported hosts.",
-      "status": "partial",
+      "status": "qualified",
       "proved": [
-        "Historical failability establishes genuine failures for its seven selected predecessor rows; source retention prevents silent assertion removal."
+        "Historical failability establishes genuine failures for its seven selected predecessor rows; source retention prevents silent assertion removal.",
+        "Seven actual disposable runtime mutations trigger existing relevant assertions for exclusive lock, inherited stdin, wrong warrant secret, archive copy, inbox traversal, modal detection and courier recipient validation. Exact original source/test hashes and mutation diffs/logs retained; source unchanged. Historical argument/run/lifecycle/coordination/residue failures remain complementary. This qualifies named fault sensitivity, not complete security or provider execution."
       ],
       "evidenceKeys": [
         "local",
         "retention",
-        "fieldRace"
+        "fieldRace",
+        "assertionMapping",
+        "faultSensitivity"
       ],
-      "remainingAssertions": [
-        "The selected predecessor table does not by itself prove every listed claim/liveness/lock/guard/stdin/evidence-retention family. Full positive dashboard success alone also cannot prove negative sensitivity."
-      ],
-      "nextChecks": [
-        "Inspect existing negative cases in test_coordination, test_courier, test_runlock, test_sandbox_coordination, test_warrant, test_evidence_archive, test_inbox_guard, test_modal_guard, test_no_inherited_stdin, test_argguard, test_idle, test_lifecycle and test_runcards. Map recorded rejection assertions; add only uncovered focused fault probes without weakening identity/scope expectations."
-      ],
+      "remainingAssertions": [],
+      "nextChecks": [],
       "limits": [
         "Field-panel concurrency negative proof is separately recorded; it does not stand in for the listed harness/guard/stdin/evidence-retention families."
       ],
@@ -4967,6 +5092,30 @@
         "dashboard/test_idle.sh",
         "dashboard/test_lifecycle.sh",
         "dashboard/test_runcards.py"
+      ],
+      "history": [
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "Historical failability establishes genuine failures for its seven selected predecessor rows; source retention prevents silent assertion removal."
+            ],
+            "remainingAssertions": [
+              "The selected predecessor table does not by itself prove every listed claim/liveness/lock/guard/stdin/evidence-retention family. Full positive dashboard success alone also cannot prove negative sensitivity."
+            ],
+            "nextChecks": [
+              "Inspect existing negative cases in test_coordination, test_courier, test_runlock, test_sandbox_coordination, test_warrant, test_evidence_archive, test_inbox_guard, test_modal_guard, test_no_inherited_stdin, test_argguard, test_idle, test_lifecycle and test_runcards. Map recorded rejection assertions; add only uncovered focused fault probes without weakening identity/scope expectations."
+            ],
+            "evidenceKeys": [
+              "local",
+              "retention",
+              "fieldRace"
+            ]
+          },
+          "reason": "Attach bounded assertion mapping and actual deliberate failures without accepting missing broader checks."
+        }
       ]
     },
     {
@@ -5027,20 +5176,18 @@
       "componentId": "HAR-18",
       "requirement": "Run each paired test module unchanged as the source baseline and verify target orchestration attaches the actual result and source revision.",
       "requiredEnvironment": "Offline Python unittest environment on supported platforms.",
-      "status": "partial",
+      "status": "qualified",
       "proved": [
-        "All seven unchanged paired orchtest modules ran: 28 tests passed on WSL Python 3.14.4. Result records exact source hashes and a2e9ee6 candidate."
+        "All seven unchanged paired orchtest modules ran: 28 tests passed on WSL Python 3.14.4. Result records exact source hashes and a2e9ee6 candidate.",
+        "Actual alpha shell claims target work, executes unchanged orchtest28 with zero skips/errors/failures and returns source revision plus log digest through production release(done). Operator work_show retrieves same descriptor and validates actual log/hash. Native Unix peer ancestry authenticates identity; no --as override/mock. Initial external loader failure and cleanup records preserved. Local path/digest in work JSON, not a dedicated artifact transport or provider proof."
       ],
       "evidenceKeys": [
         "local",
-        "retention"
+        "retention",
+        "identityShell"
       ],
-      "remainingAssertions": [
-        "The evidence runner attaches revision/results, but does not prove that target orchestration itself attaches an actual orchtest execution result and source revision."
-      ],
-      "nextChecks": [
-        "In a disposable target-orchestration fixture, execute python -m unittest discover -s orchtest -p test_*.py; assert returned execution evidence contains the actual result and checked-out revision. Reuse unchanged baseline evidence."
-      ],
+      "remainingAssertions": [],
+      "nextChecks": [],
       "limits": [],
       "sourceAssertions": [
         "orchtest/cidr.py",
@@ -5066,6 +5213,29 @@
         "orchtest/test_shorten.py",
         "orchtest/test_sizes.py",
         "orchtest/test_slug.py"
+      ],
+      "history": [
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "All seven unchanged paired orchtest modules ran: 28 tests passed on WSL Python 3.14.4. Result records exact source hashes and a2e9ee6 candidate."
+            ],
+            "remainingAssertions": [
+              "The evidence runner attaches revision/results, but does not prove that target orchestration itself attaches an actual orchtest execution result and source revision."
+            ],
+            "nextChecks": [
+              "In a disposable target-orchestration fixture, execute python -m unittest discover -s orchtest -p test_*.py; assert returned execution evidence contains the actual result and checked-out revision. Reuse unchanged baseline evidence."
+            ],
+            "evidenceKeys": [
+              "local",
+              "retention"
+            ]
+          },
+          "reason": "Actual hub/shell identity and returned result evidence, independently reviewed. Later production adapter obligation retained."
+        }
       ]
     },
     {
@@ -5479,22 +5649,24 @@
       "componentId": "HUB-01",
       "requirement": "Translate legacy aliases to new identities without collisions across projects or agent generations; compare local and remote recipient selection.",
       "requiredEnvironment": "Pinned Python and SQLite with FTS5 on native macOS/Linux and Linux filesystems in WSL; isolated temporary homes. Two contract SDKs and isolated NATS.",
-      "status": "partial",
+      "status": "qualified",
       "proved": [
-        "Existing legacy-name tests translate aliases to canonical local session identities, refuse duplicate live names, and prevent a re-registered generation inheriting old mail. Federation fixtures compare repository URL/local alias identity and peer recipient selection."
+        "Existing legacy-name tests translate aliases to canonical local session identities, refuse duplicate live names, and prevent a re-registered generation inheriting old mail. Federation fixtures compare repository URL/local alias identity and peer recipient selection.",
+        "Actual alpha-worker-same and beta-worker-same coexist across two repositories. Seven address forms select expected recipients with actual pane acknowledgements; bare shared name refuses; beta pane cannot claim alpha work. Independent2122source references agree witha21f. Existing generation/federation assertions remain separately mapped; no new-v1 identity migration claimed.",
+        "Independent opinion explicitly maps legacy aliases, duplicate live names, re-registration generations, per-repo claims, shared repository IDs and peer agent/role selection. Exact native129 source/test results plus actual WSL same-name two-repo proof close P01 characterization gap. No production v1 adapter claimed."
       ],
       "evidenceKeys": [
         "baseline",
-        "native"
+        "native",
+        "identityShell",
+        "assertionMapping",
+        "nativeA21"
       ],
-      "remainingAssertions": [
-        "No legacy-to-new-platform adapter is implemented; old alias translation cannot be relabeled as a new v1 identity migration. Complete an explicit assertion map for existing cross-project/generation and local/remote selection; retain later adapter comparison with its owning phase."
-      ],
-      "nextChecks": [
-        "Map Messaging.test_legacy_names_resolve, test_duplicate_live_name_refused, test_reregistered_name_does_not_inherit_mail and federation Identity/peer-address cases to the retained boundary. Reuse matching hashes; execute any missing cross-project collision case. When the production adapter exists, compare the same fixtures against it."
-      ],
+      "remainingAssertions": [],
+      "nextChecks": [],
       "limits": [
-        "P01 preflight explicitly leaves production legacy adapters to later phases; this map does not authorize advancing phases or demand implementing those adapters in P01."
+        "P01 preflight explicitly leaves production legacy adapters to later phases; this map does not authorize advancing phases or demand implementing those adapters in P01.",
+        "Production adapter comparison remains required on P04-T01/P04-T01-AC05; no later-phase implementation or acceptance occurs in P01."
       ],
       "sourceAssertions": [
         "contracts/v1/README.md",
@@ -5524,6 +5696,73 @@
       ],
       "existingTests": [
         "hub/tests/test_hub_offline.py"
+      ],
+      "history": [
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "Existing legacy-name tests translate aliases to canonical local session identities, refuse duplicate live names, and prevent a re-registered generation inheriting old mail. Federation fixtures compare repository URL/local alias identity and peer recipient selection."
+            ],
+            "remainingAssertions": [
+              "No legacy-to-new-platform adapter is implemented; old alias translation cannot be relabeled as a new v1 identity migration. Complete an explicit assertion map for existing cross-project/generation and local/remote selection; retain later adapter comparison with its owning phase."
+            ],
+            "nextChecks": [
+              "Map Messaging.test_legacy_names_resolve, test_duplicate_live_name_refused, test_reregistered_name_does_not_inherit_mail and federation Identity/peer-address cases to the retained boundary. Reuse matching hashes; execute any missing cross-project collision case. When the production adapter exists, compare the same fixtures against it."
+            ],
+            "evidenceKeys": [
+              "baseline",
+              "native"
+            ]
+          },
+          "reason": "Actual hub/shell identity and returned result evidence, independently reviewed. Later production adapter obligation retained."
+        },
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "Existing legacy-name tests translate aliases to canonical local session identities, refuse duplicate live names, and prevent a re-registered generation inheriting old mail. Federation fixtures compare repository URL/local alias identity and peer recipient selection.",
+              "Actual alpha-worker-same and beta-worker-same coexist across two repositories. Seven address forms select expected recipients with actual pane acknowledgements; bare shared name refuses; beta pane cannot claim alpha work. Independent2122source references agree witha21f. Existing generation/federation assertions remain separately mapped; no new-v1 identity migration claimed."
+            ],
+            "remainingAssertions": [
+              "No legacy-to-new-platform adapter is implemented; old alias translation cannot be relabeled as a new v1 identity migration. Complete an explicit assertion map for existing cross-project/generation and local/remote selection; retain later adapter comparison with its owning phase."
+            ],
+            "nextChecks": [
+              "Map Messaging.test_legacy_names_resolve, test_duplicate_live_name_refused, test_reregistered_name_does_not_inherit_mail and federation Identity/peer-address cases to the retained boundary. Reuse matching hashes; execute any missing cross-project collision case. When the production adapter exists, compare the same fixtures against it."
+            ],
+            "evidenceKeys": [
+              "baseline",
+              "native",
+              "identityShell"
+            ]
+          },
+          "reason": "Complete current-boundary characterization with explicit source-bound assertion mapping. Production adapter obligation remains unaccepted and is detailed on its planned owner task."
+        }
+      ],
+      "qualificationScope": "Recorded P01 current-boundary characterization only",
+      "productionAdapterAccepted": false,
+      "remainingProductionObligations": [
+        {
+          "taskId": "P04-T01",
+          "criterionId": "P04-T01-AC05",
+          "requirement": "Execute the retained identity/generation/local/remote selection fixtures against the actual production legacy-to-v1 identity adapter. Preserve original aliases with source hub and generation, reject collisions across organizations/projects/instances, and verify same short names do not change scoped recipients. P01 characterization is not migration acceptance.",
+          "status": "not-run"
+        }
+      ],
+      "assertionMapping": [
+        "Messaging.test_legacy_names_resolve",
+        "Messaging.test_duplicate_live_name_refused",
+        "Messaging.test_reregistered_name_does_not_inherit_mail",
+        "Messaging.test_role_broadcast_and_cross_repo_group",
+        "Work.test_path_claims_are_per_repo",
+        "Identity.test_same_repo_same_rid_whatever_the_url_spelling",
+        "Identity.test_local_names_differ_rid_does_not",
+        "Fed.test_p2_address_in_the_peers_own_naming",
+        "Fed.test_p2_role_address_reaches_a_holder"
       ]
     },
     {
@@ -5579,22 +5818,24 @@
       "componentId": "HUB-11",
       "requirement": "Reject mismatched plane/type/recipient/account and unsupported versions; translate valid legacy envelopes without losing sender, source node, repository or original ID.",
       "requiredEnvironment": "Isolated macOS/Linux/WSL hubs, pinned Python federation dependencies, nsc, Git and a real NATS server; use separate test accounts and stores. New versioned contract fixtures.",
-      "status": "partial",
+      "status": "qualified",
       "proved": [
-        "Legacy governance and real-broker federation tests exercise authenticated subject/plane/type/recipient binding and identity preservation at the existing boundary. New contracts/leaf fixtures exercise their separate v1 namespace and broker-account denial."
+        "Legacy governance and real-broker federation tests exercise authenticated subject/plane/type/recipient binding and identity preservation at the existing boundary. New contracts/leaf fixtures exercise their separate v1 namespace and broker-account denial.",
+        "Explicit source-field mapping: WorkProtocol.test_result_binds_peer_node_attempt_task_repo_grant_and_evidence independently changes from/node/rid/origin_node/origin_id plus offer/execution/grant/result fields; each invalid result leaves origin reserved, valid result completes exact row. Source lines294–312 and nativea21f job logs show executed method success on both hosts. Envelope/account/peer-sender/version/recovery methods are individually mapped in independent characterization opinion. No actual legacy-v2/v3 to v1 translation claimed."
       ],
       "evidenceKeys": [
         "baseline",
         "native",
-        "native37"
+        "native37",
+        "identityShell",
+        "assertionMapping",
+        "nativeA21"
       ],
-      "remainingAssertions": [
-        "No actual legacy-v2/v3 to new-v1 translation path has been executed. Enumerate preserved sender, source node, repository and original ID assertions separately from new-schema rejection. Current native contract evidence is reviewed under native37; it does not supply the production adapter."
+      "remainingAssertions": [],
+      "nextChecks": [],
+      "limits": [
+        "Production adapter comparison remains required on P10-T01/P10-T01-AC05; no later-phase implementation or acceptance occurs in P01."
       ],
-      "nextChecks": [
-        "Review AuthorizationBinding and real federation receive/peer-address assertions against all listed identity fields. Preserve a deferred adapter-comparison obligation for its production owning phase."
-      ],
-      "limits": [],
       "sourceAssertions": [
         "hub/fed/config.py",
         "hub/fed/policy.py",
@@ -5603,7 +5844,50 @@
       "existingTests": [
         "hub/tests/test_fed_unit.py",
         "hub/tests/test_fed_live.py"
-      ]
+      ],
+      "history": [
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "Legacy governance and real-broker federation tests exercise authenticated subject/plane/type/recipient binding and identity preservation at the existing boundary. New contracts/leaf fixtures exercise their separate v1 namespace and broker-account denial."
+            ],
+            "remainingAssertions": [
+              "No actual legacy-v2/v3 to new-v1 translation path has been executed. Enumerate preserved sender, source node, repository and original ID assertions separately from new-schema rejection. Current native contract evidence is reviewed under native37; it does not supply the production adapter."
+            ],
+            "nextChecks": [
+              "Review AuthorizationBinding and real federation receive/peer-address assertions against all listed identity fields. Preserve a deferred adapter-comparison obligation for its production owning phase."
+            ],
+            "evidenceKeys": [
+              "baseline",
+              "native",
+              "native37"
+            ]
+          },
+          "reason": "Complete current-boundary characterization with explicit source-bound assertion mapping. Production adapter obligation remains unaccepted and is detailed on its planned owner task."
+        }
+      ],
+      "qualificationScope": "Recorded P01 current-boundary characterization only",
+      "productionAdapterAccepted": false,
+      "remainingProductionObligations": [
+        {
+          "taskId": "P10-T01",
+          "criterionId": "P10-T01-AC05",
+          "requirement": "Execute actual legacy-v2/v3 to new-v1 envelope translation through the production federation adapter. Compare sender, source node, repository, original message/work IDs, peer/account, plane/type/recipient and version refusals against the retained native129 baseline and P01 per-field mapping; retain all refusal/recovery cases. P01 characterization is not adapter acceptance.",
+          "status": "not-run"
+        }
+      ],
+      "assertionMapping": {
+        "planeTypeRecipient": "AuthorizationBinding.test_work_cannot_enter_through_information_plane; test_subject_destination_repository_and_role_match",
+        "senderAndBrokerAccount": "Inbound.test_spoof_self_and_scope; Fed.test_p0_server_refuses_spoofed_subject; test_p0_payload_spoof_is_dropped",
+        "unsupportedVersion": "Envelope.test_validate rejects v1 at legacy boundary; Fed.test_governance_v3_offer_isolated_from_legacy_work_consumer verifies separate v3 work delivery",
+        "peerQualifiedSender": "Fed.test_p2_message_reply_round_trip checks exact peer/repo/role/agent sender and reply",
+        "sourceNodeRepositoryOriginalWorkID": "WorkProtocol.test_result_binds_peer_node_attempt_task_repo_grant_and_evidence independently mutates node, rid, origin_node, origin_id plus from and requires origin stay reserved; valid result completes exact original row",
+        "crossNodeCompletion": "Fed.test_governance_same_peer_different_node_round_trip returns result to exact original work ID on real broker",
+        "resultEnvelopeIdentity": "WorkProtocol.test_completion_recovers_after_restart_and_failed_staging retains result message ID through recovery and duplicate delivery"
+      }
     },
     {
       "id": "HUB-24-C01",
@@ -5801,21 +6085,24 @@
       "componentId": "HUB-26",
       "requirement": "Run a mapped target comparison for each owning component and retain old failing cases until fixed or disproved with evidence.",
       "requiredEnvironment": "P01 verification harness plus each component's target environment.",
-      "status": "partial",
+      "status": "qualified",
       "proved": [
-        "Baseline repair cases and legacy suites remain; retention gate checks 105 regression files and rejects an actual removed assertion. The comparison preserves reviewed replacements rather than silently weakening tests."
+        "Baseline repair cases and legacy suites remain; retention gate checks 105 regression files and rejects an actual removed assertion. The comparison preserves reviewed replacements rather than silently weakening tests.",
+        "Independent read-only review maps all18assigned dashboard suites to owner capabilities and exact assertion lines; test hashes match retained full-run records. Current maintained-plugin36 proof supersedes missing external-plugin source counts separately. Later production adapter comparisons remain obligations in their owning phases.",
+        "Sixlegacy modules run129tests natively on macOS/Linux with exactsourcebinding, WSLsource-bound baseline retained, repaired regressions/faults retained. Class ownership below links suite methods to current component boundaries; SDK/contract/storage/leaf reports retain their separate fixtureoracles."
       ],
       "evidenceKeys": [
         "baseline",
-        "retention"
+        "retention",
+        "assertionMapping",
+        "nativeA21"
       ],
-      "remainingAssertions": [
-        "This map distinguishes retained behavior from missing target-adapter comparisons; a complete per-owning-component assertion/result mapping has not been established for all assigned tests."
+      "remainingAssertions": [],
+      "nextChecks": [],
+      "limits": [
+        "Broad Fed class spans capabilities; use exact methodnames/results to claim individual behaviors, not classpass alone.",
+        "No blanket all198behavior or wholecomponentqualification. Production adapter comparisons remain required in later owningtasks."
       ],
-      "nextChecks": [
-        "Complete the per-component mapping using existing test identities/results and reviewed replacement records; use unchanged-source reuse for unchanged behavior. Keep later production adapter parity obligations in their owning phases."
-      ],
-      "limits": [],
       "sourceAssertions": [
         "hub/tests/__init__.py",
         "hub/tests/fedharness.py",
@@ -5881,7 +6168,152 @@
         "hub/tests/test_fed_live.py",
         "hub/tests/test_governance.py",
         "hub/tests/test_local_runner.py"
-      ]
+      ],
+      "history": [
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "Baseline repair cases and legacy suites remain; retention gate checks 105 regression files and rejects an actual removed assertion. The comparison preserves reviewed replacements rather than silently weakening tests."
+            ],
+            "remainingAssertions": [
+              "This map distinguishes retained behavior from missing target-adapter comparisons; a complete per-owning-component assertion/result mapping has not been established for all assigned tests."
+            ],
+            "nextChecks": [
+              "Complete the per-component mapping using existing test identities/results and reviewed replacement records; use unchanged-source reuse for unchanged behavior. Keep later production adapter parity obligations in their owning phases."
+            ],
+            "evidenceKeys": [
+              "baseline",
+              "retention"
+            ]
+          },
+          "reason": "Attach bounded assertion mapping and actual deliberate failures without accepting missing broader checks."
+        },
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "Baseline repair cases and legacy suites remain; retention gate checks 105 regression files and rejects an actual removed assertion. The comparison preserves reviewed replacements rather than silently weakening tests.",
+              "Independent read-only review maps all18assigned dashboard suites to owner capabilities and exact assertion lines; test hashes match retained full-run records. Current maintained-plugin36 proof supersedes missing external-plugin source counts separately. Later production adapter comparisons remain obligations in their owning phases."
+            ],
+            "remainingAssertions": [
+              "This map distinguishes retained behavior from missing target-adapter comparisons; a complete per-owning-component assertion/result mapping has not been established for all assigned tests."
+            ],
+            "nextChecks": [
+              "Complete the per-component mapping using existing test identities/results and reviewed replacement records; use unchanged-source reuse for unchanged behavior. Keep later production adapter parity obligations in their owning phases."
+            ],
+            "evidenceKeys": [
+              "baseline",
+              "retention",
+              "assertionMapping"
+            ]
+          },
+          "reason": "Current-boundary characterization reviewed using completed runs, exact source bindings and scoped supplements; preserve recorded environment limits and later production comparisons."
+        }
+      ],
+      "qualificationScope": "Recorded P01 current-boundary characterization only",
+      "productionAdapterAccepted": false,
+      "remainingProductionObligations": [
+        {
+          "requirement": "Retain and apply this existing AC03 on each later task that changes these boundaries; current characterization does not discharge it.",
+          "status": "not-run",
+          "scope": "Each later implementation task that changes the mapped boundary retains AC03 baseline/candidate comparison. All phase ADD-01 gates remain required."
+        }
+      ],
+      "currentClassOwnerMapping": {
+        "hub.tests.test_hub_offline.Names": [
+          "HUB-01"
+        ],
+        "hub.tests.test_hub_offline.Messaging": [
+          "HUB-02",
+          "HUB-03"
+        ],
+        "hub.tests.test_hub_offline.Work": [
+          "HUB-03"
+        ],
+        "hub.tests.test_hub_offline.Deliver": [
+          "HUB-05",
+          "HUB-06"
+        ],
+        "hub.tests.test_hub_offline.CliReceipts": [
+          "HUB-07"
+        ],
+        "hub.tests.test_hub_offline.BackupsAndRetention": [
+          "HUB-03"
+        ],
+        "hub.tests.test_hub_offline.ServerAPI": [
+          "HUB-02",
+          "HUB-04"
+        ],
+        "hub.tests.test_hub_offline.Profiles": [
+          "HUB-06"
+        ],
+        "hub.tests.test_hub_offline.MenuByLabel": [
+          "HUB-06"
+        ],
+        "hub.tests.test_hub_offline.BridgeConnectBounded": [
+          "HUB-08"
+        ],
+        "hub.tests.test_nats_federation.TwoNodes": [
+          "HUB-08"
+        ],
+        "hub.tests.test_fed_unit.Identity": [
+          "HUB-11"
+        ],
+        "hub.tests.test_fed_unit.Redaction": [
+          "HUB-12"
+        ],
+        "hub.tests.test_fed_unit.Outbound": [
+          "HUB-12"
+        ],
+        "hub.tests.test_fed_unit.Inbound": [
+          "HUB-12"
+        ],
+        "hub.tests.test_fed_unit.Config": [
+          "HUB-11"
+        ],
+        "hub.tests.test_fed_unit.Envelope": [
+          "HUB-11"
+        ],
+        "hub.tests.test_fed_unit.Mcp": [
+          "HUB-21"
+        ],
+        "hub.tests.test_fed_unit.Gate": [
+          "HUB-13"
+        ],
+        "hub.tests.test_governance.AuthorizationBinding": [
+          "HUB-12"
+        ],
+        "hub.tests.test_governance.BackupIdentity": [
+          "HUB-03"
+        ],
+        "hub.tests.test_governance.WorkRecovery": [
+          "HUB-17"
+        ],
+        "hub.tests.test_governance.WorkProtocol": [
+          "HUB-17"
+        ],
+        "hub.tests.test_fed_live.Fed": [
+          "HUB-10",
+          "HUB-12",
+          "HUB-14",
+          "HUB-15",
+          "HUB-16",
+          "HUB-17",
+          "HUB-18",
+          "HUB-19",
+          "HUB-20",
+          "HUB-23"
+        ],
+        "hub.tests.test_local_runner.RunnerTests": [
+          "HUB-26",
+          "REPO-03"
+        ]
+      }
     },
     {
       "id": "HUB-26-C03",
@@ -6011,24 +6443,28 @@
       "componentId": "REPO-03",
       "requirement": "Deliberately failing an existing assertion blocks the relevant gate; skipped environments cannot count as passes.",
       "requiredEnvironment": "CI with declared Node, Python and supported OS jobs",
-      "status": "partial",
+      "status": "qualified",
       "proved": [
         "Archived native CI a2 exercises an intentional broken contract fixture; retention checker rejects a removed existing Python assertion. Twelve evidence-admission tests reject stale sources, missing tests, skips and wrong operating-system claims.",
-        "Native 37e macOS/Linux CI artifacts are now reviewed, with deliberate negative fixture and skip/evidence-admission checks retained."
+        "Native 37e macOS/Linux CI artifacts are now reviewed, with deliberate negative fixture and skip/evidence-admission checks retained.",
+        "Actual dashboard workflow script/arguments (python3 interpreter vs workflow python) return1 for one deliberately failed existing assertion, four tests/zero errors; setup import failure retained separately. Native conformance/skip evidence and existing strict local-runner rejection cases remain distinct. No actual failed CI workflow execution or skipped broker success claimed.",
+        "Strict localrunner test_failed_selection_can_be_retried_without_running_other_suites proves failureexit1 then repairedexit0; skipped/emptyselection tests prove1; nativecontract fixture/admission and patternnegative evidence; deliberate dashboardassertion exits1 through sameworkflow script/args."
       ],
       "evidenceKeys": [
         "native",
         "retention",
         "admission",
-        "native37"
+        "native37",
+        "assertionMapping",
+        "legacyStepNegative",
+        "nativeA21"
       ],
-      "remainingAssertions": [
-        "Existing tests.yml broker skips do not qualify native live legacy suites; dashboard SKIP exit-zero behavior requires report inspection. Current native contract workflow success does not establish that every other existing workflow gate rejects its own failed assertion."
+      "remainingAssertions": [],
+      "nextChecks": [],
+      "limits": [
+        "Local dashboardprobe interpreter is python3 vs workflowpython; no deliberate remoteCI failure asserted.",
+        "tests.yml optional broker skips never qualify liveevidence; native strict129 supplies actualbroker execution."
       ],
-      "nextChecks": [
-        "Link deliberate failure return codes to each relevant remaining legacy gate. Record unrun/skipped legacy environments as gaps rather than importing native contract counts."
-      ],
-      "limits": [],
       "sourceAssertions": [
         ".github/workflows/contracts.yml",
         ".github/workflows/design-patterns.yml",
@@ -6037,12 +6473,74 @@
       "existingTests": [
         ".github/workflows/tests.yml",
         ".github/workflows/design-patterns.yml"
+      ],
+      "history": [
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "Archived native CI a2 exercises an intentional broken contract fixture; retention checker rejects a removed existing Python assertion. Twelve evidence-admission tests reject stale sources, missing tests, skips and wrong operating-system claims.",
+              "Native 37e macOS/Linux CI artifacts are now reviewed, with deliberate negative fixture and skip/evidence-admission checks retained."
+            ],
+            "remainingAssertions": [
+              "Existing tests.yml broker skips do not qualify native live legacy suites; dashboard SKIP exit-zero behavior requires report inspection. Current native contract workflow success does not establish that every other existing workflow gate rejects its own failed assertion."
+            ],
+            "nextChecks": [
+              "Link deliberate failure return codes to each relevant remaining legacy gate. Record unrun/skipped legacy environments as gaps rather than importing native contract counts."
+            ],
+            "evidenceKeys": [
+              "native",
+              "retention",
+              "admission",
+              "native37"
+            ]
+          },
+          "reason": "Attach bounded assertion mapping and actual deliberate failures without accepting missing broader checks."
+        },
+        {
+          "date": "2026-10-09",
+          "reviewer": "Codex",
+          "previous": {
+            "status": "partial",
+            "proved": [
+              "Archived native CI a2 exercises an intentional broken contract fixture; retention checker rejects a removed existing Python assertion. Twelve evidence-admission tests reject stale sources, missing tests, skips and wrong operating-system claims.",
+              "Native 37e macOS/Linux CI artifacts are now reviewed, with deliberate negative fixture and skip/evidence-admission checks retained.",
+              "Actual dashboard workflow script/arguments (python3 interpreter vs workflow python) return1 for one deliberately failed existing assertion, four tests/zero errors; setup import failure retained separately. Native conformance/skip evidence and existing strict local-runner rejection cases remain distinct. No actual failed CI workflow execution or skipped broker success claimed."
+            ],
+            "remainingAssertions": [
+              "Existing tests.yml broker skips do not qualify native live legacy suites; dashboard SKIP exit-zero behavior requires report inspection. Current native contract workflow success does not establish that every other existing workflow gate rejects its own failed assertion."
+            ],
+            "nextChecks": [
+              "Link deliberate failure return codes to each relevant remaining legacy gate. Record unrun/skipped legacy environments as gaps rather than importing native contract counts."
+            ],
+            "evidenceKeys": [
+              "native",
+              "retention",
+              "admission",
+              "native37",
+              "assertionMapping",
+              "legacyStepNegative"
+            ]
+          },
+          "reason": "Current-boundary characterization reviewed using completed runs, exact source bindings and scoped supplements; preserve recorded environment limits and later production comparisons."
+        }
+      ],
+      "qualificationScope": "Recorded P01 current-boundary characterization only",
+      "productionAdapterAccepted": false,
+      "remainingProductionObligations": [
+        {
+          "requirement": "Retain and apply this existing AC03 on each later task that changes these boundaries; current characterization does not discharge it.",
+          "status": "not-run",
+          "scope": "Each later implementation task that changes the mapped boundary retains AC03 baseline/candidate comparison. All phase ADD-01 gates remain required."
+        }
       ]
     }
   ],
   "counts": {
-    "qualified": 18,
-    "partial": 8,
+    "qualified": 26,
+    "partial": 0,
     "missing": 2
   },
   "updatedAt": "2026-10-10T00:52:29.088344+00:00",

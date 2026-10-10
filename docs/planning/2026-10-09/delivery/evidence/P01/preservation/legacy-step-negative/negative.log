@@ -1,0 +1,14 @@
+.F..
+======================================================================
+FAIL: test_own_names_are_served (__main__.HostGuard.test_own_names_are_served)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/legacy-step-negative-wk3j5z60/dashboard/test_host_guard.py", line 55, in test_own_names_are_served
+    self.fail("intentional workflow-step assertion fixture")
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: intentional workflow-step assertion fixture
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.508s
+
+FAILED (failures=1)

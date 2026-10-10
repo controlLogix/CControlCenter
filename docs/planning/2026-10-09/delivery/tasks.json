@@ -2148,7 +2148,12 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/plugin-restoration/parent-review.json",
         "docs/planning/2026-10-09/delivery/evidence/P01/preservation/har20-fresh/result.json",
         "docs/planning/2026-10-09/delivery/evidence/P01/wsl-native-80f43e0/archive.json",
-        "docs/planning/2026-10-09/delivery/evidence/P01/plugin-restoration/metadata-fastpath-parent-review.json"
+        "docs/planning/2026-10-09/delivery/evidence/P01/plugin-restoration/metadata-fastpath-parent-review.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/native/a21f03a/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/fault-sensitivity/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/legacy-step-negative/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/assertion-mapping/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/preservation/identity-shell/archive.json"
       ],
       "commits": [
         "f19c6473d56335b8eeb28704b02895b9d9ab7fcc",
@@ -2156,7 +2161,7 @@
         "00353fd0ccb0b4ce34cb4eb45549703430af30d1",
         "7a7d47ae6830f86b8fed318ee64da6a5aac52701"
       ],
-      "blocker": null,
+      "blocker": "The four required real-provider repetitions (calib/team/crossrepo/swarm) remain unrun. Windows and WSL Grok auth caches are absent and no configured API credential is available; a Windows-owned credential source is requested. Windows-owned client session/state and tool-path prerequisites remain under investigation. No fake worker, reduced provider mix or source-only review can replace these executions.",
       "history": [
         {
           "at": "2026-10-09T22:15:02.344871+00:00",
@@ -2270,6 +2275,23 @@
           "from": "in_progress",
           "to": "in_progress",
           "note": "Reviewed actual native80f Linux/macOS22checks/hub129 and independently588source references each; Bash finding closed. Approved maintained legacy22file plugin repair after unchanged20 plus16 added checks, real dashboard/tmux and nine realGitcollect outcomes; no P06/historicalsource equality. HAR20 fresh raw judgments/fullflow4cycles closes two named gaps. Retained four realprovider scenarios, orchestration-attached orchtest and remaining assertion/sensitivity mapping gaps; P01 remains open."
+        },
+        {
+          "date": "2026-10-09",
+          "actor": "Codex",
+          "reason": "Reviewed native23-check candidate and focused fault/identity/attached-result evidence. Four real-provider scenario repetitions remain incomplete; task and phase remain open.",
+          "sourceCommit": "a21f03a8a6792f4fa21099afe62804a56dfa7fc4"
+        },
+        {
+          "date": "2026-10-09",
+          "actor": "Codex",
+          "reason": "Completed current-boundary assertion/identity/result and native evidence review. Keep task in progress while client prerequisites are investigated; real-provider execution remains a genuine gap.",
+          "sourceCommit": "a21f03a8a6792f4fa21099afe62804a56dfa7fc4",
+          "preservationCounts": {
+            "qualified": 26,
+            "partial": 0,
+            "missing": 2
+          }
         }
       ],
       "phaseCriteria": [
@@ -4469,7 +4491,8 @@
         "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
         "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
         "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
-        "Preserve the assertions assigned to this task for AMX-BASE-001 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements."
+        "Preserve the assertions assigned to this task for AMX-BASE-001 in delivery/evidence/P00/baseline-findings.md. Re-run or port the actual fixtures at the changed authority boundary; preserve explicitly open broader acceptance requirements.",
+        "Reuse P01 HUB-01-C02 assertion mappings and immutable baseline artifacts when comparing the actual production adapter; retain refused inputs, original identity fields and every failed/skipped outcome."
       ],
       "acceptanceCriteria": [
         {
@@ -4487,6 +4510,10 @@
         {
           "id": "P04-T01-AC04",
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
+        },
+        {
+          "id": "P04-T01-AC05",
+          "text": "Execute the retained identity/generation/local/remote selection fixtures against the actual production legacy-to-v1 identity adapter. Preserve original aliases with source hub and generation, reject collisions across organizations/projects/instances, and verify same short names do not change scoped recipients. P01 characterization is not migration acceptance."
         }
       ],
       "evidence": [],
@@ -4501,6 +4528,29 @@
             "AMX-BASE-001"
           ],
           "note": "Existing baseline repair invariants assigned to their replacing tasks; task status and phase gates unchanged."
+        },
+        {
+          "date": "2026-10-09",
+          "actor": "Codex",
+          "reason": "Make retained production adapter obligation explicit; characterization cannot substitute for migration execution.",
+          "previousAcceptanceCriteria": [
+            {
+              "id": "P04-T01-AC01",
+              "text": "The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Implement human, device, service, and plugin identities, enrollment/revocation, organization/project membership, permissions, approvals, and audit outside the kernel. Distinguish allowed, denied, and review-required actions; ordinary approval cannot override a hard denial."
+            },
+            {
+              "id": "P04-T01-AC02",
+              "text": "Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope."
+            },
+            {
+              "id": "P04-T01-AC03",
+              "text": "Affected existing behavior has a baseline/candidate comparison or an approved behavior-change record; no capability, required assertion or stored identity is silently removed."
+            },
+            {
+              "id": "P04-T01-AC04",
+              "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
+            }
+          ]
         }
       ],
       "phaseCriteria": [
@@ -15087,7 +15137,8 @@
         "Record inputs, outputs, authority, failure states and compatibility constraints for this scope. Use the phase's approved contracts; resolve any blocking design decision before changing its implementation.",
         "Implement the scoped work in a reviewable slice behind existing entry points where compatible. Preserve legacy assertions, stable IDs, data relationships and user configuration; record a justified replacement or migration where reuse is insufficient.",
         "Add or reuse focused fixtures for the successful path and the applicable denial, malformed input, retry, cancellation and crash boundaries. Start with the smallest failing test, then run affected integration checks.",
-        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted."
+        "Attach the resulting artifacts and source-bound evidence. Update affected pattern and component records. Hand the result to the phase verification task without claiming the whole phase is accepted.",
+        "Reuse P01 HUB-11-C02 assertion mappings and immutable baseline artifacts when comparing the actual production adapter; retain refused inputs, original identity fields and every failed/skipped outcome."
       ],
       "acceptanceCriteria": [
         {
@@ -15105,12 +15156,40 @@
         {
           "id": "P10-T01-AC04",
           "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
+        },
+        {
+          "id": "P10-T01-AC05",
+          "text": "Execute actual legacy-v2/v3 to new-v1 envelope translation through the production federation adapter. Compare sender, source node, repository, original message/work IDs, peer/account, plane/type/recipient and version refusals against the retained native129 baseline and P01 per-field mapping; retain all refusal/recovery cases. P01 characterization is not adapter acceptance."
         }
       ],
       "evidence": [],
       "commits": [],
       "blocker": null,
-      "history": [],
+      "history": [
+        {
+          "date": "2026-10-09",
+          "actor": "Codex",
+          "reason": "Make retained production adapter obligation explicit; characterization cannot substitute for migration execution.",
+          "previousAcceptanceCriteria": [
+            {
+              "id": "P10-T01-AC01",
+              "text": "The scoped deliverable is implemented or, for a decision/review item, explicitly decided with alternatives and consequences: Extend current federation capability. Move one recorded protocol and persistence boundary at a time, preserving existing messages, work, board, knowledge, code and deployment administration workflows."
+            },
+            {
+              "id": "P10-T01-AC02",
+              "text": "Every named capability in the scope has a passing focused check or a recorded, unresolved environment/decision gap. A gap prevents this task being marked done; a smaller successful example cannot stand in for the entire scope."
+            },
+            {
+              "id": "P10-T01-AC03",
+              "text": "Affected existing behavior has a baseline/candidate comparison or an approved behavior-change record; no capability, required assertion or stored identity is silently removed."
+            },
+            {
+              "id": "P10-T01-AC04",
+              "text": "Evidence identifies the candidate commit, actual environment, command and result for each task criterion; secrets and private agent reasoning are excluded. Known limitations, migration and recovery behavior are documented."
+            }
+          ]
+        }
+      ],
       "phaseCriteria": [
         "P10-AC01",
         "P10-AC02",

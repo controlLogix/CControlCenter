@@ -1,0 +1,24 @@
+--- a traversing name is refused ---
+  FAIL  accepted '../queue/dev'
+  FAIL  accepted '../../etc/passwd'
+  FAIL  accepted 'a/b'
+  FAIL  accepted '/etc/passwd'
+  ok    refused '..'
+  ok    refused '.'
+--- and the outbox it would have destroyed is intact ---
+  FAIL  queue/dev.jsonl was destroyed
+--- an empty name is the default, not an error ---
+  ok    an empty name falls back to 'orchestrator'
+--- a legitimate name still works ---
+  ok    reads the orchestrator inbox
+  ok    --clear empties a valid inbox
+  ok    a missing inbox reports empty rather than failing
+  ok    dots, dashes and underscores are accepted
+--- --clear keeps what it printed, rather than destroying it ---
+  ok    cleared messages are retained in the .read snapshot
+--- THE RACE: a message arriving during --clear must not vanish ---
+  ok    no message lost across the clear (176 archived + 124 still live = 300)
+  ok    the clear genuinely interleaved with the writer (124 arrived after it)
+  ok    every surviving record is intact JSON - no torn appends
+
+passed 11, failed 5

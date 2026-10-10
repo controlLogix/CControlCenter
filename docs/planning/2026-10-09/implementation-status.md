@@ -25,6 +25,7 @@ Branch: `feat/agentmux-platform-rearchitecture`. No phase or merge approval is i
 ## Current work and blockers
 
 - **P01-T04 — in_progress:** Establish per-phase evidence records, dependency gates, migration fixtures, and security/quality regression jobs.
+  Reason: The four required real-provider repetitions (calib/team/crossrepo/swarm) remain unrun. Windows and WSL Grok auth caches are absent and no configured API credential is available; a Windows-owned credential source is requested. Windows-owned client session/state and tool-path prerequisites remain under investigation. No fake worker, reduced provider mix or source-only review can replace these executions.
 
 ## P00. Scope, baseline, and architecture decisions
 

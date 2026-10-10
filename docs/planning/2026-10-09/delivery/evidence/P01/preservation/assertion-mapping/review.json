@@ -1,0 +1,3354 @@
+{
+  "recordedAt": "2026-10-10T01:14:14.058635+00:00",
+  "candidate": "80f43e02f3344696a3985c48ef12578319f3bd0f",
+  "scope": "Read-only mapping; no executions or acceptance",
+  "evidenceHashes": {
+    "docs\\planning\\2026-10-09\\delivery\\evidence\\P01\\preservation\\acceptance-map.json": "c451d88771676d427b173afb482ec2c6428e9b464082aac52b0453d1cc2b33a8",
+    "docs\\planning\\2026-10-09\\delivery\\evidence\\P01\\dashboard-windows\\passed-candidate\\dashboard-full-windows-result.json": "ce83bdf77c062840fdc650a5e30a48abfcb06484025e555ee32b85629e32c1e9",
+    "docs\\planning\\2026-10-09\\delivery\\evidence\\P01\\dashboard-windows\\passed-candidate\\dashboard-full-runner.log": "553b716dc54885006891e8c7fb1904f31c5064255f1d1ce62d982258c4d30b96",
+    "docs\\planning\\2026-10-09\\delivery\\evidence\\P01\\native\\80f43e0\\independent-hash-review.json": "e4394ddf2996d1cb8cab0e5339c1bd44ec411f8e09a499e03b837b9204160035",
+    "docs\\planning\\2026-10-09\\delivery\\evidence\\P01\\preservation\\failability.log": "748450dd3d77dc23a5ae5dae2e91761e4a05ed0b267fa4b1fd02c725e420b296",
+    "docs\\planning\\2026-10-09\\delivery\\evidence\\P01\\windows-callback-final\\focused-result.json": "161700722e07d07a54b76b686b99f9834e7c869ff69029873f06cee839b1d3d5",
+    "docs\\planning\\2026-10-09\\delivery\\evidence\\P01\\backup-boundary\\result.json": "398ab003f8174d7c614c1e1e6c7492069a3797a0e813d9a3b5f7af47a5e8f238"
+  },
+  "dashboardMappings": [
+    {
+      "test": "dashboard/test_argguard.sh",
+      "owners": [
+        "HAR-01",
+        "HAR-02"
+      ],
+      "sha256": "21edec75335ed35d035ac80a5eaa22b4a14ea98e03ec87d0e4a64f0918a5b3cd",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_argguard.sh passed 38, failed 0",
+      "assertionAnchors": [
+        {
+          "line": 87,
+          "text": "bad 'inbox --clear claude did NOT clear claude'"
+        },
+        {
+          "line": 89,
+          "text": "ok 'inbox --clear claude cleared claude'"
+        },
+        {
+          "line": 92,
+          "text": "ok \"the orchestrator's inbox was left alone\""
+        },
+        {
+          "line": 94,
+          "text": "bad \"the orchestrator's inbox was cleared as collateral - the original bug\""
+        },
+        {
+          "line": 97,
+          "text": "ok 'the cleared messages are still recoverable from the snapshot'"
+        },
+        {
+          "line": 99,
+          "text": "bad 'a destructive clear left nothing behind'"
+        },
+        {
+          "line": 108,
+          "text": "ok 'a read without --clear leaves the inbox in place'"
+        },
+        {
+          "line": 110,
+          "text": "bad 'a plain read destroyed the inbox'"
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": null
+    },
+    {
+      "test": "dashboard/test_coordination.sh",
+      "owners": [
+        "HAR-09",
+        "HAR-10"
+      ],
+      "sha256": "d2d1e03f6b853d560c0a65d322218fc5630fba9934f467011ac80e555e7ac942",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_coordination.sh passed 61, failed 0",
+      "assertionAnchors": [
+        {
+          "line": 70,
+          "text": "ok 'and the new holder is recorded'"
+        },
+        {
+          "line": 72,
+          "text": "bad 'new holder not recorded'"
+        },
+        {
+          "line": 82,
+          "text": "ok '--json emits a parseable array'"
+        },
+        {
+          "line": 84,
+          "text": "bad '--json did not parse'"
+        },
+        {
+          "line": 91,
+          "text": "ok 'the dependency is shown in the listing'"
+        },
+        {
+          "line": 93,
+          "text": "bad 'dependency not shown'"
+        },
+        {
+          "line": 109,
+          "text": "bad 'a traversing claim created a file'"
+        },
+        {
+          "line": 111,
+          "text": "ok 'no claim file escaped the claims directory'"
+        },
+        {
+          "line": 122,
+          "text": "ok 'the entry is on disk'"
+        },
+        {
+          "line": 124,
+          "text": "bad 'entry not written'"
+        },
+        {
+          "line": 131,
+          "text": "ok 'claims write a journal entry'"
+        },
+        {
+          "line": 133,
+          "text": "bad 'claim was not journalled'"
+        },
+        {
+          "line": 167,
+          "text": "ok 'a claim nobody depends on notifies nobody'"
+        },
+        {
+          "line": 169,
+          "text": "bad \"$before message(s) queued for an uninterested audience\""
+        },
+        {
+          "line": 183,
+          "text": "ok \"the interested set is exactly the depender (got '$target')\""
+        },
+        {
+          "line": 185,
+          "text": "bad \"interested set wrong: '$target'\""
+        },
+        {
+          "line": 193,
+          "text": "ok 'and it is empty for an unrelated resource'"
+        },
+        {
+          "line": 195,
+          "text": "bad \"unrelated resource had $target interested agents\""
+        },
+        {
+          "line": 221,
+          "text": "ok 'the claim was valid and held by alice on every read during renewal'"
+        },
+        {
+          "line": 223,
+          "text": "bad \"$bad_reads read(s) saw an empty or broken claim mid-renewal\""
+        },
+        {
+          "line": 244,
+          "text": "ok \"bob's live claim survived alice's release (holder=$holder)\""
+        },
+        {
+          "line": 246,
+          "text": "bad \"bob's claim was destroyed (holder=$holder)\""
+        },
+        {
+          "line": 266,
+          "text": "ok \"exactly one of 12 concurrent claimants won ($(cat \"$winners\"))\""
+        },
+        {
+          "line": 268,
+          "text": "bad \"$count winners out of 12 - mutual exclusion is broken\""
+        },
+        {
+          "line": 272,
+          "text": "ok 'and exactly one claim file exists'"
+        },
+        {
+          "line": 274,
+          "text": "bad \"$held claim files after the race\""
+        },
+        {
+          "line": 277,
+          "text": "ok 'the recorded holder is the process that was told it won'"
+        },
+        {
+          "line": 279,
+          "text": "bad 'the winner and the recorded holder disagree'"
+        },
+        {
+          "line": 356,
+          "text": "ok \"identity: $verb refuses a forged identity before side effects\""
+        },
+        {
+          "line": 358,
+          "text": "bad \"identity: $verb accepted forgery or failed for the wrong reason (rc=$rc: $out)\""
+        },
+        {
+          "line": 368,
+          "text": "check 'identity: matching holder accepted, mismatch refused' '2/0' \"$forged_rc/$matching_rc\""
+        },
+        {
+          "line": 382,
+          "text": "ok \"identity: orchestrator $verb accepted only outside a pane\""
+        },
+        {
+          "line": 384,
+          "text": "bad \"identity: orchestrator $verb contract broken (inside=$rc outside=$outside_rc: $out)\""
+        },
+        {
+          "line": 391,
+          "text": "ok 'identity: a pane named orchestrator cannot use the virtual identity'"
+        },
+        {
+          "line": 393,
+          "text": "bad \"identity: virtual identity available inside a pane (rc=$rc: $out)\""
+        },
+        {
+          "line": 401,
+          "text": "ok 'identity: non-live matching holder refused without the test bypass'"
+        },
+        {
+          "line": 403,
+          "text": "bad \"identity: liveness guard failed (rc=$rc: $out)\""
+        },
+        {
+          "line": 418,
+          "text": "ok \"keys: $verb says what is wrong with a mistyped key\""
+        },
+        {
+          "line": 420,
+          "text": "bad \"keys: $verb (rc=$rc) $(printf '%s' \"$out\" | tail -1)\""
+        },
+        {
+          "line": 426,
+          "text": "ok 'keys: a real key of the wrong kind is named as such'"
+        },
+        {
+          "line": 428,
+          "text": "bad \"keys: wrong-kind key (rc=$rc) $(printf '%s' \"$out\" | tail -1)\""
+        },
+        {
+          "line": 435,
+          "text": "bad \"keys: a valid key was refused instead of attempted (rc=$rc: $(printf '%s' \"$out\" | tail -1))\""
+        },
+        {
+          "line": 437,
+          "text": "bad 'keys: a valid key against an unreachable board produced a traceback'"
+        },
+        {
+          "line": 439,
+          "text": "ok 'keys: a well-formed key is still taken to the board'"
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": null
+    },
+    {
+      "test": "dashboard/test_courier.py",
+      "owners": [
+        "HAR-13"
+      ],
+      "sha256": "3a7770a7f8f2258c68a1145a80374fa5ca28c1e688cb848112635e8de369300d",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_courier.py  passed 129, failed 0",
+      "assertionAnchors": [
+        {
+          "line": 40,
+          "text": "def check(label, expected, actual):"
+        },
+        {
+          "line": 163,
+          "text": "check(\"a valid record parses\", \"rev\", courier.parse_record(good.encode())[\"recipient\"])"
+        },
+        {
+          "line": 164,
+          "text": "check(\"ref survives\", \"T-1\", courier.parse_record(good.encode())[\"ref\"])"
+        },
+        {
+          "line": 165,
+          "text": "check(\"not JSON\", None, courier.parse_record(b\"{nope\"))"
+        },
+        {
+          "line": 166,
+          "text": "check(\"JSON but not an object\", None, courier.parse_record(b\"[1,2]\"))"
+        },
+        {
+          "line": 167,
+          "text": "check(\"unknown kind\", None, courier.parse_record("
+        },
+        {
+          "line": 169,
+          "text": "check(\"no recipient is not deliverable\", None, courier.parse_record("
+        },
+        {
+          "line": 171,
+          "text": "check(\"recipient with a slash\", None, courier.parse_record("
+        },
+        {
+          "line": 173,
+          "text": "check(\"sender with a space\", None, courier.parse_record("
+        },
+        {
+          "line": 175,
+          "text": "check(\"empty body\", None, courier.parse_record("
+        },
+        {
+          "line": 177,
+          "text": "check(\"body is capped\", courier.BODY_MAX, len(courier.parse_record("
+        },
+        {
+          "line": 180,
+          "text": "check(\"a missing 'at' is filled in\", True, bool(courier.parse_record("
+        },
+        {
+          "line": 185,
+          "text": "check(\"render names the sender\", True, \"from dev\" in rendered)"
+        },
+        {
+          "line": 186,
+          "text": "check(\"render names the kind\", True, \"(finding)\" in rendered)"
+        },
+        {
+          "line": 187,
+          "text": "check(\"render carries the body\", True, rendered.endswith(\"it leaks\"))"
+        },
+        {
+          "line": 188,
+          "text": "check(\"render is marked as relayed\", True, rendered.startswith(\"[agentmux]\"))"
+        },
+        {
+          "line": 189,
+          "text": "check(\"render includes a ref when set\", True, \"ref T-9\" in courier.render("
+        },
+        {
+          "line": 200,
+          "text": "check(\"nothing delivered from an unseen outbox\", 0, summary[\"delivered\"])"
+        },
+        {
+          "line": 201,
+          "text": "check(\"and nothing queued either\", 0, summary[\"pending\"])"
+        },
+        {
+          "line": 202,
+          "text": "check(\"the stub was never called\", 0, len(sent()))"
+        },
+        {
+          "line": 203,
+          "text": "check(\"a cursor was written\", True, (STATE / \"dev.cursor\").is_file())"
+        },
+        {
+          "line": 204,
+          "text": "check(\"the cursor is at EOF\", (QUEUE / \"dev.jsonl\").stat().st_size,"
+        },
+        {
+          "line": 206,
+          "text": "check(\"cursor is 0600\", 0o600, stat.S_IMODE((STATE / \"dev.cursor\").stat().st_mode))"
+        },
+        {
+          "line": 213,
+          "text": "check(\"a newly spawned agent's opening message is not swallowed\", 1, summary[\"delivered\"])"
+        },
+        {
+          "line": 214,
+          "text": "check(\"it reaches the recipient\", True, \"my first message\" in sent()[0][2])"
+        },
+        {
+          "line": 215,
+          "text": "check(\"history and new files are told apart by the marker\", True,"
+        },
+        {
+          "line": 222,
+          "text": "check(\"--from-start does replay\", 1, summary[\"delivered\"])"
+        },
+        {
+          "line": 223,
+          "text": "check(\"delivered to the right agent\", \"rev\", sent()[0][1])"
+        },
+        {
+          "line": 224,
+          "text": "check(\"delivered with the send verb\", \"send\", sent()[0][0])"
+        },
+        {
+          "line": 225,
+          "text": "check(\"no --force anywhere\", False, Path(str(STUB_LOG) + \".force\").exists())"
+        },
+        {
+          "line": 235,
+          "text": "check(\"a new message is delivered\", 1, summary[\"delivered\"])"
+        },
+        {
+          "line": 236,
+          "text": "check(\"text reaches the pane\", True, \"first\" in sent()[0][2])"
+        },
+        {
+          "line": 239,
+          "text": "check(\"a second pass redelivers nothing\", 0, summary[\"delivered\"])"
+        },
+        {
+          "line": 240,
+          "text": "check(\"the stub stayed idle\", 0, len(sent()))"
+        },
+        {
+          "line": 244,
+          "text": "check(\"two more are delivered in one pass\", 2, summary[\"delivered\"])"
+        },
+        {
+          "line": 245,
+          "text": "check(\"in file order\", [\"second\", \"third\"],"
+        },
+        {
+          "line": 256,
+          "text": "check(\"the complete record goes\", 1, summary[\"delivered\"])"
+        },
+        {
+          "line": 257,
+          "text": "check(\"the partial one does not\", 1, len(sent()))"
+        },
+        {
+          "line": 261,
+          "text": "check(\"it is delivered once completed\", 1, summary[\"delivered\"])"
+        },
+        {
+          "line": 262,
+          "text": "check(\"with its body intact\", True, \"rest\" in sent()[1][2])"
+        },
+        {
+          "line": 273,
+          "text": "check(\"truncated outbox delivers only what is new\", 1, summary[\"delivered\"])"
+        },
+        {
+          "line": 274,
+          "text": "check(\"and it is the new message\", True, \"after truncate\" in sent()[0][2])"
+        },
+        {
+          "line": 279,
+          "text": "check(\"a replaced outbox restarts at 0\", 1, summary[\"delivered\"])"
+        },
+        {
+          "line": 280,
+          "text": "check(\"delivering the new file's contents\", True, \"after rotate\" in sent()[0][2])"
+        },
+        {
+          "line": 290,
+          "text": "check(\"a self-addressed message is not delivered\", 0, summary[\"delivered\"])"
+        },
+        {
+          "line": 291,
+          "text": "check(\"it is not retried forever either\", 1, summary[\"pending\"])"
+        },
+        {
+          "line": 296,
+          "text": "check(\"nothing is delivered to the courier\", 0, summary[\"delivered\"])"
+        },
+        {
+          "line": 300,
+          "text": "check(\"the courier's own outbox is never harvested\", 0, summary[\"delivered\"])"
+        },
+        {
+          "line": 301,
+          "text": "check(\"and gets no cursor\", False, (STATE / \"courier.cursor\").exists())"
+        },
+        {
+          "line": 312,
+          "text": "check(\"a symlinked outbox delivers nothing\", 0, summary[\"delivered\"])"
+        },
+        {
+          "line": 324,
+          "text": "check(\"not delivered\", 0, summary[\"delivered\"])"
+        },
+        {
+          "line": 325,
+          "text": "check(\"held as pending\", 1, summary[\"pending\"])"
+        },
+        {
+          "line": 326,
+          "text": "check(\"never handed to send at all\", 0, len(sent()))"
+        },
+        {
+          "line": 327,
+          "text": "check(\"the reason names the agent\", True, \"ghost\" in courier.load_pending()[0][\"reason\"])"
+        },
+        {
+          "line": 328,
+          "text": "check(\"pending is 0600\", 0o600, stat.S_IMODE(courier.PENDING.stat().st_mode))"
+        },
+        {
+          "line": 331,
+          "text": "check(\"delivered once the agent appears\", 1, summary[\"delivered\"])"
+        },
+        {
+          "line": 332,
+          "text": "check(\"and pending drains\", 0, summary[\"pending\"])"
+        },
+        {
+          "line": 333,
+          "text": "check(\"the body survived the wait\", True, \"anyone there\" in sent()[0][2])"
+        },
+        {
+          "line": 342,
+          "text": "check(\"a refused send is not counted as delivered\", 0, summary[\"delivered\"])"
+        },
+        {
+          "line": 343,
+          "text": "check(\"it is pending\", 1, summary[\"pending\"])"
+        },
+        {
+          "line": 344,
+          "text": "check(\"the refusal reason is kept\", True,"
+        },
+        {
+          "line": 346,
+          "text": "check(\"attempts are counted\", 1, courier.load_pending()[0][\"attempts\"])"
+        },
+        {
+          "line": 348,
+          "text": "check(\"attempts increment on retry\", 2, courier.load_pending()[0][\"attempts\"])"
+        },
+        {
+          "line": 349,
+          "text": "check(\"--force is never used\", False, Path(str(STUB_LOG) + \".force\").exists())"
+        },
+        {
+          "line": 352,
+          "text": "check(\"it lands once the modal clears\", 1, summary[\"delivered\"])"
+        },
+        {
+          "line": 363,
+          "text": "check(\"the message is eventually dropped\", 1, dropped)"
+        },
+        {
+          "line": 364,
+          "text": "check(\"after exactly MAX_ATTEMPTS tries\", courier.MAX_ATTEMPTS, len(sent()))"
+        },
+        {
+          "line": 365,
+          "text": "check(\"and stops consuming retries\", 0, summary[\"pending\"])"
+        },
+        {
+          "line": 368,
+          "text": "check(\"a note was posted\", 1, len(notes))"
+        },
+        {
+          "line": 369,
+          "text": "check(\"as an error\", \"error\", notes[0][\"kind\"])"
+        },
+        {
+          "line": 370,
+          "text": "check(\"from the courier\", \"courier\", notes[0][\"sender\"])"
+        },
+        {
+          "line": 371,
+          "text": "check(\"addressed to nobody, so it cannot loop\", None, notes[0][\"recipient\"])"
+        },
+        {
+          "line": 372,
+          "text": "check(\"naming both ends\", True,"
+        },
+        {
+          "line": 379,
+          "text": "check(\"the message lands in the dead-letter file\", 1, len(kept))"
+        },
+        {
+          "line": 380,
+          "text": "check(\"with its body intact\", \"doomed\", kept[0][\"message\"][\"body\"])"
+        },
+        {
+          "line": 381,
+          "text": "check(\"and its attempt count\", courier.MAX_ATTEMPTS, kept[0][\"attempts\"])"
+        },
+        {
+          "line": 382,
+          "text": "check(\"and why it failed\", True, \"prompt\" in (kept[0][\"reason\"] or \"\"))"
+        },
+        {
+          "line": 383,
+          "text": "check(\"the note points at the dead-letter file\", True,"
+        },
+        {
+          "line": 385,
+          "text": "check(\"dead-letter is 0600\", 0o600, stat.S_IMODE(courier.DEAD_LETTER.stat().st_mode))"
+        },
+        {
+          "line": 399,
+          "text": "check(\"delivered even though no pane exists\", 1, summary[\"delivered\"])"
+        },
+        {
+          "line": 400,
+          "text": "check(\"nothing is left pending\", 0, summary[\"pending\"])"
+        },
+        {
+          "line": 401,
+          "text": "check(\"it went to the inbox, not a pane\", 0, len(sent()))"
+        },
+        {
+          "line": 403,
+          "text": "check(\"the inbox has it\", 1, len(box))"
+        },
+        {
+          "line": 404,
+          "text": "check(\"with the body intact\", \"answering the orchestrator\", box[0][\"body\"])"
+        },
+        {
+          "line": 405,
+          "text": "check(\"attributed to the sender\", \"dev\", box[0][\"sender\"])"
+        },
+        {
+          "line": 406,
+          "text": "check(\"inbox file is 0600\", 0o600,"
+        },
+        {
+          "line": 408,
+          "text": "check(\"nothing reached the dead-letter file\", 0, len(dead_letters()))"
+        },
+        {
+          "line": 416,
+          "text": "check(\"delivered to the pane\", 1, summary[\"delivered\"])"
+        },
+        {
+          "line": 417,
+          "text": "check(\"the launcher was used\", \"orchestrator\", sent()[0][1])"
+        },
+        {
+          "line": 418,
+          "text": "check(\"and the inbox was not written\", 0, len(inbox()))"
+        },
+        {
+          "line": 423,
+          "text": "check(\"first retry waits the base interval\", 3.0, courier.backoff_for(1))"
+        },
+        {
+          "line": 424,
+          "text": "check(\"it doubles\", 6.0, courier.backoff_for(2))"
+        },
+        {
+          "line": 425,
+          "text": "check(\"and again\", 12.0, courier.backoff_for(3))"
+        },
+        {
+          "line": 426,
+          "text": "check(\"but is capped\", courier.BACKOFF_MAX, courier.backoff_for(20))"
+        },
+        {
+          "line": 428,
+          "text": "check(\"zero base disables it, for tests\", 0.0, courier.backoff_for(5))"
+        },
+        {
+          "line": 429,
+          "text": "check(\"more attempts than the old five\", True, courier.MAX_ATTEMPTS > 5)"
+        },
+        {
+          "line": 439,
+          "text": "check(\"held until its next_at\", 0, summary[\"delivered\"])"
+        },
+        {
+          "line": 440,
+          "text": "check(\"no send attempted\", 0, len(sent()))"
+        },
+        {
+          "line": 441,
+          "text": "check(\"still pending\", 1, summary[\"pending\"])"
+        },
+        {
+          "line": 442,
+          "text": "check(\"attempts did not increment\", 1, courier.load_pending()[0][\"attempts\"])"
+        },
+        {
+          "line": 463,
+          "text": "check(\"nothing is delivered while the first waits\", 0, summary[\"delivered\"])"
+        },
+        {
+          "line": 464,
+          "text": "check(\"SECOND did not overtake FIRST\", 0,"
+        },
+        {
+          "line": 466,
+          "text": "check(\"both are still pending\", 2, summary[\"pending\"])"
+        },
+        {
+          "line": 468,
+          "text": "check(\"the held message keeps its order\", \"FIRST\", rows[0][\"message\"][\"body\"])"
+        },
+        {
+          "line": 469,
+          "text": "check(\"and the blocked one did NOT consume an attempt\", 0, rows[1][\"attempts\"])"
+        },
+        {
+          "line": 476,
+          "text": "check(\"both delivered\", 2, summary[\"delivered\"])"
+        },
+        {
+          "line": 477,
+          "text": "check(\"FIRST first\", [\"FIRST\", \"SECOND\"],"
+        },
+        {
+          "line": 490,
+          "text": "check(\"the live recipient still gets its message\", 1, summary[\"delivered\"])"
+        },
+        {
+          "line": 491,
+          "text": "check(\"it is the right one\", \"rev\", sent()[0][1])"
+        },
+        {
+          "line": 492,
+          "text": "check(\"the stuck one is held\", 1, summary[\"pending\"])"
+        },
+        {
+          "line": 499,
+          "text": "check(\"first is deferred\", 1, summary[\"pending\"])"
+        },
+        {
+          "line": 502,
+          "text": "check(\"the second queues behind it rather than overtaking\", 2, summary[\"pending\"])"
+        },
+        {
+          "line": 505,
+          "text": "check(\"both go when the agent appears\", 2, summary[\"delivered\"])"
+        },
+        {
+          "line": 506,
+          "text": "check(\"in the order they were posted\", [\"message one\", \"message two\"],"
+        },
+        {
+          "line": 517,
+          "text": "check(\"a dead pid reads as not running\", None, courier.running_pid())"
+        },
+        {
+          "line": 519,
+          "text": "check(\"a live pid is reported\", os.getpid(), courier.running_pid())"
+        },
+        {
+          "line": 521,
+          "text": "check(\"a corrupt pidfile is not running\", None, courier.running_pid())"
+        },
+        {
+          "line": 523,
+          "text": "check(\"no pidfile is not running\", None, courier.running_pid())"
+        },
+        {
+          "line": 530,
+          "text": "check(\"dry run sends nothing\", 0, summary[\"delivered\"])"
+        },
+        {
+          "line": 531,
+          "text": "check(\"dry run calls no stub\", 0, len(sent()))"
+        },
+        {
+          "line": 533,
+          "text": "check(\"the cursor did not advance, so it still delivers\", 1, summary[\"delivered\"])"
+        },
+        {
+          "line": 534,
+          "text": "check(\"exactly once\", 1, len(sent()))"
+        },
+        {
+          "line": 543,
+          "text": "check(\"the monster line is stepped over, not parsed\", 0, summary[\"delivered\"])"
+        },
+        {
+          "line": 545,
+          "text": "check(\"the record behind it still arrives\", 1, summary[\"delivered\"])"
+        },
+        {
+          "line": 546,
+          "text": "check(\"intact\", True, \"after the monster\" in sent()[0][2])"
+        },
+        {
+          "line": 565,
+          "text": "check(\"the watcher came up\", True, pidfile.exists())"
+        },
+        {
+          "line": 575,
+          "text": "check(\"it exits when its home is removed\", 0, stopped)"
+        },
+        {
+          "line": 579,
+          "text": "check(\"and it did not rebuild the home it was told to forget\", False, orphan.exists())"
+        },
+        {
+          "line": 588,
+          "text": "check(\"--once still creates a home that has never existed\", 0, once.returncode)"
+        },
+        {
+          "line": 589,
+          "text": "check(\"and it is there afterwards\", True, (fresh / \"queue\").is_dir())"
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": null
+    },
+    {
+      "test": "dashboard/test_dispatch.py",
+      "owners": [
+        "HAR-11"
+      ],
+      "sha256": "a15fac0491f2cdd936b67017e6c666b7a99295f8dd5b8a9fe47eb9062c155439",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_dispatch.py passed 333, failed 0",
+      "assertionAnchors": [
+        {
+          "line": 50,
+          "text": "def ok(label, condition, detail=\"\"):"
+        },
+        {
+          "line": 69,
+          "text": "ok(label, True)"
+        },
+        {
+          "line": 72,
+          "text": "ok(label, False, \"wrong exception: \" + type(err).__name__ + \": \" + str(err))"
+        },
+        {
+          "line": 74,
+          "text": "ok(label, False, \"the call was allowed\")"
+        },
+        {
+          "line": 125,
+          "text": "ok(\"dispatch is OFF by default\","
+        },
+        {
+          "line": 128,
+          "text": "ok(\"every dispatch setting has a default\","
+        },
+        {
+          "line": 131,
+          "text": "ok(\"dispatchEnabled accepts a bool\", ccboard.config(db)[\"dispatchEnabled\"] is True)"
+        },
+        {
+          "line": 135,
+          "text": "ok(\"dispatchWip accepts a number in range\", ccboard.config(db)[\"dispatchWip\"] == 4)"
+        },
+        {
+          "line": 143,
+          "text": "ok(\"dispatchCli accepts a plain name\", ccboard.config(db)[\"dispatchCli\"] == \"claude\")"
+        },
+        {
+          "line": 148,
+          "text": "ok(\"a card with no body or acceptance is not offered\","
+        },
+        {
+          "line": 155,
+          "text": "ok(\"a card with no body is not offered\","
+        },
+        {
+          "line": 159,
+          "text": "ok(\"a fully specified card IS offered\", good in ids(ccboard.dispatchable(db, 50)))"
+        },
+        {
+          "line": 165,
+          "text": "ok(\"requireEpic is on for this board\", ccboard.config(db)[\"requireEpic\"] is True)"
+        },
+        {
+          "line": 166,
+          "text": "ok(\"a card with an epic is not reported epic-less\","
+        },
+        {
+          "line": 175,
+          "text": "ok(\"a card labelled \" + label + \" is not offered\","
+        },
+        {
+          "line": 180,
+          "text": "ok(\"decision:research IS offered\","
+        },
+        {
+          "line": 188,
+          "text": "ok(\"a card whose blocker is open is not offered\","
+        },
+        {
+          "line": 191,
+          "text": "ok(\"the same card is offered once the blocker is done\","
+        },
+        {
+          "line": 196,
+          "text": "ok(\"an in_progress card is not offered\","
+        },
+        {
+          "line": 199,
+          "text": "ok(\"in_flight reports it once it has an assignee\","
+        },
+        {
+          "line": 206,
+          "text": "ok(\"busy_paths reports the in-flight card's files\","
+        },
+        {
+          "line": 212,
+          "text": "ok(\"a card overlapping busy work is still offered\", overlap in offered)"
+        },
+        {
+          "line": 213,
+          "text": "ok(\"a card overlapping busy work ranks after a disjoint one\","
+        },
+        {
+          "line": 219,
+          "text": "ok(\"two cards on the same file are not both ranked first\","
+        },
+        {
+          "line": 226,
+          "text": "ok(\"the highest priority disjoint card comes first\","
+        },
+        {
+          "line": 228,
+          "text": "ok(\"a low priority card still appears\", low in order)"
+        },
+        {
+          "line": 232,
+          "text": "ok(\"view carries the queue\", isinstance(view.get(\"tasks\"), list))"
+        },
+        {
+          "line": 233,
+          "text": "ok(\"view carries what is in flight\", isinstance(view.get(\"inFlight\"), list))"
+        },
+        {
+          "line": 234,
+          "text": "ok(\"view carries only the dispatch half of config\","
+        },
+        {
+          "line": 236,
+          "text": "ok(\"view respects the limit\", len(view[\"tasks\"]) <= 5, len(view[\"tasks\"]))"
+        },
+        {
+          "line": 237,
+          "text": "ok(\"the queue carries no bodies\","
+        },
+        {
+          "line": 250,
+          "text": "ok(\"a sweep cannot put a human-vetoed card back in the queue\","
+        },
+        {
+          "line": 263,
+          "text": "ok(\"role suffix resolves to its card\", dispatch.key_of_worker(\"tm-042-dev\") == \"TM-042\")"
+        },
+        {
+          "line": 264,
+          "text": "ok(\"four-digit key keeps its final digit\", dispatch.key_of_worker(\"tm-0427\") == \"TM-0427\")"
+        },
+        {
+          "line": 267,
+          "text": "ok(\"invalid worker is rejected: %r\" % invalid, dispatch.key_of_worker(invalid) is None)"
+        },
+        {
+          "line": 272,
+          "text": "ok(\"lead round-trip: \" + key, lead == key.lower() and dispatch.key_of_worker(lead) == key)"
+        },
+        {
+          "line": 273,
+          "text": "ok(\"unsuffixed role is lead: \" + key, dispatch.role_of_worker(lead) == \"lead\")"
+        },
+        {
+          "line": 278,
+          "text": "ok(\"member round-trip: \" + expected,"
+        },
+        {
+          "line": 282,
+          "text": "ok(\"member ordinal defaults to one\","
+        },
+        {
+          "line": 292,
+          "text": "ok(\"invalid member arguments refused: %r\" % ((key, role, ordinal),), True)"
+        },
+        {
+          "line": 294,
+          "text": "ok(\"invalid member arguments refused: %r\" % ((key, role, ordinal),), False)"
+        },
+        {
+          "line": 305,
+          "text": "ok(\"chosen persona appears under its heading\","
+        },
+        {
+          "line": 307,
+          "text": "ok(\"task content is unchanged by adding a persona\", brief.startswith(plain))"
+        },
+        {
+          "line": 311,
+          "text": "ok(\"oversized multibyte persona stays within BRIEF_MAX bytes\","
+        },
+        {
+          "line": 313,
+          "text": "ok(\"persona truncation keeps all task content and final claim\","
+        },
+        {
+          "line": 316,
+          "text": "ok(\"persona was truncated\", long_spec.persona not in bounded)"
+        },
+        {
+          "line": 318,
+          "text": "ok(\"zero persona budget preserves the complete task\","
+        },
+        {
+          "line": 324,
+          "text": "ok(\"oversized required content is refused without overwriting the brief\","
+        },
+        {
+          "line": 327,
+          "text": "ok(\"oversized required content is refused without overwriting the brief\", False)"
+        },
+        {
+          "line": 348,
+          "text": "ok(\"a dashboard serving another home is refused\", bool(foreign_case(mine, theirs)))"
+        },
+        {
+          "line": 349,
+          "text": "ok(\"the refusal names both homes and the way out\","
+        },
+        {
+          "line": 352,
+          "text": "ok(\"a dashboard serving this home is allowed\", foreign_case(mine, mine) == \"\")"
+        },
+        {
+          "line": 353,
+          "text": "ok(\"an undiscoverable dashboard fails open\", foreign_case(mine, None) == \"\")"
+        },
+        {
+          "line": 354,
+          "text": "ok(\"the default pairing is not second-guessed\", foreign_case(None, theirs) == \"\")"
+        },
+        {
+          "line": 355,
+          "text": "ok(\"the escape hatch is honoured\", foreign_case(mine, theirs, hatch=True) == \"\")"
+        },
+        {
+          "line": 361,
+          "text": "ok(\"a refused board is never even read\","
+        },
+        {
+          "line": 382,
+          "text": "ok(\"definitions are loaded for the dispatch repository\","
+        },
+        {
+          "line": 384,
+          "text": "ok(\"roster selection receives the full task and CLI override\","
+        },
+        {
+          "line": 391,
+          "text": "ok(\"chosen CLI, model, auth and posture reach spawn\","
+        },
+        {
+          "line": 395,
+          "text": "ok(\"spawn precedes claims and brief delivery\","
+        },
+        {
+          "line": 397,
+          "text": "ok(\"dispatch writes chosen persona and sends the brief path\","
+        },
+        {
+          "line": 404,
+          "text": "ok(\"no definition preserves legacy CLI resolution: \" + expected,"
+        },
+        {
+          "line": 408,
+          "text": "ok(\"no definition preserves the original brief\","
+        },
+        {
+          "line": 411,
+          "text": "ok(\"CLI override drops incompatible model and auth\","
+        },
+        {
+          "line": 414,
+          "text": "ok(\"dry run does not spawn or claim\", result == \"tm-900\" and not calls)"
+        },
+        {
+          "line": 416,
+          "text": "ok(\"oversized required brief is refused before spawning\", result is None and not calls)"
+        },
+        {
+          "line": 420,
+          "text": "ok(\"member resource satisfies the coordination pattern\","
+        },
+        {
+          "line": 422,
+          "text": "ok(\"flattened claims distinguish lead and both members\","
+        },
+        {
+          "line": 427,
+          "text": "ok(\"combined resource accepts exactly 200 characters\","
+        },
+        {
+          "line": 433,
+          "text": "ok(\"invalid member path refused: \" + bad[:30], True)"
+        },
+        {
+          "line": 435,
+          "text": "ok(\"invalid member path refused: \" + bad[:30], False)"
+        },
+        {
+          "line": 456,
+          "text": "ok(\"lead claims the full unnamespaced touches set\","
+        },
+        {
+          "line": 458,
+          "text": "ok(\"member can claim the same file within its tree\","
+        },
+        {
+          "line": 461,
+          "text": "ok(\"member release preserves lead claim\","
+        },
+        {
+          "line": 467,
+          "text": "ok(\"partial acquisition releases its successful claim on conflict\","
+        },
+        {
+          "line": 469,
+          "text": "ok(\"rollback preserves the conflicting owner's claim\","
+        },
+        {
+          "line": 473,
+          "text": "ok(\"invalid late resource is rejected before any acquisition\", not success and not mux.called)"
+        },
+        {
+          "line": 477,
+          "text": "ok(\"failed rollback is surfaced for recovery\", not success and \"rollback failed\" in refusal)"
+        },
+        {
+          "line": 504,
+          "text": "ok(\"member %d records tree, branch and pane on its row\" % ordinal,"
+        },
+        {
+          "line": 506,
+          "text": "ok(\"member tree is outside the repository\", repo not in tree.parents)"
+        },
+        {
+          "line": 509,
+          "text": "ok(\"member checks out its own recorded branch\", actual == metadata[\"branch\"])"
+        },
+        {
+          "line": 513,
+          "text": "ok(\"duplicate setup preserves the original member tree\", tree.is_dir())"
+        },
+        {
+          "line": 515,
+          "text": "ok(\"duplicate setup preserves the original member tree\", False)"
+        },
+        {
+          "line": 520,
+          "text": "ok(\"cleanup refuses to discard uncommitted member work\", tree.exists())"
+        },
+        {
+          "line": 522,
+          "text": "ok(\"cleanup refuses to discard uncommitted member work\", False)"
+        },
+        {
+          "line": 525,
+          "text": "ok(\"clean removal retains the member branch for lead integration\","
+        },
+        {
+          "line": 537,
+          "text": "ok(\"failed recording rolls back roster metadata\", tuple(row) == (None, None, None))"
+        },
+        {
+          "line": 538,
+          "text": "ok(\"failed recording removes the new tree and unused branch\","
+        },
+        {
+          "line": 541,
+          "text": "ok(\"failed recording rolls back roster metadata\", False)"
+        },
+        {
+          "line": 546,
+          "text": "ok(\"missing approved row is refused before creating a worktree\", not create.called)"
+        },
+        {
+          "line": 548,
+          "text": "ok(\"missing approved row is refused before creating a worktree\", False)"
+        },
+        {
+          "line": 553,
+          "text": "ok(\"configured worktree storage inside repo is refused\", True)"
+        },
+        {
+          "line": 555,
+          "text": "ok(\"configured worktree storage inside repo is refused\", False)"
+        },
+        {
+          "line": 588,
+          "text": "ok(status + \" reaps all members before lead\", outcome == status and kills == [reviewer, worker, lead])"
+        },
+        {
+          "line": 589,
+          "text": "ok(status + \" releases member namespaces and lead resources\","
+        },
+        {
+          "line": 593,
+          "text": "ok(status + \" does not change the card status\", not status_call.called)"
+        },
+        {
+          "line": 596,
+          "text": "ok(\"submitted team reaps workers then lead\", outcome == \"submitted\" and kills == [reviewer, worker, lead])"
+        },
+        {
+          "line": 597,
+          "text": "ok(\"submission never closes the card\", not status_call.called)"
+        },
+        {
+          "line": 600,
+          "text": "ok(\"idle lead with busy member stays working, evidence=%r\" % evidence,"
+        },
+        {
+          "line": 603,
+          "text": "ok(\"idle member without evidence keeps the lead working\", outcome == \"working\" and not kills)"
+        },
+        {
+          "line": 605,
+          "text": "ok(\"finished member is reaped while busy lead continues\", outcome == \"working\" and kills == [worker])"
+        },
+        {
+          "line": 607,
+          "text": "ok(\"exited member CLI still has its pane reaped\", outcome == \"working\" and kills == [worker])"
+        },
+        {
+          "line": 610,
+          "text": "ok(\"dead lead reaps live members and parks card\","
+        },
+        {
+          "line": 615,
+          "text": "ok(\"failed member kill prevents lead reap\", outcome == \"unresolved\" and lead not in kills)"
+        },
+        {
+          "line": 619,
+          "text": "ok(\"single lead retains \" + expected + \" behavior\", outcome == expected)"
+        },
+        {
+          "line": 624,
+          "text": "ok(\"collection propagates conflict parking and reaps the lead\","
+        },
+        {
+          "line": 628,
+          "text": "ok(\"failed integration is not reported as submission\", outcome == \"unresolved\" and not kills)"
+        },
+        {
+          "line": 630,
+          "text": "ok(\"roster discovers absent member panes and releases their claims\","
+        },
+        {
+          "line": 634,
+          "text": "ok(\"failed claim release cannot report clean teardown\", not dispatch.release_all(worker, [\"x\"]))"
+        },
+        {
+          "line": 663,
+          "text": "ok(\"member commits merge into the lead integration branch\","
+        },
+        {
+          "line": 666,
+          "text": "ok(\"successful teardown removes member tree and branch\","
+        },
+        {
+          "line": 668,
+          "text": "ok(\"teardown releases claims beyond original touches\","
+        },
+        {
+          "line": 672,
+          "text": "ok(\"repeated integration and teardown succeed\","
+        },
+        {
+          "line": 683,
+          "text": "ok(\"conflict parks the card\","
+        },
+        {
+          "line": 686,
+          "text": "ok(\"conflict comment identifies source, target and files\","
+        },
+        {
+          "line": 689,
+          "text": "ok(\"conflict preserves commits and leaves no merge in progress\","
+        },
+        {
+          "line": 695,
+          "text": "ok(\"teardown refuses unmerged member commits\", tree.exists())"
+        },
+        {
+          "line": 697,
+          "text": "ok(\"teardown refuses unmerged member commits\", False)"
+        },
+        {
+          "line": 700,
+          "text": "ok(\"failed conflict reporting cannot claim successful parking\","
+        },
+        {
+          "line": 702,
+          "text": "ok(\"integration never closes the card\","
+        },
+        {
+          "line": 714,
+          "text": "ok(\"successful teardown leaves no claims held by the member\","
+        },
+        {
+          "line": 719,
+          "text": "ok(\"already removed tree still has its branch cleaned up\","
+        },
+        {
+          "line": 725,
+          "text": "ok(\"missing directory with stale git registration is cleaned up\","
+        },
+        {
+          "line": 748,
+          "text": "ok(\"pool collects before filling slots\", collect.call_count == 1)"
+        },
+        {
+          "line": 751,
+          "text": "ok(\"three-pane team uses one card slot\", len(pool_case(team, 2, 8)) == 1)"
+        },
+        {
+          "line": 752,
+          "text": "ok(\"global pane cap stops dispatch despite free card slots\", pool_case(team, 5, 3) == [])"
+        },
+        {
+          "line": 753,
+          "text": "ok(\"manual panes also consume global capacity\", pool_case(team + [\"manual\"], 5, 4) == [])"
+        },
+        {
+          "line": 754,
+          "text": "ok(\"pane budget limits the number of newly started leads\", len(pool_case(team, 6, 5)) == 2)"
+        },
+        {
+          "line": 755,
+          "text": "ok(\"card budget remains binding with pane space available\", pool_case(team, 1, 8) == [])"
+        },
+        {
+          "line": 756,
+          "text": "ok(\"missing teamMaxAgents uses default eight\", len(pool_case(team, 20)) == 5)"
+        },
+        {
+          "line": 757,
+          "text": "ok(\"newly hired panes are recounted after dispatch\","
+        },
+        {
+          "line": 759,
+          "text": "ok(\"zero card budget disables new dispatch\", pool_case([], 0, 8) == [])"
+        },
+        {
+          "line": 761,
+          "text": "ok(\"team limit is loaded from board metadata when dispatch view omits it\","
+        },
+        {
+          "line": 769,
+          "text": "ok(\"unavailable team config prevents dispatch\", result.get(\"error\") and not spawn.called)"
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": null
+    },
+    {
+      "test": "dashboard/test_evidence_archive.sh",
+      "owners": [
+        "HAR-03",
+        "HAR-12"
+      ],
+      "sha256": "c65aa48dce5a98b99423aa6739f1c87ed0bdbebcf693d441b5fa21553bd04b13",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_evidence_archive.sh passed 5, failed 0",
+      "assertionAnchors": [
+        {
+          "line": 9,
+          "text": "def check(label):"
+        },
+        {
+          "line": 68,
+          "text": "assert (r.returncode == 0) == ok, (args, r.returncode, r.stdout, r.stderr)"
+        },
+        {
+          "line": 82,
+          "text": "assert (logs / 'w1.log').read_text() == 'run one delivered X\\n', 'kill must not touch the log'"
+        },
+        {
+          "line": 87,
+          "text": "assert (archive / names[0]).read_text() == 'run one delivered X\\n'"
+        },
+        {
+          "line": 88,
+          "text": "assert (logs / 'w1.log').read_text() == '', 'the new run starts a fresh log'"
+        },
+        {
+          "line": 92,
+          "text": "check('respawn archives the previous non-empty log; kill leaves it in place')"
+        },
+        {
+          "line": 112,
+          "text": "assert (archive / 'old.20200103T000000Z.log').exists(), 'only as much as the cap requires'"
+        },
+        {
+          "line": 113,
+          "text": "assert (archive / 'README.operator').exists(), 'files of another shape are never pruned'"
+        },
+        {
+          "line": 115,
+          "text": "check('log retention keeps newest N per agent and trims oldest-first to the size cap')"
+        },
+        {
+          "line": 133,
+          "text": "assert (kept_tree / 'projects' / 'session.jsonl').read_text() == 'transcript of what c1 did\\n'"
+        },
+        {
+          "line": 134,
+          "text": "assert (kept_tree / 'settings.json').exists()"
+        },
+        {
+          "line": 138,
+          "text": "assert (carch.stat().st_mode & 0o777) == 0o700"
+        },
+        {
+          "line": 143,
+          "text": "check('GC archives dead claude mirrors with transcripts, strips every credential, keeps newest N')"
+        },
+        {
+          "line": 164,
+          "text": "assert (shared_target.stat().st_mode & 0o777) == 0o600"
+        },
+        {
+          "line": 168,
+          "text": "check('diverged credential: newest valid copy adopted, stale and invalid copies relinked')"
+        },
+        {
+          "line": 189,
+          "text": "check('GC adopts a dead mirror\\'s newer refresh before archiving; an older copy never wins')"
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": null
+    },
+    {
+      "test": "dashboard/test_idle.sh",
+      "owners": [
+        "HAR-02"
+      ],
+      "sha256": "2906101f7406eab5a9498c040c389e3c18056908f7c2b032535e99915d07c14d",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_idle.sh     passed 34, failed 0",
+      "assertionAnchors": [
+        {
+          "line": 19,
+          "text": "ok()  { passed=$((passed+1)); printf '  ok    %s\\n' \"$1\"; }"
+        },
+        {
+          "line": 20,
+          "text": "bad() { failed=$((failed+1)); printf '  FAIL  %s\\n     %s\\n' \"$1\" \"${2:-}\"; }"
+        },
+        {
+          "line": 21,
+          "text": "check() {"
+        },
+        {
+          "line": 45,
+          "text": "check \"an hour of silence is closed\" \"old 3600\" \\"
+        },
+        {
+          "line": 47,
+          "text": "check \"and so is a day of it\" \"ancient 86400\" \\"
+        },
+        {
+          "line": 51,
+          "text": "check \"one second under the limit is left alone\" \"\" \\"
+        },
+        {
+          "line": 53,
+          "text": "check \"a session busy right now is left alone\" \"\" \\"
+        },
+        {
+          "line": 57,
+          "text": "check \"an ATTACHED session is never closed, however idle\" \"\" \\"
+        },
+        {
+          "line": 59,
+          "text": "check \"nor is an attached session at exactly the limit\" \"\" \\"
+        },
+        {
+          "line": 68,
+          "text": "check \"two of four\" \"stale 7200"
+        },
+        {
+          "line": 73,
+          "text": "check \"'$junk' yields nothing\" \"\" \"$(candidates \"$junk\")\""
+        },
+        {
+          "line": 75,
+          "text": "check \"a bad line does not stop the good one after it\" \"good 7200\" \\"
+        },
+        {
+          "line": 80,
+          "text": "check \"0 disables it\" \"idle timeout disabled (AGENTMUX_IDLE_MINUTES=0)\" \"$out\""
+        },
+        {
+          "line": 82,
+          "text": "check \"a non-numeric --minutes is refused\" \"1\" \"$rc\""
+        },
+        {
+          "line": 85,
+          "text": "check \"an unknown flag is refused\" \"1\" \"$rc\""
+        },
+        {
+          "line": 88,
+          "text": "check \"IDLE_MINUTES default\" \"60\" \"$(AGENTMUX_IDLE_MINUTES= bash -c '"
+        },
+        {
+          "line": 104,
+          "text": "ok \"agentmux_self exists\""
+        },
+        {
+          "line": 123,
+          "text": "bad \"agentmux_self exists\" \"not defined\""
+        },
+        {
+          "line": 129,
+          "text": "ok \"the watchdog it writes strips CR before running agentmux.sh\""
+        },
+        {
+          "line": 131,
+          "text": "bad \"the watchdog it writes strips CR\" \"a CRLF checkout would make every tick fail\""
+        },
+        {
+          "line": 182,
+          "text": "bad \"the watchdog script is generated\" \"start_idle_watchdog wrote nothing\""
+        },
+        {
+          "line": 223,
+          "text": "check \"only this home's agent is closed\" \"mine\" \"$(tr -d '\\r' < \"$KILLED\")\""
+        },
+        {
+          "line": 226,
+          "text": "ok \"and the one left alone is reported, not silently dropped\" ;;"
+        },
+        {
+          "line": 243,
+          "text": "ok \"the generated loop checks its home is still there\""
+        },
+        {
+          "line": 245,
+          "text": "bad \"the generated loop checks its home is still there\" \\"
+        },
+        {
+          "line": 268,
+          "text": "bad \"the watchdog script is generated\" \"start_idle_watchdog wrote nothing\""
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": null
+    },
+    {
+      "test": "dashboard/test_inbox_guard.sh",
+      "owners": [
+        "HAR-13"
+      ],
+      "sha256": "dfaf2c61070861e25c49b777a74928543a1ba0658d6cb888101e88962052925d",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_inbox_guard.sh passed 16, failed 0",
+      "assertionAnchors": [
+        {
+          "line": 34,
+          "text": "bad \"accepted '$name'\""
+        },
+        {
+          "line": 36,
+          "text": "ok \"refused '$name'\""
+        },
+        {
+          "line": 42,
+          "text": "ok 'queue/dev.jsonl still holds its undelivered message'"
+        },
+        {
+          "line": 44,
+          "text": "bad 'queue/dev.jsonl was destroyed'"
+        },
+        {
+          "line": 52,
+          "text": "ok \"an empty name falls back to 'orchestrator'\""
+        },
+        {
+          "line": 54,
+          "text": "bad 'an empty name errored'"
+        },
+        {
+          "line": 62,
+          "text": "ok 'reads the orchestrator inbox'"
+        },
+        {
+          "line": 64,
+          "text": "bad 'could not read a valid inbox'"
+        },
+        {
+          "line": 68,
+          "text": "ok '--clear empties a valid inbox'"
+        },
+        {
+          "line": 70,
+          "text": "bad '--clear did not work on a valid inbox'"
+        },
+        {
+          "line": 73,
+          "text": "ok 'a missing inbox reports empty rather than failing'"
+        },
+        {
+          "line": 75,
+          "text": "bad 'missing inbox did not report empty'"
+        },
+        {
+          "line": 78,
+          "text": "ok 'dots, dashes and underscores are accepted'"
+        },
+        {
+          "line": 80,
+          "text": "bad 'rejected a legitimate name'"
+        },
+        {
+          "line": 89,
+          "text": "ok 'cleared messages are retained in the .read snapshot'"
+        },
+        {
+          "line": 91,
+          "text": "bad 'cleared messages were destroyed'"
+        },
+        {
+          "line": 123,
+          "text": "ok \"no message lost across the clear ($snap archived + $live still live = 300)\""
+        },
+        {
+          "line": 125,
+          "text": "bad \"$((300 - total)) message(s) vanished ($snap archived + $live live)\""
+        },
+        {
+          "line": 130,
+          "text": "ok \"the clear genuinely interleaved with the writer ($live arrived after it)\""
+        },
+        {
+          "line": 132,
+          "text": "bad \"no interleave (snap=$snap live=$live) - the race was not exercised\""
+        },
+        {
+          "line": 138,
+          "text": "ok 'every surviving record is intact JSON - no torn appends'"
+        },
+        {
+          "line": 140,
+          "text": "bad 'a record was torn'"
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": null
+    },
+    {
+      "test": "dashboard/test_launch.sh",
+      "owners": [
+        "HAR-01",
+        "HAR-11"
+      ],
+      "sha256": "b8b6e7d180222772b222178c5f8b3688c0fe6d7e482e493ec16abece9f1fa8e4",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_launch.sh   passed 8, failed 0",
+      "assertionAnchors": [
+        {
+          "line": 47,
+          "text": "assert (result.returncode == 0) == success, (args, result.returncode, result.stdout, result.stderr)"
+        },
+        {
+          "line": 51,
+          "text": "def check(label):"
+        },
+        {
+          "line": 61,
+          "text": "check('missing, unknown, and malformed flags fail before tmux')"
+        },
+        {
+          "line": 67,
+          "text": "assert (root / 'home/run' / (name+'.posture')).read_text() == posture+'\\n'"
+        },
+        {
+          "line": 68,
+          "text": "assert (root / 'home/run' / (name+'.perms')).read_text() == ('UNRESTRICTED\\n' if posture == 'unrestricted' else 'sandboxed\\n')"
+        },
+        {
+          "line": 70,
+          "text": "assert ('--dangerously-bypass-approvals-and-sandbox' if posture == 'unrestricted'"
+        },
+        {
+          "line": 84,
+          "text": "check('Codex/Claude posture matrix, denies, isolated settings and permission sidecars')"
+        },
+        {
+          "line": 89,
+          "text": "assert (root / 'home/run' / (cli+'-ro-brake.posture')).read_text() == 'read-only\\n'"
+        },
+        {
+          "line": 90,
+          "text": "check('machine ceiling logs clamp and preserves read-only')"
+        },
+        {
+          "line": 96,
+          "text": "check('unverified Grok/custom postures fail closed, including machine clamp')"
+        },
+        {
+          "line": 109,
+          "text": "check('four bounded one-line sidecars; private persona copy; degraded tool prose; no command interpolation')"
+        },
+        {
+          "line": 114,
+          "text": "check('Claude named tool restrictions cannot reopen bounded tools')"
+        },
+        {
+          "line": 122,
+          "text": "assert (root / 'home/claude-config' / ('parallel-'+posture) / 'settings.json').exists()"
+        },
+        {
+          "line": 123,
+          "text": "check('concurrent different-posture spawns retain separate configs; GC prunes only dead agents')"
+        },
+        {
+          "line": 136,
+          "text": "check('published-settings corruption and broken source fail the spawn without permissive fallback')"
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": null
+    },
+    {
+      "test": "dashboard/test_lifecycle.sh",
+      "owners": [
+        "HAR-03",
+        "HAR-04"
+      ],
+      "sha256": "004d3390b349a38385b6af4b50280510ce9c9f42533a6e53bb434dbde4f4253a",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_lifecycle.sh passed 26, failed 0",
+      "assertionAnchors": [
+        {
+          "line": 64,
+          "text": "check \"the live agent keeps its sidecars\" 3 \"$(sidecars \"$TAG-live\")\""
+        },
+        {
+          "line": 65,
+          "text": "check \"the dead agent's sidecars are gone\" 0 \"$(sidecars \"$TAG-dead\")\""
+        },
+        {
+          "line": 73,
+          "text": "ok 'reap re-reads the spawn stamp before deleting'"
+        },
+        {
+          "line": 75,
+          "text": "bad 'no stamp re-check: a fast respawn-and-die still loses its sidecars'"
+        },
+        {
+          "line": 78,
+          "text": "ok 'reap re-checks liveness before deleting'"
+        },
+        {
+          "line": 80,
+          "text": "bad 'no liveness re-check: the original #15'"
+        },
+        {
+          "line": 96,
+          "text": "check 'the winner is recorded' first \"$(cat \"$RUNDIR/reported/$TAG-dead\" 2>/dev/null)\""
+        },
+        {
+          "line": 111,
+          "text": "ok 'the marker outlives the sidecar sweep'"
+        },
+        {
+          "line": 113,
+          "text": "bad 'the sweep deleted the marker - the dashboard reaper will post a duplicate'"
+        },
+        {
+          "line": 115,
+          "text": "check 'and the sidecars are still swept' 0 \"$(sidecars \"$TAG-dead\")\""
+        },
+        {
+          "line": 125,
+          "text": "check 'and leaves every sidecar in place' 3 \"$(sidecars \"$TAG-kill\")\""
+        },
+        {
+          "line": 135,
+          "text": "check 'the first generation survived the second clear' 1 \"$(grep -c gen-one \"$ARCHIVE\" 2>/dev/null || echo 0)\""
+        },
+        {
+          "line": 136,
+          "text": "check 'the second generation is there too'             1 \"$(grep -c gen-two \"$ARCHIVE\" 2>/dev/null || echo 0)\""
+        },
+        {
+          "line": 137,
+          "text": "check 'no staging file was left behind' 0 \"$(ls \"$AGENTMUX_HOME/inbox/\" | grep -c taking || true)\""
+        },
+        {
+          "line": 175,
+          "text": "ok 'home: auth_default_for reads the selected auth.json'"
+        },
+        {
+          "line": 177,
+          "text": "bad 'home: auth_default_for read another home or lost the configured default'"
+        },
+        {
+          "line": 190,
+          "text": "ok 'home: auth_resolve reads settings and secret names from the selected home'"
+        },
+        {
+          "line": 192,
+          "text": "bad \"home: auth_resolve ignored the selected configuration (rc=$rc)\""
+        },
+        {
+          "line": 203,
+          "text": "ok 'home: task_cli requires atlassian.json in the selected home only'"
+        },
+        {
+          "line": 205,
+          "text": "bad \"home: task_cli used another home (present=$present_rc absent=$absent_rc)\""
+        },
+        {
+          "line": 275,
+          "text": "ok \"home: fresh-db clears selected $file and preserves default-home bytes\""
+        },
+        {
+          "line": 277,
+          "text": "bad \"home: fresh-db targeted the wrong $file (or the deletion block failed)\""
+        },
+        {
+          "line": 283,
+          "text": "ok \"home: fresh-db moved selected $file aside intact rather than deleting it\""
+        },
+        {
+          "line": 285,
+          "text": "bad \"home: fresh-db destroyed selected $file (no recoverable copy in $PATH_HOME/cc.db.aside-*)\""
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": null
+    },
+    {
+      "test": "dashboard/test_modal_guard.sh",
+      "owners": [
+        "HAR-02"
+      ],
+      "sha256": "8b6a43adf4ca22f32fb528cfa12e24d0df55ccffea6bfc806c6e85b6d7ffb4f0",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_modal_guard.sh passed 32, failed 0",
+      "assertionAnchors": [],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": null
+    },
+    {
+      "test": "dashboard/test_no_inherited_stdin.py",
+      "owners": [
+        "HAR-01",
+        "HAR-11",
+        "HAR-14"
+      ],
+      "sha256": "d5b5b6aa88cbc3bf79935453250394ff51d575576237074c60956ed40de57973",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_no_inherited_stdin.py passed 4, failed 0",
+      "assertionAnchors": [
+        {
+          "line": 39,
+          "text": "def check(label, expected, actual):"
+        },
+        {
+          "line": 115,
+          "text": "check(\"the sweep actually found spawning calls\", True, total >= 20)"
+        },
+        {
+          "line": 118,
+          "text": "check(\"no spawn inherits the caller's stdin\", [], offenders)"
+        },
+        {
+          "line": 123,
+          "text": "check(\"notify.py still spawns at all\", True, len(notify_calls) >= 3)"
+        },
+        {
+          "line": 124,
+          "text": "check(\"every notify.py spawn is guarded\", [],"
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": null
+    },
+    {
+      "test": "dashboard/test_orchestration_plugin.py",
+      "owners": [
+        "HAR-23"
+      ],
+      "sha256": "4c45e748533bec8a4f3fc1d08ef7df09afebe02a8cb06d36a10d8f35e5ff6463",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_orchestration_plugin.py passed 0, failed 0",
+      "assertionAnchors": [
+        {
+          "line": 103,
+          "text": "self.assertEqual(result.returncode, 2, result.stderr)"
+        },
+        {
+          "line": 104,
+          "text": "self.assertIn(reason, result.stderr)"
+        },
+        {
+          "line": 105,
+          "text": "self.assertEqual(result.stdout, \"\")"
+        },
+        {
+          "line": 107,
+          "text": "def test_registration_covers_both_harnesses(self):"
+        },
+        {
+          "line": 110,
+          "text": "self.assertTrue(any(re.fullmatch(h[\"matcher\"], tool) for h in hooks), tool)"
+        },
+        {
+          "line": 112,
+          "text": "self.assertIn(\"/hooks/agentmux-hook.sh\", gate[\"hooks\"][0][\"command\"])"
+        },
+        {
+          "line": 114,
+          "text": "def test_irrelevant_bash_exits_before_external_process(self):"
+        },
+        {
+          "line": 118,
+          "text": "self.assertEqual((result.returncode, result.stdout, result.stderr), (0, \"\", \"\"))"
+        },
+        {
+          "line": 119,
+          "text": "self.assertIn(\"exit 0\", self.shim.read_text().splitlines()[2])"
+        },
+        {
+          "line": 120,
+          "text": "self.assertEqual(self.requests, [])"
+        },
+        {
+          "line": 122,
+          "text": "def test_no_roster_refuses_hire(self):"
+        },
+        {
+          "line": 124,
+          "text": "self.assertEqual(self.requests, [\"/api/board/roster?id=TM-059\"])"
+        },
+        {
+          "line": 126,
+          "text": "def test_only_matching_approved_member_allows_hire(self):"
+        },
+        {
+          "line": 134,
+          "text": "self.assertEqual(result.returncode, 0, result.stderr)"
+        },
+        {
+          "line": 136,
+          "text": "def test_hire_unavailable_fails_closed(self):"
+        },
+        {
+          "line": 140,
+          "text": "def test_installed_skill_launcher_uses_same_gates(self):"
+        },
+        {
+          "line": 146,
+          "text": "def test_dynamic_and_multiple_hires_refuse(self):"
+        },
+        {
+          "line": 149,
+          "text": "self.assertEqual(self.shell(command).returncode, 2)"
+        },
+        {
+          "line": 151,
+          "text": "def test_duplicate_name_cannot_check_a_different_member(self):"
+        },
+        {
+          "line": 155,
+          "text": "def test_live_definition_cli_writes_refuse(self):"
+        },
+        {
+          "line": 161,
+          "text": "def test_stale_and_unrelated_workers_allow_edit(self):"
+        },
+        {
+          "line": 164,
+          "text": "self.assertEqual(self.shell(\"python3 coordination.py agentdef global reviewer\").returncode, 0)"
+        },
+        {
+          "line": 166,
+          "text": "def test_direct_file_and_patch_edits_refuse(self):"
+        },
+        {
+          "line": 176,
+          "text": "def test_edit_service_failure_refuses_but_unrelated_edit_passes(self):"
+        },
+        {
+          "line": 179,
+          "text": "self.assertEqual(self.hook({\"file_path\": \"app.py\"}, \"pre-edit\").returncode, 0)"
+        },
+        {
+          "line": 181,
+          "text": "def test_raw_api_mutations_refuse(self):"
+        },
+        {
+          "line": 190,
+          "text": "self.assertEqual(result.returncode, 0, result.stderr)"
+        },
+        {
+          "line": 191,
+          "text": "self.assertEqual(result.stderr, \"\")"
+        },
+        {
+          "line": 194,
+          "text": "def test_mcp_discovery_without_user_config_or_dashboard(self):"
+        },
+        {
+          "line": 201,
+          "text": "self.assertEqual(len(replies), 2)"
+        },
+        {
+          "line": 202,
+          "text": "self.assertEqual(replies[0][\"result\"][\"protocolVersion\"], \"2024-11-05\")"
+        },
+        {
+          "line": 203,
+          "text": "self.assertEqual({t[\"name\"] for t in replies[1][\"result\"][\"tools\"]}, {\"agent_roster\", \"team_roster\"})"
+        },
+        {
+          "line": 204,
+          "text": "self.assertEqual(self.requests, [])"
+        },
+        {
+          "line": 206,
+          "text": "def test_mcp_roster_reads_correct_endpoints(self):"
+        },
+        {
+          "line": 210,
+          "text": "self.assertTrue(all(\"isError\" not in r[\"result\"] for r in replies))"
+        },
+        {
+          "line": 211,
+          "text": "self.assertEqual(self.requests, [\"/api/board/agents\", \"/api/board/agents?name=reviewer\", \"/api/board/roster?id=TM-059\"])"
+        },
+        {
+          "line": 213,
+          "text": "def test_mcp_errors_do_not_kill_server(self):"
+        },
+        {
+          "line": 222,
+          "text": "self.assertTrue(replies[0][\"result\"][\"isError\"])"
+        },
+        {
+          "line": 223,
+          "text": "self.assertTrue(replies[1][\"result\"][\"isError\"])"
+        },
+        {
+          "line": 224,
+          "text": "self.assertEqual([r[\"error\"][\"code\"] for r in replies[2:5]], [-32602, -32601, -32602])"
+        },
+        {
+          "line": 225,
+          "text": "self.assertEqual(replies[5][\"result\"], {})"
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": "The two zero-test plugin historical results are not passes; use fresh final36 replacement report for those suites."
+    },
+    {
+      "test": "dashboard/test_plugin_skills.py",
+      "owners": [
+        "HAR-23"
+      ],
+      "sha256": "38f0c17512cf355cd43f569ad78c53a28362a1a35f39d886d02a113a2233f2b0",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_plugin_skills.py passed 0, failed 0",
+      "assertionAnchors": [
+        {
+          "line": 51,
+          "text": "def test_relocated_copy_preserves_arguments_and_refusals(self):"
+        },
+        {
+          "line": 56,
+          "text": "self.assertEqual(result.returncode, 7)"
+        },
+        {
+          "line": 57,
+          "text": "self.assertEqual(json.loads(result.stdout), args)"
+        },
+        {
+          "line": 58,
+          "text": "self.assertEqual(result.stderr.strip(), 'fixture refusal')"
+        },
+        {
+          "line": 60,
+          "text": "def test_missing_and_relative_binding_refuse(self):"
+        },
+        {
+          "line": 63,
+          "text": "self.assertNotEqual(result.returncode, 0)"
+        },
+        {
+          "line": 64,
+          "text": "self.assertIn('absolute installed agentmux checkout', result.stderr)"
+        },
+        {
+          "line": 66,
+          "text": "def test_incomplete_runtime_refuses(self):"
+        },
+        {
+          "line": 68,
+          "text": "self.assertNotEqual(result.returncode, 0)"
+        },
+        {
+          "line": 69,
+          "text": "self.assertIn('missing installed command', result.stderr)"
+        },
+        {
+          "line": 71,
+          "text": "def test_arbitrary_script_selector_refuses(self):"
+        },
+        {
+          "line": 73,
+          "text": "self.assertNotEqual(result.returncode, 0)"
+        },
+        {
+          "line": 74,
+          "text": "self.assertIn('expected coordination, dispatch, or setup-auth', result.stderr)"
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": "The two zero-test plugin historical results are not passes; use fresh final36 replacement report for those suites."
+    },
+    {
+      "test": "dashboard/test_run.sh",
+      "owners": [
+        "HAR-12"
+      ],
+      "sha256": "30ea8dc4a6a6a3c12927711ea4c71cd16f39768120c871c5947c32691979fe43",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_run.sh      passed 91, failed 0",
+      "assertionAnchors": [
+        {
+          "line": 136,
+          "text": "ok 'all 12 concurrent submits survived the fold'"
+        },
+        {
+          "line": 138,
+          "text": "bad \"only $submitted of 12 submits survived - events were lost\""
+        },
+        {
+          "line": 142,
+          "text": "ok 'every event record is intact JSON - no torn appends'"
+        },
+        {
+          "line": 144,
+          "text": "bad 'a record was torn'"
+        },
+        {
+          "line": 176,
+          "text": "ok \"no event exceeds the 1024-byte atomic cap (longest $longest)\""
+        },
+        {
+          "line": 178,
+          "text": "bad \"an event is $longest bytes - appends are no longer atomic\""
+        },
+        {
+          "line": 268,
+          "text": "ok \"every event stayed under the atomic cap (longest $longest)\""
+        },
+        {
+          "line": 270,
+          "text": "bad \"an event of $longest bytes was written past EVENT_MAX - the append can tear\""
+        },
+        {
+          "line": 273,
+          "text": "ok 'the oversized payload was spilled to a sidecar'"
+        },
+        {
+          "line": 275,
+          "text": "bad 'nothing was spilled; the event was silently truncated instead'"
+        },
+        {
+          "line": 287,
+          "text": "ok 'ownership: a pane cannot assign a job or allocate its directory'"
+        },
+        {
+          "line": 289,
+          "text": "bad \"ownership: pane assignment was not refused before allocation (rc=$rc jobs=$guard_count)\""
+        },
+        {
+          "line": 301,
+          "text": "ok 'ownership: orchestrator assignment works and a pane cannot add its own pairing'"
+        },
+        {
+          "line": 303,
+          "text": "bad \"ownership: assignment boundary failed (orchestrator=$owner_rc pane=$pane_rc jobs=$owner_count)\""
+        },
+        {
+          "line": 322,
+          "text": "check 'ownership: actor attribution and new/legacy worker folding' \\"
+        },
+        {
+          "line": 352,
+          "text": "ok 'ownership: pane teardown is refused before side effects; orchestrator teardown works'"
+        },
+        {
+          "line": 354,
+          "text": "bad \"ownership: teardown boundary failed (pane=$pane_rc orchestrator=$owner_rc sentinel=$survived)\""
+        },
+        {
+          "line": 392,
+          "text": "ok 'completion is refused while the operator has asked for changes'"
+        },
+        {
+          "line": 394,
+          "text": "bad \"changes-requested run completed anyway (rc=$rc): $out\""
+        },
+        {
+          "line": 398,
+          "text": "ok 'and --force does not override a human objection'"
+        },
+        {
+          "line": 400,
+          "text": "bad \"--force completed over the operator's objection (rc=$rc)\""
+        },
+        {
+          "line": 425,
+          "text": "ok 'an approval stops covering work that changed after it was given'"
+        },
+        {
+          "line": 427,
+          "text": "bad \"drifted approval still completed (rc=$rc): $out\""
+        },
+        {
+          "line": 455,
+          "text": "ok 'an approval that cannot read its files refuses to complete'"
+        },
+        {
+          "line": 457,
+          "text": "bad \"unreadable approval completed anyway (rc=$rc): $out\""
+        },
+        {
+          "line": 461,
+          "text": "bad 'reported an unreadable file as a changed one'"
+        },
+        {
+          "line": 463,
+          "text": "ok 'and does not report it as a change that never happened'"
+        },
+        {
+          "line": 481,
+          "text": "bad 'an unverified run was approved'"
+        },
+        {
+          "line": 483,
+          "text": "ok 'approval is refused while a job is still unverified'"
+        },
+        {
+          "line": 501,
+          "text": "ok 'a COMPLETE run takes no new work'"
+        },
+        {
+          "line": 503,
+          "text": "bad \"assign onto a completed run succeeded (rc=$rc): $out\""
+        },
+        {
+          "line": 518,
+          "text": "ok 'a verified job refuses a further submission'"
+        },
+        {
+          "line": 520,
+          "text": "bad \"a verified job accepted a resubmission (rc=$rc): $out\""
+        },
+        {
+          "line": 537,
+          "text": "ok 'an escalated job refuses a fourth submission'"
+        },
+        {
+          "line": 539,
+          "text": "bad \"escalation was cleared by resubmitting (rc=$rc): $out\""
+        },
+        {
+          "line": 565,
+          "text": "ok 'teardown refuses an open run without --force'"
+        },
+        {
+          "line": 567,
+          "text": "bad \"teardown tore down an open run (rc=$rc): $out\""
+        },
+        {
+          "line": 572,
+          "text": "ok 'and refuses a malformed run id'"
+        },
+        {
+          "line": 574,
+          "text": "bad \"teardown accepted a malformed run id (rc=$rc): $out\""
+        },
+        {
+          "line": 579,
+          "text": "ok 'and refuses a run that does not exist'"
+        },
+        {
+          "line": 581,
+          "text": "bad \"teardown accepted a nonexistent run (rc=$rc): $out\""
+        },
+        {
+          "line": 600,
+          "text": "ok 'and the first attempt is still on disk'"
+        },
+        {
+          "line": 602,
+          "text": "bad 'the first submission was destroyed by the resubmit'"
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": null
+    },
+    {
+      "test": "dashboard/test_runcards.py",
+      "owners": [
+        "HAR-12",
+        "HAR-10"
+      ],
+      "sha256": "afc452c9a9979fca1d9d9cfff6a47c30e7a210ff106eca612d8af1be64410ff7",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_runcards.py OK",
+      "assertionAnchors": [
+        {
+          "line": 77,
+          "text": "def test_task_keys_are_collected_in_job_order(self):"
+        },
+        {
+          "line": 79,
+          "text": "self.assertEqual(self.run.cards_of(self.state(rid)), [\"TM-9\", \"TM-3\"])"
+        },
+        {
+          "line": 81,
+          "text": "def test_a_key_assigned_twice_is_reported_once(self):"
+        },
+        {
+          "line": 83,
+          "text": "self.assertEqual(self.run.cards_of(self.state(rid)), [\"TM-5\"])"
+        },
+        {
+          "line": 85,
+          "text": "def test_a_run_whose_jobs_carry_no_task_reports_nothing(self):"
+        },
+        {
+          "line": 91,
+          "text": "self.assertEqual(self.run.cards_of(self.state(rid)), [])"
+        },
+        {
+          "line": 92,
+          "text": "self.assertEqual(self.run.report_cards(self.state(rid)), (\"\", []))"
+        },
+        {
+          "line": 105,
+          "text": "def test_an_unknown_card_is_named_rather_than_skipped(self):"
+        },
+        {
+          "line": 111,
+          "text": "self.assertIn(\"TM-404\", text)"
+        },
+        {
+          "line": 112,
+          "text": "self.assertIn(\"TM-404\", summary)"
+        },
+        {
+          "line": 114,
+          "text": "def test_the_summary_is_empty_when_there_is_nothing_to_chase(self):"
+        },
+        {
+          "line": 121,
+          "text": "self.assertEqual((summary, lines), (\"\", []))"
+        },
+        {
+          "line": 123,
+          "text": "def test_an_unavailable_board_says_so_instead_of_claiming_all_is_well(self):"
+        },
+        {
+          "line": 132,
+          "text": "self.assertEqual(summary, \"\")"
+        },
+        {
+          "line": 133,
+          "text": "self.assertIn(\"board unavailable\", \"\\n\".join(lines))"
+        },
+        {
+          "line": 134,
+          "text": "self.assertIn(\"TM-7\", \"\\n\".join(lines))"
+        },
+        {
+          "line": 136,
+          "text": "def test_a_board_that_raises_is_caught_rather_than_failing_the_run(self):"
+        },
+        {
+          "line": 150,
+          "text": "self.assertEqual(summary, \"\")"
+        },
+        {
+          "line": 151,
+          "text": "self.assertIn(\"board unavailable\", \"\\n\".join(lines))"
+        },
+        {
+          "line": 153,
+          "text": "def test_card_status_returns_none_when_the_board_cannot_be_reached(self):"
+        },
+        {
+          "line": 156,
+          "text": "self.assertIsNone(self.run.card_status([\"TM-1\"]))"
+        },
+        {
+          "line": 160,
+          "text": "def test_no_keys_means_no_query(self):"
+        },
+        {
+          "line": 161,
+          "text": "self.assertIsNone(self.run.card_status([]))"
+        },
+        {
+          "line": 165,
+          "text": "def test_the_notice_carries_the_open_cards(self):"
+        },
+        {
+          "line": 171,
+          "text": "self.assertTrue(summary.startswith(\"cards still open:\"))"
+        },
+        {
+          "line": 172,
+          "text": "self.assertIn(\"TM-404\", summary)"
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": null
+    },
+    {
+      "test": "dashboard/test_runlock.py",
+      "owners": [
+        "HAR-12"
+      ],
+      "sha256": "ae1c28fa5bc0802e2df76d58fa5a71b91684cb3f33fe1f5ffdcdc7edc68b7def",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_runlock.py  OK",
+      "assertionAnchors": [
+        {
+          "line": 99,
+          "text": "def test_a_live_holder_is_not_interrupted_by_the_clock(self):"
+        },
+        {
+          "line": 105,
+          "text": "self.assertFalse(got.wait(1.0), \"a live holder's lock was broken\")"
+        },
+        {
+          "line": 106,
+          "text": "self.assertTrue((self.lock / \"owner\").exists())"
+        },
+        {
+          "line": 108,
+          "text": "def test_it_is_taken_the_moment_the_holder_releases(self):"
+        },
+        {
+          "line": 112,
+          "text": "self.assertFalse(got.wait(0.3))"
+        },
+        {
+          "line": 114,
+          "text": "self.assertTrue(got.wait(5), \"the waiter did not notice the release\")"
+        },
+        {
+          "line": 116,
+          "text": "def test_a_wedged_live_holder_is_broken_at_the_ceiling(self):"
+        },
+        {
+          "line": 123,
+          "text": "self.assertTrue(got.wait(10), \"a wedged live holder wedged the run forever\")"
+        },
+        {
+          "line": 127,
+          "text": "def test_a_dead_holder_is_broken_without_waiting_out_any_clock(self):"
+        },
+        {
+          "line": 134,
+          "text": "self.assertTrue(got.wait(10), \"a lock held by a dead pid wedged the run\")"
+        },
+        {
+          "line": 135,
+          "text": "self.assertLess(time.time() - started, 5)"
+        },
+        {
+          "line": 137,
+          "text": "def test_a_lock_that_records_no_owner_waits_before_it_is_broken(self):"
+        },
+        {
+          "line": 145,
+          "text": "self.assertTrue(got.wait(10))"
+        },
+        {
+          "line": 146,
+          "text": "self.assertGreaterEqual(time.time() - started, 0.3,"
+        },
+        {
+          "line": 149,
+          "text": "def test_a_claim_in_progress_is_not_mistaken_for_an_abandoned_one(self):"
+        },
+        {
+          "line": 155,
+          "text": "self.assertFalse(got.wait(1.5), \"the lock was taken from a claim in progress\")"
+        },
+        {
+          "line": 159,
+          "text": "def test_finishing_does_not_remove_a_lock_somebody_else_now_holds(self):"
+        },
+        {
+          "line": 167,
+          "text": "self.assertTrue(self.lock.exists(), \"the successor's lock was removed\")"
+        },
+        {
+          "line": 168,
+          "text": "self.assertEqual(self.run.lock_holder(self.lock), (4242, \"someone-else\"))"
+        },
+        {
+          "line": 170,
+          "text": "def test_finishing_releases_your_own(self):"
+        },
+        {
+          "line": 173,
+          "text": "self.assertEqual(self.run.lock_holder(self.lock)[0], os.getpid())"
+        },
+        {
+          "line": 174,
+          "text": "self.assertFalse(self.lock.exists())"
+        },
+        {
+          "line": 176,
+          "text": "def test_only_one_waiter_gets_in_at_a_time(self):"
+        },
+        {
+          "line": 194,
+          "text": "self.assertEqual(peak[0], 1, \"two holders were inside the lock together\")"
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": null
+    },
+    {
+      "test": "dashboard/test_sandbox_coordination.py",
+      "owners": [
+        "HAR-09",
+        "HAR-11"
+      ],
+      "sha256": "63ad8b1873e61dd33e8731eda2579abe4355dea4e108c7cfa624dc80c8ef0df4",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_sandbox_coordination.py passed 11, failed 0",
+      "assertionAnchors": [
+        {
+          "line": 28,
+          "text": "def test_live_and_empty(self):"
+        },
+        {
+          "line": 31,
+          "text": "self.assertEqual(co.live_agents(), expected)"
+        },
+        {
+          "line": 36,
+          "text": "self.assertEqual(co.live_agents(), set())"
+        },
+        {
+          "line": 38,
+          "text": "def test_unreachable_is_not_empty(self):"
+        },
+        {
+          "line": 41,
+          "text": "with self.assertRaisesRegex(co.TmuxUnavailable, 'tmux unreachable.*' + detail):"
+        },
+        {
+          "line": 45,
+          "text": "with self.assertRaisesRegex(co.TmuxUnavailable, 'liveness is unknown'):"
+        },
+        {
+          "line": 48,
+          "text": "def test_mutations_refuse_with_actual_cause(self):"
+        },
+        {
+          "line": 52,
+          "text": "self.assertEqual(co.main(args), 2)"
+        },
+        {
+          "line": 53,
+          "text": "self.assertIn('tmux unreachable', err.getvalue())"
+        },
+        {
+          "line": 54,
+          "text": "self.assertIn('sandbox', err.getvalue())"
+        },
+        {
+          "line": 55,
+          "text": "self.assertNotIn('not a live agent', err.getvalue())"
+        },
+        {
+          "line": 56,
+          "text": "journal.assert_not_called()"
+        },
+        {
+          "line": 57,
+          "text": "board.assert_not_called()"
+        },
+        {
+          "line": 59,
+          "text": "def test_dispatch_refuses_before_spawn_even_dry_run(self):"
+        },
+        {
+          "line": 70,
+          "text": "self.assertIsNone(dispatch.dispatch_one('TM-068', dry_run=dry))"
+        },
+        {
+          "line": 71,
+          "text": "spawn.assert_not_called()"
+        },
+        {
+          "line": 72,
+          "text": "claim.assert_not_called()"
+        },
+        {
+          "line": 73,
+          "text": "status.assert_not_called()"
+        },
+        {
+          "line": 74,
+          "text": "self.assertIn('sandbox', log.call_args.args[0])"
+        },
+        {
+          "line": 75,
+          "text": "self.assertIn('posture=' + posture, log.call_args_list[0].args[0])"
+        },
+        {
+          "line": 77,
+          "text": "def test_lead_selection_policy_and_visible_posture(self):"
+        },
+        {
+          "line": 79,
+          "text": "self.assertEqual(fallback.posture, 'unrestricted')"
+        },
+        {
+          "line": 83,
+          "text": "self.assertEqual(agentdefs.choose_roster({}, {s.name: s for s in [z, a, worker]}, {})[0], a)"
+        },
+        {
+          "line": 85,
+          "text": "def test_team_spawn_refuses_effective_sandbox(self):"
+        },
+        {
+          "line": 96,
+          "text": "self.assertNotEqual(result.returncode, 0)"
+        },
+        {
+          "line": 97,
+          "text": "self.assertIn('sandbox posture', result.stderr)"
+        },
+        {
+          "line": 98,
+          "text": "self.assertIn('coordination', result.stderr)"
+        },
+        {
+          "line": 99,
+          "text": "self.assertEqual(list((root / 'state/run').iterdir()), [])"
+        },
+        {
+          "line": 101,
+          "text": "def test_notification_reports_unknown_without_undoing_claim(self):"
+        },
+        {
+          "line": 104,
+          "text": "self.assertEqual(co.broadcast('worker', 'claim', 'claimed'), 0)"
+        },
+        {
+          "line": 105,
+          "text": "self.assertIn('Notification skipped', err.getvalue())"
+        },
+        {
+          "line": 106,
+          "text": "post.assert_not_called()"
+        },
+        {
+          "line": 108,
+          "text": "def test_collect_aborts_when_liveness_unknown(self):"
+        },
+        {
+          "line": 110,
+          "text": "with self.assertRaises(co.TmuxUnavailable):"
+        },
+        {
+          "line": 112,
+          "text": "status.assert_not_called()"
+        },
+        {
+          "line": 113,
+          "text": "release.assert_not_called()"
+        },
+        {
+          "line": 125,
+          "text": "def test_a_killed_process_does_not_wedge_a_generation_forever(self):"
+        },
+        {
+          "line": 159,
+          "text": "self.assertEqual(holder.stdout.readline().strip(), 'held',"
+        },
+        {
+          "line": 161,
+          "text": "self.assertFalse(self.generation_is_free(resource, path),"
+        },
+        {
+          "line": 168,
+          "text": "self.assertTrue(self.generation_is_free(resource, path),"
+        },
+        {
+          "line": 172,
+          "text": "def test_a_renewal_cannot_be_unlinked_by_a_concurrent_steal(self):"
+        },
+        {
+          "line": 232,
+          "text": "self.assertTrue(at_the_window.wait(30), 'the stealer never reached the unlink')"
+        },
+        {
+          "line": 236,
+          "text": "self.assertFalse(thief.is_alive(), 'the stealer never finished')"
+        },
+        {
+          "line": 240,
+          "text": "self.assertEqual(sorted(outcome.values()), [0, 1], outcome)"
+        },
+        {
+          "line": 243,
+          "text": "self.assertEqual(survivor['holder'], winner,"
+        },
+        {
+          "line": 245,
+          "text": "self.assertTrue(self.generation_is_free(resource, path),"
+        },
+        {
+          "line": 249,
+          "text": "def test_a_forced_release_cannot_unlink_the_claim_that_replaced_it(self):"
+        },
+        {
+          "line": 300,
+          "text": "self.assertTrue(at_the_window.wait(30), 'the releaser never reached the unlink')"
+        },
+        {
+          "line": 306,
+          "text": "self.assertFalse(releaser.is_alive(), 'the releaser never finished')"
+        },
+        {
+          "line": 313,
+          "text": "self.assertTrue(path.exists(),"
+        },
+        {
+          "line": 315,
+          "text": "self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['holder'],"
+        },
+        {
+          "line": 318,
+          "text": "self.assertFalse(path.exists(),"
+        },
+        {
+          "line": 320,
+          "text": "self.assertTrue(self.generation_is_free(resource, path),"
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": null
+    },
+    {
+      "test": "dashboard/test_warrant.py",
+      "owners": [
+        "HAR-09",
+        "HAR-12"
+      ],
+      "sha256": "31a4d46640542b4175ac3ac1450230ea39f04d997cf28bfb3987c95f925bea0a",
+      "matchesDashboardRecordedTest": true,
+      "recordedResult": "test_warrant.py  OK",
+      "assertionAnchors": [
+        {
+          "line": 78,
+          "text": "def test_a_valid_warrant_names_its_pane(self):"
+        },
+        {
+          "line": 82,
+          "text": "self.assertEqual(self.co.orchestrator_warrant(), AGENT)"
+        },
+        {
+          "line": 83,
+          "text": "self.assertEqual(self.co.orchestrator_pane(), AGENT)"
+        },
+        {
+          "line": 85,
+          "text": "def test_it_authorises_only_the_pane_it_names(self):"
+        },
+        {
+          "line": 88,
+          "text": "self.assertIsNone(self.co.orchestrator_warrant(),"
+        },
+        {
+          "line": 91,
+          "text": "def test_the_file_alone_is_not_authority(self):"
+        },
+        {
+          "line": 94,
+          "text": "self.assertIsNone(self.co.orchestrator_warrant())"
+        },
+        {
+          "line": 96,
+          "text": "def test_a_wrong_secret_is_refused(self):"
+        },
+        {
+          "line": 99,
+          "text": "self.assertIsNone(self.co.orchestrator_warrant())"
+        },
+        {
+          "line": 101,
+          "text": "def test_a_malformed_secret_never_reaches_the_file(self):"
+        },
+        {
+          "line": 105,
+          "text": "self.assertIsNone(self.co.orchestrator_warrant(), bad)"
+        },
+        {
+          "line": 107,
+          "text": "def test_a_readable_warrant_is_refused(self):"
+        },
+        {
+          "line": 112,
+          "text": "self.assertIsNone(self.co.orchestrator_warrant())"
+        },
+        {
+          "line": 114,
+          "text": "def test_an_expired_warrant_is_refused(self):"
+        },
+        {
+          "line": 118,
+          "text": "self.assertIsNone(self.co.orchestrator_warrant())"
+        },
+        {
+          "line": 120,
+          "text": "def test_a_warrant_from_a_different_home_is_not_in_scope(self):"
+        },
+        {
+          "line": 127,
+          "text": "self.assertIsNone(co2.orchestrator_warrant())"
+        },
+        {
+          "line": 129,
+          "text": "def test_an_unknown_version_is_refused(self):"
+        },
+        {
+          "line": 132,
+          "text": "self.assertIsNone(self.co.orchestrator_warrant())"
+        },
+        {
+          "line": 134,
+          "text": "def test_a_torn_warrant_is_refused_rather_than_crashing(self):"
+        },
+        {
+          "line": 138,
+          "text": "self.assertIsNone(self.co.orchestrator_warrant())"
+        },
+        {
+          "line": 140,
+          "text": "def test_no_warrant_at_all_is_quiet(self):"
+        },
+        {
+          "line": 143,
+          "text": "self.assertIsNone(self.co.orchestrator_warrant())"
+        },
+        {
+          "line": 151,
+          "text": "def test_minting_a_warrant_for_orchestrator_is_refused(self):"
+        },
+        {
+          "line": 152,
+          "text": "with self.assertRaises(ValueError) as caught:"
+        },
+        {
+          "line": 154,
+          "text": "self.assertIn(\"reserved\", str(caught.exception))"
+        },
+        {
+          "line": 156,
+          "text": "def test_a_hand_written_warrant_naming_orchestrator_is_ignored(self):"
+        },
+        {
+          "line": 163,
+          "text": "self.assertIsNone(self.co.orchestrator_warrant())"
+        },
+        {
+          "line": 164,
+          "text": "with self.assertRaises(self.co.IdentityError):"
+        },
+        {
+          "line": 167,
+          "text": "def test_an_invalid_agent_name_is_refused(self):"
+        },
+        {
+          "line": 169,
+          "text": "with self.assertRaises(ValueError):"
+        },
+        {
+          "line": 174,
+          "text": "def test_a_warranted_pane_may_act_as_the_orchestrator(self):"
+        },
+        {
+          "line": 176,
+          "text": "self.assertEqual(self.co.orchestrator_identity(\"complete\"), \"orchestrator\")"
+        },
+        {
+          "line": 178,
+          "text": "def test_an_unwarranted_pane_is_still_refused(self):"
+        },
+        {
+          "line": 180,
+          "text": "with self.assertRaises(self.co.IdentityError) as caught:"
+        },
+        {
+          "line": 183,
+          "text": "self.assertIn(\"orchestrator's to call\", str(caught.exception))"
+        },
+        {
+          "line": 185,
+          "text": "def test_outside_a_pane_is_unaffected(self):"
+        },
+        {
+          "line": 186,
+          "text": "self.assertEqual(self.co.orchestrator_identity(\"start\"), \"orchestrator\")"
+        },
+        {
+          "line": 188,
+          "text": "def test_the_warrant_does_not_excuse_a_claimed_by(self):"
+        },
+        {
+          "line": 192,
+          "text": "with self.assertRaises(self.co.IdentityError):"
+        },
+        {
+          "line": 195,
+          "text": "def test_revoking_removes_the_authority(self):"
+        },
+        {
+          "line": 197,
+          "text": "self.assertEqual(self.co.orchestrator_warrant(), AGENT)"
+        },
+        {
+          "line": 199,
+          "text": "self.assertIn(\"orchestrator.warrant\", removed)"
+        },
+        {
+          "line": 200,
+          "text": "self.assertIsNone(self.co.orchestrator_warrant())"
+        },
+        {
+          "line": 202,
+          "text": "def test_the_env_file_is_separate_from_the_shared_env(self):"
+        },
+        {
+          "line": 207,
+          "text": "self.assertTrue(self.co.WARRANT_ENV.is_file())"
+        },
+        {
+          "line": 208,
+          "text": "self.assertNotEqual(self.co.WARRANT_ENV, self.home / \"env\")"
+        },
+        {
+          "line": 209,
+          "text": "self.assertFalse((self.home / \"env\").exists())"
+        },
+        {
+          "line": 211,
+          "text": "def test_both_files_are_private(self):"
+        },
+        {
+          "line": 214,
+          "text": "self.assertEqual(path.stat().st_mode & 0o077, 0, path.name)"
+        },
+        {
+          "line": 241,
+          "text": "self.assertEqual(start.returncode, 0, start.stderr)"
+        },
+        {
+          "line": 245,
+          "text": "self.assertEqual(assign.returncode, 0, assign.stderr)"
+        },
+        {
+          "line": 248,
+          "text": "def test_a_warranted_pane_can_start_assign_and_complete(self):"
+        },
+        {
+          "line": 261,
+          "text": "self.assertEqual(done.returncode, 0, done.stderr)"
+        },
+        {
+          "line": 262,
+          "text": "self.assertIn(\"COMPLETE\", done.stdout)"
+        },
+        {
+          "line": 264,
+          "text": "def test_the_ledger_records_that_it_was_not_a_person(self):"
+        },
+        {
+          "line": 272,
+          "text": "self.assertEqual(start.get(\"via\"), AGENT)"
+        },
+        {
+          "line": 274,
+          "text": "def test_a_worker_still_cannot_verdict_its_own_job(self):"
+        },
+        {
+          "line": 281,
+          "text": "self.assertNotEqual(out.returncode, 0,"
+        },
+        {
+          "line": 284,
+          "text": "def test_the_warranted_pane_cannot_verdict_either(self):"
+        },
+        {
+          "line": 291,
+          "text": "self.assertNotEqual(out.returncode, 0,"
+        },
+        {
+          "line": 294,
+          "text": "def test_a_warranted_pane_cannot_complete_without_an_approval(self):"
+        },
+        {
+          "line": 306,
+          "text": "self.assertNotEqual(out.returncode, 0,"
+        },
+        {
+          "line": 308,
+          "text": "self.assertIn(\"has not been approved\", out.stderr)"
+        },
+        {
+          "line": 309,
+          "text": "self.assertFalse((self.home / \"runs\" / rid / \"COMPLETE\").exists())"
+        },
+        {
+          "line": 315,
+          "text": "self.assertEqual(done.returncode, 0, done.stderr)"
+        },
+        {
+          "line": 317,
+          "text": "def test_a_person_still_needs_no_approval(self):"
+        },
+        {
+          "line": 328,
+          "text": "self.assertEqual(done.returncode, 0, done.stderr)"
+        },
+        {
+          "line": 330,
+          "text": "def test_force_is_refused_to_a_warranted_pane(self):"
+        },
+        {
+          "line": 335,
+          "text": "self.assertNotEqual(out.returncode, 0)"
+        },
+        {
+          "line": 336,
+          "text": "self.assertIn(\"--force is not available\", out.stderr)"
+        },
+        {
+          "line": 337,
+          "text": "self.assertFalse((self.home / \"runs\" / rid / \"COMPLETE\").exists())"
+        },
+        {
+          "line": 339,
+          "text": "def test_force_still_works_for_a_person_outside_a_pane(self):"
+        },
+        {
+          "line": 344,
+          "text": "self.assertEqual(out.returncode, 0, out.stderr)"
+        },
+        {
+          "line": 345,
+          "text": "self.assertTrue((self.home / \"runs\" / rid / \"COMPLETE\").exists())"
+        }
+      ],
+      "runtimeNote": "Historical full-run source differs in agentmux.sh, hub/cli.py, hub/server.py, hub/store.py. Current native/focused repairs are supplemental, not same-candidate full dashboard execution.",
+      "pluginNote": null
+    }
+  ],
+  "identityMappings": {
+    "HUB-01-C02": {
+      "assertions": [
+        "hub/tests/test_hub_offline.py:Messaging.test_legacy_names_resolve",
+        "hub/tests/test_hub_offline.py:Messaging.test_duplicate_live_name_refused",
+        "hub/tests/test_hub_offline.py:Messaging.test_reregistered_name_does_not_inherit_mail",
+        "hub/tests/test_hub_offline.py:Messaging.test_role_broadcast_and_cross_repo_group",
+        "hub/tests/test_hub_offline.py:Work.test_path_claims_are_per_repo",
+        "hub/tests/test_fed_unit.py:Identity.test_same_repo_same_rid_whatever_the_url_spelling",
+        "hub/tests/test_fed_unit.py:Identity.test_local_names_differ_rid_does_not"
+      ],
+      "remaining": "Same short alias colliding across two projects is not explicitly demonstrated by different-role group routing; add one explicit same-role/same-local-name alpha versus beta addressing case if no exact existing assertion is found. New v1 migration is later owner-phase work, not inferred from legacy aliases."
+    },
+    "HUB-11-C02": {
+      "assertions": [
+        "hub/tests/test_governance.py:AuthorizationBinding.test_work_cannot_enter_through_information_plane",
+        "hub/tests/test_governance.py:AuthorizationBinding.test_subject_destination_repository_and_role_match",
+        "hub/tests/test_fed_unit.py:Inbound.test_spoof_self_and_scope",
+        "hub/tests/test_fed_unit.py:Envelope.test_validate",
+        "hub/tests/test_fed_live.py:test_p0_server_refuses_spoofed_subject",
+        "hub/tests/test_fed_live.py:test_governance_same_peer_different_node_round_trip",
+        "hub/tests/test_fed_live.py:266-269 peer-qualified sender/reply assertions"
+      ],
+      "remaining": "Legacy authenticated delivery identity and governance origin/result bindings are demonstrated, not a legacy-v2/v3 to new-v1 translator. Retain explicit original ID/source-node/repository fields in later adapter comparison."
+    },
+    "sourceMethods": {
+      "hub/tests/test_hub_offline.py": [
+        "Names.test_normalize_and_refuse",
+        "Names.test_session_roundtrip",
+        "Names.test_addresses_and_subjects",
+        "Names.test_all_address_forms_roundtrip",
+        "Names.test_malformed_addresses_rejected",
+        "Names.test_session_spellings_enforce_same_length_limits",
+        "Messaging.test_duplicate_live_name_refused",
+        "Messaging.test_legacy_names_resolve",
+        "Messaging.test_courier_kinds_accepted",
+        "Messaging.test_reregistered_name_does_not_inherit_mail",
+        "Messaging.test_direct_inbox_ack",
+        "Messaging.test_idempotent_post",
+        "Messaging.test_order_preserved",
+        "Messaging.test_role_broadcast_and_cross_repo_group",
+        "Messaging.test_unknown_kind_lists_known",
+        "Messaging.test_no_live_recipient_refused",
+        "Messaging.test_virtual_operator_inbox",
+        "Messaging.test_attempts_to_dead",
+        "Messaging.test_events_tail_returns_newest_oldest_first",
+        "Messaging.test_fts_and_audit",
+        "Work.test_first_claim_wins_across_processes",
+        "Work.test_capacity_and_lease_expiry",
+        "Work.test_dead_agent_returns_leases",
+        "Work.test_direct_to_dead_refused",
+        "Work.test_requirements",
+        "Work.test_team_lead_decomposes",
+        "Work.test_cancel_takes_open_children",
+        "Work.test_path_claims_are_per_repo",
+        "Deliver.test_clean_submit",
+        "Deliver.test_update_modal_answered_safely",
+        "Deliver.test_update_banner_is_not_the_update_menu",
+        "Deliver.test_login_modal_blocks_without_keys",
+        "Deliver.test_unknown_prompt_blocks",
+        "Deliver.test_copy_mode_left_first",
+        "Deliver.test_busy_defers_without_keys",
+        "Deliver.test_booting_defers",
+        "Deliver.test_placeholder_gets_second_enter",
+        "Deliver.test_stale_line_resubmitted_not_retyped",
+        "Deliver.test_handle_mismatch_refused",
+        "Deliver.test_hint_text_cleared_first",
+        "CliReceipts.test_each_cli_format",
+        "CliReceipts.test_assistant_text_and_partial_lines_are_not_receipts",
+        "CliReceipts.test_grok_bell_split_across_chunks",
+        "CliReceipts.test_hold_alert_fires_once",
+        "CliReceipts.test_mark_received",
+        "BackupsAndRetention.test_rotation_keeps_newest_and_copy_restores",
+        "BackupsAndRetention.test_prune_never_touches_undelivered_mail",
+        "BackupsAndRetention.test_migration_takes_a_backup_first",
+        "ServerAPI.test_every_write_verb_returns_a_result",
+        "ServerAPI.test_unknown_verb_is_an_error_not_null",
+        "ServerAPI.test_tcp_requires_a_valid_token",
+        "ServerAPI.test_tcp_ignores_as",
+        "ServerAPI.test_tcp_post_and_read",
+        "ServerAPI.test_retire_courier_imports_only_the_undelivered_backlog_once",
+        "ServerAPI.test_agentmux_post_goes_through_the_hub",
+        "ServerAPI.test_token_file_is_private",
+        "ServerAPI.test_subscribe_streams_new_mail_and_events",
+        "Profiles.test_claude_idle_prompt_is_not_a_modal",
+        "Profiles.test_claude_bypass_consent_answer",
+        "MenuByLabel.test_trust_selects_yes_even_when_no_is_preselected",
+        "MenuByLabel.test_missing_safe_option_blocks",
+        "BridgeConnectBounded.test_silent_endpoint_times_out_instead_of_hanging"
+      ],
+      "hub/tests/test_fed_unit.py": [
+        "Identity.test_same_repo_same_rid_whatever_the_url_spelling",
+        "Identity.test_local_names_differ_rid_does_not",
+        "Identity.test_unshared_and_unmatched",
+        "Redaction.test_redacts_known_tokens_and_keeps_the_rest",
+        "Redaction.test_blocks_private_keys_and_seeds",
+        "Redaction.test_clean_payload_is_untouched",
+        "Outbound.test_scope",
+        "Outbound.test_redact_block_and_size",
+        "Inbound.test_trust_levels",
+        "Inbound.test_spoof_self_and_scope",
+        "Inbound.test_privileged_work_is_quarantined_even_from_auto",
+        "Inbound.test_wrap",
+        "Config.test_round_trip",
+        "Envelope.test_subjects_refuse_bad_tokens",
+        "Envelope.test_validate",
+        "Mcp.test_protocol",
+        "Gate.test_only_privileged_tools_are_gated",
+        "Gate.test_remote_work_blocks_privileged"
+      ],
+      "hub/tests/test_fed_live.py": [
+        "Fed.test_governance_same_peer_different_node_round_trip",
+        "Fed.test_governance_wrong_executor_result_cannot_complete_work",
+        "Fed.test_governance_v3_offer_isolated_from_legacy_work_consumer",
+        "Fed.test_p0_connected_and_present",
+        "Fed.test_p0_server_refuses_spoofed_subject",
+        "Fed.test_p0_payload_spoof_is_dropped",
+        "Fed.test_p1_secrets_are_redacted_and_keys_blocked",
+        "Fed.test_p1_untrusted_peer_is_quarantined_then_approved",
+        "Fed.test_p1_denied_peer_is_dropped",
+        "Fed.test_p1_scope_limits_who_a_repo_is_shared_with",
+        "Fed.test_p1_remote_privileged_work_needs_explicit_approval",
+        "Fed.test_p2_message_reply_round_trip",
+        "Fed.test_p2_address_in_the_peers_own_naming",
+        "Fed.test_p2_role_address_reaches_a_holder",
+        "Fed.test_p2_federated_work_is_done_exactly_once_and_comes_home",
+        "Fed.test_p3_shared_board_cas",
+        "Fed.test_p4_knowledge_explicit_auto_and_search",
+        "Fed.test_p5_code_share_fetch_verify",
+        "Fed.test_p6_panel_has_every_plugin",
+        "Fed.test_z_kill_switch_revoke_and_resume"
+      ],
+      "hub/tests/test_governance.py": [
+        "AuthorizationBinding.test_work_cannot_enter_through_information_plane",
+        "AuthorizationBinding.test_subject_destination_repository_and_role_match",
+        "BackupIdentity.test_frozen_clock_keeps_distinct_restorable_snapshots",
+        "BackupIdentity.test_second_boundary_uses_one_timestamp_for_backup_rotation",
+        "BackupIdentity.test_failed_copy_does_not_publish_or_prune_a_snapshot",
+        "BackupIdentity.test_concurrent_stores_do_not_replace_snapshots",
+        "WorkRecovery.test_incoming_creation_rolls_back_when_attribution_fails",
+        "WorkRecovery.test_same_peer_other_node_is_not_discarded",
+        "WorkRecovery.test_wrong_peer_result_does_not_complete_origin",
+        "WorkRecovery.test_completion_keeps_durable_return_intent_without_callback",
+        "WorkProtocol.test_two_receivers_only_origin_selected_one_becomes_ready",
+        "WorkProtocol.test_receive_is_atomic_with_claim_and_retry_after_injected_crash",
+        "WorkProtocol.test_completion_recovers_after_restart_and_failed_staging",
+        "WorkProtocol.test_result_binds_peer_node_attempt_task_repo_grant_and_evidence",
+        "WorkProtocol.test_same_peer_other_node_completes_without_confusing_origin_rows",
+        "WorkProtocol.test_origin_reservation_and_grant_rollback_together",
+        "WorkProtocol.test_exhausted_lease_also_records_return_obligation",
+        "WorkProtocol.test_abrupt_process_exit_after_completion_still_returns_result",
+        "WorkProtocol.test_malformed_claim_cannot_reserve_an_origin_task",
+        "WorkProtocol.test_late_grant_cannot_revive_cancelled_execution",
+        "WorkProtocol.test_legacy_work_stays_quarantined_and_cannot_be_auto_approved"
+      ]
+    }
+  },
+  "nativeEvidence": {
+    "macos": {
+      "jobId": 114087190599,
+      "jobUrl": "https://github.com/controlLogix/agentmux/actions/runs/38009885497/job/114087190599",
+      "sourceCommit": "80f43e02f3344696a3985c48ef12578319f3bd0f",
+      "checks": 22,
+      "failedChecks": [],
+      "hashComparisons": 588,
+      "sourceMismatches": [],
+      "conformance": {
+        "testsRun": 45,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "exitCode": 0,
+        "sourceUnchangedDuringRun": true
+      },
+      "independentAdmissionExit": 0,
+      "hub": {
+        "tests": 129,
+        "status": "passed",
+        "failures": [],
+        "skips": []
+      },
+      "caseCounts": {
+        "storage-result.json": 20,
+        "leaf-result.json": 11,
+        "signed-leaf-result.json": 19
+      },
+      "reportHashes": {
+        "ci-result.json": "93b4a9f72e76862c4ad619133c1d00de99268d2a9ff4a7adebdd2ed708e20c44",
+        "conformance-admission-negative.json": "2408bb4cac0929956384f47cc62a62798ead23060d558ecdb316fc8737999a11",
+        "conformance-admission.json": "a83da51529a3a865a6ad23cd9c460c4afd345f61e12cd4968d7938b47d1a256a",
+        "contracts.json": "f23e853343794b27731b7841a4827151d48da2c2c3f26eda5b225fb7438398af",
+        "hub-full-result.json": "e6e76d09125a1c51e473fe4df2ea28c9ba6660d115d5cfe4d2ca76f62ab19b67",
+        "leaf-result.json": "d801e8f78ac05d9f0cca428a4b9bbddad8e6618b6a830adc754d691ba249666b",
+        "negative-fixture.json": "afcb8455bea62ce76d9eb25e7cf297a60a44ab265bf40b18ed795ba76ff28245",
+        "signed-leaf-result.json": "207264888e1f2313a73f962be2f685d468f473cfbeb0b0e846aa4fd264d6afa1",
+        "storage-result.json": "dc370cb34e7969e99f68768cc6bf8627bd0f669dffd7187fccbfcf51db4afe12"
+      }
+    },
+    "linux": {
+      "jobId": 114087190733,
+      "jobUrl": "https://github.com/controlLogix/agentmux/actions/runs/38009885497/job/114087190733",
+      "sourceCommit": "80f43e02f3344696a3985c48ef12578319f3bd0f",
+      "checks": 22,
+      "failedChecks": [],
+      "hashComparisons": 588,
+      "sourceMismatches": [],
+      "conformance": {
+        "testsRun": 45,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "exitCode": 0,
+        "sourceUnchangedDuringRun": true
+      },
+      "independentAdmissionExit": 0,
+      "hub": {
+        "tests": 129,
+        "status": "passed",
+        "failures": [],
+        "skips": []
+      },
+      "caseCounts": {
+        "storage-result.json": 20,
+        "leaf-result.json": 11,
+        "signed-leaf-result.json": 19
+      },
+      "reportHashes": {
+        "ci-result.json": "c2ca96da6ad178b5f909e2059552ed9326ed928e7bfdf98d62a7e18214fd4f9a",
+        "conformance-admission-negative.json": "f8d889e11f7a85727889bf7bf9e3454d8c8b50befa04d431a8c61e5164d15447",
+        "conformance-admission.json": "ea1c903256d013006cd566bd04ba2d569e3c4923af6ae4486fb37676e646c2b3",
+        "contracts.json": "3520aa2f0737f25dfaceb1fdded47d1354b827a5d1b288994e4be1aed1797ae5",
+        "hub-full-result.json": "e5498a7e7a9c6b9a5759f49a4606dbb95322177c36f1cffa914185ed6d73d232",
+        "leaf-result.json": "e069a5a122239b65c4ec9b934cb91221e54f5aedf6ff7d5316527103e6ba059f",
+        "negative-fixture.json": "afcb8455bea62ce76d9eb25e7cf297a60a44ab265bf40b18ed795ba76ff28245",
+        "signed-leaf-result.json": "bc375e2baa2f4b783d053ea4fbed57ed628400e50a9103e3342f205de301ff03",
+        "storage-result.json": "f6c6376d270c0290e095cc17842f5e56cffb0fc8db4ac576ae1b6eee4170a1cd"
+      }
+    }
+  },
+  "remainingNegativeReview": [
+    {
+      "check": "DASH-31-C02",
+      "family": "run lock",
+      "existingEvidence": "test_runlock methods preserve ownership, generation, timeout and mutual exclusion; full dashboard reports OK",
+      "smallestAdditionalNegative": "In a disposable copied runtime disable exclusive acquisition; run test_only_one_waiter_gets_in_at_a_time and require assertion failure, then discard copy. No valid positive rerun needed unless touched source changed."
+    },
+    {
+      "check": "DASH-31-C02",
+      "family": "stdin inheritance",
+      "existingEvidence": "test_no_inherited_stdin four static assertions found at least20spawns and require guarded stdin",
+      "smallestAdditionalNegative": "Remove stdin binding from one included notify.py spawn in a copied source tree; require existing detector fails. This is static fault sensitivity, not a provider run."
+    },
+    {
+      "check": "DASH-31-C02",
+      "family": "warrant authorization",
+      "existingEvidence": "test_warrant rejects wrong secret, scope, expiry, identity and self-review",
+      "smallestAdditionalNegative": "Disable one warrant validation branch in copied coordination.py; require the corresponding wrong-secret/wrong-home method fails. Retain source mutation diff and observed assertion."
+    },
+    {
+      "check": "DASH-31-C02",
+      "family": "archive retention",
+      "existingEvidence": "test_evidence_archive five positives in full dashboard",
+      "smallestAdditionalNegative": "Suppress one evidence copy in disposable archive cleanup code; require existing archive test reports missing retained evidence. Review test labels to choose an actual observed copy, not unrelated source."
+    },
+    {
+      "check": "DASH-31-C02",
+      "family": "courier/inbox/modal guards",
+      "existingEvidence": "Positive refusal fixtures exist; historical differential table covers argument/run/lifecycle/coordination/residue, not these independent guard files",
+      "smallestAdditionalNegative": "Map argguard historical failures to shared gate first; for any separate courier/inbox/modal predicate not covered, invert that one predicate in disposable copy and run its existing rejection assertion. Do not collapse distinct guards into one claimed proof."
+    },
+    {
+      "check": "REPO-03-C01",
+      "family": "gate admission",
+      "existingEvidence": "RunnerTests.test_failed_selection_can_be_retried_without_running_other_suites asserts main failingfixture returns1 then repairedfixture returns0; test_skipped_or_empty_selection_cannot_pass asserts1 for both; native80f43e0 full129 includes these unchanged methods. Contract deliberate fixture, skip/source admission, historical dashboard failability and pattern negatives are separate retained evidence.",
+      "smallestAdditionalNegative": "None for strict local-hub exit propagation: existing executed assertions already prove it. Map tests.yml optional broker skips as unqualified; contracts.yml strict fullhub is the accepted native execution path. Do not duplicate this valid negative."
+    }
+  ],
+  "DASH-29-C02": {
+    "evidence": "Windows passedcandidate62suite runner plus residue wrapper, shortTMPDIRremoved, noownedprocesses, unchanged8787",
+    "limit": "Source09fe9c7; current callback and Bash startup changes require explicit impact review. Plugin skips separately restored; no phase acceptance.",
+    "changeImpact": "09fe9c7\u219280f43e0 shell changes are explicit callback earlybranch plus per-pane environment selection before tmux spawn; current callback19tests and real17check probe cover isolation including a following nativepane. Backup fix is hub snapshot logic with focused negative plus nativefull. Dashboard isolation runner/source itself unchanged. Reuse unaffected fullrunner isolation assertions with this documented supplemental evidence; no claim oldfullrun executed newcallback code."
+  },
+  "HUB-26-C02": {
+    "mapping": "Existing full six hub modules run natively in80f43e0, source/hash review attached; this report enumerates exact identity assertions and all18dashboard suite ownerships",
+    "limit": "Not all198component behaviors or later target adapters are accepted by a suite-wide pass."
+  },
+  "noProviderCalls": true,
+  "repositoryUnmodifiedByReview": true,
+  "sourceBindings": {
+    "hub/tests/test_local_runner.py": "e183314d0397b4ca4fa302fad5afda0aab47985bc2f0ce1140c9dcf6e9f2dc35",
+    "hub/tests/test_hub_offline.py": "56fb5359476f012c1a7170829d2d56771c1bd42ba63834e07c9660407495338e",
+    "hub/tests/test_fed_unit.py": "b5753215fef5705fdb829078730e5fb14e12bc4c1ec040870e84ff2603772adf",
+    "hub/tests/test_fed_live.py": "af39ed93f205952f90a9975a7ed7381a7560ee8e0e4278dee220a57b08ad3b0c",
+    "hub/tests/test_governance.py": "67348cc4c748e9bbdd93286808c770622f9c563addf3fb6c78b84a4090f1648d",
+    "agentmux.sh": "310d538866f29478ef01bfd77c782dd62ead2a09eb1a244fe890bf96b1b36867",
+    "dashboard/check_test_failability.sh": "f68e90739fc000ce401dc0dfebacf78635260f5bbf8ef69aee063c20b3d51c7a",
+    ".github/workflows/tests.yml": "4643ad24a591f079aa9bd8d7bf309091e059d328554dd5251b5107447ca9103f",
+    ".github/workflows/contracts.yml": "ec49a0ef6074420c998ef123c13f5dfb38ee37ed7d80540db0249fbd371f7b33"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "files": {
+    "result.json": "7bddcfa15869962117703180b784d3b31b4492cdcfc7d3fb5d429e499b2093fc",
+    "negative.log": "1e133fcad28555bfe3f52df0886ed6de90378560787712cc120de33c54f46e72",
+    "setup-failure.log": "24de9e545858be94b1b848f8c0e0c5330cd66d6e634d72a1cb18a77f6289e29b",
+    "independent-review.json": "15c3d6db87f50cd9bd9b44fc44a82f80340a63ba53aa2767af2a7cd210605c2b",
+    "runner.py": "36303db0da6dc21f484c479787ca9b0a245b2a00d8d89fff546c744534160603"
+  },
+  "scope": "Four host guard tests, one intentional assertion failure, zero errors; preserves prior fixture-import setup failure separately. Independent source/log review. Probe uses python3, workflow uses python: equivalent script/arguments only, not literal command equality or actual CI-failure execution."
+}

@@ -1,0 +1,11 @@
+--- original/agentmux.sh
++++ mutant/agentmux.sh
+@@ -253,7 +253,7 @@
+   [ -s "$log" ] && [ ! -L "$log" ] || return 0
+   mkdir -p "$LOGDIR/archive" || return 1
+   dest="$(archive_dest "$LOGDIR/archive" "$name" .log)"
+-  mv_T "$log" "$dest" || return 1
++  : "$log" "$dest"
+   archive_prune "$LOGDIR/archive" "$name" \
+     "${AGENTMUX_LOG_ARCHIVE_KEEP:-20}" "${AGENTMUX_LOG_ARCHIVE_MB:-2048}" || true
+ }

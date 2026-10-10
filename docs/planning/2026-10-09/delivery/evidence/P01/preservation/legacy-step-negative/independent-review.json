@@ -1,0 +1,62 @@
+{
+  "candidateReviewed": "a21f03a8a6792f4fa21099afe62804a56dfa7fc4",
+  "legacyStep": {
+    "admittedBoundedEvidence": true,
+    "actualTests": 4,
+    "failures": 1,
+    "errors": 0,
+    "exitCode": 1,
+    "sourceHashesVerified": 92,
+    "sourceMismatches": [],
+    "logSha256": "1e133fcad28555bfe3f52df0886ed6de90378560787712cc120de33c54f46e72",
+    "setupFailureRetained": true,
+    "setupFailureMeaning": "Original missing-agentdefs import crash; not accepted fault sensitivity.",
+    "commandPrecision": "Workflow literally uses python dashboard/test_host_guard.py; probe uses python3 dashboard/test_host_guard.py. Same script and no arguments, but executable spelling differs. Report should call this script/argument equivalence, not a byte-for-byte command match. GitHub setup-python selects its python; local probe used system python3.",
+    "failurePropagation": "Current workflow ordinary run step has no continue-on-error, shell suppression or pipeline around the failing last command; its nonzero result fails that step. This local execution is not a deliberately failed remote CI run.",
+    "harnessLimit": "Mutation inserts unconditional self.fail into an existing test. Proves assertion-to-process exit propagation, not sensitivity to a broken production Host guard."
+  },
+  "dashboard": {
+    "sourceCandidate": "09fe9c749ff674c0dd5ca4fa7c53abfbe23cadcd",
+    "suites": 62,
+    "sourceUnchangedDuringRecordedRun": true,
+    "logsVerified": true,
+    "zeroCheckSuites": [
+      "test_orchestration_plugin.py passed 0, failed 0",
+      "test_plugin_skills.py passed 0, failed 0"
+    ],
+    "skipAccounting": {
+      "externalPluginTestsMissing": 20,
+      "externalPluginSuites": 2,
+      "gatewayBytecodeDifferential": "unavailable onPython3.14; existingPython3.12report required",
+      "phaseAccepted": false
+    },
+    "ownedProcessesBeforeCleanup": [
+      82940
+    ],
+    "ownedProcessesAfterCleanup": [],
+    "shortTempRootRemoved": true,
+    "residueLimit": "CLEAN0 coveredfiles in isolated home; operator8787 pidnone. Cannot infer a populated realhome was preserved or an existing running operator dashboard survived. Separate sentinel/failure/signal meta tests supply those control cases.",
+    "currentSourceChanges": [
+      "README.md",
+      "agentmux.cmd",
+      "agentmux.sh",
+      "hub/cli.py",
+      "hub/server.py",
+      "hub/store.py",
+      "hub/tests/test_governance.py",
+      "tests/contracts/README.md",
+      "tests/contracts/ci.py",
+      "tests/storage/README.md",
+      "tests/storage/run.py"
+    ],
+    "runnerAndDashboardSourceUnchanged": "dashboard/ and taskmgmt/ have no diff09fe9c7\u2192a21f03a. Changed runtimepaths require supplemental evidence, not relabeling oldrun.",
+    "impactReview": "agentmux.sh callbackearlybranch and per-pane callbackenv selection: callbackfocused19+real17includingnativepane; hubcli/serverauthorization callbackchecks covered focused+nativehubfull; hubstorebackup timestampfix covered positiveandnegative boundary plus native129. None edits full-dashboard isolation runner. New22fileplugin covered independently by fresh36tests, not oldzeroresults.",
+    "retainedLimits": [
+      "ArchivedCPython3.12bytecode differential not executed under3.14; existing3.12report remains needed.",
+      "WindowsCodexUNCstatefailed; no modelinference or nativeWindows hookqualification.",
+      "No physicalhost or process-wide Windows fileaccessaudit.",
+      "Rawrunner suppresses individual suiteoutput; current skipaccounting is supported by earlier explicit detailed plugin/gateway followups, not independent per-method enumeration from this aggregate log."
+    ],
+    "DASH29C02Recommendation": "Accept bounded fullfixtureisolation andcleanup using recordedrun plus preserved sentinel/signal control evidence and explicit currentchangeimpact. Do not assert wholephaseacceptance or populatedoperator preservation from this run alone."
+  }
+}

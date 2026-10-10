@@ -1,0 +1,15 @@
+test_only_one_waiter_gets_in_at_a_time (__main__.TestReleaseIsConditional.test_only_one_waiter_gets_in_at_a_time) ... FAIL
+
+======================================================================
+FAIL: test_only_one_waiter_gets_in_at_a_time (__main__.TestReleaseIsConditional.test_only_one_waiter_gets_in_at_a_time)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ryan/.cache/agentmux-governance/preservation-faults-yhxmcem8/lock/dashboard/test_runlock.py", line 194, in test_only_one_waiter_gets_in_at_a_time
+    self.assertEqual(peak[0], 1, "two holders were inside the lock together")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 8 != 1 : two holders were inside the lock together
+
+----------------------------------------------------------------------
+Ran 1 test in 0.102s
+
+FAILED (failures=1)

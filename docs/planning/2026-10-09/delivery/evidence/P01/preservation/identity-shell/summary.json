@@ -1,0 +1,111 @@
+{
+  "candidate": "a21f03a8a6792f4fa21099afe62804a56dfa7fc4",
+  "identityEvidence": "/home/ryan/.cache/agentmux-governance/identity-shell-3q6u9faw",
+  "shellEvidence": "/home/ryan/.cache/agentmux-governance/identity-shell-es8gsah5",
+  "identityChecksPassedBeforeHarnessFailure": [
+    "hub started",
+    "same local name produces distinct repo identities",
+    "resolve agent:alpha/worker/same",
+    "delivery recipients agent:alpha/worker/same",
+    "actual pane acknowledgement agent:alpha/worker/same",
+    "resolve agent:beta/worker/same",
+    "delivery recipients agent:beta/worker/same",
+    "actual pane acknowledgement agent:beta/worker/same",
+    "resolve agent:alpha-worker-same",
+    "delivery recipients agent:alpha-worker-same",
+    "actual pane acknowledgement agent:alpha-worker-same",
+    "resolve role:alpha/worker",
+    "delivery recipients role:alpha/worker",
+    "actual pane acknowledgement role:alpha/worker",
+    "resolve role:beta/worker",
+    "delivery recipients role:beta/worker",
+    "actual pane acknowledgement role:beta/worker",
+    "resolve role:group:both/worker",
+    "delivery recipients role:group:both/worker",
+    "actual pane acknowledgement role:group:both/worker",
+    "resolve role:*/worker",
+    "delivery recipients role:*/worker",
+    "actual pane acknowledgement role:*/worker",
+    "bare shared local name refused",
+    "wrong-repo pane ran without exception",
+    "wrong-repo native identity",
+    "beta cannot claim alpha work"
+  ],
+  "historicalHarnessFailure": "Explicit unittest top_level_dir rejected orchtest namespace directory before running tests; source runtime unchanged. Only failing shell-result portion rerun with normal discover semantics.",
+  "shellChecks": [
+    {
+      "name": "hub started",
+      "passed": true
+    },
+    {
+      "name": "same local name produces distinct repo identities",
+      "passed": true
+    },
+    {
+      "name": "bare shared local name refused",
+      "passed": true
+    },
+    {
+      "name": "wrong-repo pane ran without exception",
+      "passed": true
+    },
+    {
+      "name": "wrong-repo native identity",
+      "passed": true
+    },
+    {
+      "name": "beta cannot claim alpha work",
+      "passed": true
+    },
+    {
+      "name": "run pane ran without exception",
+      "passed": true
+    },
+    {
+      "name": "run native identity",
+      "passed": true
+    },
+    {
+      "name": "operator sees alpha completion",
+      "passed": true
+    },
+    {
+      "name": "operator verifies real log digest",
+      "passed": true
+    },
+    {
+      "name": "operator verifies source and count",
+      "passed": true
+    }
+  ],
+  "sourceUnchangedBoth": true,
+  "returnedAttachment": {
+    "sourceRevision": "a21f03a8a6792f4fa21099afe62804a56dfa7fc4",
+    "tests": 28,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "logPath": "/home/ryan/.cache/agentmux-governance/identity-shell-es8gsah5/run.log",
+    "logSha256": "7f69338751e8b90ebcfefefbd2d1dbb69426f34e6b3f2f7c67a980f602ebfda1"
+  },
+  "phaseAccepted": false,
+  "limits": [
+    "Same-role/local-name isolation uses actual native WSL local hub and tmux shell agents, not cross-hub federation.",
+    "No real model provider execution. Local path and digest travel as structured JSON in the existing work result, not a dedicated artifact transport."
+  ],
+  "evidenceHashes": {
+    "/home/ryan/.cache/agentmux-governance/identity-shell-3q6u9faw/runner.py": "b3f1751a6a2355e39649e12974e57c2fd8f1cd95a144cbcbc07cc19980ccb056",
+    "/home/ryan/.cache/agentmux-governance/identity-shell-3q6u9faw/result.json": "e76a7616089ada414880efad0ac2a513b77e4261643bba56106571447d22e1bc",
+    "/home/ryan/.cache/agentmux-governance/identity-shell-3q6u9faw/cleanup.json": "e80ab7b9006bbd8e7db33eca998436a8db4763ae393a82649c736411820ba00b",
+    "/home/ryan/.cache/agentmux-governance/identity-shell-3q6u9faw/worker.py": "ec5e02189487fa56dbb4747d845994c59b36c63b48cf9915fbf00f21fd75363d",
+    "/home/ryan/.cache/agentmux-governance/identity-shell-3q6u9faw/run.json": "166b529c2c02482308a9191360cd73cdec447742d2c1cd32321216fcd39e97e1",
+    "/home/ryan/.cache/agentmux-governance/identity-shell-3q6u9faw/wrong-repo.json": "2e34729514fa0319dd686f4eee0417b56e9ac1dc81ee0f87d00775a675dabdaf",
+    "/home/ryan/.cache/agentmux-governance/identity-shell-es8gsah5/runner.py": "af5a35462d3ee350653d5d5287326a695aff8feeb8c45c37f73fb2cd4ec9399a",
+    "/home/ryan/.cache/agentmux-governance/identity-shell-es8gsah5/result.json": "29509d0374d3800c18a2e788c84aa88c8d433967c969083b253b505bf5f13719",
+    "/home/ryan/.cache/agentmux-governance/identity-shell-es8gsah5/cleanup.json": "e80ab7b9006bbd8e7db33eca998436a8db4763ae393a82649c736411820ba00b",
+    "/home/ryan/.cache/agentmux-governance/identity-shell-es8gsah5/worker.py": "bbfb075ce9fe582b7c0f77ad4b8484c787f91a717f0213813e83e140a9753947",
+    "/home/ryan/.cache/agentmux-governance/identity-shell-es8gsah5/run.json": "1ac41902fac069f67640bd532f8432736eff651059cf4dba97b1cab0b27aaf2b",
+    "/home/ryan/.cache/agentmux-governance/identity-shell-es8gsah5/run.log": "7f69338751e8b90ebcfefefbd2d1dbb69426f34e6b3f2f7c67a980f602ebfda1",
+    "/home/ryan/.cache/agentmux-governance/identity-shell-es8gsah5/wrong-repo.json": "23e1292786a31a5313b50976c288e1b7bb03d09a890b7b695278c3aef2721c4b"
+  }
+}
