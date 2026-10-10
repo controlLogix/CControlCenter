@@ -25,7 +25,7 @@ Branch: `feat/agentmux-platform-rearchitecture`. No phase or merge approval is i
 ## Current work and blockers
 
 - **P01-T04 — in_progress:** Establish per-phase evidence records, dependency gates, migration fixtures, and security/quality regression jobs.
-  Reason: The four required real-provider repetitions (calib/team/crossrepo/swarm) remain unrun. Windows and WSL Grok auth caches are absent and no configured API credential is available; a Windows-owned credential source is requested. Windows-owned client session/state and tool-path prerequisites remain under investigation. No fake worker, reduced provider mix or source-only review can replace these executions. A disposable Windows-native file-link probe also failed WinError1314 before login/config commands; link-based private profile sharing remains unqualified.
+  Reason: The four required real-provider repetitions (calib/team/crossrepo/swarm) remain unrun. Grok Windows-owned authentication is unavailable and a credential source is requested. Native file links failed WinError1314; a synthetic whole-profile junction now passes 16 persistence checks but shares session/log state. Generic NTFS file/cwd/tool interoperability and native Windows Job Object descendant cleanup passed; actual client session attribution, tool/callback routing and WSL/tmux provider containment still require qualification. No fake worker or reduced provider mix can substitute.
 
 ## P00. Scope, baseline, and architecture decisions
 

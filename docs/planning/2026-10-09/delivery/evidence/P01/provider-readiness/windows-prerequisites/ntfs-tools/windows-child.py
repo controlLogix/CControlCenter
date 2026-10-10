@@ -1,0 +1,2 @@
+import pathlib,sys,json,os
+p=pathlib.Path.cwd(); data=p.joinpath('from-wsl.bin').read_bytes(); assert data==b'WSL shared NTFS marker\x00\xff\r\n'; p.joinpath('from-windows.bin').write_bytes(b'Windows shared NTFS marker\x00\xfe\r\n'); print(json.dumps({'cwd':os.getcwd(),'argv':sys.argv,'python':sys.executable,'inputBytesHex':data.hex(),'outputBytesHex':p.joinpath('from-windows.bin').read_bytes().hex()}))

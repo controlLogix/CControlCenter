@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "scope": "Synthetic Windows parent and child only; no client, auth or model calls.",
+  "commands": {
+    "probe": "C:\\Users\\RyanHelms\\AppData\\Local\\Programs\\Python\\Python314\\python.exe C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-windows-cleanup-0333675031384ad188d92c73f1917a77\\probe.py",
+    "parent": "C:\\Users\\RyanHelms\\AppData\\Local\\Programs\\Python\\Python314\\python.exe C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-windows-cleanup-0333675031384ad188d92c73f1917a77\\probe.py parent",
+    "child": "C:\\Users\\RyanHelms\\AppData\\Local\\Programs\\Python\\Python314\\python.exe C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-windows-cleanup-0333675031384ad188d92c73f1917a77\\probe.py child"
+  },
+  "fixture": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux-windows-cleanup-0333675031384ad188d92c73f1917a77",
+  "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+  "events": [
+    {
+      "action": "CreateJobObjectW",
+      "elapsedSeconds": 0.0011
+    },
+    {
+      "action": "Set kill-on-job-close limit",
+      "elapsedSeconds": 0.0011
+    },
+    {
+      "action": "Create suspended parent",
+      "elapsedSeconds": 0.0231
+    },
+    {
+      "action": "Assign suspended parent to job",
+      "elapsedSeconds": 0.0232
+    },
+    {
+      "action": "Resume assigned parent",
+      "previousSuspendCount": 1
+    },
+    {
+      "action": "Open exact child handle",
+      "elapsedSeconds": 0.7189
+    },
+    {
+      "action": "Check parent membership",
+      "elapsedSeconds": 0.719
+    },
+    {
+      "action": "Check child membership",
+      "elapsedSeconds": 0.719
+    },
+    {
+      "action": "Terminate this exact job",
+      "elapsedSeconds": 0.7191
+    },
+    {
+      "action": "Read parent exit code",
+      "elapsedSeconds": 0.7308
+    },
+    {
+      "action": "Read child exit code",
+      "elapsedSeconds": 0.7309
+    }
+  ],
+  "passed": true,
+  "limits": [
+    "This proves native Windows Job Object containment for these synthetic processes.",
+    "It does not prove that WSL interop or tmux launches place real providers in this job.",
+    "Real provider launches, tool paths and authentication remain untested."
+  ],
+  "parentPid": 54048,
+  "childPid": 26672,
+  "handles": {
+    "job": 436,
+    "parentProcess": 476,
+    "parentThread": 472,
+    "childProcess": 432
+  },
+  "parentBefore": {
+    "inJob": true,
+    "waitResult": 258
+  },
+  "childBefore": {
+    "inJob": true,
+    "waitResult": 258
+  },
+  "parentAfter": {
+    "waitResult": 0,
+    "exitCode": 73
+  },
+  "childAfter": {
+    "waitResult": 0,
+    "exitCode": 73
+  },
+  "elapsedSeconds": 0.7316,
+  "scriptSha256": "d758ec5e3e20a02b3bcd71dc8b61bbfa01ec271b5a4805f9a93a7a1e546bd505"
+}

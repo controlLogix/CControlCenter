@@ -1,0 +1,28 @@
+{
+  "sourceCommit": "f250627c352775e07d9a78b8d51c0e1a6445255b",
+  "files": {
+    "junction/probe.py": "1e72b56246669ebe9319a14ec99473446f119366aae766b31098772ffe0dccf6",
+    "junction/result.json": "e682fa9ea33153ebd67bf5ef3d5f8eaadf309f4d459680f6c890eb5157ec1846",
+    "junction/review.md": "de9ef303b684db728ea265d129d361c2ddf70c5723f6e467a6ebf5a2a5b00fe5",
+    "junction/create-junction.stdout.log": "35dfb278fb9c6247f176499bde51a01309a8fc2126c4dc2e6fcbc0ad98034036",
+    "junction/create-junction.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "junction/dummy-save.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "junction/dummy-save.stderr.log": "19409596bfe1ab440dbcf244d278e5f1ec507263b7f868bdc4e0802c9cfbf862",
+    "junction/config-edit.stdout.log": "33006ad1580f4b9fd9d6d4f99045d812b3aa71b9affdfaf2c36cddf7b34926b6",
+    "junction/config-edit.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ntfs-tools/probe.py": "8025f0e2bc2e125cb5f236c7c3869709cb244e704476b8c9b646006d5affc0e8",
+    "ntfs-tools/supplement.py": "df099d6f8e36990b2c833b9193c31e136a56086fdbc07bf210f022aeaef8052a",
+    "ntfs-tools/git-fixture.py": "b4a61bf1c4153ce027128473ad866e5ddab88e074322861d860f2acdc15de8d5",
+    "ntfs-tools/windows-child.py": "8ebee4d70b63cb70a08ddad28cbbc5f7f8cb6ef7f36331eeaa9a41e873a65db4",
+    "ntfs-tools/result.json": "1213edc390499b2fa849f1a7a16cc8c52c5985f7393de32bef7d500e209ec5e8",
+    "ntfs-tools/from-wsl.bin": "81be6e1ea520b346ca58e0f63f2e9a6691c855ea13ed9b78d357a9825f30b5e9",
+    "ntfs-tools/from-windows.bin": "0ceafb8093805e1d8165fe7b0148f491800740cb6c8e926c247b783327a7c1d6",
+    "cleanup/probe.py": "d758ec5e3e20a02b3bcd71dc8b61bbfa01ec271b5a4805f9a93a7a1e546bd505",
+    "cleanup/result.json": "d333211e1417b9547bedf481c60da83d34a259ceb07c3d2545e290daaf5927ee",
+    "cleanup/run.log": "d333211e1417b9547bedf481c60da83d34a259ceb07c3d2545e290daaf5927ee",
+    "cleanup/parent-ready.json": "2f20c1109cda9994445884d3f4c73e4085220d02fe3c610ba7bb2b51ba6be5ba",
+    "cleanup/child-ready.json": "30c62e0fe44d94e8461193163e5d04a228f4760c58e76fcd420b0cb94535d7a4",
+    "README.md": "2df8950c727219dabce64cbd4ab627445e086db6ccb5284c52efb6aaaf75d437"
+  },
+  "scope": "Three actual synthetic Windows/WSL prerequisites only; no real-provider scenario, actual client tool routing, concurrent session isolation or P06 acceptance. Explicit file allowlists exclude synthetic profiles and generated Git repository."
+}

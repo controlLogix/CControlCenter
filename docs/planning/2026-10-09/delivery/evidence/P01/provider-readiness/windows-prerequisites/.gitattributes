@@ -1,0 +1,5 @@
+*.json -text whitespace=cr-at-eol
+*.log -text -whitespace
+*.py -text -whitespace
+*.bin -text
+*.md -text whitespace=cr-at-eol

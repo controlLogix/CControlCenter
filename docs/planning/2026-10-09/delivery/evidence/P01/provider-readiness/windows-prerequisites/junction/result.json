@@ -1,0 +1,160 @@
+{
+  "fixture": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-junction-zhptuxn3",
+  "started": 1791597088.2117283,
+  "scope": "Installed Windows Codex; dummy auth and config persistence through a directory junction only. No real credentials, service calls, inference or isolated session qualification.",
+  "environment": {
+    "SystemRoot": "C:\\windows",
+    "WINDIR": "C:\\windows",
+    "COMSPEC": "C:\\windows\\system32\\cmd.exe",
+    "PATHEXT": ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.CPL",
+    "PATH": "C:\\nvm4w\\nodejs;C:\\windows\\System32",
+    "CODEX_HOME": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-junction-zhptuxn3\\wsl-profile-alias",
+    "USERPROFILE": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-junction-zhptuxn3",
+    "HOME": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-junction-zhptuxn3",
+    "APPDATA": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-junction-zhptuxn3\\roaming",
+    "LOCALAPPDATA": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-junction-zhptuxn3\\local",
+    "TEMP": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-junction-zhptuxn3\\tmp",
+    "TMP": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-junction-zhptuxn3\\tmp",
+    "HTTP_PROXY": "http://127.0.0.1:9",
+    "HTTPS_PROXY": "http://127.0.0.1:9",
+    "ALL_PROXY": "http://127.0.0.1:9"
+  },
+  "sourceBefore": {
+    "C:\\nvm4w\\nodejs\\node.exe": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237",
+    "C:\\nvm4w\\nodejs\\node_modules\\@openai\\codex\\bin\\codex.js": "61b0194f3bb6534439c8d26a3ed57d0805f84b884588b761795323eeb92fcf70",
+    "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-junction-producer-627813af-a48e-4d1e-84ad-3c4827033437.py": "1e72b56246669ebe9319a14ec99473446f119366aae766b31098772ffe0dccf6"
+  },
+  "commands": [
+    {
+      "name": "create-junction",
+      "argv": [
+        "C:\\windows\\System32\\cmd.exe",
+        "/d",
+        "/c",
+        "mklink",
+        "/J",
+        "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-junction-zhptuxn3\\wsl-profile-alias",
+        "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-junction-zhptuxn3\\synthetic-windows-profile"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "dummy-save",
+      "argv": [
+        "C:\\nvm4w\\nodejs\\node.exe",
+        "C:\\nvm4w\\nodejs\\node_modules\\@openai\\codex\\bin\\codex.js",
+        "-c",
+        "cli_auth_credentials_store=\"file\"",
+        "login",
+        "--with-api-key"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "config-edit",
+      "argv": [
+        "C:\\nvm4w\\nodejs\\node.exe",
+        "C:\\nvm4w\\nodejs\\node_modules\\@openai\\codex\\bin\\codex.js",
+        "-c",
+        "cli_auth_credentials_store=\"file\"",
+        "features",
+        "enable",
+        "shell_snapshot"
+      ],
+      "exit": 0
+    }
+  ],
+  "checks": [
+    {
+      "name": "canonical target stays in checked fixture",
+      "passed": true
+    },
+    {
+      "name": "alias parent stays in checked fixture",
+      "passed": true
+    },
+    {
+      "name": "alias does not already exist",
+      "passed": true
+    },
+    {
+      "name": "create-junction succeeds",
+      "passed": true
+    },
+    {
+      "name": "profile alias is a directory junction",
+      "passed": true
+    },
+    {
+      "name": "junction resolves to synthetic Windows profile",
+      "passed": true
+    },
+    {
+      "name": "dummy-save succeeds",
+      "passed": true
+    },
+    {
+      "name": "auth save reaches synthetic canonical file",
+      "passed": true
+    },
+    {
+      "name": "alias auth and canonical auth are same file",
+      "passed": true
+    },
+    {
+      "name": "auth save leaves config unchanged",
+      "passed": true
+    },
+    {
+      "name": "config-edit succeeds",
+      "passed": true
+    },
+    {
+      "name": "config edit reaches synthetic canonical file",
+      "passed": true
+    },
+    {
+      "name": "alias config and canonical config are same file",
+      "passed": true
+    },
+    {
+      "name": "config edit leaves auth unchanged",
+      "passed": true
+    },
+    {
+      "name": "junction remains",
+      "passed": true
+    },
+    {
+      "name": "only one regular credential file exists",
+      "passed": true
+    }
+  ],
+  "junctionBefore": {
+    "target": "\\\\?\\C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-junction-zhptuxn3\\synthetic-windows-profile",
+    "resolved": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux-codex-junction-zhptuxn3\\synthetic-windows-profile"
+  },
+  "passed": true,
+  "sourceUnchanged": true,
+  "junctionAfter": {
+    "isJunction": true,
+    "target": "\\\\?\\C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux-codex-junction-zhptuxn3\\synthetic-windows-profile",
+    "resolved": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux-codex-junction-zhptuxn3\\synthetic-windows-profile"
+  },
+  "fixtureRetained": true,
+  "files": {
+    "config-edit.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "config-edit.stdout.log": "33006ad1580f4b9fd9d6d4f99045d812b3aa71b9affdfaf2c36cddf7b34926b6",
+    "create-junction.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "create-junction.stdout.log": "35dfb278fb9c6247f176499bde51a01309a8fc2126c4dc2e6fcbc0ad98034036",
+    "dummy-save.stderr.log": "19409596bfe1ab440dbcf244d278e5f1ec507263b7f868bdc4e0802c9cfbf862",
+    "dummy-save.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "probe.py": "1e72b56246669ebe9319a14ec99473446f119366aae766b31098772ffe0dccf6",
+    "synthetic-windows-profile\\auth.json": "9434efe23f95f0b2639b4334d67088d5c479d99e029be696f6eaca4b793c6a15",
+    "synthetic-windows-profile\\config.toml": "70402f47fb7129a6fb45585dfa53ea45bba1e6234e6dca1aa56c4c42e65e060a",
+    "wsl-profile-alias\\auth.json": "9434efe23f95f0b2639b4334d67088d5c479d99e029be696f6eaca4b793c6a15",
+    "wsl-profile-alias\\config.toml": "70402f47fb7129a6fb45585dfa53ea45bba1e6234e6dca1aa56c4c42e65e060a",
+    "wsl-profile-alias\\log\\codex-login.log": "0a74b33a6ac614ef16297dde40fe4a30b6c3ee7336f3bcc24106e4d7a1df975e",
+    "synthetic-windows-profile\\log\\codex-login.log": "0a74b33a6ac614ef16297dde40fe4a30b6c3ee7336f3bcc24106e4d7a1df975e"
+  }
+}

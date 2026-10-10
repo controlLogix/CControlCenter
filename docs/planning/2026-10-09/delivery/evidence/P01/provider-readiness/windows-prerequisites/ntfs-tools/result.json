@@ -1,0 +1,251 @@
+{
+  "scope": "Synthetic NTFS files and installed tool versions only. No model, auth or config operations.",
+  "fixture": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b",
+  "wslFixture": "/mnt/c/Users/RyanHelms/AppData/Local/Temp/agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b",
+  "python": "C:\\Users\\RyanHelms\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+  "records": [
+    {
+      "name": "wsl-write",
+      "argv": [
+        "wsl.exe",
+        "-d",
+        "Ubuntu-26.04",
+        "--",
+        "python3",
+        "-c",
+        "import pathlib,sys,json,os\np=pathlib.Path(sys.argv[1]); p.joinpath('from-wsl.bin').write_bytes(b'WSL shared NTFS marker\\x00\\xff\\r\\n'); print(json.dumps({'cwd':os.getcwd(),'argv':sys.argv,'path':str(p),'bytesHex':p.joinpath('from-wsl.bin').read_bytes().hex()}))\n",
+        "/mnt/c/Users/RyanHelms/AppData/Local/Temp/agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b"
+      ],
+      "cwd": "C:\\Users\\RyanHelms\\GitHub\\agentmux",
+      "exitCode": 0,
+      "stdout": "{\"cwd\": \"/mnt/c/Users/RyanHelms/GitHub/agentmux\", \"argv\": [\"-c\", \"/mnt/c/Users/RyanHelms/AppData/Local/Temp/agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\"], \"path\": \"/mnt/c/Users/RyanHelms/AppData/Local/Temp/agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\", \"bytesHex\": \"57534c20736861726564204e544653206d61726b657200ff0d0a\"}\n",
+      "stderr": "",
+      "durationSeconds": 9.380562600010308
+    },
+    {
+      "name": "windows-read-write",
+      "argv": [
+        "C:\\Users\\RyanHelms\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\\windows-child.py",
+        "argument with spaces",
+        "--literal=value with spaces"
+      ],
+      "cwd": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b",
+      "exitCode": 0,
+      "stdout": "{\"cwd\": \"C:\\\\Users\\\\RyanHelms\\\\AppData\\\\Local\\\\Temp\\\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\", \"argv\": [\"C:\\\\Users\\\\RyanHelms\\\\AppData\\\\Local\\\\Temp\\\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\\\\windows-child.py\", \"argument with spaces\", \"--literal=value with spaces\"], \"python\": \"C:\\\\Users\\\\RyanHelms\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\python.exe\", \"inputBytesHex\": \"57534c20736861726564204e544653206d61726b657200ff0d0a\", \"outputBytesHex\": \"57696e646f777320736861726564204e544653206d61726b657200fe0d0a\"}\n",
+      "stderr": "",
+      "durationSeconds": 0.21399010000459384
+    },
+    {
+      "name": "wsl-read-verify",
+      "argv": [
+        "wsl.exe",
+        "-d",
+        "Ubuntu-26.04",
+        "--",
+        "python3",
+        "-c",
+        "import pathlib,sys,json,os\np=pathlib.Path(sys.argv[1]); data=p.joinpath('from-windows.bin').read_bytes(); assert data==b'Windows shared NTFS marker\\x00\\xfe\\r\\n'; print(json.dumps({'cwd':os.getcwd(),'argv':sys.argv,'inputBytesHex':data.hex(),'files':[{'name':v.name,'sha256':__import__('hashlib').sha256(v.read_bytes()).hexdigest()} for v in sorted(p.glob('from-*.bin'))]}))\n",
+        "/mnt/c/Users/RyanHelms/AppData/Local/Temp/agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b"
+      ],
+      "cwd": "C:\\Users\\RyanHelms\\GitHub\\agentmux",
+      "exitCode": 0,
+      "stdout": "{\"cwd\": \"/mnt/c/Users/RyanHelms/GitHub/agentmux\", \"argv\": [\"-c\", \"/mnt/c/Users/RyanHelms/AppData/Local/Temp/agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\"], \"inputBytesHex\": \"57696e646f777320736861726564204e544653206d61726b657200fe0d0a\", \"files\": [{\"name\": \"from-windows.bin\", \"sha256\": \"0ceafb8093805e1d8165fe7b0148f491800740cb6c8e926c247b783327a7c1d6\"}, {\"name\": \"from-wsl.bin\", \"sha256\": \"81be6e1ea520b346ca58e0f63f2e9a6691c855ea13ed9b78d357a9825f30b5e9\"}]}\n",
+      "stderr": "",
+      "durationSeconds": 0.5901596000039717
+    },
+    {
+      "name": "windows-git-version",
+      "argv": [
+        "C:/Program Files/Git/cmd/git.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b",
+      "exitCode": 0,
+      "stdout": "git version 2.56.0.windows.1\n",
+      "stderr": "",
+      "durationSeconds": 0.07105779999983497
+    },
+    {
+      "name": "windows-git-cwd",
+      "argv": [
+        "C:/Program Files/Git/cmd/git.exe",
+        "-C",
+        "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b",
+        "rev-parse",
+        "--show-toplevel"
+      ],
+      "cwd": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b",
+      "exitCode": 128,
+      "stdout": "",
+      "stderr": "fatal: not a git repository (or any of the parent directories): .git\n",
+      "durationSeconds": 0.0939601000136463
+    },
+    {
+      "name": "windows-python-path",
+      "argv": [
+        "where.exe",
+        "python"
+      ],
+      "cwd": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b",
+      "exitCode": 0,
+      "stdout": "C:\\Users\\RyanHelms\\AppData\\Local\\Programs\\Python\\Python314\\python.exe\nC:\\Users\\RyanHelms\\AppData\\Local\\Programs\\Python\\Python312\\python.exe\nC:\\Users\\RyanHelms\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe\n",
+      "stderr": "",
+      "durationSeconds": 0.38852229999611154
+    },
+    {
+      "name": "windows-python3-path",
+      "argv": [
+        "where.exe",
+        "python3"
+      ],
+      "cwd": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b",
+      "exitCode": 0,
+      "stdout": "C:\\Users\\RyanHelms\\AppData\\Local\\Programs\\Python\\Python314\\python3.exe\nC:\\Users\\RyanHelms\\AppData\\Local\\Programs\\Python\\Python312\\python3.exe\nC:\\Users\\RyanHelms\\AppData\\Local\\Microsoft\\WindowsApps\\python3.exe\n",
+      "stderr": "",
+      "durationSeconds": 0.22276920000149403
+    },
+    {
+      "name": "windows-git-path",
+      "argv": [
+        "where.exe",
+        "git"
+      ],
+      "cwd": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b",
+      "exitCode": 0,
+      "stdout": "C:\\Program Files\\Git\\cmd\\git.exe\nC:\\Users\\RyanHelms\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\git\\cmd\\git.exe\n",
+      "stderr": "",
+      "durationSeconds": 0.2748330000031274
+    },
+    {
+      "name": "windows-python-default-version",
+      "argv": [
+        "python",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b",
+      "exitCode": 0,
+      "stdout": "Python 3.14.7\n",
+      "stderr": "",
+      "durationSeconds": 0.05978319999121595
+    },
+    {
+      "name": "windows-python3-default-version",
+      "argv": [
+        "python3",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b",
+      "exitCode": 0,
+      "stdout": "Python 3.14.7\n",
+      "stderr": "",
+      "durationSeconds": 0.047739300003740937
+    },
+    {
+      "name": "windows-git-default-version",
+      "argv": [
+        "git",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b",
+      "exitCode": 0,
+      "stdout": "git version 2.56.0.windows.1\n",
+      "stderr": "",
+      "durationSeconds": 0.0991922999965027
+    },
+    {
+      "name": "wsl-forwarder-inventory",
+      "argv": [
+        "wsl.exe",
+        "-d",
+        "Ubuntu-26.04",
+        "--",
+        "python3",
+        "-c",
+        "import pathlib,json,hashlib,shutil\nbase=pathlib.Path('/home/ryan/.local/share/agentmux/windows-clients'); out={'sourceFiles':[],'commands':[]}\nfor name in ('forward.py','clients.json'):\n p=base/name; out['sourceFiles'].append({'path':str(p),'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size})\nfor name in ('claude','codex','grok','kimi','goose','dsh','trueforge','pi'):\n q=shutil.which(name); p=pathlib.Path(q) if q else None; out['commands'].append({'command':name,'path':q,'symlink':p.is_symlink() if p else False,'resolved':str(p.resolve()) if p else None,'sha256':hashlib.sha256(p.read_bytes()).hexdigest() if p and p.is_file() else None})\nprint(json.dumps(out))\n"
+      ],
+      "cwd": "C:\\Users\\RyanHelms\\GitHub\\agentmux",
+      "exitCode": 0,
+      "stdout": "{\"sourceFiles\": [{\"path\": \"/home/ryan/.local/share/agentmux/windows-clients/forward.py\", \"sha256\": \"8c702954575d96e9169cce0c7e1399018e22496aa1b3e4e41c607e23f1734600\", \"bytes\": 2555}, {\"path\": \"/home/ryan/.local/share/agentmux/windows-clients/clients.json\", \"sha256\": \"28f37c3b81b5450b8458b1b77e5ea6af266f114e90653609a2b07121911a8cfa\", \"bytes\": 1353}], \"commands\": [{\"command\": \"claude\", \"path\": \"/usr/local/bin/claude\", \"symlink\": true, \"resolved\": \"/home/ryan/.local/share/agentmux/windows-clients/forward.py\", \"sha256\": \"8c702954575d96e9169cce0c7e1399018e22496aa1b3e4e41c607e23f1734600\"}, {\"command\": \"codex\", \"path\": \"/usr/local/bin/codex\", \"symlink\": true, \"resolved\": \"/home/ryan/.local/share/agentmux/windows-clients/forward.py\", \"sha256\": \"8c702954575d96e9169cce0c7e1399018e22496aa1b3e4e41c607e23f1734600\"}, {\"command\": \"grok\", \"path\": \"/usr/local/bin/grok\", \"symlink\": true, \"resolved\": \"/home/ryan/.local/share/agentmux/windows-clients/forward.py\", \"sha256\": \"8c702954575d96e9169cce0c7e1399018e22496aa1b3e4e41c607e23f1734600\"}, {\"command\": \"kimi\", \"path\": \"/usr/local/bin/kimi\", \"symlink\": true, \"resolved\": \"/home/ryan/.local/share/agentmux/windows-clients/forward.py\", \"sha256\": \"8c702954575d96e9169cce0c7e1399018e22496aa1b3e4e41c607e23f1734600\"}, {\"command\": \"goose\", \"path\": \"/usr/local/bin/goose\", \"symlink\": true, \"resolved\": \"/home/ryan/.local/share/agentmux/windows-clients/forward.py\", \"sha256\": \"8c702954575d96e9169cce0c7e1399018e22496aa1b3e4e41c607e23f1734600\"}, {\"command\": \"dsh\", \"path\": \"/usr/local/bin/dsh\", \"symlink\": true, \"resolved\": \"/home/ryan/.local/share/agentmux/windows-clients/forward.py\", \"sha256\": \"8c702954575d96e9169cce0c7e1399018e22496aa1b3e4e41c607e23f1734600\"}, {\"command\": \"trueforge\", \"path\": \"/usr/local/bin/trueforge\", \"symlink\": true, \"resolved\": \"/home/ryan/.local/share/agentmux/windows-clients/forward.py\", \"sha256\": \"8c702954575d96e9169cce0c7e1399018e22496aa1b3e4e41c607e23f1734600\"}, {\"command\": \"pi\", \"path\": null, \"symlink\": false, \"resolved\": null, \"sha256\": null}]}\n",
+      "stderr": "",
+      "durationSeconds": 1.698228300010669
+    },
+    {
+      "name": "wsl-exec-windows-python-cwd",
+      "argv": [
+        "wsl.exe",
+        "-d",
+        "Ubuntu-26.04",
+        "--",
+        "python3",
+        "-c",
+        "import subprocess,sys,json,os\np=subprocess.run(['/mnt/c/Users/RyanHelms/AppData/Local/Programs/Python/Python314/python.exe',sys.argv[2],'launched from WSL with spaces'],cwd=sys.argv[1],capture_output=True,text=True,timeout=20); print(json.dumps({'launcherCwd':os.getcwd(),'requestedCwd':sys.argv[1],'argv':p.args,'exitCode':p.returncode,'stdout':p.stdout,'stderr':p.stderr})); sys.exit(p.returncode)\n",
+        "/mnt/c/Users/RyanHelms/AppData/Local/Temp/agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b",
+        "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\\windows-child.py"
+      ],
+      "cwd": "C:\\Users\\RyanHelms\\GitHub\\agentmux",
+      "exitCode": 0,
+      "stdout": "{\"launcherCwd\": \"/mnt/c/Users/RyanHelms/GitHub/agentmux\", \"requestedCwd\": \"/mnt/c/Users/RyanHelms/AppData/Local/Temp/agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\", \"argv\": [\"/mnt/c/Users/RyanHelms/AppData/Local/Programs/Python/Python314/python.exe\", \"C:\\\\Users\\\\RyanHelms\\\\AppData\\\\Local\\\\Temp\\\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\\\\windows-child.py\", \"launched from WSL with spaces\"], \"exitCode\": 0, \"stdout\": \"{\\\"cwd\\\": \\\"C:\\\\\\\\Users\\\\\\\\RyanHelms\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\\\", \\\"argv\\\": [\\\"C:\\\\\\\\Users\\\\\\\\RyanHelms\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\\\\\\\\windows-child.py\\\", \\\"launched from WSL with spaces\\\"], \\\"python\\\": \\\"C:\\\\\\\\Users\\\\\\\\RyanHelms\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Programs\\\\\\\\Python\\\\\\\\Python314\\\\\\\\python.exe\\\", \\\"inputBytesHex\\\": \\\"57534c20736861726564204e544653206d61726b657200ff0d0a\\\", \\\"outputBytesHex\\\": \\\"57696e646f777320736861726564204e544653206d61726b657200fe0d0a\\\"}\\n\", \"stderr\": \"\"}\n",
+      "stderr": ""
+    },
+    {
+      "name": "windows-git-init",
+      "argv": [
+        "C:/Program Files/Git/cmd/git.exe",
+        "-C",
+        "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\\git fixture with spaces",
+        "init"
+      ],
+      "cwd": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b",
+      "exitCode": 0,
+      "stdout": "Initialized empty Git repository in C:/Users/RyanHelms/AppData/Local/Temp/agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b/git fixture with spaces/.git/\n",
+      "stderr": ""
+    },
+    {
+      "name": "windows-git-fixture-cwd",
+      "argv": [
+        "C:/Program Files/Git/cmd/git.exe",
+        "-C",
+        "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\\git fixture with spaces",
+        "rev-parse",
+        "--show-toplevel"
+      ],
+      "cwd": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b",
+      "exitCode": 0,
+      "stdout": "C:/Users/RyanHelms/AppData/Local/Temp/agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b/git fixture with spaces\n",
+      "stderr": ""
+    }
+  ],
+  "scripts": [
+    {
+      "path": "C:\\Users\\RYANHE~1\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\\probe.py",
+      "sha256": "8025f0e2bc2e125cb5f236c7c3869709cb244e704476b8c9b646006d5affc0e8"
+    },
+    {
+      "path": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\\windows-child.py",
+      "sha256": "8ebee4d70b63cb70a08ddad28cbbc5f7f8cb6ef7f36331eeaa9a41e873a65db4"
+    },
+    {
+      "path": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\\supplement.py",
+      "sha256": "df099d6f8e36990b2c833b9193c31e136a56086fdbc07bf210f022aeaef8052a"
+    },
+    {
+      "path": "C:\\Users\\RyanHelms\\AppData\\Local\\Temp\\agentmux NTFS tool probe b486f14faf3740b385e2e7b7aa7c733b\\git-fixture.py",
+      "sha256": "b4a61bf1c4153ce027128473ad866e5ddab88e074322861d860f2acdc15de8d5"
+    }
+  ],
+  "limits": [
+    "The git rev-parse failure is expected because this fixture is not a Git repository.",
+    "This does not qualify the crossrepo home path, callback delivery, client auth, session isolation or actual model execution."
+  ],
+  "reportHistory": [
+    {
+      "sha256": "e06955c3c9e7fa8c91989b073e16e205712bf75a3fe4a14c1ef08e207d577839",
+      "note": "Initial file exchange and tool inventory."
+    },
+    {
+      "sha256": "57fc97d00a3d85f1e86c7c1d2cf971d24a5380e8d46dc127ea17b0cf6b6ecf65",
+      "note": "Added successful WSL-to-Windows cwd inheritance. Supplement outer cwd label corrected to actual producer cwd."
+    }
+  ]
+}

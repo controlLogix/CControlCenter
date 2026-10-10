@@ -1,6 +1,6 @@
 {
-  "reviewer": "Codex, scoped Windows-owned client link contract and P01 prerequisite evidence review",
-  "sourceDigest": "f1d402a1f0e55fbad9dc195f0145b4caadc4656b9f23c1250d060ebb9b523d24",
+  "reviewer": "Codex, scoped P01 Windows/WSL prerequisite evidence review",
+  "sourceDigest": "848728c1d8049a558914fd3ca7e9a375408a644977a35a6248521fcc4f4a321d",
   "incrementalReviews": [
     {
       "date": "2026-10-09",
@@ -565,6 +565,32 @@
         "docs/planning/2026-10-09/delivery/evidence/P01/provider-readiness/windows-link-failure/archive.json"
       ],
       "rationale": "Reviewed documentation and tracker changes only. Stable WSL command symlinks resolve a Windows entry point or forwarding launcher; native Windows profile lookup or qualified links share Windows-owned auth/config without credential copying. Added explicit P06-T03/P06-T05 acceptance criteria, preserved previous scope in history and kept both tasks planned. Independent scope review confirms existing phase ownership and that failed Windows credential-file links do not disprove WSL executable forwarding. Archived actual synthetic Windows WinError1314 before any CLI persistence command; no links, credentials or installed client settings changed. P01 remains active with four required real-provider repetitions open. Tracker check and 22 tracker tests pass. No runtime source, registered pattern relationship, diagram, baseline or remediation changed. No later-phase implementation, client workflow acceptance or merge is claimed."
+    },
+    {
+      "date": "2026-10-10T01:57:53.738392+00:00",
+      "reviewer": "Codex; bounded subagent prerequisite probes and independent archive review",
+      "scope": "P01 synthetic Windows/WSL readiness evidence only",
+      "previousReviewer": "Codex, scoped Windows-owned client link contract and P01 prerequisite evidence review",
+      "previousSourceDigest": "f1d402a1f0e55fbad9dc195f0145b4caadc4656b9f23c1250d060ebb9b523d24",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/provider-readiness/windows-prerequisites/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/provider-readiness/windows-prerequisites/README.md",
+        "docs/planning/2026-10-09/delivery/tasks.json"
+      ],
+      "rationale": "Inspected actual synthetic installed-Windows Codex directory-junction persistence16 checks and producers; same canonical dummy auth/config, no credential copy or real authentication. Reviewed actual NTFS Windows/WSL markers, spaced cwd/argument and available Python/Git with initial nonrepo exit128 retained. Reviewed native Windows exact-handle Job Object parent/child membership and termination with ready PID records; WSL/tmux real-provider containment remains unproven. Archive raw bytes/hash allowlists exclude profiles/Git fixture. P01-T04 blocker/evidence updated without task completion; Grok auth and all four original provider runs remain open. No runtime source or pattern architecture changed; registry/diagrams/baseline/remediation untouched. No new implementation pattern is claimed for the external OS preparation probes. Tracker check passes, historical source-bound testing remains historical. No P02 advancement, P06 acceptance, full client/session proof, merge or final completion."
+    },
+    {
+      "date": "2026-10-10T01:58:17.915641+00:00",
+      "reviewer": "Codex; bounded subagent prerequisite probes and independent archive review",
+      "scope": "P01 synthetic Windows/WSL readiness evidence only",
+      "previousReviewer": "Codex, scoped P01 Windows/WSL prerequisite evidence review",
+      "previousSourceDigest": "ffd201f542ae4709b882ee89caf8dbdd366035a96b35f3ca75156b0bda05e1d9",
+      "evidence": [
+        "docs/planning/2026-10-09/delivery/evidence/P01/provider-readiness/windows-prerequisites/archive.json",
+        "docs/planning/2026-10-09/delivery/evidence/P01/provider-readiness/windows-prerequisites/README.md",
+        "docs/planning/2026-10-09/delivery/tasks.json"
+      ],
+      "rationale": "Inspected actual synthetic installed-Windows Codex directory-junction persistence16 checks and producers; same canonical dummy auth/config, no credential copy or real authentication. Reviewed actual NTFS Windows/WSL markers, spaced cwd/argument and available Python/Git with initial nonrepo exit128 retained. Reviewed native Windows exact-handle Job Object parent/child membership and termination with ready PID records; WSL/tmux real-provider containment remains unproven. Archive raw bytes/hash allowlists exclude profiles/Git fixture. P01-T04 blocker/evidence updated without task completion; Grok auth and all four original provider runs remain open. No runtime source or pattern architecture changed; registry/diagrams/baseline/remediation untouched. No new implementation pattern is claimed for the external OS preparation probes. Tracker check passes, historical source-bound testing remains historical. No P02 advancement, P06 acceptance, full client/session proof, merge or final completion."
     }
   ],
   "rules": {
